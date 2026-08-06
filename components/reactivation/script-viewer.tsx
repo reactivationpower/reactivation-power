@@ -61,7 +61,9 @@ export function ScriptViewer({
     // Role-aware pronouns: the provider says "I / me", everyone else
     // speaks for the practice with "we / us".
     e.rec_pronoun = isProvider ? 'I' : 'we'
+    e.rec_pronoun_cap = isProvider ? 'I' : 'We'
     e.rec_obj = isProvider ? 'me' : 'us'
+    e.rec_poss = isProvider ? 'my' : 'our'
     return e
   }, [callerName, practiceName, niches, nicheId, isProvider])
 
