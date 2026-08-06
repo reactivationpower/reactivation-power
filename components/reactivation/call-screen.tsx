@@ -103,6 +103,8 @@ export function CallScreen({
   const [callBackAt, setCallBackAt] = useState('')
   const [saving, startSaving] = useTransition()
   const [error, setError] = useState<string | null>(null)
+  const [savedDisposition, setSavedDisposition] =
+    useState<CallDisposition | null>(null)
 
   const extras = useMemo(() => {
     const e: Record<string, string> = {
@@ -166,11 +168,9 @@ export function CallScreen({
       }
       setVoicemailPromptOpen(false)
       setCallBackOpen(false)
-      if (nextContactId) {
-        router.push(`/portal/reactivation/call/${nextContactId}`)
-      } else {
-        router.push('/portal/reactivation')
-      }
+      // Don't silently navigate away — confirm the save and let the caller
+      // choose where to go next.
+      setSavedDisposition(disposition)
     })
   }
 
@@ -419,6 +419,56 @@ export function CallScreen({
           </div>
         </div>
       </div>
+
+      {/* Call saved confirmation */}
+      <Dialog
+        open={savedDisposition !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            // Dismissing the dialog still returns to the dashboard so the
+            // caller is never left on an already-logged call.
+            router.push('/portal/reactivation')
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CheckCircle2 className="size-5 text-accent" />
+              Call saved
+            </DialogTitle>
+            <DialogDescription>
+              {contact.name} was logged as{' '}
+              <span className="font-medium text-foreground">
+                {savedDisposition
+                  ? (DISPOSITION_LABELS[savedDisposition] ?? savedDisposition)
+                  : ''}
+              </span>
+              {notes.trim() ? ' with your note.' : '.'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-2">
+            {nextContactId && (
+              <Button
+                className="w-full gap-2"
+                onClick={() =>
+                  router.push(`/portal/reactivation/call/${nextContactId}`)
+                }
+              >
+                <Phone className="size-4" />
+                Next call due
+              </Button>
+            )}
+            <Button
+              variant={nextContactId ? 'outline' : 'default'}
+              className="w-full"
+              onClick={() => router.push('/portal/reactivation')}
+            >
+              Back to Reactivation
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Voicemail prompt */}
       <Dialog open={voicemailPromptOpen} onOpenChange={setVoicemailPromptOpen}>
