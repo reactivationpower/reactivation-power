@@ -9,9 +9,10 @@ import { formatDateTime } from '@/lib/format'
 export default async function ViewersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; new?: string }>
+  searchParams: Promise<{ q?: string; new?: string; status?: string }>
 }) {
-  const { q = '', new: openNew } = await searchParams
+  const { q = '', new: openNew, status = 'active' } = await searchParams
+  const showDisabled = status === 'disabled'
   const [viewers, videoCount] = await Promise.all([
     getViewerRows(),
     (async () => {
@@ -33,7 +34,12 @@ export default async function ViewersPage({
       )
     : viewers
 
-  const owners = filtered.filter((v) => v.role === 'owner')
+  const allOwners = filtered.filter((v) => v.role === 'owner')
+  const activeCount = allOwners.filter((v) => v.is_active).length
+  const disabledCount = allOwners.length - activeCount
+  const owners = allOwners.filter((v) =>
+    showDisabled ? !v.is_active : v.is_active,
+  )
   const staffByParent = new Map<string, typeof filtered>()
   for (const v of viewers.filter((v) => v.role === 'staff')) {
     const list = staffByParent.get(v.parent_id!) ?? []
@@ -69,6 +75,29 @@ export default async function ViewersPage({
       </div>
 
       <ViewerSearch initialQuery={q} />
+
+      <div className="mt-4 flex items-center gap-1 rounded-lg border border-border bg-muted/40 p-1 w-fit">
+        <Link
+          href={`/admin/participants${q ? `?q=${encodeURIComponent(q)}` : ''}`}
+          className={
+            !showDisabled
+              ? 'rounded-md bg-card px-4 py-1.5 text-sm font-medium text-foreground shadow-sm'
+              : 'rounded-md px-4 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground'
+          }
+        >
+          Active ({activeCount})
+        </Link>
+        <Link
+          href={`/admin/participants?status=disabled${q ? `&q=${encodeURIComponent(q)}` : ''}`}
+          className={
+            showDisabled
+              ? 'rounded-md bg-card px-4 py-1.5 text-sm font-medium text-foreground shadow-sm'
+              : 'rounded-md px-4 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground'
+          }
+        >
+          Disabled ({disabledCount})
+        </Link>
+      </div>
 
       <div className="mt-4 overflow-x-auto rounded-lg border border-border bg-card">
         <table className="w-full min-w-[900px] text-sm">
@@ -109,7 +138,9 @@ export default async function ViewersPage({
                 >
                   {query
                     ? 'No viewers match your search.'
-                    : 'No participants yet. Add your first participant to grant course access.'}
+                    : showDisabled
+                      ? 'No disabled participants.'
+                      : 'No participants yet. Add your first participant to grant course access.'}
                 </td>
               </tr>
             )}
