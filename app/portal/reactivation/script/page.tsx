@@ -51,6 +51,7 @@ export default async function PracticeScriptPage() {
           initialNicheId={participant.selected_niche_id ?? null}
           callerName={participant.first_name}
           practiceName={owner?.practice_name ?? null}
+          isProvider={participant.role === 'owner'}
         />
       </div>
     </div>

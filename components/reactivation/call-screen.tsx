@@ -65,6 +65,7 @@ interface Props {
   callerName: string
   practiceName: string | null
   providerName: string | null
+  isProvider?: boolean
   callHistory: CallWithCaller[]
   flowSteps: ScriptFlowStep[]
   flowChoices: ScriptFlowChoice[]
@@ -80,6 +81,7 @@ export function CallScreen({
   callerName,
   practiceName,
   providerName,
+  isProvider = false,
   callHistory,
   flowSteps,
   flowChoices,
@@ -112,8 +114,12 @@ export function CallScreen({
     if (practiceName) e.practice_name = practiceName
     if (providerName) e.provider_name = providerName
     else if (practiceName) e.provider_name = practiceName
+    // Role-aware pronouns: the provider says "I / me", everyone else
+    // speaks for the practice with "we / us".
+    e.rec_pronoun = isProvider ? 'I' : 'we'
+    e.rec_obj = isProvider ? 'me' : 'us'
     return e
-  }, [contact.name, callerName, practiceName, providerName])
+  }, [contact.name, callerName, practiceName, providerName, isProvider])
 
   const merged = useMemo(() => {
     const nicheSections = sections.filter((s) => s.niche_id === nicheId)

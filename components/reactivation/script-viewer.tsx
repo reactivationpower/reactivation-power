@@ -22,6 +22,7 @@ interface Props {
   initialNicheId: string | null
   callerName?: string
   practiceName?: string | null
+  isProvider?: boolean
 }
 
 export function ScriptViewer({
@@ -31,6 +32,7 @@ export function ScriptViewer({
   initialNicheId,
   callerName,
   practiceName,
+  isProvider = false,
 }: Props) {
   // Only honor the saved niche if it belongs to this account's sector(s);
   // otherwise fall back to the first available niche.
@@ -56,8 +58,12 @@ export function ScriptViewer({
       e.practice_name = practiceName
       e.provider_name = practiceName
     }
+    // Role-aware pronouns: the provider says "I / me", everyone else
+    // speaks for the practice with "we / us".
+    e.rec_pronoun = isProvider ? 'I' : 'we'
+    e.rec_obj = isProvider ? 'me' : 'us'
     return e
-  }, [callerName, practiceName, niches, nicheId])
+  }, [callerName, practiceName, niches, nicheId, isProvider])
 
   function handleNicheChange(id: string | null) {
     if (!id) return

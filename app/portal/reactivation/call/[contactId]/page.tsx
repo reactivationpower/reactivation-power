@@ -74,6 +74,7 @@ export default async function CallPage({
           providerName={
             owner ? `Dr. ${owner.first_name} ${owner.last_name}`.trim() : null
           }
+          isProvider={participant.role === 'owner'}
           callHistory={callHistory}
           flowSteps={flow.steps}
           flowChoices={flow.choices}
