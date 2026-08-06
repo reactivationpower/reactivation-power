@@ -78,24 +78,19 @@ export function ScriptFlowPlayer({
   const [trail, setTrail] = useState<string[]>([])
 
   const step = currentKey ? (stepMap.get(currentKey) ?? null) : null
-  const stepChoices = step ? (choiceMap.get(step.step_key) ?? []) : []
+  const allStepChoices = step ? (choiceMap.get(step.step_key) ?? []) : []
 
   // Path awareness: did the caller come through the kept-the-weight-off path?
   const KEPT_PATH_KEYS = ['resp_doing_great', 'transition_kept', 'digging_in_kept']
   const cameViaKeptPath = trail.some((k) => KEPT_PATH_KEYS.includes(k))
 
-  // On the uncover screen for a kept-it-off patient, the weight-focused cost
-  // objection doesn't apply — steer the caller to the general cost button.
-  function choiceHighlight(c: ScriptFlowChoice): string | null {
-    if (step?.step_key !== 'uncover' || !cameViaKeptPath) return null
-    if (c.to_step_key === 'obj_cost') {
-      return 'border-primary/60 bg-primary/10 text-foreground hover:bg-primary/20'
-    }
-    if (c.to_step_key === 'obj_cost_weight') {
-      return 'border-border bg-muted/40 text-muted-foreground hover:bg-muted/60'
-    }
-    return null
-  }
+  // A kept-it-off patient has no regained weight to handle, so the
+  // weight-focused cost objection is hidden on the uncover screen for that
+  // path only. The regained-weight paths still see both cost buttons.
+  const stepChoices =
+    step?.step_key === 'uncover' && cameViaKeptPath
+      ? allStepChoices.filter((c) => c.to_step_key !== 'obj_cost_weight')
+      : allStepChoices
 
   const paragraphs = useMemo(() => {
     if (!step) return []
@@ -238,9 +233,7 @@ export function ScriptFlowPlayer({
                     onClick={() => go(c)}
                     className={cn(
                       'inline-flex min-h-11 items-center rounded-md border px-4 py-2.5 text-sm font-medium transition-colors',
-                      choiceHighlight(c) ??
-                        CHOICE_STYLES[c.variant] ??
-                        CHOICE_STYLES.default,
+                      CHOICE_STYLES[c.variant] ?? CHOICE_STYLES.default,
                     )}
                   >
                     {c.label}
