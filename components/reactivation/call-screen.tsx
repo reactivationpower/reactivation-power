@@ -120,6 +120,11 @@ export function CallScreen({
     e.rec_pronoun_cap = isProvider ? 'I' : 'We'
     e.rec_obj = isProvider ? 'me' : 'us'
     e.rec_poss = isProvider ? 'my' : 'our'
+    // Credibility line in the Professional Open: staff callers borrow the
+    // provider's authority; the provider speaks for themselves.
+    e.asked_by_provider = isProvider
+      ? 'I wanted to reach out to you personally.'
+      : `${e.provider_name ?? '[PROVIDER NAME]'} asked me to reach out to you personally.`
     return e
   }, [contact.name, callerName, practiceName, providerName, isProvider])
 
