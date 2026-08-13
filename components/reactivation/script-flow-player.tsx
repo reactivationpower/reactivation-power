@@ -59,6 +59,8 @@ const PATIENT_TOKENS: Record<string, string> = {
   pt_invested: 'the result you invested in',
   pt_uncover_action:
     'coming in to take care of something you\u2019ve told me is bothering you',
+  pt_cost_ask:
+    'Can I ask \u2014 how much does getting back to feeling the way you did matter to you?',
 }
 
 const PARENT_TOKENS: Record<string, string> = {
@@ -96,6 +98,8 @@ const PARENT_TOKENS: Record<string, string> = {
   pt_invested: 'the result you\u2019ve both invested in',
   pt_uncover_action:
     'getting them in to take care of something you\u2019ve told me has been bothering them',
+  pt_cost_ask:
+    'And taking a look is exactly what lets us see what \u2014 if anything \u2014 is actually needed, so the office can give you a real answer on cost instead of a guess. One thing worth knowing: catching it early usually means a small tweak, and a small tweak is always going to be faster and less expensive than waiting until things have really shifted.',
 }
 
 const CHOICE_STYLES: Record<ScriptFlowVariant, string> = {
