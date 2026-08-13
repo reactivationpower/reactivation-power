@@ -45,6 +45,8 @@ const PATIENT_TOKENS: Record<string, string> = {
   pt_al_photos_q:
     'And how do you feel about your smile in photos and on video calls these days? Be honest \u2014 do you still catch yourself doing the closed-lip smile, or angling away from the camera?',
   pt_moved_back_q: 'does it feel like they\u2019ve moved back quite a bit',
+  pt_your_file: 'your file',
+  pt_smile_bite: 'the smile and the bite',
 }
 
 const PARENT_TOKENS: Record<string, string> = {
@@ -68,6 +70,8 @@ const PARENT_TOKENS: Record<string, string> = {
   pt_al_photos_q:
     'And how does your child feel about their smile these days \u2014 still showing it off, or any covering the mouth in photos or teasing at school?',
   pt_moved_back_q: 'are you seeing that they\u2019ve moved back quite a bit',
+  pt_your_file: 'your child\u2019s file',
+  pt_smile_bite: 'their smile and bite',
 }
 
 const CHOICE_STYLES: Record<ScriptFlowVariant, string> = {
