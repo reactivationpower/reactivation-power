@@ -19,6 +19,49 @@ interface Props {
   fontSize: number
 }
 
+// Relationship tokens: scripts can use {{pt_*}} slots that resolve
+// differently when the caller is speaking with a parent/guardian instead of
+// the patient. Parent mode turns on when the trail passes through a step
+// whose key starts with "mode_parent" (reached from a "who's on the phone"
+// screen). Niches without pt_ tokens are unaffected.
+const PATIENT_TOKENS: Record<string, string> = {
+  pt_you: 'you',
+  pt_you_cap: 'You',
+  pt_your: 'your',
+  pt_them: 'you',
+  pt_they_are: 'you\u2019re',
+  pt_get_you_in: 'get you in',
+  pt_no_fault: 'it\u2019s not anything you did wrong',
+  pt_proud: 'you were so proud of it',
+  pt_bite_q:
+    'Any changes in the bite \u2014 teeth hitting differently than they used to, or one side doing more of the chewing work?',
+  pt_jaw_q:
+    'Any jaw soreness, clicking, or tension headaches, especially in the morning?',
+  pt_photos_q:
+    'And how do you feel about the smile in photos these days \u2014 still showing it off, or any creeping self-consciousness?',
+  pt_obj_braces_q: 'Do I have to get braces again?',
+  pt_obj_embarrassed_q: 'I\u2019m embarrassed I stopped wearing my retainer',
+}
+
+const PARENT_TOKENS: Record<string, string> = {
+  pt_you: 'your child',
+  pt_you_cap: 'Your child',
+  pt_your: 'their',
+  pt_them: 'them',
+  pt_they_are: 'they\u2019re',
+  pt_get_you_in: 'get your child in',
+  pt_no_fault: 'it\u2019s not anything you or your child did wrong',
+  pt_proud: 'they were so proud of it',
+  pt_bite_q:
+    'Has your child mentioned any changes in the bite \u2014 teeth hitting differently than they used to, or chewing more on one side?',
+  pt_jaw_q:
+    'Any complaints of jaw soreness, clicking, or headaches, especially in the morning?',
+  pt_photos_q:
+    'And how does your child feel about their smile these days \u2014 still showing it off, or any covering the mouth in photos or teasing at school?',
+  pt_obj_braces_q: 'Does my child have to get braces again?',
+  pt_obj_embarrassed_q: 'I feel bad we let the retainer routine slip',
+}
+
 const CHOICE_STYLES: Record<ScriptFlowVariant, string> = {
   positive: '',
   caution:
@@ -92,25 +135,52 @@ export function ScriptFlowPlayer({
       ? allStepChoices.filter((c) => c.to_step_key !== 'obj_cost_weight')
       : allStepChoices
 
+  // Parent/guardian mode: on when the trail passed through a mode_parent
+  // marker step. Marker steps (key prefix "mode_") are recorded in the trail
+  // but never displayed \u2014 navigation passes straight through them.
+  const parentMode = trail.some((k) => k.startsWith('mode_parent'))
+
+  const effectiveExtras = useMemo(
+    () => ({
+      ...(parentMode ? PARENT_TOKENS : PATIENT_TOKENS),
+      ...extras,
+    }),
+    [extras, parentMode],
+  )
+
   const paragraphs = useMemo(() => {
     if (!step) return []
-    return mergeScript(step.content, [], extras)
+    return mergeScript(step.content, [], effectiveExtras)
       .split(/\n\s*\n/)
       .map((p) => p.trim())
       .filter(Boolean)
-  }, [step, extras])
+  }, [step, effectiveExtras])
 
   function go(choice: ScriptFlowChoice) {
     if (!choice.to_step_key || !stepMap.has(choice.to_step_key)) return
+    const target = choice.to_step_key
+    if (target.startsWith('mode_')) {
+      // Pass through the marker: record it in the trail, land on its
+      // single onward destination so the caller never sees an extra screen.
+      const onward = (choiceMap.get(target) ?? [])[0]?.to_step_key
+      if (onward && stepMap.has(onward)) {
+        setTrail((t) => [...t, currentKey!, target])
+        setCurrentKey(onward)
+        return
+      }
+    }
     setTrail((t) => [...t, currentKey!])
-    setCurrentKey(choice.to_step_key)
+    setCurrentKey(target)
   }
 
   function back() {
     setTrail((t) => {
-      if (t.length === 0) return t
-      setCurrentKey(t[t.length - 1])
-      return t.slice(0, -1)
+      // Skip over pass-through marker steps when stepping back.
+      let i = t.length - 1
+      while (i >= 0 && t[i].startsWith('mode_')) i--
+      if (i < 0) return t
+      setCurrentKey(t[i])
+      return t.slice(0, i)
     })
   }
 
@@ -140,6 +210,11 @@ export function ScriptFlowPlayer({
           {isObjection && (
             <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-semibold text-destructive">
               Objection
+            </span>
+          )}
+          {parentMode && (
+            <span className="rounded-full bg-accent/15 px-2 py-0.5 text-xs font-semibold text-accent-foreground">
+              Parent/guardian wording
             </span>
           )}
           <h2 className="text-sm font-semibold text-foreground">
@@ -224,7 +299,7 @@ export function ScriptFlowPlayer({
                     className="h-auto min-h-11 whitespace-normal py-2.5 text-left"
                     onClick={() => go(c)}
                   >
-                    {c.label}
+                    {mergeScript(c.label, [], effectiveExtras)}
                   </Button>
                 ) : (
                   <button
@@ -236,7 +311,7 @@ export function ScriptFlowPlayer({
                       CHOICE_STYLES[c.variant] ?? CHOICE_STYLES.default,
                     )}
                   >
-                    {c.label}
+                    {mergeScript(c.label, [], effectiveExtras)}
                   </button>
                 ),
               )}
