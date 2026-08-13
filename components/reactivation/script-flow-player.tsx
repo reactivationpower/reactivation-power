@@ -40,7 +40,10 @@ const PATIENT_TOKENS: Record<string, string> = {
   pt_photos_q:
     'And how do you feel about the smile in photos these days \u2014 still showing it off, or any creeping self-consciousness?',
   pt_obj_braces_q: 'Do I have to get braces again?',
+  pt_obj_startover_q: 'Do I have to start all over?',
   pt_obj_embarrassed_q: 'I\u2019m embarrassed I stopped wearing my retainer',
+  pt_al_photos_q:
+    'And how do you feel about your smile in photos and on video calls these days? Be honest \u2014 do you still catch yourself doing the closed-lip smile, or angling away from the camera?',
 }
 
 const PARENT_TOKENS: Record<string, string> = {
@@ -59,7 +62,10 @@ const PARENT_TOKENS: Record<string, string> = {
   pt_photos_q:
     'And how does your child feel about their smile these days \u2014 still showing it off, or any covering the mouth in photos or teasing at school?',
   pt_obj_braces_q: 'Does my child have to get braces again?',
+  pt_obj_startover_q: 'Does my child have to start all over?',
   pt_obj_embarrassed_q: 'I feel bad we let the retainer routine slip',
+  pt_al_photos_q:
+    'And how does your child feel about their smile these days \u2014 still showing it off, or any covering the mouth in photos or teasing at school?',
 }
 
 const CHOICE_STYLES: Record<ScriptFlowVariant, string> = {
