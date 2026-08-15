@@ -23,6 +23,8 @@ interface Props {
   callerName?: string
   practiceName?: string | null
   isProvider?: boolean
+  /** Optional deep link: open the player at this step (review/debug use). */
+  initialStepKey?: string | null
 }
 
 export function ScriptViewer({
@@ -33,6 +35,7 @@ export function ScriptViewer({
   callerName,
   practiceName,
   isProvider = false,
+  initialStepKey = null,
 }: Props) {
   // Only honor the saved niche if it belongs to this account's sector(s);
   // otherwise fall back to the first available niche.
@@ -136,6 +139,7 @@ export function ScriptViewer({
         nicheId={nicheId || null}
         extras={extras}
         fontSize={FONT_SIZES[sizeIndex]}
+        initialStepKey={initialStepKey}
       />
     </div>
   )

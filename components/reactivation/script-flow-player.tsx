@@ -17,7 +17,9 @@ interface Props {
   nicheId: string | null
   extras: Record<string, string>
   fontSize: number
-}
+  /** Optional deep link: start the player at this step instead of the first screen. */
+  initialStepKey?: string | null
+  }
 
 // Relationship tokens: scripts can use {{pt_*}} slots that resolve
 // differently when the caller is speaking with a parent/guardian instead of
@@ -123,6 +125,7 @@ export function ScriptFlowPlayer({
   nicheId,
   extras,
   fontSize,
+  initialStepKey,
 }: Props) {
   // Resolve niche overrides: a niche row with the same step_key replaces the
   // general row; a niche's choice set for a step replaces the general set.
@@ -161,7 +164,9 @@ export function ScriptFlowPlayer({
     return { stepMap, choiceMap, startKey: ordered[0]?.step_key ?? null }
   }, [steps, choices, nicheId])
 
-  const [currentKey, setCurrentKey] = useState<string | null>(startKey)
+  const [currentKey, setCurrentKey] = useState<string | null>(
+    initialStepKey && stepMap.has(initialStepKey) ? initialStepKey : startKey,
+  )
   const [trail, setTrail] = useState<string[]>([])
 
   const step = currentKey ? (stepMap.get(currentKey) ?? null) : null

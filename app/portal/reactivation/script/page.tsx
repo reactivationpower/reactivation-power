@@ -10,7 +10,12 @@ import { getNiches, getScriptFlow } from '@/lib/data/reactivation'
 import { getOwnerSectors } from '@/lib/data/courses'
 import { ScriptViewer } from '@/components/reactivation/script-viewer'
 
-export default async function PracticeScriptPage() {
+export default async function PracticeScriptPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ screen?: string }>
+}) {
+  const { screen } = await searchParams
   const participant = await getCurrentParticipant()
   if (!participant) redirect(`/?next=/portal/reactivation`)
 
@@ -52,6 +57,7 @@ export default async function PracticeScriptPage() {
           callerName={participant.first_name}
           practiceName={owner?.practice_name ?? null}
           isProvider={participant.role === 'owner'}
+          initialStepKey={screen ?? null}
         />
       </div>
     </div>
