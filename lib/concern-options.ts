@@ -98,6 +98,92 @@ export const CONCERN_OPTIONS: Record<string, ConcernOption[]> = {
     { label: 'Sleep', spoken: 'your sleep' },
     { label: 'Stress', spoken: 'the stress' },
   ],
+  ChiroThin: [
+    { label: 'Weight creeping back', spoken: 'the weight creeping back' },
+    {
+      label: 'Eating habits slipping',
+      spoken: 'getting your eating habits back on track',
+    },
+    { label: 'Energy crashes', spoken: 'the energy crashes' },
+    { label: 'Sleep problems', spoken: 'your sleep' },
+    { label: 'Stress / irritability', spoken: 'the stress' },
+    { label: 'Allergy / sinus', spoken: 'the allergy and sinus problems' },
+    { label: 'Neck or back pain', spoken: 'the back pain' },
+    {
+      label: 'Knees, hips, or feet',
+      spoken: 'the trouble with your knees and hips',
+    },
+    { label: 'Headaches', spoken: 'your headaches' },
+    { label: 'Medications', spoken: 'your reliance on those medications' },
+  ],
+  'Skin Tightening': [
+    { label: 'Jawline / neck', spoken: 'that jawline and neck area' },
+    { label: 'Arms', spoken: 'the crepey skin on your arms' },
+    { label: 'Above the knees', spoken: 'that spot above the knees' },
+    { label: 'Chest', spoken: 'the chest area' },
+    { label: 'Backs of hands', spoken: 'the backs of your hands' },
+    {
+      label: 'Skin after weight change',
+      spoken: 'the areas where the skin didn\u2019t keep up',
+    },
+  ],
+  'Cellulite Reduction': [
+    { label: 'Backs of thighs', spoken: 'the backs of your thighs' },
+    { label: 'Buttocks', spoken: 'the buttocks area' },
+    { label: 'Above the knees', spoken: 'that spot above the knees' },
+    {
+      label: 'How clothes fit / feel',
+      spoken: 'the way your clothes are fitting',
+    },
+    { label: 'Skin texture / firmness', spoken: 'that skin texture' },
+    { label: 'The original area', spoken: 'that original area we treated' },
+  ],
+  'Red Light / Body Contouring': [
+    { label: 'Lower belly', spoken: 'that lower belly' },
+    { label: 'Flanks / love handles', spoken: 'those love handles' },
+    { label: 'Upper arms', spoken: 'the upper arms' },
+    { label: 'Under the chin', spoken: 'that spot under the chin' },
+    {
+      label: 'How clothes fit',
+      spoken: 'the way your clothes are fitting',
+    },
+    { label: 'Energy / recovery', spoken: 'your energy and recovery' },
+  ],
+  'Laser Hair Removal': [
+    { label: 'The regrowth', spoken: 'the regrowth' },
+    {
+      label: 'Irritation / ingrowns',
+      spoken: 'the irritation and ingrowns',
+    },
+    { label: 'Underarms', spoken: 'your underarms' },
+    { label: 'Legs', spoken: 'your legs' },
+    { label: 'Bikini line', spoken: 'the bikini line' },
+    { label: 'Face', spoken: 'the facial hair' },
+    { label: 'Back', spoken: 'your back' },
+    {
+      label: 'A treatment they asked about',
+      spoken: 'that treatment you\u2019ve been curious about',
+    },
+  ],
+  'Body Waxing': [
+    {
+      label: 'Routine slipped',
+      spoken: 'getting your routine back on track',
+    },
+    {
+      label: 'Irritation / ingrowns',
+      spoken: 'the irritation and ingrowns',
+    },
+    { label: 'Brows', spoken: 'your brows' },
+    { label: 'Lip / face', spoken: 'the facial hair' },
+    { label: 'Underarms', spoken: 'your underarms' },
+    { label: 'Legs', spoken: 'your legs' },
+    { label: 'Back', spoken: 'your back' },
+    {
+      label: 'A service they asked about',
+      spoken: 'that service you\u2019ve been curious about',
+    },
+  ],
   'Gut Health': [
     { label: 'Bloating', spoken: 'the bloating' },
     { label: 'Energy crashes', spoken: 'the energy crashes' },
