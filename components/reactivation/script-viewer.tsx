@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { ScriptFlowPlayer } from '@/components/reactivation/script-flow-player'
+import { CONCERN_OPTIONS } from '@/lib/concern-options'
 import type { Niche, ScriptFlowChoice, ScriptFlowStep } from '@/lib/types'
 
 const FONT_SIZES = [16, 18, 20, 24, 28, 32, 36, 40]
@@ -140,6 +141,11 @@ export function ScriptViewer({
         extras={extras}
         fontSize={FONT_SIZES[sizeIndex]}
         initialStepKey={initialStepKey}
+        concernOptions={
+          CONCERN_OPTIONS[
+            niches.find((n) => n.id === nicheId)?.name ?? ''
+          ] ?? undefined
+        }
       />
     </div>
   )

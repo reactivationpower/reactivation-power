@@ -1,8 +1,13 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { ArrowLeft, MousePointerClick, RotateCcw } from 'lucide-react'
+import { ArrowLeft, Crosshair, MousePointerClick, RotateCcw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import {
+  CONCERN_FALLBACK,
+  type ConcernOption,
+} from '@/lib/concern-options'
 import { mergeScript } from '@/lib/script-merge'
 import { cn } from '@/lib/utils'
 import type {
@@ -19,6 +24,10 @@ interface Props {
   fontSize: number
   /** Optional deep link: start the player at this step instead of the first screen. */
   initialStepKey?: string | null
+  /** Main-concern capture chips for this niche (clinical niches only).
+   * Shown on the questions screen; the tapped concern fills the
+   * {{main_concern}} token on every later screen. */
+  concernOptions?: ConcernOption[]
   }
 
 // Relationship tokens: scripts can use {{pt_*}} slots that resolve
@@ -126,6 +135,7 @@ export function ScriptFlowPlayer({
   extras,
   fontSize,
   initialStepKey,
+  concernOptions,
 }: Props) {
   // Resolve niche overrides: a niche row with the same step_key replaces the
   // general row; a niche's choice set for a step replaces the general set.
@@ -169,6 +179,15 @@ export function ScriptFlowPlayer({
   )
   const [trail, setTrail] = useState<string[]>([])
 
+  // Main-concern capture: the caller taps the patient's answer to the magic
+  // question on the questions screen. Last tap wins. "Other" opens a small
+  // type-in. The choice fills {{main_concern}} on every later screen; when
+  // nothing is tapped the token falls back to a generic phrase so the script
+  // never breaks.
+  const [concern, setConcern] = useState<ConcernOption | null>(null)
+  const [otherOpen, setOtherOpen] = useState(false)
+  const [otherText, setOtherText] = useState('')
+
   const step = currentKey ? (stepMap.get(currentKey) ?? null) : null
   const allStepChoices = step ? (choiceMap.get(step.step_key) ?? []) : []
 
@@ -193,8 +212,9 @@ export function ScriptFlowPlayer({
     () => ({
       ...(parentMode ? PARENT_TOKENS : PATIENT_TOKENS),
       ...extras,
+      main_concern: concern?.spoken?.trim() || CONCERN_FALLBACK,
     }),
-    [extras, parentMode],
+    [extras, parentMode, concern],
   )
 
   const paragraphs = useMemo(() => {
@@ -236,6 +256,14 @@ export function ScriptFlowPlayer({
   function restart() {
     setTrail([])
     setCurrentKey(startKey)
+    setConcern(null)
+    setOtherOpen(false)
+    setOtherText('')
+  }
+
+  function pickConcern(option: ConcernOption) {
+    setConcern(option)
+    setOtherOpen(false)
   }
 
   if (!step) {
@@ -264,6 +292,12 @@ export function ScriptFlowPlayer({
           {parentMode && (
             <span className="rounded-full bg-accent/15 px-2 py-0.5 text-xs font-semibold text-accent-foreground">
               Parent/guardian wording
+            </span>
+          )}
+          {concern && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
+              <Crosshair className="size-3" />
+              {concern.label}
             </span>
           )}
           <h2 className="text-sm font-semibold text-foreground">
@@ -328,6 +362,82 @@ export function ScriptFlowPlayer({
           )}
         </div>
       </div>
+
+      {/* Main-concern capture: shown on the questions screen for niches with
+          a concern list. Tapping records the patient's answer to the magic
+          question; the routing buttons below still control navigation. */}
+      {step.step_key === 'digging_in' &&
+        concernOptions &&
+        concernOptions.length > 0 && (
+          <div className="border-t border-border bg-primary/5 px-5 py-4 sm:px-8">
+            <p className="mb-3 flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              <Crosshair className="size-3.5" />
+              Tap their answer — which one do they want gone?
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {concernOptions.map((opt) => (
+                <button
+                  key={opt.label}
+                  type="button"
+                  onClick={() => pickConcern(opt)}
+                  aria-pressed={concern?.label === opt.label}
+                  className={cn(
+                    'inline-flex min-h-10 items-center rounded-full border px-4 py-2 text-sm font-medium transition-colors',
+                    concern?.label === opt.label && !otherOpen
+                      ? 'border-primary bg-primary text-primary-foreground'
+                      : 'border-border bg-card text-foreground hover:bg-muted',
+                  )}
+                >
+                  {opt.label}
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={() => {
+                  setOtherOpen(true)
+                  if (otherText.trim()) {
+                    setConcern({ label: 'Other', spoken: otherText.trim() })
+                  }
+                }}
+                aria-pressed={otherOpen}
+                className={cn(
+                  'inline-flex min-h-10 items-center rounded-full border px-4 py-2 text-sm font-medium transition-colors',
+                  otherOpen
+                    ? 'border-primary bg-primary text-primary-foreground'
+                    : 'border-dashed border-border bg-card text-muted-foreground hover:bg-muted',
+                )}
+              >
+                Other…
+              </button>
+            </div>
+            {otherOpen && (
+              <div className="mt-3 flex max-w-md items-center gap-2">
+                <Input
+                  autoFocus
+                  value={otherText}
+                  placeholder="Type it as you’d say it, e.g. “the dizziness”"
+                  onChange={(e) => {
+                    setOtherText(e.target.value)
+                    setConcern(
+                      e.target.value.trim()
+                        ? { label: 'Other', spoken: e.target.value.trim() }
+                        : null,
+                    )
+                  }}
+                />
+              </div>
+            )}
+            {concern && !otherOpen && (
+              <p className="mt-3 text-xs text-muted-foreground">
+                The script ahead will now say{' '}
+                <span className="font-medium text-foreground">
+                  “{concern.spoken}”
+                </span>
+                . Tap a different chip if they change their answer.
+              </p>
+            )}
+          </div>
+        )}
 
       {/* Choice buttons */}
       <div className="border-t border-border bg-muted/30 px-5 py-4 sm:px-8">
