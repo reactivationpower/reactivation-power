@@ -366,8 +366,7 @@ export function ScriptFlowPlayer({
       {/* Main-concern capture: shown on the questions screen for niches with
           a concern list. Tapping records the patient's answer to the magic
           question; the routing buttons below still control navigation. */}
-      {(step.step_key === 'digging_in' ||
-        step.step_key === 'digging_in_concern') &&
+      {step.step_key.startsWith('digging_in') &&
         concernOptions &&
         concernOptions.length > 0 && (
           <div className="border-t border-border bg-primary/5 px-5 py-4 sm:px-8">
