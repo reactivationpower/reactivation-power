@@ -34,6 +34,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { mergeScript } from '@/lib/script-merge'
+import { CONCERN_OPTIONS } from '@/lib/concern-options'
 import { ScriptFlowPlayer } from '@/components/reactivation/script-flow-player'
 import type { CallWithCaller, ContactWithMeta } from '@/lib/data/reactivation'
 import type {
@@ -316,6 +317,11 @@ export function CallScreen({
           nicheId={nicheId || null}
           extras={extras}
           fontSize={FONT_SIZES[sizeIndex]}
+          concernOptions={
+            CONCERN_OPTIONS[
+              niches.find((n) => n.id === nicheId)?.name ?? ''
+            ] ?? undefined
+          }
         />
       ) : (
       <article
