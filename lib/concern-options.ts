@@ -184,6 +184,19 @@ export const CONCERN_OPTIONS: Record<string, ConcernOption[]> = {
       spoken: 'that service you\u2019ve been curious about',
     },
   ],
+  'GLP Patients': [
+    { label: 'Weight coming back', spoken: 'the weight coming back' },
+    { label: 'Appetite coming back', spoken: 'the appetite coming back' },
+    {
+      label: 'Old eating habits creeping in',
+      spoken: 'getting your eating habits back on track',
+    },
+    { label: 'Energy dips / fatigue', spoken: 'the energy dips' },
+    { label: 'Muscle or strength loss', spoken: 'the muscle and strength loss' },
+    { label: 'Sleep trouble', spoken: 'your sleep' },
+    { label: 'Joint aches', spoken: 'the joint aches' },
+    { label: 'Stress / anxiety', spoken: 'the stress' },
+  ],
   'Gut Health': [
     { label: 'Bloating', spoken: 'the bloating' },
     { label: 'Energy crashes', spoken: 'the energy crashes' },
