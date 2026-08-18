@@ -57,7 +57,7 @@ ${body}
 
 const header = `        <tr>
           <td align="center" style="background-color:#ffffff;padding:28px 40px 24px 40px;border-bottom:3px solid #39889f;" class="inner">
-            <img src="https://umbrella-bay.vercel.app/images/logo.png" alt="Reactivation Power" width="200" style="width:200px;max-width:200px;height:auto;margin:0 auto;" />
+            <img src="https://umbrella-bay.vercel.app/images/logo-slogan.png" alt="Reactivation Power — Turning old business into new business &amp; new money" width="240" style="width:240px;max-width:240px;height:auto;margin:0 auto;" />
           </td>
         </tr>`
 
