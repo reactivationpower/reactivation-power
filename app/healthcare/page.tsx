@@ -10,9 +10,9 @@ import {
   TrendingUp,
   Users,
 } from 'lucide-react'
+import { HeroOpportunity } from '@/components/landing/hero-opportunity'
 import { LeadDialog } from '@/components/landing/lead-dialog'
 import { LeadForm } from '@/components/landing/lead-form'
-import { TestimonialVideo } from '@/components/landing/testimonial-video'
 
 export const metadata: Metadata = {
   title: 'Reactivation Power Program for Healthcare Practices',
@@ -140,14 +140,8 @@ export default function HealthcareLandingPage() {
             </dl>
           </div>
 
-          {/* Testimonial video */}
-          <figure className="flex flex-col gap-4">
-            <TestimonialVideo />
-            <figcaption className="text-center text-sm leading-relaxed text-muted-foreground">
-              Hear how one practice turned their dormant patient list into
-              booked-solid weeks.
-            </figcaption>
-          </figure>
+          {/* Revenue opportunity calculator */}
+          <HeroOpportunity />
         </div>
       </section>
 
