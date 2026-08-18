@@ -3,29 +3,32 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { Check, ChevronDown } from 'lucide-react'
 
-/** Healthcare niches offered in the course — keep in sync with the niches table */
+/**
+ * Healthcare niches offered in the course — keep in sync with the niches
+ * table, listed in the same sort_order the user portal displays them.
+ */
 const HEALTHCARE_SERVICES = [
-  'Acoustic Wave Therapy',
-  'Acupuncture',
-  'Body Waxing',
-  'Botox',
-  'Cellulite Reduction',
   'Chiropractic',
   'ChiroThin',
-  'Clear Aligners',
-  'Decompression',
-  'Dental Implants',
-  'GLP Patients',
-  'Gut Health',
-  'Joint Pain',
-  'Laser Hair Removal',
-  'Massage Therapy',
-  'Med Spa',
-  'Neuropathy',
-  'Orthodontics / Braces',
   'Red Light / Body Contouring',
-  'Skin Tightening',
+  'Decompression',
+  'Neuropathy',
+  'Acoustic Wave Therapy',
+  'Joint Pain',
+  'Gut Health',
+  'Massage Therapy',
+  'Acupuncture',
+  'Botox',
   'Teeth Whitening',
+  'Cellulite Reduction',
+  'Skin Tightening',
+  'Clear Aligners',
+  'Orthodontics / Braces',
+  'Body Waxing',
+  'Laser Hair Removal',
+  'GLP Patients',
+  'Dental Implants',
+  'Med Spa',
 ] as const
 
 export function ServicesMultiSelect() {
