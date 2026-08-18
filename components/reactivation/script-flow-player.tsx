@@ -217,8 +217,12 @@ export function ScriptFlowPlayer({
   // 2. the concern the patient named during this call (tapped chip)
   // 3. generic fallback phrase — and on the opening question the optional
   //    "especially with ..." clause is dropped entirely instead.
+  // The generic fallback phrase doesn't count as a real complaint here:
+  // "especially with" clauses read awkwardly with it, so they still drop.
+  const concernSpoken = concern?.spoken?.trim()
   const hasComplaint = Boolean(
-    extras.complaint_reference || concern?.spoken?.trim(),
+    extras.complaint_reference ||
+      (concernSpoken && concernSpoken !== COMPLAINT_FALLBACK),
   )
 
   const effectiveExtras = useMemo(
@@ -285,6 +289,23 @@ export function ScriptFlowPlayer({
     setConcern(option)
     setOtherOpen(false)
   }
+
+  // Original-complaint chip: always first on the questions screen, so the
+  // most common answer to the magic question ("the thing I originally came
+  // in for") is a one-tap capture. When the office documented a condition,
+  // the chip shows and speaks it; when not, a generic chip fills the
+  // fallback phrase so the script ahead still reads naturally.
+  const originalChip = useMemo<ConcernOption>(() => {
+    const documented = extras.complaint_reference?.trim()
+    if (documented) {
+      const display = documented.replace(/^the\s+/i, '')
+      return {
+        label: `${display.charAt(0).toUpperCase()}${display.slice(1)} (original)`,
+        spoken: documented,
+      }
+    }
+    return { label: 'Original complaint', spoken: COMPLAINT_FALLBACK }
+  }, [extras.complaint_reference])
 
   if (!step) {
     return (
@@ -395,7 +416,7 @@ export function ScriptFlowPlayer({
               Tap their answer — which one do they want gone?
             </p>
             <div className="flex flex-wrap gap-2">
-              {concernOptions.map((opt) => (
+              {[originalChip, ...concernOptions].map((opt) => (
                 <button
                   key={opt.label}
                   type="button"
@@ -405,7 +426,9 @@ export function ScriptFlowPlayer({
                     'inline-flex min-h-10 items-center rounded-full border px-4 py-2 text-sm font-medium transition-colors',
                     concern?.label === opt.label && !otherOpen
                       ? 'border-primary bg-primary text-primary-foreground'
-                      : 'border-border bg-card text-foreground hover:bg-muted',
+                      : opt === originalChip
+                        ? 'border-primary/40 bg-primary/5 text-foreground hover:bg-primary/10'
+                        : 'border-border bg-card text-foreground hover:bg-muted',
                   )}
                 >
                   {opt.label}
