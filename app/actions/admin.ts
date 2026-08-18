@@ -293,12 +293,17 @@ export async function createParticipant(formData: FormData) {
   const supabase = getAdminClient()
 
   if (parentId) {
+    // Only active staff count toward the limit — disabling a staff member
+    // frees up a seat for a replacement.
     const { count } = await supabase
       .from('participants')
       .select('id', { count: 'exact', head: true })
       .eq('parent_id', parentId)
+      .eq('is_active', true)
     if ((count ?? 0) >= MAX_STAFF) {
-      return { error: `Staff limit reached (max ${MAX_STAFF} per participant)` }
+      return {
+        error: `Staff limit reached (max ${MAX_STAFF} active per participant)`,
+      }
     }
   }
 

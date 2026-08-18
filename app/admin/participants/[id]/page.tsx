@@ -203,11 +203,14 @@ export default async function ParticipantDetailPage({
           <Card>
             <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0">
               <CardTitle className="text-base">
-                Staff members ({staff.length}/{MAX_STAFF})
+                Staff members ({staff.filter((s) => s.is_active).length}/
+                {MAX_STAFF} active)
               </CardTitle>
               <AddStaffForm
                 parentId={participant.id}
-                disabled={staff.length >= MAX_STAFF}
+                disabled={
+                  staff.filter((s) => s.is_active).length >= MAX_STAFF
+                }
               />
             </CardHeader>
             <CardContent className="flex flex-col gap-3">

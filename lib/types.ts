@@ -126,8 +126,8 @@ export interface ActivityEvent {
 
 /** Video completion threshold (percent watched) */
 export const COMPLETION_THRESHOLD = 90
-/** Max staff members per owner participant */
-export const MAX_STAFF = 3
+/** Max active staff members per owner participant (disabled staff don't count) */
+export const MAX_STAFF = 5
 
 // ---------- Reactivation ----------
 
