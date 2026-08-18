@@ -41,7 +41,7 @@ export function HeroOpportunity() {
             htmlFor="hero-inactive"
             className="text-sm font-medium text-foreground"
           >
-            Inactive patients in your list
+            Inactive patient files
           </label>
           <span className="text-base font-semibold tabular-nums text-foreground">
             {inactiveCount.toLocaleString('en-US')}
