@@ -56,8 +56,8 @@ ${body}
 </html>`
 
 const header = `        <tr>
-          <td align="center" style="background-color:#ffffff;padding:28px 40px 24px 40px;border-bottom:3px solid #39889f;" class="inner">
-            <img src="https://umbrella-bay.vercel.app/images/logo-slogan.png" alt="Reactivation Power — Turning old business into new business &amp; new money" width="240" style="width:240px;max-width:240px;height:auto;margin:0 auto;" />
+          <td align="center" style="background-color:#ffffff;padding:18px 40px 16px 40px;border-bottom:3px solid #39889f;" class="inner">
+            <img src="https://umbrella-bay.vercel.app/images/logo-slogan.png" alt="Reactivation Power — Turning old business into new business &amp; new money" width="170" style="width:170px;max-width:170px;height:auto;margin:0 auto;" />
           </td>
         </tr>`
 
