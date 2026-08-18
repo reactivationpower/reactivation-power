@@ -8,6 +8,7 @@ import {
   ClipboardList,
   LayoutGrid,
   LogOut,
+  Mail,
   PhoneCall,
   Plus,
   Users,
@@ -26,6 +27,7 @@ const NAV = [
       { href: '/admin/courses', label: 'Courses', icon: ClipboardList },
       { href: '/admin/participants', label: 'Viewers', icon: Users },
       { href: '/admin/reactivation', label: 'Reactivation', icon: PhoneCall },
+      { href: '/admin/emails', label: 'Email Templates', icon: Mail },
     ],
   },
   {
