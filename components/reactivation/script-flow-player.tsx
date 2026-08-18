@@ -8,7 +8,11 @@ import {
   CONCERN_FALLBACK,
   type ConcernOption,
 } from '@/lib/concern-options'
-import { mergeScript } from '@/lib/script-merge'
+import {
+  COMPLAINT_FALLBACK,
+  mergeScript,
+  stripComplaintClause,
+} from '@/lib/script-merge'
 import { cn } from '@/lib/utils'
 import type {
   ScriptFlowChoice,
@@ -208,9 +212,22 @@ export function ScriptFlowPlayer({
   // but never displayed \u2014 navigation passes straight through them.
   const parentMode = trail.some((k) => k.startsWith('mode_parent'))
 
+  // {{complaint_reference}} resolution, best source first:
+  // 1. documented condition from the contact record (arrives via extras)
+  // 2. the concern the patient named during this call (tapped chip)
+  // 3. generic fallback phrase — and on the opening question the optional
+  //    "especially with ..." clause is dropped entirely instead.
+  const hasComplaint = Boolean(
+    extras.complaint_reference || concern?.spoken?.trim(),
+  )
+
   const effectiveExtras = useMemo(
     () => ({
       ...(parentMode ? PARENT_TOKENS : PATIENT_TOKENS),
+      complaint_reference:
+        extras.complaint_reference ||
+        concern?.spoken?.trim() ||
+        COMPLAINT_FALLBACK,
       ...extras,
       main_concern: concern?.spoken?.trim() || CONCERN_FALLBACK,
     }),
@@ -219,11 +236,14 @@ export function ScriptFlowPlayer({
 
   const paragraphs = useMemo(() => {
     if (!step) return []
-    return mergeScript(step.content, [], effectiveExtras)
+    const body = hasComplaint
+      ? step.content
+      : stripComplaintClause(step.content)
+    return mergeScript(body, [], effectiveExtras)
       .split(/\n\s*\n/)
       .map((p) => p.trim())
       .filter(Boolean)
-  }, [step, effectiveExtras])
+  }, [step, effectiveExtras, hasComplaint])
 
   function go(choice: ScriptFlowChoice) {
     if (!choice.to_step_key || !stepMap.has(choice.to_step_key)) return

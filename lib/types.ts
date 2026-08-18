@@ -203,6 +203,9 @@ export interface Contact {
   notes: string | null
   first_call_at: string | null
   service_label: string | null
+  /** What the patient was previously treated for (optional; fills
+   * the {{complaint_reference}} script token when present). */
+  original_complaint: string | null
   created_at: string
 }
 

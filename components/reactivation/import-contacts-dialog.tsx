@@ -76,7 +76,15 @@ function parseCsv(text: string): string[][] {
 
 // ---------- column auto-detection ----------
 
-type Target = 'name' | 'firstName' | 'lastName' | 'phone' | 'email' | 'service' | 'notes'
+type Target =
+  | 'name'
+  | 'firstName'
+  | 'lastName'
+  | 'phone'
+  | 'email'
+  | 'service'
+  | 'complaint'
+  | 'notes'
 
 const TARGET_LABELS: Record<Target, string> = {
   name: 'Full name',
@@ -85,6 +93,7 @@ const TARGET_LABELS: Record<Target, string> = {
   phone: 'Phone',
   email: 'Email',
   service: 'Service / appointment type',
+  complaint: 'Previously treated for',
   notes: 'Notes',
 }
 
@@ -97,6 +106,10 @@ const HEADER_PATTERNS: Array<[Target, RegExp]> = [
   [
     'service',
     /(service|appointment[\s_-]?type|appt[\s_-]?type|treatment|procedure|visit[\s_-]?type|product|package|program|last[\s_-]?service)/i,
+  ],
+  [
+    'complaint',
+    /(complaint|condition|treated[\s_-]?for|diagnosis|concern)/i,
   ],
   ['notes', /(note|comment|memo)/i],
 ]
@@ -277,6 +290,10 @@ export function ImportContactsDialog({
         email: columns.email !== undefined ? (r[columns.email] ?? '').trim() : '',
         service:
           columns.service !== undefined ? (r[columns.service] ?? '').trim() : '',
+        complaint:
+          columns.complaint !== undefined
+            ? (r[columns.complaint] ?? '').trim()
+            : '',
         notes: columns.notes !== undefined ? (r[columns.notes] ?? '').trim() : '',
       }
     })
@@ -416,7 +433,7 @@ export function ImportContactsDialog({
                 </label>
                 <div className="grid gap-3 sm:grid-cols-2">
                   {(
-                    ['name', 'firstName', 'lastName', 'phone', 'email', 'service', 'notes'] as Target[]
+                    ['name', 'firstName', 'lastName', 'phone', 'email', 'service', 'complaint', 'notes'] as Target[]
                   ).map((target) => (
                     <div key={target} className="flex flex-col gap-1.5">
                       <Label className="text-xs">

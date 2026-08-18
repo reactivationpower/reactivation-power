@@ -111,6 +111,16 @@ export function AddContactDialog({ niches }: { niches: Niche[] }) {
               </Select>
             </div>
             <div className="flex flex-col gap-2">
+              <Label htmlFor="contact-complaint">
+                Previously treated for (optional)
+              </Label>
+              <Input
+                id="contact-complaint"
+                name="originalComplaint"
+                placeholder="e.g. lower back pain"
+              />
+            </div>
+            <div className="flex flex-col gap-2">
               <Label htmlFor="contact-notes">Notes (optional)</Label>
               <Textarea
                 id="contact-notes"

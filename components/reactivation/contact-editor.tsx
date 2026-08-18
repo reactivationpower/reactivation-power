@@ -129,6 +129,24 @@ export function ContactEditor({
             {dnc ? 'On — excluded from all queues' : 'Off'}
           </label>
         </div>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="edit-complaint">
+            Previously Treated For{' '}
+            <span className="font-normal text-muted-foreground">
+              (optional)
+            </span>
+          </Label>
+          <Input
+            id="edit-complaint"
+            name="originalComplaint"
+            placeholder="e.g. lower back pain"
+            defaultValue={contact.original_complaint ?? ''}
+          />
+          <p className="text-xs text-muted-foreground">
+            Fills the condition into the call script. Leave blank and the
+            script uses a generic lead-in instead.
+          </p>
+        </div>
       </div>
       <div className="flex flex-col gap-2">
         <Label htmlFor="edit-notes">Notes</Label>

@@ -171,6 +171,9 @@ export async function createContact(formData: FormData) {
   const email = String(formData.get('email') ?? '').trim()
   const nicheId = String(formData.get('nicheId') ?? '')
   const notes = String(formData.get('notes') ?? '').trim()
+  const originalComplaint = String(
+    formData.get('originalComplaint') ?? '',
+  ).trim()
   if (!name || !phone) return { error: 'Name and phone are required' }
 
   const supabase = getAdminClient()
@@ -203,6 +206,7 @@ export async function createContact(formData: FormData) {
           : (ownerRow?.default_niche_id ?? null),
       stage_id: newStage?.id ?? null,
       notes: notes || null,
+      original_complaint: originalComplaint || null,
     })
     .select('id')
     .single()
@@ -230,6 +234,11 @@ export async function updateContact(formData: FormData) {
     const v = formData.get(key)
     if (v !== null) patch[key] = String(v).trim() || null
   }
+  // Optional "previously treated for" — clearing the field stores null so
+  // the script falls back to its generic lead-in.
+  const originalComplaint = formData.get('originalComplaint')
+  if (originalComplaint !== null)
+    patch.original_complaint = String(originalComplaint).trim() || null
   const nicheId = formData.get('nicheId')
   if (nicheId !== null)
     patch.niche_id =
@@ -288,6 +297,8 @@ export interface ImportRow {
   email?: string
   service?: string
   notes?: string
+  /** What the patient was previously treated for (optional) */
+  complaint?: string
 }
 
 export interface ImportMapping {
@@ -399,6 +410,7 @@ export async function importContacts(input: {
       stage_id: newStage?.id ?? null,
       notes: (row.notes ?? '').trim() || null,
       service_label: serviceRaw || null,
+      original_complaint: (row.complaint ?? '').trim() || null,
     })
   }
 

@@ -33,7 +33,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { mergeScript } from '@/lib/script-merge'
+import { mergeScript, spokenComplaint } from '@/lib/script-merge'
 import { CONCERN_OPTIONS } from '@/lib/concern-options'
 import { ScriptFlowPlayer } from '@/components/reactivation/script-flow-player'
 import type { CallWithCaller, ContactWithMeta } from '@/lib/data/reactivation'
@@ -114,6 +114,11 @@ export function CallScreen({
       caller_name: callerName,
       your_name: callerName,
     }
+    // Documented condition from the contact record fills the
+    // {{complaint_reference}} token; when absent, the flow player handles
+    // the fallback (clause drop on the opener, generic phrase mid-sentence).
+    const complaint = spokenComplaint(contact.original_complaint ?? '')
+    if (complaint) e.complaint_reference = complaint
     if (practiceName) e.practice_name = practiceName
     if (providerName) e.provider_name = providerName
     else if (practiceName) e.provider_name = practiceName
@@ -129,7 +134,14 @@ export function CallScreen({
       ? 'I wanted to reach out to you personally.'
       : `${e.provider_name ?? '[PROVIDER NAME]'} asked me to reach out to you personally.`
     return e
-  }, [contact.name, callerName, practiceName, providerName, isProvider])
+  }, [
+    contact.name,
+    contact.original_complaint,
+    callerName,
+    practiceName,
+    providerName,
+    isProvider,
+  ])
 
   const merged = useMemo(() => {
     const nicheSections = sections.filter((s) => s.niche_id === nicheId)
