@@ -20,6 +20,13 @@ const LANDING_PAGES: LandingPage[] = [
       'The primary lead-generation page — stats, the interactive revenue opportunity calculator, how it works, benefits, and the lead form. This is the page the marketing emails link to.',
   },
   {
+    id: 'healthcare-testimonial',
+    name: 'Healthcare Landing — Testimonial Version',
+    path: '/healthcare/testimonial',
+    description:
+      'Variant of the main landing page with a video testimonial in the hero instead of the revenue calculator. Currently shows a placeholder until a testimonial video is added.',
+  },
+  {
     id: 'your-opportunity',
     name: 'Your Opportunity Calculator',
     path: '/healthcare/your-opportunity',
