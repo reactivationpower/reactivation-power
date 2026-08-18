@@ -89,6 +89,13 @@ export const EMAIL_TEMPLATES: EmailTemplate[] = [
             <p style="margin:0 0 16px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:26px;color:#314158;">These are people who already know you, already trust you, and already got results with you. They didn't leave because they were unhappy — life just got busy. And reaching them costs you <strong>nothing in ad spend.</strong></p>
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0;">
               <tr>
+                <td>
+                  <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Concept_1_Old_Patient_Files_Asset_No_Label-hyoFHnr5ONQKfPJarHrFb9qg6YPadx.png" alt="Your old patient files are an asset — the opportunity is already sitting in your database. 1,000 old patient files, just 10% reactivated through simple outreach, equals 100 returning patients at a $1,000 average patient value: $100,000 in recovered revenue. This is not new business — this is business you already earned." width="520" style="width:100%;max-width:520px;height:auto;margin:0 auto;border-radius:6px;" />
+                </td>
+              </tr>
+            </table>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0;">
+              <tr>
                 <td style="background-color:#f1f5f9;border-left:4px solid #39889f;padding:20px 24px;">
                   <p style="margin:0 0 10px 0;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:24px;color:#1d293d;"><strong>Reactivating a past patient is 5&ndash;7x cheaper</strong> than acquiring a new one.</p>
                   <p style="margin:0 0 10px 0;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:24px;color:#1d293d;"><strong>20&ndash;40% of inactive lists typically rebook</strong> when contacted the right way.</p>
