@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation'
 import {
   BarChart3,
   ClipboardList,
+  Globe,
   LayoutGrid,
   LogOut,
   Mail,
@@ -28,6 +29,7 @@ const NAV = [
       { href: '/admin/participants', label: 'Viewers', icon: Users },
       { href: '/admin/reactivation', label: 'Reactivation', icon: PhoneCall },
       { href: '/admin/emails', label: 'Email Templates', icon: Mail },
+      { href: '/admin/landing', label: 'Landing Pages', icon: Globe },
     ],
   },
   {
