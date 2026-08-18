@@ -8,7 +8,7 @@ import {
 import {
   getCallHistory,
   getContact,
-  getNiches,
+  getOwnerNiches,
   getPipelineStages,
 } from '@/lib/data/reactivation'
 import { DISPOSITION_LABELS } from '@/lib/types'
@@ -30,7 +30,7 @@ export default async function ContactProfilePage({
   const [history, stages, niches] = await Promise.all([
     getCallHistory(id),
     getPipelineStages(ownerId),
-    getNiches(true),
+    getOwnerNiches(ownerId),
   ])
 
   return (

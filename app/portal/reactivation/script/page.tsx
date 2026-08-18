@@ -6,7 +6,7 @@ import {
   getCurrentParticipant,
   getParticipantById,
 } from '@/lib/data/participants'
-import { getNiches, getScriptFlow } from '@/lib/data/reactivation'
+import { getOwnerNiches, getScriptFlow } from '@/lib/data/reactivation'
 import { getOwnerSectors } from '@/lib/data/courses'
 import { ScriptViewer } from '@/components/reactivation/script-viewer'
 
@@ -22,7 +22,7 @@ export default async function PracticeScriptPage({
   const ownerId = accessOwnerId(participant)
   const sectors = await getOwnerSectors(ownerId)
   const [niches, flow, owner] = await Promise.all([
-    getNiches(true, sectors),
+    getOwnerNiches(ownerId, sectors),
     getScriptFlow(),
     participant.role === 'owner'
       ? Promise.resolve(participant)

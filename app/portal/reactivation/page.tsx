@@ -10,7 +10,7 @@ import {
 import {
   getCallQueue,
   getContacts,
-  getNiches,
+  getOwnerNiches,
   getPipelineStages,
   getServiceMappings,
   getTeamStats,
@@ -49,7 +49,7 @@ export default async function ReactivationDashboardPage() {
       getContacts(ownerId),
       getCallQueue(ownerId),
       getPipelineStages(ownerId),
-      getNiches(true, sectors),
+      getOwnerNiches(ownerId, sectors),
       isOwner ? getTeamStats(owner, staff) : Promise.resolve([]),
       getServiceMappings(ownerId),
     ])
@@ -105,6 +105,18 @@ export default async function ReactivationDashboardPage() {
           <AddContactDialog niches={niches} />
         </div>
       </div>
+
+      {niches.length === 0 && (
+        <div className="mt-6 rounded-lg border border-border bg-muted/50 px-5 py-4">
+          <p className="text-sm font-medium text-foreground">
+            No niches enabled for this account
+          </p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Call scripts are unlocked per niche. Contact your account manager
+            to enable the niches for the services you offer.
+          </p>
+        </div>
+      )}
 
       {isOwner && teamStats.length > 0 && (
         <div className="mt-6">

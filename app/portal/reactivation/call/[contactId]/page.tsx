@@ -11,7 +11,7 @@ import {
   getCallQueue,
   getContact,
   getMasterScript,
-  getNiches,
+  getOwnerNiches,
   getScriptFlow,
   getScriptSections,
 } from '@/lib/data/reactivation'
@@ -34,7 +34,7 @@ export default async function CallPage({
   const sectors = await getOwnerSectors(ownerId)
   const [niches, script, sections, queue, owner, callHistory, flow] =
     await Promise.all([
-      getNiches(true, sectors),
+      getOwnerNiches(ownerId, sectors),
       getMasterScript(),
       getScriptSections(),
       getCallQueue(ownerId),

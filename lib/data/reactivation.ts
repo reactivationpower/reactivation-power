@@ -30,6 +30,35 @@ export async function getNiches(
   return (data ?? []) as Niche[]
 }
 
+/** Niche ids an access-owner has been granted (mirrors course_access) */
+export async function getAccessibleNicheIds(
+  ownerId: string,
+): Promise<string[]> {
+  const supabase = getAdminClient()
+  const { data } = await supabase
+    .from('niche_access')
+    .select('niche_id')
+    .eq('participant_id', ownerId)
+  return (data ?? []).map((r) => r.niche_id as string)
+}
+
+/**
+ * Active niches the owner's account can use in the portal — the global
+ * active list filtered down to what has been toggled on for the account.
+ * Staff inherit from their owner via accessOwnerId upstream.
+ */
+export async function getOwnerNiches(
+  ownerId: string,
+  sectors?: Sector[],
+): Promise<Niche[]> {
+  const [niches, accessIds] = await Promise.all([
+    getNiches(true, sectors),
+    getAccessibleNicheIds(ownerId),
+  ])
+  const allowed = new Set(accessIds)
+  return niches.filter((n) => allowed.has(n.id))
+}
+
 // ---------- Scripts ----------
 
 export async function getMasterScript(): Promise<ReactivationScript | null> {

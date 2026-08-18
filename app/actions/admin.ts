@@ -385,3 +385,28 @@ export async function setCourseAccess(
   revalidatePath(`/admin/participants/${participantId}`)
   revalidatePath('/admin/participants')
 }
+
+// ---------- Niche access ----------
+
+export async function setNicheAccess(
+  participantId: string,
+  nicheId: string,
+  granted: boolean,
+) {
+  const supabase = getAdminClient()
+  if (granted) {
+    await supabase
+      .from('niche_access')
+      .upsert(
+        { participant_id: participantId, niche_id: nicheId },
+        { onConflict: 'participant_id,niche_id' },
+      )
+  } else {
+    await supabase
+      .from('niche_access')
+      .delete()
+      .eq('participant_id', participantId)
+      .eq('niche_id', nicheId)
+  }
+  revalidatePath(`/admin/participants/${participantId}`)
+}

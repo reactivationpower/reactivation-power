@@ -8,6 +8,7 @@ import {
   accessOwnerId,
 } from '@/lib/data/participants'
 import { getCourses, getAccessibleCourseIds, getCourseTree } from '@/lib/data/courses'
+import { getNiches, getAccessibleNicheIds } from '@/lib/data/reactivation'
 import { getActivityEvents } from '@/lib/data/analytics'
 import { getAdminClient } from '@/lib/supabase/admin'
 import { formatDateTime, formatDuration } from '@/lib/format'
@@ -24,6 +25,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { CourseAccessToggle } from '@/components/admin/course-access-toggle'
+import { NicheAccessToggle } from '@/components/admin/niche-access-toggle'
 import { AddStaffForm } from '@/components/admin/add-staff-form'
 import { ParticipantActiveToggle } from '@/components/admin/participant-active-toggle'
 import { ArrowLeft, Mail, Phone, Users } from 'lucide-react'
@@ -50,16 +52,34 @@ export default async function ParticipantDetailPage({
   const isOwner = participant.role === 'owner'
 
   const supabase = getAdminClient()
-  const [staff, aliases, sessions, courses, accessIds, events, progressRes] =
-    await Promise.all([
-      isOwner ? getStaffMembers(participant.id) : Promise.resolve([]),
-      getAliases(participant.id),
-      getSessions(participant.id, 20),
-      getCourses(),
-      getAccessibleCourseIds(ownerId),
-      getActivityEvents({ participantId: participant.id, limit: 50 }),
-      supabase.from('video_progress').select('*').eq('participant_id', id),
-    ])
+  const [
+    staff,
+    aliases,
+    sessions,
+    courses,
+    accessIds,
+    events,
+    progressRes,
+    niches,
+    nicheAccessIds,
+  ] = await Promise.all([
+    isOwner ? getStaffMembers(participant.id) : Promise.resolve([]),
+    getAliases(participant.id),
+    getSessions(participant.id, 20),
+    getCourses(),
+    getAccessibleCourseIds(ownerId),
+    getActivityEvents({ participantId: participant.id, limit: 50 }),
+    supabase.from('video_progress').select('*').eq('participant_id', id),
+    getNiches(true),
+    getAccessibleNicheIds(ownerId),
+  ])
+  const nicheAccessSet = new Set(nicheAccessIds)
+  const nichesBySector = new Map<string, typeof niches>()
+  for (const n of niches) {
+    const list = nichesBySector.get(n.sector) ?? []
+    list.push(n)
+    nichesBySector.set(n.sector, list)
+  }
 
   const progress = (progressRes.data ?? []) as VideoProgress[]
   const progressByVideo = new Map(progress.map((p) => [p.video_id, p]))
@@ -230,6 +250,65 @@ export default async function ParticipantDetailPage({
           </Card>
         )}
       </div>
+
+      {/* Niche access (reactivation) */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Niche access</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Reactivation niches this account can use. Toggle on the niches the
+            client purchased — more can be enabled later as they add services.
+          </p>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-5">
+          {niches.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No niches yet.</p>
+          ) : (
+            [...nichesBySector.entries()].map(([sector, sectorNiches]) => (
+              <div key={sector}>
+                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  {SECTOR_LABELS[sector as keyof typeof SECTOR_LABELS] ??
+                    sector}
+                </p>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {sectorNiches.map((niche) => (
+                    <div
+                      key={niche.id}
+                      className="flex items-center justify-between gap-4 rounded-md border border-border px-4 py-2.5"
+                    >
+                      <p className="min-w-0 truncate text-sm font-medium">
+                        {niche.name}
+                      </p>
+                      {isOwner ? (
+                        <NicheAccessToggle
+                          participantId={participant.id}
+                          nicheId={niche.id}
+                          initialGranted={nicheAccessSet.has(niche.id)}
+                        />
+                      ) : (
+                        <Badge
+                          variant={
+                            nicheAccessSet.has(niche.id) ? 'default' : 'outline'
+                          }
+                        >
+                          {nicheAccessSet.has(niche.id)
+                            ? 'Inherited'
+                            : 'No access'}
+                        </Badge>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))
+          )}
+          {!isOwner ? (
+            <p className="text-xs text-muted-foreground">
+              Staff inherit niche access from their parent participant.
+            </p>
+          ) : null}
+        </CardContent>
+      </Card>
 
       {/* Aliases for owners */}
       {isOwner ? (
