@@ -124,6 +124,13 @@ ${button('See How It Works', '[LANDING_PAGE_URL]')}
             <p style="margin:0 0 16px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:26px;color:#314158;">Hi {{contact.first_name}},</p>
             <p style="margin:0 0 16px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:26px;color:#314158;">Think about what it takes to turn a total stranger into a patient: they have to see your ad, trust your name, overcome their skepticism, and finally pick up the phone. You pay for every step of that journey — and ad costs climb every year.</p>
             <p style="margin:0 0 16px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:26px;color:#314158;">Now compare that to a past patient. The trust is built. The skepticism is gone. They've already said yes to you once. <strong>All they need is a genuine reason to come back — and someone to reach out.</strong></p>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0;">
+              <tr>
+                <td>
+                  <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Concept_3_Marketing_Dollar_No_Label-hRD6TlNZDpAljxjZxATJhZIlYtOSwo.png" alt="Where would you rather spend your marketing dollar? Acquiring a stranger costs money at every step — ad spend, click, lead, follow-up, appointment — with an uncertain outcome. Reactivating a patient is just a phone call and an appointment: low cost, higher return." width="520" style="width:100%;max-width:520px;height:auto;margin:0 auto;border-radius:6px;" />
+                </td>
+              </tr>
+            </table>
             <p style="margin:0 0 16px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:26px;color:#314158;">This is especially powerful if you've added <strong>new services</strong> since they were last in. Whether it's a new treatment, new technology, or an expanded program — your existing and inactive patients are the warmest possible audience for it. They just don't know it exists yet.</p>
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0;">
               <tr>
