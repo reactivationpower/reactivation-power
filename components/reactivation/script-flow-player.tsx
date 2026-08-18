@@ -192,7 +192,17 @@ export function ScriptFlowPlayer({
   const [otherOpen, setOtherOpen] = useState(false)
   const [otherText, setOtherText] = useState('')
 
-  const step = currentKey ? (stepMap.get(currentKey) ?? null) : null
+  // Concern-aware step swap (ChiroThin): a non-weight concern replaces the
+  // weight-anchored Making It Real with its non-weight variant. The trail
+  // still records 'making_it_real', so Back navigation is unaffected.
+  const concernIsNonWeight = concern?.weightRelated === false
+  const resolvedKey =
+    currentKey === 'making_it_real' &&
+    concernIsNonWeight &&
+    stepMap.has('making_it_real_nw')
+      ? 'making_it_real_nw'
+      : currentKey
+  const step = resolvedKey ? (stepMap.get(resolvedKey) ?? null) : null
   const allStepChoices = step ? (choiceMap.get(step.step_key) ?? []) : []
 
   // Path awareness: did the caller come through the kept-the-weight-off path?
@@ -213,7 +223,6 @@ export function ScriptFlowPlayer({
     'obj_nw_thought_behind_me',
     'obj_nw_chiro_didnt_help',
   ]
-  const concernIsNonWeight = concern?.weightRelated === false
 
   let stepChoices = allStepChoices
   if (step?.step_key === 'uncover') {
