@@ -109,8 +109,9 @@ export function HeroOpportunity() {
         </button>
       </LeadDialog>
       <p className="text-center text-xs leading-relaxed text-muted-foreground">
-        Conservative estimate — no ad spend, no new leads, just patients you
-        already have.
+        Based on just 5% of your inactive files reactivating — practices
+        typically see 20&ndash;40%. No ad spend, no new leads, just patients
+        you already have.
       </p>
     </div>
   )
