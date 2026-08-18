@@ -2,16 +2,16 @@
 
 import { useState } from 'react'
 import { LeadDialog } from '@/components/landing/lead-dialog'
-import {
-  SLIDER_MAX,
-  SLIDER_MIN,
-  SLIDER_STEP,
-  reactivatedPatients,
-} from '@/lib/opportunity'
+import { reactivatedPatients } from '@/lib/opportunity'
 
 const INACTIVE_MIN = 100
 const INACTIVE_MAX = 5000
 const INACTIVE_STEP = 100
+
+const VALUE_MIN = 1000
+const VALUE_MAX = 5000
+const VALUE_STEP = 100
+const VALUE_DEFAULT = 2000
 
 function formatMoney(n: number): string {
   return '$' + Math.round(n).toLocaleString('en-US')
@@ -19,7 +19,7 @@ function formatMoney(n: number): string {
 
 export function HeroOpportunity() {
   const [inactiveCount, setInactiveCount] = useState(500)
-  const [patientValue, setPatientValue] = useState(1000)
+  const [patientValue, setPatientValue] = useState(VALUE_DEFAULT)
 
   const patients = reactivatedPatients(inactiveCount)
   const revenue = patients * patientValue
@@ -75,9 +75,9 @@ export function HeroOpportunity() {
         <input
           id="hero-value"
           type="range"
-          min={SLIDER_MIN}
-          max={SLIDER_MAX}
-          step={SLIDER_STEP}
+          min={VALUE_MIN}
+          max={VALUE_MAX}
+          step={VALUE_STEP}
           value={patientValue}
           onChange={(e) => setPatientValue(Number(e.target.value))}
           className="w-full accent-accent"
