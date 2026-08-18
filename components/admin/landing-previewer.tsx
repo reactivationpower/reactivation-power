@@ -17,7 +17,7 @@ const LANDING_PAGES: LandingPage[] = [
     name: 'Healthcare Main Landing Page',
     path: '/healthcare',
     description:
-      'The primary lead-generation page — stats, how it works, benefits, testimonial, and the lead form. This is the page the marketing emails link to.',
+      'The primary lead-generation page — stats, the interactive revenue opportunity calculator, how it works, benefits, and the lead form. This is the page the marketing emails link to.',
   },
   {
     id: 'your-opportunity',
