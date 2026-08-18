@@ -199,13 +199,37 @@ export function ScriptFlowPlayer({
   const KEPT_PATH_KEYS = ['resp_doing_great', 'transition_kept', 'digging_in_kept']
   const cameViaKeptPath = trail.some((k) => KEPT_PATH_KEYS.includes(k))
 
-  // A kept-it-off patient has no regained weight to handle, so the
-  // weight-focused cost objection is hidden on the uncover screen for that
-  // path only. The regained-weight paths still see both cost buttons.
-  const stepChoices =
-    step?.step_key === 'uncover' && cameViaKeptPath
-      ? allStepChoices.filter((c) => c.to_step_key !== 'obj_cost_weight')
-      : allStepChoices
+  // Concern-aware uncover screen (ChiroThin): when the tapped concern is
+  // explicitly non-weight (weightRelated: false), the weight-assuming
+  // objections are swapped for chiropractic-style handling. A weight chip,
+  // "Other", the original-complaint chip, or no chip keeps today's set.
+  // Kept-it-off path additionally hides the weight-focused cost objection.
+  const WEIGHT_ONLY_OBJECTIONS = [
+    'obj_do_it_myself',
+    'obj_embarrassed',
+    'obj_cost_weight',
+  ]
+  const NONWEIGHT_ONLY_OBJECTIONS = [
+    'obj_nw_thought_behind_me',
+    'obj_nw_chiro_didnt_help',
+  ]
+  const concernIsNonWeight = concern?.weightRelated === false
+
+  let stepChoices = allStepChoices
+  if (step?.step_key === 'uncover') {
+    stepChoices = concernIsNonWeight
+      ? stepChoices.filter(
+          (c) => !WEIGHT_ONLY_OBJECTIONS.includes(c.to_step_key ?? ''),
+        )
+      : stepChoices.filter(
+          (c) => !NONWEIGHT_ONLY_OBJECTIONS.includes(c.to_step_key ?? ''),
+        )
+    if (cameViaKeptPath) {
+      stepChoices = stepChoices.filter(
+        (c) => c.to_step_key !== 'obj_cost_weight',
+      )
+    }
+  }
 
   // Parent/guardian mode: on when the trail passed through a mode_parent
   // marker step. Marker steps (key prefix "mode_") are recorded in the trail

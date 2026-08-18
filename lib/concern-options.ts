@@ -19,6 +19,11 @@
 export interface ConcernOption {
   label: string
   spoken: string
+  /** ChiroThin only: explicitly false means the concern is NOT weight-related,
+   * which swaps the weight-assuming objections on the uncover screen for
+   * chiropractic-style handling. Undefined (all other niches, the
+   * original-complaint chip, and "Other") keeps the default objection set. */
+  weightRelated?: boolean
 }
 
 export const CONCERN_OPTIONS: Record<string, ConcernOption[]> = {
@@ -99,22 +104,36 @@ export const CONCERN_OPTIONS: Record<string, ConcernOption[]> = {
     { label: 'Stress', spoken: 'the stress' },
   ],
   ChiroThin: [
-    { label: 'Weight creeping back', spoken: 'the weight creeping back' },
+    {
+      label: 'Weight creeping back',
+      spoken: 'the weight creeping back',
+      weightRelated: true,
+    },
     {
       label: 'Eating habits slipping',
       spoken: 'getting your eating habits back on track',
+      weightRelated: true,
     },
-    { label: 'Energy crashes', spoken: 'the energy crashes' },
-    { label: 'Sleep problems', spoken: 'your sleep' },
-    { label: 'Stress / irritability', spoken: 'the stress' },
-    { label: 'Allergy / sinus', spoken: 'the allergy and sinus problems' },
-    { label: 'Neck or back pain', spoken: 'the back pain' },
+    { label: 'Energy crashes', spoken: 'the energy crashes', weightRelated: false },
+    { label: 'Sleep problems', spoken: 'your sleep', weightRelated: false },
+    { label: 'Stress / irritability', spoken: 'the stress', weightRelated: false },
+    {
+      label: 'Allergy / sinus',
+      spoken: 'the allergy and sinus problems',
+      weightRelated: false,
+    },
+    { label: 'Neck or back pain', spoken: 'the back pain', weightRelated: false },
     {
       label: 'Knees, hips, or feet',
       spoken: 'the trouble with your knees and hips',
+      weightRelated: false,
     },
-    { label: 'Headaches', spoken: 'your headaches' },
-    { label: 'Medications', spoken: 'your reliance on those medications' },
+    { label: 'Headaches', spoken: 'your headaches', weightRelated: false },
+    {
+      label: 'Medications',
+      spoken: 'your reliance on those medications',
+      weightRelated: false,
+    },
   ],
   'Skin Tightening': [
     { label: 'Jawline / neck', spoken: 'that jawline and neck area' },
