@@ -122,5 +122,5 @@ export async function login(
 
 export async function logout() {
   await clearSessionCookie()
-  redirect('/')
+  redirect('/login')
 }

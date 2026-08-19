@@ -32,7 +32,7 @@ export const metadata = {
 
 export default async function ReactivationDashboardPage() {
   const participant = await getCurrentParticipant()
-  if (!participant) redirect('/')
+  if (!participant) redirect('/login')
 
   const ownerId = accessOwnerId(participant)
   const isOwner = participant.role === 'owner'
@@ -40,7 +40,7 @@ export default async function ReactivationDashboardPage() {
   const owner = isOwner
     ? participant
     : await getParticipantById(ownerId)
-  if (!owner) redirect('/')
+  if (!owner) redirect('/login')
 
   const staff = await getStaffMembers(ownerId)
   const sectors = await getOwnerSectors(ownerId)

@@ -17,7 +17,7 @@ export default async function PracticeScriptPage({
 }) {
   const { screen } = await searchParams
   const participant = await getCurrentParticipant()
-  if (!participant) redirect(`/?next=/portal/reactivation`)
+  if (!participant) redirect(`/login?next=/portal/reactivation`)
 
   const ownerId = accessOwnerId(participant)
   const sectors = await getOwnerSectors(ownerId)

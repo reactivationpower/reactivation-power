@@ -13,6 +13,27 @@ interface LandingPage {
 
 const LANDING_PAGES: LandingPage[] = [
   {
+    id: 'website-home',
+    name: 'Website — Home',
+    path: '/',
+    description:
+      'The main website at reactivationpower.com — brand hero with the revenue calculator, the reactivation story, benefits, and Schedule a Call CTAs. This is what visitors see when they type in the domain.',
+  },
+  {
+    id: 'website-how-it-works',
+    name: 'Website — How It Works',
+    path: '/how-it-works',
+    description:
+      'The program page — what is included (training, interactive scripts, the portal), what it looks like day to day, and the niches covered. Answers "is this legit and does it fit my practice?"',
+  },
+  {
+    id: 'website-schedule',
+    name: 'Website — Schedule a Call',
+    path: '/schedule-a-call',
+    description:
+      'The booking page every website CTA leads to. Calendar embed placeholder (add your scheduler URL when ready) with the lead form as a fallback.',
+  },
+  {
     id: 'healthcare',
     name: 'Healthcare Main Landing Page',
     path: '/healthcare',

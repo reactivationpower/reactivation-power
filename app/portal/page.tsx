@@ -13,7 +13,7 @@ import {
 
 export default async function PortalHomePage() {
   const participant = await getCurrentParticipant()
-  if (!participant) redirect('/')
+  if (!participant) redirect('/login')
 
   const courses = await getAccessibleCourses(accessOwnerId(participant))
 

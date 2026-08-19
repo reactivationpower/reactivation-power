@@ -21,7 +21,7 @@ export default async function ContactProfilePage({
 }) {
   const { id } = await params
   const participant = await getCurrentParticipant()
-  if (!participant) redirect('/')
+  if (!participant) redirect('/login')
   const ownerId = accessOwnerId(participant)
 
   const contact = await getContact(id)

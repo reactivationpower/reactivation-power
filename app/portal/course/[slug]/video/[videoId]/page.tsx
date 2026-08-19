@@ -26,7 +26,7 @@ export default async function VideoPage({
 }) {
   const { slug, videoId } = await params
   const participant = await getCurrentParticipant()
-  if (!participant) redirect(`/?next=/portal/course/${slug}`)
+  if (!participant) redirect(`/login?next=/portal/course/${slug}`)
 
   const course = await getCourseBySlug(slug)
   if (!course || course.status !== 'live') notFound()

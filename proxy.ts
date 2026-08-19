@@ -9,7 +9,7 @@ export default function proxy(request: NextRequest) {
     const session = token ? decodeSession(token) : null
     if (!session) {
       const url = request.nextUrl.clone()
-      url.pathname = '/'
+      url.pathname = '/login'
       url.searchParams.set('next', pathname)
       return NextResponse.redirect(url)
     }

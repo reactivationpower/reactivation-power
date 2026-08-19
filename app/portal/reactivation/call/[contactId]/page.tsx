@@ -25,7 +25,7 @@ export default async function CallPage({
 }) {
   const { contactId } = await params
   const participant = await getCurrentParticipant()
-  if (!participant) redirect(`/?next=/portal/reactivation`)
+  if (!participant) redirect(`/login?next=/portal/reactivation`)
 
   const ownerId = accessOwnerId(participant)
   const contact = await getContact(contactId)
