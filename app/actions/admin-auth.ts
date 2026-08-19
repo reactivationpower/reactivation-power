@@ -80,10 +80,18 @@ export async function adminLogin(
     .eq('success', false)
 
   const cookieStore = await cookies()
+  const h = await headers()
+  const proto = h.get('x-forwarded-proto')
+  const secure = proto
+    ? proto.split(',')[0].trim() === 'https'
+    : process.env.NODE_ENV === 'production'
   cookieStore.set(ADMIN_COOKIE_NAME, encodeAdminSession(), {
     httpOnly: true,
-    secure: true,
-    sameSite: 'lax',
+    // The preview runs in a cross-origin iframe: cookies must be
+    // SameSite=None + Secure + Partitioned to survive navigation there.
+    sameSite: secure ? 'none' : 'lax',
+    secure,
+    partitioned: secure,
     path: '/',
     maxAge: ADMIN_SESSION_MAX_AGE,
   })
