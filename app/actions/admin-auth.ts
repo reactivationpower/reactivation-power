@@ -29,11 +29,11 @@ export async function adminLogin(
   _prev: { error?: string } | null,
   formData: FormData,
 ): Promise<{ error?: string }> {
-  const password = String(formData.get('password') ?? '')
+  const password = String(formData.get('password') ?? '').trim()
   const next = String(formData.get('next') ?? '') || '/admin'
   if (!password) return { error: 'Please enter the admin password.' }
 
-  const expected = process.env.ADMIN_PASSWORD
+  const expected = process.env.ADMIN_PASSWORD?.trim()
   if (!expected) {
     return {
       error:
@@ -71,7 +71,13 @@ export async function adminLogin(
     }
   }
 
+  // Successful login clears this IP's failed attempts so the counter resets.
   await supabase.from('admin_login_attempts').insert({ ip, success: true })
+  await supabase
+    .from('admin_login_attempts')
+    .delete()
+    .eq('ip', ip)
+    .eq('success', false)
 
   const cookieStore = await cookies()
   cookieStore.set(ADMIN_COOKIE_NAME, encodeAdminSession(), {
