@@ -101,36 +101,85 @@ const TARGET_LABELS: Record<Target, string> = {
   notes: 'Notes',
 }
 
-const HEADER_PATTERNS: Array<[Target, RegExp]> = [
-  ['firstName', /^(first[\s_-]?name|fname|first)$/i],
-  ['lastName', /^(last[\s_-]?name|lname|last|surname)$/i],
-  ['name', /^(full[\s_-]?name|name|patient[\s_-]?name|client[\s_-]?name|contact)$/i],
-  ['phone', /(phone|mobile|cell|tel)/i],
-  ['email', /e-?mail/i],
-  // Checked before "service" so a dedicated niche column always wins
-  ['niche', /^(niche|niche[\s_-]?name|script|script[\s_-]?type|campaign)$/i],
+/**
+ * Header detection runs in two passes so that precise headings always win
+ * over loose ones no matter what order the CRM exported them in. Every
+ * practice-management system names these columns differently, and the
+ * office can still remap anything by hand on the columns step.
+ */
+
+// Pass 1 — unambiguous headings.
+const STRICT_PATTERNS: Array<[Target, RegExp]> = [
+  ['firstName', /^(first[\s_-]?name|fname|first|given[\s_-]?name)$/i],
+  [
+    'lastName',
+    /^(last[\s_-]?name|lname|last|surname|family[\s_-]?name)$/i,
+  ],
+  [
+    'name',
+    /^((full|patient|client|customer|contact|display)[\s_-]?)?name$|^(patient|client|customer)$|^name[\s_-]?of[\s_-]?patient$|^patient[\s_-]?full[\s_-]?name$/i,
+  ],
+  // Prefer a mobile line: it's the number most likely to be answered
+  ['phone', /^(mobile|cell)[\s_-]?(phone|number|no|#)?$|^(phone|primary|preferred)[\s_-]?(mobile|cell)$/i],
+  ['email', /^(e-?mail|email[\s_-]?address|e-?mail[\s_-]?1)$/i],
+  // Before "service" so a dedicated niche column always wins
+  [
+    'niche',
+    /^(niche|niche[\s_-]?name|script|script[\s_-]?type|campaign|category|patient[\s_-]?type|patient[\s_-]?category|treatment[\s_-]?category|service[\s_-]?line|specialty|speciality|segment|tag)$/i,
+  ],
   [
     'service',
-    /(service|appointment[\s_-]?type|appt[\s_-]?type|treatment|procedure|visit[\s_-]?type|product|package|program|last[\s_-]?service)/i,
+    /^(service|services|last[\s_-]?service|appointment[\s_-]?type|appt[\s_-]?type|treatment|treatment[\s_-]?type|procedure|visit[\s_-]?type|product|package|program)$/i,
   ],
   [
     'complaint',
-    /(complaint|condition|treated[\s_-]?for|diagnosis|concern)/i,
+    /^(complaint|original[\s_-]?complaint|chief[\s_-]?complaint|condition|treated[\s_-]?for|previously[\s_-]?treated[\s_-]?for|diagnosis|concern)$/i,
   ],
-  ['notes', /(note|comment|memo)/i],
+  ['notes', /^(note|notes|comment|comments|memo|remarks)$/i],
+]
+
+// Pass 2 — looser "contains" fallbacks for headings we didn't recognize.
+const LOOSE_PATTERNS: Array<[Target, RegExp]> = [
+  ['phone', /(phone|mobile|cell|tel\b|contact[\s_-]?number)/i],
+  ['email', /e-?mail/i],
+  ['firstName', /first[\s_-]?name/i],
+  ['lastName', /last[\s_-]?name/i],
+  ['name', /\bname\b/i],
+  ['niche', /(niche|script|campaign)/i],
+  [
+    'service',
+    /(service|appointment[\s_-]?type|appt[\s_-]?type|treatment|procedure|visit[\s_-]?type|product|package|program)/i,
+  ],
+  ['complaint', /(complaint|condition|treated[\s_-]?for|diagnosis|concern)/i],
+  ['notes', /(note|comment|memo|remark)/i],
 ]
 
 function detectColumns(headers: string[]): Partial<Record<Target, number>> {
   const map: Partial<Record<Target, number>> = {}
-  headers.forEach((h, idx) => {
-    const header = h.trim()
-    for (const [target, pattern] of HEADER_PATTERNS) {
-      if (map[target] === undefined && pattern.test(header)) {
-        map[target] = idx
-        return
+  const claimed = new Set<number>()
+
+  for (const patterns of [STRICT_PATTERNS, LOOSE_PATTERNS]) {
+    for (const [target, pattern] of patterns) {
+      if (map[target] !== undefined) continue
+      for (let idx = 0; idx < headers.length; idx++) {
+        if (claimed.has(idx)) continue
+        if (pattern.test(headers[idx].trim())) {
+          map[target] = idx
+          claimed.add(idx)
+          break
+        }
       }
     }
-  })
+  }
+
+  // A full-name column is redundant when first/last both came through
+  if (
+    map.name !== undefined &&
+    map.firstName !== undefined &&
+    map.lastName !== undefined
+  ) {
+    delete map.name
+  }
   return map
 }
 
@@ -259,11 +308,21 @@ export function ImportContactsDialog({
       setError('That file looks empty. Export your patient list as a CSV and try again.')
       return
     }
+    const detected = detectColumns(parsed[0] ?? [])
+    const looksLikeHeaders = Object.keys(detected).length > 0
+
+    // Headings but nothing under them — usually a filter left applied in
+    // the CRM, or only the header row got copied
+    if (looksLikeHeaders && parsed.length < 2) {
+      setError(
+        'That file has column headings but no patients under them. Check that your export included the rows, then try again.',
+      )
+      return
+    }
+
     setError(null)
     setFileName(name)
     setRows(parsed)
-    const detected = detectColumns(parsed[0] ?? [])
-    const looksLikeHeaders = Object.keys(detected).length > 0
     setHasHeaders(looksLikeHeaders)
     setColumns(looksLikeHeaders ? detected : {})
     setStep('columns')
