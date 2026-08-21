@@ -84,55 +84,57 @@ interface DayCell {
   key: string
   ms: number
   dayOfMonth: number
-  monthLabel: string // e.g. "August 2026"
+  monthShort: string // e.g. "Sep"
+  isNewMonth: boolean // first visible day of a month — wears the month tag
   isPast: boolean
 }
 
-/** Build the rolling window and group it into month segments */
-function buildMonthSegments(tz: string): {
-  monthLabel: string
-  leadingBlanks: number
-  days: DayCell[]
-}[] {
+/**
+ * Build the rolling window as one continuous run of weeks (Sun-Sat rows)
+ * with no month breaks — the Continuous Flow layout. Month changes are
+ * marked on the cell itself via isNewMonth.
+ */
+function buildWeeks(tz: string): (DayCell | null)[][] {
   const now = Date.now()
   const cells: DayCell[] = []
   const seen = new Set<string>()
+  let prevMonth = ''
   for (let i = -PAST_DAYS_SHOWN; i < WINDOW_DAYS; i++) {
     const ms = now + i * DAY_MS
     const key = dayKey(ms, tz)
     if (seen.has(key)) continue // DST fold safety
     seen.add(key)
+    const monthShort = new Intl.DateTimeFormat('en-US', {
+      timeZone: tz,
+      month: 'short',
+    }).format(new Date(ms))
     cells.push({
       key,
       ms,
       dayOfMonth: Number(key.slice(8, 10)),
-      monthLabel: new Intl.DateTimeFormat('en-US', {
-        timeZone: tz,
-        month: 'long',
-        year: 'numeric',
-      }).format(new Date(ms)),
+      monthShort,
+      isNewMonth: monthShort !== prevMonth,
       isPast: i < 0,
     })
+    prevMonth = monthShort
   }
 
-  const segments: {
-    monthLabel: string
-    leadingBlanks: number
-    days: DayCell[]
-  }[] = []
+  const weeks: (DayCell | null)[][] = []
+  let week: (DayCell | null)[] = new Array(
+    weekdayIndex(cells[0].ms, tz),
+  ).fill(null)
   for (const cell of cells) {
-    const last = segments[segments.length - 1]
-    if (!last || last.monthLabel !== cell.monthLabel) {
-      segments.push({
-        monthLabel: cell.monthLabel,
-        leadingBlanks: weekdayIndex(cell.ms, tz),
-        days: [cell],
-      })
-    } else {
-      last.days.push(cell)
+    week.push(cell)
+    if (week.length === 7) {
+      weeks.push(week)
+      week = []
     }
   }
-  return segments
+  if (week.length > 0) {
+    while (week.length < 7) week.push(null)
+    weeks.push(week)
+  }
+  return weeks
 }
 
 function slotTimeLabel(iso: string, tz: string): string {
@@ -175,16 +177,16 @@ export function BookingCalendar({
   )
 
   const slots = data?.slots ?? {}
-  const segments = useMemo(() => buildMonthSegments(timezone), [timezone])
+  const weeks = useMemo(() => buildWeeks(timezone), [timezone])
 
   const firstAvailableDay = useMemo(() => {
-    for (const seg of segments) {
-      for (const d of seg.days) {
-        if (!d.isPast && (slots[d.key]?.length ?? 0) > 0) return d.key
+    for (const week of weeks) {
+      for (const d of week) {
+        if (d && !d.isPast && (slots[d.key]?.length ?? 0) > 0) return d.key
       }
     }
     return null
-  }, [segments, slots])
+  }, [weeks, slots])
 
   const activeDay = selectedDay ?? firstAvailableDay
   const activeSlots = activeDay ? (slots[activeDay] ?? []) : []
@@ -286,64 +288,57 @@ export function BookingCalendar({
   )
 
   const calendarPane = (
-    <div className="flex flex-col gap-4">
-      {segments.map((seg, i) => (
-        <div key={seg.monthLabel} className="flex flex-col gap-2">
-          {/* Month divider indicator — no button pressing to change months */}
-          <div className="flex items-center gap-3">
-            <p className="text-sm font-semibold text-foreground">
-              {seg.monthLabel}
-            </p>
-            <div className="h-px flex-1 bg-border" aria-hidden="true" />
-          </div>
-          {i === 0 && (
-            <div className="grid grid-cols-7 gap-1 text-center">
-              {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, j) => (
-                <span
-                  key={`${d}-${j}`}
-                  className="text-xs font-medium text-muted-foreground"
-                  aria-hidden="true"
-                >
-                  {d}
-                </span>
-              ))}
-            </div>
-          )}
-          <div className="grid grid-cols-7 gap-1">
-            {Array.from({ length: seg.leadingBlanks }).map((_, j) => (
-              <span key={`blank-${j}`} aria-hidden="true" />
-            ))}
-            {seg.days.map((d) => {
-              const count = slots[d.key]?.length ?? 0
-              const bookable = !d.isPast && count > 0
-              const isActive = activeDay === d.key
-              return (
-                <button
-                  key={d.key}
-                  type="button"
-                  disabled={!bookable}
-                  onClick={() => pickDay(d.key)}
-                  aria-label={`${fullDateLabel(d.key, timezone)}${bookable ? `, ${count} times available` : ', unavailable'}`}
-                  aria-pressed={isActive}
-                  className={`flex aspect-square flex-col items-center justify-center gap-0.5 rounded-md text-sm transition-colors ${
-                    isActive
-                      ? 'bg-accent font-semibold text-accent-foreground'
-                      : bookable
-                        ? 'bg-card font-medium text-foreground ring-1 ring-inset ring-border hover:bg-accent/10'
-                        : 'text-muted-foreground/50'
-                  }`}
-                >
-                  {d.dayOfMonth}
-                  {bookable && !isActive && (
-                    <span
-                      className="size-1 rounded-full bg-accent"
-                      aria-hidden="true"
-                    />
-                  )}
-                </button>
-              )
-            })}
-          </div>
+    <div className="flex flex-col gap-1">
+      <div className="grid grid-cols-7 gap-1 text-center">
+        {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, j) => (
+          <span
+            key={`${d}-${j}`}
+            className="pb-1 text-xs font-medium text-muted-foreground"
+            aria-hidden="true"
+          >
+            {d}
+          </span>
+        ))}
+      </div>
+      {weeks.map((week, wi) => (
+        <div key={wi} className="grid grid-cols-7 gap-1">
+          {week.map((d, di) => {
+            if (d === null) {
+              return <span key={`blank-${wi}-${di}`} aria-hidden="true" />
+            }
+            const count = slots[d.key]?.length ?? 0
+            const bookable = !d.isPast && count > 0
+            const isActive = activeDay === d.key
+            return (
+              <button
+                key={d.key}
+                type="button"
+                disabled={!bookable}
+                onClick={() => pickDay(d.key)}
+                aria-label={`${fullDateLabel(d.key, timezone)}${bookable ? `, ${count} times available` : ', unavailable'}`}
+                aria-pressed={isActive}
+                className={`relative flex aspect-square flex-col items-center justify-center rounded-md text-sm transition-colors ${
+                  isActive
+                    ? 'bg-accent font-semibold text-accent-foreground'
+                    : bookable
+                      ? 'bg-accent/10 font-semibold text-accent hover:bg-accent/20'
+                      : 'font-normal text-muted-foreground/40'
+                }`}
+              >
+                {d.isNewMonth && (
+                  <span
+                    className={`absolute left-1/2 top-0.5 -translate-x-1/2 text-[11px] font-bold uppercase leading-none tracking-wide ${
+                      isActive ? 'text-accent-foreground/80' : 'text-accent'
+                    }`}
+                    aria-hidden="true"
+                  >
+                    {d.monthShort}
+                  </span>
+                )}
+                {d.dayOfMonth}
+              </button>
+            )
+          })}
         </div>
       ))}
     </div>
@@ -370,7 +365,7 @@ export function BookingCalendar({
         <p className="rounded-md bg-muted px-4 py-6 text-center text-sm text-muted-foreground">
           {activeDay
             ? 'No times available this day — pick another date.'
-            : 'Select a date with a dot to see available times.'}
+            : 'Select a highlighted date to see available times.'}
         </p>
       ) : (
         <div className="grid grid-cols-2 gap-2">
