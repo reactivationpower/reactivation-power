@@ -186,6 +186,9 @@ export default function HowItWorksPage() {
                 {niche}
               </li>
             ))}
+            <li className="rounded-full border border-accent bg-accent/10 px-4 py-1.5 text-sm font-semibold text-accent">
+              {"Don't see your niche? We'll build it for you."}
+            </li>
           </ul>
         </section>
 
