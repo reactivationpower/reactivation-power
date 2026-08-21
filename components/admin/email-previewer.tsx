@@ -28,25 +28,53 @@ export function EmailPreviewer() {
   return (
     <div className="flex h-full flex-col gap-4">
       {/* Template picker */}
-      <div className="flex flex-wrap gap-2">
-        {EMAIL_TEMPLATES.map((t) => (
-          <button
-            key={t.id}
-            type="button"
-            onClick={() => {
-              setSelectedId(t.id)
-              setCopied(false)
-            }}
-            className={cn(
-              'rounded-md border px-4 py-2 text-sm font-medium transition-colors',
-              t.id === selectedId
-                ? 'border-primary bg-primary text-primary-foreground'
-                : 'border-border bg-card text-foreground hover:bg-muted',
-            )}
-          >
-            {t.name}
-          </button>
-        ))}
+      <div className="rounded-lg border border-border bg-card">
+        <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
+          <span className="text-sm font-medium text-foreground">
+            Templates
+          </span>
+          <span className="text-xs text-muted-foreground">
+            {EMAIL_TEMPLATES.length} ready to send
+          </span>
+        </div>
+        <div className="max-h-52 overflow-y-auto p-2">
+          <div className="grid gap-1.5 sm:grid-cols-2">
+            {EMAIL_TEMPLATES.map((t, i) => {
+              const active = t.id === selectedId
+              return (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => {
+                    setSelectedId(t.id)
+                    setCopied(false)
+                  }}
+                  aria-pressed={active}
+                  className={cn(
+                    'flex items-start gap-2.5 rounded-md border px-3 py-2 text-left transition-colors',
+                    active
+                      ? 'border-primary bg-primary text-primary-foreground'
+                      : 'border-transparent text-foreground hover:bg-muted',
+                  )}
+                >
+                  <span
+                    className={cn(
+                      'shrink-0 font-mono text-xs leading-5',
+                      active
+                        ? 'text-primary-foreground/70'
+                        : 'text-muted-foreground',
+                    )}
+                  >
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <span className="text-sm font-medium leading-5">
+                    {t.name.replace(/^Email \d+ — /, '')}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+        </div>
       </div>
 
       {/* Meta */}
