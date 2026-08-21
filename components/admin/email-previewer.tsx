@@ -71,9 +71,10 @@ export function EmailPreviewer() {
             <dd className="text-muted-foreground">
               None to swap — the Schedule a Call button links to{' '}
               <code className="rounded bg-muted px-1.5 py-0.5 text-xs">
-                reactivationpower.com/healthcare#get-started
+                reactivationpower.com/healthcare
               </code>{' '}
-              (the intake form, which flows into the booking calendar).{' '}
+              (the landing page, where the intake form flows into the booking
+              calendar).{' '}
               <code className="rounded bg-muted px-1.5 py-0.5 text-xs">
                 {'{{contact.first_name}}'}
               </code>{' '}

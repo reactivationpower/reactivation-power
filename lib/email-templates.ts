@@ -8,8 +8,8 @@ export interface EmailTemplate {
 }
 
 // {{contact.first_name}} is a GHL merge tag and works as-is when pasted
-// into GHL. The Schedule a Call buttons link to the live landing page's
-// intake form (#get-started), which flows into the booking calendar at
+// into GHL. The Schedule a Call buttons link to the live landing page,
+// where the intake form flows into the booking calendar at
 // /healthcare/book-a-call after submit — no placeholders to swap.
 const LANDING_PAGE_URL = 'https://reactivationpower.com/healthcare'
 
@@ -106,7 +106,7 @@ export const EMAIL_TEMPLATES: EmailTemplate[] = [
             </table>
             <p style="margin:0 0 16px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:26px;color:#314158;">The Reactivation Power Program gives your front desk everything it needs to turn that list into booked appointments: word-for-word interactive call scripts (objections included), an organized call queue, and a dashboard that tracks every dollar recovered. No sales experience needed — the screen tells your team exactly what to say at every turn.</p>
             <p style="margin:0 0 8px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:26px;color:#314158;">Grab a time that works for you and we'll walk you through what your list is realistically worth:</p>
-${button('Schedule a Call', `${LANDING_PAGE_URL}#get-started`)}
+${button('Schedule a Call', LANDING_PAGE_URL)}
             <p style="margin:0 0 32px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:26px;color:#314158;">It takes about a minute — answer a few quick questions about your practice, then pick a day and time right on the calendar.</p>
             <p style="margin:0 0 4px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:26px;color:#314158;">To your practice's growth,</p>
             <p style="margin:0 0 40px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:26px;color:#1d293d;"><strong>The Reactivation Power Team</strong></p>
@@ -147,7 +147,7 @@ ${button('Schedule a Call', `${LANDING_PAGE_URL}#get-started`)}
               </tr>
             </table>
             <p style="margin:0 0 8px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:26px;color:#314158;">Let's look at your patient list together and map out the opportunity:</p>
-${button('Schedule a Call', `${LANDING_PAGE_URL}#get-started`)}
+${button('Schedule a Call', LANDING_PAGE_URL)}
             <p style="margin:0 0 32px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:26px;color:#314158;">It takes about a minute — answer a few quick questions about your practice, then pick a day and time right on the calendar.</p>
             <p style="margin:0 0 4px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:26px;color:#314158;">To your practice's growth,</p>
             <p style="margin:0 0 40px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:26px;color:#1d293d;"><strong>The Reactivation Power Team</strong></p>
