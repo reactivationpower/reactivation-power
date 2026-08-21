@@ -9,8 +9,9 @@ export interface EmailTemplate {
 
 // Shared placeholders the user swaps in GHL:
 //   {{contact.first_name}}  — GHL merge tag, works as-is when pasted into GHL
-//   [CALENDAR_LINK]         — replace with the booking-calendar URL
-//   [LANDING_PAGE_URL]      — replace with the live landing page URL
+//   [LANDING_PAGE_URL]      — replace with the live landing page URL.
+//     The Schedule a Call buttons append #get-started so the lead lands on
+//     the intake form, which flows to the booking calendar after submit.
 
 const wrap = (body: string, previewText: string) => `<!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
@@ -104,10 +105,9 @@ export const EMAIL_TEMPLATES: EmailTemplate[] = [
               </tr>
             </table>
             <p style="margin:0 0 16px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:26px;color:#314158;">The Reactivation Power Program gives your front desk everything it needs to turn that list into booked appointments: word-for-word interactive call scripts (objections included), an organized call queue, and a dashboard that tracks every dollar recovered. No sales experience needed — the screen tells your team exactly what to say at every turn.</p>
-            <p style="margin:0 0 8px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:26px;color:#314158;">See exactly how it works here:</p>
-${button('See How It Works', '[LANDING_PAGE_URL]')}
-            <p style="margin:0 0 16px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:26px;color:#314158;">Prefer to talk it through? Grab a time that works for you and we'll walk you through what your list is realistically worth:</p>
-            <p style="margin:0 0 32px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:26px;"><a href="[CALENDAR_LINK]" style="color:#39889f;font-weight:bold;text-decoration:underline;">Book a quick call &rarr;</a></p>
+            <p style="margin:0 0 8px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:26px;color:#314158;">Grab a time that works for you and we'll walk you through what your list is realistically worth:</p>
+${button('Schedule a Call', '[LANDING_PAGE_URL]#get-started')}
+            <p style="margin:0 0 32px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:26px;color:#314158;">It takes about a minute — answer a few quick questions about your practice, then pick a day and time right on the calendar.</p>
             <p style="margin:0 0 4px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:26px;color:#314158;">To your practice's growth,</p>
             <p style="margin:0 0 40px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:26px;color:#1d293d;"><strong>The Reactivation Power Team</strong></p>
           </td>
@@ -146,10 +146,9 @@ ${button('See How It Works', '[LANDING_PAGE_URL]')}
                 </td>
               </tr>
             </table>
-            <p style="margin:0 0 8px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:26px;color:#314158;">The full breakdown — including what a typical inactive list is worth — is here:</p>
-${button('See What Your List Is Worth', '[LANDING_PAGE_URL]')}
-            <p style="margin:0 0 16px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:26px;color:#314158;">Or skip straight to a conversation — we'll look at your patient list together and map out the opportunity:</p>
-            <p style="margin:0 0 32px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:26px;"><a href="[CALENDAR_LINK]" style="color:#39889f;font-weight:bold;text-decoration:underline;">Book a quick call &rarr;</a></p>
+            <p style="margin:0 0 8px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:26px;color:#314158;">Let's look at your patient list together and map out the opportunity:</p>
+${button('Schedule a Call', '[LANDING_PAGE_URL]#get-started')}
+            <p style="margin:0 0 32px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:26px;color:#314158;">It takes about a minute — answer a few quick questions about your practice, then pick a day and time right on the calendar.</p>
             <p style="margin:0 0 4px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:26px;color:#314158;">To your practice's growth,</p>
             <p style="margin:0 0 40px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:26px;color:#1d293d;"><strong>The Reactivation Power Team</strong></p>
           </td>

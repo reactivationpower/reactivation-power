@@ -70,13 +70,11 @@ export function EmailPreviewer() {
             </dt>
             <dd className="text-muted-foreground">
               <code className="rounded bg-muted px-1.5 py-0.5 text-xs">
-                [CALENDAR_LINK]
-              </code>{' '}
-              and{' '}
-              <code className="rounded bg-muted px-1.5 py-0.5 text-xs">
                 [LANDING_PAGE_URL]
               </code>{' '}
-              — replace before sending.{' '}
+              — replace with the live landing page URL before sending. The
+              Schedule a Call button links to the intake form, which flows
+              into the booking calendar.{' '}
               <code className="rounded bg-muted px-1.5 py-0.5 text-xs">
                 {'{{contact.first_name}}'}
               </code>{' '}
