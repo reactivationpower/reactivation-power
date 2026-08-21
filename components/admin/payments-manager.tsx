@@ -1,6 +1,8 @@
 'use client'
 
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import {
   EmbeddedCheckout,
   EmbeddedCheckoutProvider,
@@ -8,7 +10,7 @@ import {
 import { loadStripe } from '@stripe/stripe-js'
 import QRCode from 'qrcode'
 import {
-  Check,
+  ChevronRight,
   Copy,
   CreditCard,
   ExternalLink,
@@ -23,6 +25,7 @@ import {
   confirmPayment,
   createPaymentLink,
   deletePaymentLink,
+  listPaymentLinks,
   startPaymentCheckout,
   type PaymentLink,
   type StaffMember,
@@ -37,6 +40,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { notifyDone, notifyError } from '@/lib/notify'
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY as string,
@@ -60,6 +64,7 @@ export function PaymentsManager({
 }: {
   initialLinks: PaymentLink[]
 }) {
+  const router = useRouter()
   const [links, setLinks] = useState(initialLinks)
 
   // Create form state
@@ -96,34 +101,98 @@ export function PaymentsManager({
       amountDollars: Number(amount),
     })
     setCreating(false)
-    if (!res.ok) {
+    if (!res.ok || !res.link) {
       setFormError(res.error ?? 'Something went wrong.')
+      notifyError('Could not create the link', res.error)
       return
     }
-    // Refresh from server state via a light reload of the list
-    window.location.reload()
+    setLinks((prev) => [res.link as PaymentLink, ...prev])
+    setName('')
+    setEmail('')
+    setPhone('')
+    setAmount('')
+    setStaff([])
+    notifyDone(
+      'Payment link created',
+      `${res.link.name} — ${formatUsd(res.link.amount_cents)}`,
+    )
   }
 
+  /** Re-read the list from the server after a status change. */
+  async function refreshLinks() {
+    try {
+      setLinks(await listPaymentLinks())
+    } catch {
+      // Non-fatal — the router refresh will catch up on next navigation
+    }
+  }
+
+  /**
+   * Poll while the tab is visible so a payment made on the customer's own
+   * device still announces itself here with a toast and a chime.
+   */
+  useEffect(() => {
+    const id = window.setInterval(async () => {
+      if (document.visibilityState !== 'visible') return
+      let fresh: PaymentLink[]
+      try {
+        fresh = await listPaymentLinks()
+      } catch {
+        return
+      }
+      setLinks((prev) => {
+        const wasPending = new Set(
+          prev.filter((l) => l.status === 'pending').map((l) => l.id),
+        )
+        for (const l of fresh) {
+          if (l.status === 'paid' && wasPending.has(l.id)) {
+            notifyDone(
+              `Payment received — ${formatUsd(l.amount_cents)}`,
+              `${l.name} just paid. Portal accounts are ready.`,
+            )
+          }
+        }
+        return fresh
+      })
+    }, 20000)
+    return () => window.clearInterval(id)
+  }, [])
+
   async function handleCopy(link: PaymentLink) {
-    await navigator.clipboard.writeText(payUrl(link.token))
-    setCopiedToken(link.token)
-    setTimeout(() => setCopiedToken(null), 2000)
+    try {
+      await navigator.clipboard.writeText(payUrl(link.token))
+      setCopiedToken(link.token)
+      setTimeout(() => setCopiedToken(null), 2000)
+      notifyDone('Payment link copied', `${link.name} — ready to paste`)
+    } catch {
+      notifyError('Could not copy the link')
+    }
   }
 
   async function handleQr(link: PaymentLink) {
-    const dataUrl = await QRCode.toDataURL(payUrl(link.token), {
-      width: 320,
-      margin: 2,
-      color: { dark: '#1d3d47', light: '#ffffff' },
-    })
-    setQrDataUrl(dataUrl)
-    setQrFor(link)
+    try {
+      const dataUrl = await QRCode.toDataURL(payUrl(link.token), {
+        width: 320,
+        margin: 2,
+        color: { dark: '#1d3d47', light: '#ffffff' },
+      })
+      setQrDataUrl(dataUrl)
+      setQrFor(link)
+      notifyDone('QR code generated', link.name)
+    } catch {
+      notifyError('Could not generate the QR code')
+    }
   }
 
   async function handleDelete(link: PaymentLink) {
     if (!window.confirm(`Delete the pending link for ${link.name}?`)) return
     const res = await deletePaymentLink(link.id)
-    if (res.ok) setLinks((prev) => prev.filter((l) => l.id !== link.id))
+    if (!res.ok) {
+      notifyError(res.error ?? 'Could not delete the link')
+      return
+    }
+    setLinks((prev) => prev.filter((l) => l.id !== link.id))
+    notifyDone('Payment link deleted', link.name)
   }
 
   const startChargeSession = useCallback(() => {
@@ -291,11 +360,21 @@ export function PaymentsManager({
         {links.map((link) => (
           <div
             key={link.id}
-            className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4"
+            onClick={() => router.push(`/admin/payments/${link.id}`)}
+            className="flex cursor-pointer flex-col gap-3 rounded-lg border border-border bg-card p-4 transition-colors hover:border-primary/40 hover:bg-accent/40"
           >
             <div className="flex flex-wrap items-start justify-between gap-2">
               <div className="min-w-0">
-                <p className="font-semibold text-foreground">{link.name}</p>
+                <p className="flex items-center gap-1 font-semibold text-foreground">
+                  <Link
+                    href={`/admin/payments/${link.id}`}
+                    className="hover:underline"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {link.name}
+                  </Link>
+                  <ChevronRight className="size-4 text-muted-foreground" />
+                </p>
                 <p className="truncate text-sm text-muted-foreground">
                   {link.email}
                   {link.phone ? ` · ${link.phone}` : ''}
@@ -327,24 +406,18 @@ export function PaymentsManager({
             </div>
 
             {link.status === 'pending' && (
-              <div className="flex flex-wrap items-center gap-2">
+              <div
+                className="flex flex-wrap items-center gap-2"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <Button
                   variant="outline"
                   size="sm"
                   className="bg-transparent"
                   onClick={() => handleCopy(link)}
                 >
-                  {copiedToken === link.token ? (
-                    <>
-                      <Check className="size-3.5 text-success" />
-                      Copied
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="size-3.5" />
-                      Copy link
-                    </>
-                  )}
+                  <Copy className="size-3.5" />
+                  {copiedToken === link.token ? 'Copied' : 'Copy link'}
                 </Button>
                 <Button
                   variant="outline"
@@ -385,6 +458,11 @@ export function PaymentsManager({
               Created {new Date(link.created_at).toLocaleDateString('en-US')}
               {link.paid_at
                 ? ` · Paid ${new Date(link.paid_at).toLocaleDateString('en-US')}`
+                : ''}
+              {link.status === 'paid'
+                ? link.participant_id
+                  ? ' · Portal accounts created'
+                  : ' · Accounts not created yet'
                 : ''}
             </p>
           </div>
@@ -447,10 +525,21 @@ export function PaymentsManager({
               options={{
                 fetchClientSecret: startChargeSession,
                 onComplete: () => {
-                  // Verify with Stripe, mark paid, then refresh the list
-                  void confirmPayment(chargeFor.token).then(() =>
-                    window.location.reload(),
-                  )
+                  // Verify with Stripe, mark paid, provision accounts
+                  const paidLink = chargeFor
+                  void confirmPayment(paidLink.token).then((res) => {
+                    setChargeFor(null)
+                    if (!res.paid) {
+                      notifyError('Payment could not be verified')
+                      return
+                    }
+                    notifyDone(
+                      `Payment completed — ${formatUsd(paidLink.amount_cents)}`,
+                      `${paidLink.name} is paid and their portal accounts are ready`,
+                    )
+                    router.refresh()
+                    void refreshLinks()
+                  })
                 },
               }}
             >

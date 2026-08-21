@@ -1,6 +1,7 @@
 import type React from 'react'
 import { AdminSidebar } from '@/components/admin/sidebar'
 import { UploadTray } from '@/components/admin/upload-tray'
+import { Toaster } from '@/components/ui/sonner'
 
 export const metadata = {
   title: 'Admin | Training Portal',
@@ -34,6 +35,7 @@ export default function AdminLayout({
         <main className="flex-1 overflow-y-auto p-6 lg:p-8">{children}</main>
       </div>
       <UploadTray />
+      <Toaster position="bottom-right" richColors closeButton />
     </div>
   )
 }

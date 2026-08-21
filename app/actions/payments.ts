@@ -7,6 +7,7 @@ import { cookies } from 'next/headers'
 import { ADMIN_COOKIE_NAME, decodeAdminSession } from '@/lib/auth/admin-token'
 import { getAdminClient } from '@/lib/supabase/admin'
 import { stripe } from '@/lib/stripe'
+import { MAX_STAFF } from '@/lib/types'
 
 const PRODUCT_NAME = 'Reactivation Power Access'
 
@@ -26,6 +27,21 @@ export interface PaymentLink {
   status: 'pending' | 'paid'
   paid_at: string | null
   created_at: string
+  participant_id: string | null
+  provisioned_at: string | null
+}
+
+const LINK_COLUMNS =
+  'id, token, name, email, phone, staff, amount_cents, status, paid_at, created_at, participant_id, provisioned_at'
+
+/** A provisioned portal account shown on the payment detail page. */
+export interface ProvisionedAccount {
+  id: string
+  first_name: string
+  last_name: string
+  email: string
+  role: 'owner' | 'staff'
+  is_active: boolean
 }
 
 async function requireAdmin(): Promise<void> {
@@ -47,6 +63,97 @@ function sanitizeStaff(input: unknown): StaffMember[] {
     .filter((s) => s.name || s.email)
 }
 
+/** Split a single display name into first / last for the participants table. */
+function splitName(full: string): { first: string; last: string } {
+  const parts = full.trim().split(/\s+/).filter(Boolean)
+  if (parts.length === 0) return { first: 'Customer', last: '' }
+  if (parts.length === 1) return { first: parts[0], last: '' }
+  return { first: parts.slice(0, -1).join(' '), last: parts[parts.length - 1] }
+}
+
+/**
+ * Turn a paid link into portal accounts: the buyer becomes an owner
+ * (viewer) and each staff member becomes a staff account under them.
+ *
+ * Idempotent and non-fatal — an account that already exists for an email
+ * is reused rather than duplicated, and any failure here is logged
+ * without disturbing the payment record itself.
+ */
+async function provisionAccounts(linkId: string): Promise<string | null> {
+  const supabase = getAdminClient()
+  const { data: link } = await supabase
+    .from('payment_links')
+    .select('id, name, email, phone, staff, participant_id')
+    .eq('id', linkId)
+    .maybeSingle()
+  if (!link) return null
+  if (link.participant_id) return link.participant_id as string
+
+  const email = String(link.email).toLowerCase()
+  const { first, last } = splitName(String(link.name))
+
+  // Reuse an existing account with this email instead of duplicating
+  const { data: existing } = await supabase
+    .from('participants')
+    .select('id')
+    .eq('email', email)
+    .maybeSingle()
+
+  let ownerId = existing?.id as string | undefined
+  if (!ownerId) {
+    const { data: created, error } = await supabase
+      .from('participants')
+      .insert({
+        first_name: first,
+        last_name: last,
+        email,
+        phone: link.phone ?? null,
+        role: 'owner',
+      })
+      .select('id')
+      .single()
+    if (error || !created) {
+      console.error('[v0] provision owner failed:', error?.message)
+      return null
+    }
+    ownerId = created.id
+  }
+
+  // Staff members become sub-accounts under the owner
+  const staff = sanitizeStaff(link.staff).filter((s) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.email),
+  )
+  for (const member of staff.slice(0, MAX_STAFF)) {
+    const staffEmail = member.email.toLowerCase()
+    const { data: dupe } = await supabase
+      .from('participants')
+      .select('id')
+      .eq('email', staffEmail)
+      .maybeSingle()
+    if (dupe) continue
+    const staffName = splitName(member.name || staffEmail.split('@')[0])
+    const { error } = await supabase.from('participants').insert({
+      first_name: staffName.first,
+      last_name: staffName.last,
+      email: staffEmail,
+      parent_id: ownerId,
+      role: 'staff',
+    })
+    if (error) console.error('[v0] provision staff failed:', error.message)
+  }
+
+  await supabase
+    .from('payment_links')
+    .update({
+      participant_id: ownerId,
+      provisioned_at: new Date().toISOString(),
+    })
+    .eq('id', link.id)
+
+  revalidatePath('/admin/participants')
+  return ownerId ?? null
+}
+
 /** Create a payment link with a unique, unguessable token. */
 export async function createPaymentLink(input: {
   name: string
@@ -54,7 +161,7 @@ export async function createPaymentLink(input: {
   phone?: string
   staff?: StaffMember[]
   amountDollars: number
-}): Promise<{ ok: boolean; error?: string; token?: string }> {
+}): Promise<{ ok: boolean; error?: string; link?: PaymentLink }> {
   await requireAdmin()
 
   const name = input.name?.trim().slice(0, 120)
@@ -72,20 +179,24 @@ export async function createPaymentLink(input: {
 
   const token = randomBytes(16).toString('base64url')
   const supabase = getAdminClient()
-  const { error } = await supabase.from('payment_links').insert({
-    token,
-    name,
-    email,
-    phone,
-    staff: sanitizeStaff(input.staff),
-    amount_cents: amountCents,
-  })
-  if (error) {
-    console.error('[v0] createPaymentLink failed:', error.message)
+  const { data, error } = await supabase
+    .from('payment_links')
+    .insert({
+      token,
+      name,
+      email,
+      phone,
+      staff: sanitizeStaff(input.staff),
+      amount_cents: amountCents,
+    })
+    .select(LINK_COLUMNS)
+    .single()
+  if (error || !data) {
+    console.error('[v0] createPaymentLink failed:', error?.message)
     return { ok: false, error: 'Could not create the payment link.' }
   }
   revalidatePath('/admin/payments')
-  return { ok: true, token }
+  return { ok: true, link: data as unknown as PaymentLink }
 }
 
 /** List all payment links, newest first. */
@@ -94,12 +205,37 @@ export async function listPaymentLinks(): Promise<PaymentLink[]> {
   const supabase = getAdminClient()
   const { data } = await supabase
     .from('payment_links')
-    .select(
-      'id, token, name, email, phone, staff, amount_cents, status, paid_at, created_at',
-    )
+    .select(LINK_COLUMNS)
     .order('created_at', { ascending: false })
     .limit(200)
-  return (data as PaymentLink[]) ?? []
+  return (data as unknown as PaymentLink[]) ?? []
+}
+
+/** Fetch one payment link plus the portal accounts it provisioned. */
+export async function getPaymentDetail(id: string): Promise<{
+  link: PaymentLink
+  accounts: ProvisionedAccount[]
+} | null> {
+  await requireAdmin()
+  const supabase = getAdminClient()
+  const { data } = await supabase
+    .from('payment_links')
+    .select(LINK_COLUMNS)
+    .eq('id', id)
+    .maybeSingle()
+  if (!data) return null
+  const link = data as unknown as PaymentLink
+
+  let accounts: ProvisionedAccount[] = []
+  if (link.participant_id) {
+    const { data: rows } = await supabase
+      .from('participants')
+      .select('id, first_name, last_name, email, role, is_active')
+      .or(`id.eq.${link.participant_id},parent_id.eq.${link.participant_id}`)
+      .order('role', { ascending: true })
+    accounts = (rows as ProvisionedAccount[]) ?? []
+  }
+  return { link, accounts }
 }
 
 /** Delete a pending payment link. Paid links are kept as records. */
@@ -197,13 +333,30 @@ export async function confirmPayment(
         .from('payment_links')
         .update({ status: 'paid', paid_at: new Date().toISOString() })
         .eq('id', link.id)
+      // Payment is recorded first, then the portal accounts are created
+      await provisionAccounts(link.id)
       revalidatePath('/admin/payments')
+      revalidatePath(`/admin/payments/${link.id}`)
       return { paid: true }
     }
   } catch (err) {
     console.error('[v0] confirmPayment failed:', err)
   }
   return { paid: false }
+}
+
+/**
+ * Admin: retry account creation for a paid link. Useful if the buyer's
+ * email collided with an existing account or the first attempt failed.
+ */
+export async function provisionAccountsNow(
+  id: string,
+): Promise<{ ok: boolean; error?: string }> {
+  await requireAdmin()
+  const ownerId = await provisionAccounts(id)
+  if (!ownerId) return { ok: false, error: 'Could not create the accounts.' }
+  revalidatePath(`/admin/payments/${id}`)
+  return { ok: true }
 }
 
 /** Public: fetch the details a payer needs to see on the checkout page. */

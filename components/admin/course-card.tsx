@@ -6,6 +6,7 @@ import { Check, Layers, LinkIcon, PlayCircle } from 'lucide-react'
 import { updateCourse } from '@/app/actions/admin'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { notifyDone, notifyError } from '@/lib/notify'
 import { SECTOR_LABELS, type Course } from '@/lib/types'
 
 export function CourseCard({
@@ -22,10 +23,14 @@ export function CourseCard({
 
   function copyLink() {
     const url = `${window.location.origin}/portal/course/${course.slug}`
-    navigator.clipboard.writeText(url).then(() => {
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    })
+    navigator.clipboard.writeText(url).then(
+      () => {
+        setCopied(true)
+        setTimeout(() => setCopied(false), 2000)
+        notifyDone('Course link copied', course.title)
+      },
+      () => notifyError('Could not copy the link'),
+    )
   }
 
   function toggleStatus() {

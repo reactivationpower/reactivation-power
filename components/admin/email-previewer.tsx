@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Check, Copy, Monitor, Smartphone } from 'lucide-react'
 import { EMAIL_TEMPLATES } from '@/lib/email-templates'
+import { notifyDone, notifyError } from '@/lib/notify'
 import { cn } from '@/lib/utils'
 
 export function EmailPreviewer() {
@@ -14,9 +15,14 @@ export function EmailPreviewer() {
     EMAIL_TEMPLATES.find((t) => t.id === selectedId) ?? EMAIL_TEMPLATES[0]
 
   async function copyCode() {
-    await navigator.clipboard.writeText(template.html)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+    try {
+      await navigator.clipboard.writeText(template.html)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+      notifyDone('Email HTML copied', template.name)
+    } catch {
+      notifyError('Could not copy the HTML')
+    }
   }
 
   return (
