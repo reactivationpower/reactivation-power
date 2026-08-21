@@ -3,6 +3,7 @@
 import {
   addGhlContactNote,
   bookGhlAppointment,
+  getGhlContactName,
   getGhlFreeSlots,
   ghlConfigured,
 } from '@/lib/ghl'
@@ -92,10 +93,18 @@ export async function bookStrategyCall(params: {
   }
 
   try {
+    // Pull the contact's real name from GHL so the calendar event reads
+    // "Reactivation Power Strategy Call w/ First Last". If the lookup
+    // fails, fall back to the plain title — never block the booking.
+    const contactName = await getGhlContactName(contactId).catch(() => null)
+    const title = contactName
+      ? `Reactivation Power Strategy Call w/ ${contactName}`
+      : 'Reactivation Power Strategy Call'
+
     await bookGhlAppointment({
       contactId,
       startTime: slot,
-      title: 'Reactivation Power Strategy Call',
+      title,
     })
 
     const pretty = new Intl.DateTimeFormat('en-US', {

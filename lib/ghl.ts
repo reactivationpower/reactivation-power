@@ -99,6 +99,24 @@ export async function upsertGhlContact(
   return id
 }
 
+/** Fetch a contact's full name (for appointment titles). */
+export async function getGhlContactName(
+  contactId: string,
+): Promise<string | null> {
+  const json = (await ghlFetch(
+    `/contacts/${encodeURIComponent(contactId)}`,
+  )) as {
+    contact?: { firstName?: string; lastName?: string; contactName?: string }
+  }
+  const c = json?.contact
+  if (!c) return null
+  const name =
+    [c.firstName, c.lastName].filter(Boolean).join(' ').trim() ||
+    c.contactName?.trim() ||
+    ''
+  return name || null
+}
+
 /** Add a note to a contact. */
 export async function addGhlContactNote(
   contactId: string,
