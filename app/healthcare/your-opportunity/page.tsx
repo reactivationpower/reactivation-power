@@ -27,6 +27,7 @@ export default async function YourOpportunityPage({
 }) {
   const params = await searchParams
   const firstName = typeof params.name === 'string' ? params.name.slice(0, 40) : ''
+  const contactId = typeof params.cid === 'string' ? params.cid.slice(0, 64) : ''
   const inactiveLabel =
     typeof params.inactive === 'string' ? params.inactive : 'Not sure'
   const services =
@@ -53,6 +54,7 @@ export default async function YourOpportunityPage({
       </header>
       <OpportunityCalculator
         firstName={firstName}
+        contactId={contactId}
         inactiveLabel={inactiveLabel}
         inactiveCount={inactiveCount}
         defaultPatientValue={defaultPatientValue}

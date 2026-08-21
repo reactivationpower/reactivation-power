@@ -11,6 +11,7 @@ import {
 
 interface OpportunityCalculatorProps {
   firstName: string
+  contactId?: string
   inactiveLabel: string
   inactiveCount: number
   defaultPatientValue: number
@@ -29,6 +30,7 @@ function formatMoney(n: number): string {
 
 export function OpportunityCalculator({
   firstName,
+  contactId,
   inactiveLabel,
   inactiveCount,
   defaultPatientValue,
@@ -159,7 +161,11 @@ export function OpportunityCalculator({
 
       <div className="flex flex-col items-center gap-3">
         <Link
-          href="/healthcare/book-a-call"
+          href={
+            contactId
+              ? `/healthcare/book-a-call?cid=${encodeURIComponent(contactId)}&name=${encodeURIComponent(firstName)}`
+              : '/healthcare/book-a-call'
+          }
           className="rounded-md bg-accent px-8 py-3.5 text-base font-semibold text-accent-foreground transition-colors hover:bg-accent/90"
         >
           Book My Free Strategy Call
