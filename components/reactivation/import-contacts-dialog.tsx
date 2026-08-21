@@ -6,6 +6,7 @@ import {
   ArrowRight,
   CheckCircle2,
   FileSpreadsheet,
+  Download,
   Loader2,
   Sparkles,
   Upload,
@@ -404,6 +405,18 @@ export function ImportContactsDialog({
                   aria-label="Upload CSV file"
                   onChange={(e) => void handleFile(e.target.files?.[0])}
                 />
+                <div className="flex items-center justify-between gap-3 rounded-md border border-border bg-muted/40 px-3 py-2.5">
+                  <p className="text-xs leading-relaxed text-muted-foreground">
+                    Not sure how to format your list? Start from our template —
+                    the columns are pre-named so they match automatically.
+                  </p>
+                  <Button asChild size="sm" variant="outline" className="shrink-0 bg-transparent">
+                    <a href="/templates/contact-import-template.csv" download="contact-import-template.csv">
+                      <Download className="size-3.5" />
+                      CSV template
+                    </a>
+                  </Button>
+                </div>
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="csv-paste">Or paste CSV data</Label>
                   <Textarea
