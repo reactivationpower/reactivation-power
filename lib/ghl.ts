@@ -122,22 +122,38 @@ export async function getGhlFreeSlots(params: {
 }): Promise<Record<string, string[]>> {
   const calendarId = process.env.GHL_CALENDAR_ID
   if (!calendarId) throw new Error('GHL_CALENDAR_ID is not set')
-  const qs = new URLSearchParams({
-    startDate: String(params.startMs),
-    endDate: String(params.endMs),
-    timezone: params.timezone,
-  })
-  const json = (await ghlFetch(
-    `/calendars/${encodeURIComponent(calendarId)}/free-slots?${qs.toString()}`,
-  )) as Record<string, unknown>
+
+  // GHL caps each free-slots request at 31 days, so chunk the window
+  // into <=30-day ranges and fetch them in parallel.
+  const CHUNK_MS = 30 * 24 * 60 * 60 * 1000
+  const ranges: Array<{ start: number; end: number }> = []
+  for (let start = params.startMs; start < params.endMs; start += CHUNK_MS) {
+    ranges.push({ start, end: Math.min(start + CHUNK_MS, params.endMs) })
+  }
+
+  const results = await Promise.all(
+    ranges.map((range) => {
+      const qs = new URLSearchParams({
+        startDate: String(range.start),
+        endDate: String(range.end),
+        timezone: params.timezone,
+      })
+      return ghlFetch(
+        `/calendars/${encodeURIComponent(calendarId)}/free-slots?${qs.toString()}`,
+      ) as Promise<Record<string, unknown>>
+    }),
+  )
 
   const out: Record<string, string[]> = {}
-  for (const [key, value] of Object.entries(json ?? {})) {
-    // Keys are dates like "2026-08-21"; skip metadata keys (e.g. traceId)
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(key)) continue
-    const slots = (value as { slots?: unknown })?.slots
-    if (Array.isArray(slots)) {
-      out[key] = slots.filter((s): s is string => typeof s === 'string')
+  for (const json of results) {
+    for (const [key, value] of Object.entries(json ?? {})) {
+      // Keys are dates like "2026-08-21"; skip metadata keys (e.g. traceId)
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(key)) continue
+      const slots = (value as { slots?: unknown })?.slots
+      if (Array.isArray(slots)) {
+        const clean = slots.filter((s): s is string => typeof s === 'string')
+        out[key] = out[key] ? [...out[key], ...clean] : clean
+      }
     }
   }
   return out

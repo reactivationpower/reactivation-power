@@ -5,13 +5,13 @@ import { LeadForm } from '@/components/landing/lead-form'
 
 interface LeadDialogProps {
   /** The button/link that opens the dialog */
-  children: React.ReactNode
+  children: React.ReactElement
 }
 
 export function LeadDialog({ children }: LeadDialogProps) {
   return (
     <Dialog>
-      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogTrigger render={children} />
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="text-xl">
