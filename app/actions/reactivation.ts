@@ -319,13 +319,16 @@ function normalizePhone(phone: string): string {
 
 /**
  * Bulk import contacts from a CSV upload. Each row's niche is resolved:
- * service mapping -> practice default -> none. Mappings are saved so the
- * next upload from this practice classifies automatically. Duplicate phones
- * (already in the account, or repeated in the file) are skipped.
+ * forced file niche -> service mapping -> practice default -> none.
+ * Mappings are saved so the next upload from this practice classifies
+ * automatically. Duplicate phones (already in the account, or repeated in
+ * the file) are skipped.
  */
 export async function importContacts(input: {
   rows: ImportRow[]
   mappings: ImportMapping[]
+  /** When set, every contact in this upload is tagged with this niche */
+  forceNicheId?: string | null
 }) {
   const participant = await getCurrentParticipant()
   if (!participant) return { error: 'Not signed in' }
@@ -370,6 +373,18 @@ export async function importContacts(input: {
   ])
   const defaultNicheId = ownerRow?.default_niche_id ?? null
 
+  // Validate the forced file-level niche against real, active niches
+  let forcedNicheId: string | null = null
+  if (input.forceNicheId) {
+    const { data: forced } = await supabase
+      .from('niches')
+      .select('id')
+      .eq('id', input.forceNicheId)
+      .eq('is_active', true)
+      .maybeSingle()
+    forcedNicheId = forced?.id ?? null
+  }
+
   // 3. Existing phones for dedupe
   const { data: existing } = await supabase
     .from('contacts')
@@ -398,7 +413,7 @@ export async function importContacts(input: {
     const serviceRaw = (row.service ?? '').trim()
     const serviceKey = serviceRaw.replace(/\s+/g, ' ').toLowerCase()
     const mapped = serviceKey ? nicheByService.get(serviceKey) : undefined
-    const nicheId = mapped ?? defaultNicheId
+    const nicheId = forcedNicheId ?? mapped ?? defaultNicheId
 
     toInsert.push({
       owner_id: ownerId,

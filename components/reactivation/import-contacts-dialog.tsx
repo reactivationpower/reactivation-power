@@ -134,6 +134,7 @@ type Step = 'upload' | 'columns' | 'services' | 'done'
 
 const NONE = '__none__'
 const DEFAULT = '__default__'
+const AUTO = '__auto__'
 
 interface Props {
   niches: Niche[]
@@ -153,6 +154,7 @@ export function ImportContactsDialog({
   const [rows, setRows] = useState<string[][]>([])
   const [hasHeaders, setHasHeaders] = useState(true)
   const [columns, setColumns] = useState<Partial<Record<Target, number>>>({})
+  const [fileNiche, setFileNiche] = useState<string>(AUTO)
   const [serviceMap, setServiceMap] = useState<Record<string, string>>({})
   const [autoMatched, setAutoMatched] = useState(0)
   const [error, setError] = useState<string | null>(null)
@@ -206,6 +208,7 @@ export function ImportContactsDialog({
     setRows([])
     setHasHeaders(true)
     setColumns({})
+    setFileNiche(AUTO)
     setServiceMap({})
     setError(null)
     setResult(null)
@@ -241,6 +244,13 @@ export function ImportContactsDialog({
       return
     }
     setError(null)
+
+    if (fileNiche !== AUTO) {
+      // Whole file tagged with one niche: no per-service mapping needed
+      setServiceMap({})
+      void runImport({})
+      return
+    }
 
     if (columns.service === undefined || uniqueServices.length === 0) {
       // No service column: everything falls to the practice default
@@ -308,7 +318,11 @@ export function ImportContactsDialog({
           service_label,
           niche_id: v === NONE ? null : v,
         }))
-      const res = await importContacts({ rows: buildRows(), mappings })
+      const res = await importContacts({
+        rows: buildRows(),
+        mappings,
+        forceNicheId: fileNiche !== AUTO ? fileNiche : null,
+      })
       if (res?.error) {
         setError(res.error)
         return
@@ -334,6 +348,11 @@ export function ImportContactsDialog({
         ? `Account default (${defaultNicheName})`
         : 'Account default (none set)',
     },
+    ...niches.map((n) => ({ value: n.id, label: n.name })),
+  ]
+
+  const fileNicheItems = [
+    { value: AUTO, label: 'Auto-match from service column' },
     ...niches.map((n) => ({ value: n.id, label: n.name })),
   ]
 
@@ -422,6 +441,34 @@ export function ImportContactsDialog({
                 </DialogDescription>
               </DialogHeader>
               <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-1.5 rounded-md border border-border bg-muted/40 px-3 py-2.5">
+                  <Label htmlFor="file-niche" className="text-xs">
+                    Niche for this file
+                  </Label>
+                  <Select
+                    value={fileNiche}
+                    onValueChange={(v) => {
+                      if (v) setFileNiche(v)
+                    }}
+                    items={fileNicheItems}
+                  >
+                    <SelectTrigger id="file-niche" className="h-9" aria-label="Niche for this file">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {fileNicheItems.map((item) => (
+                        <SelectItem key={item.value} value={item.value}>
+                          {item.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs leading-relaxed text-muted-foreground">
+                    {fileNiche === AUTO
+                      ? 'Contacts are matched by their service column, falling back to your account default. Or pick a niche to tag every contact in this file with it.'
+                      : `Every contact in this file will be tagged ${nicheById.get(fileNiche)?.name ?? 'the selected niche'} and get that script when called.`}
+                  </p>
+                </div>
                 <label className="flex items-center gap-2 text-sm text-foreground">
                   <input
                     type="checkbox"
@@ -479,14 +526,14 @@ export function ImportContactsDialog({
                     </div>
                   ))}
                 </div>
-                {columns.service === undefined && (
+                {columns.service === undefined && fileNiche === AUTO && (
                   <p className="rounded-md bg-muted px-3 py-2 text-xs leading-relaxed text-muted-foreground">
                     No service column selected — every imported contact will
                     use your account default niche
                     {defaultNicheName ? ` (${defaultNicheName})` : ''}. If your
                     software can export the appointment or service type,
                     including it lets each contact get the right script
-                    automatically.
+                    automatically. Or pick a niche for this file above.
                   </p>
                 )}
                 {error && <p className="text-sm text-destructive">{error}</p>}
@@ -505,7 +552,7 @@ export function ImportContactsDialog({
                     ) : (
                       <ArrowRight className="size-4" />
                     )}
-                    {columns.service === undefined
+                    {fileNiche !== AUTO || columns.service === undefined
                       ? `Import ${dataRows.length} contact${dataRows.length === 1 ? '' : 's'}`
                       : 'Continue'}
                   </Button>
