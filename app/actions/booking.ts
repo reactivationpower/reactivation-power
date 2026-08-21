@@ -6,6 +6,7 @@ import {
   getGhlContactName,
   getGhlFreeSlots,
   ghlConfigured,
+  setGhlContactCustomField,
 } from '@/lib/ghl'
 
 const BOOKING_WINDOW_DAYS = 45
@@ -62,6 +63,49 @@ export interface BookResult {
   error?: string
 }
 
+const TZ_ABBREV: Record<string, string> = {
+  'America/New_York': 'ET',
+  'America/Chicago': 'CT',
+  'America/Denver': 'MT',
+  'America/Phoenix': 'AZ',
+  'America/Los_Angeles': 'PT',
+  'America/Anchorage': 'AKT',
+  'Pacific/Honolulu': 'HT',
+}
+
+function ordinal(n: number): string {
+  if (n % 100 >= 11 && n % 100 <= 13) return `${n}th`
+  const suffix = { 1: 'st', 2: 'nd', 3: 'rd' }[n % 10] ?? 'th'
+  return `${n}${suffix}`
+}
+
+/**
+ * Format a slot for the GHL "Appointment Date And Time" custom field:
+ * "Wednesday, Aug. 21st, 2026 at 11:00 AM ET"
+ */
+function formatAppointmentField(slot: string, timezone: string): string {
+  const date = new Date(slot)
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: timezone,
+    weekday: 'long',
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  }).formatToParts(date)
+  const get = (type: string) =>
+    parts.find((p) => p.type === type)?.value ?? ''
+  const month = get('month').replace(/\.$/, '')
+  // Abbreviated months get a period; "May" (never abbreviated) does not
+  const dot = month === 'May' ? '' : '.'
+  const day = ordinal(Number(get('day')))
+  const time = `${get('hour')}:${get('minute')} ${get('dayPeriod')}`
+  const tz = TZ_ABBREV[timezone] ?? ''
+  return `${get('weekday')}, ${month}${dot} ${day}, ${get('year')} at ${time}${tz ? ` ${tz}` : ''}`
+}
+
 /**
  * Book the chosen slot for the GHL contact, confirmed by default,
  * and drop a submission note on the contact.
@@ -105,6 +149,18 @@ export async function bookStrategyCall(params: {
       contactId,
       startTime: slot,
       title,
+    })
+
+    // Fill the "Appointment Date And Time" custom field on the contact,
+    // e.g. "Wednesday, Aug. 21st, 2026 at 11:00 AM ET" — used in GHL
+    // automations via {{contact.appointment_date_and_time}}.
+    await setGhlContactCustomField(
+      contactId,
+      'contact.appointment_date_and_time',
+      formatAppointmentField(slot, timezone),
+    ).catch((err) => {
+      // The appointment is booked — a failed field write should not fail the flow
+      console.error('[v0] GHL custom field update failed:', err)
     })
 
     const pretty = new Intl.DateTimeFormat('en-US', {

@@ -117,6 +117,44 @@ export async function getGhlContactName(
   return name || null
 }
 
+// Cache custom-field IDs per fieldKey so each booking doesn't re-fetch
+const customFieldIdCache = new Map<string, string>()
+
+/** Resolve a location custom field's ID by its fieldKey. */
+async function getGhlCustomFieldId(fieldKey: string): Promise<string | null> {
+  const cached = customFieldIdCache.get(fieldKey)
+  if (cached) return cached
+  const locationId = process.env.GHL_LOCATION_ID
+  if (!locationId) throw new Error('GHL_LOCATION_ID is not set')
+  const json = (await ghlFetch(
+    `/locations/${encodeURIComponent(locationId)}/customFields`,
+  )) as { customFields?: Array<{ id?: string; fieldKey?: string }> }
+  const match = (json?.customFields ?? []).find(
+    (f) => f.fieldKey === fieldKey,
+  )
+  if (match?.id) {
+    customFieldIdCache.set(fieldKey, match.id)
+    return match.id
+  }
+  return null
+}
+
+/** Set a custom field value on a contact, looked up by fieldKey. */
+export async function setGhlContactCustomField(
+  contactId: string,
+  fieldKey: string,
+  value: string,
+): Promise<void> {
+  const fieldId = await getGhlCustomFieldId(fieldKey)
+  if (!fieldId) throw new Error(`GHL custom field not found: ${fieldKey}`)
+  await ghlFetch(`/contacts/${encodeURIComponent(contactId)}`, {
+    method: 'PUT',
+    body: JSON.stringify({
+      customFields: [{ id: fieldId, value }],
+    }),
+  })
+}
+
 /** Add a note to a contact. */
 export async function addGhlContactNote(
   contactId: string,
