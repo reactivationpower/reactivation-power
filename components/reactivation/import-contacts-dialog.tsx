@@ -225,13 +225,16 @@ export function ImportContactsDialog({
       }
       counts.set(raw, (counts.get(raw) ?? 0) + 1)
     }
-    const matched: Array<{ label: string; niche: string; count: number }> = []
+    // Group by the niche we resolved to, so "Spinal Decompression" and
+    // "Decompression" show as one line rather than two
+    const byNiche = new Map<string, number>()
     const unmatched: Array<{ label: string; count: number }> = []
     for (const [label, count] of counts) {
       const hit = matchNicheByName(label, niches)
-      if (hit) matched.push({ label, niche: hit.name, count })
+      if (hit) byNiche.set(hit.name, (byNiche.get(hit.name) ?? 0) + count)
       else unmatched.push({ label, count })
     }
+    const matched = Array.from(byNiche, ([niche, count]) => ({ niche, count }))
     matched.sort((a, b) => b.count - a.count)
     unmatched.sort((a, b) => b.count - a.count)
     return { matched, unmatched, blank }
@@ -398,7 +401,7 @@ export function ImportContactsDialog({
   ]
 
   const fileNicheItems = [
-    { value: AUTO, label: 'Auto-match from service column' },
+    { value: AUTO, label: 'Auto-match from the file' },
     ...niches.map((n) => ({ value: n.id, label: n.name })),
   ]
 
@@ -456,12 +459,14 @@ export function ImportContactsDialog({
                     the columns are pre-named so they match automatically, and
                     it lists the exact niche names your account can use.
                   </p>
-                  <Button asChild size="sm" variant="outline" className="shrink-0 bg-transparent">
-                    <a href="/api/templates/contacts" download>
-                      <Download className="size-3.5" />
-                      CSV template
-                    </a>
-                  </Button>
+                  <a
+                    href="/api/templates/contacts"
+                    download
+                    className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-border bg-transparent px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                  >
+                    <Download className="size-3.5" />
+                    CSV template
+                  </a>
                 </div>
                 {niches.length > 0 && (
                   <details className="rounded-md border border-border bg-muted/40 px-3 py-2.5">
@@ -622,7 +627,7 @@ export function ImportContactsDialog({
                       <div className="flex flex-wrap gap-1.5">
                         {nichePreview.matched.map((m) => (
                           <span
-                            key={m.label}
+                            key={m.niche}
                             className="rounded-full border border-border bg-background px-2 py-0.5 text-xs text-foreground"
                           >
                             {m.niche}
