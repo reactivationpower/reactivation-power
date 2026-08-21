@@ -7,6 +7,7 @@ import type { ContactWithMeta } from '@/lib/data/reactivation'
 import type { PipelineStage } from '@/lib/types'
 import { DISPOSITION_LABELS } from '@/lib/types'
 import { cn } from '@/lib/utils'
+import { DeleteContactButton } from '@/components/reactivation/delete-contact-button'
 
 export function ContactsTable({
   contacts,
@@ -145,15 +146,22 @@ export function ContactsTable({
                         : '—'}
                   </td>
                   <td className="px-5 py-3">
-                    {!c.do_not_call && (
-                      <Link
-                        href={`/portal/reactivation/call/${c.id}`}
-                        className="inline-flex items-center gap-1.5 rounded-md border border-input bg-card px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted"
-                      >
-                        <Phone className="size-3.5" />
-                        Call
-                      </Link>
-                    )}
+                    <div className="flex items-center justify-end gap-2">
+                      {!c.do_not_call && (
+                        <Link
+                          href={`/portal/reactivation/call/${c.id}`}
+                          className="inline-flex items-center gap-1.5 rounded-md border border-input bg-card px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted"
+                        >
+                          <Phone className="size-3.5" />
+                          Call
+                        </Link>
+                      )}
+                      <DeleteContactButton
+                        contactId={c.id}
+                        contactName={c.name}
+                        variant="row"
+                      />
+                    </div>
                   </td>
                 </tr>
               ))}

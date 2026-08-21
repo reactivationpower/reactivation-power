@@ -13,6 +13,7 @@ import {
 } from '@/lib/data/reactivation'
 import { DISPOSITION_LABELS } from '@/lib/types'
 import { ContactEditor } from '@/components/reactivation/contact-editor'
+import { DeleteContactButton } from '@/components/reactivation/delete-contact-button'
 
 export default async function ContactProfilePage({
   params,
@@ -148,6 +149,22 @@ export default async function ContactProfilePage({
             ))}
           </ul>
         )}
+      </section>
+
+      <section className="mt-10 flex flex-col gap-3 rounded-lg border border-destructive/30 bg-destructive/5 p-5 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="text-sm font-semibold text-foreground">
+            Delete this contact
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Removes {contact.name} and their call history for good. Use this if
+            they were added by mistake.
+          </p>
+        </div>
+        <DeleteContactButton
+          contactId={contact.id}
+          contactName={contact.name}
+        />
       </section>
     </div>
   )
