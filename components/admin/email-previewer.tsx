@@ -69,12 +69,11 @@ export function EmailPreviewer() {
               Placeholders
             </dt>
             <dd className="text-muted-foreground">
+              None to swap — the Schedule a Call button links to{' '}
               <code className="rounded bg-muted px-1.5 py-0.5 text-xs">
-                [LANDING_PAGE_URL]
+                reactivationpower.com/healthcare#get-started
               </code>{' '}
-              — replace with the live landing page URL before sending. The
-              Schedule a Call button links to the intake form, which flows
-              into the booking calendar.{' '}
+              (the intake form, which flows into the booking calendar).{' '}
               <code className="rounded bg-muted px-1.5 py-0.5 text-xs">
                 {'{{contact.first_name}}'}
               </code>{' '}
