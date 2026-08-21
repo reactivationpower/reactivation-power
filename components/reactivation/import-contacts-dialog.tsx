@@ -30,6 +30,7 @@ import {
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import {
+  matchNicheByName,
   normalizeServiceLabel,
   suggestNicheForService,
 } from '@/lib/niche-match'
@@ -83,6 +84,7 @@ type Target =
   | 'lastName'
   | 'phone'
   | 'email'
+  | 'niche'
   | 'service'
   | 'complaint'
   | 'notes'
@@ -93,6 +95,7 @@ const TARGET_LABELS: Record<Target, string> = {
   lastName: 'Last name',
   phone: 'Phone',
   email: 'Email',
+  niche: 'Niche (script to use)',
   service: 'Service / appointment type',
   complaint: 'Previously treated for',
   notes: 'Notes',
@@ -104,6 +107,8 @@ const HEADER_PATTERNS: Array<[Target, RegExp]> = [
   ['name', /^(full[\s_-]?name|name|patient[\s_-]?name|client[\s_-]?name|contact)$/i],
   ['phone', /(phone|mobile|cell|tel)/i],
   ['email', /e-?mail/i],
+  // Checked before "service" so a dedicated niche column always wins
+  ['niche', /^(niche|niche[\s_-]?name|script|script[\s_-]?type|campaign)$/i],
   [
     'service',
     /(service|appointment[\s_-]?type|appt[\s_-]?type|treatment|procedure|visit[\s_-]?type|product|package|program|last[\s_-]?service)/i,
@@ -163,6 +168,7 @@ export function ImportContactsDialog({
     imported: number
     skippedDuplicate: number
     skippedInvalid: number
+    unmatchedNiches: string[]
   } | null>(null)
   const [pending, startTransition] = useTransition()
   const fileRef = useRef<HTMLInputElement>(null)
@@ -201,6 +207,35 @@ export function ImportContactsDialog({
       .map(([key, v]) => ({ key, ...v }))
       .sort((a, b) => b.count - a.count)
   }, [dataRows, columns.service])
+
+  /**
+   * What the Niche column actually resolves to, so the office can fix a
+   * typo before importing instead of discovering it on a call.
+   */
+  const nichePreview = useMemo(() => {
+    const idx = columns.niche
+    if (idx === undefined) return null
+    const counts = new Map<string, number>()
+    let blank = 0
+    for (const r of dataRows) {
+      const raw = (r[idx] ?? '').trim()
+      if (!raw) {
+        blank++
+        continue
+      }
+      counts.set(raw, (counts.get(raw) ?? 0) + 1)
+    }
+    const matched: Array<{ label: string; niche: string; count: number }> = []
+    const unmatched: Array<{ label: string; count: number }> = []
+    for (const [label, count] of counts) {
+      const hit = matchNicheByName(label, niches)
+      if (hit) matched.push({ label, niche: hit.name, count })
+      else unmatched.push({ label, count })
+    }
+    matched.sort((a, b) => b.count - a.count)
+    unmatched.sort((a, b) => b.count - a.count)
+    return { matched, unmatched, blank }
+  }, [dataRows, columns.niche, niches])
 
   function reset() {
     setStep('upload')
@@ -253,6 +288,13 @@ export function ImportContactsDialog({
       return
     }
 
+    // A Niche column answers the question per contact already
+    if (columns.niche !== undefined) {
+      setServiceMap({})
+      void runImport({})
+      return
+    }
+
     if (columns.service === undefined || uniqueServices.length === 0) {
       // No service column: everything falls to the practice default
       setServiceMap({})
@@ -299,6 +341,8 @@ export function ImportContactsDialog({
         name,
         phone: columns.phone !== undefined ? (r[columns.phone] ?? '').trim() : '',
         email: columns.email !== undefined ? (r[columns.email] ?? '').trim() : '',
+        niche:
+          columns.niche !== undefined ? (r[columns.niche] ?? '').trim() : '',
         service:
           columns.service !== undefined ? (r[columns.service] ?? '').trim() : '',
         complaint:
@@ -332,6 +376,7 @@ export function ImportContactsDialog({
         imported: res.imported ?? 0,
         skippedDuplicate: res.skippedDuplicate ?? 0,
         skippedInvalid: res.skippedInvalid ?? 0,
+        unmatchedNiches: res.unmatchedNiches ?? [],
       })
       setStep('done')
     })
@@ -377,9 +422,9 @@ export function ImportContactsDialog({
                 <DialogTitle>Import contacts from a CSV</DialogTitle>
                 <DialogDescription>
                   Export your patient or customer list from your management
-                  software and upload it here. If the export includes a
-                  service or appointment-type column, contacts are matched to
-                  the right niche automatically.
+                  software and upload it here. Add a Niche column to the export
+                  and every patient arrives tagged with the script they should
+                  be called on — no switching scripts mid-list.
                 </DialogDescription>
               </DialogHeader>
               <div className="flex flex-col gap-4">
@@ -393,8 +438,8 @@ export function ImportContactsDialog({
                     Click to choose a CSV file
                   </span>
                   <span className="text-xs text-muted-foreground">
-                    Include columns for name, phone, and (ideally) the service
-                    or appointment type
+                    Include columns for name, phone, and (ideally) a Niche
+                    column
                   </span>
                 </button>
                 <input
@@ -408,15 +453,38 @@ export function ImportContactsDialog({
                 <div className="flex items-center justify-between gap-3 rounded-md border border-border bg-muted/40 px-3 py-2.5">
                   <p className="text-xs leading-relaxed text-muted-foreground">
                     Not sure how to format your list? Start from our template —
-                    the columns are pre-named so they match automatically.
+                    the columns are pre-named so they match automatically, and
+                    it lists the exact niche names your account can use.
                   </p>
                   <Button asChild size="sm" variant="outline" className="shrink-0 bg-transparent">
-                    <a href="/templates/contact-import-template.csv" download="contact-import-template.csv">
+                    <a href="/api/templates/contacts" download>
                       <Download className="size-3.5" />
                       CSV template
                     </a>
                   </Button>
                 </div>
+                {niches.length > 0 && (
+                  <details className="rounded-md border border-border bg-muted/40 px-3 py-2.5">
+                    <summary className="cursor-pointer text-xs font-medium text-foreground">
+                      Niche values you can put in the Niche column (
+                      {niches.length})
+                    </summary>
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {niches.map((n) => (
+                        <span
+                          key={n.id}
+                          className="rounded-full border border-border bg-background px-2 py-0.5 text-xs text-foreground"
+                        >
+                          {n.name}
+                        </span>
+                      ))}
+                    </div>
+                    <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                      Close matches work too — {'"'}Ortho{'"'}, {'"'}Invisalign
+                      {'"'} or {'"'}shockwave{'"'} all land on the right script.
+                    </p>
+                  </details>
+                )}
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="csv-paste">Or paste CSV data</Label>
                   <Textarea
@@ -478,8 +546,8 @@ export function ImportContactsDialog({
                   </Select>
                   <p className="text-xs leading-relaxed text-muted-foreground">
                     {fileNiche === AUTO
-                      ? 'Contacts are matched by their service column, falling back to your account default. Or pick a niche to tag every contact in this file with it.'
-                      : `Every contact in this file will be tagged ${nicheById.get(fileNiche)?.name ?? 'the selected niche'} and get that script when called.`}
+                      ? 'Each contact is tagged from their own Niche column when your file has one, then the service column, then your account default. Or pick a niche to tag every contact in this file with it.'
+                      : `Every contact in this file will be tagged ${nicheById.get(fileNiche)?.name ?? 'the selected niche'} and get that script when called — this overrides any Niche column on the file.`}
                   </p>
                 </div>
                 <label className="flex items-center gap-2 text-sm text-foreground">
@@ -493,15 +561,20 @@ export function ImportContactsDialog({
                 </label>
                 <div className="grid gap-3 sm:grid-cols-2">
                   {(
-                    ['name', 'firstName', 'lastName', 'phone', 'email', 'service', 'complaint', 'notes'] as Target[]
+                    ['name', 'firstName', 'lastName', 'phone', 'email', 'niche', 'service', 'complaint', 'notes'] as Target[]
                   ).map((target) => (
                     <div key={target} className="flex flex-col gap-1.5">
                       <Label className="text-xs">
                         {TARGET_LABELS[target]}
                         {target === 'phone' && ' *'}
+                        {target === 'niche' && (
+                          <span className="ml-1 font-normal text-muted-foreground">
+                            (best option)
+                          </span>
+                        )}
                         {target === 'service' && (
                           <span className="ml-1 font-normal text-muted-foreground">
-                            (drives niche matching)
+                            (fallback matching)
                           </span>
                         )}
                       </Label>
@@ -539,16 +612,61 @@ export function ImportContactsDialog({
                     </div>
                   ))}
                 </div>
-                {columns.service === undefined && fileNiche === AUTO && (
-                  <p className="rounded-md bg-muted px-3 py-2 text-xs leading-relaxed text-muted-foreground">
-                    No service column selected — every imported contact will
-                    use your account default niche
-                    {defaultNicheName ? ` (${defaultNicheName})` : ''}. If your
-                    software can export the appointment or service type,
-                    including it lets each contact get the right script
-                    automatically. Or pick a niche for this file above.
-                  </p>
+                {nichePreview && fileNiche === AUTO && (
+                  <div className="flex flex-col gap-2 rounded-md border border-border bg-muted/40 px-3 py-2.5">
+                    <p className="flex items-center gap-1.5 text-xs font-medium text-foreground">
+                      <Sparkles className="size-3.5 text-accent" />
+                      Niche column found — each patient keeps their own script
+                    </p>
+                    {nichePreview.matched.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5">
+                        {nichePreview.matched.map((m) => (
+                          <span
+                            key={m.label}
+                            className="rounded-full border border-border bg-background px-2 py-0.5 text-xs text-foreground"
+                          >
+                            {m.niche}
+                            <span className="ml-1 text-muted-foreground">
+                              {m.count}
+                            </span>
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    {nichePreview.unmatched.length > 0 && (
+                      <p className="text-xs leading-relaxed text-destructive">
+                        {"We don't recognize "}
+                        {nichePreview.unmatched
+                          .map((u) => `"${u.label}" (${u.count})`)
+                          .join(', ')}
+                        {
+                          '. Check the spelling against your niche list, or those contacts will fall back to your account default'
+                        }
+                        {defaultNicheName ? ` (${defaultNicheName})` : ''}.
+                      </p>
+                    )}
+                    {nichePreview.blank > 0 && (
+                      <p className="text-xs leading-relaxed text-muted-foreground">
+                        {nichePreview.blank} row
+                        {nichePreview.blank === 1 ? ' has' : 's have'} no niche
+                        listed and will use your account default
+                        {defaultNicheName ? ` (${defaultNicheName})` : ''}.
+                      </p>
+                    )}
+                  </div>
                 )}
+                {columns.niche === undefined &&
+                  columns.service === undefined &&
+                  fileNiche === AUTO && (
+                    <p className="rounded-md bg-muted px-3 py-2 text-xs leading-relaxed text-muted-foreground">
+                      No niche or service column selected — every imported
+                      contact will use your account default niche
+                      {defaultNicheName ? ` (${defaultNicheName})` : ''}. Adding
+                      a Niche column to your export is the cleanest way to let
+                      each contact get the right script. Or pick a niche for
+                      this file above.
+                    </p>
+                  )}
                 {error && <p className="text-sm text-destructive">{error}</p>}
                 <div className="flex justify-between gap-2">
                   <Button variant="ghost" className="gap-2" onClick={reset}>
@@ -565,7 +683,9 @@ export function ImportContactsDialog({
                     ) : (
                       <ArrowRight className="size-4" />
                     )}
-                    {fileNiche !== AUTO || columns.service === undefined
+                    {fileNiche !== AUTO ||
+                    columns.niche !== undefined ||
+                    columns.service === undefined
                       ? `Import ${dataRows.length} contact${dataRows.length === 1 ? '' : 's'}`
                       : 'Continue'}
                   </Button>
@@ -695,6 +815,15 @@ export function ImportContactsDialog({
                     )}
                   </div>
                 </div>
+                {result.unmatchedNiches.length > 0 && (
+                  <p className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs leading-relaxed text-foreground">
+                    {"These niche values weren't recognized: "}
+                    {result.unmatchedNiches.join(', ')}. Those contacts are
+                    using your account default instead — you can fix each one
+                    from the contacts table, or re-export with the exact niche
+                    name and import again.
+                  </p>
+                )}
                 <div className="flex justify-end">
                   <Button
                     onClick={() => {

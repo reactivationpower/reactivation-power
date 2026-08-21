@@ -124,6 +124,20 @@ const KEYWORD_RULES: Array<{ niche: string; keywords: string[] }> = [
     ],
   },
   {
+    niche: 'Acoustic Wave Therapy',
+    keywords: [
+      'acoustic wave',
+      'acoustic',
+      'shockwave',
+      'shock wave',
+      'soundwave',
+      'sound wave',
+      'gainswave',
+      'pulse wave',
+      'swt',
+    ],
+  },
+  {
     niche: 'Acupuncture',
     keywords: ['acupuncture', 'dry needling', 'cupping', 'needling'],
   },
@@ -203,11 +217,64 @@ const KEYWORD_RULES: Array<{ niche: string; keywords: string[] }> = [
       'mini-split',
     ],
   },
+  {
+    niche: 'Plumbing',
+    keywords: [
+      'plumb',
+      'drain',
+      'water heater',
+      'tankless',
+      'sewer',
+      'faucet',
+      'toilet',
+      'repipe',
+      're-pipe',
+      'clog',
+      'garbage disposal',
+      'sump pump',
+      'backflow',
+      'water softener',
+      'pipe leak',
+    ],
+  },
 ]
 
 /** Normalize a raw service label for matching and storage keys */
 export function normalizeServiceLabel(raw: string): string {
   return raw.trim().replace(/\s+/g, ' ').toLowerCase()
+}
+
+/**
+ * Loose comparison key for niche names typed by hand into a CSV, so
+ * "Red Light / Body Contouring", "red light body contouring" and
+ * "Red Light/Body Contouring" all collapse to the same thing.
+ */
+function nicheKey(raw: string): string {
+  return raw
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+}
+
+/**
+ * Resolve a value from an explicit "Niche" column on the import file.
+ *
+ * Tries an exact niche-name match first (punctuation and case are
+ * ignored), then falls back to the same keyword rules used for service
+ * labels — so "Ortho", "Invisalign" or "shockwave" still land on the
+ * right niche. Returns null when nothing matches, which lets the caller
+ * fall back to the service column or the account default.
+ */
+export function matchNicheByName(
+  value: string,
+  niches: Niche[],
+): Niche | null {
+  const key = nicheKey(value)
+  if (!key) return null
+  for (const niche of niches) {
+    if (nicheKey(niche.name) === key) return niche
+  }
+  return suggestNicheForService(value, niches)
 }
 
 /**

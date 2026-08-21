@@ -6,6 +6,8 @@ import {
   accessOwnerId,
   getCurrentParticipant,
 } from '@/lib/data/participants'
+import { getOwnerNiches } from '@/lib/data/reactivation'
+import { matchNicheByName } from '@/lib/niche-match'
 import type { CallDisposition } from '@/lib/types'
 import { RETRY_WINDOW_MONTHS } from '@/lib/types'
 
@@ -299,6 +301,12 @@ export interface ImportRow {
   notes?: string
   /** What the patient was previously treated for (optional) */
   complaint?: string
+  /**
+   * Value from an explicit "Niche" column on the file. Resolved by name
+   * per contact, so one upload can mix decompression, Botox, etc. and
+   * every caller still gets the right script.
+   */
+  niche?: string
 }
 
 export interface ImportMapping {
@@ -385,6 +393,11 @@ export async function importContacts(input: {
     forcedNicheId = forced?.id ?? null
   }
 
+  // Niches this account can actually use, for resolving a "Niche" column
+  const usesNicheColumn = rows.some((r) => (r.niche ?? '').trim() !== '')
+  const ownerNiches = usesNicheColumn ? await getOwnerNiches(ownerId) : []
+  const unmatchedNiches = new Set<string>()
+
   // 3. Existing phones for dedupe
   const { data: existing } = await supabase
     .from('contacts')
@@ -413,7 +426,18 @@ export async function importContacts(input: {
     const serviceRaw = (row.service ?? '').trim()
     const serviceKey = serviceRaw.replace(/\s+/g, ' ').toLowerCase()
     const mapped = serviceKey ? nicheByService.get(serviceKey) : undefined
-    const nicheId = forcedNicheId ?? mapped ?? defaultNicheId
+
+    // A Niche column on the row beats the service mapping, but a niche
+    // forced for the whole upload still wins over everything.
+    const nicheRaw = (row.niche ?? '').trim()
+    let rowNicheId: string | undefined
+    if (nicheRaw && ownerNiches.length > 0) {
+      const match = matchNicheByName(nicheRaw, ownerNiches)
+      if (match) rowNicheId = match.id
+      else unmatchedNiches.add(nicheRaw)
+    }
+
+    const nicheId = forcedNicheId ?? rowNicheId ?? mapped ?? defaultNicheId
 
     toInsert.push({
       owner_id: ownerId,
@@ -453,7 +477,13 @@ export async function importContacts(input: {
   }
 
   revalidatePath('/portal/reactivation')
-  return { imported, skippedDuplicate, skippedInvalid }
+  return {
+    imported,
+    skippedDuplicate,
+    skippedInvalid,
+    // Niche values we could not match, so the UI can flag the typo
+    unmatchedNiches: Array.from(unmatchedNiches).slice(0, 8),
+  }
 }
 
 // ---------- Portal: niche selection ----------
