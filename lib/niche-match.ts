@@ -128,8 +128,11 @@ const KEYWORD_RULES: Array<{ niche: string; keywords: string[] }> = [
     keywords: [
       'acoustic wave',
       'acoustic',
+      // Popular device/brand names offices use instead of the niche name
       'shockwave',
       'shock wave',
+      'softwave',
+      'soft wave',
       'soundwave',
       'sound wave',
       'gainswave',
