@@ -8,7 +8,12 @@ import {
   accessOwnerId,
 } from '@/lib/data/participants'
 import { getCourses, getAccessibleCourseIds, getCourseTree } from '@/lib/data/courses'
-import { getNiches, getAccessibleNicheIds } from '@/lib/data/reactivation'
+import {
+  getNiches,
+  getAccessibleNicheIds,
+  getAccountReactivationStats,
+  type AccountReactivationStats,
+} from '@/lib/data/reactivation'
 import { getActivityEvents } from '@/lib/data/analytics'
 import { getAdminClient } from '@/lib/supabase/admin'
 import { formatDateTime, formatDuration } from '@/lib/format'
@@ -28,7 +33,17 @@ import { CourseAccessToggle } from '@/components/admin/course-access-toggle'
 import { NicheAccessToggle } from '@/components/admin/niche-access-toggle'
 import { AddStaffForm } from '@/components/admin/add-staff-form'
 import { ParticipantActiveToggle } from '@/components/admin/participant-active-toggle'
-import { ArrowLeft, Mail, Phone, Users } from 'lucide-react'
+import {
+  ArrowLeft,
+  Mail,
+  Phone,
+  Users,
+  PhoneCall,
+  Clock,
+  Layers,
+  AlertTriangle,
+  CheckCircle2,
+} from 'lucide-react'
 
 const EVENT_LABELS: Record<string, string> = {
   login: 'Logged in',
@@ -100,6 +115,14 @@ export default async function ParticipantDetailPage({
 
   const parent = participant.parent_id
     ? await getParticipantById(participant.parent_id)
+    : null
+
+  // Account-level reactivation accountability (owner accounts only)
+  const reactivationStats = isOwner
+    ? await getAccountReactivationStats(participant.id, [
+        participant.id,
+        ...staff.map((s) => s.id),
+      ])
     : null
 
   return (
@@ -253,6 +276,11 @@ export default async function ParticipantDetailPage({
           </Card>
         )}
       </div>
+
+      {/* Reactivation accountability (owner accounts only) */}
+      {reactivationStats ? (
+        <ReactivationActivityCard stats={reactivationStats} />
+      ) : null}
 
       {/* Niche access (reactivation) */}
       <Card>
@@ -563,5 +591,126 @@ function AliasList({
         })}
       </TableBody>
     </Table>
+  )
+}
+
+function StatBlock({
+  icon,
+  label,
+  value,
+  hint,
+}: {
+  icon: React.ReactNode
+  label: string
+  value: string | number
+  hint?: string
+}) {
+  return (
+    <div className="rounded-lg border border-border p-4">
+      <div className="flex items-center gap-2 text-muted-foreground">
+        {icon}
+        <span className="text-xs font-medium">{label}</span>
+      </div>
+      <p className="mt-2 text-2xl font-semibold tabular-nums">{value}</p>
+      {hint ? (
+        <p className="mt-0.5 text-xs text-muted-foreground">{hint}</p>
+      ) : null}
+    </div>
+  )
+}
+
+function ReactivationActivityCard({
+  stats,
+}: {
+  stats: AccountReactivationStats
+}) {
+  // Plain-English health signal. We judge by throughput + staleness, not a
+  // raw overdue count — a big backlog just means someone bulk-imported.
+  const hasList = stats.totalContacts > 0
+  const stale =
+    stats.liveInQueue > 0 &&
+    stats.oldestLiveAgeDays !== null &&
+    stats.oldestLiveAgeDays >= 5
+  const idle = hasList && stats.callsThisWeek === 0
+
+  let tone: 'good' | 'warn' = 'good'
+  let message = 'Working the list — calls logged this week.'
+  if (!hasList) {
+    message = 'No contacts imported yet.'
+  } else if (idle) {
+    tone = 'warn'
+    message = stats.lastCallAt
+      ? `No calls logged in the last 7 days. Last call ${formatDateTime(stats.lastCallAt)}.`
+      : 'No calls have ever been logged for this account.'
+  } else if (stale) {
+    tone = 'warn'
+    message = `The current batch has sat unworked for ${stats.oldestLiveAgeDays} days.`
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base">Reactivation activity</CardTitle>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-4">
+        <div
+          className={
+            tone === 'warn'
+              ? 'flex items-start gap-2 rounded-md bg-destructive/10 px-3 py-2 text-sm font-medium text-destructive'
+              : 'flex items-start gap-2 rounded-md bg-accent/10 px-3 py-2 text-sm font-medium text-accent'
+          }
+        >
+          {tone === 'warn' ? (
+            <AlertTriangle className="mt-0.5 size-4 shrink-0" />
+          ) : (
+            <CheckCircle2 className="mt-0.5 size-4 shrink-0" />
+          )}
+          <span>{message}</span>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          <StatBlock
+            icon={<Users className="size-4" />}
+            label="Total contacts"
+            value={stats.totalContacts}
+          />
+          <StatBlock
+            icon={<PhoneCall className="size-4" />}
+            label="Live in queue"
+            value={stats.liveInQueue}
+            hint={
+              stats.oldestLiveAgeDays !== null && stats.liveInQueue > 0
+                ? `oldest ${stats.oldestLiveAgeDays}d`
+                : undefined
+            }
+          />
+          <StatBlock
+            icon={<Layers className="size-4" />}
+            label="In reserve"
+            value={stats.waiting}
+          />
+          <StatBlock
+            icon={<CheckCircle2 className="size-4" />}
+            label="Ever called"
+            value={`${stats.everCalled} / ${stats.totalContacts}`}
+          />
+          <StatBlock
+            icon={<Clock className="size-4" />}
+            label="Calls this week"
+            value={stats.callsThisWeek}
+            hint={`${stats.callsToday} today`}
+          />
+          <StatBlock
+            icon={<PhoneCall className="size-4" />}
+            label="Last call"
+            value={
+              stats.lastCallAt
+                ? formatDateTime(stats.lastCallAt).split(',')[0]
+                : '—'
+            }
+          />
+        </div>
+      </CardContent>
+    </Card>
   )
 }

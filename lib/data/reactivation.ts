@@ -298,9 +298,32 @@ function isReserveCandidate(c: ContactWithMeta): boolean {
 }
 
 /**
+ * Insert an initial follow-up (due now) for each contact. Returns the
+ * contacts that were successfully released. Kept low-level so callers can
+ * build the queue in memory without a stale re-read (see below).
+ */
+async function insertInitialFollowUps(
+  contacts: ContactWithMeta[],
+): Promise<ContactWithMeta[]> {
+  if (contacts.length === 0) return []
+  const supabase = getAdminClient()
+  const now = new Date().toISOString()
+  const { error } = await supabase.from('follow_ups').insert(
+    contacts.map((c) => ({
+      contact_id: c.id,
+      due_at: now,
+      reason: 'initial' as const,
+    })),
+  )
+  if (error) return []
+  return contacts
+}
+
+/**
  * Release up to `count` reserve contacts into the queue by creating an
  * initial follow-up (due now) for each. Oldest-imported first, so the list
  * is worked in a stable order. Returns how many were actually released.
+ * Used by the manual "Add More Calls" action.
  */
 export async function releaseReserveContacts(
   ownerId: string,
@@ -313,59 +336,96 @@ export async function releaseReserveContacts(
     // getContacts returns newest-first; reverse so we release oldest imports first
     .reverse()
     .slice(0, count)
-  if (reserve.length === 0) return 0
+  const released = await insertInitialFollowUps(reserve)
+  return released.length
+}
 
-  const supabase = getAdminClient()
+/** Build a synthetic QueueItem for a just-released contact (due now). */
+function syntheticQueueItem(contact: ContactWithMeta): QueueItem {
   const now = new Date().toISOString()
-  const { error } = await supabase.from('follow_ups').insert(
-    reserve.map((c) => ({
-      contact_id: c.id,
+  return {
+    follow_up: {
+      // Not yet re-read from the DB; id is only used as a React key and the
+      // Call action keys off contact.id, so a synthetic id is safe.
+      id: `pending-${contact.id}`,
+      contact_id: contact.id,
       due_at: now,
-      reason: 'initial' as const,
-    })),
-  )
-  if (error) return 0
-  return reserve.length
+      reason: 'initial',
+      completed_call_id: null,
+      created_at: now,
+    },
+    contact,
+  }
 }
 
 /**
- * The queue plus reserve counts, auto-topping-up to the batch target.
+ * The queue plus reserve counts, releasing a fresh batch when it empties.
  *
  * Rules (agreed with the product owner):
- *  - The queue is never left empty while reserve remains ("never empty").
- *  - It never balloons past `batchSize` cold calls (the ceiling).
- *  - No cadence/time gate: purely demand-driven. Below target → top up to
- *    target from the reserve, right when the dashboard loads.
+ *  - The queue is never *shown* empty while reserve remains ("never empty"):
+ *    when the live cold-call queue hits zero, the next full batch of
+ *    `batchSize` is released on the same load, so the staffer always lands
+ *    on work.
+ *  - Batch rhythm: while cold calls are still in the queue we do NOT keep
+ *    topping up — the staffer works the batch down, then the next batch
+ *    appears. (The manual "Add More Calls" action pulls the next batch early
+ *    for a fast worker — see releaseReserveContacts.)
+ *  - No cadence/time gate: purely demand-driven.
+ *
+ * Implementation note: this reads contacts exactly once and computes the
+ * release from that single snapshot, appending freshly-released contacts to
+ * the queue in memory. It deliberately does NOT re-read after inserting —
+ * Next.js memoizes identical fetches within a render, so a re-read returns
+ * the stale pre-insert data. That stale read previously made every load
+ * think the queue was empty and release another batch (a runaway).
+ * Release-from-one-snapshot makes it idempotent per request.
  */
 export async function getCallQueueState(
   ownerId: string,
   batchSize: number,
 ): Promise<CallQueueState> {
   const target = Math.max(1, batchSize)
+  const contacts = await getContacts(ownerId)
+  const byId = new Map(contacts.map((c) => [c.id, c]))
+  const nowMs = Date.now()
 
-  // How many released cold calls are already due?
-  let queue = await getCallQueue(ownerId)
+  // Base queue: every contact whose follow-up is due now or overdue.
+  const queue: QueueItem[] = []
+  for (const c of contacts) {
+    if (c.do_not_call || !c.next_follow_up) continue
+    if (new Date(c.next_follow_up.due_at).getTime() <= nowMs) {
+      queue.push({ follow_up: c.next_follow_up, contact: byId.get(c.id)! })
+    }
+  }
   let releasedInitial = queue.filter(
     (q) => q.follow_up.reason === 'initial',
   ).length
 
-  // Top up to the target from reserve if we're short.
-  if (releasedInitial < target) {
-    const released = await releaseReserveContacts(
-      ownerId,
-      target - releasedInitial,
-    )
-    if (released > 0) {
-      queue = await getCallQueue(ownerId)
-      releasedInitial = queue.filter(
-        (q) => q.follow_up.reason === 'initial',
-      ).length
+  // Reserve candidates from this same snapshot (oldest import first).
+  const reserve = contacts.filter(isReserveCandidate).reverse()
+
+  // Only refill when the live cold-call queue is empty — then release a full
+  // batch. Append synthetic items so they appear in THIS render without a
+  // stale re-fetch.
+  const releasedIds = new Set<string>()
+  if (releasedInitial === 0 && reserve.length > 0) {
+    const toRelease = reserve.slice(0, target)
+    const released = await insertInitialFollowUps(toRelease)
+    for (const c of released) {
+      queue.push(syntheticQueueItem(c))
+      releasedIds.add(c.id)
     }
+    releasedInitial += released.length
   }
 
-  // Remaining reserve after any release
-  const contacts = await getContacts(ownerId)
-  const waiting = contacts.filter(isReserveCandidate).length
+  queue.sort(
+    (a, b) =>
+      new Date(a.follow_up.due_at).getTime() -
+      new Date(b.follow_up.due_at).getTime(),
+  )
+
+  // Reserve remaining = candidates we did not just release.
+  const waiting = reserve.filter((c) => !releasedIds.has(c.id)).length
 
   return { queue, releasedInitial, waiting, batchSize: target }
 }
