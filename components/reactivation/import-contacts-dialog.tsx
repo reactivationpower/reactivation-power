@@ -2,6 +2,7 @@
 
 import { useMemo, useRef, useState, useTransition } from 'react'
 import {
+  AlertCircle,
   ArrowLeft,
   ArrowRight,
   CheckCircle2,
@@ -35,6 +36,7 @@ import {
   suggestNicheForService,
 } from '@/lib/niche-match'
 import type { Niche, ServiceNicheMapping } from '@/lib/types'
+import { cn } from '@/lib/utils'
 
 // ---------- tiny CSV parser (handles quoted fields, CRLF) ----------
 
@@ -257,6 +259,12 @@ export function ImportContactsDialog({
       .sort((a, b) => b.count - a.count)
   }, [dataRows, columns.service])
 
+  /** Services we couldn't recognize and the office hasn't assigned yet */
+  const unreviewedServices = useMemo(
+    () => uniqueServices.filter((s) => serviceMap[s.key] === undefined).length,
+    [uniqueServices, serviceMap],
+  )
+
   /**
    * What the Niche column actually resolves to, so the office can fix a
    * typo before importing instead of discovering it on a call.
@@ -381,9 +389,9 @@ export function ImportContactsDialog({
       if (suggestion) {
         map[s.key] = suggestion.id
         matched++
-      } else {
-        map[s.key] = DEFAULT
       }
+      // Deliberately left unset when nothing matched, so the row can be
+      // flagged for review instead of silently sitting on the default
     }
     setServiceMap(map)
     setAutoMatched(matched)
@@ -779,18 +787,42 @@ export function ImportContactsDialog({
                     automatically — review and adjust anything we got wrong.
                   </p>
                 )}
+                {unreviewedServices > 0 && (
+                  <p className="flex items-center gap-2 rounded-md bg-destructive/10 px-3 py-2 text-xs font-medium text-destructive">
+                    <AlertCircle className="size-3.5 shrink-0" />
+                    {unreviewedServices === 1
+                      ? "1 service we couldn't recognize. Those contacts go to your account default unless you pick a niche below."
+                      : `${unreviewedServices} services we couldn't recognize. Those contacts go to your account default unless you pick a niche below.`}
+                  </p>
+                )}
                 <ul className="flex max-h-80 flex-col gap-2 overflow-y-auto pr-1">
-                  {uniqueServices.map((s) => (
+                  {uniqueServices.map((s) => {
+                    const needsReview = serviceMap[s.key] === undefined
+                    return (
                     <li
                       key={s.key}
-                      className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-border bg-card px-3 py-2"
+                      className={cn(
+                        'flex flex-wrap items-center justify-between gap-2 rounded-md border px-3 py-2',
+                        needsReview
+                          ? 'border-destructive/40 bg-destructive/5'
+                          : 'border-border bg-card',
+                      )}
                     >
                       <div className="min-w-0">
                         <p className="truncate text-sm font-medium text-foreground">
                           {s.label}
                         </p>
-                        <p className="text-xs text-muted-foreground">
-                          {s.count} contact{s.count === 1 ? '' : 's'}
+                        <p
+                          className={cn(
+                            'text-xs',
+                            needsReview
+                              ? 'font-medium text-destructive'
+                              : 'text-muted-foreground',
+                          )}
+                        >
+                          {needsReview
+                            ? `Not recognized — ${s.count} contact${s.count === 1 ? '' : 's'}`
+                            : `${s.count} contact${s.count === 1 ? '' : 's'}`}
                         </p>
                       </div>
                       <Select
@@ -816,7 +848,8 @@ export function ImportContactsDialog({
                         </SelectContent>
                       </Select>
                     </li>
-                  ))}
+                    )
+                  })}
                 </ul>
                 {error && <p className="text-sm text-destructive">{error}</p>}
                 <div className="flex justify-between gap-2">

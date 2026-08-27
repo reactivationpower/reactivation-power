@@ -245,15 +245,47 @@ export function normalizeServiceLabel(raw: string): string {
 }
 
 /**
+ * Normalize a label for keyword matching by flattening ALL punctuation to
+ * single spaces. Practices write the same service a dozen ways —
+ * "Red-Light", "Red Light", "Red/Light", "RED_LIGHT" — and every one of
+ * those must land on the same niche.
+ */
+function matchKey(raw: string): string {
+  return raw
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+/**
+ * Does `text` contain `keyword`?
+ *
+ * Keywords are normalized the same way as the text, so a keyword written
+ * with punctuation ("a/c", "all-on-4", "x-ray") still matches. Very short
+ * keywords and those containing a single-letter word ("dts", "glp", "a c")
+ * require whole-word matches so they can't fire inside an unrelated word —
+ * longer keywords stay substring-based so "chiro" still finds
+ * "chiropractic".
+ */
+function keywordMatches(text: string, keyword: string): boolean {
+  const kw = matchKey(keyword)
+  if (!kw) return false
+
+  const needsWholeWord = kw.length <= 3 || /(^| )[a-z0-9]( |$)/.test(kw)
+  if (!needsWholeWord) return text.includes(kw)
+
+  const escaped = kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  return new RegExp(`(^| )${escaped}( |$)`).test(text)
+}
+
+/**
  * Loose comparison key for niche names typed by hand into a CSV, so
  * "Red Light / Body Contouring", "red light body contouring" and
  * "Red Light/Body Contouring" all collapse to the same thing.
  */
 function nicheKey(raw: string): string {
-  return raw
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, ' ')
-    .trim()
+  return matchKey(raw)
 }
 
 /**
@@ -285,20 +317,20 @@ export function suggestNicheForService(
   service: string,
   niches: Niche[],
 ): Niche | null {
-  const text = ` ${normalizeServiceLabel(service)} `
-  if (!text.trim()) return null
+  const text = matchKey(service)
+  if (!text) return null
 
-  const byName = new Map(niches.map((n) => [n.name.toLowerCase(), n]))
+  const byName = new Map(niches.map((n) => [matchKey(n.name), n]))
 
   // Exact niche-name match first (e.g. a column literally says "Chiropractic")
-  const exact = byName.get(text.trim())
+  const exact = byName.get(text)
   if (exact) return exact
 
   for (const rule of KEYWORD_RULES) {
-    const niche = byName.get(rule.niche.toLowerCase())
+    const niche = byName.get(matchKey(rule.niche))
     if (!niche) continue
     for (const kw of rule.keywords) {
-      if (text.includes(kw)) return niche
+      if (keywordMatches(text, kw)) return niche
     }
   }
   return null
