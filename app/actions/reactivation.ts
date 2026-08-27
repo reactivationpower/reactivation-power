@@ -6,10 +6,13 @@ import {
   accessOwnerId,
   getCurrentParticipant,
 } from '@/lib/data/participants'
-import { getOwnerNiches } from '@/lib/data/reactivation'
+import {
+  getOwnerNiches,
+  releaseReserveContacts,
+} from '@/lib/data/reactivation'
 import { matchNicheByName } from '@/lib/niche-match'
 import type { CallDisposition } from '@/lib/types'
-import { RETRY_WINDOW_MONTHS } from '@/lib/types'
+import { CALL_BATCH_SIZES, RETRY_WINDOW_MONTHS } from '@/lib/types'
 
 // ---------- Admin: niches ----------
 
@@ -453,7 +456,11 @@ export async function importContacts(input: {
     })
   }
 
-  // 4. Insert in chunks + create the initial follow-up for each
+  // 4. Insert in chunks. We deliberately do NOT create follow-ups here —
+  // imported contacts start in the "reserve" pool with no follow-up. The
+  // dashboard releases them into the live queue a batch at a time
+  // (getCallQueueState), so a bulk upload never dumps everyone into
+  // "Calls Due" at once.
   let imported = 0
   const CHUNK = 250
   for (let i = 0; i < toInsert.length; i += CHUNK) {
@@ -464,16 +471,6 @@ export async function importContacts(input: {
       .select('id')
     if (error) return { error: error.message, imported }
     imported += inserted?.length ?? 0
-    if (inserted && inserted.length > 0) {
-      const now = new Date().toISOString()
-      await supabase.from('follow_ups').insert(
-        inserted.map((c) => ({
-          contact_id: c.id,
-          due_at: now,
-          reason: 'initial',
-        })),
-      )
-    }
   }
 
   revalidatePath('/portal/reactivation')
@@ -484,6 +481,52 @@ export async function importContacts(input: {
     // Niche values we could not match, so the UI can flag the typo
     unmatchedNiches: Array.from(unmatchedNiches).slice(0, 8),
   }
+}
+
+// ---------- Portal: call batch size + manual release ----------
+
+/** Owner sets how many cold calls stay live in the queue (5/7/10) */
+export async function setCallBatchSize(size: number) {
+  const participant = await getCurrentParticipant()
+  if (!participant) return { error: 'Not signed in' }
+  if (participant.role !== 'owner')
+    return { error: 'Only the account owner can change the batch size' }
+  if (!CALL_BATCH_SIZES.includes(size as (typeof CALL_BATCH_SIZES)[number]))
+    return { error: 'Invalid batch size' }
+  const supabase = getAdminClient()
+  const { error } = await supabase
+    .from('participants')
+    .update({ call_batch_size: size })
+    .eq('id', participant.id)
+  if (error) return { error: error.message }
+  revalidatePath('/portal/reactivation')
+  return {}
+}
+
+/**
+ * "Add More Calls" — manually pull the next batch of reserve contacts into
+ * the queue on demand, for a caller who has worked through their batch and
+ * still has time. Releases up to `count` (defaults to the account batch
+ * size), regardless of any auto top-up.
+ */
+export async function addMoreCalls(count?: number) {
+  const participant = await getCurrentParticipant()
+  if (!participant) return { error: 'Not signed in' }
+  const ownerId = accessOwnerId(participant)
+
+  let n = count ?? 0
+  if (!n) {
+    const supabase = getAdminClient()
+    const { data: owner } = await supabase
+      .from('participants')
+      .select('call_batch_size')
+      .eq('id', ownerId)
+      .maybeSingle()
+    n = owner?.call_batch_size ?? 7
+  }
+  const released = await releaseReserveContacts(ownerId, Math.max(1, n))
+  revalidatePath('/portal/reactivation')
+  return { released }
 }
 
 // ---------- Portal: niche selection ----------

@@ -21,8 +21,14 @@ export interface Participant {
   selected_niche_id?: string | null
   practice_name?: string | null
   default_niche_id?: string | null
+  /** How many cold-list "initial" calls to keep live in the queue (5/7/10) */
+  call_batch_size?: number | null
   created_at: string
 }
+
+/** Allowed call-queue batch sizes, and the default for new accounts */
+export const CALL_BATCH_SIZES = [5, 7, 10] as const
+export const DEFAULT_CALL_BATCH_SIZE = 7
 
 export interface ParticipantAlias {
   id: string

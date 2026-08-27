@@ -271,6 +271,105 @@ export async function getCallQueue(ownerId: string): Promise<QueueItem[]> {
   return items
 }
 
+/**
+ * Batched-release model.
+ *
+ * A bulk import no longer dumps every contact into the queue. Instead the
+ * queue holds at most `batchSize` cold-list ("initial") calls at a time.
+ * "Released" = the contact has an open initial follow-up. "Waiting" = an
+ * uncalled contact with no follow-up yet — the reserve pool. Real scheduled
+ * callbacks (retry/manual/quarterly follow-ups from logged calls) always
+ * show and are never throttled.
+ */
+export interface CallQueueState {
+  /** Everything due now: released cold calls + due scheduled callbacks */
+  queue: QueueItem[]
+  /** How many due items are cold-list initial calls (subject to the cap) */
+  releasedInitial: number
+  /** Uncalled contacts still held in reserve (no follow-up yet) */
+  waiting: number
+  /** The account's batch target */
+  batchSize: number
+}
+
+/** An uncalled contact is a reserve candidate when it has no open follow-up */
+function isReserveCandidate(c: ContactWithMeta): boolean {
+  return !c.do_not_call && !c.next_follow_up && !c.first_call_at
+}
+
+/**
+ * Release up to `count` reserve contacts into the queue by creating an
+ * initial follow-up (due now) for each. Oldest-imported first, so the list
+ * is worked in a stable order. Returns how many were actually released.
+ */
+export async function releaseReserveContacts(
+  ownerId: string,
+  count: number,
+): Promise<number> {
+  if (count <= 0) return 0
+  const contacts = await getContacts(ownerId)
+  const reserve = contacts
+    .filter(isReserveCandidate)
+    // getContacts returns newest-first; reverse so we release oldest imports first
+    .reverse()
+    .slice(0, count)
+  if (reserve.length === 0) return 0
+
+  const supabase = getAdminClient()
+  const now = new Date().toISOString()
+  const { error } = await supabase.from('follow_ups').insert(
+    reserve.map((c) => ({
+      contact_id: c.id,
+      due_at: now,
+      reason: 'initial' as const,
+    })),
+  )
+  if (error) return 0
+  return reserve.length
+}
+
+/**
+ * The queue plus reserve counts, auto-topping-up to the batch target.
+ *
+ * Rules (agreed with the product owner):
+ *  - The queue is never left empty while reserve remains ("never empty").
+ *  - It never balloons past `batchSize` cold calls (the ceiling).
+ *  - No cadence/time gate: purely demand-driven. Below target → top up to
+ *    target from the reserve, right when the dashboard loads.
+ */
+export async function getCallQueueState(
+  ownerId: string,
+  batchSize: number,
+): Promise<CallQueueState> {
+  const target = Math.max(1, batchSize)
+
+  // How many released cold calls are already due?
+  let queue = await getCallQueue(ownerId)
+  let releasedInitial = queue.filter(
+    (q) => q.follow_up.reason === 'initial',
+  ).length
+
+  // Top up to the target from reserve if we're short.
+  if (releasedInitial < target) {
+    const released = await releaseReserveContacts(
+      ownerId,
+      target - releasedInitial,
+    )
+    if (released > 0) {
+      queue = await getCallQueue(ownerId)
+      releasedInitial = queue.filter(
+        (q) => q.follow_up.reason === 'initial',
+      ).length
+    }
+  }
+
+  // Remaining reserve after any release
+  const contacts = await getContacts(ownerId)
+  const waiting = contacts.filter(isReserveCandidate).length
+
+  return { queue, releasedInitial, waiting, batchSize: target }
+}
+
 // ---------- Team stats ----------
 
 export interface TeamMemberStats {
@@ -337,4 +436,96 @@ export async function getTeamStats(
         reached > 0 ? Math.round((scheduled / reached) * 100) : 0,
     }
   })
+}
+
+// ---------- Admin accountability ----------
+
+/**
+ * A blunt, admin-facing read on whether an account is actually working its
+ * list. This is the "they called in saying it's not working" view — it
+ * measures throughput and staleness, not a scary overdue count.
+ */
+export interface AccountReactivationStats {
+  totalContacts: number
+  /** Cold calls currently live in the queue (released, uncalled) */
+  liveInQueue: number
+  /** Uncalled contacts still held in reserve */
+  waiting: number
+  /** Contacts that have been called at least once */
+  everCalled: number
+  callsThisWeek: number
+  callsToday: number
+  /** Days the oldest live cold call has sat unworked (null if queue empty) */
+  oldestLiveAgeDays: number | null
+  /** Most recent call across the whole account (null if never) */
+  lastCallAt: string | null
+}
+
+export async function getAccountReactivationStats(
+  ownerId: string,
+  memberIds: string[],
+): Promise<AccountReactivationStats> {
+  const supabase = getAdminClient()
+  const contacts = await getContacts(ownerId)
+
+  const now = Date.now()
+  const startOfToday = new Date()
+  startOfToday.setHours(0, 0, 0, 0)
+  const weekAgo = new Date(now - 7 * 24 * 60 * 60 * 1000)
+
+  let liveInQueue = 0
+  let waiting = 0
+  let everCalled = 0
+  let oldestLiveMs: number | null = null
+
+  for (const c of contacts) {
+    if (c.first_call_at) everCalled++
+    if (isReserveCandidate(c)) {
+      waiting++
+      continue
+    }
+    // A live cold call: released initial follow-up, due, not yet called
+    const fu = c.next_follow_up
+    if (
+      !c.do_not_call &&
+      fu &&
+      fu.reason === 'initial' &&
+      new Date(fu.due_at).getTime() <= now
+    ) {
+      liveInQueue++
+      const age = new Date(fu.due_at).getTime()
+      if (oldestLiveMs === null || age < oldestLiveMs) oldestLiveMs = age
+    }
+  }
+
+  let callsThisWeek = 0
+  let callsToday = 0
+  let lastCallAt: string | null = null
+  if (memberIds.length > 0) {
+    const { data: calls } = await supabase
+      .from('reactivation_calls')
+      .select('created_at')
+      .in('caller_id', memberIds)
+      .order('created_at', { ascending: false })
+    for (const c of calls ?? []) {
+      const t = new Date(c.created_at)
+      if (t >= weekAgo) callsThisWeek++
+      if (t >= startOfToday) callsToday++
+    }
+    lastCallAt = (calls ?? [])[0]?.created_at ?? null
+  }
+
+  return {
+    totalContacts: contacts.length,
+    liveInQueue,
+    waiting,
+    everCalled,
+    callsThisWeek,
+    callsToday,
+    oldestLiveAgeDays:
+      oldestLiveMs === null
+        ? null
+        : Math.floor((now - oldestLiveMs) / (24 * 60 * 60 * 1000)),
+    lastCallAt,
+  }
 }

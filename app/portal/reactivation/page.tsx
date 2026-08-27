@@ -8,7 +8,7 @@ import {
   getStaffMembers,
 } from '@/lib/data/participants'
 import {
-  getCallQueue,
+  getCallQueueState,
   getContacts,
   getOwnerNiches,
   getPipelineStages,
@@ -16,9 +16,12 @@ import {
   getTeamStats,
 } from '@/lib/data/reactivation'
 import { getOwnerSectors } from '@/lib/data/courses'
+import { DEFAULT_CALL_BATCH_SIZE } from '@/lib/types'
 import { CallQueue } from '@/components/reactivation/call-queue'
+import { AddMoreCalls } from '@/components/reactivation/add-more-calls'
 import { PracticeNameForm } from '@/components/reactivation/practice-name-form'
 import { DefaultNicheSelect } from '@/components/reactivation/default-niche-select'
+import { BatchSizeSelect } from '@/components/reactivation/batch-size-select'
 import { ContactsTable } from '@/components/reactivation/contacts-table'
 import { AddContactDialog } from '@/components/reactivation/add-contact-dialog'
 import { ImportContactsDialog } from '@/components/reactivation/import-contacts-dialog'
@@ -44,15 +47,17 @@ export default async function ReactivationDashboardPage() {
 
   const staff = await getStaffMembers(ownerId)
   const sectors = await getOwnerSectors(ownerId)
-  const [contacts, queue, stages, niches, teamStats, serviceMappings] =
+  const batchSize = owner.call_batch_size ?? DEFAULT_CALL_BATCH_SIZE
+  const [contacts, queueState, stages, niches, teamStats, serviceMappings] =
     await Promise.all([
       getContacts(ownerId),
-      getCallQueue(ownerId),
+      getCallQueueState(ownerId, batchSize),
       getPipelineStages(ownerId),
       getOwnerNiches(ownerId, sectors),
       isOwner ? getTeamStats(owner, staff) : Promise.resolve([]),
       getServiceMappings(ownerId),
     ])
+  const { queue, waiting, releasedInitial } = queueState
 
   const defaultNiche =
     niches.find((n) => n.id === owner.default_niche_id) ?? null
@@ -86,6 +91,7 @@ export default async function ReactivationDashboardPage() {
                 niches={niches}
                 initialNicheId={owner.default_niche_id ?? null}
               />
+              <BatchSizeSelect initialSize={batchSize} />
             </div>
           )}
         </div>
@@ -132,17 +138,43 @@ export default async function ReactivationDashboardPage() {
       </div>
 
       <section className="mt-8">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <PhoneCall className="size-5 text-accent" />
           <h2 className="text-xl font-semibold text-foreground">
-            Calls Due Now
+            Calls Due Today
           </h2>
           <span className="rounded-full bg-accent/10 px-2.5 py-0.5 text-sm font-medium text-accent">
             {queue.length}
           </span>
+          {waiting > 0 && (
+            <span className="text-sm text-muted-foreground">
+              · {waiting} in reserve
+            </span>
+          )}
         </div>
         <div className="mt-4">
-          <CallQueue queue={queue} />
+          {queue.length === 0 && waiting > 0 ? (
+            // Queue empty but reserve remains — offer the next batch prominently.
+            <AddMoreCalls
+              waiting={waiting}
+              batchSize={batchSize}
+              variant="prominent"
+            />
+          ) : (
+            <>
+              <CallQueue queue={queue} />
+              {/* Queue still has work but is running low — quiet top-up. */}
+              {queue.length > 0 && releasedInitial <= 2 && waiting > 0 && (
+                <div className="mt-3">
+                  <AddMoreCalls
+                    waiting={waiting}
+                    batchSize={batchSize}
+                    variant="subtle"
+                  />
+                </div>
+              )}
+            </>
+          )}
         </div>
       </section>
 
