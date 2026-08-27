@@ -57,7 +57,7 @@ export default async function ReactivationDashboardPage() {
       isOwner ? getTeamStats(owner, staff) : Promise.resolve([]),
       getServiceMappings(ownerId),
     ])
-  const { queue, waiting, releasedInitial } = queueState
+  const { queue, waiting } = queueState
 
   const defaultNiche =
     niches.find((n) => n.id === owner.default_niche_id) ?? null
@@ -154,7 +154,9 @@ export default async function ReactivationDashboardPage() {
         </div>
         <div className="mt-4">
           {queue.length === 0 && waiting > 0 ? (
-            // Queue empty but reserve remains — offer the next batch prominently.
+            // Only reached if the batch was worked to zero within a single
+            // session (the queue refills on the next load) — offer the next
+            // batch prominently right away.
             <AddMoreCalls
               waiting={waiting}
               batchSize={batchSize}
@@ -163,8 +165,8 @@ export default async function ReactivationDashboardPage() {
           ) : (
             <>
               <CallQueue queue={queue} />
-              {/* Queue still has work but is running low — quiet top-up. */}
-              {queue.length > 0 && releasedInitial <= 2 && waiting > 0 && (
+              {/* Reserve remains — let a fast worker pull the next batch early. */}
+              {queue.length > 0 && waiting > 0 && (
                 <div className="mt-3">
                   <AddMoreCalls
                     waiting={waiting}
