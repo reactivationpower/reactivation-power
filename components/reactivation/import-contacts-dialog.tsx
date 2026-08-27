@@ -215,6 +215,7 @@ export function ImportContactsDialog({
   const [serviceMap, setServiceMap] = useState<Record<string, string>>({})
   const [autoMatched, setAutoMatched] = useState(0)
   const [error, setError] = useState<string | null>(null)
+  const [dragActive, setDragActive] = useState(false)
   const [result, setResult] = useState<{
     imported: number
     skippedDuplicate: number
@@ -340,6 +341,25 @@ export function ImportContactsDialog({
     if (!file) return
     const text = await file.text()
     loadText(text, file.name)
+  }
+
+  function handleDrop(e: React.DragEvent) {
+    e.preventDefault()
+    setDragActive(false)
+    const file = e.dataTransfer.files?.[0]
+    if (!file) return
+    // Accept anything that looks like a CSV/plain-text export; some CRMs
+    // hand out an empty MIME type, so fall back to the file extension
+    const isCsv =
+      /\.(csv|txt)$/i.test(file.name) ||
+      file.type === 'text/csv' ||
+      file.type === 'text/plain' ||
+      file.type === ''
+    if (!isCsv) {
+      setError('That does not look like a CSV file. Please drop a .csv export.')
+      return
+    }
+    void handleFile(file)
   }
 
   function goToServices() {
@@ -501,11 +521,36 @@ export function ImportContactsDialog({
                 <button
                   type="button"
                   onClick={() => fileRef.current?.click()}
-                  className="flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border bg-muted/40 px-6 py-10 text-center transition-colors hover:border-accent hover:bg-accent/5"
+                  onDragEnter={(e) => {
+                    e.preventDefault()
+                    setDragActive(true)
+                  }}
+                  onDragOver={(e) => {
+                    e.preventDefault()
+                    setDragActive(true)
+                  }}
+                  onDragLeave={(e) => {
+                    e.preventDefault()
+                    setDragActive(false)
+                  }}
+                  onDrop={handleDrop}
+                  className={cn(
+                    'flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed px-6 py-10 text-center transition-colors',
+                    dragActive
+                      ? 'border-accent bg-accent/10'
+                      : 'border-border bg-muted/40 hover:border-accent hover:bg-accent/5',
+                  )}
                 >
-                  <FileSpreadsheet className="size-8 text-muted-foreground" />
+                  <FileSpreadsheet
+                    className={cn(
+                      'size-8',
+                      dragActive ? 'text-accent' : 'text-muted-foreground',
+                    )}
+                  />
                   <span className="text-sm font-medium text-foreground">
-                    Click to choose a CSV file
+                    {dragActive
+                      ? 'Drop your CSV file here'
+                      : 'Drag & drop a CSV file, or click to choose'}
                   </span>
                   <span className="text-xs text-muted-foreground">
                     Include columns for name, phone, and (ideally) a Niche
