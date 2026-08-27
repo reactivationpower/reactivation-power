@@ -272,4 +272,4 @@ export const DISPOSITION_LABELS: Record<CallDisposition, string> = {
 }
 
 /** Months a contact stays in the weekly retry cycle before dropping to quarterly */
-export const RETRY_WINDOW_MONTHS = 3
+export const RETRY_WINDOW_MONTHS = 2
