@@ -562,11 +562,11 @@ export async function setPracticeName(formData: FormData) {
 // ---------- Portal: log a call (dispositions + cadence) ----------
 
 /**
- * Scattered weekly retry: 5-9 days out, random weekday, random time block
+ * Scattered weekly retry: 4-7 days out, random weekday, random time block
  * between 9am and 6pm so retries don't always land at the same time.
  */
 function nextScatteredRetry(): Date {
-  const days = 5 + Math.floor(Math.random() * 5) // 5-9 days
+  const days = 4 + Math.floor(Math.random() * 4) // 4-7 days
   const d = new Date()
   d.setDate(d.getDate() + days)
   // Skip weekends
