@@ -75,6 +75,25 @@ export function easternClock(iso: string): string {
   }).format(new Date(iso))
 }
 
+/** 0 = Morning, 1 = Midday, 2 = Afternoon. */
+export function bandIndex(band: CallTimeBand): 0 | 1 | 2 {
+  return band === 'Morning' ? 0 : band === 'Midday' ? 1 : 2
+}
+
+/**
+ * The intentional call time for a follow-up, or null when there isn't one.
+ * Only scattered retries (no-answer/VM) and picked callbacks carry a real
+ * time-of-day; cold-call "initial" releases and 3-month/quarterly defaults
+ * have no meaningful hour, so we don't imply one.
+ */
+export function suggestedCallTime(
+  reason: string,
+  dueAt: string,
+): { band: CallTimeBand; clock: string } | null {
+  if (reason !== 'retry' && reason !== 'manual') return null
+  return { band: callTimeBand(dueAt), clock: easternClock(dueAt) }
+}
+
 /** The Eastern calendar date (YYYY-MM-DD) of an instant — lexically sortable. */
 function easternDateKey(d: Date): string {
   return new Intl.DateTimeFormat('en-CA', {
