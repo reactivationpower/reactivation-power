@@ -58,7 +58,8 @@ export default async function ReactivationDashboardPage() {
       isOwner ? getTeamStats(owner, staff) : Promise.resolve([]),
       getServiceMappings(ownerId),
     ])
-  const { queue, waiting } = queueState
+  const { followUps, newCalls, waiting } = queueState
+  const totalDue = followUps.length + newCalls.length
 
   const defaultNiche =
     niches.find((n) => n.id === owner.default_niche_id) ?? null
@@ -146,7 +147,7 @@ export default async function ReactivationDashboardPage() {
             Calls Due Today
           </h2>
           <span className="rounded-full bg-accent/10 px-2.5 py-0.5 text-sm font-medium text-accent">
-            {queue.length}
+            {totalDue}
           </span>
           {waiting > 0 && (
             <span className="text-sm text-muted-foreground">
@@ -154,32 +155,60 @@ export default async function ReactivationDashboardPage() {
             </span>
           )}
         </div>
-        <div className="mt-4">
-          {queue.length === 0 && waiting > 0 ? (
-            // Only reached if the batch was worked to zero within a single
-            // session (the queue refills on the next load) — offer the next
-            // batch prominently right away.
+
+        {totalDue === 0 && waiting > 0 ? (
+          // Batch worked to zero within a session (it refills on next load) —
+          // offer the next batch prominently right away.
+          <div className="mt-4">
             <AddMoreCalls
               waiting={waiting}
               batchSize={batchSize}
               variant="prominent"
             />
-          ) : (
-            <>
-              <CallQueue queue={queue} />
+          </div>
+        ) : (
+          <>
+            {/* Scheduled callbacks — commitments already made, worked first. */}
+            {followUps.length > 0 && (
+              <div className="mt-6">
+                <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                  Follow-ups due today
+                  <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-foreground">
+                    {followUps.length}
+                  </span>
+                </h3>
+                <CallQueue queue={followUps} />
+              </div>
+            )}
+
+            {/* Fresh cold-list calls — throttled by the batch size. */}
+            <div className="mt-6">
+              <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                New calls
+                <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-foreground">
+                  {newCalls.length}
+                </span>
+              </h3>
+              {newCalls.length > 0 ? (
+                <CallQueue queue={newCalls} />
+              ) : (
+                <p className="rounded-lg border border-dashed border-border bg-muted/30 p-4 text-sm text-muted-foreground">
+                  No new cold calls in this batch right now.
+                </p>
+              )}
               {/* Reserve remains — let a fast worker pull the next batch early. */}
-              {queue.length > 0 && waiting > 0 && (
+              {waiting > 0 && (
                 <div className="mt-3">
                   <AddMoreCalls
                     waiting={waiting}
                     batchSize={batchSize}
-                    variant="subtle"
+                    variant={newCalls.length === 0 ? 'prominent' : 'subtle'}
                   />
                 </div>
               )}
-            </>
-          )}
-        </div>
+            </div>
+          </>
+        )}
       </section>
 
       <section className="mt-10">

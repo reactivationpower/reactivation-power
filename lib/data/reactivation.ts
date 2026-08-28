@@ -283,10 +283,14 @@ export async function getCallQueue(ownerId: string): Promise<QueueItem[]> {
  * show and are never throttled.
  */
 export interface CallQueueState {
-  /** Everything due now: released cold calls + due scheduled callbacks */
-  queue: QueueItem[]
-  /** How many due items are cold-list initial calls (subject to the cap) */
-  releasedInitial: number
+  /**
+   * Scheduled callbacks due today (no-answer/VM retries, "call back later"
+   * picks, quarterly check-ins). Commitments the system already made — always
+   * shown, never throttled, and worked before the fresh batch.
+   */
+  followUps: QueueItem[]
+  /** Fresh cold-list calls released from reserve, capped at batchSize. */
+  newCalls: QueueItem[]
   /** Uncalled contacts still held in reserve (no follow-up yet) */
   waiting: number
   /** The account's batch target */
@@ -420,16 +424,24 @@ export async function getCallQueueState(
     releasedInitial += released.length
   }
 
-  queue.sort(
-    (a, b) =>
-      new Date(a.follow_up.due_at).getTime() -
-      new Date(b.follow_up.due_at).getTime(),
-  )
+  const byDueAt = (a: QueueItem, b: QueueItem) =>
+    new Date(a.follow_up.due_at).getTime() -
+    new Date(b.follow_up.due_at).getTime()
+
+  // Split into scheduled callbacks vs fresh cold calls. Callbacks are
+  // commitments already made, so they show as their own prioritized group
+  // above the batch; only the "initial" cold calls are throttled.
+  const followUps = queue
+    .filter((q) => q.follow_up.reason !== 'initial')
+    .sort(byDueAt)
+  const newCalls = queue
+    .filter((q) => q.follow_up.reason === 'initial')
+    .sort(byDueAt)
 
   // Reserve remaining = candidates we did not just release.
   const waiting = reserve.filter((c) => !releasedIds.has(c.id)).length
 
-  return { queue, releasedInitial, waiting, batchSize: target }
+  return { followUps, newCalls, waiting, batchSize: target }
 }
 
 // ---------- Team stats ----------
