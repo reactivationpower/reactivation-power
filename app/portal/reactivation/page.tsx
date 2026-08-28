@@ -177,7 +177,7 @@ export default async function ReactivationDashboardPage() {
                     {followUps.length}
                   </span>
                 </h3>
-                <CallQueue queue={followUps} />
+                <CallQueue queue={followUps} timeAnchored />
               </div>
             )}
 
