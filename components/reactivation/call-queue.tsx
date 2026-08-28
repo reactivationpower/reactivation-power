@@ -1,6 +1,7 @@
 import Link from 'next/link'
-import { Phone } from 'lucide-react'
+import { Phone, Clock } from 'lucide-react'
 import type { QueueItem } from '@/lib/data/reactivation'
+import { callTimeBand, easternClock } from '@/lib/call-time'
 
 function dueLabel(dueAt: string): string {
   const due = new Date(dueAt)
@@ -11,6 +12,17 @@ function dueLabel(dueAt: string): string {
   if (diffDays <= 0) return 'Due today'
   if (diffDays === 1) return '1 day overdue'
   return `${diffDays} days overdue`
+}
+
+// The scattered time-of-day is only meaningful for retries (no-answer/VM) and
+// picked callbacks. Cold-call "initial" releases and the 3-month/quarterly
+// defaults have no intentional time, so we don't imply one.
+function suggestedTime(
+  reason: string,
+  dueAt: string,
+): { band: string; clock: string } | null {
+  if (reason !== 'retry' && reason !== 'manual') return null
+  return { band: callTimeBand(dueAt), clock: easternClock(dueAt) }
 }
 
 export function CallQueue({ queue }: { queue: QueueItem[] }) {
@@ -28,7 +40,9 @@ export function CallQueue({ queue }: { queue: QueueItem[] }) {
 
   return (
     <ul className="flex flex-col gap-3">
-      {queue.map(({ follow_up, contact }) => (
+      {queue.map(({ follow_up, contact }) => {
+        const suggested = suggestedTime(follow_up.reason, follow_up.due_at)
+        return (
         <li
           key={follow_up.id}
           className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-border bg-card p-4"
@@ -44,6 +58,15 @@ export function CallQueue({ queue }: { queue: QueueItem[] }) {
               <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive">
                 {dueLabel(follow_up.due_at)}
               </span>
+              {suggested && (
+                <span
+                  className="inline-flex items-center gap-1 rounded-full bg-accent/10 px-2 py-0.5 text-xs font-medium text-accent"
+                  title={`Try around ${suggested.clock} (Eastern) — a different time than last call`}
+                >
+                  <Clock className="size-3" />
+                  Call {suggested.band.toLowerCase()}
+                </span>
+              )}
               {contact.stage && (
                 <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
                   {contact.stage.name}
@@ -56,6 +79,7 @@ export function CallQueue({ queue }: { queue: QueueItem[] }) {
               {contact.call_count > 0
                 ? ` · ${contact.call_count} previous call${contact.call_count === 1 ? '' : 's'}`
                 : ' · Never called'}
+              {suggested ? ` · Suggested ${suggested.clock} ET` : ''}
             </p>
           </div>
           <Link
@@ -66,7 +90,8 @@ export function CallQueue({ queue }: { queue: QueueItem[] }) {
             Start Call
           </Link>
         </li>
-      ))}
+        )
+      })}
     </ul>
   )
 }

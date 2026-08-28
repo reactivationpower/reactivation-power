@@ -11,6 +11,7 @@ import {
   releaseReserveContacts,
 } from '@/lib/data/reactivation'
 import { matchNicheByName } from '@/lib/niche-match'
+import { easternWallClockToUtc } from '@/lib/call-time'
 import type { CallDisposition } from '@/lib/types'
 import { CALL_BATCH_SIZES, RETRY_WINDOW_MONTHS } from '@/lib/types'
 
@@ -580,17 +581,26 @@ export async function setOfficePhone(formData: FormData) {
 
 /**
  * Scattered weekly retry: 4-7 days out, random weekday, random time block
- * between 9am and 6pm so retries don't always land at the same time.
+ * between 9am and 6pm EASTERN so retries don't always land at the same time.
+ * The hour is anchored to Eastern (not the UTC server clock) so "afternoon"
+ * actually means afternoon for the office.
  */
 function nextScatteredRetry(): Date {
   const days = 4 + Math.floor(Math.random() * 4) // 4-7 days
   const d = new Date()
-  d.setDate(d.getDate() + days)
-  // Skip weekends
-  if (d.getDay() === 0) d.setDate(d.getDate() + 1)
-  if (d.getDay() === 6) d.setDate(d.getDate() + 2)
-  d.setHours(9 + Math.floor(Math.random() * 9), Math.random() < 0.5 ? 0 : 30, 0, 0)
-  return d
+  d.setUTCDate(d.getUTCDate() + days)
+  // Skip weekends (evaluated on the target calendar day)
+  if (d.getUTCDay() === 0) d.setUTCDate(d.getUTCDate() + 1)
+  if (d.getUTCDay() === 6) d.setUTCDate(d.getUTCDate() + 2)
+  const hour = 9 + Math.floor(Math.random() * 9) // 9am-5:30pm ET start
+  const minute = Math.random() < 0.5 ? 0 : 30
+  return easternWallClockToUtc(
+    d.getUTCFullYear(),
+    d.getUTCMonth(),
+    d.getUTCDate(),
+    hour,
+    minute,
+  )
 }
 
 function monthsFromNow(months: number): Date {

@@ -1,6 +1,7 @@
 import 'server-only'
 
 import { getAdminClient } from '@/lib/supabase/admin'
+import { dueWithinEasternToday } from '@/lib/call-time'
 import type {
   Contact,
   FollowUp,
@@ -387,13 +388,14 @@ export async function getCallQueueState(
   const target = Math.max(1, batchSize)
   const contacts = await getContacts(ownerId)
   const byId = new Map(contacts.map((c) => [c.id, c]))
-  const nowMs = Date.now()
 
-  // Base queue: every contact whose follow-up is due now or overdue.
+  // Base queue: every contact whose follow-up is overdue or due sometime
+  // today (Eastern). A contact scattered to the afternoon shows all day with
+  // a "Call afternoon" hint rather than staying hidden until its exact time.
   const queue: QueueItem[] = []
   for (const c of contacts) {
     if (c.do_not_call || !c.next_follow_up) continue
-    if (new Date(c.next_follow_up.due_at).getTime() <= nowMs) {
+    if (dueWithinEasternToday(c.next_follow_up.due_at)) {
       queue.push({ follow_up: c.next_follow_up, contact: byId.get(c.id)! })
     }
   }
