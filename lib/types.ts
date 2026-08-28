@@ -20,6 +20,8 @@ export interface Participant {
   is_active: boolean
   selected_niche_id?: string | null
   practice_name?: string | null
+  /** Office callback number, auto-filled into the voicemail script */
+  office_phone?: string | null
   default_niche_id?: string | null
   /** How many cold-list "initial" calls to keep live in the queue (5/7/10) */
   call_batch_size?: number | null
@@ -264,7 +266,7 @@ export interface FollowUp {
 
 export const DISPOSITION_LABELS: Record<CallDisposition, string> = {
   no_answer: 'No Answer',
-  voicemail: 'Voicemail',
+  voicemail: 'No Answer \u2014 Left VM',
   spoke_did_not_schedule: 'Spoke — Didn\u2019t Schedule',
   spoke_call_back_later: 'Spoke — Call Back Later',
   scheduled: 'Scheduled',

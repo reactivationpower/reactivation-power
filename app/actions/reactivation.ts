@@ -559,6 +559,23 @@ export async function setPracticeName(formData: FormData) {
   return {}
 }
 
+/** Owner sets the office callback number, auto-filled into the VM script */
+export async function setOfficePhone(formData: FormData) {
+  const participant = await getCurrentParticipant()
+  if (!participant) return { error: 'Not signed in' }
+  if (participant.role !== 'owner')
+    return { error: 'Only the account owner can set the office number' }
+  const officePhone = String(formData.get('officePhone') ?? '').trim()
+  const supabase = getAdminClient()
+  const { error } = await supabase
+    .from('participants')
+    .update({ office_phone: officePhone || null })
+    .eq('id', participant.id)
+  if (error) return { error: error.message }
+  revalidatePath('/portal/reactivation')
+  return {}
+}
+
 // ---------- Portal: log a call (dispositions + cadence) ----------
 
 /**

@@ -71,6 +71,7 @@ export default async function CallPage({
           nextContactId={nextContactId}
           callerName={participant.first_name}
           practiceName={owner?.practice_name ?? null}
+          officePhone={owner?.office_phone ?? null}
           providerName={
             owner ? `Dr. ${owner.first_name} ${owner.last_name}`.trim() : null
           }

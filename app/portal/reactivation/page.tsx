@@ -20,6 +20,7 @@ import { DEFAULT_CALL_BATCH_SIZE } from '@/lib/types'
 import { CallQueue } from '@/components/reactivation/call-queue'
 import { AddMoreCalls } from '@/components/reactivation/add-more-calls'
 import { PracticeNameForm } from '@/components/reactivation/practice-name-form'
+import { OfficePhoneForm } from '@/components/reactivation/office-phone-form'
 import { DefaultNicheSelect } from '@/components/reactivation/default-niche-select'
 import { BatchSizeSelect } from '@/components/reactivation/batch-size-select'
 import { ContactsTable } from '@/components/reactivation/contacts-table'
@@ -87,6 +88,7 @@ export default async function ReactivationDashboardPage() {
                   sectors.includes('healthcare') ? 'practice' : 'business'
                 }
               />
+              <OfficePhoneForm initialPhone={owner.office_phone ?? null} />
               <DefaultNicheSelect
                 niches={niches}
                 initialNicheId={owner.default_niche_id ?? null}

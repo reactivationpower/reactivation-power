@@ -47,7 +47,7 @@ import type {
 
 const DISPOSITION_LABELS: Record<string, string> = {
   no_answer: 'No answer',
-  voicemail: 'Left voicemail',
+  voicemail: 'No answer \u2014 left VM',
   spoke_did_not_schedule: 'Spoke \u2014 didn\u2019t schedule',
   spoke_call_back_later: 'Spoke \u2014 call back later',
   scheduled: 'Scheduled',
@@ -65,6 +65,7 @@ interface Props {
   nextContactId: string | null
   callerName: string
   practiceName: string | null
+  officePhone: string | null
   providerName: string | null
   isProvider?: boolean
   callHistory: CallWithCaller[]
@@ -81,6 +82,7 @@ export function CallScreen({
   nextContactId,
   callerName,
   practiceName,
+  officePhone,
   providerName,
   isProvider = false,
   callHistory,
@@ -99,7 +101,7 @@ export function CallScreen({
   const [notes, setNotes] = useState('')
   const [pendingDisposition, setPendingDisposition] =
     useState<CallDisposition | null>(null)
-  const [voicemailPromptOpen, setVoicemailPromptOpen] = useState(false)
+  const [vmScriptOpen, setVmScriptOpen] = useState(false)
   const [callBackOpen, setCallBackOpen] = useState(false)
   const [callBackAt, setCallBackAt] = useState('')
   const [saving, startSaving] = useTransition()
@@ -157,6 +159,16 @@ export function CallScreen({
     [merged],
   )
 
+  // "Leave VM" is offered on every 2nd attempt overall (2nd, 4th, 6th...),
+  // not every call. callHistory is prior attempts, so this call is the next.
+  const attemptNumber = callHistory.length + 1
+  const showLeaveVm = attemptNumber % 2 === 0
+
+  const firstName = contact.name.split(' ')[0]
+  const vmBusiness = practiceName?.trim() || 'our office'
+  const vmCallback = officePhone?.trim() || '(your office number)'
+  const voicemailScript = `Hi ${firstName}, this is ${callerName} from ${vmBusiness}, and we're doing file updates on patients we haven't seen in a while. If you could do me a favor and give me a call back at this number, ${vmCallback}, when you have a few minutes, I'd really appreciate it. Thanks in advance, and have a great day!`
+
   function handleNicheChange(id: string | null) {
     if (!id) return
     setNicheId(id)
@@ -179,7 +191,7 @@ export function CallScreen({
         setError(result.error)
         return
       }
-      setVoicemailPromptOpen(false)
+      setVmScriptOpen(false)
       setCallBackOpen(false)
       // Don't silently navigate away — confirm the save and let the caller
       // choose where to go next.
@@ -189,9 +201,7 @@ export function CallScreen({
 
   function handleDisposition(d: CallDisposition) {
     setPendingDisposition(d)
-    if (d === 'no_answer') {
-      setVoicemailPromptOpen(true)
-    } else if (d === 'spoke_call_back_later') {
+    if (d === 'spoke_call_back_later') {
       setCallBackOpen(true)
     } else {
       submit(d)
@@ -392,6 +402,18 @@ export function CallScreen({
               <PhoneMissed className="size-4" />
               No Answer
             </Button>
+            {showLeaveVm && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2"
+                disabled={saving}
+                onClick={() => setVmScriptOpen(true)}
+              >
+                <Voicemail className="size-4" />
+                Leave VM
+              </Button>
+            )}
             <Button
               variant="outline"
               size="sm"
@@ -488,22 +510,36 @@ export function CallScreen({
         </DialogContent>
       </Dialog>
 
-      {/* Voicemail prompt */}
-      <Dialog open={voicemailPromptOpen} onOpenChange={setVoicemailPromptOpen}>
-        <DialogContent className="sm:max-w-sm">
+      {/* Voicemail script */}
+      <Dialog open={vmScriptOpen} onOpenChange={setVmScriptOpen}>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>No answer</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <Voicemail className="size-5 text-accent" />
+              Voicemail script
+            </DialogTitle>
             <DialogDescription>
-              Did you leave a voicemail for {contact.name}?
+              Read this to {contact.name}, then log the call.
             </DialogDescription>
           </DialogHeader>
+          <div className="rounded-lg border border-border bg-muted/40 p-4">
+            <p className="text-base leading-relaxed text-foreground">
+              {voicemailScript}
+            </p>
+          </div>
+          {!officePhone?.trim() && (
+            <p className="text-xs text-muted-foreground">
+              Tip: set your office callback number on the Reactivation dashboard
+              so it fills in here automatically.
+            </p>
+          )}
           <div className="flex items-center justify-end gap-2">
             <Button
               variant="outline"
               disabled={saving}
-              onClick={() => submit('no_answer', false)}
+              onClick={() => setVmScriptOpen(false)}
             >
-              No voicemail
+              Cancel
             </Button>
             <Button
               className="gap-2"
@@ -511,7 +547,7 @@ export function CallScreen({
               onClick={() => submit('voicemail', true)}
             >
               <Voicemail className="size-4" />
-              Left a voicemail
+              Log — Voicemail Left
             </Button>
           </div>
         </DialogContent>
