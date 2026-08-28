@@ -344,6 +344,8 @@ export function CallScreen({
               niches.find((n) => n.id === nicheId)?.name ?? ''
             ] ?? undefined
           }
+          showLeaveVm={showLeaveVm}
+          onLeaveVoicemail={() => setVmScriptOpen(true)}
         />
       ) : (
       <article
@@ -402,18 +404,6 @@ export function CallScreen({
               <PhoneMissed className="size-4" />
               No Answer
             </Button>
-            {showLeaveVm && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-2"
-                disabled={saving}
-                onClick={() => setVmScriptOpen(true)}
-              >
-                <Voicemail className="size-4" />
-                Leave VM
-              </Button>
-            )}
             <Button
               variant="outline"
               size="sm"

@@ -1,7 +1,13 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { ArrowLeft, Crosshair, MousePointerClick, RotateCcw } from 'lucide-react'
+import {
+  ArrowLeft,
+  Crosshair,
+  MousePointerClick,
+  RotateCcw,
+  Voicemail,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -32,6 +38,10 @@ interface Props {
    * Shown on the questions screen; the tapped concern fills the
    * {{main_concern}} token on every later screen. */
   concernOptions?: ConcernOption[]
+  /** When true, show the "Leave VM" chip on the opener step (every 2nd call). */
+  showLeaveVm?: boolean
+  /** Opens the voicemail script dialog (owned by the call screen). */
+  onLeaveVoicemail?: () => void
   }
 
 // Relationship tokens: scripts can use {{pt_*}} slots that resolve
@@ -140,6 +150,8 @@ export function ScriptFlowPlayer({
   fontSize,
   initialStepKey,
   concernOptions,
+  showLeaveVm = false,
+  onLeaveVoicemail,
 }: Props) {
   // Resolve niche overrides: a niche row with the same step_key replaces the
   // general row; a niche's choice set for a step replaces the general set.
@@ -349,6 +361,10 @@ export function ScriptFlowPlayer({
   }
 
   const isObjection = step.step_key.startsWith('obj_')
+  // The opener is the entry step. If nobody picks up here, this is where the
+  // caller leaves a voicemail — so the "Leave VM" chip lives on this screen.
+  const isStartStep = step.step_key === startKey
+  const canLeaveVm = isStartStep && showLeaveVm && Boolean(onLeaveVoicemail)
 
   return (
     <article
@@ -550,12 +566,36 @@ export function ScriptFlowPlayer({
                   </button>
                 ),
               )}
+              {canLeaveVm && (
+                <button
+                  type="button"
+                  onClick={onLeaveVoicemail}
+                  className="inline-flex min-h-11 items-center gap-2 rounded-md border border-accent/50 bg-accent/10 px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent/20"
+                >
+                  <Voicemail className="size-4 text-accent" />
+                  No answer — leave a voicemail
+                </button>
+              )}
             </div>
           </>
         ) : (
-          <p className="text-sm text-muted-foreground">
-            End of script — add your notes and log the call outcome below.
-          </p>
+          <div className="flex flex-col gap-3">
+            <p className="text-sm text-muted-foreground">
+              End of script — add your notes and log the call outcome below.
+            </p>
+            {canLeaveVm && (
+              <div>
+                <button
+                  type="button"
+                  onClick={onLeaveVoicemail}
+                  className="inline-flex min-h-11 items-center gap-2 rounded-md border border-accent/50 bg-accent/10 px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent/20"
+                >
+                  <Voicemail className="size-4 text-accent" />
+                  No answer — leave a voicemail
+                </button>
+              </div>
+            )}
+          </div>
         )}
       </div>
     </article>
