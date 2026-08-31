@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Phone, Clock } from 'lucide-react'
+import { Phone, Clock, Lock } from 'lucide-react'
 import type { QueueItem } from '@/lib/data/reactivation'
 import { suggestedCallTime } from '@/lib/call-time'
 
@@ -17,6 +17,7 @@ function dueLabel(dueAt: string): string {
 function QueueRow({ follow_up, contact }: QueueItem) {
   const suggested = suggestedCallTime(follow_up.reason, follow_up.due_at)
   const overdue = dueLabel(follow_up.due_at) !== 'Due today'
+  const nicheInactive = !!contact.niche && !contact.niche_active
   return (
     <li className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-border bg-card p-4">
       <div className="min-w-0">
@@ -50,23 +51,42 @@ function QueueRow({ follow_up, contact }: QueueItem) {
               {contact.stage.name}
             </span>
           )}
+          {nicheInactive && (
+            <span className="inline-flex items-center gap-1 rounded-full border border-destructive/40 bg-destructive/10 px-2 py-0.5 text-xs font-semibold text-destructive">
+              <Lock className="size-3" />
+              {contact.niche!.name} — not active
+            </span>
+          )}
         </div>
         <p className="mt-0.5 text-sm text-muted-foreground">
           {contact.phone}
-          {contact.niche ? ` · ${contact.niche.name}` : ''}
+          {contact.niche && !nicheInactive ? ` · ${contact.niche.name}` : ''}
           {contact.call_count > 0
             ? ` · ${contact.call_count} previous call${contact.call_count === 1 ? '' : 's'}`
             : ' · Never called'}
           {suggested ? ` · Suggested ${suggested.clock} ET` : ''}
         </p>
       </div>
-      <Link
-        href={`/portal/reactivation/call/${contact.id}`}
-        className="flex shrink-0 items-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-      >
-        <Phone className="size-4" />
-        Start Call
-      </Link>
+      {nicheInactive ? (
+        <div className="flex shrink-0 flex-col items-end gap-1 text-right">
+          <span className="flex items-center gap-2 rounded-md bg-muted px-4 py-2.5 text-sm font-medium text-muted-foreground">
+            <Lock className="size-4" />
+            Start Call
+          </span>
+          <span className="max-w-[190px] text-xs leading-tight text-destructive">
+            This niche isn&apos;t active — contact the Reactivation Power team
+            to turn it on.
+          </span>
+        </div>
+      ) : (
+        <Link
+          href={`/portal/reactivation/call/${contact.id}`}
+          className="flex shrink-0 items-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+        >
+          <Phone className="size-4" />
+          Start Call
+        </Link>
+      )}
     </li>
   )
 }

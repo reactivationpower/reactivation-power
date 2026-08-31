@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { Phone } from 'lucide-react'
+import { Phone, Lock } from 'lucide-react'
 import type { ContactWithMeta } from '@/lib/data/reactivation'
 import type { PipelineStage } from '@/lib/types'
 import { DISPOSITION_LABELS } from '@/lib/types'
@@ -88,6 +88,7 @@ export function ContactsTable({
               <tr className="border-b border-border text-left text-muted-foreground">
                 <th className="px-5 py-3 font-medium">Name</th>
                 <th className="px-5 py-3 font-medium">Phone</th>
+                <th className="px-5 py-3 font-medium">Niche</th>
                 <th className="px-5 py-3 font-medium">Stage</th>
                 <th className="px-5 py-3 font-medium">Last Call</th>
                 <th className="px-5 py-3 font-medium">Next Follow-up</th>
@@ -116,6 +117,23 @@ export function ContactsTable({
                     )}
                   </td>
                   <td className="px-5 py-3 text-muted-foreground">{c.phone}</td>
+                  <td className="px-5 py-3">
+                    {c.niche ? (
+                      c.niche_active ? (
+                        <span className="text-foreground">{c.niche.name}</span>
+                      ) : (
+                        <span
+                          className="inline-flex items-center gap-1 rounded-full border border-destructive/40 bg-destructive/10 px-2 py-0.5 text-xs font-semibold text-destructive"
+                          title="This niche isn't active on your account — contact the Reactivation Power team to turn it on."
+                        >
+                          <Lock className="size-3" />
+                          {c.niche.name} — not active
+                        </span>
+                      )
+                    ) : (
+                      '—'
+                    )}
+                  </td>
                   <td className="px-5 py-3">
                     {c.stage ? (
                       <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
@@ -147,15 +165,24 @@ export function ContactsTable({
                   </td>
                   <td className="px-5 py-3">
                     <div className="flex items-center justify-end gap-2">
-                      {!c.do_not_call && (
-                        <Link
-                          href={`/portal/reactivation/call/${c.id}`}
-                          className="inline-flex items-center gap-1.5 rounded-md border border-input bg-card px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted"
-                        >
-                          <Phone className="size-3.5" />
-                          Call
-                        </Link>
-                      )}
+                      {!c.do_not_call &&
+                        (c.niche && !c.niche_active ? (
+                          <span
+                            className="inline-flex cursor-not-allowed items-center gap-1.5 rounded-md border border-input bg-muted px-3 py-1.5 text-xs font-medium text-muted-foreground"
+                            title="This niche isn't active on your account — contact the Reactivation Power team to turn it on."
+                          >
+                            <Lock className="size-3.5" />
+                            Call
+                          </span>
+                        ) : (
+                          <Link
+                            href={`/portal/reactivation/call/${c.id}`}
+                            className="inline-flex items-center gap-1.5 rounded-md border border-input bg-card px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted"
+                          >
+                            <Phone className="size-3.5" />
+                            Call
+                          </Link>
+                        ))}
                       <DeleteContactButton
                         contactId={c.id}
                         contactName={c.name}

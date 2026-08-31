@@ -451,8 +451,18 @@ export async function importContacts(input: {
         // Not one of the account's enabled niches. Is it a real niche that
         // just isn't turned on here, or genuinely unrecognized?
         const systemMatch = matchNicheByName(nicheRaw, allActiveNiches)
-        if (systemMatch) notEnabledNiches.add(systemMatch.name)
-        else unmatchedNiches.add(nicheRaw)
+        if (systemMatch) {
+          notEnabledNiches.add(systemMatch.name)
+          // Store the patient's TRUE niche even though it isn't enabled yet.
+          // We deliberately do NOT fall back to the account default — that
+          // would silently load the wrong script. The contact shows flagged
+          // ("… — not active") and is blocked from calling until the team
+          // turns the niche on, at which point it self-heals to the right
+          // script with no re-import.
+          rowNicheId = systemMatch.id
+        } else {
+          unmatchedNiches.add(nicheRaw)
+        }
       }
     }
 

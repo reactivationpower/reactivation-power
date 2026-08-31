@@ -147,6 +147,14 @@ export interface ContactWithMeta extends Contact {
   next_follow_up: FollowUp | null
   last_call: ReactivationCall | null
   call_count: number
+  /**
+   * Whether the contact's niche is currently enabled on the account. False
+   * means the niche exists but hasn't been turned on (e.g. imported before
+   * it was purchased) — the UI flags it "… — not active" and blocks calling
+   * so no one runs the wrong script. A contact with no niche is treated as
+   * active (nothing to flag).
+   */
+  niche_active: boolean
 }
 
 export async function getContacts(ownerId: string): Promise<ContactWithMeta[]> {
@@ -157,6 +165,13 @@ export async function getContacts(ownerId: string): Promise<ContactWithMeta[]> {
     .eq('owner_id', ownerId)
     .order('created_at', { ascending: false })
   if (!contacts || contacts.length === 0) return []
+
+  // Niche ids currently usable on this account (enabled AND globally active),
+  // to flag contacts whose niche isn't turned on (e.g. imported before it was
+  // purchased/activated).
+  const activeNicheIds = new Set(
+    (await getOwnerNiches(ownerId)).map((n) => n.id),
+  )
 
   const ids = contacts.map((c) => c.id)
   const [{ data: followUps }, { data: calls }] = await Promise.all([
@@ -192,6 +207,7 @@ export async function getContacts(ownerId: string): Promise<ContactWithMeta[]> {
     next_follow_up: nextByContact.get(c.id) ?? null,
     last_call: lastCallByContact.get(c.id) ?? null,
     call_count: callCounts.get(c.id) ?? 0,
+    niche_active: !c.niche_id || activeNicheIds.has(c.niche_id),
   }))
 }
 
@@ -204,20 +220,24 @@ export async function getContact(id: string): Promise<ContactWithMeta | null> {
     .maybeSingle()
   if (!c) return null
 
-  const [{ data: followUps }, { data: calls }] = await Promise.all([
-    supabase
-      .from('follow_ups')
-      .select('*')
-      .eq('contact_id', id)
-      .is('completed_call_id', null)
-      .order('due_at')
-      .limit(1),
-    supabase
-      .from('reactivation_calls')
-      .select('*')
-      .eq('contact_id', id)
-      .order('created_at', { ascending: false }),
-  ])
+  const [{ data: followUps }, { data: calls }, ownerNiches] =
+    await Promise.all([
+      supabase
+        .from('follow_ups')
+        .select('*')
+        .eq('contact_id', id)
+        .is('completed_call_id', null)
+        .order('due_at')
+        .limit(1),
+      supabase
+        .from('reactivation_calls')
+        .select('*')
+        .eq('contact_id', id)
+        .order('created_at', { ascending: false }),
+      getOwnerNiches((c as Contact).owner_id),
+    ])
+
+  const activeNicheIds = new Set(ownerNiches.map((n) => n.id))
 
   return {
     ...(c as Contact),
@@ -226,6 +246,9 @@ export async function getContact(id: string): Promise<ContactWithMeta | null> {
     next_follow_up: ((followUps ?? [])[0] ?? null) as FollowUp | null,
     last_call: ((calls ?? [])[0] ?? null) as ReactivationCall | null,
     call_count: calls?.length ?? 0,
+    niche_active:
+      !(c as Contact).niche_id ||
+      activeNicheIds.has((c as Contact).niche_id as string),
   }
 }
 
