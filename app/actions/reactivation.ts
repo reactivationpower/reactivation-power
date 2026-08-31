@@ -720,11 +720,22 @@ function nextScatteredRetry(): Date {
   )
 }
 
+/**
+ * A fixed-interval follow-up N months out, anchored to 10:00 AM EASTERN.
+ * We must NOT use setHours() here — that sets the hour in the server's clock
+ * (UTC), which lands at ~5:00 AM Eastern in winter. Anchoring to ET keeps
+ * every rescheduled call inside normal calling hours (9am-7pm ET).
+ */
 function monthsFromNow(months: number): Date {
   const d = new Date()
-  d.setMonth(d.getMonth() + months)
-  d.setHours(10, 0, 0, 0)
-  return d
+  d.setUTCMonth(d.getUTCMonth() + months)
+  return easternWallClockToUtc(
+    d.getUTCFullYear(),
+    d.getUTCMonth(),
+    d.getUTCDate(),
+    10,
+    0,
+  )
 }
 
 export async function logCall(formData: FormData) {
