@@ -7,6 +7,7 @@ import {
   getCurrentParticipant,
 } from '@/lib/data/participants'
 import {
+  getNiches,
   getOwnerNiches,
   releaseReserveContacts,
 } from '@/lib/data/reactivation'
@@ -397,10 +398,18 @@ export async function importContacts(input: {
     forcedNicheId = forced?.id ?? null
   }
 
-  // Niches this account can actually use, for resolving a "Niche" column
+  // Niches this account can actually use, for resolving a "Niche" column.
+  // We also load every active niche so we can tell the difference between a
+  // niche value we truly don't recognize (a typo) and one that is a real
+  // niche the account simply hasn't had enabled yet — the latter needs a
+  // "contact the Reactivation Power team" message, not a "check spelling" one.
   const usesNicheColumn = rows.some((r) => (r.niche ?? '').trim() !== '')
-  const ownerNiches = usesNicheColumn ? await getOwnerNiches(ownerId) : []
+  const [ownerNiches, allActiveNiches] = usesNicheColumn
+    ? await Promise.all([getOwnerNiches(ownerId), getNiches(true)])
+    : [[], []]
   const unmatchedNiches = new Set<string>()
+  // Canonical names of real niches present in the file but not enabled here
+  const notEnabledNiches = new Set<string>()
 
   // 3. Existing phones for dedupe
   const { data: existing } = await supabase
@@ -438,7 +447,13 @@ export async function importContacts(input: {
     if (nicheRaw && ownerNiches.length > 0) {
       const match = matchNicheByName(nicheRaw, ownerNiches)
       if (match) rowNicheId = match.id
-      else unmatchedNiches.add(nicheRaw)
+      else {
+        // Not one of the account's enabled niches. Is it a real niche that
+        // just isn't turned on here, or genuinely unrecognized?
+        const systemMatch = matchNicheByName(nicheRaw, allActiveNiches)
+        if (systemMatch) notEnabledNiches.add(systemMatch.name)
+        else unmatchedNiches.add(nicheRaw)
+      }
     }
 
     const nicheId = forcedNicheId ?? rowNicheId ?? mapped ?? defaultNicheId
@@ -479,8 +494,11 @@ export async function importContacts(input: {
     imported,
     skippedDuplicate,
     skippedInvalid,
-    // Niche values we could not match, so the UI can flag the typo
+    // Niche values we could not match at all, so the UI can flag the typo
     unmatchedNiches: Array.from(unmatchedNiches).slice(0, 8),
+    // Real niches in the file that aren't enabled on this account — the UI
+    // tells the client to contact the Reactivation Power team to enable them
+    notEnabledNiches: Array.from(notEnabledNiches).slice(0, 12),
   }
 }
 

@@ -194,13 +194,20 @@ const DEFAULT = '__default__'
 const AUTO = '__auto__'
 
 interface Props {
+  /** Niches enabled on this account (what a value can resolve to) */
   niches: Niche[]
+  /**
+   * Every active niche in the account's sectors — used only to tell apart a
+   * value that's a real niche the account hasn't enabled from a true typo.
+   */
+  allNiches: Niche[]
   savedMappings: ServiceNicheMapping[]
   defaultNicheName: string | null
 }
 
 export function ImportContactsDialog({
   niches,
+  allNiches,
   savedMappings,
   defaultNicheName,
 }: Props) {
@@ -221,6 +228,7 @@ export function ImportContactsDialog({
     skippedDuplicate: number
     skippedInvalid: number
     unmatchedNiches: string[]
+    notEnabledNiches: string[]
   } | null>(null)
   const [pending, startTransition] = useTransition()
   const fileRef = useRef<HTMLInputElement>(null)
@@ -286,17 +294,36 @@ export function ImportContactsDialog({
     // Group by the niche we resolved to, so "Spinal Decompression" and
     // "Decompression" show as one line rather than two
     const byNiche = new Map<string, number>()
+    // Real niches that aren't enabled on this account, grouped by canonical
+    // name — these need a "contact the team to enable" message
+    const notEnabled = new Map<string, number>()
     const unmatched: Array<{ label: string; count: number }> = []
     for (const [label, count] of counts) {
       const hit = matchNicheByName(label, niches)
-      if (hit) byNiche.set(hit.name, (byNiche.get(hit.name) ?? 0) + count)
-      else unmatched.push({ label, count })
+      if (hit) {
+        byNiche.set(hit.name, (byNiche.get(hit.name) ?? 0) + count)
+        continue
+      }
+      const systemHit = matchNicheByName(label, allNiches)
+      if (systemHit) {
+        notEnabled.set(
+          systemHit.name,
+          (notEnabled.get(systemHit.name) ?? 0) + count,
+        )
+      } else {
+        unmatched.push({ label, count })
+      }
     }
     const matched = Array.from(byNiche, ([niche, count]) => ({ niche, count }))
+    const notEnabledList = Array.from(notEnabled, ([niche, count]) => ({
+      niche,
+      count,
+    }))
     matched.sort((a, b) => b.count - a.count)
+    notEnabledList.sort((a, b) => b.count - a.count)
     unmatched.sort((a, b) => b.count - a.count)
-    return { matched, unmatched, blank }
-  }, [dataRows, columns.niche, niches])
+    return { matched, notEnabled: notEnabledList, unmatched, blank }
+  }, [dataRows, columns.niche, niches, allNiches])
 
   function reset() {
     setStep('upload')
@@ -467,6 +494,7 @@ export function ImportContactsDialog({
         skippedDuplicate: res.skippedDuplicate ?? 0,
         skippedInvalid: res.skippedInvalid ?? 0,
         unmatchedNiches: res.unmatchedNiches ?? [],
+        notEnabledNiches: res.notEnabledNiches ?? [],
       })
       setStep('done')
     })
@@ -729,6 +757,42 @@ export function ImportContactsDialog({
                     </div>
                   ))}
                 </div>
+                {nichePreview &&
+                  fileNiche === AUTO &&
+                  nichePreview.notEnabled.length > 0 && (
+                    <div className="flex flex-col gap-2 rounded-md border-2 border-destructive bg-destructive/10 px-4 py-3">
+                      <p className="flex items-center gap-2 text-sm font-bold text-destructive">
+                        <AlertCircle className="size-5 shrink-0" />
+                        Some niches in your file aren&apos;t turned on for this
+                        account
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {nichePreview.notEnabled.map((m) => (
+                          <span
+                            key={m.niche}
+                            className="rounded-full border border-destructive/40 bg-background px-2 py-0.5 text-xs font-medium text-foreground"
+                          >
+                            {m.niche}
+                            <span className="ml-1 text-muted-foreground">
+                              {m.count}
+                            </span>
+                          </span>
+                        ))}
+                      </div>
+                      <p className="text-xs leading-relaxed text-foreground">
+                        These are real niches, but they aren&apos;t enabled on
+                        your account yet, so those contacts will come in on your
+                        account default
+                        {defaultNicheName ? ` (${defaultNicheName})` : ''}{' '}
+                        instead of the right script.{' '}
+                        <span className="font-semibold">
+                          Contact the Reactivation Power team to turn these
+                          niches on
+                        </span>{' '}
+                        so your patients get matched correctly.
+                      </p>
+                    </div>
+                  )}
                 {nichePreview && fileNiche === AUTO && (
                   <div className="flex flex-col gap-2 rounded-md border border-border bg-muted/40 px-3 py-2.5">
                     <p className="flex items-center gap-1.5 text-xs font-medium text-foreground">
@@ -957,6 +1021,29 @@ export function ImportContactsDialog({
                     )}
                   </div>
                 </div>
+                {result.notEnabledNiches.length > 0 && (
+                  <div className="flex flex-col gap-2 rounded-md border-2 border-destructive bg-destructive/10 px-4 py-3">
+                    <p className="flex items-center gap-2 text-sm font-bold text-destructive">
+                      <AlertCircle className="size-5 shrink-0" />
+                      Some niches aren&apos;t turned on for this account
+                    </p>
+                    <p className="text-xs leading-relaxed text-foreground">
+                      {result.notEnabledNiches.join(', ')}{' '}
+                      {result.notEnabledNiches.length === 1
+                        ? 'is a real niche that isn\u2019t'
+                        : 'are real niches that aren\u2019t'}{' '}
+                      enabled on your account, so those contacts came in on your
+                      account default
+                      {defaultNicheName ? ` (${defaultNicheName})` : ''} instead
+                      of the right script.{' '}
+                      <span className="font-semibold">
+                        Contact the Reactivation Power team to enable{' '}
+                        {result.notEnabledNiches.length === 1 ? 'it' : 'them'}
+                      </span>
+                      , then re-import to get everyone on the correct script.
+                    </p>
+                  </div>
+                )}
                 {result.unmatchedNiches.length > 0 && (
                   <p className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs leading-relaxed text-foreground">
                     {"These niche values weren't recognized: "}

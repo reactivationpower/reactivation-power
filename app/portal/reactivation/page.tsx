@@ -10,6 +10,7 @@ import {
 import {
   getCallQueueState,
   getContacts,
+  getNiches,
   getOwnerNiches,
   getPipelineStages,
   getServiceMappings,
@@ -49,15 +50,23 @@ export default async function ReactivationDashboardPage() {
   const staff = await getStaffMembers(ownerId)
   const sectors = await getOwnerSectors(ownerId)
   const batchSize = owner.call_batch_size ?? DEFAULT_CALL_BATCH_SIZE
-  const [contacts, queueState, stages, niches, teamStats, serviceMappings] =
-    await Promise.all([
-      getContacts(ownerId),
-      getCallQueueState(ownerId, batchSize),
-      getPipelineStages(ownerId),
-      getOwnerNiches(ownerId, sectors),
-      isOwner ? getTeamStats(owner, staff) : Promise.resolve([]),
-      getServiceMappings(ownerId),
-    ])
+  const [
+    contacts,
+    queueState,
+    stages,
+    niches,
+    allSectorNiches,
+    teamStats,
+    serviceMappings,
+  ] = await Promise.all([
+    getContacts(ownerId),
+    getCallQueueState(ownerId, batchSize),
+    getPipelineStages(ownerId),
+    getOwnerNiches(ownerId, sectors),
+    getNiches(true, sectors),
+    isOwner ? getTeamStats(owner, staff) : Promise.resolve([]),
+    getServiceMappings(ownerId),
+  ])
   const { followUps, newCalls, waiting } = queueState
 
   const defaultNiche =
@@ -107,6 +116,7 @@ export default async function ReactivationDashboardPage() {
           </Link>
           <ImportContactsDialog
             niches={niches}
+            allNiches={allSectorNiches}
             savedMappings={serviceMappings}
             defaultNicheName={defaultNiche?.name ?? null}
           />
