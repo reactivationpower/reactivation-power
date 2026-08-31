@@ -13,7 +13,7 @@ import {
 import { matchNicheByName } from '@/lib/niche-match'
 import { easternWallClockToUtc } from '@/lib/call-time'
 import type { CallDisposition } from '@/lib/types'
-import { CALL_BATCH_SIZES, RETRY_WINDOW_MONTHS } from '@/lib/types'
+import { CALL_BATCH_SIZES, RETRY_WINDOW_MONTHS, MAX_STAFF } from '@/lib/types'
 
 // ---------- Admin: niches ----------
 
@@ -572,6 +572,95 @@ export async function setOfficePhone(formData: FormData) {
     .from('participants')
     .update({ office_phone: officePhone || null })
     .eq('id', participant.id)
+  if (error) return { error: error.message }
+  revalidatePath('/portal/reactivation')
+  return {}
+}
+
+// ---------- Portal: team / callers (owner self-management) ----------
+
+/**
+ * Owner adds a caller (staff member) to their own account. The new member
+ * logs in with their own email and inherits the owner's niches/scripts.
+ * Every write is scoped to the current owner — an owner can only add staff
+ * under themselves, never under another account.
+ */
+export async function addTeamMember(formData: FormData) {
+  const participant = await getCurrentParticipant()
+  if (!participant) return { error: 'Not signed in' }
+  if (participant.role !== 'owner')
+    return { error: 'Only the account owner can add callers' }
+
+  const firstName = String(formData.get('firstName') ?? '').trim()
+  const lastName = String(formData.get('lastName') ?? '').trim()
+  const email = String(formData.get('email') ?? '')
+    .trim()
+    .toLowerCase()
+  const phone = String(formData.get('phone') ?? '').trim()
+  if (!firstName || !lastName || !email) {
+    return { error: 'First name, last name, and email are required' }
+  }
+
+  const supabase = getAdminClient()
+
+  // Only active staff count toward the limit — deactivating frees a seat.
+  const { count } = await supabase
+    .from('participants')
+    .select('id', { count: 'exact', head: true })
+    .eq('parent_id', participant.id)
+    .eq('is_active', true)
+  if ((count ?? 0) >= MAX_STAFF) {
+    return { error: `You can have up to ${MAX_STAFF} active callers.` }
+  }
+
+  const { error } = await supabase.from('participants').insert({
+    first_name: firstName,
+    last_name: lastName,
+    email,
+    phone: phone || null,
+    parent_id: participant.id,
+    role: 'staff',
+  })
+  if (error) {
+    if (error.code === '23505')
+      return { error: 'Someone with this email already exists.' }
+    return { error: error.message }
+  }
+  revalidatePath('/portal/reactivation')
+  return {}
+}
+
+/**
+ * Owner activates or deactivates one of their own callers. Ownership is
+ * enforced by matching parent_id to the current owner, so an owner can never
+ * toggle a caller that isn't theirs.
+ */
+export async function setTeamMemberActive(memberId: string, isActive: boolean) {
+  const participant = await getCurrentParticipant()
+  if (!participant) return { error: 'Not signed in' }
+  if (participant.role !== 'owner')
+    return { error: 'Only the account owner can manage callers' }
+  if (!memberId) return { error: 'Missing caller' }
+
+  const supabase = getAdminClient()
+
+  // Re-enabling counts against the active limit.
+  if (isActive) {
+    const { count } = await supabase
+      .from('participants')
+      .select('id', { count: 'exact', head: true })
+      .eq('parent_id', participant.id)
+      .eq('is_active', true)
+    if ((count ?? 0) >= MAX_STAFF) {
+      return { error: `You can have up to ${MAX_STAFF} active callers.` }
+    }
+  }
+
+  const { error } = await supabase
+    .from('participants')
+    .update({ is_active: isActive })
+    .eq('id', memberId)
+    .eq('parent_id', participant.id) // ownership guard
   if (error) return { error: error.message }
   revalidatePath('/portal/reactivation')
   return {}

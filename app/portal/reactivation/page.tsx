@@ -27,6 +27,7 @@ import { AddContactDialog } from '@/components/reactivation/add-contact-dialog'
 import { ImportContactsDialog } from '@/components/reactivation/import-contacts-dialog'
 import { StageManager } from '@/components/reactivation/stage-manager'
 import { TeamStatsCards } from '@/components/reactivation/team-stats'
+import { TeamManager } from '@/components/reactivation/team-manager'
 import { HowItWorks } from '@/components/reactivation/how-it-works'
 
 export const metadata = {
@@ -128,6 +129,17 @@ export default async function ReactivationDashboardPage() {
       {isOwner && teamStats.length > 0 && (
         <div className="mt-6">
           <TeamStatsCards stats={teamStats} />
+        </div>
+      )}
+
+      {isOwner && (
+        <div className="mt-6">
+          <TeamManager
+            members={staff}
+            entityLabel={
+              sectors.includes('healthcare') ? 'practice' : 'business'
+            }
+          />
         </div>
       )}
 
