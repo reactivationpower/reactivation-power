@@ -781,15 +781,18 @@ export function ImportContactsDialog({
                       </div>
                       <p className="text-xs leading-relaxed text-foreground">
                         These are real niches, but they aren&apos;t enabled on
-                        your account yet, so those contacts will come in on your
-                        account default
-                        {defaultNicheName ? ` (${defaultNicheName})` : ''}{' '}
-                        instead of the right script.{' '}
+                        your account yet. These contacts will still import with
+                        the correct niche attached, but they&apos;ll be marked{' '}
+                        <span className="font-semibold">
+                          &ldquo;not active&rdquo;
+                        </span>{' '}
+                        and can&apos;t be called until the niche is turned on.{' '}
                         <span className="font-semibold">
                           Contact the Reactivation Power team to turn these
-                          niches on
+                          niches on, then refresh this page
                         </span>{' '}
-                        so your patients get matched correctly.
+                        — those patients will be ready to call with the right
+                        script automatically.
                       </p>
                     </div>
                   )}
@@ -1032,15 +1035,19 @@ export function ImportContactsDialog({
                       {result.notEnabledNiches.length === 1
                         ? 'is a real niche that isn\u2019t'
                         : 'are real niches that aren\u2019t'}{' '}
-                      enabled on your account, so those contacts came in on your
-                      account default
-                      {defaultNicheName ? ` (${defaultNicheName})` : ''} instead
-                      of the right script.{' '}
+                      enabled on your account yet. Those contacts were imported
+                      with the correct niche attached, but they&apos;re marked{' '}
+                      <span className="font-semibold">
+                        &ldquo;not active&rdquo;
+                      </span>{' '}
+                      and can&apos;t be called until the niche is turned on.{' '}
                       <span className="font-semibold">
                         Contact the Reactivation Power team to enable{' '}
-                        {result.notEnabledNiches.length === 1 ? 'it' : 'them'}
-                      </span>
-                      , then re-import to get everyone on the correct script.
+                        {result.notEnabledNiches.length === 1 ? 'it' : 'them'},
+                        then refresh this page
+                      </span>{' '}
+                      — those contacts will be ready to call with the right
+                      script automatically. No re-import needed.
                     </p>
                   </div>
                 )}
