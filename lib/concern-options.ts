@@ -135,6 +135,41 @@ export const CONCERN_OPTIONS: Record<string, ConcernOption[]> = {
       weightRelated: false,
     },
   ],
+  // Clone of ChiroThin for offices running their own weight-loss program
+  // (not ChiroThin, not GLP). Same weightRelated flags so the concern-aware
+  // step swap (making_it_real_nw) and uncover-objection swap behave identically.
+  'Weight Loss (Not ChiroThin)': [
+    {
+      label: 'Weight creeping back',
+      spoken: 'the weight creeping back',
+      weightRelated: true,
+    },
+    {
+      label: 'Eating habits slipping',
+      spoken: 'getting your eating habits back on track',
+      weightRelated: true,
+    },
+    { label: 'Energy crashes', spoken: 'the energy crashes', weightRelated: false },
+    { label: 'Sleep problems', spoken: 'your sleep', weightRelated: false },
+    { label: 'Stress / irritability', spoken: 'the stress', weightRelated: false },
+    {
+      label: 'Allergy / sinus',
+      spoken: 'the allergy and sinus problems',
+      weightRelated: false,
+    },
+    { label: 'Neck or back pain', spoken: 'the back pain', weightRelated: false },
+    {
+      label: 'Knees, hips, or feet',
+      spoken: 'the trouble with your knees and hips',
+      weightRelated: false,
+    },
+    { label: 'Headaches', spoken: 'your headaches', weightRelated: false },
+    {
+      label: 'Medications',
+      spoken: 'your reliance on those medications',
+      weightRelated: false,
+    },
+  ],
   'Skin Tightening': [
     { label: 'Jawline / neck', spoken: 'that jawline and neck area' },
     { label: 'Arms', spoken: 'the crepey skin on your arms' },

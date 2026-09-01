@@ -33,6 +33,7 @@ export const NICHE_ANNUAL_VALUE: Record<string, number> = {
   'Cellulite Reduction': 1200,
   Chiropractic: 1000,
   ChiroThin: 1200,
+  'Weight Loss (Not ChiroThin)': 1200,
   'Clear Aligners': 3500,
   Decompression: 2500,
   'Dental Implants': 4000,

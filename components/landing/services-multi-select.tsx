@@ -10,6 +10,7 @@ import { Check } from 'lucide-react'
 const HEALTHCARE_SERVICES = [
   'Chiropractic',
   'ChiroThin',
+  'Weight Loss (Not ChiroThin)',
   'Red Light / Body Contouring',
   'Decompression',
   'Neuropathy',

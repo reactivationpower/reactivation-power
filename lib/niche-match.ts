@@ -26,6 +26,22 @@ const KEYWORD_RULES: Array<{ niche: string; keywords: string[] }> = [
     ],
   },
   {
+    // Generic in-office weight-loss program — NOT ChiroThin, NOT GLP.
+    // Listed after GLP so injection/medication labels resolve to GLP first,
+    // and ChiroThin's own rule (above) still wins for "chirothin".
+    niche: 'Weight Loss (Not ChiroThin)',
+    keywords: [
+      'weight loss',
+      'weight-loss',
+      'weightloss',
+      'weight management',
+      'weight program',
+      'medical weight',
+      'fat loss',
+      'slim',
+    ],
+  },
+  {
     niche: 'Decompression',
     keywords: ['decompression', 'decomp', 'dts', 'traction', 'disc therapy'],
   },
