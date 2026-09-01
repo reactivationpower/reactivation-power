@@ -99,14 +99,40 @@ export interface ScriptFlow {
  */
 export async function getScriptFlow(): Promise<ScriptFlow> {
   const supabase = getAdminClient()
-  const [{ data: steps }, { data: choices }] = await Promise.all([
-    supabase.from('script_flow_steps').select('*').order('sort_order'),
-    supabase.from('script_flow_choices').select('*').order('sort_order'),
+  const [steps, choices] = await Promise.all([
+    fetchAllRows<ScriptFlowStep>('script_flow_steps'),
+    fetchAllRows<ScriptFlowChoice>('script_flow_choices'),
   ])
-  return {
-    steps: (steps ?? []) as ScriptFlowStep[],
-    choices: (choices ?? []) as ScriptFlowChoice[],
+  return { steps, choices }
+}
+
+/**
+ * Fetch every row from a script-flow table, paging past PostgREST's per-request
+ * row cap (1000). Both tables now exceed 1000 rows across all niches, and the
+ * default single request silently truncated to the first 1000 by sort_order —
+ * which dropped every choice/step at higher sort orders. We page in 1000-row
+ * chunks with a stable (sort_order, id) order so page boundaries never skip or
+ * duplicate a row.
+ */
+async function fetchAllRows<T>(
+  table: 'script_flow_steps' | 'script_flow_choices',
+): Promise<T[]> {
+  const supabase = getAdminClient()
+  const PAGE = 1000
+  const all: T[] = []
+  for (let from = 0; ; from += PAGE) {
+    const { data, error } = await supabase
+      .from(table)
+      .select('*')
+      .order('sort_order')
+      .order('id')
+      .range(from, from + PAGE - 1)
+    if (error) throw error
+    const rows = (data ?? []) as T[]
+    all.push(...rows)
+    if (rows.length < PAGE) break
   }
+  return all
 }
 
 // ---------- Service -> niche mappings (learned at CSV import) ----------
