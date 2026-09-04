@@ -2,22 +2,23 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { UserPlus, Users, HelpCircle } from 'lucide-react'
+import { Users, HelpCircle, Pencil } from 'lucide-react'
 import {
-  addTeamMember,
   setTeamMemberActive,
+  updateTeamMember,
 } from '@/app/actions/reactivation'
 import { MAX_STAFF, type Participant } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { PhoneInput } from '@/components/reactivation/phone-input'
+import { AddCallerDialog } from '@/components/reactivation/add-caller-dialog'
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog'
 
 export function TeamManager({
@@ -28,25 +29,30 @@ export function TeamManager({
   entityLabel: string
 }) {
   const router = useRouter()
-  const [open, setOpen] = useState(false)
   const [helpOpen, setHelpOpen] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [editing, setEditing] = useState<Participant | null>(null)
+  const [editError, setEditError] = useState<string | null>(null)
+  const [editSubmitting, setEditSubmitting] = useState(false)
   const [pending, startTransition] = useTransition()
   const [togglingId, setTogglingId] = useState<string | null>(null)
 
   const activeCount = members.filter((m) => m.is_active).length
   const atLimit = activeCount >= MAX_STAFF
 
-  async function onAdd(e: React.FormEvent<HTMLFormElement>) {
+  async function onEdit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
-    setError(null)
+    if (!editing) return
+    setEditError(null)
+    setEditSubmitting(true)
     const fd = new FormData(e.currentTarget)
-    const res = await addTeamMember(fd)
+    fd.set('memberId', editing.id)
+    const res = await updateTeamMember(fd)
+    setEditSubmitting(false)
     if (res?.error) {
-      setError(res.error)
+      setEditError(res.error)
       return
     }
-    setOpen(false)
+    setEditing(null)
     router.refresh()
   }
 
@@ -76,56 +82,95 @@ export function TeamManager({
           </span>
         </div>
 
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger
-            render={
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-2"
-                disabled={atLimit}
-              />
-            }
-          >
-            <UserPlus className="size-4" />
-            Add caller
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Add a caller</DialogTitle>
-              <DialogDescription>
-                They sign in with their own email on the login screen and get
-                your {entityLabel}&apos;s scripts and call queue. You can have
-                up to {MAX_STAFF} active callers.
-              </DialogDescription>
-            </DialogHeader>
-            <form onSubmit={onAdd} className="flex flex-col gap-4">
+        <AddCallerDialog entityLabel={entityLabel} activeCount={activeCount} />
+      </div>
+
+      {/* Edit caller */}
+      <Dialog
+        open={!!editing}
+        onOpenChange={(o) => {
+          if (!o) {
+            setEditing(null)
+            setEditError(null)
+          }
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit caller</DialogTitle>
+            <DialogDescription>
+              Update their name, email, or phone. They sign in with whatever
+              name and email is saved here.
+            </DialogDescription>
+          </DialogHeader>
+          {editing && (
+            <form
+              key={editing.id}
+              onSubmit={onEdit}
+              className="flex flex-col gap-4"
+            >
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="tm-first">First name</Label>
-                  <Input id="tm-first" name="firstName" required />
+                  <Label htmlFor="ed-first">First name</Label>
+                  <Input
+                    id="ed-first"
+                    name="firstName"
+                    defaultValue={editing.first_name}
+                    required
+                  />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="tm-last">Last name</Label>
-                  <Input id="tm-last" name="lastName" required />
+                  <Label htmlFor="ed-last">Last name</Label>
+                  <Input
+                    id="ed-last"
+                    name="lastName"
+                    defaultValue={editing.last_name}
+                    required
+                  />
                 </div>
               </div>
               <div className="flex flex-col gap-2">
-                <Label htmlFor="tm-email">Email address</Label>
-                <Input id="tm-email" name="email" type="email" required />
+                <Label htmlFor="ed-email">Email address</Label>
+                <Input
+                  id="ed-email"
+                  name="email"
+                  type="email"
+                  defaultValue={editing.email}
+                  required
+                />
               </div>
               <div className="flex flex-col gap-2">
-                <Label htmlFor="tm-phone">Phone (optional)</Label>
-                <Input id="tm-phone" name="phone" />
+                <Label htmlFor="ed-phone">
+                  Phone{' '}
+                  <span className="font-normal text-muted-foreground">
+                    (optional)
+                  </span>
+                </Label>
+                <PhoneInput
+                  id="ed-phone"
+                  name="phone"
+                  defaultValue={editing.phone ?? ''}
+                />
               </div>
-              {error ? (
-                <p className="text-sm text-destructive">{error}</p>
+              {editError ? (
+                <p className="text-sm text-destructive">{editError}</p>
               ) : null}
-              <Button type="submit">Add caller</Button>
+              <div className="flex justify-end gap-2">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => setEditing(null)}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={editSubmitting}>
+                  {editSubmitting ? 'Saving…' : 'Save changes'}
+                </Button>
+              </div>
             </form>
-          </DialogContent>
-        </Dialog>
-      </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <p className="mt-2 text-sm text-muted-foreground">
         Add the people who will be making reactivation calls. Each caller logs
@@ -147,7 +192,8 @@ export function TeamManager({
               Managing your callers
             </DialogTitle>
             <DialogDescription>
-              A quick guide to adding and removing the people who make calls.
+              A quick guide to adding, editing, and removing the people who
+              make calls.
             </DialogDescription>
           </DialogHeader>
 
@@ -160,7 +206,8 @@ export function TeamManager({
                   <span className="font-medium text-foreground">
                     “Add caller”
                   </span>{' '}
-                  button at the top of this card.
+                  button at the top of this card (or “Add Staff Member” on the
+                  Training page — same thing).
                 </li>
                 <li>
                   Enter their first name, last name, and email address. A phone
@@ -182,8 +229,18 @@ export function TeamManager({
               <p className="text-muted-foreground">
                 Your caller goes to the login screen and enters the same first
                 name, last name, and email you used here. They’ll automatically
-                see your {entityLabel}’s scripts and call list — there’s no
-                password to set up.
+                see your {entityLabel}’s training, scripts, and call list —
+                there’s no password to set up.
+              </p>
+            </section>
+
+            <section className="flex flex-col gap-2">
+              <h4 className="font-semibold">To fix a name, email, or phone</h4>
+              <p className="text-muted-foreground">
+                Click{' '}
+                <span className="font-medium text-foreground">“Edit”</span>{' '}
+                next to their name, change what you need, and save. Callers can
+                also update their own details from the Settings page.
               </p>
             </section>
 
@@ -253,27 +310,41 @@ export function TeamManager({
                   {m.phone ? ` · ${m.phone}` : ''}
                 </p>
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                disabled={
-                  pending && togglingId === m.id
-                    ? true
-                    : !m.is_active && atLimit
-                }
-                onClick={() => onToggle(m)}
-                className={
-                  m.is_active
-                    ? 'text-destructive hover:text-destructive'
-                    : 'text-accent hover:text-accent'
-                }
-              >
-                {pending && togglingId === m.id
-                  ? 'Saving…'
-                  : m.is_active
-                    ? 'Deactivate'
-                    : 'Reactivate'}
-              </Button>
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="gap-1.5"
+                  onClick={() => {
+                    setEditError(null)
+                    setEditing(m)
+                  }}
+                >
+                  <Pencil className="size-3.5" />
+                  Edit
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  disabled={
+                    pending && togglingId === m.id
+                      ? true
+                      : !m.is_active && atLimit
+                  }
+                  onClick={() => onToggle(m)}
+                  className={
+                    m.is_active
+                      ? 'text-destructive hover:text-destructive'
+                      : 'text-accent hover:text-accent'
+                  }
+                >
+                  {pending && togglingId === m.id
+                    ? 'Saving…'
+                    : m.is_active
+                      ? 'Deactivate'
+                      : 'Reactivate'}
+                </Button>
+              </div>
             </li>
           ))}
         </ul>

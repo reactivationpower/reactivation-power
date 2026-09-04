@@ -15,6 +15,7 @@ import { OfficePhoneForm } from '@/components/reactivation/office-phone-form'
 import { DefaultNicheSelect } from '@/components/reactivation/default-niche-select'
 import { BatchSizeSelect } from '@/components/reactivation/batch-size-select'
 import { TeamManager } from '@/components/reactivation/team-manager'
+import { MyProfileForm } from '@/components/portal/my-profile-form'
 import { StageManager } from '@/components/reactivation/stage-manager'
 
 export const metadata = {
@@ -79,6 +80,13 @@ export default async function SettingsPage() {
       </div>
 
       <div className="mt-8">
+        <SettingsSection
+          title="My profile"
+          description="Your own name, email, and phone. Changing your email here changes what you type to sign in."
+        >
+          <MyProfileForm participant={participant} />
+        </SettingsSection>
+
         {isOwner ? (
           <>
             <SettingsSection
@@ -123,16 +131,15 @@ export default async function SettingsPage() {
           </>
         ) : (
           <SettingsSection
-            title="Your account"
-            description="Settings for the practice are managed by the account owner."
+            title={`${healthcare ? 'Practice' : 'Business'} settings`}
+            description="Callers, niches, and calling defaults are managed by the account owner."
           >
-            <div className="rounded-lg border border-border bg-card p-5 text-sm">
-              <p className="font-medium text-foreground">
-                {participant.first_name} {participant.last_name}
-              </p>
-              <p className="mt-0.5 text-muted-foreground">
-                {participant.email}
-              </p>
+            <div className="rounded-lg border border-dashed border-border bg-muted/30 p-5 text-sm text-muted-foreground">
+              {owner.practice_name
+                ? `You're calling on behalf of ${owner.practice_name}.`
+                : `You're a caller on ${owner.first_name} ${owner.last_name}'s account.`}{' '}
+              Ask them if anything about the scripts or call queue needs to
+              change.
             </div>
           </SettingsSection>
         )}

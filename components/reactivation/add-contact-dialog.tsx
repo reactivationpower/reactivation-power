@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { PhoneInput } from '@/components/reactivation/phone-input'
 import {
   Select,
   SelectContent,
@@ -74,13 +75,7 @@ export function AddContactDialog({ niches }: { niches: Niche[] }) {
             </div>
             <div className="flex flex-col gap-2">
               <Label htmlFor="contact-phone">Phone</Label>
-              <Input
-                id="contact-phone"
-                name="phone"
-                type="tel"
-                placeholder="(555) 555-5555"
-                required
-              />
+              <PhoneInput id="contact-phone" name="phone" required />
             </div>
             <div className="flex flex-col gap-2">
               <Label htmlFor="contact-email">Email (optional)</Label>

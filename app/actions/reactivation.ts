@@ -13,6 +13,7 @@ import {
 } from '@/lib/data/reactivation'
 import { matchNicheByName } from '@/lib/niche-match'
 import { easternWallClockToUtc } from '@/lib/call-time'
+import { sanitizeNotes } from '@/lib/notes-html'
 import type { CallDisposition } from '@/lib/types'
 import { CALL_BATCH_SIZES, RETRY_WINDOW_MONTHS, MAX_STAFF } from '@/lib/types'
 
@@ -237,10 +238,14 @@ export async function updateContact(formData: FormData) {
   if (!id) return { error: 'Missing id' }
 
   const patch: Record<string, unknown> = {}
-  for (const key of ['name', 'phone', 'email', 'notes'] as const) {
+  for (const key of ['name', 'phone', 'email'] as const) {
     const v = formData.get(key)
     if (v !== null) patch[key] = String(v).trim() || null
   }
+  // Notes arrive as a small HTML subset from the rich-text editor; strip
+  // anything outside that subset so pasted EHR notes can't inject markup.
+  const notes = formData.get('notes')
+  if (notes !== null) patch.notes = sanitizeNotes(String(notes)) || null
   // Optional "previously treated for" — clearing the field stores null so
   // the script falls back to its generic lead-in.
   const originalComplaint = formData.get('originalComplaint')
@@ -765,6 +770,85 @@ export async function setTeamMemberActive(memberId: string, isActive: boolean) {
     .eq('id', memberId)
     .eq('parent_id', participant.id) // ownership guard
   if (error) return { error: error.message }
+  revalidatePath('/portal', 'layout')
+  return {}
+}
+
+/**
+ * Owner edits one of their own callers' name / email / phone — so a typo
+ * doesn't require an admin ticket. Same parent_id ownership guard as toggle.
+ */
+export async function updateTeamMember(formData: FormData) {
+  const participant = await getCurrentParticipant()
+  if (!participant) return { error: 'Not signed in' }
+  if (participant.role !== 'owner')
+    return { error: 'Only the account owner can edit callers' }
+  const memberId = String(formData.get('memberId') ?? '')
+  if (!memberId) return { error: 'Missing caller' }
+
+  const firstName = String(formData.get('firstName') ?? '').trim()
+  const lastName = String(formData.get('lastName') ?? '').trim()
+  const email = String(formData.get('email') ?? '')
+    .trim()
+    .toLowerCase()
+  const phone = String(formData.get('phone') ?? '').trim()
+  if (!firstName || !lastName || !email) {
+    return { error: 'First name, last name, and email are required' }
+  }
+
+  const supabase = getAdminClient()
+  const { error } = await supabase
+    .from('participants')
+    .update({
+      first_name: firstName,
+      last_name: lastName,
+      email,
+      phone: phone || null,
+    })
+    .eq('id', memberId)
+    .eq('parent_id', participant.id) // ownership guard
+  if (error) {
+    if (error.code === '23505')
+      return { error: 'Someone with this email already exists.' }
+    return { error: error.message }
+  }
+  revalidatePath('/portal', 'layout')
+  return {}
+}
+
+/**
+ * Any signed-in participant (owner or caller) updates their OWN name, email,
+ * and phone. Scoped to participant.id — nothing else is editable here.
+ */
+export async function updateMyProfile(formData: FormData) {
+  const participant = await getCurrentParticipant()
+  if (!participant) return { error: 'Not signed in' }
+
+  const firstName = String(formData.get('firstName') ?? '').trim()
+  const lastName = String(formData.get('lastName') ?? '').trim()
+  const email = String(formData.get('email') ?? '')
+    .trim()
+    .toLowerCase()
+  const phone = String(formData.get('phone') ?? '').trim()
+  if (!firstName || !lastName || !email) {
+    return { error: 'First name, last name, and email are required' }
+  }
+
+  const supabase = getAdminClient()
+  const { error } = await supabase
+    .from('participants')
+    .update({
+      first_name: firstName,
+      last_name: lastName,
+      email,
+      phone: phone || null,
+    })
+    .eq('id', participant.id)
+  if (error) {
+    if (error.code === '23505')
+      return { error: 'Someone with this email already exists.' }
+    return { error: error.message }
+  }
   revalidatePath('/portal', 'layout')
   return {}
 }

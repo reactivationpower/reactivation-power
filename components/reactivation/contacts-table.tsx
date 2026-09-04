@@ -24,6 +24,7 @@ import type { ContactWithMeta } from '@/lib/data/reactivation'
 import type { Niche, PipelineStage } from '@/lib/types'
 import { DISPOSITION_LABELS } from '@/lib/types'
 import { formatPhone } from '@/lib/phone'
+import { notesToText } from '@/lib/notes-text'
 import { cn } from '@/lib/utils'
 import { bulkAssignNiche, bulkDeleteContacts } from '@/app/actions/reactivation'
 import { Button } from '@/components/ui/button'
@@ -72,7 +73,7 @@ function haystack(c: ContactWithMeta): string {
     c.next_follow_up ? fmtDate(c.next_follow_up.due_at) : '',
     c.service_label ?? '',
     c.original_complaint ?? '',
-    c.notes ?? '',
+    notesToText(c.notes),
   ]
   return parts.join(' ').toLowerCase()
 }

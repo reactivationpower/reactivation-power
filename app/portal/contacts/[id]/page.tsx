@@ -93,12 +93,7 @@ export default async function ContactProfilePage({
       </div>
 
       <section className="mt-8">
-        <h2 className="text-xl font-semibold text-foreground">
-          Contact Details
-        </h2>
-        <div className="mt-4">
-          <ContactEditor contact={contact} stages={stages} niches={niches} />
-        </div>
+        <ContactEditor contact={contact} stages={stages} niches={niches} />
       </section>
 
       <section className="mt-10">
