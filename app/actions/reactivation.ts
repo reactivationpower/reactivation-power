@@ -823,6 +823,11 @@ export async function logCall(formData: FormData) {
   const voicemailLeft = formData.get('voicemailLeft') === 'true'
   const notes = String(formData.get('notes') ?? '').trim()
   const callBackAt = String(formData.get('callBackAt') ?? '')
+  const appointmentAtRaw = String(formData.get('appointmentAt') ?? '')
+  const appointmentAt =
+    appointmentAtRaw && !Number.isNaN(new Date(appointmentAtRaw).getTime())
+      ? new Date(appointmentAtRaw).toISOString()
+      : null
 
   const valid: CallDisposition[] = [
     'no_answer',
@@ -854,6 +859,7 @@ export async function logCall(formData: FormData) {
       disposition,
       voicemail_left: voicemailLeft,
       notes: notes || null,
+      appointment_at: disposition === 'scheduled' ? appointmentAt : null,
     })
     .select('id')
     .single()
