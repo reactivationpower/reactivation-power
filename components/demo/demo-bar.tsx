@@ -86,6 +86,10 @@ export function DemoBar({
               value={currentId}
               onValueChange={(v) => onSwitch(String(v ?? ''))}
               disabled={pending}
+              items={identities.map((p) => ({
+                value: p.id,
+                label: `${p.label} · ${p.role === 'owner' ? 'Owner' : 'Caller'}`,
+              }))}
             >
               <SelectTrigger className="h-8 w-56 bg-card text-foreground">
                 <SelectValue />

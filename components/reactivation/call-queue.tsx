@@ -3,11 +3,17 @@ import { Phone, Clock, Lock } from 'lucide-react'
 import type { QueueItem } from '@/lib/data/reactivation'
 import { suggestedCallTime } from '@/lib/call-time'
 
+/**
+ * Calendar-day comparison, not elapsed hours: a call due yesterday at 2 PM is
+ * "1 day overdue" first thing this morning, not "Due today" until 2 PM.
+ */
 function dueLabel(dueAt: string): string {
   const due = new Date(dueAt)
   const now = new Date()
-  const diffDays = Math.floor(
-    (now.getTime() - due.getTime()) / (24 * 60 * 60 * 1000),
+  const dueDay = new Date(due.getFullYear(), due.getMonth(), due.getDate())
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const diffDays = Math.round(
+    (today.getTime() - dueDay.getTime()) / (24 * 60 * 60 * 1000),
   )
   if (diffDays <= 0) return 'Due today'
   if (diffDays === 1) return '1 day overdue'

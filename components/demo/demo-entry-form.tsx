@@ -1,29 +1,26 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useActionState, useState } from 'react'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import { enterDemo } from '@/app/actions/demo'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
-export function DemoEntryForm() {
-  const [error, setError] = useState<string | null>(null)
-  const [show, setShow] = useState(false)
-  const [pending, startTransition] = useTransition()
+type State = { error?: string }
+const initialState: State = {}
 
-  function onSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    setError(null)
-    const fd = new FormData(e.currentTarget)
-    startTransition(async () => {
-      const res = await enterDemo(fd)
-      if (res?.error) setError(res.error)
-    })
-  }
+async function submit(_prev: State, formData: FormData): Promise<State> {
+  const res = await enterDemo(formData)
+  return res ?? {}
+}
+
+export function DemoEntryForm() {
+  const [state, formAction, pending] = useActionState(submit, initialState)
+  const [show, setShow] = useState(false)
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-5">
+    <form action={formAction} className="flex flex-col gap-5">
       <div className="flex flex-col gap-2">
         <Label htmlFor="demo-password">Demo password</Label>
         <div className="relative">
@@ -46,9 +43,9 @@ export function DemoEntryForm() {
           </button>
         </div>
       </div>
-      {error ? (
+      {state.error ? (
         <p role="alert" className="text-sm text-destructive">
-          {error}
+          {state.error}
         </p>
       ) : null}
       <Button type="submit" disabled={pending} className="w-full">

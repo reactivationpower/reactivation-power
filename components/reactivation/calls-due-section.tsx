@@ -78,6 +78,8 @@ export function CallsDueSection({
     // Pre-mount: show every follow-up in the "now" group in due order.
     nowFollowUps.push(...[...followUps].sort(byDueAt))
   } else {
+    const startOfToday = new Date()
+    startOfToday.setHours(0, 0, 0, 0)
     for (const item of followUps) {
       const s = suggestedCallTime(item.follow_up.reason, item.follow_up.due_at)
       // No set time (quarterly / 3-month) → always actionable → "now".
@@ -85,10 +87,17 @@ export function CallsDueSection({
         nowFollowUps.push(item)
         continue
       }
+      // Already overdue from a PREVIOUS day → always actionable → "now",
+      // regardless of what time-of-day it was originally suggested for. The
+      // band hiding below only applies to slots that were for *today*.
+      if (new Date(item.follow_up.due_at) < startOfToday) {
+        nowFollowUps.push(item)
+        continue
+      }
       const b = bandIndex(s.band)
       if (b === current) nowFollowUps.push(item)
       else if (b > current) laterFollowUps.push(item)
-      // b < current → window passed → hidden today (rolls to tomorrow).
+      // b < current → today's window passed → hidden (rolls to tomorrow).
     }
     nowFollowUps.sort(byDueAt)
     laterFollowUps.sort(byDueAt)
