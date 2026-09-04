@@ -7,8 +7,14 @@ import {
   getStaffMembers,
 } from '@/lib/data/participants'
 import { getTeamStats } from '@/lib/data/reactivation'
+import { getCallAnalytics } from '@/lib/data/caller-analytics'
 import { PORTAL_WIDTH } from '@/lib/portal-layout'
 import { TeamStatsCards } from '@/components/reactivation/team-stats'
+import {
+  ActivityTrendChart,
+  AppointmentsByMonthChart,
+} from '@/components/analytics/call-charts'
+import { InsightGrid, Section } from '@/components/analytics/blocks'
 
 export const metadata = {
   title: 'Analytics — Reactivation Power',
@@ -26,10 +32,14 @@ export default async function AnalyticsPage() {
   if (!owner) redirect('/login')
 
   const staff = await getStaffMembers(ownerId)
-  const teamStats = await getTeamStats(owner, staff)
+  const memberIds = [owner.id, ...staff.map((s) => s.id)]
+  const [teamStats, team] = await Promise.all([
+    getTeamStats(owner, staff),
+    getCallAnalytics(memberIds),
+  ])
 
   return (
-    <div className={`${PORTAL_WIDTH} py-8`}>
+    <div className={`${PORTAL_WIDTH} flex flex-col gap-8 py-8`}>
       <div className="flex items-center gap-3">
         <div className="flex size-11 items-center justify-center rounded-lg bg-accent/10">
           <BarChart3 className="size-5 text-accent" />
@@ -42,8 +52,33 @@ export default async function AnalyticsPage() {
         </div>
       </div>
 
-      <div className="mt-8">
-        <TeamStatsCards stats={teamStats} />
+      <TeamStatsCards stats={teamStats} />
+
+      <div className="flex flex-col gap-4">
+        <div>
+          <h2 className="text-lg font-semibold text-foreground">
+            Whole team
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Everyone&apos;s calls combined. Per-caller versions of each chart
+            live on their page.
+          </p>
+        </div>
+        <InsightGrid insights={team.insights} />
+        <div className="grid gap-6 lg:grid-cols-2">
+          <Section
+            title="Activity — last 12 weeks"
+            description="Dials, conversations, and appointments by week. Gray is effort, teal is reach, green is results."
+          >
+            <ActivityTrendChart data={team.byWeek} />
+          </Section>
+          <Section
+            title="Appointments per month"
+            description="Teal is when the appointment was booked on a call; green is the month the appointment itself falls in."
+          >
+            <AppointmentsByMonthChart data={team.byMonth} />
+          </Section>
+        </div>
       </div>
     </div>
   )
