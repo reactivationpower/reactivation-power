@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useRef, useState, useTransition } from 'react'
+import { useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import {
   AlertCircle,
   ArrowLeft,
@@ -112,10 +112,14 @@ const TARGET_LABELS: Record<Target, string> = {
 
 // Pass 1 — unambiguous headings.
 const STRICT_PATTERNS: Array<[Target, RegExp]> = [
-  ['firstName', /^(first[\s_-]?name|fname|first|given[\s_-]?name)$/i],
+  // "First Name", "Patient First", "Pt First Name", "Given Name", "FName"
+  [
+    'firstName',
+    /^((patient|pt|client|customer|contact)[\s_-]?)?(first[\s_-]?name|fname|first|given[\s_-]?name)$/i,
+  ],
   [
     'lastName',
-    /^(last[\s_-]?name|lname|last|surname|family[\s_-]?name)$/i,
+    /^((patient|pt|client|customer|contact)[\s_-]?)?(last[\s_-]?name|lname|last|surname|family[\s_-]?name)$/i,
   ],
   [
     'name',
@@ -144,8 +148,13 @@ const STRICT_PATTERNS: Array<[Target, RegExp]> = [
 const LOOSE_PATTERNS: Array<[Target, RegExp]> = [
   ['phone', /(phone|mobile|cell|tel\b|contact[\s_-]?number)/i],
   ['email', /e-?mail/i],
-  ['firstName', /first[\s_-]?name/i],
-  ['lastName', /last[\s_-]?name/i],
+  ['firstName', /first[\s_-]?name|\bfirst\b/i],
+  // A bare "last" is a surname unless it's clearly a date or service
+  // ("Last Visit", "Last Service", "Last Appt Date")
+  [
+    'lastName',
+    /last[\s_-]?name|\blast\b(?![\s_-]?(visit|service|seen|appt|appointment|date|call|contact|treatment|procedure))/i,
+  ],
   ['name', /\bname\b/i],
   ['niche', /(niche|script|campaign)/i],
   [
@@ -187,11 +196,81 @@ function detectColumns(headers: string[]): Partial<Record<Target, number>> {
 
 // ---------- component ----------
 
-type Step = 'upload' | 'columns' | 'services' | 'done'
+type Step = 'upload' | 'columns' | 'services' | 'importing' | 'done'
 
 const NONE = '__none__'
 const DEFAULT = '__default__'
 const AUTO = '__auto__'
+
+/** Order the mapping rows appear in — the fields an office actually thinks in */
+const MAPPING_ORDER: Target[] = [
+  'name',
+  'firstName',
+  'lastName',
+  'phone',
+  'email',
+  'niche',
+  'service',
+  'complaint',
+  'notes',
+]
+
+/** How many real values from the file to show beside each mapped field */
+const SAMPLE_COUNT = 3
+
+/** Progress bar for the import step — fills left to right, then snaps to 100 when the server answers */
+function ImportProgress({
+  total,
+  done,
+  label,
+}: {
+  total: number
+  done: boolean
+  label: string
+}) {
+  const [pct, setPct] = useState(4)
+  useEffect(() => {
+    if (done) {
+      setPct(100)
+      return
+    }
+    // Ease toward ~92% while the server works so the bar never looks stuck;
+    // completion snaps it to 100.
+    const id = window.setInterval(() => {
+      setPct((p) => (p >= 92 ? p : p + Math.max(0.6, (92 - p) * 0.08)))
+    }, 120)
+    return () => window.clearInterval(id)
+  }, [done])
+  const shown = Math.round((pct / 100) * total)
+  return (
+    <div className="flex flex-col items-center gap-5 py-10 text-center">
+      <p className="text-sm font-medium text-muted-foreground">{label}</p>
+      <p className="text-4xl font-bold tabular-nums text-foreground">
+        {done ? total : Math.min(shown, total)}
+        <span className="text-xl font-semibold text-muted-foreground">
+          {' '}
+          / {total}
+        </span>
+      </p>
+      <div
+        className="h-3 w-full max-w-md overflow-hidden rounded-full bg-muted"
+        role="progressbar"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={Math.round(pct)}
+        aria-label="Upload progress"
+      >
+        <div
+          className="h-full rounded-full bg-accent transition-[width] duration-200 ease-out"
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+      <p className="text-xs text-muted-foreground">
+        {done ? 'All set.' : 'Adding contacts to your list…'}
+      </p>
+    </div>
+  )
+}
 
 interface Props {
   /** Niches enabled on this account (what a value can resolve to) */
@@ -230,6 +309,7 @@ export function ImportContactsDialog({
     unmatchedNiches: string[]
     notEnabledNiches: string[]
   } | null>(null)
+  const [importDone, setImportDone] = useState(false)
   const [pending, startTransition] = useTransition()
   const fileRef = useRef<HTMLInputElement>(null)
 
@@ -336,6 +416,7 @@ export function ImportContactsDialog({
     setServiceMap({})
     setError(null)
     setResult(null)
+    setImportDone(false)
   }
 
   function loadText(text: string, name: string | null) {
@@ -473,6 +554,10 @@ export function ImportContactsDialog({
 
   function runImport(map: Record<string, string>) {
     setError(null)
+    const returnTo: Step = step === 'services' ? 'services' : 'columns'
+    setImportDone(false)
+    setStep('importing')
+    const startedAt = Date.now()
     startTransition(async () => {
       const mappings = Object.entries(map)
         .filter(([, v]) => v !== DEFAULT)
@@ -487,8 +572,14 @@ export function ImportContactsDialog({
       })
       if (res?.error) {
         setError(res.error)
+        setStep(returnTo)
         return
       }
+      // Let the bar be visible long enough to read on small files
+      const elapsed = Date.now() - startedAt
+      if (elapsed < 900) await new Promise((r) => setTimeout(r, 900 - elapsed))
+      setImportDone(true)
+      await new Promise((r) => setTimeout(r, 450))
       setResult({
         imported: res.imported ?? 0,
         skippedDuplicate: res.skippedDuplicate ?? 0,
@@ -498,6 +589,18 @@ export function ImportContactsDialog({
       })
       setStep('done')
     })
+  }
+
+  /** First few non-blank values in a column, so the office can sanity-check a mapping at a glance */
+  function sampleValues(colIndex: number | undefined): string[] {
+    if (colIndex === undefined) return []
+    const out: string[] = []
+    for (const r of dataRows) {
+      const v = (r[colIndex] ?? '').trim()
+      if (v && !out.includes(v)) out.push(v)
+      if (out.length >= SAMPLE_COUNT) break
+    }
+    return out
   }
 
   const columnItems = [
@@ -524,7 +627,7 @@ export function ImportContactsDialog({
     <>
       <Button variant="outline" onClick={() => setOpen(true)} className="gap-2">
         <Upload className="size-4" />
-        Import CSV
+        Upload Contacts
       </Button>
       <Dialog
         open={open}
@@ -537,12 +640,12 @@ export function ImportContactsDialog({
           {step === 'upload' && (
             <>
               <DialogHeader>
-                <DialogTitle>Import contacts from a CSV</DialogTitle>
+                <DialogTitle>Upload Contacts</DialogTitle>
                 <DialogDescription>
                   Export your patient or customer list from your management
-                  software and upload it here. Add a Niche column to the export
-                  and every patient arrives tagged with the script they should
-                  be called on — no switching scripts mid-list.
+                  software as a CSV and upload it here. Add a Niche column to
+                  the export and every patient arrives tagged with the script
+                  they should be called on — no switching scripts mid-list.
                 </DialogDescription>
               </DialogHeader>
               <div className="flex flex-col gap-4">
@@ -593,20 +696,31 @@ export function ImportContactsDialog({
                   aria-label="Upload CSV file"
                   onChange={(e) => void handleFile(e.target.files?.[0])}
                 />
-                <div className="flex items-center justify-between gap-3 rounded-md border border-border bg-muted/40 px-3 py-2.5">
+                <div className="flex flex-col gap-2.5 rounded-md border border-border bg-muted/40 px-3 py-2.5">
                   <p className="text-xs leading-relaxed text-muted-foreground">
-                    Not sure how to format your list? Start from our template —
-                    the columns are pre-named so they match automatically, and
-                    it lists the exact niche names your account can use.
+                    Not sure how to format your list? Start from a sample file
+                    — one row for each of your {niches.length} niche
+                    {niches.length === 1 ? '' : 's'}, columns pre-named so they
+                    match automatically. They double as demo files.
                   </p>
-                  <a
-                    href="/api/templates/contacts"
-                    download
-                    className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-border bg-transparent px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-                  >
-                    <Download className="size-3.5" />
-                    CSV template
-                  </a>
+                  <div className="flex flex-wrap gap-2">
+                    <a
+                      href="/api/templates/contacts?variant=niche"
+                      download
+                      className="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                    >
+                      <Download className="size-3.5" />
+                      Sample with Niche column
+                    </a>
+                    <a
+                      href="/api/templates/contacts?variant=services"
+                      download
+                      className="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                    >
+                      <Download className="size-3.5" />
+                      Sample without Niche (services only)
+                    </a>
+                  </div>
                 </div>
                 {niches.length > 0 && (
                   <details className="rounded-md border border-border bg-muted/40 px-3 py-2.5">
@@ -662,8 +776,12 @@ export function ImportContactsDialog({
                 <DialogTitle>Match your columns</DialogTitle>
                 <DialogDescription>
                   {fileName ? `${fileName} — ` : ''}
-                  {dataRows.length} row{dataRows.length === 1 ? '' : 's'} found.
-                  We matched what we could — confirm which column is which.
+                  <span className="font-semibold text-foreground">
+                    {dataRows.length} contact{dataRows.length === 1 ? '' : 's'}{' '}
+                    detected.
+                  </span>{' '}
+                  We matched what we could — check the sample values on each
+                  row to confirm the right column is picked.
                 </DialogDescription>
               </DialogHeader>
               <div className="flex flex-col gap-3">
@@ -704,58 +822,96 @@ export function ImportContactsDialog({
                   />
                   First row is column headings
                 </label>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {(
-                    ['name', 'firstName', 'lastName', 'phone', 'email', 'niche', 'service', 'complaint', 'notes'] as Target[]
-                  ).map((target) => (
-                    <div key={target} className="flex flex-col gap-1.5">
-                      <Label className="text-xs">
-                        {TARGET_LABELS[target]}
-                        {target === 'phone' && ' *'}
-                        {target === 'niche' && (
-                          <span className="ml-1 font-normal text-muted-foreground">
-                            (best option)
-                          </span>
-                        )}
-                        {target === 'service' && (
-                          <span className="ml-1 font-normal text-muted-foreground">
-                            (fallback matching)
-                          </span>
-                        )}
-                      </Label>
-                      <Select
-                        value={
-                          columns[target] !== undefined
-                            ? String(columns[target])
-                            : NONE
-                        }
-                        onValueChange={(v) => {
-                          if (!v) return
-                          setColumns((prev) => {
-                            const next = { ...prev }
-                            if (v === NONE) delete next[target]
-                            else next[target] = Number(v)
-                            return next
-                          })
-                        }}
-                        items={columnItems}
-                      >
-                        <SelectTrigger
-                          className="h-9"
-                          aria-label={TARGET_LABELS[target]}
+                {/* One row per field: their column | our field | what's actually in it */}
+                <div className="overflow-hidden rounded-md border border-border">
+                  <div className="grid grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)_minmax(0,1.3fr)] items-center gap-3 border-b border-border bg-muted/60 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    <span>Your column</span>
+                    <span>Goes into</span>
+                    <span>Sample values</span>
+                  </div>
+                  <ul className="divide-y divide-border">
+                    {MAPPING_ORDER.map((target) => {
+                      const idx = columns[target]
+                      const samples = sampleValues(idx)
+                      const required =
+                        target === 'phone' ||
+                        (target === 'name' &&
+                          columns.firstName === undefined) ||
+                        (target === 'firstName' && columns.name === undefined)
+                      return (
+                        <li
+                          key={target}
+                          className={cn(
+                            'grid grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)_minmax(0,1.3fr)] items-center gap-3 px-3 py-2',
+                            idx === undefined ? 'bg-background' : 'bg-card',
+                          )}
                         >
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {columnItems.map((item) => (
-                            <SelectItem key={item.value} value={item.value}>
-                              {item.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  ))}
+                          <Select
+                            value={idx !== undefined ? String(idx) : NONE}
+                            onValueChange={(v) => {
+                              if (!v) return
+                              setColumns((prev) => {
+                                const next = { ...prev }
+                                if (v === NONE) delete next[target]
+                                else next[target] = Number(v)
+                                return next
+                              })
+                            }}
+                            items={columnItems}
+                          >
+                            <SelectTrigger
+                              className={cn(
+                                'h-9 min-w-0',
+                                idx === undefined && 'text-muted-foreground',
+                              )}
+                              aria-label={`Your column for ${TARGET_LABELS[target]}`}
+                            >
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {columnItems.map((item) => (
+                                <SelectItem key={item.value} value={item.value}>
+                                  {item.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <div className="flex min-w-0 items-center gap-1.5">
+                            <ArrowRight className="size-3.5 shrink-0 text-muted-foreground" />
+                            <span className="truncate text-sm font-medium text-foreground">
+                              {TARGET_LABELS[target]}
+                              {required && (
+                                <span className="text-destructive"> *</span>
+                              )}
+                            </span>
+                            {target === 'niche' && (
+                              <span className="shrink-0 rounded-full bg-accent/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-accent">
+                                best
+                              </span>
+                            )}
+                          </div>
+                          <div className="min-w-0 text-xs text-muted-foreground">
+                            {idx === undefined ? (
+                              <span className="italic">Not in this file</span>
+                            ) : samples.length === 0 ? (
+                              <span className="italic">Column is empty</span>
+                            ) : (
+                              <span className="block truncate" title={samples.join(' · ')}>
+                                {samples.map((s, i) => (
+                                  <span key={i}>
+                                    {i > 0 && (
+                                      <span className="text-border"> · </span>
+                                    )}
+                                    <span className="text-foreground">{s}</span>
+                                  </span>
+                                ))}
+                              </span>
+                            )}
+                          </div>
+                        </li>
+                      )
+                    })}
+                  </ul>
                 </div>
                 {nichePreview &&
                   fileNiche === AUTO &&
@@ -870,7 +1026,7 @@ export function ImportContactsDialog({
                     {fileNiche !== AUTO ||
                     columns.niche !== undefined ||
                     columns.service === undefined
-                      ? `Import ${dataRows.length} contact${dataRows.length === 1 ? '' : 's'}`
+                      ? `Upload ${dataRows.length} contact${dataRows.length === 1 ? '' : 's'}`
                       : 'Continue'}
                   </Button>
                 </div>
@@ -984,7 +1140,7 @@ export function ImportContactsDialog({
                     ) : (
                       <Upload className="size-4" />
                     )}
-                    Import {dataRows.length} contact
+                    Upload {dataRows.length} contact
                     {dataRows.length === 1 ? '' : 's'}
                   </Button>
                 </div>
@@ -992,10 +1148,28 @@ export function ImportContactsDialog({
             </>
           )}
 
+          {step === 'importing' && (
+            <>
+              <DialogHeader>
+                <DialogTitle>Uploading contacts</DialogTitle>
+                <DialogDescription>
+                  {fileName ? `${fileName} — ` : ''}
+                  {dataRows.length} contact{dataRows.length === 1 ? '' : 's'}{' '}
+                  detected. Hang tight, this only takes a moment.
+                </DialogDescription>
+              </DialogHeader>
+              <ImportProgress
+                total={dataRows.length}
+                done={importDone}
+                label="Contacts uploaded"
+              />
+            </>
+          )}
+
           {step === 'done' && result && (
             <>
               <DialogHeader>
-                <DialogTitle>Import complete</DialogTitle>
+                <DialogTitle>Upload complete</DialogTitle>
                 <DialogDescription>
                   Your contacts are in the queue with the right niche attached
                   — the call screen will load the matching script
@@ -1008,7 +1182,7 @@ export function ImportContactsDialog({
                   <div>
                     <p className="text-sm font-semibold text-foreground">
                       {result.imported} contact
-                      {result.imported === 1 ? '' : 's'} imported
+                      {result.imported === 1 ? '' : 's'} uploaded
                     </p>
                     {(result.skippedDuplicate > 0 ||
                       result.skippedInvalid > 0) && (
@@ -1055,9 +1229,9 @@ export function ImportContactsDialog({
                   <p className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs leading-relaxed text-foreground">
                     {"These niche values weren't recognized: "}
                     {result.unmatchedNiches.join(', ')}. Those contacts are
-                    using your account default instead — you can fix each one
-                    from the contacts table, or re-export with the exact niche
-                    name and import again.
+                    using your account default instead — select them in the
+                    contacts table and use Assign niche to fix them in one go,
+                    or re-export with the exact niche name and upload again.
                   </p>
                 )}
                 <div className="flex justify-end">
