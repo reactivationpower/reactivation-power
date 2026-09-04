@@ -457,7 +457,7 @@ export function CallScreen({
           if (!open) {
             // Dismissing the dialog still returns to the dashboard so the
             // caller is never left on an already-logged call.
-            router.push('/portal/reactivation')
+            router.push('/portal/dialer')
           }
         }}
       >
@@ -482,7 +482,7 @@ export function CallScreen({
               <Button
                 className="w-full gap-2"
                 onClick={() =>
-                  router.push(`/portal/reactivation/call/${nextContactId}`)
+                  router.push(`/portal/dialer/call/${nextContactId}`)
                 }
               >
                 <Phone className="size-4" />
@@ -492,9 +492,9 @@ export function CallScreen({
             <Button
               variant={nextContactId ? 'outline' : 'default'}
               className="w-full"
-              onClick={() => router.push('/portal/reactivation')}
+              onClick={() => router.push('/portal/dialer')}
             >
-              Back to Reactivation
+              Back to Dialer
             </Button>
           </div>
         </DialogContent>
@@ -519,7 +519,7 @@ export function CallScreen({
           </div>
           {!officePhone?.trim() && (
             <p className="text-xs text-muted-foreground">
-              Tip: set your office callback number on the Reactivation dashboard
+              Tip: set your office callback number in Settings
               so it fills in here automatically.
             </p>
           )}

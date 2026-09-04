@@ -77,7 +77,7 @@ export async function updateMasterScript(formData: FormData) {
     .eq('id', id)
   if (error) return { error: error.message }
   revalidatePath('/admin/reactivation')
-  revalidatePath('/portal/reactivation')
+  revalidatePath('/portal', 'layout')
   return {}
 }
 
@@ -121,7 +121,7 @@ export async function createStage(formData: FormData) {
     .from('pipeline_stages')
     .insert({ owner_id: ownerId, name, sort_order: nextOrder })
   if (error) return { error: error.message }
-  revalidatePath('/portal/reactivation')
+  revalidatePath('/portal', 'layout')
   return {}
 }
 
@@ -147,7 +147,7 @@ export async function moveStage(id: string, direction: 'up' | 'down') {
       supabase.from('pipeline_stages').update({ sort_order: i }).eq('id', sid),
     ),
   )
-  revalidatePath('/portal/reactivation')
+  revalidatePath('/portal', 'layout')
 }
 
 export async function deleteStage(id: string) {
@@ -162,7 +162,7 @@ export async function deleteStage(id: string) {
     .eq('owner_id', accessOwnerId(participant))
     .eq('is_default', false)
   if (error) return { error: error.message }
-  revalidatePath('/portal/reactivation')
+  revalidatePath('/portal', 'layout')
   return {}
 }
 
@@ -226,7 +226,7 @@ export async function createContact(formData: FormData) {
     reason: 'initial',
   })
 
-  revalidatePath('/portal/reactivation')
+  revalidatePath('/portal', 'layout')
   return { id: contact.id }
 }
 
@@ -262,8 +262,7 @@ export async function updateContact(formData: FormData) {
     .eq('id', id)
     .eq('owner_id', accessOwnerId(participant))
   if (error) return { error: error.message }
-  revalidatePath('/portal/reactivation')
-  revalidatePath(`/portal/reactivation/contacts/${id}`)
+  revalidatePath('/portal', 'layout')
   return {}
 }
 
@@ -276,8 +275,84 @@ export async function deleteContact(id: string) {
     .delete()
     .eq('id', id)
     .eq('owner_id', accessOwnerId(participant))
-  revalidatePath('/portal/reactivation')
+  revalidatePath('/portal', 'layout')
   return {}
+}
+
+// ---------- Portal: bulk contact actions (owner only) ----------
+
+const BULK_CHUNK = 500
+
+function chunk<T>(arr: T[], size: number): T[][] {
+  const out: T[][] = []
+  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size))
+  return out
+}
+
+/**
+ * Owner deletes many contacts at once (the "select all → delete" reset path).
+ * Scoped to the owner's own contacts; follow-ups and call history cascade.
+ */
+export async function bulkDeleteContacts(ids: string[]) {
+  const participant = await getCurrentParticipant()
+  if (!participant) return { error: 'Not signed in' }
+  if (participant.role !== 'owner')
+    return { error: 'Only the account owner can delete contacts in bulk' }
+  const clean = Array.from(new Set((ids ?? []).filter(Boolean)))
+  if (clean.length === 0) return { error: 'No contacts selected' }
+
+  const supabase = getAdminClient()
+  let deleted = 0
+  for (const part of chunk(clean, BULK_CHUNK)) {
+    const { data, error } = await supabase
+      .from('contacts')
+      .delete()
+      .in('id', part)
+      .eq('owner_id', participant.id)
+      .select('id')
+    if (error) return { error: error.message, deleted }
+    deleted += data?.length ?? 0
+  }
+  revalidatePath('/portal', 'layout')
+  return { deleted }
+}
+
+/**
+ * Owner assigns (or clears) the niche on many contacts at once — for lists
+ * that were uploaded without a niche and need the right script attached.
+ */
+export async function bulkAssignNiche(ids: string[], nicheId: string | null) {
+  const participant = await getCurrentParticipant()
+  if (!participant) return { error: 'Not signed in' }
+  if (participant.role !== 'owner')
+    return { error: 'Only the account owner can change niches in bulk' }
+  const clean = Array.from(new Set((ids ?? []).filter(Boolean)))
+  if (clean.length === 0) return { error: 'No contacts selected' }
+
+  const supabase = getAdminClient()
+  if (nicheId) {
+    const { data: niche } = await supabase
+      .from('niches')
+      .select('id')
+      .eq('id', nicheId)
+      .eq('is_active', true)
+      .maybeSingle()
+    if (!niche) return { error: 'That niche is not available' }
+  }
+
+  let updated = 0
+  for (const part of chunk(clean, BULK_CHUNK)) {
+    const { data, error } = await supabase
+      .from('contacts')
+      .update({ niche_id: nicheId })
+      .in('id', part)
+      .eq('owner_id', participant.id)
+      .select('id')
+    if (error) return { error: error.message, updated }
+    updated += data?.length ?? 0
+  }
+  revalidatePath('/portal', 'layout')
+  return { updated }
 }
 
 // ---------- Portal: CSV import + default niche ----------
@@ -294,7 +369,7 @@ export async function setDefaultNiche(nicheId: string) {
     .update({ default_niche_id: nicheId || null })
     .eq('id', participant.id)
   if (error) return { error: error.message }
-  revalidatePath('/portal/reactivation')
+  revalidatePath('/portal', 'layout')
   return {}
 }
 
@@ -499,7 +574,7 @@ export async function importContacts(input: {
     imported += inserted?.length ?? 0
   }
 
-  revalidatePath('/portal/reactivation')
+  revalidatePath('/portal', 'layout')
   return {
     imported,
     skippedDuplicate,
@@ -528,7 +603,7 @@ export async function setCallBatchSize(size: number) {
     .update({ call_batch_size: size })
     .eq('id', participant.id)
   if (error) return { error: error.message }
-  revalidatePath('/portal/reactivation')
+  revalidatePath('/portal', 'layout')
   return {}
 }
 
@@ -554,7 +629,7 @@ export async function addMoreCalls(count?: number) {
     n = owner?.call_batch_size ?? 7
   }
   const released = await releaseReserveContacts(ownerId, Math.max(1, n))
-  revalidatePath('/portal/reactivation')
+  revalidatePath('/portal', 'layout')
   return { released }
 }
 
@@ -568,7 +643,7 @@ export async function setSelectedNiche(nicheId: string) {
   .from('participants')
   .update({ selected_niche_id: nicheId || null })
   .eq('id', participant.id)
-  revalidatePath('/portal/reactivation')
+  revalidatePath('/portal', 'layout')
   }
 
 /** Owner sets their practice name, auto-filled into scripts as {{practice_name}} */
@@ -584,7 +659,7 @@ export async function setPracticeName(formData: FormData) {
     .update({ practice_name: practiceName || null })
     .eq('id', participant.id)
   if (error) return { error: error.message }
-  revalidatePath('/portal/reactivation')
+  revalidatePath('/portal', 'layout')
   return {}
 }
 
@@ -601,7 +676,7 @@ export async function setOfficePhone(formData: FormData) {
     .update({ office_phone: officePhone || null })
     .eq('id', participant.id)
   if (error) return { error: error.message }
-  revalidatePath('/portal/reactivation')
+  revalidatePath('/portal', 'layout')
   return {}
 }
 
@@ -654,7 +729,7 @@ export async function addTeamMember(formData: FormData) {
       return { error: 'Someone with this email already exists.' }
     return { error: error.message }
   }
-  revalidatePath('/portal/reactivation')
+  revalidatePath('/portal', 'layout')
   return {}
 }
 
@@ -690,7 +765,7 @@ export async function setTeamMemberActive(memberId: string, isActive: boolean) {
     .eq('id', memberId)
     .eq('parent_id', participant.id) // ownership guard
   if (error) return { error: error.message }
-  revalidatePath('/portal/reactivation')
+  revalidatePath('/portal', 'layout')
   return {}
 }
 
@@ -871,7 +946,6 @@ export async function logCall(formData: FormData) {
     })
   }
 
-  revalidatePath('/portal/reactivation')
-  revalidatePath(`/portal/reactivation/contacts/${contactId}`)
+  revalidatePath('/portal', 'layout')
   return { callId: call.id }
 }

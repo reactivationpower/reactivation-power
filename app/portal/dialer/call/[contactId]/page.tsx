@@ -25,7 +25,7 @@ export default async function CallPage({
 }) {
   const { contactId } = await params
   const participant = await getCurrentParticipant()
-  if (!participant) redirect(`/login?next=/portal/reactivation`)
+  if (!participant) redirect(`/login?next=/portal/dialer`)
 
   const ownerId = accessOwnerId(participant)
   const contact = await getContact(contactId)
@@ -55,11 +55,11 @@ export default async function CallPage({
     return (
       <div className="mx-auto w-full max-w-2xl px-4 py-6 sm:px-6">
         <Link
-          href="/portal/reactivation"
+          href="/portal/dialer"
           className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="size-4" />
-          Back to Reactivation
+          Back to Dialer
         </Link>
         <div className="mt-6 rounded-lg border-2 border-destructive bg-destructive/10 p-6">
           <div className="flex items-start gap-3">
@@ -92,11 +92,11 @@ export default async function CallPage({
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6">
       <Link
-        href="/portal/reactivation"
+        href="/portal/dialer"
         className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
       >
         <ArrowLeft className="size-4" />
-        Back to Reactivation
+        Back to Dialer
       </Link>
 
       <div className="mt-4">

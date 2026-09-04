@@ -41,7 +41,7 @@ export function DeleteContactButton({
       }
       onDeleted?.()
       if (variant === 'detail') {
-        router.push('/portal/reactivation')
+        router.push('/portal/contacts')
       } else {
         router.refresh()
       }

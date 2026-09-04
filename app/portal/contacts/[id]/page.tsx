@@ -37,11 +37,11 @@ export default async function ContactProfilePage({
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-8">
       <Link
-        href="/portal/reactivation"
+        href="/portal/contacts"
         className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
       >
         <ArrowLeft className="size-4" />
-        Back to Reactivation
+        Back to Contacts
       </Link>
 
       <div className="mt-4 flex flex-wrap items-start justify-between gap-4">
@@ -83,7 +83,7 @@ export default async function ContactProfilePage({
         </div>
         {!contact.do_not_call && (
           <Link
-            href={`/portal/reactivation/call/${contact.id}`}
+            href={`/portal/dialer/call/${contact.id}`}
             className="flex items-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
             <Phone className="size-4" />

@@ -17,7 +17,7 @@ export default async function PracticeScriptPage({
 }) {
   const { screen } = await searchParams
   const participant = await getCurrentParticipant()
-  if (!participant) redirect(`/login?next=/portal/reactivation`)
+  if (!participant) redirect(`/login?next=/portal/dialer`)
 
   const ownerId = accessOwnerId(participant)
   const sectors = await getOwnerSectors(ownerId)
@@ -32,11 +32,11 @@ export default async function PracticeScriptPage({
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6">
       <Link
-        href="/portal/reactivation"
+        href="/portal/dialer"
         className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
       >
         <ArrowLeft className="size-4" />
-        Back to Reactivation
+        Back to Dialer
       </Link>
 
       <div className="mt-4 flex flex-col gap-1">

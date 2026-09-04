@@ -23,7 +23,7 @@ function QueueRow({ follow_up, contact }: QueueItem) {
       <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-2">
           <Link
-            href={`/portal/reactivation/contacts/${contact.id}`}
+            href={`/portal/contacts/${contact.id}`}
             className="font-semibold text-foreground hover:underline"
           >
             {contact.name}
@@ -80,7 +80,7 @@ function QueueRow({ follow_up, contact }: QueueItem) {
         </div>
       ) : (
         <Link
-          href={`/portal/reactivation/call/${contact.id}`}
+          href={`/portal/dialer/call/${contact.id}`}
           className="flex shrink-0 items-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
         >
           <Phone className="size-4" />
