@@ -92,7 +92,8 @@ function etDay(offsetDays: number) {
 /** A UTC instant for an ET wall-clock time on today+offsetDays. */
 function at(offsetDays: number, hour: number, minute = 0): Date {
   const { y, mo, d } = etDay(offsetDays)
-  return easternWallClockToUtc(y, mo, d, hour, minute)
+  // Intl gives a 1-based month; easternWallClockToUtc feeds Date.UTC (0-based).
+  return easternWallClockToUtc(y, mo - 1, d, hour, minute)
 }
 
 function isWeekend(offsetDays: number) {
@@ -559,11 +560,20 @@ export async function seedDemoData(): Promise<SeedSummary> {
   const nameQueue = [...PATIENT_NAMES]
   const nicheCycle = [0, 0, 0, 0, 1, 1, 2, 2, 3, 0] // Chiro-heavy mix
 
-  // 60 "worked" patients imported ~10 weeks ago (staggered over a week)
+  // 60 "worked" patients, uploaded in four waves over the past 10 weeks —
+  // the way a real office feeds the list. The most recent wave is still
+  // being actively worked, so the timeline runs right up to yesterday and a
+  // handful of bookings land in the coming two weeks.
+  const waveOf = (i: number) => {
+    if (i < 20) return -70 + between(0, 4) // 10 weeks ago
+    if (i < 35) return -49 + between(0, 3) // 7 weeks ago
+    if (i < 48) return -28 + between(0, 3) // 4 weeks ago
+    return -11 + between(0, 3) // last week and a half
+  }
   for (let i = 0; i < 60; i++) {
     const [first, last] = nameQueue.shift()!
     const niche = DEMO_NICHES[nicheCycle[i % nicheCycle.length]]
-    const importDay = -70 + between(0, 6)
+    const importDay = waveOf(i)
     contacts.push({
       name: `${first} ${last}`,
       phone: fakePhone(),

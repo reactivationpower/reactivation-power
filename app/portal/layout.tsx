@@ -1,10 +1,12 @@
 import type React from 'react'
+import { Suspense } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { LogOut } from 'lucide-react'
 import { logout } from '@/app/actions/auth'
 import { PortalNav, SettingsNavLink } from '@/components/portal/portal-nav'
 import { PORTAL_WIDTH } from '@/lib/portal-layout'
+import { DemoBarServer } from '@/components/demo/demo-bar-server'
 
 export const metadata = {
   title: 'Reactivation Power — Portal',
@@ -17,6 +19,9 @@ export default function PortalLayout({
 }) {
   return (
     <div className="flex min-h-screen flex-col">
+      <Suspense fallback={null}>
+        <DemoBarServer />
+      </Suspense>
       <header className="border-b border-border bg-card">
         <div
           className={`${PORTAL_WIDTH} flex h-16 items-center justify-between gap-4`}

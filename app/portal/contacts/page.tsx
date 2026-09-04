@@ -16,6 +16,7 @@ import { PORTAL_WIDTH } from '@/lib/portal-layout'
 import { ContactsTable } from '@/components/reactivation/contacts-table'
 import { AddContactDialog } from '@/components/reactivation/add-contact-dialog'
 import { ImportContactsDialog } from '@/components/reactivation/import-contacts-dialog'
+import { DEMO_SAMPLE_CSV } from '@/lib/demo/sample-csv'
 
 export const metadata = {
   title: 'Contacts — Reactivation Power',
@@ -62,6 +63,7 @@ export default async function ContactsPage() {
             allNiches={allSectorNiches}
             savedMappings={serviceMappings}
             defaultNicheName={defaultNiche?.name ?? null}
+            demoSampleCsv={participant.is_demo ? DEMO_SAMPLE_CSV : null}
           />
           <AddContactDialog niches={niches} />
         </div>

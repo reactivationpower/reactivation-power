@@ -434,7 +434,7 @@ export async function importContacts(input: {
 
   // 1. Save/refresh the service -> niche mappings for this practice
   const mappings = (input.mappings ?? []).filter((m) => m.service_label)
-  if (mappings.length > 0) {
+  if (mappings.length > 0 && !participant.is_demo) {
     await supabase.from('service_niche_mappings').upsert(
       mappings.map((m) => ({
         owner_id: ownerId,
@@ -568,6 +568,23 @@ export async function importContacts(input: {
   // (getCallQueueState), so a bulk upload never dumps everyone into
   // "Calls Due" at once.
   let imported = 0
+
+  // DEMO ACCOUNT: run the whole mapping/dedupe/niche-classification pass so
+  // the dialog's preview, progress bar, and warnings are genuine — but never
+  // write. The demo's 100 patients stay exactly as seeded; the reset button
+  // and nightly cron keep them current.
+  if (participant.is_demo) {
+    revalidatePath('/portal', 'layout')
+    return {
+      imported: toInsert.length,
+      skippedDuplicate,
+      skippedInvalid,
+      unmatchedNiches: Array.from(unmatchedNiches).slice(0, 8),
+      notEnabledNiches: Array.from(notEnabledNiches).slice(0, 12),
+      simulated: true as const,
+    }
+  }
+
   const CHUNK = 250
   for (let i = 0; i < toInsert.length; i += CHUNK) {
     const chunk = toInsert.slice(i, i + CHUNK)

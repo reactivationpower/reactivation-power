@@ -282,6 +282,12 @@ interface Props {
   allNiches: Niche[]
   savedMappings: ServiceNicheMapping[]
   defaultNicheName: string | null
+  /**
+   * Demo account only: a ready-made CSV the presenter can load with one click
+   * so no file is needed on their laptop. The server never writes demo
+   * imports, so the whole flow is safe to run live in front of a prospect.
+   */
+  demoSampleCsv?: string | null
 }
 
 export function ImportContactsDialog({
@@ -289,6 +295,7 @@ export function ImportContactsDialog({
   allNiches,
   savedMappings,
   defaultNicheName,
+  demoSampleCsv = null,
 }: Props) {
   const [open, setOpen] = useState(false)
   const [step, setStep] = useState<Step>('upload')
@@ -649,6 +656,29 @@ export function ImportContactsDialog({
                 </DialogDescription>
               </DialogHeader>
               <div className="flex flex-col gap-4">
+                {demoSampleCsv ? (
+                  <div className="flex flex-col gap-2 rounded-lg border border-accent/40 bg-accent/10 p-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-foreground">
+                        Demo: use the sample patient export
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        A realistic 24-patient CSV with a Niche column — no
+                        file needed. Nothing is written to the demo account.
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      className="shrink-0 gap-2"
+                      onClick={() =>
+                        loadText(demoSampleCsv, 'ridgeline-patient-export.csv')
+                      }
+                    >
+                      <FileSpreadsheet className="size-4" />
+                      Load sample file
+                    </Button>
+                  </div>
+                ) : null}
                 <button
                   type="button"
                   onClick={() => fileRef.current?.click()}
