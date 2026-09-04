@@ -234,21 +234,21 @@ export function DispositionBar({
           />
         ))}
       </div>
-      <ul className="grid grid-cols-2 gap-x-6 gap-y-1.5 text-xs sm:grid-cols-3">
+      <ul className="flex flex-col gap-2 text-sm">
         {dispositions.map((d) => (
-          <li key={d.key} className="flex items-center gap-2">
+          <li key={d.key} className="flex items-center gap-3">
             <span
               className={cn(
                 'size-2.5 shrink-0 rounded-sm',
                 DISPOSITION_TONE[d.key] ?? 'bg-muted-foreground',
               )}
             />
-            <span className="truncate text-muted-foreground">{d.label}</span>
-            <span className="ml-auto font-medium text-foreground">
+            <span className="flex-1 text-muted-foreground">{d.label}</span>
+            <span className="tabular-nums font-medium text-foreground">
               {d.count}
-              <span className="ml-1 text-muted-foreground">
-                ({Math.round((d.count / total) * 100)}%)
-              </span>
+            </span>
+            <span className="w-12 text-right tabular-nums text-muted-foreground">
+              {Math.round((d.count / total) * 100)}%
             </span>
           </li>
         ))}

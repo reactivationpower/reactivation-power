@@ -56,7 +56,7 @@ const axisTick = { fontSize: 12 }
 export function ActivityTrendChart({ data }: { data: WeekRow[] }) {
   return (
     <ChartContainer config={FUNNEL} className="h-56 w-full">
-      <AreaChart data={data} margin={{ left: -16, right: 8, top: 8 }}>
+      <AreaChart data={data} margin={{ left: 0, right: 8, top: 8 }}>
         <CartesianGrid vertical={false} strokeDasharray="3 3" />
         <XAxis
           dataKey="label"
@@ -152,7 +152,7 @@ export function BucketRateChart({
   const color = metric === 'answerRate' ? 'var(--chart-1)' : 'var(--chart-2)'
   return (
     <ChartContainer config={RATES} className={`${height} w-full`}>
-      <BarChart data={data} margin={{ left: -16, right: 8, top: 8 }}>
+      <BarChart data={data} margin={{ left: 0, right: 8, top: 8 }}>
         <CartesianGrid vertical={false} strokeDasharray="3 3" />
         <XAxis
           dataKey="label"
@@ -189,7 +189,7 @@ export function BucketRateChart({
 export function BucketDualRateChart({ data }: { data: Bucket[] }) {
   return (
     <ChartContainer config={RATES} className="h-52 w-full">
-      <BarChart data={data} margin={{ left: -16, right: 8, top: 8 }}>
+      <BarChart data={data} margin={{ left: 0, right: 8, top: 8 }}>
         <CartesianGrid vertical={false} strokeDasharray="3 3" />
         <XAxis
           dataKey="label"
@@ -237,14 +237,15 @@ export function BucketDualRateChart({ data }: { data: Bucket[] }) {
 export function AppointmentsByMonthChart({ data }: { data: MonthRow[] }) {
   return (
     <ChartContainer config={APPTS} className="h-56 w-full">
-      <BarChart data={data} margin={{ left: -16, right: 8, top: 8 }}>
+      <BarChart data={data} margin={{ left: 0, right: 8, top: 8 }}>
         <CartesianGrid vertical={false} strokeDasharray="3 3" />
         <XAxis
           dataKey="label"
           tickLine={false}
           axisLine={false}
           tick={axisTick}
-          interval={0}
+          interval="preserveStartEnd"
+          minTickGap={20}
         />
         <YAxis
           tickLine={false}
@@ -284,7 +285,7 @@ export function LoginsByWeekChart({
 }) {
   return (
     <ChartContainer config={LOGINS} className="h-36 w-full">
-      <BarChart data={data} margin={{ left: -16, right: 8, top: 8 }}>
+      <BarChart data={data} margin={{ left: 0, right: 8, top: 8 }}>
         <CartesianGrid vertical={false} strokeDasharray="3 3" />
         <XAxis
           dataKey="label"
