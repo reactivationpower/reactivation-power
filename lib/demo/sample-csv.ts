@@ -4,10 +4,11 @@
  * Deliberate design:
  * - Realistic "EHR export" headers, including columns we ignore (Account #,
  *   Last Appt) so the auto-detection has something to show off.
- * - A Niche column mixing the four enabled demo niches, plus TWO rows tagged
- *   "Massage Therapy" — a real niche that is NOT enabled on the demo account,
- *   which triggers the red "not turned on for this account" warning so the
- *   presenter can explain how entitlements work.
+ * - A Niche column using ONLY the four enabled demo niches (Chiropractic,
+ *   Decompression, Joint Pain, ChiroThin) so the upload previews clean with
+ *   no "not turned on for this account" warning. (User decision 9/4/2026 —
+ *   an earlier version included two Massage Therapy rows to show off the
+ *   entitlement warning; he wanted the upload to run without it.)
  * - Two rows share a phone with an existing seeded patient so the dedupe
  *   count is non-zero.
  * - Names are distinct from the 100 seeded patients.
@@ -21,13 +22,13 @@ export const DEMO_SAMPLE_CSV = `Account #,Patient Last Name,Patient First Name,M
 10457,Dwyer,Colin,(303) 555-0165,colin.dwyer@example.com,ChiroThin,Weight management,02/10/2025
 10462,Ekwueme,Adaeze,(720) 555-0198,adaeze.e@example.com,Chiropractic,Neck stiffness,04/02/2025
 10478,Fontaine,Marc,(303) 555-0129,marc.fontaine@example.com,Decompression,Herniated disc L4-L5,12/18/2024
-10481,Gallagher,Sheila,(720) 555-0176,sheila.g@example.com,Massage Therapy,Shoulder tension,03/28/2025
+10481,Gallagher,Sheila,(720) 555-0176,sheila.g@example.com,Chiropractic,Shoulder tension,03/28/2025
 10495,Hutchins,Dale,(303) 555-0151,dale.hutchins@example.com,Joint Pain,Hip pain,10/09/2024
 10502,Iqbal,Farah,(720) 555-0134,farah.iqbal@example.com,Chiropractic,Headaches,02/25/2025
 10517,Jankowski,Peter,(303) 555-0108,peter.j@example.com,ChiroThin,Weight management,01/07/2025
 10523,Kirkland,Maureen,(720) 555-0182,maureen.k@example.com,Decompression,Numbness in legs,11/30/2024
 10538,Lindstrom,Erik,(303) 555-0147,erik.lindstrom@example.com,Chiropractic,Mid-back pain,03/03/2025
-10544,Moreau,Celeste,(720) 555-0119,celeste.moreau@example.com,Massage Therapy,Stress and tension,04/11/2025
+10544,Moreau,Celeste,(720) 555-0119,celeste.moreau@example.com,Joint Pain,Shoulder pain,04/11/2025
 10559,Nwosu,Chidi,(303) 555-0193,chidi.nwosu@example.com,Joint Pain,Left shoulder pain,09/21/2024
 10566,Oakes,Trevor,(720) 555-0156,trevor.oakes@example.com,Chiropractic,Lower back pain,02/14/2025
 10571,Pellegrino,Dana,(303) 555-0171,dana.p@example.com,ChiroThin,Weight management,12/02/2024
