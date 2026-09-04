@@ -25,6 +25,10 @@ export interface Participant {
   default_niche_id?: string | null
   /** How many cold-list "initial" calls to keep live in the queue (5/7/10) */
   call_batch_size?: number | null
+  /** True only for the sales demo account (owner + its callers). */
+  is_demo?: boolean
+  /** When the demo data was last regenerated (demo owner row only). */
+  demo_seeded_at?: string | null
   created_at: string
 }
 
