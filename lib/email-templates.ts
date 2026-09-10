@@ -1432,6 +1432,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
             '&ldquo;I need to think about it.&rdquo; &ldquo;Just send me some info.&rdquo; &ldquo;I\'m looking at another option.&rdquo; Each one is a button on the screen with the words already written. Nobody has to improvise.',
           ],
         ]),
+        cta('If you\'d rather hear this than read it:', 'Book a Live Walkthrough'),
         p(
           'Notice what isn\'t in there: no pressure, no discount, no &ldquo;this week only.&rdquo; It\'s the conversation a good front-desk person would have anyway &mdash; with the parts that are hard to remember written down.',
         ),
@@ -1442,7 +1443,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         p(
           'On the call, we can walk you through it live for whatever you treat most &mdash; and you can decide whether it sounds like your practice.',
         ),
-        cta('Want to hear it read for your practice? Book a time:'),
+        cta('Pick a time and we\'ll read it for your practice:', 'Reserve My Strategy Call'),
         finePrint(),
         signoff(),
       ]),
@@ -1569,6 +1570,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
             'A callback that\'s due this afternoon says so. Your team works top to bottom and trusts the order.',
           ],
         ]),
+        cta('Want to see the queue with a real list in it?', 'See It Live on a Call'),
         p(
           'That\'s the difference between a spreadsheet and a queue. A spreadsheet shows you everything you haven\'t done. A queue shows you the next thing to do.',
         ),
@@ -1579,7 +1581,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         p(
           'On the call we\'ll look at your actual list size and pick the batch size that fits your team\'s day.',
         ),
-        cta("Let's look at your list and set the pace:"),
+        cta("Let's look at your list and set the pace:", 'Book Your Call'),
         finePrint(),
         signoff(),
       ]),
@@ -1711,6 +1713,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
             'One tap, and they\'re out for good. Respecting the no is part of the system too.',
           ],
         ]),
+        cta('Five outcomes, zero sticky notes. See it working on a live list:', 'Pick a Time That Works'),
         p(
           'None of that lives in anyone\'s memory. It\'s the software\'s job. Your team\'s job is the seven calls in front of them.',
         ),
@@ -1720,7 +1723,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         p(
           'On the call, we\'ll show you the queue with a real list in it, so you can see how the follow-ups stack up for yourself.',
         ),
-        cta('See how the follow-through works &mdash; book a time:'),
+        cta('Ready to see the follow-through on your own list?', 'Book Your Strategy Call'),
         finePrint(),
         signoff(),
       ]),
@@ -1847,6 +1850,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
             'The &ldquo;spoke, didn\'t schedule&rdquo; patients from month one resurface for a fresh conversation. Your caller has the script cold. Your analytics show which hour of the day gets answered and which gets a yes, so the block of calls moves to where it works. The list has become a routine, not an initiative.',
           ],
         ]),
+        cta('Want this mapped to your list size?', 'Map My First 90 Days'),
         p('Two things worth noticing about that arc:'),
         checks([
           '<strong>The best month isn\'t the first one.</strong> Programs judged on week two get abandoned right before the follow-ups come due.',
@@ -1859,7 +1863,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         p(
           'On the call, we\'ll map your list size to this timeline so you know what a realistic month one, two and three look like for your office &mdash; before you commit to anything.',
         ),
-        cta("Let's map your first 90 days:"),
+        cta("Grab a time and we'll build it together:", 'Schedule Your Strategy Session'),
         finePrint(),
         signoff(),
       ]),
@@ -1960,6 +1964,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         p(
           'If you\'ve read a few of these and haven\'t booked, there\'s probably a specific reason. Here are the ones we hear most, each with the honest short answer.',
         ),
+        cta('Already past all of them? Skip straight to the calendar:', 'Skip to the Calendar'),
         image(
           asset('37-every-reason-answered.jpg'),
           'Six cards, each with a teal check: No Time, Tried It, They Moved On, Seems Desperate, Not Now, Will It Pay. Bring your reason. We\'ll answer it.',
@@ -1997,7 +2002,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
           'The only reason we can\'t answer is the one you don\'t bring.',
           'Book the call and bring it.',
         ]),
-        cta("Bring your reason. We'll give you the straight answer:"),
+        cta("Bring your reason. We'll give you the straight answer:", 'Book the Call'),
         finePrint(),
         signoff(),
       ]),
@@ -2052,6 +2057,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         h1('What happens after you book'),
         greet,
         p('The form takes about a minute. Here\'s everything after it, so there are no surprises.'),
+        cta('If you\'re ready now, this is step one:', 'Start With the Form'),
         image(
           asset('39-after-you-book.jpg'),
           'Four connected steps: Pick a Time, Pull 3 Numbers, The Call, Your Break-Even. No surprises. Just your numbers.',
@@ -2077,7 +2083,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         panel([
           'One request: if the time stops working, grab another one rather than skipping it. The call is short, and the number is worth having.',
         ]),
-        cta('Ready? Start with the form:'),
+        cta('Everything above starts with one click:', 'Grab a Time on the Calendar'),
         finePrint(),
         signoff(),
       ]),
@@ -2119,6 +2125,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         p(
           '<strong>And the list doesn\'t wait.</strong> Every month, a slice of it quietly becomes unreachable.',
         ),
+        cta('If that already adds up for you:', 'Reserve My Strategy Call'),
         darkPanel([
           'You don\'t have to believe any of that yet.',
           'You have to spend one short call finding out whether it\'s true for your office.',
@@ -2127,7 +2134,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
           'If it isn\'t, we\'ll tell you, and you\'ll walk away with a clearer picture of an asset you already own. If it is, you\'ll know exactly what one to three patients are worth to you &mdash; and how many are sitting in that list.',
         ),
         p('Does that sound reasonable?'),
-        cta("Let's find out together:"),
+        cta("Let's find out together:", 'Schedule Your Call'),
         finePrint(),
         signoff(),
       ]),
