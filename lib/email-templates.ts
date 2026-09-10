@@ -166,6 +166,19 @@ ${rightItems
               </tr>
             </table>`
 
+/**
+ * Full-width hosted graphic. The alt text must carry the whole message so
+ * the email still lands in clients that block images by default.
+ */
+const image = (src: string, alt: string) =>
+  `            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0;">
+              <tr>
+                <td>
+                  <img src="${src}" alt="${alt}" width="520" style="display:block;width:100%;max-width:520px;height:auto;margin:0 auto;border-radius:6px;" />
+                </td>
+              </tr>
+            </table>`
+
 /** Stacked calculation that lands on a bold total. */
 const mathBox = (
   rows: Array<[string, string]>,
@@ -643,21 +656,9 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         p(
           'The difference is that a booked slot pays for that overhead. <strong>An empty one just absorbs it.</strong>',
         ),
-        compare(
-          'An open slot',
-          [
-            'Overhead runs anyway',
-            'Staff are paid regardless',
-            'Nothing recovered',
-            'The gap quietly repeats next week',
-          ],
-          'A slot filled from your list',
-          [
-            'Overhead is covered',
-            'Same staff, same hours, real production',
-            'Revenue from a patient you already earned',
-            'A patient re-engaged in their care',
-          ],
+        image(
+          'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/ChatGPT%20Image%20Sep%2010%2C%202026%2C%2011_33_11%20AM-imIexzmdeZe7tE11MOulTOoV3ffekm.png',
+          'An open slot versus a slot filled from your list. Open slot: overhead runs anyway, staff are paid regardless, nothing recovered, the gap quietly repeats next week. Filled from your list: overhead is covered, same staff and same hours with real production, revenue from a patient you already earned, a patient re-engaged in their care.',
         ),
         p(
           'This is where a reactivation list earns its keep. Late cancellation at 2pm? There is a queue of warm patients who already know you and have a reason to come in — and a script that gets them booked.',
