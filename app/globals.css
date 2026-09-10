@@ -116,8 +116,8 @@
       to right,
       var(--accent) 0%,
       var(--accent) var(--range-pct),
-      var(--muted) var(--range-pct),
-      var(--muted) 100%
+      var(--input) var(--range-pct),
+      var(--input) 100%
     );
     outline: none;
     touch-action: pan-y;
