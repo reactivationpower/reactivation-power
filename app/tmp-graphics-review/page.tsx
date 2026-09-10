@@ -81,13 +81,13 @@ const PROPOSALS: Proposal[] = [
   },
   {
     number: 22,
-    emailName: 'One Conversation Covers It',
-    subject: 'One conversation usually pays for the whole thing',
+    emailName: 'One to Three Patients Covers It',
+    subject: 'How many patients does it take to pay for this?',
     kind: 'Infographic',
     file: '/images/emails/22-one-conversation.png',
     placement:
-      'Replaces the math box (Hundreds / One / Margin). Same content, drawn.',
-    why: 'Same treatment as the Email 13 graphic. The teal ONE block being the hero is the entire email in a single glance.',
+      'Replaces the math box (Hundreds / One to three / Margin). Same content, drawn.',
+    why: 'Same treatment as the Email 13 graphic. The teal ONE TO THREE block being the hero is the entire email in a single glance, and the range matches the corrected copy so the sales call lands inside it.',
   },
 ]
 

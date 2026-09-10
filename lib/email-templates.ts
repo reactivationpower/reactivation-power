@@ -1254,12 +1254,12 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
   {
     id: 'one-conversation',
     audience: 'chiropractic',
-    name: 'Email 22 — One Conversation Covers It',
-    subject: 'One conversation usually pays for the whole thing',
+    name: 'Email 22 — One to Three Patients Covers It',
+    subject: 'How many patients does it take to pay for this?',
     previewText:
-      'When a single returning patient covers the investment, the math stops being the hard part.',
+      'When one to three returning patients cover the investment, the math stops being the hard part.',
     angle:
-      'Low-risk close. Frames the break-even point as a single reactivated patient.',
+      'Low-risk close. Frames the break-even point as one to three reactivated patients, depending on the practice\'s case average — a range the sales call can land inside.',
     html: wrap(
       compose([
         h1('Count how many patients it takes to pay for this'),
@@ -1272,29 +1272,32 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         ),
         p('Here, the answer is usually a very small number:'),
         bigStat(
-          'One patient',
-          'For most practices, a single reactivated patient and their plan of care covers the investment',
+          'One to three patients',
+          'Depending on your case average, that\'s how many reactivated patients — with their plans of care — it takes to cover the investment',
         ),
         p(
-          'That changes the decision entirely. You\'re not betting on a campaign performing. You\'re asking whether your team, given the exact words to say, can bring back <em>one</em> patient out of hundreds who already know you.',
+          'A practice with a higher average plan of care breaks even on one. A lower one might take three. Either way, it\'s a handful out of hundreds.',
+        ),
+        p(
+          'That changes the decision entirely. You\'re not betting on a campaign performing. You\'re asking whether your team, given the exact words to say, can bring back one, two, or three patients out of hundreds who already know you.',
         ),
         mathBox(
           [
             ['Patients contacted in a normal month', 'Hundreds'],
-            ['Needed to cover the investment', 'One'],
+            ['Needed to cover the investment', 'One to three'],
             ['Everything reactivated after that', 'Margin'],
           ],
           'Break-even',
-          'One patient',
+          'One to three patients',
         ),
         p(
-          'And that first patient is rarely the last one — every appointment after it is recovered revenue on a list you already owned.',
+          'And once you\'re past break-even, every appointment after it is recovered revenue on a list you already owned.',
         ),
         cta("Let's run your numbers and find your break-even:"),
         finePrint(),
         signoff('To your practice\u2019s growth,'),
       ]),
-      'When a single returning patient covers the investment, the math stops being the hard part.',
+      'When one to three returning patients cover the investment, the math stops being the hard part.',
     ),
   },
 ]
