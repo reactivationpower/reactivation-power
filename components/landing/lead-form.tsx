@@ -65,6 +65,9 @@ export function LeadForm() {
   const [inactive, setInactive] = useState(() =>
     calc ? String(calc.inactiveCount) : '',
   )
+  // Set once the visitor types in the count field — even retyping the same
+  // number counts, because they've now confirmed it
+  const [inactiveEdited, setInactiveEdited] = useState(false)
   // Follow the slider if the visitor moves it after this form has mounted
   const sliderCount = calc?.inactiveCount
   useEffect(() => {
@@ -356,9 +359,10 @@ export function LeadForm() {
             autoComplete="off"
             placeholder="e.g. 1,000"
             value={formatCount(inactive)}
-            onChange={(e) =>
+            onChange={(e) => {
               setInactive(e.target.value.replace(/\D/g, '').slice(0, 6))
-            }
+              setInactiveEdited(true)
+            }}
             aria-invalid={errors.inactivePatients ? 'true' : undefined}
             className={inputClass(Boolean(errors.inactivePatients))}
           />
@@ -377,7 +381,19 @@ export function LeadForm() {
       </div>
 
       {calc ? (
-        <input type="hidden" name="patientValue" value={calc.patientValue} />
+        <>
+          <input type="hidden" name="patientValue" value={calc.patientValue} />
+          <input
+            type="hidden"
+            name="inactiveAdjusted"
+            value={calc.inactiveTouched || inactiveEdited ? 'yes' : 'no'}
+          />
+          <input
+            type="hidden"
+            name="valueAdjusted"
+            value={calc.valueTouched ? 'yes' : 'no'}
+          />
+        </>
       ) : null}
 
       <ServicesMultiSelect

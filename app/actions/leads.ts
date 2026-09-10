@@ -102,6 +102,20 @@ export async function submitHealthcareLead(
   const revenueShown = reactivatedPatients(inactiveCount) * patientValue
   const money = (n: number) => '$' + n.toLocaleString('en-US')
 
+  // An untouched slider default looks identical to a real answer in the CRM,
+  // so tell the salesperson which it was. The flags are absent on pages
+  // without a calculator, where the count is typed and the value is assumed.
+  const UNTOUCHED = ' (default — visitor did not adjust)'
+  const inactiveNote =
+    formData.get('inactiveAdjusted') === 'no' ? UNTOUCHED : ''
+  const valueAdjusted = formData.get('valueAdjusted')
+  const valueNote =
+    valueAdjusted === 'no'
+      ? UNTOUCHED
+      : valueAdjusted === null
+        ? ' (assumed — no calculator on that page)'
+        : ''
+
   const firstName = titleCase(firstNameRaw)
   const lastName = titleCase(lastNameRaw)
 
@@ -141,8 +155,8 @@ export async function submitHealthcareLead(
         `Location: ${city && state ? `${city}, ${state} ${zip}` : zip}`,
         '',
         `Years in practice: ${yearsInPractice}`,
-        `Inactive patient files: ${inactiveCount.toLocaleString('en-US')}`,
-        `Annual patient value used: ${money(patientValue)}`,
+        `Inactive patient files: ${inactiveCount.toLocaleString('en-US')}${inactiveNote}`,
+        `Annual patient value used: ${money(patientValue)}${valueNote}`,
         `Revenue estimate shown to lead: ${money(revenueShown)}`,
         `Services offered: ${services.length > 0 ? services.join(', ') : '(none selected)'}`,
       ].join('\n')
