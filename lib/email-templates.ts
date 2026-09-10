@@ -564,7 +564,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         ),
         image(
           'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/ChatGPT%20Image%20Sep%2010%2C%202026%2C%2004_38_55%20PM-upmeGBsCYI1RyWO4BTQAxzPPRMorls.png',
-          'A text blast versus a phone call. A text blast: one message, identical for everyone; reads as marketing the moment it arrives; can\'t hear "well, it\'s been kind of okay"; a reply is the win, and someone still has to call. A phone call: a person who knows their name and history; asks how they\'ve been since they finished care; hears the pause, and knows what to say next; ends with an appointment on the calendar.',
+          'A text blast versus a phone call. A text blast: one message, identical for everyone; reads as marketing the moment it arrives; can\'t hear &ldquo;well, it\'s been kind of okay&rdquo;; a reply is the win, and someone still has to call. A phone call: a person who knows their name and history; asks how they\'ve been since they finished care; hears the pause, and knows what to say next; ends with an appointment on the calendar.',
         ),
         panel([
           'A text asks the patient to do the work: read it, decide, call back, sit on hold. A call does the work for them. That is why one fills a schedule and the other gets swiped away.',
@@ -724,9 +724,9 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
           'Think about what has changed since your inactive patients were last in. New equipment. New services. Maybe an entire program that didn\'t exist when they walked out.',
         ),
         p('Now consider what they think you do:'),
-        quote(
-          'Oh, I know that office. I went there a few years ago for my back.',
-          'What a past patient believes about your practice',
+        image(
+          'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/ChatGPT%20Image%20Sep%2010%2C%202026%2C%2005_10_43%20PM-V0Xv2gCVVYP1Qmh4VYM7ZSjiucswxI.png',
+          'What they\'re still thinking versus what you offer now. A past patient pictures a single adjustment room from years ago and thinks, &ldquo;Oh, I know that office. I went there a few years ago for my back.&rdquo; Outdated, limited, just one service in their mind. Meanwhile the practice now offers chiropractic care, spinal decompression, soft wave, weight loss, red light and aesthetics, and laser hair removal. The warmest possible audience for a new service is the patient who already had a good experience with you and simply doesn\'t know the service exists.',
         ),
         p(
           'That\'s the whole picture in their head. Not the new technology. Not the program that would be perfect for what they\'re dealing with now. <strong>Just the one thing they came in for, years ago.</strong>',
