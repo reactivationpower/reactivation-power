@@ -18,6 +18,10 @@ function formatMoney(n: number): string {
   return '$' + Math.round(n).toLocaleString('en-US')
 }
 
+function fillPercent(value: number, min: number, max: number): string {
+  return `${((value - min) / (max - min)) * 100}%`
+}
+
 export function HeroOpportunity() {
   const [inactiveCount, setInactiveCount] = useState(INACTIVE_DEFAULT)
   const [patientValue, setPatientValue] = useState(VALUE_DEFAULT)
@@ -34,17 +38,20 @@ export function HeroOpportunity() {
         <h2 className="text-balance text-xl font-bold text-foreground md:text-2xl">
           See what&apos;s hiding in your inactive patient list
         </h2>
+        <p className="text-pretty text-sm text-muted-foreground">
+          Drag the sliders to match your practice.
+        </p>
       </div>
 
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-3">
         <div className="flex items-baseline justify-between gap-4">
           <label
             htmlFor="hero-inactive"
             className="text-sm font-medium text-foreground"
           >
-            Inactive patient files
+            How many inactive patient files do you have?
           </label>
-          <span className="text-base font-semibold tabular-nums text-foreground">
+          <span className="text-lg font-bold tabular-nums text-accent">
             {inactiveCount.toLocaleString('en-US')}
             {inactiveCount >= INACTIVE_MAX ? '+' : ''}
           </span>
@@ -57,19 +64,26 @@ export function HeroOpportunity() {
           step={INACTIVE_STEP}
           value={inactiveCount}
           onChange={(e) => setInactiveCount(Number(e.target.value))}
-          className="w-full accent-accent"
+          className="range-slider"
+          style={{
+            ['--range-pct' as string]: fillPercent(
+              inactiveCount,
+              INACTIVE_MIN,
+              INACTIVE_MAX,
+            ),
+          }}
         />
       </div>
 
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-3">
         <div className="flex items-baseline justify-between gap-4">
           <label
             htmlFor="hero-value"
             className="text-sm font-medium text-foreground"
           >
-            Average annual patient value
+            What&apos;s a patient worth to you per year?
           </label>
-          <span className="text-base font-semibold tabular-nums text-foreground">
+          <span className="text-lg font-bold tabular-nums text-accent">
             {formatMoney(patientValue)}
           </span>
         </div>
@@ -81,7 +95,14 @@ export function HeroOpportunity() {
           step={VALUE_STEP}
           value={patientValue}
           onChange={(e) => setPatientValue(Number(e.target.value))}
-          className="w-full accent-accent"
+          className="range-slider"
+          style={{
+            ['--range-pct' as string]: fillPercent(
+              patientValue,
+              VALUE_MIN,
+              VALUE_MAX,
+            ),
+          }}
         />
       </div>
 
@@ -90,7 +111,7 @@ export function HeroOpportunity() {
           Estimated additional annual revenue
         </p>
         <p
-          className="text-4xl font-bold tabular-nums text-accent md:text-5xl"
+          className="text-4xl font-bold tabular-nums text-accent transition-all duration-200 md:text-5xl"
           aria-live="polite"
         >
           {formatMoney(revenue)}
