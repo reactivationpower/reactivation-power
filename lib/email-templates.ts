@@ -554,44 +554,34 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
       'The shortcut objection. A blast is easy, which is why it feels like the answer — but reactivation is a conversation, and a text can\'t have one.',
     html: wrap(
       compose([
-        h1('The question every owner asks before anyone picks up a phone'),
+        h1('The question every owner asks first'),
         greet,
         p(
-          'Somewhere in the first few minutes of talking with a practice, this comes up: <strong>&ldquo;Can\'t we just send them a text?&rdquo;</strong> It\'s a fair question. Texting is cheap, it\'s fast, and nobody on your team has to make a call.',
+          'Sooner or later every practice asks it: <strong>&ldquo;Can\'t we just send them a text?&rdquo;</strong> Fair question. It\'s cheap, it\'s fast, and nobody has to pick up a phone.',
         ),
         p(
-          'So here is what a text is good at: <strong>reminding someone of a decision they already made.</strong> Confirming Tuesday at 2:00. Nudging a patient who already said yes. That is real work, and texts do it well.',
-        ),
-        p(
-          'Reactivation is a different job. The patient stopped coming. Something has to change their mind — and a text can\'t do the one thing that changes minds, which is listen.',
+          'A text is good at one thing: <strong>reminding someone of a decision they already made.</strong> Confirming Tuesday at 2:00. Reactivation is a different job — the patient stopped coming, and something has to change their mind. A text can\'t do the one thing that changes minds: listen.',
         ),
         compare(
           'A text blast',
           [
-            'One message, identical for everyone on the list',
+            'One message, identical for everyone',
             'Reads as marketing the moment it arrives',
-            'Can\'t hear &ldquo;well, it\'s been kind of okay&rdquo; — the answer the whole conversation turns on',
-            'No way to respond to a hesitation or a question',
-            'Success is a reply — and then someone still has to call',
+            'Can\'t hear &ldquo;well, it\'s been kind of okay&rdquo;',
+            'A reply is the win — and someone still has to call',
           ],
           'A phone call',
           [
-            'A person who knows the patient\'s name and history',
-            'Opens by asking how they\'ve been since they finished care',
+            'A person who knows their name and history',
+            'Asks how they\'ve been since they finished care',
             'Hears the pause, and knows what to say next',
-            'Handles &ldquo;I\'m too busy&rdquo; or &ldquo;let me check with my spouse&rdquo; on the spot',
             'Ends with an appointment on the calendar',
           ],
         ),
-        p(
-          'Notice what the call does that the text can\'t: it lets the patient talk. When someone says the pain is &ldquo;mostly manageable,&rdquo; a text has nothing to say back. A caller with the right words asks how long it\'s been that way — and the patient hears their own answer.',
-        ),
         panel([
-          'A text asks the patient to do the work: read it, decide, call back, sit on hold. A call does the work for them. That difference is the whole reason one fills a schedule and the other gets swiped away.',
+          'A text asks the patient to do the work: read it, decide, call back, sit on hold. A call does the work for them. That is why one fills a schedule and the other gets swiped away.',
         ]),
-        p(
-          'Texting has a place in your practice. It just isn\'t the tool for this job — and the slow way to find that out is to send the blast, wait, and then make the calls anyway.',
-        ),
+        p('Texting has its place in your practice. This isn\'t it.'),
         cta('Want to hear what the call actually sounds like? Let\'s talk:'),
         finePrint(),
         signoff(),
@@ -612,40 +602,35 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         h1('Nobody picked up. Now what?'),
         greet,
         p(
-          'Picture the first afternoon of calling. Your front desk works through ten names. Two real conversations, a couple of &ldquo;call me next week,&rdquo; and six voicemails. Then the day ends.',
+          'Picture the first afternoon of calling. Ten names. Two real conversations, a couple of &ldquo;call me next week,&rdquo; and six voicemails.',
         ),
         p(
-          'This is the moment reactivation quietly dies in an office without a system — not because anyone gave up, but because <strong>nobody knows what to do with the six.</strong> Call again tomorrow? At the same hour, when they were clearly busy? Leave another message and risk seeming pushy? Move on?',
+          'This is where reactivation quietly dies without a system — not because anyone quit, but because <strong>nobody knows what to do with the six.</strong> Call again tomorrow? Same hour? Leave another message? Move on?',
         ),
-        p(
-          'Without a system, those six names go on a sticky note, and the sticky note goes wherever sticky notes go. With one, a voicemail is just a scheduling event. Here is exactly what happens next:',
-        ),
+        p('With a system, a voicemail is just a scheduling event:'),
         steps([
           [
-            'The name comes back on its own — four to seven days later, at a different time of day.',
-            'Someone who didn\'t answer at 10 in the morning may pick up at 4:30 in the afternoon. The system varies the time deliberately, so your team isn\'t hitting the same voicemail at the same hour every week.',
+            'The name comes back on its own — 4 to 7 days later, at a different time of day.',
+            'Someone who didn\'t answer at 10 AM may pick up at 4:30.',
           ],
           [
-            'Your team leaves a message on every second attempt, not every one.',
-            'A short, scripted voicemail — &ldquo;we\'re updating our files on patients we haven\'t seen in a while, would you give us a call back&rdquo; — that sounds like your office and nothing like a sales pitch. On the other attempts, no message. A voicemail every few days feels like pressure. One every couple of weeks feels like a practice that cares.',
+            'A voicemail on every second attempt, not every one.',
+            'A short, scripted message that sounds like your office, not a sales pitch. Every few days feels like pressure; every couple of weeks feels like care.',
           ],
           [
-            'The rhythm continues for about two months.',
-            'Seven to ten attempts spread across mornings, middays, and afternoons — with nobody on your team counting, deciding, or remembering. The queue just shows them who\'s next.',
+            'The rhythm runs about two months.',
+            'Seven to ten attempts, spread across the day. Nobody counts — the queue just shows who\'s next.',
           ],
           [
-            'Still no answer? The patient isn\'t deleted. They\'re parked.',
-            'They resurface once a quarter for a single check-in call. Life changes. A number that never picked up in March answers in September.',
+            'Still no answer? Parked, not deleted.',
+            'They resurface once a quarter for one check-in. A number that never picked up in March answers in September.',
           ],
         ]),
-        p(
-          'None of this requires your team to be persistent. <strong>The system is persistent.</strong> Your team just makes the calls that appear on the screen that day.',
-        ),
         panel([
-          'The patient who answers on the fourth attempt has no idea it was the fourth attempt. To them, it\'s one friendly call from an office they already trust, on an afternoon they happened to be free.',
+          'The patient who answers on the fourth attempt has no idea it was the fourth attempt. To them, it\'s one friendly call from an office they already trust.',
         ]),
         p(
-          'That is the difference between calling your list and working your list. One is an event. The other is a rhythm — and only one of them fills a schedule.',
+          'Your team doesn\'t have to be persistent. <strong>The system is.</strong>',
         ),
         cta(
           "Let's walk through what your team's screen looks like on day one — and day forty:",
