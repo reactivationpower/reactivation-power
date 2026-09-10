@@ -362,7 +362,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
             </table>
             <p style="margin:0 0 8px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:26px;color:#314158;">Let's look at your patient list together and map out the opportunity:</p>
 ${button('Schedule a Call', LANDING_PAGE_URL)}
-            <p style="margin:0 0 32px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:26px;color:#314158;">It takes about a minute ��� answer a few quick questions about your practice, then pick a day and time right on the calendar.</p>
+            <p style="margin:0 0 32px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:26px;color:#314158;">It takes about a minute ���� answer a few quick questions about your practice, then pick a day and time right on the calendar.</p>
             <p style="margin:0 0 4px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:26px;color:#314158;">To your practice's growth,</p>
             <p style="margin:0 0 40px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:26px;color:#1d293d;"><strong>The Reactivation Power Team</strong></p>
           </td>
@@ -802,15 +802,9 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
           'When practices evaluate a reactivation call, they tend to price it as one appointment. That undercounts it badly.',
         ),
         p('Here\'s what actually happens when a lapsed patient comes back:'),
-        mathBox(
-          [
-            ['The initial visit that gets them in the door', 'Visit 1'],
-            ['The plan of care that follows', 'Multiple visits'],
-            ['Services they didn\u2019t know you offered', 'Additional revenue'],
-            ['Family and friends they mention you to', 'New patients'],
-          ],
-          'Value of one reactivated patient',
-          'Far more than one visit',
+        image(
+          'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/attachments/gen-images/sources-v2/CL636t4ggZ0InBds1LWMJ-gxq7csIOQLmqx4B7YcWtPJLryPVFIU.png',
+          'The appointment is the smallest part of the return. One reactivated patient is rarely one appointment. Four stages in sequence: Visit 1, a front-desk team member greeting a returning patient; Plan of Care, a chiropractor adjusting the patient with several follow-up visits on the calendar; Additional Services, a SoftWave device, red light panel and smart scale; Referrals, the patient walking in with friends and family. You\'re not recovering one visit. You\'re restarting a relationship that had already proven itself once.',
         ),
         p(
           'A patient who re-engages usually needs a course of care, not a single appointment. Along the way they learn what else you offer. And people who feel genuinely taken care of talk — <strong>referrals come from active patients, not from a list gathering dust.</strong>',
