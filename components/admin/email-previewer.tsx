@@ -3,12 +3,22 @@
 import { useState } from 'react'
 import { Check, Copy, Download, Monitor, Smartphone } from 'lucide-react'
 import {
+  EMAIL_ASSET_BASE,
   EMAIL_AUDIENCES,
   templatesForAudience,
   type EmailAudienceId,
 } from '@/lib/email-templates'
 import { notifyDone, notifyError } from '@/lib/notify'
 import { cn } from '@/lib/utils'
+
+/**
+ * Display-only: point graphics at this deployment's own /images/emails so a
+ * freshly generated one previews before the production site is republished.
+ * The copied and exported HTML keeps the production URLs untouched.
+ */
+function previewHtml(html: string) {
+  return html.split(EMAIL_ASSET_BASE).join('/images/emails')
+}
 
 export function EmailPreviewer() {
   const [audienceId, setAudienceId] = useState<EmailAudienceId>(
@@ -277,7 +287,7 @@ export function EmailPreviewer() {
               <div className="flex min-h-0 flex-1 items-start justify-center overflow-auto bg-muted p-4">
                 <iframe
                   title={`Preview: ${template.name}`}
-                  srcDoc={template.html}
+                  srcDoc={previewHtml(template.html)}
                   sandbox=""
                   className={cn(
                     'h-full rounded-md border border-border bg-background shadow-sm transition-all',
