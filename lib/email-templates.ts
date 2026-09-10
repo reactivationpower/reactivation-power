@@ -562,21 +562,9 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         p(
           'A text is good at one thing: <strong>reminding someone of a decision they already made.</strong> Confirming Tuesday at 2:00. Reactivation is a different job — the patient stopped coming, and something has to change their mind. A text can\'t do the one thing that changes minds: listen.',
         ),
-        compare(
-          'A text blast',
-          [
-            'One message, identical for everyone',
-            'Reads as marketing the moment it arrives',
-            'Can\'t hear &ldquo;well, it\'s been kind of okay&rdquo;',
-            'A reply is the win — and someone still has to call',
-          ],
-          'A phone call',
-          [
-            'A person who knows their name and history',
-            'Asks how they\'ve been since they finished care',
-            'Hears the pause, and knows what to say next',
-            'Ends with an appointment on the calendar',
-          ],
+        image(
+          'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/ChatGPT%20Image%20Sep%2010%2C%202026%2C%2004_38_55%20PM-upmeGBsCYI1RyWO4BTQAxzPPRMorls.png',
+          'A text blast versus a phone call. A text blast: one message, identical for everyone; reads as marketing the moment it arrives; can\'t hear "well, it\'s been kind of okay"; a reply is the win, and someone still has to call. A phone call: a person who knows their name and history; asks how they\'ve been since they finished care; hears the pause, and knows what to say next; ends with an appointment on the calendar.',
         ),
         panel([
           'A text asks the patient to do the work: read it, decide, call back, sit on hold. A call does the work for them. That is why one fills a schedule and the other gets swiped away.',
