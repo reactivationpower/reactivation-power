@@ -7,6 +7,7 @@ import { reactivatedPatients } from '@/lib/opportunity'
 const INACTIVE_MIN = 100
 const INACTIVE_MAX = 5000
 const INACTIVE_STEP = 100
+const INACTIVE_DEFAULT = 1000
 
 const VALUE_MIN = 1000
 const VALUE_MAX = 5000
@@ -18,7 +19,7 @@ function formatMoney(n: number): string {
 }
 
 export function HeroOpportunity() {
-  const [inactiveCount, setInactiveCount] = useState(500)
+  const [inactiveCount, setInactiveCount] = useState(INACTIVE_DEFAULT)
   const [patientValue, setPatientValue] = useState(VALUE_DEFAULT)
 
   const patients = reactivatedPatients(inactiveCount)
