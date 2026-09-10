@@ -562,10 +562,10 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         p(
           '<strong>They have no idea.</strong> Nobody sends a reminder that unused benefits are about to disappear. There\'s no notification for it.',
         ),
-        darkPanel([
-          'This is the rare call your team can make where the patient is genuinely glad you reached out.',
-          'You\'re not pitching anything. You\'re telling them they\'re about to lose something they already paid for.',
-        ]),
+        image(
+          'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/ChatGPT%20Image%20Sep%2010%2C%202026%2C%2004_16_17%20PM-5bhyr6GoDA3GpgAigaSC08ahS2jQXj.png',
+          'This is the rare call your team can make where the patient is genuinely glad you reached out. You\'re not pitching anything. You\'re telling them they\'re about to lose something they already paid for. Real patients. Real deadline. Real appreciation. A smiling front-desk team member on the phone at a chiropractic office.',
+        ),
         p(
           'It also gives your front desk the easiest opening line they will ever get. There is no convincing required — just a real deadline and a helpful heads-up.',
         ),
