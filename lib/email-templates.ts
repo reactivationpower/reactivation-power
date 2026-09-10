@@ -179,6 +179,20 @@ const image = (src: string, alt: string) =>
               </tr>
             </table>`
 
+/**
+ * Product screenshot with a caption. Bordered because app screenshots are
+ * mostly white and would otherwise bleed into the email body.
+ */
+const screenshot = (src: string, alt: string, caption: string) =>
+  `            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0;">
+              <tr>
+                <td>
+                  <img src="${src}" alt="${alt}" width="520" style="display:block;width:100%;max-width:520px;height:auto;margin:0 auto;border:1px solid #e2e8f0;border-radius:6px;" />
+                  <p style="margin:10px 0 0 0;font-family:${FONT};font-size:13px;line-height:20px;color:#62748e;text-align:center;">${caption}</p>
+                </td>
+              </tr>
+            </table>`
+
 /** Stacked calculation that lands on a bold total. */
 const mathBox = (
   rows: Array<[string, string]>,
@@ -362,7 +376,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
             </table>
             <p style="margin:0 0 8px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:26px;color:#314158;">Let's look at your patient list together and map out the opportunity:</p>
 ${button('Schedule a Call', LANDING_PAGE_URL)}
-            <p style="margin:0 0 32px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:26px;color:#314158;">It takes about a minute ���� answer a few quick questions about your practice, then pick a day and time right on the calendar.</p>
+            <p style="margin:0 0 32px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:26px;color:#314158;">It takes about a minute ����� answer a few quick questions about your practice, then pick a day and time right on the calendar.</p>
             <p style="margin:0 0 4px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:26px;color:#314158;">To your practice's growth,</p>
             <p style="margin:0 0 40px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:26px;color:#1d293d;"><strong>The Reactivation Power Team</strong></p>
           </td>
@@ -841,6 +855,11 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
           'That\'s not anyone\'s fault. If the calls live on a printed list and the outcomes live in someone\'s memory, a feeling is the only honest answer available.',
         ),
         p('Your dashboard answers it instead:'),
+        screenshot(
+          'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Screenshot%202026-09-10%20at%205.30.17%E2%80%AFPM-wKJdWP04MvF0lUqQURYyUT6FqK6L0D.png',
+          'The Analytics page inside the Reactivation Power portal. Top cards show Calls Today, Calls This Week (21) and Scheduled This Week (2). A Caller Performance table ranks each caller by success rate with calls, reached, scheduled, success rate, close rate and this week\'s activity; the top caller is tagged Top performer and a caller with zero appointments is tagged Needs attention. Below, Whole Team insight cards show the best time to reach someone (5 PM), the hardest time (4 PM), the most likely hour for a yes (9 AM) and the most likely day for a yes (Friday).',
+          '<strong>Actual screenshot from inside the Reactivation Power portal</strong> &mdash; this is the Analytics page an office sees when it logs in.',
+        ),
         metrics([
           ['Calls made', 'This week and this month'],
           ['Patients actually reached', 'Versus voicemails and no-answers'],
@@ -849,7 +868,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
           ['Revenue recovered', 'Tied back to specific calls'],
         ]),
         p(
-          'This changes the conversation with your team. Instead of asking whether people are calling, you can see which scripts convert, which service lines respond best, and where the drop-off happens.',
+          'This changes the conversation with your team. Instead of asking whether people are calling, you can see who\'s converting, who needs a hand, and what time of day your patients actually pick up.',
         ),
         panel([
           'A number you can see is a number you can improve. <strong>An activity nobody measures quietly stops happening.</strong>',
