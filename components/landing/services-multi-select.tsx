@@ -14,7 +14,8 @@ const HEALTHCARE_SERVICES = [
   'Red Light / Body Contouring',
   'Decompression',
   'Neuropathy',
-  'Softwave/Acoustic Wave Therapy',
+  'Softwave/Shockwave',
+  'Acoustic Wave Therapy',
   'Joint Pain',
   'Gut Health',
   'Massage Therapy',
@@ -29,7 +30,6 @@ const HEALTHCARE_SERVICES = [
   'Laser Hair Removal',
   'GLP Patients',
   'Dental Implants',
-  'Med Spa',
 ] as const
 
 export function ServicesMultiSelect({
