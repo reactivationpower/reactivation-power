@@ -1331,7 +1331,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         p(
           'That\'s it. No slides, no countdown, no &ldquo;sign now&rdquo; pricing. You leave with a number you can use whether or not you ever talk to us again.',
         ),
-        cta("Pick a time and we'll bring the math:", 'Book Your Call'),
+        cta("Pick a time and we'll bring the math:"),
         finePrint(),
         signoff(),
       ]),
@@ -1379,7 +1379,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         panel([
           'You don\'t need the numbers to book. You need them for the call. <strong>Book first, pull them the morning of.</strong>',
         ]),
-        cta('Grab a time, then pull the three numbers before it:', 'Reserve My Strategy Call'),
+        cta('Grab a time, then pull the three numbers before it:'),
         finePrint(),
         signoff(),
       ]),
@@ -1479,7 +1479,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         p(
           'So the question on the call isn\'t whether your team can do this. It\'s who on your team, and for how many minutes a day.',
         ),
-        cta("Let's figure out who and when:", 'Schedule Your Strategy Session'),
+        cta("Let's figure out who and when:"),
         finePrint(),
         signoff(),
       ]),
@@ -1523,7 +1523,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         p(
           'This is the part of the program that\'s hardest to see from the outside and easiest to feel on a live call. On ours, ask us to read one.',
         ),
-        cta("Book a time and ask for the &ldquo;think about it&rdquo; screen:", 'Hear It Read Live'),
+        cta("Book a time and ask for the &ldquo;think about it&rdquo; screen:"),
         finePrint(),
         signoff(),
       ]),
@@ -1616,7 +1616,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         p(
           'What it does include is a straight look at your list, your case average, and your team &mdash; and a number you can hold us to.',
         ),
-        cta('Pick a time. Bring your skepticism:', 'Pick a Time That Works'),
+        cta('Pick a time. Bring your skepticism:'),
         finePrint(),
         signoff(),
       ]),
@@ -1661,7 +1661,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         p(
           'If you\'re adding a provider in the next year &mdash; or already did, and the schedule is thinner than you\'d like &mdash; that\'s exactly the situation to bring to the call.',
         ),
-        cta("Let's talk about filling that schedule from the list you already own:", 'Book a Strategy Call'),
+        cta("Let's talk about filling that schedule from the list you already own:"),
         finePrint(),
         signoff(),
       ]),
@@ -1759,7 +1759,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         p(
           'Bring whatever answer you get &mdash; the report or the guess &mdash; and we\'ll turn it into your break-even on the call.',
         ),
-        cta('Ask the question, then grab a time:', 'Bring Me the Number'),
+        cta('Ask the question, then grab a time:'),
         finePrint(),
         signoff(),
       ]),
@@ -1809,7 +1809,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
           'So we built the program around your team instead: the words, the order of calls, the follow-through, the tracking. Everything except the voice.',
         ),
         p('The result is a call that sounds like your practice checking in &mdash; because it is.'),
-        cta("Let's talk about who in your office would make these calls:", 'Schedule the Conversation'),
+        cta("Let's talk about who in your office would make these calls:"),
         finePrint(),
         signoff(),
       ]),
@@ -1899,7 +1899,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         p(
           'If the answer is no, you\'ve spent a short call and gained a number. If it\'s yes, you\'ll know exactly why.',
         ),
-        cta('Book first. Decide after:', 'Grab a Time on the Calendar'),
+        cta('Book first. Decide after:'),
         finePrint(),
         signoff(),
       ]),
@@ -1941,7 +1941,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         p(
           'Your team won\'t sound scripted. They\'ll sound like your practice on its best day, every time.',
         ),
-        cta('Hear a screen read aloud on the call &mdash; book a time:', 'Book a Live Walkthrough'),
+        cta('Hear a screen read aloud on the call &mdash; book a time:'),
         finePrint(),
         signoff(),
       ]),
@@ -2036,7 +2036,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         panel([
           'That\'s it. The only question is whether it\'s worth a short call to see what those numbers look like for your office.',
         ]),
-        cta("Yes, let's look:", "Yes, Let's Look"),
+        cta("Yes, let's look:"),
         finePrint(),
         signoff(),
       ]),
