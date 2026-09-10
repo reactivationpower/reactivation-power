@@ -362,7 +362,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
             </table>
             <p style="margin:0 0 8px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:26px;color:#314158;">Let's look at your patient list together and map out the opportunity:</p>
 ${button('Schedule a Call', LANDING_PAGE_URL)}
-            <p style="margin:0 0 32px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:26px;color:#314158;">It takes about a minute �� answer a few quick questions about your practice, then pick a day and time right on the calendar.</p>
+            <p style="margin:0 0 32px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:26px;color:#314158;">It takes about a minute ��� answer a few quick questions about your practice, then pick a day and time right on the calendar.</p>
             <p style="margin:0 0 4px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:26px;color:#314158;">To your practice's growth,</p>
             <p style="margin:0 0 40px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:26px;color:#1d293d;"><strong>The Reactivation Power Team</strong></p>
           </td>
@@ -763,9 +763,9 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
           'There\'s a quiet assumption behind why so many practices never call their inactive list: <strong>if they wanted to come back, they would have.</strong> Reaching out feels like bothering someone who chose to leave.',
         ),
         p('But ask patients why they actually stopped, and it sounds like this:'),
-        quote(
-          'I got busy and missed an appointment, then I felt weird about calling to reschedule — and then it had been a year.',
-          'The most common reason care ends',
+        image(
+          'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/ChatGPT%20Image%20Sep%2010%2C%202026%2C%2005_13_35%20PM-XJ1Lkf79mAxuhbr2aPpsUbQSeu1Ixv.png',
+          'What you might be thinking versus what they\'re actually thinking. An owner assumes: &ldquo;If they wanted to come back, they would have.&rdquo; They probably found somewhere else; it would feel weird to call them; they chose to leave. The patient\'s side: &ldquo;I got busy and missed an appointment, then I felt weird about calling to reschedule &mdash; and then it had been a year.&rdquo; Life got busy (a work season, move, new baby); their symptoms improved so they stopped coming; enough time passed that reaching out felt awkward. Plenty of lapsed patients are quietly waiting for permission to come back. A phone call is that permission.',
         ),
         p(
           'Not anger. Not disappointment. A missed appointment, a busy season at work, a move, a new baby, a stretch where the pain eased up. Then enough time passed that reaching out felt awkward — <strong>for them.</strong>',
