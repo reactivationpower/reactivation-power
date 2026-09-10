@@ -487,25 +487,9 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
           'So we always ask the same question: <strong>what exactly did that look like?</strong> The answer is almost always some version of &ldquo;we printed a list and had someone start calling.&rdquo;',
         ),
         p('That\'s not a reactivation system. That\'s a list and good intentions.'),
-        compare(
-          'A list and good intentions',
-          [
-            'No words — every call improvised',
-            'One awkward objection stalls the whole thing',
-            'Calls fizzle out within a week',
-            'No record of who was called or what they said',
-            'Callbacks live on sticky notes and get lost',
-            'No idea whether it worked',
-          ],
-          'An actual system',
-          [
-            'Word-for-word script on screen',
-            'Every objection has a scripted response',
-            'A daily queue that tells your team who is next',
-            'Every call logged against the patient',
-            'Callbacks resurface automatically on the right day',
-            'A dashboard showing appointments and revenue recovered',
-          ],
+        image(
+          'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/ChatGPT%20Image%20Sep%2010%2C%202026%2C%2004_00_41%20PM-eZvgLBr0XMdYO0claE03MDZby21orn.png',
+          'A list and good intentions versus an actual system. A list and good intentions: no words, every call improvised; one awkward objection stalls the whole thing; calls fizzle out within a week; no record of who was called or what they said; callbacks live on sticky notes and get lost; no idea whether it worked. An actual system: word-for-word script on screen; every objection has a scripted response; a daily queue that tells your team who is next; every call logged against the patient; callbacks resurface automatically on the right day; a dashboard showing appointments and revenue recovered.',
         ),
         p(
           'Same list. Same team. Completely different outcome — because the hard parts stopped depending on someone\'s memory and mood.',
