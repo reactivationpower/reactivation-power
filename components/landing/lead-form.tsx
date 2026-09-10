@@ -8,8 +8,19 @@ import {
 } from '@/app/actions/leads'
 import { ServicesMultiSelect } from '@/components/landing/services-multi-select'
 import { Button } from '@/components/ui/button'
+import { readLeadFields, validateLeadFields } from '@/lib/lead-validation'
 
 const initialState: LeadState = {}
+
+/** Red asterisk for sighted users; the input's `required` attr covers AT. */
+function RequiredMark() {
+  return (
+    <span className="text-destructive" aria-hidden="true">
+      {' '}
+      *
+    </span>
+  )
+}
 
 /** Format a raw digit string as (xxx) xxx-xxxx while typing */
 function formatPhone(raw: string): string {
@@ -43,7 +54,11 @@ export function LeadForm() {
     state: string
   } | null>(null)
 
-  const errors = state.fieldErrors ?? {}
+  // Errors shown to the visitor. Seeded by the instant client check on submit;
+  // replaced by the server's verdict if the server disagrees.
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  // Bumped every time a fresh batch of errors lands so we scroll to the first.
+  const [errorRound, setErrorRound] = useState(0)
   const v = state.values ?? {}
 
   // Restore controlled values after a failed submit so nothing resets
@@ -54,9 +69,15 @@ export function LeadForm() {
     }
   }, [state.values])
 
+  useEffect(() => {
+    if (!state.fieldErrors) return
+    setErrors(state.fieldErrors)
+    setErrorRound((n) => n + 1)
+  }, [state.fieldErrors])
+
   // Scroll to and focus the first invalid field (mobile especially)
   useEffect(() => {
-    if (!state.fieldErrors || !formRef.current) return
+    if (errorRound === 0 || !formRef.current) return
     const firstBad = formRef.current.querySelector<HTMLElement>(
       '[aria-invalid="true"]',
     )
@@ -64,7 +85,30 @@ export function LeadForm() {
       firstBad.scrollIntoView({ behavior: 'smooth', block: 'center' })
       firstBad.focus({ preventScroll: true })
     }
-  }, [state.fieldErrors])
+  }, [errorRound])
+
+  // Check every rule before the request leaves the browser. Returning early
+  // with preventDefault stops React from running the server action.
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    const found = validateLeadFields(readLeadFields(new FormData(e.currentTarget)))
+    if (Object.keys(found).length > 0) {
+      e.preventDefault()
+      setErrors(found)
+      setErrorRound((n) => n + 1)
+      return
+    }
+    setErrors({})
+  }
+
+  // Drop a field's error as soon as the visitor starts fixing it
+  function clearError(name: string) {
+    if (!name || !(name in errors)) return
+    setErrors((prev) => {
+      const next = { ...prev }
+      delete next[name]
+      return next
+    })
+  }
 
   // Auto-populate city/state once the zip has 5 digits
   useEffect(() => {
@@ -86,6 +130,8 @@ export function LeadForm() {
     <form
       ref={formRef}
       action={formAction}
+      onSubmit={handleSubmit}
+      onInput={(e) => clearError((e.target as HTMLInputElement).name)}
       noValidate
       className="flex flex-col gap-4"
     >
@@ -96,10 +142,12 @@ export function LeadForm() {
             className="text-sm font-medium text-foreground"
           >
             First name
+            <RequiredMark />
           </label>
           <input
             id={`${uid}-first-name`}
             name="firstName"
+            required
             autoComplete="given-name"
             defaultValue={v.firstName ?? ''}
             aria-invalid={errors.firstName ? 'true' : undefined}
@@ -117,10 +165,12 @@ export function LeadForm() {
             className="text-sm font-medium text-foreground"
           >
             Last name
+            <RequiredMark />
           </label>
           <input
             id={`${uid}-last-name`}
             name="lastName"
+            required
             autoComplete="family-name"
             defaultValue={v.lastName ?? ''}
             aria-invalid={errors.lastName ? 'true' : undefined}
@@ -140,11 +190,13 @@ export function LeadForm() {
           className="text-sm font-medium text-foreground"
         >
           Email address
+          <RequiredMark />
         </label>
         <input
           id={`${uid}-email`}
           name="email"
           type="email"
+          required
           autoComplete="email"
           defaultValue={v.email ?? ''}
           aria-invalid={errors.email ? 'true' : undefined}
@@ -164,11 +216,13 @@ export function LeadForm() {
             className="text-sm font-medium text-foreground"
           >
             Phone number
+            <RequiredMark />
           </label>
           <input
             id={`${uid}-phone`}
             name="phone"
             type="tel"
+            required
             inputMode="numeric"
             autoComplete="tel"
             placeholder="(555) 555-1234"
@@ -190,10 +244,12 @@ export function LeadForm() {
             className="text-sm font-medium text-foreground"
           >
             Zip code
+            <RequiredMark />
           </label>
           <input
             id={`${uid}-zip`}
             name="zip"
+            required
             inputMode="numeric"
             autoComplete="postal-code"
             placeholder="12345"
@@ -240,10 +296,12 @@ export function LeadForm() {
             className="text-sm font-medium text-foreground"
           >
             How long in practice?
+            <RequiredMark />
           </label>
           <select
             id={`${uid}-years`}
             name="yearsInPractice"
+            required
             defaultValue={v.yearsInPractice ?? ''}
             aria-invalid={errors.yearsInPractice ? 'true' : undefined}
             className={inputClass(Boolean(errors.yearsInPractice))}
@@ -269,10 +327,12 @@ export function LeadForm() {
             className="text-sm font-medium text-foreground"
           >
             Estimated inactive patients
+            <RequiredMark />
           </label>
           <select
             id={`${uid}-inactive`}
             name="inactivePatients"
+            required
             defaultValue={v.inactivePatients ?? ''}
             aria-invalid={errors.inactivePatients ? 'true' : undefined}
             className={inputClass(Boolean(errors.inactivePatients))}
@@ -295,7 +355,11 @@ export function LeadForm() {
         </div>
       </div>
 
-      <ServicesMultiSelect defaultSelected={state.services ?? []} />
+      <ServicesMultiSelect
+        defaultSelected={state.services ?? []}
+        error={errors.services}
+        onSelectionChange={() => clearError('services')}
+      />
 
       <div className="flex flex-col gap-1.5">
         <label
@@ -308,6 +372,7 @@ export function LeadForm() {
           <input
             type="checkbox"
             name="consent"
+            required
             defaultChecked={v.consent === 'on'}
             aria-invalid={errors.consent ? 'true' : undefined}
             className="mt-0.5 size-4 shrink-0 accent-accent"
@@ -316,6 +381,7 @@ export function LeadForm() {
             I consent to being contacted by text message and phone call for
             marketing related to Reactivation Power. Message and data rates
             may apply. Reply STOP to opt out at any time.
+            <RequiredMark />
           </span>
         </label>
         {errors.consent && (

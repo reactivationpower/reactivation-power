@@ -8,6 +8,7 @@ import {
   ghlConfigured,
   upsertGhlContact,
 } from '@/lib/ghl'
+import { readLeadFields, validateLeadFields } from '@/lib/lead-validation'
 
 export interface LeadState {
   error?: string
@@ -18,8 +19,6 @@ export interface LeadState {
   /** Services echoed back (multi-value) */
   services?: string[]
 }
-
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 /** Look up city/state for a US zip code (server-side, no API key). */
 export async function lookupZip(
@@ -57,24 +56,19 @@ export async function submitHealthcareLead(
   _prev: LeadState,
   formData: FormData,
 ): Promise<LeadState> {
-  const firstNameRaw = String(formData.get('firstName') ?? '').trim()
-  const lastNameRaw = String(formData.get('lastName') ?? '').trim()
-  const email = String(formData.get('email') ?? '')
-    .trim()
-    .toLowerCase()
-  const phone = String(formData.get('phone') ?? '').trim()
+  const fields = readLeadFields(formData)
+  const {
+    firstName: firstNameRaw,
+    lastName: lastNameRaw,
+    email,
+    phone,
+    zip,
+    yearsInPractice,
+    inactivePatients,
+    consent,
+    services,
+  } = fields
   const practiceName = String(formData.get('practiceName') ?? '').trim()
-  const zip = String(formData.get('zip') ?? '')
-    .replace(/\D/g, '')
-    .slice(0, 5)
-  const yearsInPractice = String(formData.get('yearsInPractice') ?? '').trim()
-  const inactivePatients = String(formData.get('inactivePatients') ?? '').trim()
-  const consent = formData.get('consent') === 'on'
-  const services = formData
-    .getAll('services')
-    .map((s) => String(s).trim())
-    .filter(Boolean)
-    .slice(0, 30)
 
   const values: Record<string, string> = {
     firstName: firstNameRaw,
@@ -88,27 +82,13 @@ export async function submitHealthcareLead(
     consent: consent ? 'on' : '',
   }
 
-  // Field-level validation — return every problem at once
-  const fieldErrors: Record<string, string> = {}
-  if (!firstNameRaw) fieldErrors.firstName = 'First name is required.'
-  if (!lastNameRaw) fieldErrors.lastName = 'Last name is required.'
-  if (!email) fieldErrors.email = 'Email is required.'
-  else if (!EMAIL_RE.test(email))
-    fieldErrors.email = 'Enter a valid email address.'
-  const phoneDigits = phone.replace(/\D/g, '')
-  if (!phone) fieldErrors.phone = 'Phone number is required.'
-  else if (phoneDigits.length !== 10)
-    fieldErrors.phone = 'Enter a valid 10-digit phone number.'
-  if (zip.length !== 5) fieldErrors.zip = 'Enter your 5-digit zip code.'
-  if (!yearsInPractice) fieldErrors.yearsInPractice = 'Select an option.'
-  if (!inactivePatients) fieldErrors.inactivePatients = 'Select an option.'
-  if (!consent)
-    fieldErrors.consent =
-      'Please check this box so we can contact you about your call.'
-
+  // The client runs these same rules before submitting; this is the real gate.
+  const fieldErrors = validateLeadFields(fields)
   if (Object.keys(fieldErrors).length > 0) {
     return { fieldErrors, values, services }
   }
+
+  const phoneDigits = phone.replace(/\D/g, '')
 
   const firstName = titleCase(firstNameRaw)
   const lastName = titleCase(lastNameRaw)

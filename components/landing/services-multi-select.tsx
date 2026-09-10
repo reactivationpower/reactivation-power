@@ -34,23 +34,37 @@ const HEALTHCARE_SERVICES = [
 
 export function ServicesMultiSelect({
   defaultSelected = [],
+  error,
+  onSelectionChange,
 }: {
   defaultSelected?: string[]
+  /** Validation message from the form; renders the group in its error state */
+  error?: string
+  onSelectionChange?: (selected: string[]) => void
 }) {
   const [selected, setSelected] = useState<string[]>(defaultSelected)
 
   function toggle(service: string) {
-    setSelected((prev) =>
-      prev.includes(service)
-        ? prev.filter((s) => s !== service)
-        : [...prev, service],
-    )
+    const next = selected.includes(service)
+      ? selected.filter((s) => s !== service)
+      : [...selected, service]
+    setSelected(next)
+    onSelectionChange?.(next)
   }
 
   return (
-    <fieldset className="flex flex-col gap-2">
+    <fieldset
+      className="flex flex-col gap-2"
+      aria-invalid={error ? 'true' : undefined}
+      tabIndex={-1}
+    >
       <legend className="text-sm font-medium text-foreground">
-        What services do you offer?{' '}
+        What services do you offer?
+        <span className="text-destructive" aria-hidden="true">
+          {' '}
+          *
+        </span>
+        <span className="sr-only"> (required)</span>{' '}
         <span className="font-normal text-muted-foreground">
           (select all that apply)
         </span>
@@ -61,7 +75,11 @@ export function ServicesMultiSelect({
         <input key={s} type="hidden" name="services" value={s} />
       ))}
 
-      <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+      <div
+        className={`grid grid-cols-1 gap-1.5 rounded-md sm:grid-cols-2 ${
+          error ? 'outline outline-2 outline-offset-4 outline-destructive/50' : ''
+        }`}
+      >
         {HEALTHCARE_SERVICES.map((service) => {
           const checked = selected.includes(service)
           return (
@@ -93,11 +111,13 @@ export function ServicesMultiSelect({
         })}
       </div>
 
-      {selected.length > 0 && (
+      {error ? (
+        <p className="text-xs font-medium text-destructive">{error}</p>
+      ) : selected.length > 0 ? (
         <p className="text-xs text-muted-foreground">
           {selected.length} selected
         </p>
-      )}
+      ) : null}
     </fieldset>
   )
 }
