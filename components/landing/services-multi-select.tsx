@@ -14,7 +14,7 @@ const HEALTHCARE_SERVICES = [
   'Red Light / Body Contouring',
   'Decompression',
   'Neuropathy',
-  'Acoustic Wave Therapy',
+  'Softwave/Acoustic Wave Therapy',
   'Joint Pain',
   'Gut Health',
   'Massage Therapy',
