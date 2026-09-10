@@ -22,7 +22,6 @@ export const metadata: Metadata = {
 
 const STATS = [
   { value: '5–7x', label: 'cheaper than acquiring a new patient' },
-  { value: '20–40%', label: 'of inactive lists typically rebook' },
   { value: '$0', label: 'in ad spend required' },
 ]
 
@@ -101,7 +100,7 @@ export default function HomePage() {
                   How It Works
                 </Link>
               </div>
-              <dl className="mt-2 grid grid-cols-3 gap-4">
+              <dl className="mt-2 grid grid-cols-2 gap-4">
                 {STATS.map((s) => (
                   <div key={s.label} className="flex flex-col gap-1">
                     <dt className="sr-only">{s.label}</dt>
