@@ -18,9 +18,9 @@ export default function AdminEmailsPage() {
             Email Templates
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Lead-generation emails for the Reactivation Power Program. Copy the
-            HTML and paste it into a GoHighLevel email, then replace the
-            placeholders.
+            Lead-generation emails for the Reactivation Power Program, grouped
+            by the kind of office each sequence is written for. Pick a set,
+            copy the HTML, and paste it into a GoHighLevel email.
           </p>
         </div>
         {/* components/ui/button.tsx has no asChild — a styled anchor keeps this a
@@ -34,7 +34,7 @@ export default function AdminEmailsPage() {
           )}
         >
           <Download className="size-4" />
-          Download all {EMAIL_TEMPLATES.length} (.zip)
+          Download every sequence — {EMAIL_TEMPLATES.length} emails (.zip)
         </a>
       </header>
       <div className="min-h-0 flex-1">

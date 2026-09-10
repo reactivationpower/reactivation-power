@@ -1,10 +1,35 @@
+/**
+ * Who a sequence is written for. Every template belongs to exactly one
+ * audience; the admin previewer and the ZIP export group by it. To add a
+ * sequence for another kind of office, register the audience here and tag
+ * its templates with the new id — numbering restarts at Email 1 per audience.
+ */
+export const EMAIL_AUDIENCES = [
+  {
+    id: 'chiropractic',
+    name: 'Chiropractic',
+    description:
+      'Chiropractic practices and doctors. Examples, service lines and language assume a chiropractor\'s patient list — decompression, neuropathy, soft wave, weight loss and the rest.',
+  },
+] as const
+
+export type EmailAudience = (typeof EMAIL_AUDIENCES)[number]
+export type EmailAudienceId = EmailAudience['id']
+
 export interface EmailTemplate {
   id: string
+  audience: EmailAudienceId
   name: string
   subject: string
   previewText: string
   angle: string
   html: string
+}
+
+export function isEmailAudienceId(
+  value: string | null | undefined,
+): value is EmailAudienceId {
+  return EMAIL_AUDIENCES.some((a) => a.id === value)
 }
 
 // {{contact.first_name}} is a GHL merge tag and works as-is when pasted
@@ -298,9 +323,15 @@ ${parts.join('\n')}
           </td>
         </tr>`
 
+// ---------------------------------------------------------------------------
+// Chiropractic sequence — Emails 1–22
+// Written for chiropractic offices. Sequences for other practice types belong
+// under their own audience id (see EMAIL_AUDIENCES) with their own numbering.
+// ---------------------------------------------------------------------------
 export const EMAIL_TEMPLATES: EmailTemplate[] = [
   {
     id: 'hidden-revenue',
+    audience: 'chiropractic',
     name: 'Email 1 — The Revenue Hiding in Your Patient List',
     subject: 'The most profitable list you own is sitting in a filing cabinet',
     previewText:
@@ -345,6 +376,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
   },
   {
     id: 'no-ad-spend',
+    audience: 'chiropractic',
     name: 'Email 2 — Stop Paying to Reach Strangers',
     subject: 'Before you spend another dollar on ads, read this',
     previewText:
@@ -386,6 +418,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
   },
   {
     id: 'front-desk-scripts',
+    audience: 'chiropractic',
     name: 'Email 3 — Your Team Doesn\u2019t Need Sales Skills',
     subject: "Your front desk doesn't need to be salespeople",
     previewText:
@@ -439,6 +472,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
   },
   {
     id: 'the-math',
+    audience: 'chiropractic',
     name: 'Email 4 — What Your List Is Actually Worth',
     subject: 'What are 1,000 inactive patients actually worth?',
     previewText:
@@ -484,6 +518,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
   },
   {
     id: 'already-tried',
+    audience: 'chiropractic',
     name: 'Email 5 — \u201CWe Already Tried Calling Them\u201D',
     subject: '"We already tried calling our old patients"',
     previewText:
@@ -520,6 +555,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
   },
   {
     id: 'no-time',
+    audience: 'chiropractic',
     name: 'Email 6 — \u201CMy Team Has No Time\u201D',
     subject: 'This takes 45 minutes a day, not a new hire',
     previewText:
@@ -560,6 +596,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
   },
   {
     id: 'why-not-text',
+    audience: 'chiropractic',
     name: 'Email 7 — \u201CCan\u2019t We Just Text Them?\u201D',
     subject: "Can't we just text our old patients?",
     previewText:
@@ -593,6 +630,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
   },
   {
     id: 'voicemail-not-a-no',
+    audience: 'chiropractic',
     name: 'Email 8 — A Voicemail Is Not a No',
     subject: 'A voicemail is not a no',
     previewText:
@@ -645,6 +683,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
   },
   {
     id: 'empty-chair',
+    audience: 'chiropractic',
     name: 'Email 9 — The Cost of an Empty Slot',
     subject: 'Every hole in tomorrow\u2019s schedule is a bill you already paid',
     previewText:
@@ -680,6 +719,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
   },
   {
     id: 'one-list-many-programs',
+    audience: 'chiropractic',
     name: 'Email 10 — One List, Every Program',
     subject: 'One patient list. Every service you offer.',
     previewText:
@@ -724,6 +764,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
   },
   {
     id: 'they-dont-know',
+    audience: 'chiropractic',
     name: 'Email 11 — They Don\u2019t Know What You Offer Now',
     subject: 'Your patients still picture the practice you were three years ago',
     previewText:
@@ -763,6 +804,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
   },
   {
     id: 'why-they-left',
+    audience: 'chiropractic',
     name: 'Email 12 — They Didn\u2019t Leave Because of You',
     subject: "They didn't leave because they were unhappy",
     previewText:
@@ -802,6 +844,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
   },
   {
     id: 'lifetime-value',
+    audience: 'chiropractic',
     name: 'Email 13 — One Patient Is Never Just One Visit',
     subject: 'One reactivated patient is rarely one appointment',
     previewText:
@@ -838,6 +881,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
   },
   {
     id: 'know-your-numbers',
+    audience: 'chiropractic',
     name: 'Email 14 — See the Numbers',
     subject: "If you can't see the numbers, you can't grow them",
     previewText:
@@ -885,6 +929,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
   },
   {
     id: 'staff-turnover',
+    audience: 'chiropractic',
     name: 'Email 15 — When Your Best Person Leaves',
     subject: 'What happens when your best front desk person quits?',
     previewText:
@@ -934,6 +979,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
   },
   {
     id: 'depreciating-asset',
+    audience: 'chiropractic',
     name: 'Email 16 — A Depreciating Asset',
     subject: 'Your patient list is quietly losing value',
     previewText:
@@ -983,6 +1029,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
   },
   {
     id: 'someone-else',
+    audience: 'chiropractic',
     name: 'Email 17 — Somebody Will Treat Them',
     subject: 'Somebody is going to treat your patients this year',
     previewText:
@@ -1021,6 +1068,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
   },
   {
     id: 'first-thirty-days',
+    audience: 'chiropractic',
     name: 'Email 18 — Your First 30 Days',
     subject: 'What the first 30 days actually looks like',
     previewText:
@@ -1069,6 +1117,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
   },
   {
     id: 'not-your-job',
+    audience: 'chiropractic',
     name: 'Email 19 — You Don\u2019t Run This Yourself',
     subject: "You don't have to be the one making these calls",
     previewText:
@@ -1107,6 +1156,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
   },
   {
     id: 'straight-answer',
+    audience: 'chiropractic',
     name: 'Email 20 — We\u2019ll Tell You If It\u2019s Not a Fit',
     subject: "If your list is too small, we'll tell you",
     previewText:
@@ -1155,6 +1205,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
   },
   {
     id: 'cash-services',
+    audience: 'chiropractic',
     name: 'Email 21 — Your Best-Margin Services',
     subject: "Your best-margin services are the ones nobody knows about",
     previewText:
@@ -1202,6 +1253,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
   },
   {
     id: 'one-conversation',
+    audience: 'chiropractic',
     name: 'Email 22 — One Conversation Covers It',
     subject: 'One conversation usually pays for the whole thing',
     previewText:
@@ -1246,3 +1298,10 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
     ),
   },
 ]
+
+/** The templates for one audience, in sequence order. */
+export function templatesForAudience(
+  audience: EmailAudienceId,
+): EmailTemplate[] {
+  return EMAIL_TEMPLATES.filter((t) => t.audience === audience)
+}
