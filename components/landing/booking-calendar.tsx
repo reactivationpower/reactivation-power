@@ -1,5 +1,6 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import { useMemo, useState } from 'react'
 import useSWR from 'swr'
 import {
@@ -9,26 +10,12 @@ import {
 } from '@/app/actions/booking'
 import { Button } from '@/components/ui/button'
 import {
-  CalendarClock,
-  CheckCircle2,
-  ChevronLeft,
-  Globe,
-  Loader2,
-} from 'lucide-react'
-
-/**
- * US timezones, covering every DST wrinkle: Arizona (no DST), Hawaii
- * (no DST), Alaska. IANA zone names handle daylight saving automatically.
- */
-const US_TIMEZONES = [
-  { value: 'America/New_York', label: 'Eastern Time (ET)' },
-  { value: 'America/Chicago', label: 'Central Time (CT)' },
-  { value: 'America/Denver', label: 'Mountain Time (MT)' },
-  { value: 'America/Phoenix', label: 'Arizona (no DST)' },
-  { value: 'America/Los_Angeles', label: 'Pacific Time (PT)' },
-  { value: 'America/Anchorage', label: 'Alaska Time (AKT)' },
-  { value: 'Pacific/Honolulu', label: 'Hawaii Time (HST)' },
-] as const
+  DEFAULT_TIMEZONE,
+  US_TIMEZONES,
+  isUsTimezone,
+  timezoneLabel,
+} from '@/lib/us-timezones'
+import { CalendarClock, ChevronLeft, Globe, Loader2 } from 'lucide-react'
 
 const PAST_DAYS_SHOWN = 3
 const WINDOW_DAYS = 45
@@ -38,7 +25,7 @@ const DAY_MS = 24 * 60 * 60 * 1000
 function detectTimezone(): string {
   try {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
-    if (US_TIMEZONES.some((z) => z.value === tz)) return tz
+    if (isUsTimezone(tz)) return tz
     // Map other US IANA zones to the closest option by current offset
     const offset = new Intl.DateTimeFormat('en-US', {
       timeZone: tz,
@@ -58,7 +45,7 @@ function detectTimezone(): string {
   } catch {
     // fall through to default
   }
-  return 'America/New_York'
+  return DEFAULT_TIMEZONE
 }
 
 /** "YYYY-MM-DD" for an instant, in a timezone */
@@ -157,18 +144,19 @@ function fullDateLabel(key: string, tz: string): string {
 
 export function BookingCalendar({
   contactId,
-  firstName,
+  thankYouHref,
 }: {
   contactId: string
-  firstName?: string
+  /** Thank-you page URL with the lead's details; slot + tz are appended */
+  thankYouHref: string
 }) {
+  const router = useRouter()
   const [timezone, setTimezone] = useState<string>(() => detectTimezone())
   const [selectedDay, setSelectedDay] = useState<string | null>(null)
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null)
   const [mobileStep, setMobileStep] = useState<'day' | 'time'>('day')
   const [booking, setBooking] = useState(false)
   const [bookError, setBookError] = useState<string | null>(null)
-  const [confirmed, setConfirmed] = useState<string | null>(null)
 
   const { data, isLoading } = useSWR<AvailabilityResult>(
     ['ghl-availability', timezone],
@@ -214,38 +202,16 @@ export function BookingCalendar({
       slot: selectedSlot,
       timezone,
     })
-    setBooking(false)
     if (res.ok) {
-      setConfirmed(selectedSlot)
-    } else {
-      setBookError(res.error ?? 'Something went wrong. Please try again.')
+      // Leave the button in its "Booking…" state while the thank-you page loads
+      const url = new URL(thankYouHref, window.location.origin)
+      url.searchParams.set('slot', selectedSlot)
+      url.searchParams.set('tz', timezone)
+      router.push(`${url.pathname}${url.search}`)
+      return
     }
-  }
-
-  // ------- Confirmed state -------
-  if (confirmed) {
-    return (
-      <div className="flex w-full flex-col items-center gap-5 rounded-xl border border-border bg-card px-6 py-14 text-center">
-        <span className="flex size-16 items-center justify-center rounded-full bg-success/10">
-          <CheckCircle2 className="size-9 text-success" aria-hidden="true" />
-        </span>
-        <h2 className="text-2xl font-bold text-foreground">
-          {firstName ? `${firstName}, you're booked!` : "You're booked!"}
-        </h2>
-        <p className="max-w-md text-pretty text-base leading-relaxed text-muted-foreground">
-          Your strategy call is confirmed for{' '}
-          <span className="font-semibold text-foreground">
-            {new Intl.DateTimeFormat('en-US', {
-              timeZone: timezone,
-              dateStyle: 'full',
-              timeStyle: 'short',
-            }).format(new Date(confirmed))}
-          </span>{' '}
-          ({US_TIMEZONES.find((z) => z.value === timezone)?.label}). Check
-          your email for the details — we look forward to talking with you.
-        </p>
-      </div>
-    )
+    setBooking(false)
+    setBookError(res.error ?? 'Something went wrong. Please try again.')
   }
 
   // ------- Not configured / error states -------
@@ -430,7 +396,7 @@ export function BookingCalendar({
         <p className="text-sm text-muted-foreground">
           All times shown in{' '}
           <span className="font-medium text-foreground">
-            {US_TIMEZONES.find((z) => z.value === timezone)?.label}
+            {timezoneLabel(timezone)}
           </span>
           . Wrong timezone? Change it here.
         </p>

@@ -48,18 +48,18 @@ const LANDING_PAGES: LandingPage[] = [
       'Variant of the main landing page with a video testimonial in the hero instead of the revenue calculator. Currently shows a placeholder until a testimonial video is added.',
   },
   {
-    id: 'your-opportunity',
-    name: 'Your Opportunity Calculator',
-    path: '/healthcare/your-opportunity',
-    description:
-      'Post-opt-in page that shows the prospect a personalized estimate of what reactivating their inactive patients could be worth.',
-  },
-  {
     id: 'book-a-call',
     name: 'Book a Strategy Call',
     path: '/healthcare/book-a-call',
     description:
-      'Scheduling page where prospects pick a time for their free strategy call with the sales team.',
+      'Post-opt-in scheduling page where prospects pick a time for their free strategy call. The lead form sends them straight here.',
+  },
+  {
+    id: 'thank-you',
+    name: 'Thank You — Booked',
+    path: '/healthcare/thank-you',
+    description:
+      'Confirmation page after booking: the appointment time plus the personalized revenue calculator built from the numbers they entered on the landing page.',
   },
 ]
 

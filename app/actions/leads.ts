@@ -95,7 +95,7 @@ export async function submitHealthcareLead(
 
   const phoneDigits = phone.replace(/\D/g, '')
 
-  // The figures the lead saw on the calculator, carried to the results page
+  // The figures the lead saw on the calculator, carried to the thank-you page
   // and the CRM note so the salesperson sees the same number the lead did
   const inactiveCount = parseInactiveCount(inactivePatients)
   const patientValue = parsePatientValue(fields.patientValue)
@@ -213,5 +213,6 @@ export async function submitHealthcareLead(
   })
   if (services.length > 0) params.set('services', services.join('|'))
   if (ghlContactId) params.set('cid', ghlContactId)
-  redirect(`/healthcare/your-opportunity?${params.toString()}`)
+  // Straight to the calendar; the calculator now lives on the thank-you page
+  redirect(`/healthcare/book-a-call?${params.toString()}`)
 }

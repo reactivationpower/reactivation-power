@@ -8,6 +8,7 @@ import {
   ghlConfigured,
   setGhlContactCustomField,
 } from '@/lib/ghl'
+import { US_TIMEZONES } from '@/lib/us-timezones'
 
 const BOOKING_WINDOW_DAYS = 45
 
@@ -18,15 +19,7 @@ export interface AvailabilityResult {
   error?: string
 }
 
-const VALID_TZ = new Set([
-  'America/New_York',
-  'America/Chicago',
-  'America/Denver',
-  'America/Phoenix',
-  'America/Los_Angeles',
-  'America/Anchorage',
-  'Pacific/Honolulu',
-])
+const VALID_TZ = new Set<string>(US_TIMEZONES.map((z) => z.value))
 
 /**
  * Rolling 45-day availability for the strategy-call calendar,

@@ -22,6 +22,14 @@ export default async function BookACallPage({
   const firstName =
     typeof params.name === 'string' ? params.name.slice(0, 40) : ''
 
+  // Everything the thank-you page needs to greet them and run the calculator
+  const carried = new URLSearchParams()
+  for (const key of ['name', 'cid', 'inactive', 'value', 'services']) {
+    const v = params[key]
+    if (typeof v === 'string' && v) carried.set(key, v.slice(0, 600))
+  }
+  const thankYouHref = `/healthcare/thank-you?${carried.toString()}`
+
   return (
     <main className="flex min-h-screen flex-col bg-background">
       <header className="border-b border-border bg-card">
@@ -58,7 +66,10 @@ export default async function BookACallPage({
 
         <div className="mt-10 w-full">
           {contactId ? (
-            <BookingCalendar contactId={contactId} firstName={firstName} />
+            <BookingCalendar
+              contactId={contactId}
+              thankYouHref={thankYouHref}
+            />
           ) : (
             <div className="flex flex-col items-center gap-4 rounded-xl border border-dashed border-border bg-card px-6 py-16 text-center">
               <span className="flex size-14 items-center justify-center rounded-full bg-accent/10">
