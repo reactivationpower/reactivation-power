@@ -677,7 +677,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         h1('The same list, matched to the right conversation'),
         greet,
         p(
-          'A patient who came in for spinal decompression needs a completely different conversation than one who came in for a cosmetic treatment or a weight program. Same list, entirely different call.',
+          'A patient who came in for spinal decompression needs a completely different conversation than one who came in for soft wave, a weight loss program, or even chiropractic care.',
         ),
         p(
           'This is where generic call scripts fall apart. One all-purpose script forces your team to improvise the parts that matter most — and those are exactly the parts that decide whether an appointment gets booked.',
