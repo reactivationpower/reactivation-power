@@ -114,11 +114,13 @@ export function OpportunityCalculator({
           <span className="font-semibold text-foreground">
             {inactiveCount.toLocaleString('en-US')} inactive patient files
           </span>
-          , a conservative reactivation effort could bring back around{' '}
+          , a conservative reactivation effort that re-engages just 5% of your
+          inactive patients could bring back around{' '}
           <span className="font-semibold text-foreground">
             {patients.toLocaleString('en-US')} patients
           </span>
-          {servicesLabel ? ` to your ${servicesLabel} practice` : ''}.
+          {servicesLabel ? ` to your ${servicesLabel} practice` : ''} based on
+          the numbers you provided.
         </p>
       </div>
 
