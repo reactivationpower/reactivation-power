@@ -362,7 +362,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
             </table>
             <p style="margin:0 0 8px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:26px;color:#314158;">Let's look at your patient list together and map out the opportunity:</p>
 ${button('Schedule a Call', LANDING_PAGE_URL)}
-            <p style="margin:0 0 32px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:26px;color:#314158;">It takes about a minute — answer a few quick questions about your practice, then pick a day and time right on the calendar.</p>
+            <p style="margin:0 0 32px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:26px;color:#314158;">It takes about a minute �� answer a few quick questions about your practice, then pick a day and time right on the calendar.</p>
             <p style="margin:0 0 4px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:26px;color:#314158;">To your practice's growth,</p>
             <p style="margin:0 0 40px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:26px;color:#1d293d;"><strong>The Reactivation Power Team</strong></p>
           </td>
@@ -678,6 +678,10 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         greet,
         p(
           'A patient who came in for spinal decompression needs a completely different conversation than one who came in for soft wave, a weight loss program, or even chiropractic care.',
+        ),
+        image(
+          'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/ChatGPT%20Image%20Sep%2010%2C%202026%2C%2005_07_16%20PM-lhr7bi52lt5vjQysKdUpJoL9pVq7CP.png',
+          'The same list, matched to the right conversation. Each service line has a different story, and your team gets the right script for each one: chiropractic care, spinal decompression, neuropathy and joint pain; soft wave, acoustic wave therapy, acupuncture, massage and gut health; weight loss with ChiroThin, in-office programs and GLP patients; red light, body contouring, skin tightening, cellulite reduction and Botox; laser hair removal and body waxing. One import, mixed patient types: each patient carries the service they were treated for, so your team works straight down the queue without switching scripts by hand.',
         ),
         p(
           'This is where generic call scripts fall apart. One all-purpose script forces your team to improvise the parts that matter most — and those are exactly the parts that decide whether an appointment gets booked.',
