@@ -684,11 +684,12 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         ),
         p('So the program ships with scripts written for specific service lines:'),
         checks([
-          'Spinal decompression, neuropathy, joint pain and acupuncture',
-          'Chiropractic care and massage therapy',
-          'Weight programs, including medication-based plans',
-          'Aesthetics — skin tightening, laser, injectables and more',
-          'Dental — implants, whitening, clear aligners and orthodontics',
+          'Chiropractic care, spinal decompression, neuropathy and joint pain',
+          'Acoustic wave therapy / soft wave, acupuncture, massage therapy and gut health',
+          'Weight loss — ChiroThin, in-office programs and GLP patients',
+          'Red light / body contouring, skin tightening, cellulite reduction and Botox',
+          'Laser hair removal and body waxing',
+          'Dental — implants, teeth whitening, clear aligners and orthodontics',
         ]),
         p(
           '<strong>Here\'s the part that makes it usable.</strong> When you import your list, each patient carries the service they were treated for — so they arrive already matched to the right script. Your team never has to stop and figure out which conversation this person needs. They open the next call and the correct words are on screen.',
