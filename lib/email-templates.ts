@@ -520,9 +520,9 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
           'When we describe a reactivation program, the most common reaction is some form of <strong>&ldquo;my team is already buried.&rdquo;</strong> That\'s fair. Front desks are the busiest place in the building.',
         ),
         p('So here is the actual commitment:'),
-        bigStat(
-          '15 calls a day',
-          'Roughly 45 minutes of phone time — worked into the natural gaps your front desk already has',
+        image(
+          'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/ChatGPT%20Image%20Sep%2010%2C%202026%2C%2004_11_50%20PM-1o5BhlAnb79EDyLjzVdB7JFsnNR4xn.png',
+          '15 calls a day. Roughly 45 minutes of phone time, worked into the natural gaps your front desk already has. 45 minutes a day. No new hire required. Fits into natural gaps. A smiling front-desk team member on the phone at a chiropractic office.',
         ),
         p(
           'Fifteen calls a day is over <strong>300 conversations a month.</strong> No new hire, no overtime, no dedicated call room. Most offices run them in the slow stretches: mid-morning, right after lunch, the last half hour before close.',
