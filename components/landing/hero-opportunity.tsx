@@ -1,30 +1,31 @@
 'use client'
 
-import { useState } from 'react'
 import { LeadDialog } from '@/components/landing/lead-dialog'
-import { reactivatedPatients } from '@/lib/opportunity'
-
-const INACTIVE_MIN = 100
-const INACTIVE_MAX = 5000
-const INACTIVE_STEP = 100
-const INACTIVE_DEFAULT = 1000
-
-const VALUE_MIN = 1000
-const VALUE_MAX = 5000
-const VALUE_STEP = 100
-const VALUE_DEFAULT = 2000
+import { useOpportunity } from '@/components/landing/opportunity-context'
+import {
+  INACTIVE_MAX,
+  INACTIVE_MIN,
+  INACTIVE_STEP,
+  VALUE_MAX,
+  VALUE_MIN,
+  VALUE_STEP,
+  reactivatedPatients,
+  sliderFillPercent,
+} from '@/lib/opportunity'
 
 function formatMoney(n: number): string {
   return '$' + Math.round(n).toLocaleString('en-US')
 }
 
-function fillPercent(value: number, min: number, max: number): string {
-  return `${((value - min) / (max - min)) * 100}%`
-}
-
 export function HeroOpportunity() {
-  const [inactiveCount, setInactiveCount] = useState(INACTIVE_DEFAULT)
-  const [patientValue, setPatientValue] = useState(VALUE_DEFAULT)
+  const calc = useOpportunity()
+  if (!calc) {
+    throw new Error(
+      'HeroOpportunity must be rendered inside <OpportunityProvider>',
+    )
+  }
+  const { inactiveCount, setInactiveCount, patientValue, setPatientValue } =
+    calc
 
   const patients = reactivatedPatients(inactiveCount)
   const revenue = patients * patientValue
@@ -66,7 +67,7 @@ export function HeroOpportunity() {
           onChange={(e) => setInactiveCount(Number(e.target.value))}
           className="range-slider"
           style={{
-            ['--range-pct' as string]: fillPercent(
+            ['--range-pct' as string]: sliderFillPercent(
               inactiveCount,
               INACTIVE_MIN,
               INACTIVE_MAX,
@@ -97,7 +98,7 @@ export function HeroOpportunity() {
           onChange={(e) => setPatientValue(Number(e.target.value))}
           className="range-slider"
           style={{
-            ['--range-pct' as string]: fillPercent(
+            ['--range-pct' as string]: sliderFillPercent(
               patientValue,
               VALUE_MIN,
               VALUE_MAX,

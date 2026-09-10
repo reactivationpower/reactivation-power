@@ -9,6 +9,11 @@ import {
   upsertGhlContact,
 } from '@/lib/ghl'
 import { readLeadFields, validateLeadFields } from '@/lib/lead-validation'
+import {
+  parseInactiveCount,
+  parsePatientValue,
+  reactivatedPatients,
+} from '@/lib/opportunity'
 
 export interface LeadState {
   error?: string
@@ -90,6 +95,13 @@ export async function submitHealthcareLead(
 
   const phoneDigits = phone.replace(/\D/g, '')
 
+  // The figures the lead saw on the calculator, carried to the results page
+  // and the CRM note so the salesperson sees the same number the lead did
+  const inactiveCount = parseInactiveCount(inactivePatients)
+  const patientValue = parsePatientValue(fields.patientValue)
+  const revenueShown = reactivatedPatients(inactiveCount) * patientValue
+  const money = (n: number) => '$' + n.toLocaleString('en-US')
+
   const firstName = titleCase(firstNameRaw)
   const lastName = titleCase(lastNameRaw)
 
@@ -129,7 +141,9 @@ export async function submitHealthcareLead(
         `Location: ${city && state ? `${city}, ${state} ${zip}` : zip}`,
         '',
         `Years in practice: ${yearsInPractice}`,
-        `Estimated inactive patients: ${inactivePatients}`,
+        `Inactive patient files: ${inactiveCount.toLocaleString('en-US')}`,
+        `Annual patient value used: ${money(patientValue)}`,
+        `Revenue estimate shown to lead: ${money(revenueShown)}`,
         `Services offered: ${services.length > 0 ? services.join(', ') : '(none selected)'}`,
       ].join('\n')
 
@@ -168,7 +182,7 @@ export async function submitHealthcareLead(
     consent_ip: ip,
     ghl_contact_id: ghlContactId || null,
     years_in_practice: yearsInPractice,
-    inactive_patients_estimate: inactivePatients,
+    inactive_patients_estimate: String(inactiveCount),
     services,
     source_path: '/healthcare',
   })
@@ -180,7 +194,8 @@ export async function submitHealthcareLead(
 
   const params = new URLSearchParams({
     name: firstName,
-    inactive: inactivePatients,
+    inactive: String(inactiveCount),
+    value: String(patientValue),
   })
   if (services.length > 0) params.set('services', services.join('|'))
   if (ghlContactId) params.set('cid', ghlContactId)

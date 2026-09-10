@@ -13,6 +13,7 @@ import {
 import { HeroOpportunity } from '@/components/landing/hero-opportunity'
 import { LeadDialog } from '@/components/landing/lead-dialog'
 import { LeadForm } from '@/components/landing/lead-form'
+import { OpportunityProvider } from '@/components/landing/opportunity-context'
 
 export const metadata: Metadata = {
   title: 'Reactivation Power Program for Healthcare Practices',
@@ -69,6 +70,7 @@ const BENEFITS = [
 
 export default function HealthcareLandingPage() {
   return (
+    <OpportunityProvider>
     <main className="bg-background">
       {/* Header */}
       <header className="border-b border-border bg-card">
@@ -290,5 +292,6 @@ export default function HealthcareLandingPage() {
         </div>
       </footer>
     </main>
+    </OpportunityProvider>
   )
 }

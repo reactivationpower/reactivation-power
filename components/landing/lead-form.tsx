@@ -6,6 +6,7 @@ import {
   submitHealthcareLead,
   type LeadState,
 } from '@/app/actions/leads'
+import { useOpportunity } from '@/components/landing/opportunity-context'
 import { ServicesMultiSelect } from '@/components/landing/services-multi-select'
 import { Button } from '@/components/ui/button'
 import { readLeadFields, validateLeadFields } from '@/lib/lead-validation'
@@ -31,6 +32,11 @@ function formatPhone(raw: string): string {
   return `(${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6)}`
 }
 
+/** Show a digit string with thousands separators ("1800" -> "1,800") */
+function formatCount(digits: string): string {
+  return digits ? Number(digits).toLocaleString('en-US') : ''
+}
+
 const inputBase =
   'h-11 rounded-md border bg-card px-3 text-base text-foreground outline-none transition-colors focus:border-accent focus:ring-2 focus:ring-ring/30'
 
@@ -54,6 +60,17 @@ export function LeadForm() {
     state: string
   } | null>(null)
 
+  // Slider values from the hero calculator, when this page has one
+  const calc = useOpportunity()
+  const [inactive, setInactive] = useState(() =>
+    calc ? String(calc.inactiveCount) : '',
+  )
+  // Follow the slider if the visitor moves it after this form has mounted
+  const sliderCount = calc?.inactiveCount
+  useEffect(() => {
+    if (sliderCount !== undefined) setInactive(String(sliderCount))
+  }, [sliderCount])
+
   // Errors shown to the visitor. Seeded by the instant client check on submit;
   // replaced by the server's verdict if the server disagrees.
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -66,6 +83,8 @@ export function LeadForm() {
     if (state.values) {
       if (state.values.phone) setPhone(formatPhone(state.values.phone))
       if (state.values.zip) setZip(state.values.zip)
+      if (state.values.inactivePatients)
+        setInactive(state.values.inactivePatients)
     }
   }, [state.values])
 
@@ -326,34 +345,40 @@ export function LeadForm() {
             htmlFor={`${uid}-inactive`}
             className="text-sm font-medium text-foreground"
           >
-            Estimated inactive patients
+            Inactive patient files
             <RequiredMark />
           </label>
-          <select
+          <input
             id={`${uid}-inactive`}
             name="inactivePatients"
             required
-            defaultValue={v.inactivePatients ?? ''}
+            inputMode="numeric"
+            autoComplete="off"
+            placeholder="e.g. 1,000"
+            value={formatCount(inactive)}
+            onChange={(e) =>
+              setInactive(e.target.value.replace(/\D/g, '').slice(0, 6))
+            }
             aria-invalid={errors.inactivePatients ? 'true' : undefined}
             className={inputClass(Boolean(errors.inactivePatients))}
-          >
-            <option value="" disabled>
-              Select one
-            </option>
-            <option value="Under 100">Under 100</option>
-            <option value="100-500">100&ndash;500</option>
-            <option value="500-1,000">500&ndash;1,000</option>
-            <option value="1,000-5,000">1,000&ndash;5,000</option>
-            <option value="5,000+">5,000+</option>
-            <option value="Not sure">Not sure</option>
-          </select>
-          {errors.inactivePatients && (
+          />
+          {errors.inactivePatients ? (
             <p className="text-xs font-medium text-destructive">
               {errors.inactivePatients}
+            </p>
+          ) : (
+            <p className="text-xs text-muted-foreground">
+              {calc
+                ? 'Carried over from your calculator — edit if needed.'
+                : 'Your best estimate is fine.'}
             </p>
           )}
         </div>
       </div>
+
+      {calc ? (
+        <input type="hidden" name="patientValue" value={calc.patientValue} />
+      ) : null}
 
       <ServicesMultiSelect
         defaultSelected={state.services ?? []}

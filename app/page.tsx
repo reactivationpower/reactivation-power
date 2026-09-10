@@ -10,6 +10,7 @@ import {
   Users,
 } from 'lucide-react'
 import { HeroOpportunity } from '@/components/landing/hero-opportunity'
+import { OpportunityProvider } from '@/components/landing/opportunity-context'
 import { SiteFooter } from '@/components/site/site-footer'
 import { SiteHeader } from '@/components/site/site-header'
 
@@ -115,7 +116,9 @@ export default function HomePage() {
               </dl>
             </div>
 
-            <HeroOpportunity />
+            <OpportunityProvider>
+              <HeroOpportunity />
+            </OpportunityProvider>
           </div>
         </section>
 

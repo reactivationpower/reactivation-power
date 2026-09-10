@@ -3,16 +3,16 @@
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import {
-  SLIDER_MAX,
-  SLIDER_MIN,
-  SLIDER_STEP,
+  VALUE_MAX,
+  VALUE_MIN,
+  VALUE_STEP,
   reactivatedPatients,
+  sliderFillPercent,
 } from '@/lib/opportunity'
 
 interface OpportunityCalculatorProps {
   firstName: string
   contactId?: string
-  inactiveLabel: string
   inactiveCount: number
   defaultPatientValue: number
   servicesLabel: string
@@ -31,7 +31,6 @@ function formatMoney(n: number): string {
 export function OpportunityCalculator({
   firstName,
   contactId,
-  inactiveLabel,
   inactiveCount,
   defaultPatientValue,
   servicesLabel,
@@ -111,9 +110,14 @@ export function OpportunityCalculator({
           sitting in your inactive patient list
         </h1>
         <p className="text-pretty text-base leading-relaxed text-muted-foreground">
-          Based on your estimate of {inactiveLabel.toLowerCase()} inactive
-          patients, a conservative reactivation effort could bring back
-          around <span className="font-semibold text-foreground">{patients.toLocaleString('en-US')} patients</span>
+          Based on your{' '}
+          <span className="font-semibold text-foreground">
+            {inactiveCount.toLocaleString('en-US')} inactive patient files
+          </span>
+          , a conservative reactivation effort could bring back around{' '}
+          <span className="font-semibold text-foreground">
+            {patients.toLocaleString('en-US')} patients
+          </span>
           {servicesLabel ? ` to your ${servicesLabel} practice` : ''}.
         </p>
       </div>
@@ -136,26 +140,32 @@ export function OpportunityCalculator({
             htmlFor="patient-value"
             className="text-sm font-medium text-foreground"
           >
-            Average annual patient value
+            What&apos;s a patient worth to you per year?
           </label>
-          <span className="text-lg font-semibold tabular-nums text-foreground">
+          <span className="text-lg font-bold tabular-nums text-accent">
             {formatMoney(patientValue)}
           </span>
         </div>
         <input
           id="patient-value"
           type="range"
-          min={SLIDER_MIN}
-          max={SLIDER_MAX}
-          step={SLIDER_STEP}
+          min={VALUE_MIN}
+          max={VALUE_MAX}
+          step={VALUE_STEP}
           value={patientValue}
           onChange={(e) => setPatientValue(Number(e.target.value))}
-          className="w-full accent-accent"
+          className="range-slider"
+          style={{
+            ['--range-pct' as string]: sliderFillPercent(
+              patientValue,
+              VALUE_MIN,
+              VALUE_MAX,
+            ),
+          }}
         />
         <p className="text-xs leading-relaxed text-muted-foreground">
-          Pre-set from typical values for the services you offer — drag it
-          to match what an average patient is actually worth to your
-          practice each year and watch your number update.
+          Drag to match what an average patient is actually worth to your
+          practice each year — your number updates as you go.
         </p>
       </div>
 

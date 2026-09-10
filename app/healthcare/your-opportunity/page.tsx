@@ -1,10 +1,7 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import { OpportunityCalculator } from '@/components/landing/opportunity-calculator'
-import {
-  defaultValueForServices,
-  inactiveCountForRange,
-} from '@/lib/opportunity'
+import { parseInactiveCount, parsePatientValue } from '@/lib/opportunity'
 
 export const metadata: Metadata = {
   title: 'Your Reactivation Opportunity | Reactivation Power Program',
@@ -28,15 +25,18 @@ export default async function YourOpportunityPage({
   const params = await searchParams
   const firstName = typeof params.name === 'string' ? params.name.slice(0, 40) : ''
   const contactId = typeof params.cid === 'string' ? params.cid.slice(0, 64) : ''
-  const inactiveLabel =
-    typeof params.inactive === 'string' ? params.inactive : 'Not sure'
   const services =
     typeof params.services === 'string'
       ? params.services.split('|').filter(Boolean).slice(0, 30)
       : []
 
-  const inactiveCount = inactiveCountForRange(inactiveLabel)
-  const defaultPatientValue = defaultValueForServices(services)
+  // Exact figures from the hero sliders, carried through the lead form
+  const inactiveCount = parseInactiveCount(
+    typeof params.inactive === 'string' ? params.inactive : undefined,
+  )
+  const patientValue = parsePatientValue(
+    typeof params.value === 'string' ? params.value : undefined,
+  )
 
   return (
     <main className="min-h-screen bg-background">
@@ -55,9 +55,8 @@ export default async function YourOpportunityPage({
       <OpportunityCalculator
         firstName={firstName}
         contactId={contactId}
-        inactiveLabel={inactiveLabel}
         inactiveCount={inactiveCount}
-        defaultPatientValue={defaultPatientValue}
+        defaultPatientValue={patientValue}
         servicesLabel={servicesLabel(services)}
       />
     </main>

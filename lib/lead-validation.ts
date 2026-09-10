@@ -13,7 +13,10 @@ export interface LeadFieldValues {
   phone: string
   zip: string
   yearsInPractice: string
+  /** Whole-number count as a digit string, e.g. "1800" */
   inactivePatients: string
+  /** Annual patient value from the hero slider as a digit string; may be empty */
+  patientValue: string
   consent: boolean
   services: string[]
 }
@@ -28,7 +31,8 @@ export function readLeadFields(formData: FormData): LeadFieldValues {
     phone: str('phone'),
     zip: str('zip').replace(/\D/g, '').slice(0, 5),
     yearsInPractice: str('yearsInPractice'),
-    inactivePatients: str('inactivePatients'),
+    inactivePatients: str('inactivePatients').replace(/\D/g, ''),
+    patientValue: str('patientValue').replace(/\D/g, ''),
     consent: formData.get('consent') === 'on',
     services: formData
       .getAll('services')
@@ -58,7 +62,10 @@ export function validateLeadFields(
 
   if (v.zip.length !== 5) errors.zip = 'Enter your 5-digit zip code.'
   if (!v.yearsInPractice) errors.yearsInPractice = 'Select an option.'
-  if (!v.inactivePatients) errors.inactivePatients = 'Select an option.'
+  if (!v.inactivePatients)
+    errors.inactivePatients = 'Enter your inactive patient count.'
+  else if (Number(v.inactivePatients) < 1)
+    errors.inactivePatients = 'Enter a count of at least 1.'
   if (v.services.length === 0)
     errors.services = 'Select at least one service.'
   if (!v.consent)
