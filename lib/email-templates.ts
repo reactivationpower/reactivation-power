@@ -364,7 +364,7 @@ export const EMAIL_TEMPLATES: EmailTemplate[] = [
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0;">
               <tr>
                 <td>
-                  <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Concept_1_Old_Patient_Files_Asset_No_Label-hyoFHnr5ONQKfPJarHrFb9qg6YPadx.png" alt="Your old patient files are an asset — the opportunity is already sitting in your database. 1,000 old patient files, just 10% reactivated through simple outreach, equals 100 returning patients at a $1,000 average patient value: $100,000 in recovered revenue. This is not new business — this is business you already earned." width="520" style="width:100%;max-width:520px;height:auto;margin:0 auto;border-radius:6px;" />
+                  <img src="${asset('1-1-old-patient-files-asset.jpg')}" alt="Your old patient files are an asset — the opportunity is already sitting in your database. 1,000 old patient files, just 5% reactivated through simple outreach, equals 50 returning patients at a $2,000 average patient value: $100,000 in recovered revenue. This is not new business — this is business you already earned." width="520" style="width:100%;max-width:520px;height:auto;margin:0 auto;border-radius:6px;" />
                 </td>
               </tr>
             </table>
@@ -402,7 +402,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         h1('Who\'s actually in your 1,000'),
         greet,
         p(
-          'In the last email I showed you a number: 1,000 inactive files, ten percent of them back, roughly <strong>$100,000</strong>. Numbers are easy to nod at and forget. So let\'s put faces on it.',
+          'In the last email I showed you a number: 1,000 inactive files, just five percent of them back at a $2,000 average patient value, roughly <strong>$100,000</strong>. Numbers are easy to nod at and forget. So let\'s put faces on it.',
         ),
         p(
           'Pull up the inactive list in any chiropractic office and the same five people are in it. You\'ll recognize every one.',
