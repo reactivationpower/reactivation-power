@@ -36,10 +36,18 @@ interface AudienceSet {
   templates: EmailTemplate[]
 }
 
+const NAME_PREFIX = /^email\s+(\d+(?:\.\d+)?)\s*[—-]\s*/i
+
+/** "Email 1.1 — Title" → "1-1", "Email 20 — Title" → "20". */
+function emailLabel(name: string): string {
+  const match = name.match(NAME_PREFIX)
+  return match ? match[1].replace('.', '-') : ''
+}
+
 function slug(name: string): string {
   return name
     .toLowerCase()
-    .replace(/^email \d+\s*[—-]\s*/, '')
+    .replace(NAME_PREFIX, '')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
     .slice(0, 60)
@@ -49,8 +57,15 @@ function pad(n: number): string {
   return String(n).padStart(2, '0')
 }
 
+/**
+ * Every file name carries the email's OWN number ("email-1-1", "email-20")
+ * as well as its position in the send order, so a file can never be confused
+ * with a differently-numbered email (position 48 is Email 20, for example).
+ */
 function filePath(set: AudienceSet, index: number, t: EmailTemplate): string {
-  return `emails/${set.audience.id}/${pad(index + 1)}-${slug(t.name)}.html`
+  const label = emailLabel(t.name)
+  const stem = `${label ? `email-${label}-` : ''}${slug(t.name)}`
+  return `emails/${set.audience.id}/${pad(index + 1)}-${stem}.html`
 }
 
 function esc(s: string): string {
@@ -68,7 +83,7 @@ function csvCell(value: string): string {
 function buildCsv(sets: AudienceSet[]): string {
   const header = [
     'Audience',
-    '#',
+    'Send order',
     'Name',
     'Subject line',
     'Preview text',
@@ -114,7 +129,7 @@ function buildSection(set: AudienceSet): string {
     <p class="desc">${esc(set.audience.description)}</p>
     <table>
       <thead>
-        <tr><th>#</th><th>Email &amp; file</th><th>Subject line</th><th>Preview text</th></tr>
+        <tr><th title="Send order">#</th><th>Email &amp; file</th><th>Subject line</th><th>Preview text</th></tr>
       </thead>
       <tbody>${rows}
       </tbody>
@@ -172,7 +187,7 @@ function buildIndexHtml(sets: AudienceSet[], exportedAt: string): string {
       <li>Open the matching file in a text editor, select all, copy.</li>
       <li>In the GHL builder, add a <strong>Custom Code</strong> block (or switch to the code view) and paste the HTML.</li>
       <li>Set the <strong>subject line</strong> and <strong>preview text</strong> exactly as listed in the table below.</li>
-      <li>Name the template with the audience, number and name (for example <em>Chiropractic 01 — The Revenue Hiding in Your Patient List</em>) so each sequence stays in order and easy to tell apart.</li>
+      <li>Name the template with the audience plus the email's own number and name from the <strong>Email</strong> column — for example <em>Chiropractic — Email 1.1 — The Revenue Hiding in Your Patient List</em> or <em>Chiropractic — Email 15 — When Your Best Person Leaves</em>. Use the email's own number, not the <strong>#</strong> column: the # is only the send order.</li>
     </ol>
     <p style="margin:12px 0 0;font-size:13px;color:#52606d">
       Merge tags are already in GHL format — <code>{{contact.first_name}}</code> and <code>{{unsubscribe_link}}</code> — so leave them exactly as they are.
