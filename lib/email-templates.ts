@@ -206,11 +206,11 @@ ${rightItems
  * Full-width hosted graphic. The alt text must carry the whole message so
  * the email still lands in clients that block images by default.
  */
-const image = (src: string, alt: string) =>
+const image = (src: string, alt: string, maxWidth = 520) =>
   `            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0;">
-              <tr>
-                <td>
-                  <img src="${src}" alt="${alt}" width="520" style="display:block;width:100%;max-width:520px;height:auto;margin:0 auto;border-radius:6px;" />
+  <tr>
+  <td>
+  <img src="${src}" alt="${alt}" width="${maxWidth}" style="display:block;width:100%;max-width:${maxWidth}px;height:auto;margin:0 auto;border-radius:6px;" />
                 </td>
               </tr>
             </table>`
@@ -402,48 +402,24 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         h1('Who\'s actually in your 1,000'),
         greet,
         p(
-          'In the last email I showed you a number: 1,000 inactive files, just five percent of them back at a $2,000 average patient value, roughly <strong>$100,000</strong>. Numbers are easy to nod at and forget. So let\'s put faces on it.',
-        ),
-        p(
-          'Pull up the inactive list in any chiropractic office and the same five people are in it. You\'ll recognize every one.',
+          'In the last email I showed you a number: 1,000 inactive files, five percent of them back at $2,000 each, roughly <strong>$100,000</strong>. Numbers are easy to nod at. So let\'s put faces on it.',
         ),
         image(
           asset('1-2-who-is-in-your-thousand.jpg'),
           'Who is actually in your 1,000. A bright chiropractic reception area; the front-desk monitor shows an Inactive Patients list of 1,000 names sorted by last visit. Five kinds of patient make up the list: finished care, felt great, drifted; missed one visit, never rebooked; came in for one thing only; insurance or life changed; the rest of the family. Not one of them is a stranger.',
         ),
-        steps([
-          [
-            'The one who finished care and felt great.',
-            'They completed the plan, the pain was gone, and they stopped coming &mdash; because they felt fine. They still think of you as their chiropractor. They just haven\'t had a reason to call.',
-          ],
-          [
-            'The one who missed a visit and never rebooked.',
-            'Something came up, nobody followed up, and after a few weeks it felt awkward to call in. They\'re not gone. They\'re waiting for someone to make it easy.',
-          ],
-          [
-            'The one who came in for one thing.',
-            'Low back pain, three years ago. They have no idea you do decompression now, or weight loss, or red light. In their mind you\'re still the office that fixed their back.',
-          ],
-          [
-            'The one whose situation changed.',
-            'New job, new insurance, a move across town, a new baby. That was two years ago. Their situation has changed again since &mdash; and nobody has asked.',
-          ],
-          [
-            'The rest of the family.',
-            'You treated the mom. Her husband, her kids and her parents are on the same list, at the same address, and nobody has ever invited them in.',
-          ],
+        p('Pull up the inactive list in any chiropractic office and the same five people are in it:'),
+        checks([
+          '<strong>Finished care and felt great</strong> &mdash; so they stopped coming. They still call you their chiropractor.',
+          '<strong>Missed one visit</strong>, nobody followed up, and after a few weeks calling in felt awkward.',
+          '<strong>Came in for one thing</strong>, years ago. They have no idea you do decompression or weight loss now.',
+          '<strong>Life changed</strong> &mdash; new job, new insurance, a move. It has changed again since, and nobody has asked.',
+          '<strong>The rest of the family</strong>, at the same address, never once invited in.',
         ]),
-        darkPanel([
-          'Not one of these is a cold call. Every name already knows your practice, your team and your front door. That\'s the difference between this and every other kind of marketing you\'ve paid for.',
-        ]),
-        cta('Want to see your own list sorted this way?', 'Book a Live Walkthrough'),
         p(
-          'The number from the last email is what these five people add up to. They\'re not hypothetical. They\'re in your software right now, sorted by last visit.',
+          'Not one of these is a cold call. Every name already knows your practice and your front door. That\'s the difference between this and every other kind of marketing you\'ve paid for.',
         ),
-        p(
-          'On the call, we pull up your actual list and sort it exactly like this, so you can see which groups you have the most of and what each one needs to hear.',
-        ),
-        cta('Let\'s see who\'s in yours:', 'Reserve My Strategy Call'),
+        cta('On the call we pull up your actual list and sort it exactly like this:'),
         finePrint(),
         signoff(),
       ]),
@@ -467,25 +443,19 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
           'Two emails so far. The first was a number: what your inactive list is worth. The second was the people behind it: five kinds of patients, every one of them warm.',
         ),
         p(
-          'Which leaves one question. If it\'s worth that much, and they\'re that easy to call, <strong>why is it still sitting there?</strong>',
-        ),
-        p(
-          'Not because you don\'t care. Not because your team can\'t do it. It\'s still sitting there because the list has no owner.',
+          'Which leaves one question. If it\'s worth that much, and they\'re that easy to call, <strong>why is it still sitting there?</strong> Not because you don\'t care, and not because your team can\'t do it. It\'s still sitting there because the list has no owner.',
         ),
         image(
           asset('1-3-list-has-no-owner.jpg'),
           'Why it is still sitting there versus what changes. Left: a quiet chiropractic front desk with an idle phone and a long patient list on the monitor &mdash; nobody\'s name is on it, nobody knows what to say, nobody knows who\'s been called. Right: the same desk with a front-desk team member on the phone and a call queue on screen &mdash; one person owns it, every word is on the screen, the queue knows who\'s next. A system problem, not a willpower problem.',
         ),
         checks([
-          '<strong>Nobody\'s name is on it.</strong> &ldquo;Someone should call these people&rdquo; is easy to say. &ldquo;Sarah calls fifteen of them at two o\'clock&rdquo; is the sentence that actually gets them called.',
-          '<strong>Nobody knows what to say.</strong> Without the words, the first awkward pause ends the whole effort &mdash; usually before the end of the first week.',
-          '<strong>Nobody knows who\'s been called.</strong> So the same three names get called twice, and the other 997 never hear from anyone.',
-        ]),
-        panel([
-          'That\'s not a willpower problem. It\'s a system problem &mdash; and system problems are the fixable kind.',
+          '<strong>Nobody\'s name is on it.</strong> &ldquo;Someone should call these people&rdquo; never gets them called. &ldquo;Sarah calls fifteen at two o\'clock&rdquo; does.',
+          '<strong>Nobody knows what to say.</strong> Without the words, the first awkward pause ends the whole effort.',
+          '<strong>Nobody knows who\'s been called.</strong> So the same three names get called twice and the other 997 never hear from anyone.',
         ]),
         p(
-          'That\'s what Reactivation Power is. <strong>An owner:</strong> your front desk, in the gaps they already have. <strong>The words:</strong> a script on screen for every call and every objection. <strong>The record:</strong> a queue that knows who\'s next and when. The asset from the first email, the people from the second, with the missing piece put in.',
+          'That\'s a system problem, not a willpower problem &mdash; and system problems are the fixable kind. Reactivation Power is the fix: <strong>an owner</strong> (your front desk, in the gaps they already have), <strong>the words</strong> (a script on screen for every call), and <strong>the record</strong> (a queue that knows who\'s next).',
         ),
         cta(
           'Book a call and we\'ll walk through your list, your number, and what the first two weeks look like:',
@@ -552,54 +522,23 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         h1('Seven steps for a stranger. One for a patient.'),
         greet,
         p(
-          'In the last email I said marketing to strangers is the most expensive way to grow. Let\'s make that concrete. Here is the path a stranger has to walk before they\'re on your table &mdash; and notice that <strong>every step is a place you pay and a place they can leave.</strong>',
+          'In the last email I said marketing to strangers is the most expensive way to grow. Here\'s why. Before a stranger is on your table they have to see the ad, click, fill out a form, get called back, trust a name they\'ve never heard, show up, and get past the price.',
         ),
         image(
           asset('2-2-seven-steps-for-a-stranger.jpg'),
           'Seven steps for a stranger, one for a patient. The stranger: see the ad, click, fill the form, get called back, trust a name, show up, get past the price. You pay at every step; they can leave at every step. The past patient: your front desk calls, they book. Steps one through six already happened. You paid for them once. You never have to pay for them again.',
         ),
-        steps([
-          [
-            'They have to see you.',
-            'Ad spend goes out before anyone has clicked anything, and most of the people who see it were never going to.',
-          ],
-          [
-            'They have to click.',
-            'You pay again for the click, whether the person behind it was serious or bored.',
-          ],
-          [
-            'They have to fill out a form.',
-            'Most don\'t finish it. Some of the ones who do mistype the phone number.',
-          ],
-          [
-            'Someone has to call them back.',
-            'The longer the form sits, the colder it gets &mdash; and your front desk is checking someone in.',
-          ],
-          [
-            'They have to trust a name they\'ve never heard.',
-            'Reviews, website, a gut feeling on the first phone call. All of it has to line up.',
-          ],
-          [
-            'They have to show up.',
-            'A stranger who books has nothing invested in keeping the appointment.',
-          ],
-          [
-            'They have to get past the price.',
-            'Nothing you\'ve done for them yet is a reason to say yes.',
-          ],
-        ]),
+        p(
+          '<strong>Every one of those seven steps is a place you pay and a place they can leave.</strong> Most people who see the ad never click. Most who click never finish the form. And a stranger who books has nothing invested in keeping the appointment.',
+        ),
         darkPanel([
           'Now the past patient. Your front desk calls. They hear a name they know. They book.',
           'Steps one through six already happened &mdash; the first time they were your patient. You paid for them once. You never have to pay for them again.',
         ]),
-        cta('Want to see the short path on your own list?', 'See It Live on a Call'),
-        p(
-          'And if you\'ve added a service since they were last in &mdash; decompression, weight loss, red light &mdash; they hear about it from the office they already trust, not from an ad they\'ll scroll past.',
-        ),
         p(
           'On the call we pull up your inactive list and count how many people on it are already standing at the last step. That\'s the number the ad budget never sees.',
         ),
-        cta('Pick a time and we\'ll count them together:', 'Grab a Time on the Calendar'),
+        cta('Pick a time and we\'ll count them together:'),
         finePrint(),
         signoff(),
       ]),
@@ -620,7 +559,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         h1('Why the ad budget keeps winning'),
         greet,
         p(
-          'Over the last two emails I\'ve made one argument: strangers are the expensive way to grow, and past patients are the short path. If that\'s true &mdash; and you can check it against your own numbers &mdash; there\'s an obvious question. <strong>Why does the ad budget keep getting approved?</strong>',
+          'Over the last two emails I\'ve made one argument: strangers are the expensive way to grow, and past patients are the short path. Which raises an obvious question. <strong>Why does the ad budget keep getting approved?</strong>',
         ),
         p('It isn\'t because ads work better. It\'s because ads come packaged.'),
         image(
@@ -629,18 +568,13 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         ),
         checks([
           '<strong>Someone sells it to you.</strong> An agency calls, walks you through a deck, and asks for a budget. Nobody calls to sell you your own list.',
-          '<strong>Someone runs it.</strong> Once you say yes, the campaign happens without you. The list waits for someone in your office to have a free afternoon.',
-          '<strong>Someone reports on it.</strong> Clicks, leads, cost per lead, a dashboard every month. The list has never produced a report, so it never gets a line in the budget.',
-        ]),
-        panel([
-          'The list doesn\'t lose because it\'s worth less. It loses because it isn\'t packaged &mdash; and unpackaged things don\'t get done.',
+          '<strong>Someone runs it.</strong> Say yes and the campaign happens without you. The list waits for a free afternoon.',
+          '<strong>Someone reports on it.</strong> Clicks, leads, a dashboard every month. The list has never produced a report, so it never gets a line in the budget.',
         ]),
         p(
-          'That\'s what Reactivation Power is: the package. Import the list and it runs like a campaign &mdash; a queue that sets each day\'s calls, a script on screen for every conversation and every objection, and a dashboard that shows what came back. The short path from the last email, with the same structure the ad budget has always had.',
+          'The list doesn\'t lose because it\'s worth less. It loses because it isn\'t packaged. That\'s what Reactivation Power is: the package &mdash; a queue that sets each day\'s calls, a script on screen for every conversation, and a dashboard that shows what came back.',
         ),
-        cta(
-          'Book a call and we\'ll show you what your list looks like once it\'s packaged &mdash; the queue, the script, and the numbers:',
-        ),
+        cta('Book a call and we\'ll show you what your list looks like once it\'s packaged:'),
         finePrint(),
         signoff(),
       ]),
@@ -650,12 +584,12 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
   {
     id: 'front-desk-scripts',
     audience: 'chiropractic',
-    name: 'Email 3 — Your Team Doesn\u2019t Need Sales Skills',
+    name: 'Email 3.1 — Your Team Doesn\u2019t Need Sales Skills',
     subject: "Your front desk doesn't need to be salespeople",
     previewText:
       'The words are already written. Your team reads the screen, taps what the patient said, and the next line appears.',
     angle:
-      'Removes the #1 internal objection: "my team can\'t sell." The interactive script carries the call, so no memorizing and no winging it.',
+      'Day 3, email 1. Removes the #1 internal objection: "my team can\'t sell." The interactive script carries the call, so no memorizing and no winging it.',
     html: wrap(
       compose([
         h1(
@@ -702,14 +636,92 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
     ),
   },
   {
+    id: 'three-moments-written',
+    audience: 'chiropractic',
+    name: 'Email 3.2 — The Three Moments Your Front Desk Dreads',
+    subject: 'The three moments your front desk dreads',
+    previewText:
+      'The opener, the &ldquo;I\u2019m fine now,&rdquo; and the ask. All three are already written.',
+    angle:
+      'Day 3, email 2. Makes 3.1 concrete by naming the three moments in a reactivation call that make untrained staff freeze, and showing that each one is on the screen word for word.',
+    html: wrap(
+      compose([
+        h1('The three moments your front desk dreads'),
+        greet,
+        p(
+          'In the last email I said your team doesn\'t need sales skills. Here\'s what that means in practice. A reactivation call has three moments that make people freeze &mdash; and all three are on the screen, word for word.',
+        ),
+        image(
+          asset('3-2-three-moments-written.jpg'),
+          'Three moments your front desk dreads. All three are written. A tablet on a chiropractic front desk shows the call script: How have you been feeling since you finished your care with us? Below it, three answer chips: doing great now, too busy, ask my spouse. Tap what the patient said and the next line appears.',
+        ),
+        steps([
+          [
+            'The first sentence.',
+            'It opens with a question, not a pitch: &ldquo;How have you been feeling since you finished your care with us?&rdquo;',
+          ],
+          [
+            '&ldquo;Honestly, I\'ve been fine.&rdquo;',
+            'Your team taps that answer and the next question appears. No pause, no scramble.',
+          ],
+          [
+            'The ask.',
+            'Written as a recommendation with permission &mdash; &ldquo;Can I make a recommendation?&rdquo; &mdash; and it ends with &ldquo;Does that sound reasonable?&rdquo;',
+          ],
+        ]),
+        p(
+          'Nobody on your team has to be good at any of these. They have to be able to read, and to be kind. The screen handles the rest.',
+        ),
+        cta('We\'ll walk your team through all three on the call:'),
+        finePrint(),
+        signoff(),
+      ]),
+      'The opener, the "I\u2019m fine now," and the ask. All three are already written.',
+    ),
+  },
+  {
+    id: 'not-afraid-of-the-phone',
+    audience: 'chiropractic',
+    name: 'Email 3.3 — They\u2019re Not Afraid of the Phone',
+    subject: 'Your team isn\u2019t afraid of the phone',
+    previewText:
+      'They\u2019re afraid of sounding like a salesperson. The script was written so they never do.',
+    angle:
+      'Day 3, email 3. Closes the day by naming the real obstacle behind "my team can\'t sell": kind people improvising a pitch feel like salespeople and stop. The words are written to sound like a check-in from the office.',
+    html: wrap(
+      compose([
+        h1('Your team isn\'t afraid of the phone'),
+        greet,
+        p(
+          'Two emails on the script now, and one thing left to say about it. When a front desk stalls on reactivation calls, the diagnosis is usually &ldquo;they\'re not salespeople.&rdquo; That\'s the wrong diagnosis.',
+        ),
+        p(
+          'Your team talks to patients on the phone all day. What they don\'t want is to <strong>sound like a salesperson</strong> &mdash; and when nobody gives them the words, that\'s exactly what improvising turns into. A kind person making up a pitch hates every second of it, so they stop.',
+        ),
+        image(
+          asset('3-3-not-afraid-of-the-phone.jpg'),
+          'Your team isn\'t afraid of the phone. A smiling front-desk team member on a headset at a chiropractic reception counter. Written like a check-in, not a pitch: their name and their history; a question about how they\'ve been; read, not performed. Nobody on your team has to sound like a salesperson.',
+        ),
+        panel([
+          'The script isn\'t written like a pitch. It\'s written like a check-in from the office they already know: their name, their history, a question about how they\'ve been. Reading that isn\'t selling. It\'s the call your team would want to make anyway.',
+        ]),
+        p('That\'s the difference between &ldquo;call these people&rdquo; and calls that actually get made.'),
+        cta('Hear what it sounds like &mdash; book a call and we\'ll read it to you:'),
+        finePrint(),
+        signoff(),
+      ]),
+      'They\u2019re afraid of sounding like a salesperson. The script was written so they never do.',
+    ),
+  },
+  {
     id: 'the-math',
     audience: 'chiropractic',
-    name: 'Email 4 — What Your List Is Actually Worth',
+    name: 'Email 4.1 — What Your List Is Actually Worth',
     subject: 'What are 1,000 inactive patients actually worth?',
     previewText:
       'Run the arithmetic on your own list. Even a conservative reactivation rate turns into real money.',
     angle:
-      'Pure math / ROI. Makes the opportunity concrete and lets the reader substitute their own numbers.',
+      'Day 4, email 1. Pure math / ROI. Makes the opportunity concrete and lets the reader substitute their own numbers.',
     html: wrap(
       compose([
         h1('Let\u2019s do the arithmetic on your patient list'),
@@ -748,14 +760,90 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
     ),
   },
   {
+    id: 'use-your-numbers',
+    audience: 'chiropractic',
+    name: 'Email 4.2 — Use Your Numbers, Not Mine',
+    subject: 'Use your numbers, not mine',
+    previewText:
+      'Two numbers, two sliders. The page does the arithmetic on your list.',
+    angle:
+      'Day 4, email 2. Makes 4.1 concrete: where to find the two inputs in the owner\'s own practice (inactive file count from the software, patient value as a plan of care), then points at the calculator sliders on the landing page.',
+    html: wrap(
+      compose([
+        h1('Use your numbers, not mine'),
+        greet,
+        p(
+          'The last email ran the arithmetic with 1,000 files and a $2,000 patient value. Yours are different. You only need two numbers to run it properly:',
+        ),
+        steps([
+          [
+            'How many inactive files you have.',
+            'Your practice software can count this in a minute: patients with no visit in the last twelve months. Most owners are surprised by the number.',
+          ],
+          [
+            'What a patient is worth.',
+            'Not one visit &mdash; one plan of care, start to finish. Owners who guess low are almost always thinking of a single adjustment.',
+          ],
+        ]),
+        image(
+          asset('4-2-use-your-numbers.jpg'),
+          'Use your numbers, not mine. Two calculator sliders: inactive patient files set to 1,000 and average patient value set to $2,000, with an estimate card reading $100,000 if 5% come back. Move the sliders to your numbers and the page does the arithmetic.',
+        ),
+        p(
+          'The page behind the button below has two sliders. Move them to your numbers and it does the arithmetic on the spot &mdash; you\'ll see the result before you fill anything in.',
+        ),
+        cta('Run it on your list, then pick a time if the number is worth a conversation:'),
+        finePrint(),
+        signoff(),
+      ]),
+      'Two numbers, two sliders. The page does the arithmetic on your list.',
+    ),
+  },
+  {
+    id: 'a-loss-without-a-bill',
+    audience: 'chiropractic',
+    name: 'Email 4.3 — A Loss Nobody Sends You a Bill For',
+    subject: 'A loss nobody sends you a bill for',
+    previewText:
+      'Ad spend shows up on a statement every month. The patients who didn\u2019t come back never do.',
+    angle:
+      'Day 4, email 3. Closes the day by naming why a six-figure number sits untouched: uncollected revenue never appears as a loss anywhere, so it never gets managed. The dashboard turns it into a number you can see.',
+    html: wrap(
+      compose([
+        h1('A loss nobody sends you a bill for'),
+        greet,
+        p(
+          'Over the last two emails we put a number on your inactive list. Here\'s why a number that size can sit untouched for years.',
+        ),
+        p(
+          'Every dollar you spend on ads shows up on a statement. Payroll shows up. Software shows up. <strong>The patients who didn\'t come back never show up anywhere.</strong> There\'s no invoice for them, no line on the P&amp;L, no monthly report that says what they would have been worth.',
+        ),
+        image(
+          asset('4-3-a-loss-without-a-bill.jpg'),
+          'A loss nobody sends you a bill for. A practice owner reads a printed monthly statement at his desk. On the statement every month: ad spend, payroll, software. Never on it: the patients who didn\'t come back. Money you never collected never looks like money you lost.',
+        ),
+        p(
+          'Money you never collected never looks like money you lost. So it gets attention about once a year, when someone wonders about it out loud, and then it goes back to being invisible.',
+        ),
+        p(
+          'Reactivation Power puts it on a screen: how many were called, how many booked, and what came back, month by month. Once it\'s a number you can see, it becomes a number you can grow.',
+        ),
+        cta('Book a call and we\'ll show you the dashboard, and what your first month on it would look like:'),
+        finePrint(),
+        signoff(),
+      ]),
+      'Ad spend shows up on a statement every month. The patients who didn\u2019t come back never do.',
+    ),
+  },
+  {
     id: 'already-tried',
     audience: 'chiropractic',
-    name: 'Email 5 — \u201CWe Already Tried Calling Them\u201D',
+    name: 'Email 5.1 — \u201CWe Already Tried Calling Them\u201D',
     subject: '"We already tried calling our old patients"',
     previewText:
       'We hear this constantly. It usually means a list got printed and the calls stopped by Thursday.',
     angle:
-      'Handles the biggest objection head-on: they tried and it did not work. Reframes failure as missing system, not a bad list.',
+      'Day 5, email 1. Handles the biggest objection head-on: they tried and it did not work. Reframes failure as missing system, not a bad list.',
     html: wrap(
       compose([
         h1('&ldquo;We tried that. It didn\u2019t really work.&rdquo;'),
@@ -785,14 +873,81 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
     ),
   },
   {
+    id: 'how-it-went-by-thursday',
+    audience: 'chiropractic',
+    name: 'Email 5.2 — How It Went by Thursday',
+    subject: 'How it went by Thursday',
+    previewText:
+      'Monday the list got printed. Thursday it was under the keyboard. Here\u2019s what happened in between.',
+    angle:
+      'Day 5, email 2. Makes 5.1 concrete with the day-by-day anatomy of the attempt that fizzled, and names the three things that were missing: words, a queue, a record.',
+    html: wrap(
+      compose([
+        h1('How it went by Thursday'),
+        greet,
+        p(
+          'In the last email I said what most offices tried was a list and good intentions. Here\'s what that looks like day by day &mdash; you may recognize it.',
+        ),
+        image(
+          asset('5-2-how-it-went-by-thursday.jpg'),
+          'How it went by Thursday. A printed patient list with a coffee ring, half under a keyboard on a front-desk workstation. Monday: printed the list. Tuesday: twenty calls. Wednesday: six calls. Thursday: under the keyboard. The list was fine. Nothing carried it to Friday.',
+        ),
+        p(
+          '<strong>Monday</strong> the list gets printed. <strong>Tuesday</strong> someone makes twenty calls between patients; three go badly and stick. <strong>Wednesday</strong> it\'s six calls, and nobody\'s sure who was already reached. <strong>Thursday</strong> the list is under the keyboard, and by the next week it\'s in a drawer.',
+        ),
+        darkPanel([
+          'Nothing about that is a people problem. Three things were missing: the words to say, a queue that decides who\'s next, and a record of what happened on every call.',
+          'Put those three in place and Tuesday\'s twenty calls happen on Thursday, and the Thursday after that.',
+        ]),
+        cta('Want to see what Tuesday looks like with all three in place?'),
+        finePrint(),
+        signoff(),
+      ]),
+      'Monday the list got printed. Thursday it was under the keyboard. Here\u2019s what happened in between.',
+    ),
+  },
+  {
+    id: 'same-list-different-test',
+    audience: 'chiropractic',
+    name: 'Email 5.3 — Same List, Different Test',
+    subject: 'Same list. Different test.',
+    previewText:
+      'The attempt that fizzled didn\u2019t test your patients. It tested whether calls happen without a system.',
+    angle:
+      'Day 5, email 3. Closes the day by naming the obstacle: after a failed attempt the list gets blamed ("our patients don\'t respond"), and that verdict keeps the office from ever trying again. Reframe: retest the same list with a system.',
+    html: wrap(
+      compose([
+        h1('Same list. Different test.'),
+        greet,
+        p(
+          'The last two emails were about the attempt that fizzled. Here\'s the part that does the real damage &mdash; and it happens after the calls stop.',
+        ),
+        p(
+          'Somebody draws a conclusion: <strong>&ldquo;Our patients just don\'t respond to that.&rdquo;</strong> It sounds like a finding. It becomes the reason nobody suggests trying again. And it\'s the wrong conclusion, because the test never measured your patients. It measured whether calls keep happening when nobody has the words, the queue, or the record.',
+        ),
+        image(
+          asset('5-3-same-list-different-test.jpg'),
+          'Same list. Different test. A stack of plain patient folders beside a tablet showing a call queue on a chiropractic front desk. What changes the second time: the words are on the screen; a queue picks the next name; every call is recorded. The first attempt tested your patients. The second one tests the system.',
+        ),
+        p(
+          'The list that fizzled is the same list that will work. What changes the second time isn\'t the patients. It\'s what\'s on the screen when your team picks up the phone.',
+        ),
+        cta('Bring the list you already tried. We\'ll show you the second test:'),
+        finePrint(),
+        signoff(),
+      ]),
+      'The attempt that fizzled didn\u2019t test your patients. It tested whether calls happen without a system.',
+    ),
+  },
+  {
     id: 'no-time',
     audience: 'chiropractic',
-    name: 'Email 6 — \u201CMy Team Has No Time\u201D',
+    name: 'Email 6.1 — \u201CMy Team Has No Time\u201D',
     subject: 'This takes 45 minutes a day, not a new hire',
     previewText:
       'Nobody has a spare eight hours. Fortunately, this does not need one.',
     angle:
-      'Handles the time/capacity objection with a small, concrete daily commitment instead of a vague program.',
+      'Day 6, email 1. Handles the time/capacity objection with a small, concrete daily commitment instead of a vague program.',
     html: wrap(
       compose([
         h1('You don\u2019t need a spare eight hours. You need 45 minutes.'),
@@ -826,14 +981,92 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
     ),
   },
   {
+    id: 'where-the-45-minutes-hides',
+    audience: 'chiropractic',
+    name: 'Email 6.2 — Where the 45 Minutes Is Hiding',
+    subject: 'Where the 45 minutes is hiding',
+    previewText:
+      'Nobody has a free hour. Every front desk has three slow stretches. That\u2019s where the calls live.',
+    angle:
+      'Day 6, email 2. Makes 6.1 concrete: the 45 minutes isn\'t a block on the calendar, it\'s three natural gaps in a front-desk day, five calls each, with the queue already showing who\'s next when the gap opens.',
+    html: wrap(
+      compose([
+        h1('Where the 45 minutes is hiding'),
+        greet,
+        p(
+          'In the last email I said this takes about 45 minutes a day. Nobody has a free 45 minutes, so here\'s where it actually comes from &mdash; three stretches every front desk already has:',
+        ),
+        image(
+          asset('6-2-where-the-45-minutes-hides.jpg'),
+          'Where the 45 minutes is hiding. A front-desk day from 8 AM to 6 PM with three short teal windows between patient blocks: mid-morning, after lunch, and before close, five calls each. Fifteen calls a day, and nobody stopped doing their job.',
+        ),
+        steps([
+          [
+            'Mid-morning, after the first rush.',
+            'The early patients are in rooms and the phone has gone quiet. Five calls.',
+          ],
+          [
+            'Right after lunch.',
+            'The afternoon hasn\'t filled the lobby yet. Five more.',
+          ],
+          [
+            'The last half hour before close.',
+            'Checkouts are done and tomorrow is already built. The final five.',
+          ],
+        ]),
+        p(
+          'Fifteen calls, and nobody stopped doing their job to make them. The part that makes this work is what happens when the gap opens: <strong>the screen already shows who\'s next.</strong> No list to find, no deciding, no setup. Pick up the phone, read, tap, done.',
+        ),
+        cta('Tell us how your day runs and we\'ll show you where the three gaps are:'),
+        finePrint(),
+        signoff(),
+      ]),
+      'Nobody has a free hour. Every front desk has three slow stretches. That\u2019s where the calls live.',
+    ),
+  },
+  {
+    id: 'no-time-means-no-slot',
+    audience: 'chiropractic',
+    name: 'Email 6.3 — \u201CNo Time\u201D Means \u201CNo Slot\u201D',
+    subject: 'When \u201Cno time\u201D really means \u201Cno slot\u201D',
+    previewText:
+      'Things with a time on the schedule get done. Things that happen \u201Cwhen you can\u201D never do.',
+    angle:
+      'Day 6, email 3. Closes the day by naming the obstacle behind "my team has no time": the work has no appointment. Anything scheduled for "when you get a chance" loses to everything that has a slot. The queue gives the calls one.',
+    html: wrap(
+      compose([
+        h1('When &ldquo;no time&rdquo; really means &ldquo;no slot&rdquo;'),
+        greet,
+        p(
+          'Two emails about time. One more, because &ldquo;my team has no time&rdquo; usually means something else.',
+        ),
+        p(
+          'Your front desk finds time for everything that has a slot. A patient at 2:15 gets seen at 2:15. Insurance gets verified because a visit depends on it. <strong>The work that never gets done is the work that happens &ldquo;when you get a chance&rdquo;</strong> &mdash; and reactivation calls have lived in that category in every office that tried them without a system.',
+        ),
+        image(
+          asset('6-3-no-time-means-no-slot.jpg'),
+          'No time usually means no slot. A front-desk monitor shows a daily schedule of appointment blocks with one teal block among them. Give the calls a slot: same time every day; a set number of calls; done by close. Work with a slot gets done. Work without one waits forever.',
+        ),
+        panel([
+          'The fix isn\'t more time. It\'s a slot. The queue puts a specific number of calls on the screen every day, and they sit there the way a 2:15 appointment sits there &mdash; visible, finite, and done by close.',
+        ]),
+        p('That\'s the whole difference between a good intention and a habit.'),
+        cta('Book a call and we\'ll size the daily slot to your front desk:'),
+        finePrint(),
+        signoff(),
+      ]),
+      'Things with a time on the schedule get done. Things that happen \u201Cwhen you can\u201D never do.',
+    ),
+  },
+  {
     id: 'why-not-text',
     audience: 'chiropractic',
-    name: 'Email 7 — \u201CCan\u2019t We Just Text Them?\u201D',
+    name: 'Email 7.1 — \u201CCan\u2019t We Just Text Them?\u201D',
     subject: "Can't we just text our old patients?",
     previewText:
       'A text can remind someone of a decision they already made. It cannot restart care that stopped.',
     angle:
-      'The shortcut objection. A blast is easy, which is why it feels like the answer — but reactivation is a conversation, and a text can\'t have one.',
+      'Day 7, email 1. The shortcut objection. A blast is easy, which is why it feels like the answer — but reactivation is a conversation, and a text can\'t have one.',
     html: wrap(
       compose([
         h1('The question every owner asks first'),
@@ -860,14 +1093,79 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
     ),
   },
   {
+    id: 'the-pause-a-text-cant-hear',
+    audience: 'chiropractic',
+    name: 'Email 7.2 — The Pause a Text Can\u2019t Hear',
+    subject: 'The pause a text can\u2019t hear',
+    previewText:
+      'A text gets \u201Cok thanks.\u201D A call hears \u201Cwell, it\u2019s been kind of okay.\u201D The appointment is in that pause.',
+    angle:
+      'Day 7, email 2. Makes 7.1 concrete with the exact moment a call catches and a text misses: the hesitation in "kind of okay," which is where the concern lives and where the script goes next.',
+    html: wrap(
+      compose([
+        h1('The pause a text can\'t hear'),
+        greet,
+        p('In the last email I said a text can\'t listen. Here\'s the exact moment that matters.'),
+        p(
+          'Your team asks how they\'ve been since they finished care. The patient says, <strong>&ldquo;Oh, you know &mdash; it\'s been kind of okay.&rdquo;</strong> There\'s a half-second before &ldquo;okay.&rdquo; That half-second is the whole call. Your team hears it, taps what they heard, and the screen gives them the next question: what\'s been going on?',
+        ),
+        image(
+          asset('7-2-the-pause-a-text-cant-hear.jpg'),
+          'The pause a text can\'t hear. What a text gets: a reply that says ok thanks. What a call hears: well, it\'s been kind of okay. The appointment is in that pause.',
+        ),
+        p(
+          'Send the same patient a text and you get one of two things: silence, or &ldquo;ok thanks.&rdquo; The hesitation never makes it into a reply. Nobody types &ldquo;kind of.&rdquo;',
+        ),
+        p('Reactivation lives in that pause. A call is the only channel that can hear it.'),
+        cta('Want to hear how the script handles &ldquo;kind of okay&rdquo;? Let\'s talk:'),
+        finePrint(),
+        signoff(),
+      ]),
+      'A text gets "ok thanks." A call hears "well, it\u2019s been kind of okay." The appointment is in that pause.',
+    ),
+  },
+  {
+    id: 'easiest-to-send-easiest-to-ignore',
+    audience: 'chiropractic',
+    name: 'Email 7.3 — Easiest to Send, Easiest to Ignore',
+    subject: 'Why texting keeps winning anyway',
+    previewText:
+      'A text blast is the easiest thing for the office to send. That\u2019s exactly why it\u2019s the easiest thing for the patient to ignore.',
+    angle:
+      'Day 7, email 3. Closes the day by naming the obstacle: offices pick the channel that\'s easiest for the office, not the one that works on the patient. The program makes the call nearly as easy as the text, so the easy choice and the right choice are the same.',
+    html: wrap(
+      compose([
+        h1('Why texting keeps winning anyway'),
+        greet,
+        p(
+          'Two emails on texting versus calling, and if you\'re still tempted by the blast, I understand why. It isn\'t that texts work better. <strong>It\'s that they\'re easier for the office.</strong> One message, one button, done by 9:05.',
+        ),
+        p(
+          'Here\'s the trade you\'re making: the easiest thing to send is also the easiest thing to ignore. The call works because it costs something &mdash; a person, a few minutes, their name spoken out loud &mdash; and the patient can feel that.',
+        ),
+        image(
+          asset('7-3-easiest-to-send-easiest-to-ignore.jpg'),
+          'Why texting keeps winning anyway. A front-desk team member lifts the desk phone while a smartphone lies face-down beside it. Make the call as easy as the text: the queue picks the name; the script is on the screen; one tap logs the outcome. The easiest thing to send is the easiest thing to ignore.',
+        ),
+        p(
+          'So the job isn\'t to talk your team out of the easy option. It\'s to make the right option nearly as easy: the queue picks the name, the script is on the screen, the outcome is logged with a tap. When the call takes three minutes and no thought, the blast stops looking like a shortcut.',
+        ),
+        cta('Book a call and we\'ll show you the three-minute version:'),
+        finePrint(),
+        signoff(),
+      ]),
+      'A text blast is the easiest thing for the office to send. That\u2019s exactly why it\u2019s the easiest thing for the patient to ignore.',
+    ),
+  },
+  {
     id: 'voicemail-not-a-no',
     audience: 'chiropractic',
-    name: 'Email 8 — A Voicemail Is Not a No',
+    name: 'Email 8.1 — A Voicemail Is Not a No',
     subject: 'A voicemail is not a no',
     previewText:
       'Reactivation doesn\'t fail on the phone. It fails in the gap after the first unanswered call.',
     angle:
-      'Persistence as the mechanic. Owners read voicemail as rejection and quit; the system treats it as a scheduling event and keeps the patient in rotation without anyone tracking it.',
+      'Day 8, email 1. Persistence as the mechanic. Owners read voicemail as rejection and quit; the system treats it as a scheduling event and keeps the patient in rotation without anyone tracking it.',
     html: wrap(
       compose([
         h1('Nobody picked up. Now what?'),
@@ -913,14 +1211,80 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
     ),
   },
   {
+    id: 'never-the-same-hour-twice',
+    audience: 'chiropractic',
+    name: 'Email 8.2 — Never the Same Hour Twice',
+    subject: 'Never the same hour twice',
+    previewText:
+      'The fourth attempt works because it isn\u2019t the first attempt repeated. Different day, different hour, spaced far enough apart to feel like care.',
+    angle:
+      'Day 8, email 2. Makes 8.1 concrete: what actually changes between attempts. The queue moves each retry to a different time of day and a different day of the week, and tells the caller which window to use, so a patient who never answers at 10 AM gets found at 4:30.',
+    html: wrap(
+      compose([
+        h1('Never the same hour twice'),
+        greet,
+        p(
+          'The last email said a voicemail is not a no. Here\'s what makes the fourth attempt different from the first &mdash; because if it were the same call at the same hour, it wouldn\'t be.',
+        ),
+        image(
+          asset('8-2-never-the-same-hour-twice.jpg'),
+          'Never the same hour twice. A four-week calendar with four attempts on different days at different times: Tuesday 10 AM, Monday 4:30 PM, Thursday 1 PM, and Wednesday 9:30 AM marked answered. The screen picks the window: morning, midday, or afternoon. Different day, different hour, and nobody had to remember.',
+        ),
+        p(
+          'When a call goes unanswered, the queue doesn\'t just bring the name back. It brings it back <strong>on a different day of the week, at a different time of day</strong> &mdash; and it tells your team which window to use: morning, midday, or afternoon. Someone who never picks up at 10 AM because they\'re at work answers at 4:30 in the car.',
+        ),
+        p(
+          'The spacing is four to seven days, far enough apart that the patient never feels chased. Nobody on your team tracks any of it. The name just shows up when it\'s time, with the window on the screen.',
+        ),
+        cta('We\'ll show you what a retry looks like on your team\'s screen:'),
+        finePrint(),
+        signoff(),
+      ]),
+      'The fourth attempt works because it isn\u2019t the first attempt repeated. Different day, different hour, spaced far enough apart to feel like care.',
+    ),
+  },
+  {
+    id: 'one-pass-is-not-a-campaign',
+    audience: 'chiropractic',
+    name: 'Email 8.3 — One Pass Is Not a Campaign',
+    subject: 'One pass through the list is not a campaign',
+    previewText:
+      '\u201CWe called everyone once\u201D is where most offices stop. The appointments are in passes two through seven.',
+    angle:
+      'Day 8, email 3. Closes the day by naming the obstacle: offices measure the first pass through the list, conclude it didn\'t work, and stop before the attempts that actually book. The system makes passes two through seven automatic.',
+    html: wrap(
+      compose([
+        h1('One pass is not a campaign'),
+        greet,
+        p(
+          'Two emails ago I said a voicemail isn\'t a no. The bigger mistake happens later, after the whole list has been called once.',
+        ),
+        p(
+          '&ldquo;We called everyone&rdquo; feels like a finish line. It isn\'t. It means every name got one attempt, at one hour, on one day &mdash; and most of them didn\'t pick up, because most people don\'t pick up the first time, no matter who\'s calling. <strong>The appointments are in the attempts nobody makes.</strong>',
+        ),
+        image(
+          asset('8-3-one-pass-is-not-a-campaign.jpg'),
+          'One pass is not a campaign. Seven attempt markers in a row: the first three unanswered, the fourth marked booked, three more still to come. Under the first one: where most offices stop. The appointments are in the attempts nobody makes.',
+        ),
+        p(
+          'No front desk will run a second, third and fourth pass by hand. That isn\'t a discipline problem; it\'s a memory problem, and memory is what a system is for. The queue keeps every name in rotation until it\'s answered, and your team just works the screen.',
+        ),
+        cta('Let\'s look at how many names on your list have only ever had one attempt:'),
+        finePrint(),
+        signoff(),
+      ]),
+      '"We called everyone once" is where most offices stop. The appointments are in passes two through seven.',
+    ),
+  },
+  {
     id: 'empty-chair',
     audience: 'chiropractic',
-    name: 'Email 9 — The Cost of an Empty Slot',
+    name: 'Email 9.1 — The Cost of an Empty Slot',
     subject: 'Every hole in tomorrow\u2019s schedule is a bill you already paid',
     previewText:
       'Rent, payroll, and equipment cost the same whether that chair is full or empty.',
     angle:
-      'Fixed-cost / opportunity-cost framing. Reframes open appointment slots as money already spent and lost.',
+      'Day 9, email 1. Fixed-cost / opportunity-cost framing. Reframes open appointment slots as money already spent and lost.',
     html: wrap(
       compose([
         h1('Your overhead doesn\u2019t care whether the chair is full'),
@@ -949,14 +1313,82 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
     ),
   },
   {
+    id: 'fill-it-once',
+    audience: 'chiropractic',
+    name: 'Email 9.2 — Fill It Once, It Stays Filled',
+    subject: 'Fill it once. It stays filled.',
+    previewText:
+      'An empty slot isn\u2019t a one-time loss. The same Tuesday at 2:00 is empty next week too, unless the right patient is in it.',
+    angle:
+      'Day 9, email 2. Makes 9.1 concrete: an empty slot recurs week after week, and a reactivated patient on a plan of care fills the same slot for the length of the plan, not once.',
+    html: wrap(
+      compose([
+        h1('Fill it once. It stays filled.'),
+        greet,
+        p(
+          'In the last email I said an empty slot absorbs overhead. Here\'s the part that makes it worse, and the part that fixes it.',
+        ),
+        p(
+          'An open slot is not a one-time loss. Tuesday at 2:00 was empty this week, and unless something changes, it\'s empty next Tuesday and the one after. <strong>The gap repeats.</strong> That\'s what makes it expensive &mdash; not one missed visit, but the same missed visit every week.',
+        ),
+        image(
+          asset('9-2-fill-it-once.jpg'),
+          'Fill it once. It stays filled. A six-week schedule grid where the Tuesday 2:00 slot is filled and checked in every week. A patient on a plan of care fills the same slot for weeks.',
+        ),
+        p(
+          'Now look at what fills it. A stranger from an ad books one visit and may or may not come back. A reactivated patient who needs a plan of care takes Tuesday at 2:00 for the length of the plan. One call, one conversation, and the slot stops being a gap.',
+        ),
+        p('That\'s why the list is the right place to fill holes from. It doesn\'t just fill the slot. It keeps it filled.'),
+        cta('Let\'s look at where your recurring gaps are and who on your list fits them:'),
+        finePrint(),
+        signoff(),
+      ]),
+      'An empty slot isn\u2019t a one-time loss. The same Tuesday at 2:00 is empty next week too, unless the right patient is in it.',
+    ),
+  },
+  {
+    id: 'the-reflex-is-to-spend',
+    audience: 'chiropractic',
+    name: 'Email 9.3 — When the Schedule Thins, the Reflex Is to Spend',
+    subject: 'When the schedule thins, the reflex is to spend',
+    previewText:
+      'Boost a post. Run a special. Wait it out. The list should be the first call, not the last resort.',
+    angle:
+      'Day 9, email 3. Closes the day by naming the obstacle: when the schedule dips, the trained reflex is to buy attention from strangers. The list is the cheapest fill and the last one offices think of, because spending has a button and calling never did.',
+    html: wrap(
+      compose([
+        h1('When the schedule thins, the reflex is to spend'),
+        greet,
+        p('Two emails on empty slots. One more, about what most offices do when they see them.'),
+        p(
+          'The schedule looks thin for next week, and the reflex kicks in: boost a post, run a new-patient special, call the agency. Or the other reflex &mdash; wait it out and hope. <strong>The list is rarely the first move,</strong> even though it\'s the only option full of people who already said yes.',
+        ),
+        image(
+          asset('9-3-the-reflex-is-to-spend.jpg'),
+          'When the schedule thins, the reflex is to spend. A practice owner studies a thin weekly calendar on his laptop. The reflex: boost a post, run a special, wait it out. The list: call the people who already said yes. Your list should be the first call, not the last resort.',
+        ),
+        p(
+          'That\'s not because the list is a bad option. It\'s because spending is a habit and calling isn\'t. There\'s a button for one and, until now, nothing for the other.',
+        ),
+        p(
+          'Reactivation Power is the button. When the schedule dips, the queue is already there &mdash; names, script, and a record of who\'s been called &mdash; and the first move becomes the cheapest one.',
+        ),
+        cta('Book a call and we\'ll show you what the first move looks like on the screen:'),
+        finePrint(),
+        signoff(),
+      ]),
+      'Boost a post. Run a special. Wait it out. The list should be the first call, not the last resort.',
+    ),
+  },
+  {
     id: 'one-list-many-programs',
     audience: 'chiropractic',
-    name: 'Email 10 — One List, Every Program',
+    name: 'Email 10.1 — One List, Every Program',
     subject: 'One patient list. Every service you offer.',
     previewText:
       'Your decompression patients and your aesthetics patients need different conversations. Both should come from the same list.',
     angle:
-      'Multi-niche capability. The same list serves every service line, each with its own tailored script.',
+      'Day 10, email 1. Multi-niche capability. The same list serves every service line, each with its own tailored script.',
     html: wrap(
       compose([
         h1('The same list, matched to the right conversation'),
@@ -994,14 +1426,83 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
     ),
   },
   {
+    id: 'same-opener-different-middle',
+    audience: 'chiropractic',
+    name: 'Email 10.2 — Same Opener, Different Middle',
+    subject: 'Same opener. Different middle.',
+    previewText:
+      'What actually changes between a decompression script and a red light script, and why it decides whether the appointment gets booked.',
+    angle:
+      'Day 10, email 2. Makes 10.1 concrete: the scripts share the same friendly opener, but the questions in the middle and the recommendation at the end are written for what that patient came in for.',
+    html: wrap(
+      compose([
+        h1('Same opener. Different middle.'),
+        greet,
+        p(
+          'In the last email I said every service line gets its own script. Here\'s what actually changes between them &mdash; because it isn\'t the hello.',
+        ),
+        image(
+          asset('10-2-same-opener-different-middle.jpg'),
+          'Same opener. Different middle. Three script cards side by side, chiropractic, weight loss, and red light. The opener row is identical in all three; the questions and close rows are different in each. One list, and the right words for every name on it.',
+        ),
+        checks([
+          '<strong>The opener is the same.</strong> A warm check-in from an office they know. Nothing about it needs to change from one patient to the next.',
+          '<strong>The questions in the middle are different.</strong> A decompression patient is asked about the back that brought them in. A weight loss patient is asked how things have held since the program. A red light patient gets a gentler question, written so nobody feels judged.',
+          '<strong>The recommendation is different.</strong> It names what they came in for and what you\'d like to help with now &mdash; in their words, not a generic pitch.',
+        ]),
+        p(
+          'The middle is where appointments are won or lost, and it\'s exactly the part a one-size script leaves your team to improvise. Here, it\'s written.',
+        ),
+        cta('Tell us your service lines and we\'ll show you the middle of each one:'),
+        finePrint(),
+        signoff(),
+      ]),
+      'What actually changes between a decompression script and a red light script, and why it decides whether the appointment gets booked.',
+    ),
+  },
+  {
+    id: 'dont-sort-the-list-first',
+    audience: 'chiropractic',
+    name: 'Email 10.3 — You Don\u2019t Have to Sort the List First',
+    subject: 'You don\u2019t have to sort the list first',
+    previewText:
+      'The reason multi-service offices never import the whole list: sorting a thousand files by service feels like the first job. It isn\u2019t.',
+    angle:
+      'Day 10, email 3. Closes the day by naming the obstacle: owners assume they need to separate the list by service before they can start, so they import one slice or nothing. The import reads the service column the software already exports and matches each patient to the right script.',
+    html: wrap(
+      compose([
+        h1('You don\'t have to sort the list first'),
+        greet,
+        p(
+          'Two emails ago I said one list can serve every program. Here\'s the thing that stops offices from importing the whole list.',
+        ),
+        p(
+          'They picture the first job as sorting: pulling the decompression patients out, then the weight loss patients, then the aesthetics patients, each into its own campaign. <strong>That job never gets done, so the list goes in as one slice &mdash; or doesn\'t go in at all.</strong>',
+        ),
+        image(
+          asset('10-3-dont-sort-the-list-first.jpg'),
+          'You don\'t have to sort the list first. A spreadsheet column labeled last service, with rows for chiropractic, decompression, red light, softwave, weight loss and massage, each matched by an arrow to its script. The import reads the column your software already exports.',
+          360,
+        ),
+        p(
+          'There is no sorting step. Your software already exports a column for the last service or treatment category. The import reads it, matches each patient to the right script, and puts them all in one queue. Your team works straight down the list and the correct words come up for every name.',
+        ),
+        cta('Book a call and bring a sample export &mdash; we\'ll show you how it lands:'),
+        finePrint(),
+        signoff(),
+      ]),
+      'The reason multi-service offices never import the whole list: sorting a thousand files by service feels like the first job. It isn\u2019t.',
+    ),
+  },
+  {
     id: 'they-dont-know',
     audience: 'chiropractic',
-    name: 'Email 11 — They Don\u2019t Know What You Offer Now',
+    name: 'Email 11.1 — They Don\u2019t Know What You Offer Now',
     subject: 'Your patients still picture the practice you were three years ago',
     previewText:
       'New equipment, new services, new programs — and the people most likely to want them have no idea.',
     angle:
-      'New-service awareness gap. Past patients hold an outdated picture of the practice.',
+      'Day 11, email 1. New-service awareness gap. Past patients hold an outdated picture of the practice.',
     html: wrap(
       compose([
         h1('Your patients\u2019 mental picture of your practice is out of date'),
@@ -1034,14 +1535,79 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
     ),
   },
   {
+    id: 'every-new-service-has-an-audience',
+    audience: 'chiropractic',
+    name: 'Email 11.2 — Every New Service Already Has an Audience',
+    subject: 'Every new service already has an audience',
+    previewText:
+      'When you add decompression, the first people to hear about it should be the back-pain patients already in your files.',
+    angle:
+      'Day 11, email 2. Makes 11.1 concrete: the inactive list is a pre-qualified launch list for any new service, sorted by the condition that brought each patient in, and the import routes them to that service\'s script.',
+    html: wrap(
+      compose([
+        h1('Every new service already has an audience'),
+        greet,
+        p(
+          'In the last email I said your patients still picture the practice you were years ago. Here\'s what that means for every new service you add.',
+        ),
+        p(
+          'When you bring in decompression, the first hundred people who should hear about it are not strangers in a feed. They\'re the patients in your files who came to you with the back pain it\'s for. <strong>They already trust you, you already know their history, and nobody has to be sold on who you are.</strong>',
+        ),
+        image(
+          asset('11-2-every-new-service-has-an-audience.jpg'),
+          'Every new service already has an audience. A new service flows to your back-pain files, and those patients are the first to hear about it, not a stranger in a feed. The warmest launch list you will ever have is already in your software.',
+        ),
+        p(
+          'That\'s what the import does with them. Tag those files to the decompression script and they go into the queue with the right conversation attached &mdash; a check-in from their office that happens to have something new for exactly what they came in for.',
+        ),
+        p('Every service you\'ve added since they were last in has a list like that waiting in your software.'),
+        cta('Tell us what you\'ve added and we\'ll find its audience in your files:'),
+        finePrint(),
+        signoff(),
+      ]),
+      'When you add decompression, the first people to hear about it should be the back-pain patients already in your files.',
+    ),
+  },
+  {
+    id: 'a-sign-reaches-the-lobby',
+    audience: 'chiropractic',
+    name: 'Email 11.3 — A Sign in the Lobby Reaches the Lobby',
+    subject: 'A sign in the lobby reaches the lobby',
+    previewText:
+      'Offices assume the awareness gap closes on its own. The people with the gap are the ones who never walk past the sign.',
+    angle:
+      'Day 11, email 3. Closes the day by naming the obstacle: owners assume lapsed patients will find out about new services through the sign, the newsletter, or social. Every one of those channels only reaches people who are already engaged. The call is the one that goes to them.',
+    html: wrap(
+      compose([
+        h1('A sign in the lobby reaches the lobby'),
+        greet,
+        p('Two emails on the awareness gap. One more, about how offices assume it closes on its own.'),
+        p(
+          'The new service gets a banner in the waiting room, a line in the newsletter, a post on the page. All of that reaches the same people: <strong>the ones already coming in.</strong> The patient who hasn\'t been in for two years never walks past the banner, stopped opening the newsletter, and was never following the page.',
+        ),
+        image(
+          asset('11-3-a-sign-reaches-the-lobby.jpg'),
+          'A sign in the lobby reaches the lobby. A new decompression table in a bright treatment room with a small new tag on it. Who sees the new sign: patients already in the building, people who still open the newsletter, people who follow the page. Who doesn\'t: the ones who haven\'t been in. The only channel that reaches a lapsed patient is the one that goes to them.',
+        ),
+        p(
+          'Every passive channel reaches the engaged. The gap lives with the disengaged, and the only channel that goes to them is the one where someone from your office picks up the phone and says their name.',
+        ),
+        cta('Book a call and we\'ll map your newer services against the patients who never saw the sign:'),
+        finePrint(),
+        signoff(),
+      ]),
+      'Offices assume the awareness gap closes on its own. The people with the gap are the ones who never walk past the sign.',
+    ),
+  },
+  {
     id: 'why-they-left',
     audience: 'chiropractic',
-    name: 'Email 12 — They Didn\u2019t Leave Because of You',
+    name: 'Email 12.1 — They Didn\u2019t Leave Because of You',
     subject: "They didn't leave because they were unhappy",
     previewText:
       'Almost nobody stops care because of the practice. They stop because life got loud.',
     angle:
-      'Removes the owner\'s fear that reaching out is unwelcome. Patients lapse from life circumstances, not dissatisfaction.',
+      'Day 12, email 1. Removes the owner\'s fear that reaching out is unwelcome. Patients lapse from life circumstances, not dissatisfaction.',
     html: wrap(
       compose([
         h1('The story owners tell themselves about lapsed patients is usually wrong'),
@@ -1074,14 +1640,84 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
     ),
   },
   {
+    id: 'the-call-never-asks-why',
+    audience: 'chiropractic',
+    name: 'Email 12.2 — The Call Never Asks Why They Left',
+    subject: 'The call never asks why they left',
+    previewText:
+      'No \u201Cwe noticed you haven\u2019t been in.\u201D The opener asks how they\u2019ve been, and the awkwardness they were carrying disappears.',
+    angle:
+      'Day 12, email 2. Makes 12.1 concrete: the awkwardness lives on the patient\'s side, so the script is built to remove it. The opener asks how they\'ve been feeling since they finished care and never asks why they stopped.',
+    html: wrap(
+      compose([
+        h1('The call never asks why they left'),
+        greet,
+        p(
+          'In the last email I said your patients didn\'t leave because of you. Here\'s how the call is built around that.',
+        ),
+        p(
+          'The awkwardness of a long gap sits with the patient, not with you. Which means the worst thing the call can do is point at the gap. <strong>So the script never does.</strong> There\'s no &ldquo;we noticed you haven\'t been in&rdquo; and no &ldquo;what happened?&rdquo;',
+        ),
+        image(
+          asset('12-2-the-call-never-asks-why.jpg'),
+          'The call never asks why they left. Not this: we noticed you haven\'t been in for a while. This: how have you been feeling since you finished your care with us? No guilt in the opener, so there is nothing to feel awkward about.',
+        ),
+        p(
+          'The first line is a question about them: how have you been feeling since you finished your care with us? It gives them something easy to answer, it treats the gap as nothing, and it lets them tell you about the back that\'s been acting up without having to explain the two years first.',
+        ),
+        p(
+          'That one design choice is why these calls land warm. The patient was braced for a guilt trip and got a check-in instead.',
+        ),
+        cta('Hear the opener read out loud on a call with us:'),
+        finePrint(),
+        signoff(),
+      ]),
+      'No "we noticed you haven\u2019t been in." The opener asks how they\u2019ve been, and the awkwardness they were carrying disappears.',
+    ),
+  },
+  {
+    id: 'the-worst-call-is-a-pleasant-one',
+    audience: 'chiropractic',
+    name: 'Email 12.3 — The Worst Call on the List Is a Pleasant One',
+    subject: 'The worst call on the list is a pleasant one',
+    previewText:
+      'The fear is that a bad call damages the relationship. The script is built so the worst case is a friendly thirty seconds.',
+    angle:
+      'Day 12, email 3. Closes the day by naming the obstacle: owners fear a reactivation call could sour a relationship that\'s merely dormant. With the script, the downside is bounded: a patient who\'s fine gets a warm goodbye and a gentle check-in months later.',
+    html: wrap(
+      compose([
+        h1('The worst call on the list is a pleasant one'),
+        greet,
+        p('Two emails on why patients lapse. One more, about the fear that keeps the calls from happening.'),
+        p(
+          'It sounds like this: <strong>&ldquo;What if the call annoys them and we lose them for good?&rdquo;</strong> It\'s a reasonable fear when the call is improvised. It isn\'t when the call is written.',
+        ),
+        image(
+          asset('12-3-the-worst-call-is-a-pleasant-one.jpg'),
+          'The worst call on the list is a pleasant one. A woman at home in her kitchen smiles while talking on the phone. The worst case: a friendly thirty seconds, a warm goodbye, a light check-in in a few months. Nothing gets burned. The downside is bounded.',
+        ),
+        p(
+          'Here\'s the worst case with the script. The patient says they\'re doing great and don\'t need anything. Your team says that\'s wonderful to hear, thanks them for their time, and hangs up. Thirty seconds, no pitch, no pressure. The system notes it and brings the name back for a light check-in a few months from now.',
+        ),
+        p(
+          'Nothing got burned. A patient who was dormant is still dormant &mdash; and now they\'ve heard from you, kindly, once. The downside is bounded. The upside is the plan of care they book instead.',
+        ),
+        cta('Let\'s talk through what your team says when the answer is &ldquo;I\'m fine&rdquo;:'),
+        finePrint(),
+        signoff(),
+      ]),
+      'The fear is that a bad call damages the relationship. The script is built so the worst case is a friendly thirty seconds.',
+    ),
+  },
+  {
     id: 'lifetime-value',
     audience: 'chiropractic',
-    name: 'Email 13 — One Patient Is Never Just One Visit',
+    name: 'Email 13.1 — One Patient Is Never Just One Visit',
     subject: 'One reactivated patient is rarely one appointment',
     previewText:
       'A returning patient brings a plan of care, future visits, and the people they talk to.',
     angle:
-      'Lifetime value and referral compounding. The true return is much larger than a single appointment.',
+      'Day 13, email 1. Lifetime value and referral compounding. The true return is much larger than a single appointment.',
     html: wrap(
       compose([
         h1('The appointment is the smallest part of the return'),
@@ -1111,14 +1747,83 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
     ),
   },
   {
+    id: 'what-one-call-restarts',
+    audience: 'chiropractic',
+    name: 'Email 13.2 — What One Call Actually Restarts',
+    subject: 'What one call actually restarts',
+    previewText:
+      'A plan of care, a household, and a referral source. The calculator only counted the first one.',
+    angle:
+      'Day 13, email 2. Makes 13.1 concrete: the three things a single reactivated patient brings back, and the fact that the revenue calculator only counts the first.',
+    html: wrap(
+      compose([
+        h1('What one call actually restarts'),
+        greet,
+        p(
+          'In the last email I said one patient is never just one visit. Here\'s the full list of what a single call restarts &mdash; and notice how little of it the arithmetic counted.',
+        ),
+        image(
+          asset('13-2-what-one-call-restarts.jpg'),
+          'What one call actually restarts. One phone call fans out to three things: their plan of care, which the calculator counts; their household, which it doesn\'t; and their referrals, which it doesn\'t. The calculator counts the visit. The visit is the smallest part.',
+        ),
+        checks([
+          '<strong>Their plan of care.</strong> The thing they came back for, over weeks, not once. This is the only line the calculator counts.',
+          '<strong>Their household.</strong> The spouse with the neck thing, the kid who plays a sport, the parent who\'s slowing down. Same address, same trust, none of them on any list.',
+          '<strong>Their referrals.</strong> Active patients talk about you. Inactive ones don\'t. Every month they stayed away, whoever they would have sent stayed away too.',
+        ]),
+        p(
+          'When we showed the math earlier in these emails, it stopped at the first line. That was deliberate &mdash; it\'s the only line you can count in advance. But it\'s the smallest of the three.',
+        ),
+        cta('Book a call and we\'ll walk through all three against your actual list:'),
+        finePrint(),
+        signoff(),
+      ]),
+      'A plan of care, a household, and a referral source. The calculator only counted the first one.',
+    ),
+  },
+  {
+    id: 'no-cheaper-month-to-start',
+    audience: 'chiropractic',
+    name: 'Email 13.3 — There Is No Cheaper Month to Start',
+    subject: 'There is no cheaper month to start',
+    previewText:
+      '\u201CWe\u2019ll do it when things slow down.\u201D Every month a patient stays inactive, the plan of care, the household, and the referrals stay inactive too.',
+    angle:
+      'Day 13, email 3. Closes the day by naming the obstacle: waiting for a slow season. Because the return compounds (plan of care, household, referrals), delay is the one cost that grows every month, and there is never a cheaper month than the current one.',
+    html: wrap(
+      compose([
+        h1('There is no cheaper month to start'),
+        greet,
+        p('Two emails on what a returning patient is worth. One more, about when to start.'),
+        p(
+          'The most common plan we hear is a good one on paper: <strong>&ldquo;We\'ll get to the list when things slow down.&rdquo;</strong> The problem is what the last email showed. A returning patient isn\'t one visit; it\'s a plan of care, a household, and a referral source. All three start the month the call happens, and none of them start until it does.',
+        ),
+        image(
+          asset('13-3-no-cheaper-month-to-start.jpg'),
+          'There is no cheaper month to start. A blank desk calendar beside a stack of patient folders. Every month they stay inactive: the plan of care doesn\'t start, the household doesn\'t come in, the referral never happens. Waiting doesn\'t hold the cost. It stacks it.',
+        ),
+        p(
+          'So waiting doesn\'t hold the cost still. It stacks it. The plan of care that would have started this month starts three months later, and the referral that patient would have made by then never happens at all.',
+        ),
+        p(
+          'There isn\'t a slow month coming that makes this cheaper. The queue takes 45 minutes a day whenever you start, and the list is worth the most right now.',
+        ),
+        cta('Pick a time and we\'ll build the first week around your schedule as it is:'),
+        finePrint(),
+        signoff(),
+      ]),
+      '"We\u2019ll do it when things slow down." Every month a patient stays inactive, the plan of care, the household, and the referrals stay inactive too.',
+    ),
+  },
+  {
     id: 'know-your-numbers',
     audience: 'chiropractic',
-    name: 'Email 14 — See the Numbers',
+    name: 'Email 14.1 — See the Numbers',
     subject: "If you can't see the numbers, you can't grow them",
     previewText:
       'Calls made, contacts reached, appointments booked, revenue recovered. Visible without asking anyone.',
     angle:
-      'Accountability and visibility. Turns a vague activity into a measurable operation with a dashboard.',
+      'Day 14, email 1. Accountability and visibility. Turns a vague activity into a measurable operation with a dashboard.',
     html: wrap(
       compose([
         h1('&ldquo;How did the calls go this week?&rdquo; deserves a better answer than &ldquo;good&rdquo;'),
@@ -1156,6 +1861,82 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         signoff(),
       ]),
       'Calls made, contacts reached, appointments booked, revenue recovered. Visible without asking anyone.',
+    ),
+  },
+  {
+    id: 'three-numbers-three-conversations',
+    audience: 'chiropractic',
+    name: 'Email 14.2 — Three Numbers, Three Conversations',
+    subject: 'Three numbers, three conversations',
+    previewText:
+      'Calls made, reached but not booked, and booked. Each one tells you exactly which conversation to have on Monday.',
+    angle:
+      'Day 14, email 2. Makes 14.1 concrete: what an owner actually does with the dashboard. Each of the three core numbers points to a specific, short conversation with the team instead of a vague "how\'s it going."',
+    html: wrap(
+      compose([
+        h1('Three numbers, three conversations'),
+        greet,
+        p(
+          'In the last email I showed you the dashboard. Here\'s what to do with it on a Monday &mdash; because a number you don\'t act on is just decoration.',
+        ),
+        image(
+          asset('14-2-three-numbers-three-conversations.jpg'),
+          'Three numbers, three conversations. Calls made: is the slot being kept? Reached, not booked: which objection keeps coming up? Booked: who is converting? A number you can see is a conversation you can have.',
+        ),
+        steps([
+          [
+            'Calls made.',
+            'If it\'s low, the slot isn\'t being kept. That\'s a scheduling conversation, not a motivation one.',
+          ],
+          [
+            'Reached but not booked.',
+            'The calls are happening and patients are answering, but the appointment isn\'t landing. Sit in on two calls, hear which objection keeps coming up, and walk through that one screen together.',
+          ],
+          [
+            'Booked.',
+            'Someone on your team is converting. Find out what they\'re doing, and give them more of the queue.',
+          ],
+        ]),
+        p(
+          'Each conversation takes about five minutes, because you\'re not asking how it\'s going. You already know. You\'re asking about one specific thing.',
+        ),
+        cta('We\'ll show you the dashboard with a week of real activity in it:'),
+        finePrint(),
+        signoff(),
+      ]),
+      'Calls made, reached but not booked, and booked. Each one tells you exactly which conversation to have on Monday.',
+    ),
+  },
+  {
+    id: 'the-feeling-gets-there-first',
+    audience: 'chiropractic',
+    name: 'Email 14.3 — The Feeling Gets There First',
+    subject: 'The feeling that it isn\u2019t working shows up before the results do',
+    previewText:
+      'Voicemails arrive all at once. Appointments arrive spread out. Without the numbers, week three always feels like failure.',
+    angle:
+      'Day 14, email 3. Closes the day by naming the obstacle: programs don\'t get cancelled by numbers, they get cancelled by feelings, and the "not working" feeling reliably arrives before the results. The dashboard is what keeps a working program alive through week three.',
+    html: wrap(
+      compose([
+        h1('The feeling gets there first'),
+        greet,
+        p('Two emails on the numbers. One more, about the feeling that gets there before them.'),
+        p(
+          'Here\'s the pattern in every reactivation effort that runs on gut feel. The voicemails arrive all at once &mdash; six in an afternoon. The appointments arrive spread out &mdash; one on Tuesday, one the following Monday. <strong>By week three the feeling says it isn\'t working,</strong> even when the count says it is.',
+        ),
+        image(
+          asset('14-3-the-feeling-gets-there-first.jpg'),
+          'The feeling gets there first. A six-week chart: the dashed line for how it feels drops to its low point at week three, while the solid line for what the numbers show rises steadily. Programs don\'t get cancelled by numbers. They get cancelled by feelings.',
+        ),
+        p(
+          'Programs don\'t get cancelled by numbers. They get cancelled by feelings, and the feeling always shows up first. That\'s the real job of the dashboard: not to impress you, but to be the thing you look at in week three instead of your gut.',
+        ),
+        p('The office that makes it to month three is the one that could see the count in week three.'),
+        cta('Book a call and we\'ll show you what week three looks like on the screen:'),
+        finePrint(),
+        signoff(),
+      ]),
+      'Voicemails arrive all at once. Appointments arrive spread out. Without the numbers, week three always feels like failure.',
     ),
   },
   {
