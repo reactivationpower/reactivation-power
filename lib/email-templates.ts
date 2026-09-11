@@ -499,12 +499,12 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
   {
     id: 'no-ad-spend',
     audience: 'chiropractic',
-    name: 'Email 2 — Stop Paying to Reach Strangers',
+    name: 'Email 2.1 — Stop Paying to Reach Strangers',
     subject: 'Before you spend another dollar on ads, read this',
     previewText:
       'New services, same patients. The fastest way to fill your schedule is the list of people who already said yes to you once.',
     angle:
-      'Contrast angle: the cost and friction of marketing to cold audiences vs. tapping existing and inactive patients, especially for new services.',
+      'Day 2, email 1. Contrast angle: the cost and friction of marketing to cold audiences vs. tapping existing and inactive patients, especially for new services.',
     html: wrap(
       `${header}
         <tr>
@@ -516,7 +516,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0;">
               <tr>
                 <td>
-                  <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Concept_3_Marketing_Dollar_No_Label-hRD6TlNZDpAljxjZxATJhZIlYtOSwo.png" alt="Where would you rather spend your marketing dollar? Acquiring a stranger costs money at every step — ad spend, click, lead, follow-up, appointment �� with an uncertain outcome. Reactivating a patient is just a phone call and an appointment: low cost, higher return." width="520" style="width:100%;max-width:520px;height:auto;margin:0 auto;border-radius:6px;" />
+                  <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Concept_3_Marketing_Dollar_No_Label-hRD6TlNZDpAljxjZxATJhZIlYtOSwo.png" alt="Where would you rather spend your marketing dollar? Acquiring a stranger costs money at every step — ad spend, click, lead, follow-up, appointment ��� with an uncertain outcome. Reactivating a patient is just a phone call and an appointment: low cost, higher return." width="520" style="width:100%;max-width:520px;height:auto;margin:0 auto;border-radius:6px;" />
                 </td>
               </tr>
             </table>
@@ -536,6 +536,115 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
           </td>
         </tr>`,
       'New services, same patients. The fastest way to fill your schedule is the list of people who already said yes to you once.',
+    ),
+  },
+  {
+    id: 'seven-steps-for-a-stranger',
+    audience: 'chiropractic',
+    name: 'Email 2.2 — Seven Steps for a Stranger',
+    subject: 'Seven steps for a stranger. One for a patient.',
+    previewText:
+      'Every step a stranger takes is a place they can leave and a place you pay. A past patient skips straight to the last one.',
+    angle:
+      'Day 2, email 2. Builds on 2.1 by walking the stranger\'s path step by step — where the money goes, where they drop out — against the past patient\'s path, which starts at the last step.',
+    html: wrap(
+      compose([
+        h1('Seven steps for a stranger. One for a patient.'),
+        greet,
+        p(
+          'In the last email I said marketing to strangers is the most expensive way to grow. Let\'s make that concrete. Here is the path a stranger has to walk before they\'re on your table &mdash; and notice that <strong>every step is a place you pay and a place they can leave.</strong>',
+        ),
+        image(
+          asset('2-2-seven-steps-for-a-stranger.jpg'),
+          'Seven steps for a stranger, one for a patient. The stranger: see the ad, click, fill the form, get called back, trust a name, show up, get past the price. You pay at every step; they can leave at every step. The past patient: your front desk calls, they book. Steps one through six already happened. You paid for them once. You never have to pay for them again.',
+        ),
+        steps([
+          [
+            'They have to see you.',
+            'Ad spend goes out before anyone has clicked anything, and most of the people who see it were never going to.',
+          ],
+          [
+            'They have to click.',
+            'You pay again for the click, whether the person behind it was serious or bored.',
+          ],
+          [
+            'They have to fill out a form.',
+            'Most don\'t finish it. Some of the ones who do mistype the phone number.',
+          ],
+          [
+            'Someone has to call them back.',
+            'The longer the form sits, the colder it gets &mdash; and your front desk is checking someone in.',
+          ],
+          [
+            'They have to trust a name they\'ve never heard.',
+            'Reviews, website, a gut feeling on the first phone call. All of it has to line up.',
+          ],
+          [
+            'They have to show up.',
+            'A stranger who books has nothing invested in keeping the appointment.',
+          ],
+          [
+            'They have to get past the price.',
+            'Nothing you\'ve done for them yet is a reason to say yes.',
+          ],
+        ]),
+        darkPanel([
+          'Now the past patient. Your front desk calls. They hear a name they know. They book.',
+          'Steps one through six already happened &mdash; the first time they were your patient. You paid for them once. You never have to pay for them again.',
+        ]),
+        cta('Want to see the short path on your own list?', 'See It Live on a Call'),
+        p(
+          'And if you\'ve added a service since they were last in &mdash; decompression, weight loss, red light &mdash; they hear about it from the office they already trust, not from an ad they\'ll scroll past.',
+        ),
+        p(
+          'On the call we pull up your inactive list and count how many people on it are already standing at the last step. That\'s the number the ad budget never sees.',
+        ),
+        cta('Pick a time and we\'ll count them together:', 'Grab a Time on the Calendar'),
+        finePrint(),
+        signoff(),
+      ]),
+      'Every step a stranger takes is a place they can leave and a place you pay. A past patient skips straight to the last one.',
+    ),
+  },
+  {
+    id: 'ads-come-packaged',
+    audience: 'chiropractic',
+    name: 'Email 2.3 — Ads Come Packaged',
+    subject: 'Why the ad budget keeps winning',
+    previewText:
+      'Not because ads work better. Because someone packaged them, and nobody packaged your list.',
+    angle:
+      'Day 2, email 3. Closes the day: if strangers cost more and past patients cost less, why does the ad budget keep getting approved? Names the obstacle — ads come packaged, the list doesn\'t — and positions the program as the package.',
+    html: wrap(
+      compose([
+        h1('Why the ad budget keeps winning'),
+        greet,
+        p(
+          'Over the last two emails I\'ve made one argument: strangers are the expensive way to grow, and past patients are the short path. If that\'s true &mdash; and you can check it against your own numbers &mdash; there\'s an obvious question. <strong>Why does the ad budget keep getting approved?</strong>',
+        ),
+        p('It isn\'t because ads work better. It\'s because ads come packaged.'),
+        image(
+          asset('2-3-ads-come-packaged.jpg'),
+          'Ads come packaged. Your list doesn\'t. A practice owner at his desk looks at a tall stack of plain patient folders beside a glossy marketing report. What the ad budget comes with: someone who sells it to you, someone who runs it, a report every month. Nobody sells you your own list, so it stays a good idea.',
+        ),
+        checks([
+          '<strong>Someone sells it to you.</strong> An agency calls, walks you through a deck, and asks for a budget. Nobody calls to sell you your own list.',
+          '<strong>Someone runs it.</strong> Once you say yes, the campaign happens without you. The list waits for someone in your office to have a free afternoon.',
+          '<strong>Someone reports on it.</strong> Clicks, leads, cost per lead, a dashboard every month. The list has never produced a report, so it never gets a line in the budget.',
+        ]),
+        panel([
+          'The list doesn\'t lose because it\'s worth less. It loses because it isn\'t packaged &mdash; and unpackaged things don\'t get done.',
+        ]),
+        p(
+          'That\'s what Reactivation Power is: the package. Import the list and it runs like a campaign &mdash; a queue that sets each day\'s calls, a script on screen for every conversation and every objection, and a dashboard that shows what came back. The short path from the last email, with the same structure the ad budget has always had.',
+        ),
+        cta(
+          'Book a call and we\'ll show you what your list looks like once it\'s packaged &mdash; the queue, the script, and the numbers:',
+        ),
+        finePrint(),
+        signoff(),
+      ]),
+      'Not because ads work better. Because someone packaged them, and nobody packaged your list.',
     ),
   },
   {
