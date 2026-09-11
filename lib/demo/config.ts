@@ -121,6 +121,15 @@ export const DEMO_STAGE_IDS = {
 
 export const DEMO_COURSE_ID = 'bf6544e1-9e9e-4c6b-b722-4a40b239f533'
 
+/**
+ * How far the owner — the identity the presenter lands as — has gotten in the
+ * course: the first two videos complete, the third in progress. Videos unlock
+ * one at a time, so this leaves the LAST video of Module 1 and every later
+ * module locked, which is the "your callers can't skip ahead" moment in the
+ * demo. Callers keep their own trainingCompleted counts (Sarah 18, Tyler 6).
+ */
+export const DEMO_OWNER_TRAINING_COMPLETED = 2
+
 /** Live videos of the healthcare course, in course order. */
 export const DEMO_VIDEO_IDS: { id: string; module_id: string; duration_seconds: number }[] = [
   { id: 'f9af12a6-3bf8-45a6-a8df-6f12bc701e75', module_id: '4777b06a-0636-4740-9a25-006cb8222aac', duration_seconds: 248 },

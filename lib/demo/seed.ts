@@ -8,6 +8,7 @@ import {
   DEMO_COURSE_ID,
   DEMO_NICHES,
   DEMO_OWNER,
+  DEMO_OWNER_TRAINING_COMPLETED,
   DEMO_VIDEO_IDS,
   DEMO_STAGE_IDS,
   PATIENT_NAMES,
@@ -758,7 +759,7 @@ async function seedTraining(ownerId: string, callers: DemoCallerProfile[]) {
   const videos = DEMO_VIDEO_IDS
 
   const people = [
-    { id: ownerId, completedVideos: videos.length, loginsPerWeek: 1, weeks: 11 },
+    { id: ownerId, completedVideos: DEMO_OWNER_TRAINING_COMPLETED, loginsPerWeek: 1, weeks: 11 },
     ...callers.map((c) => ({
       id: c.id,
       completedVideos: c.trainingCompleted,
