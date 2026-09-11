@@ -346,7 +346,7 @@ export const EMAIL_TEMPLATES: EmailTemplate[] = [
   {
     id: 'hidden-revenue',
     audience: 'chiropractic',
-    name: 'Email 1 — The Revenue Hiding in Your Patient List',
+    name: 'Email 1.1 — The Revenue Hiding in Your Patient List',
     subject: 'The most profitable list you own is sitting in a filing cabinet',
     previewText:
       'Your inactive patients already know you and trust you. Here is how practices are turning that list into booked appointments — without spending a dollar on ads.',
@@ -386,6 +386,114 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
           </td>
         </tr>`,
       'Your inactive patients already know you and trust you. Here is how practices are turning that list into booked appointments — without spending a dollar on ads.',
+    ),
+  },
+  {
+    id: 'who-is-in-your-thousand',
+    audience: 'chiropractic',
+    name: 'Email 1.2 — Who\u2019s Actually in Your 1,000',
+    subject: 'Who\u2019s actually in your 1,000',
+    previewText:
+      'The $100,000 from the last email isn\u2019t a number. It\u2019s five people you already know.',
+    angle:
+      'Day 1, email 2. Builds on 1.1 by turning the $100,000 illustration into the five kinds of patients who make it up — every one of them warm, none of them a stranger.',
+    html: wrap(
+      compose([
+        h1('Who\'s actually in your 1,000'),
+        greet,
+        p(
+          'In the last email I showed you a number: 1,000 inactive files, ten percent of them back, roughly <strong>$100,000</strong>. Numbers are easy to nod at and forget. So let\'s put faces on it.',
+        ),
+        p(
+          'Pull up the inactive list in any chiropractic office and the same five people are in it. You\'ll recognize every one.',
+        ),
+        image(
+          asset('1-2-who-is-in-your-thousand.jpg'),
+          'Who is actually in your 1,000. A bright chiropractic reception area; the front-desk monitor shows an Inactive Patients list of 1,000 names sorted by last visit. Five kinds of patient make up the list: finished care, felt great, drifted; missed one visit, never rebooked; came in for one thing only; insurance or life changed; the rest of the family. Not one of them is a stranger.',
+        ),
+        steps([
+          [
+            'The one who finished care and felt great.',
+            'They completed the plan, the pain was gone, and they stopped coming &mdash; because they felt fine. They still think of you as their chiropractor. They just haven\'t had a reason to call.',
+          ],
+          [
+            'The one who missed a visit and never rebooked.',
+            'Something came up, nobody followed up, and after a few weeks it felt awkward to call in. They\'re not gone. They\'re waiting for someone to make it easy.',
+          ],
+          [
+            'The one who came in for one thing.',
+            'Low back pain, three years ago. They have no idea you do decompression now, or weight loss, or red light. In their mind you\'re still the office that fixed their back.',
+          ],
+          [
+            'The one whose situation changed.',
+            'New job, new insurance, a move across town, a new baby. That was two years ago. Their situation has changed again since &mdash; and nobody has asked.',
+          ],
+          [
+            'The rest of the family.',
+            'You treated the mom. Her husband, her kids and her parents are on the same list, at the same address, and nobody has ever invited them in.',
+          ],
+        ]),
+        darkPanel([
+          'Not one of these is a cold call. Every name already knows your practice, your team and your front door. That\'s the difference between this and every other kind of marketing you\'ve paid for.',
+        ]),
+        cta('Want to see your own list sorted this way?', 'Book a Live Walkthrough'),
+        p(
+          'The number from the last email is what these five people add up to. They\'re not hypothetical. They\'re in your software right now, sorted by last visit.',
+        ),
+        p(
+          'On the call, we pull up your actual list and sort it exactly like this, so you can see which groups you have the most of and what each one needs to hear.',
+        ),
+        cta('Let\'s see who\'s in yours:', 'Reserve My Strategy Call'),
+        finePrint(),
+        signoff(),
+      ]),
+      'The $100,000 from the last email isn\u2019t a number. It\u2019s five people you already know.',
+    ),
+  },
+  {
+    id: 'list-has-no-owner',
+    audience: 'chiropractic',
+    name: 'Email 1.3 — The List Has No Owner',
+    subject: 'Why it\u2019s still sitting there',
+    previewText:
+      'The number, the people, and the one thing standing between them and your schedule.',
+    angle:
+      'Day 1, email 3. Closes the day: ties 1.1 (the number) and 1.2 (the people) together, names the single obstacle — the list has no owner — and positions the program as the missing piece.',
+    html: wrap(
+      compose([
+        h1('The only thing between your list and your schedule'),
+        greet,
+        p(
+          'Two emails so far. The first was a number: what your inactive list is worth. The second was the people behind it: five kinds of patients, every one of them warm.',
+        ),
+        p(
+          'Which leaves one question. If it\'s worth that much, and they\'re that easy to call, <strong>why is it still sitting there?</strong>',
+        ),
+        p(
+          'Not because you don\'t care. Not because your team can\'t do it. It\'s still sitting there because the list has no owner.',
+        ),
+        image(
+          asset('1-3-list-has-no-owner.jpg'),
+          'Why it is still sitting there versus what changes. Left: a quiet chiropractic front desk with an idle phone and a long patient list on the monitor &mdash; nobody\'s name is on it, nobody knows what to say, nobody knows who\'s been called. Right: the same desk with a front-desk team member on the phone and a call queue on screen &mdash; one person owns it, every word is on the screen, the queue knows who\'s next. A system problem, not a willpower problem.',
+        ),
+        checks([
+          '<strong>Nobody\'s name is on it.</strong> &ldquo;Someone should call these people&rdquo; is easy to say. &ldquo;Sarah calls fifteen of them at two o\'clock&rdquo; is the sentence that actually gets them called.',
+          '<strong>Nobody knows what to say.</strong> Without the words, the first awkward pause ends the whole effort &mdash; usually before the end of the first week.',
+          '<strong>Nobody knows who\'s been called.</strong> So the same three names get called twice, and the other 997 never hear from anyone.',
+        ]),
+        panel([
+          'That\'s not a willpower problem. It\'s a system problem &mdash; and system problems are the fixable kind.',
+        ]),
+        p(
+          'That\'s what Reactivation Power is. <strong>An owner:</strong> your front desk, in the gaps they already have. <strong>The words:</strong> a script on screen for every call and every objection. <strong>The record:</strong> a queue that knows who\'s next and when. The asset from the first email, the people from the second, with the missing piece put in.',
+        ),
+        cta(
+          'Book a call and we\'ll walk through your list, your number, and what the first two weeks look like:',
+        ),
+        finePrint(),
+        signoff(),
+      ]),
+      'The number, the people, and the one thing standing between them and your schedule.',
     ),
   },
   {
