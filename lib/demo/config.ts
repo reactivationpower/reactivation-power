@@ -103,13 +103,22 @@ export const DEMO_CALLERS: Omit<DemoCallerProfile, 'id'>[] = [
   },
 ]
 
-/** The four healthcare niches enabled on the demo account. */
+/** The healthcare niches enabled on the demo account. */
 export const DEMO_NICHES = [
   { id: 'a2991531-c84f-4851-b5f5-79e0cb4cc7d4', name: 'Chiropractic' },
   { id: '25d35824-9ccb-4792-8820-3d439eb7143b', name: 'Decompression' },
   { id: '6c23d055-3e82-4f73-b835-7f61f8276a61', name: 'Joint Pain' },
   { id: '5847edee-8fbf-494e-a26f-f5c03007e649', name: 'ChiroThin' },
+  { id: '9e6f86fb-f3a9-4cf7-802e-15826e292d66', name: 'Gut Health' },
 ] as const
+
+/**
+ * Exactly one patient carries this niche, so it stays out of the niche cycle.
+ * She is the first of the new cohort and is imported a few minutes before the
+ * rest, so the oldest-first batch release puts her in today's cold calls and
+ * a presenter can open the Gut Health script from the dashboard.
+ */
+export const DEMO_GUT_HEALTH_NICHE = DEMO_NICHES[4]
 
 /** Default (owner_id null) pipeline stages */
 export const DEMO_STAGE_IDS = {

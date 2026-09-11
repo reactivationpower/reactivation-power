@@ -6,6 +6,7 @@ import type { CallDisposition } from '@/lib/types'
 import {
   DEMO_CALLERS,
   DEMO_COURSE_ID,
+  DEMO_GUT_HEALTH_NICHE,
   DEMO_NICHES,
   DEMO_OWNER,
   DEMO_OWNER_TRAINING_COMPLETED,
@@ -134,6 +135,7 @@ const COMPLAINTS: Record<string, string[]> = {
   Decompression: ['Herniated disc L4-L5', 'Sciatica', 'Degenerative disc disease', 'Lower back pain', 'Spinal stenosis'],
   'Joint Pain': ['Knee pain', 'Shoulder pain', 'Hip pain', 'Elbow tendonitis', 'Ankle pain'],
   ChiroThin: ['Weight loss', 'Weight management'],
+  'Gut Health': ['Bloating', 'Acid reflux', 'IBS symptoms', 'Constipation', 'Food sensitivities'],
 }
 
 const SERVICE_LABELS: Record<string, string[]> = {
@@ -141,6 +143,7 @@ const SERVICE_LABELS: Record<string, string[]> = {
   Decompression: ['Spinal Decompression', 'DTS Therapy'],
   'Joint Pain': ['Joint Pain Program', 'Knee Program'],
   ChiroThin: ['ChiroThin Weight Loss', 'ChiroThin'],
+  'Gut Health': ['Gut Health Program', 'Digestive Health Consult'],
 }
 
 // Notes are written the way a real caller would type them, so they read
@@ -594,7 +597,12 @@ export async function seedDemoData(): Promise<SeedSummary> {
   // 40 "new" patients imported this morning (never called)
   for (let i = 0; i < 40; i++) {
     const [first, last] = nameQueue.shift()!
-    const niche = DEMO_NICHES[nicheCycle[(i + 3) % nicheCycle.length]]
+    const isGutHealth = i === 0
+    const niche = isGutHealth
+      ? DEMO_GUT_HEALTH_NICHE
+      : DEMO_NICHES[nicheCycle[(i + 3) % nicheCycle.length]]
+    // Always draw the minute so the PRNG stream, and the rest of the story, is unchanged.
+    const importMinute = between(5, 40)
     contacts.push({
       name: `${first} ${last}`,
       phone: fakePhone(),
@@ -604,7 +612,7 @@ export async function seedDemoData(): Promise<SeedSummary> {
       do_not_call: false,
       notes: null,
       first_call_at: null,
-      created_at: at(0, 8, between(5, 40)).toISOString(),
+      created_at: at(0, 8, isGutHealth ? 0 : importMinute).toISOString(),
       service_label: pick(SERVICE_LABELS[niche.name]),
       original_complaint: pick(COMPLAINTS[niche.name]),
       owner_id: ownerId,
