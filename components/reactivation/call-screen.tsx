@@ -51,9 +51,9 @@ import type {
 
 const DISPOSITION_LABELS: Record<string, string> = {
   no_answer: 'No answer',
-  voicemail: 'No answer \u2014 left VM',
-  spoke_did_not_schedule: 'Spoke \u2014 didn\u2019t schedule',
-  spoke_call_back_later: 'Spoke \u2014 call back later',
+  voicemail: 'No answer, left VM',
+  spoke_did_not_schedule: 'Spoke, didn\u2019t schedule',
+  spoke_call_back_later: 'Spoke, call back later',
   scheduled: 'Scheduled',
   do_not_call: 'Do not call',
 }
@@ -256,12 +256,12 @@ export function CallScreen({
     { d: 'no_answer', label: 'No Answer', icon: PhoneMissed },
     {
       d: 'spoke_did_not_schedule',
-      label: 'Spoke \u2014 Didn\u2019t Schedule',
+      label: 'Spoke, Didn\u2019t Schedule',
       icon: Calendar,
     },
     {
       d: 'spoke_call_back_later',
-      label: 'Spoke \u2014 Call Back Later',
+      label: 'Spoke, Call Back Later',
       icon: CalendarClock,
     },
     { d: 'scheduled', label: 'Scheduled', icon: CheckCircle2, tone: 'primary' },
@@ -697,7 +697,7 @@ export function CallScreen({
               onClick={() => submit('voicemail', true)}
             >
               <Voicemail className="size-4" />
-              Log — Voicemail Left
+              Log as Voicemail Left
             </Button>
           </div>
         </DialogContent>
@@ -719,8 +719,8 @@ export function CallScreen({
             </DialogTitle>
             <DialogDescription>
               {pickerFor === 'scheduled'
-                ? `Pick the day ${firstName} booked, then type the time — "9a", "1030", "2:15 pm" all work.`
-                : `${firstName} asked for a callback. Pick the day, then type the time — "9a", "1030", "2:15 pm" all work.`}
+                ? `Pick the day ${firstName} booked, then type the time ("9a", "1030", and "2:15 pm" all work).`
+                : `${firstName} asked for a callback. Pick the day, then type the time ("9a", "1030", and "2:15 pm" all work).`}
             </DialogDescription>
           </DialogHeader>
           {pickerFor && (

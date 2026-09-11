@@ -270,9 +270,9 @@ export interface FollowUp {
 
 export const DISPOSITION_LABELS: Record<CallDisposition, string> = {
   no_answer: 'No Answer',
-  voicemail: 'No Answer \u2014 Left VM',
-  spoke_did_not_schedule: 'Spoke — Didn\u2019t Schedule',
-  spoke_call_back_later: 'Spoke — Call Back Later',
+  voicemail: 'No Answer, Left VM',
+  spoke_did_not_schedule: 'Spoke, Didn\u2019t Schedule',
+  spoke_call_back_later: 'Spoke, Call Back Later',
   scheduled: 'Scheduled',
   do_not_call: 'Do Not Call',
 }

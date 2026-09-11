@@ -25,7 +25,7 @@ export function spokenComplaint(raw: string): string {
  */
 export function stripComplaintClause(body: string): string {
   return body.replace(
-    /\s*[—–-]\s*especially with \{\{\s*complaint_reference\s*\}\}/g,
+    /\s*[,—–-]\s*especially with \{\{\s*complaint_reference\s*\}\}/g,
     '',
   )
 }

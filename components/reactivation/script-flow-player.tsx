@@ -59,16 +59,16 @@ const PATIENT_TOKENS: Record<string, string> = {
   pt_no_fault: 'it\u2019s not anything you did wrong',
   pt_proud: 'you were so proud of it',
   pt_bite_q:
-    'Any changes in the bite \u2014 teeth hitting differently than they used to, or one side doing more of the chewing work?',
+    'Any changes in the bite? Teeth hitting differently than they used to, or one side doing more of the chewing work?',
   pt_jaw_q:
     'Any jaw soreness, clicking, or tension headaches, especially in the morning?',
   pt_photos_q:
-    'And how do you feel about the smile in photos these days \u2014 still showing it off, or any creeping self-consciousness?',
+    'And how do you feel about the smile in photos these days? Still showing it off, or any creeping self-consciousness?',
   pt_obj_braces_q: 'Do I have to get braces again?',
   pt_obj_startover_q: 'Do I have to start all over?',
   pt_obj_embarrassed_q: 'I\u2019m embarrassed I stopped wearing my retainer',
   pt_al_photos_q:
-    'And how do you feel about your smile in photos and on video calls these days? Be honest \u2014 do you still catch yourself doing the closed-lip smile, or angling away from the camera?',
+    'And how do you feel about your smile in photos and on video calls these days? Be honest, do you still catch yourself doing the closed-lip smile, or angling away from the camera?',
   pt_moved_back_q: 'does it feel like they\u2019ve moved back quite a bit',
   pt_your_file: 'your file',
   pt_smile_bite: 'the smile and the bite',
@@ -78,16 +78,16 @@ const PATIENT_TOKENS: Record<string, string> = {
   pt_mir_q3:
     'When it\u2019s on your mind, how does it affect your confidence, your photos, the way you feel meeting people',
   pt_floss_q:
-    'How about flossing \u2014 any spots where the floss catches, shreds, or just won\u2019t go in? Crowded teeth create tight corners that are almost impossible to keep clean.',
+    'How about flossing? Any spots where the floss catches, shreds, or just won\u2019t go in? Crowded teeth create tight corners that are almost impossible to keep clean.',
   pt_clean_q:
-    'How about cleaning \u2014 any tight spots where the floss catches, shreds, or won\u2019t go in?',
+    'How about cleaning? Any tight spots where the floss catches, shreds, or won\u2019t go in?',
   pt_invested: 'the result you invested in',
   pt_uncover_action:
     'coming in to take care of something you\u2019ve told me is bothering you',
   pt_cost_ask:
-    'Can I ask \u2014 how much does getting back to feeling the way you did matter to you?',
+    'Can I ask, how much does getting back to feeling the way you did matter to you?',
   pt_bridge_q:
-    'you\u2019d really just love to get back to loving your smile again \u2014 showing it off without a second thought',
+    'you\u2019d really just love to get back to loving your smile again, showing it off without a second thought',
 }
 
 const PARENT_TOKENS: Record<string, string> = {
@@ -100,16 +100,16 @@ const PARENT_TOKENS: Record<string, string> = {
   pt_no_fault: 'it\u2019s not anything you or your child did wrong',
   pt_proud: 'they were so proud of it',
   pt_bite_q:
-    'Has your child mentioned any changes in the bite \u2014 teeth hitting differently than they used to, or chewing more on one side?',
+    'Has your child mentioned any changes in the bite? Teeth hitting differently than they used to, or chewing more on one side?',
   pt_jaw_q:
     'Any complaints of jaw soreness, clicking, or headaches, especially in the morning?',
   pt_photos_q:
-    'And how does your child feel about their smile these days \u2014 still showing it off, or any covering the mouth in photos or teasing at school?',
+    'And how does your child feel about their smile these days? Still showing it off, or any covering the mouth in photos or teasing at school?',
   pt_obj_braces_q: 'Does my child have to get braces again?',
   pt_obj_startover_q: 'Does my child have to start all over?',
   pt_obj_embarrassed_q: 'I feel bad we let the retainer routine slip',
   pt_al_photos_q:
-    'And how does your child feel about their smile these days \u2014 still showing it off, or any covering the mouth in photos or teasing at school?',
+    'And how does your child feel about their smile these days? Still showing it off, or any covering the mouth in photos or teasing at school?',
   pt_moved_back_q: 'are you seeing that they\u2019ve moved back quite a bit',
   pt_your_file: 'your child\u2019s file',
   pt_smile_bite: 'their smile and bite',
@@ -119,16 +119,16 @@ const PARENT_TOKENS: Record<string, string> = {
   pt_mir_q3:
     'When it\u2019s on their mind, how does it show up in their confidence at school, in photos, around friends',
   pt_floss_q:
-    'How about your child\u2019s flossing \u2014 have they mentioned any spots where the floss catches or shreds? Crowded teeth create tight corners that are almost impossible to keep clean.',
+    'How about your child\u2019s flossing? Have they mentioned any spots where the floss catches or shreds? Crowded teeth create tight corners that are almost impossible to keep clean.',
   pt_clean_q:
-    'How about your child\u2019s cleaning \u2014 have they mentioned any tight spots where the floss catches or shreds?',
+    'How about your child\u2019s cleaning? Have they mentioned any tight spots where the floss catches or shreds?',
   pt_invested: 'the result you\u2019ve both invested in',
   pt_uncover_action:
     'getting them in to take care of something you\u2019ve told me has been bothering them',
   pt_cost_ask:
-    'And taking a look is exactly what lets us see what \u2014 if anything \u2014 is actually needed, so the office can give you a real answer on cost instead of a guess. One thing worth knowing: catching it early usually means a small tweak, and a small tweak is always going to be faster and less expensive than waiting until things have really shifted.',
+    'And taking a look is exactly what lets us see what, if anything, is actually needed, so the office can give you a real answer on cost instead of a guess. One thing worth knowing: catching it early usually means a small tweak, and a small tweak is always going to be faster and less expensive than waiting until things have really shifted.',
   pt_bridge_q:
-    'you\u2019d really just love to see them loving their smile again \u2014 showing it off without a second thought',
+    'you\u2019d really just love to see them loving their smile again, showing it off without a second thought',
 }
 
 const CHOICE_STYLES: Record<ScriptFlowVariant, string> = {
@@ -462,7 +462,7 @@ export function ScriptFlowPlayer({
           <div className="border-t border-border bg-primary/5 px-5 py-4 sm:px-8">
             <p className="mb-3 flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
               <Crosshair className="size-3.5" />
-              Tap their answer — which one do they want gone?
+              Tap their answer: which one do they want gone?
             </p>
             <div className="flex flex-wrap gap-2">
               {[originalChip, ...concernOptions].map((opt) => (
@@ -573,7 +573,7 @@ export function ScriptFlowPlayer({
                   className="inline-flex min-h-11 items-center gap-2 rounded-md border border-accent/50 bg-accent/10 px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent/20"
                 >
                   <Voicemail className="size-4 text-accent" />
-                  No answer — leave a voicemail
+                  No answer? Leave a voicemail
                 </button>
               )}
             </div>
@@ -581,7 +581,7 @@ export function ScriptFlowPlayer({
         ) : (
           <div className="flex flex-col gap-3">
             <p className="text-sm text-muted-foreground">
-              End of script — add your notes and log the call outcome below.
+              End of script. Add your notes and log the call outcome below.
             </p>
             {canLeaveVm && (
               <div>
@@ -591,7 +591,7 @@ export function ScriptFlowPlayer({
                   className="inline-flex min-h-11 items-center gap-2 rounded-md border border-accent/50 bg-accent/10 px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent/20"
                 >
                   <Voicemail className="size-4 text-accent" />
-                  No answer — leave a voicemail
+                  No answer? Leave a voicemail
                 </button>
               </div>
             )}

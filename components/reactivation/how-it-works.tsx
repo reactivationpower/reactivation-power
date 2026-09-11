@@ -15,7 +15,7 @@ function buildSteps(person: string, org: string) {
     {
       icon: Phone,
       title: `Pick a ${person} and start the call`,
-      body: `Work top to bottom through the Calls Due Now list and click Start Call. The ${person}\u2019s phone number is at the top of the call screen \u2014 on a phone or tablet, tapping it dials directly.`,
+      body: `Work top to bottom through the Calls Due Now list and click Start Call. The ${person}\u2019s phone number is at the top of the call screen. On a phone or tablet, tapping it dials directly.`,
     },
     {
       icon: UserRound,
@@ -29,8 +29,8 @@ function buildSteps(person: string, org: string) {
     },
     {
       icon: ListChecks,
-      title: 'Log the result \u2014 every call',
-      body: `Type a quick note for the next caller, then click the outcome: No Answer, Spoke \u2014 Didn\u2019t Schedule, Spoke \u2014 Call Back Later (pick a date and they\u2019ll reappear in the queue), Scheduled, or Do Not Call. You\u2019re taken straight to the next ${person}.`,
+      title: 'Log the result after every call',
+      body: `Type a quick note for the next caller, then click the outcome that matches: no answer, spoke but didn\u2019t schedule, spoke and wants a call back later (pick a date and they\u2019ll reappear in the queue), scheduled, or do not call. You\u2019re taken straight to the next ${person}.`,
     },
   ]
 }
