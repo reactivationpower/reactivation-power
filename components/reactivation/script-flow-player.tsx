@@ -72,11 +72,11 @@ const PATIENT_TOKENS: Record<string, string> = {
   pt_moved_back_q: 'does it feel like they\u2019ve moved back quite a bit',
   pt_your_file: 'your file',
   pt_smile_bite: 'the smile and the bite',
-  pt_mir_q1: 'how long has that been bothering you',
+  pt_mir_q1: 'How long has that been bothering you',
   pt_mir_q2:
-    'is it something you notice here and there, or pretty much every time you see your smile',
+    'Is it something you notice here and there, or pretty much every time you see your smile',
   pt_mir_q3:
-    'when it\u2019s on your mind, how does it affect your confidence, your photos, the way you feel meeting people',
+    'When it\u2019s on your mind, how does it affect your confidence, your photos, the way you feel meeting people',
   pt_floss_q:
     'How about flossing \u2014 any spots where the floss catches, shreds, or just won\u2019t go in? Crowded teeth create tight corners that are almost impossible to keep clean.',
   pt_clean_q:
@@ -113,11 +113,11 @@ const PARENT_TOKENS: Record<string, string> = {
   pt_moved_back_q: 'are you seeing that they\u2019ve moved back quite a bit',
   pt_your_file: 'your child\u2019s file',
   pt_smile_bite: 'their smile and bite',
-  pt_mir_q1: 'how long has this been on your child\u2019s mind',
+  pt_mir_q1: 'How long has this been on your child\u2019s mind',
   pt_mir_q2:
-    'do they notice it here and there, or pretty much every time they see their smile',
+    'Do they notice it here and there, or pretty much every time they see their smile',
   pt_mir_q3:
-    'when it\u2019s on their mind, how does it show up in their confidence at school, in photos, around friends',
+    'When it\u2019s on their mind, how does it show up in their confidence at school, in photos, around friends',
   pt_floss_q:
     'How about your child\u2019s flossing \u2014 have they mentioned any spots where the floss catches or shreds? Crowded teeth create tight corners that are almost impossible to keep clean.',
   pt_clean_q:
