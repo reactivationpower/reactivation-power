@@ -516,7 +516,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0;">
               <tr>
                 <td>
-                  <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Concept_3_Marketing_Dollar_No_Label-hRD6TlNZDpAljxjZxATJhZIlYtOSwo.png" alt="Where would you rather spend your marketing dollar? Acquiring a stranger costs money at every step — ad spend, click, lead, follow-up, appointment — with an uncertain outcome. Reactivating a patient is just a phone call and an appointment: low cost, higher return." width="520" style="width:100%;max-width:520px;height:auto;margin:0 auto;border-radius:6px;" />
+                  <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Concept_3_Marketing_Dollar_No_Label-hRD6TlNZDpAljxjZxATJhZIlYtOSwo.png" alt="Where would you rather spend your marketing dollar? Acquiring a stranger costs money at every step — ad spend, click, lead, follow-up, appointment �� with an uncertain outcome. Reactivating a patient is just a phone call and an appointment: low cost, higher return." width="520" style="width:100%;max-width:520px;height:auto;margin:0 auto;border-radius:6px;" />
                 </td>
               </tr>
             </table>
@@ -609,19 +609,19 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
           'Most practice owners have a rough sense that there\'s money in their inactive list. Very few have ever put a number on it. So let\'s put one on it.',
         ),
         p(
-          'Take a practice with 1,000 inactive patient files and a $1,000 average patient value:',
+          'Take a practice with 1,000 inactive patient files and a $2,000 average patient value:',
         ),
         mathBox(
           [
             ['Inactive patient files', '1,000'],
-            ['Reactivated at a conservative 10%', '100 patients'],
-            ['Average patient value', '$1,000'],
+            ['Reactivated at a conservative 5%', '50 patients'],
+            ['Average patient value', '$2,000'],
           ],
           'Recovered revenue',
           '$100,000',
         ),
         p(
-          '<strong>Cut that in half and it still works.</strong> A 5% reactivation rate on the same list is $50,000 — from patients you already earned, with no ad spend attached to them.',
+          '<strong>Cut either number in half and it still works.</strong> Half the rate, or half the patient value, and the same list is still $50,000 — from patients you already earned, with no ad spend attached to them.',
         ),
         p(
           'Now swap in your real numbers. How many inactive files do you have? What is a patient actually worth over the course of care? That second number is usually higher than owners guess, because they think in terms of one visit instead of one plan of care.',
@@ -1073,7 +1073,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         ),
         image(
           asset('15-staff-turnover.jpg'),
-          'An empty front-desk chair pushed back from the reception counter. The phone is lit with an incoming call, a headset rests beside it, a notebook full of handwritten notes and sticky notes sit by the monitor, and a small box of personal items is packed and ready to carry out. Everything they knew leaves with them.',
+          'If it only works when one person does it, it isn\'t a system. Two panels. When it lives in one person: an empty front-desk chair, a packed box, sticky notes on the monitor. The list was in her head, the words were hers alone, nobody knows who was called. When it lives in the system: a new team member on the phone at the same desk. The list is in the queue, the words are on the screen, every call is on record. The new hire picks up on Monday exactly where the last one left off.',
         ),
         steps([
           [
@@ -1126,7 +1126,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         p('A patient who lapsed eight months ago and one who lapsed six years ago are not the same opportunity:'),
         image(
           asset('16-depreciating-asset.jpg'),
-          'The asset is real. It\'s also perishable. Five patient files fade along a timeline from 8 months ago to 6 years ago; the last one is a ghosted outline with its phone crossed out. Recently lapsed: contact info still accurate, remembers your team by name, has not established care elsewhere. Long lapsed: number may be disconnected, vague memory of the practice, may have found another provider. Every month, a slice of the list quietly becomes unreachable.',
+          'The asset is real. It\'s also perishable. Every month, a slice of the list quietly becomes unreachable. Five patient folders stand on a timeline from 8 months ago to 6 years ago, fading from solid to a dotted outline with a crossed-out phone. The first two are labeled still reachable, the last two going dark. A list is worth the most the day you decide to use it.',
         ),
         p(
           'This is the real cost of &ldquo;we\'ll get to it next quarter.&rdquo; The list doesn\'t sit still and wait. Each month, a slice of it quietly becomes unreachable.',
@@ -1162,7 +1162,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         ),
         image(
           asset('17-someone-else.jpg'),
-          'Evening in a living room. A man sits on the edge of the sofa with one hand pressed to his lower back, holding his phone up to a map of search results for chiropractor near me, the top listing marked as an ad. When that moment arrives, whose name comes to mind?',
+          'Evening in a living room. A man sits on the edge of the sofa, one hand pressed to his lower back, holding up his phone to a map of search results with the top listing marked as an ad. Panel: the moment they decide. The pain comes back. They reach for their phone. Someone\'s name comes up first. When that moment arrives, whose name comes to mind?',
         ),
         darkPanel([
           'When that moment arrives, they either think of you — or they search, see an ad, and go somewhere else.',
@@ -1203,7 +1203,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         p('Here is the actual shape of it:'),
         image(
           asset('18-first-thirty-days.jpg'),
-          'Your first 30 days. No six-month implementation; calls start the same week your list lands. A four-week timeline: Week 1 has three milestones close together, import your list, train your team, start calling. Weeks 2 through 4 are one long stretch labeled build the rhythm, a small block of calls each day. A Day 30 flag at the end reads look at real numbers. No new hires. No hardware. Nothing to rip out.',
+          'Your first 30 days. No six-month implementation; calls start the same week your list lands. Four photo panels in a row: Week 1, import your list. Week 1, train your team. Weeks 2 through 4, build the rhythm. Day 30, look at real numbers. No new hires. No hardware. Nothing to rip out.',
         ),
         steps([
           [
@@ -1263,7 +1263,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         ]),
         image(
           asset('19-not-your-job.jpg'),
-          'A chiropractor adjusts a patient on the treatment table, fully focused on them. Through the doorway behind, a front-desk team member in a headset works the call list at the reception computer, the on-screen script showing a few large tappable buttons. You treat patients. Your team works the list.',
+          'A chiropractor adjusts a patient on the treatment table, fully focused on them. Through the doorway behind, a front-desk team member in a headset works the call list at the reception computer. Panel: you treat patients, your team works the list. You never touch the queue. Your front desk owns the calls. You just see the numbers. If it needs you to run it, it won\'t last a month.',
         ),
         p('What you actually do is look at a dashboard when you feel like it.'),
         panel([
@@ -1307,7 +1307,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         p('What the call actually looks like:'),
         image(
           asset('20-straight-answer.jpg'),
-          'A practice owner in a white clinic coat sits at her desk on a relaxed video call, pen in hand, a notepad with a few handwritten numbers beside a coffee mug and a small spine model. A straight read on your list, even if the answer is no.',
+          'A practice owner in a white clinic coat sits at her desk on a relaxed video call, pen in hand, a notepad with a few handwritten numbers beside a coffee mug and a small spine model. Panel: a straight read on your list. Too small to be worth it? We\'ll say so. The numbers work? We\'ll show you. Either way, you leave with a number. We\'d rather tell you no than waste your time.',
         ),
         steps([
           [
@@ -1354,7 +1354,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         ),
         image(
           asset('21-cash-services.jpg'),
-          'The best margins need the warmest audience. Selling to strangers: trust built from zero, price objection arrives immediately, expensive clicks with uncertain intent, long consideration before anyone commits. Offering to past patients: trust already established, they know your care is worth paying for, no acquisition cost, one conversation from a familiar name. Behind the panels, a red light therapy panel and body-composition scale in a modern wellness office. They\'ve already answered the hardest question: is this practice worth my money?',
+          'The services with the best margins need the warmest audience. Two panels. Selling to strangers, over a laptop showing an ad dashboard: trust built from zero, price objection arrives first, expensive clicks with uncertain intent. Offering to past patients, over a wellness room with a red light panel and body-composition scale: trust already established, they know your care is worth it, no acquisition cost. They\'ve already answered the hardest question: is this practice worth my money?',
         ),
         p(
           'A patient who paid you before and felt it was worth it is dramatically more likely to say yes to an elective service than a stranger who found you in a feed. They\'ve already answered the hardest question — <em>is this practice worth my money?</em>',
@@ -1401,7 +1401,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         ),
         image(
           asset('22-one-conversation.jpg'),
-          'Count how many patients it takes to pay for this. Three blocks in a row: Hundreds, the patients contacted in a normal month; One to three, covers the investment depending on your case average; Everything after, margin. Break-even: one to three patients.',
+          'Count how many patients it takes to pay for this. Not hundreds. Not dozens. Three cards in a row: Hundreds, contacted in a normal month. 1 to 3, covers the investment. Everything after, margin. Break-even: one to three patients. Everything after that is yours.',
         ),
         p(
           'And once you\'re past break-even, every appointment after it is recovered revenue on a list you already owned.',
@@ -1431,7 +1431,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         ),
         image(
           asset('23-the-call-itself.jpg'),
-          'A practice owner at her desk on a relaxed video call, headset on, coffee beside the laptop, a notepad with one number circled. Three questions. One number. A straight answer.',
+          'A practice owner at his desk on a relaxed video call, headset on, coffee beside the laptop, a notepad with one number circled. Panel: what happens on the call. Three questions about your practice. One number: your break-even. A straight answer, either way. No pitch deck. Just your numbers.',
         ),
         panel([
           'We ask how many inactive patients you have, roughly what a plan of care is worth in your office, and who on your team would make the calls. From those three answers we work out your break-even &mdash; how many patients have to come back before this pays for itself &mdash; and tell you whether it makes sense for your practice. If it doesn\'t, we say so.',
@@ -1465,7 +1465,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         p('Ours runs differently. Bring three numbers &mdash; rough is fine &mdash; and the call produces a decision.'),
         image(
           asset('24-three-numbers.jpg'),
-          'Three cards, Inactive Patients, Case Average and Who Calls, feed an arrow into a teal card labeled Your Break-Even. Rough is fine. The call does the math.',
+          'Three numbers turn a maybe into a decision. Bring these to the call; rough is fine. Three cards, Inactive Patients, Case Average and Who Calls, feed an arrow into a teal card labeled Your Break-Even with a calculator. Rough is fine. The call does the math.',
         ),
         steps([
           [
@@ -1512,7 +1512,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         ),
         image(
           asset('25-anatomy-of-a-call.jpg'),
-          'Six connected steps in a row: Opener, Their Concern, Making It Real, The Review, Recommendation, Objections. Every word already on the screen.',
+          'What your front desk actually says. Six steps, every word already on the screen. Over a front desk with a tablet showing the script: Opener, Their Concern, Making It Real, The Review, Recommendation, Objections. Nobody improvises. The next line is always on the screen.',
         ),
         steps([
           [
@@ -1576,7 +1576,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         ),
         image(
           asset('26-same-skill.jpg'),
-          'A front-desk team member smiles on the phone at a bright chiropractic reception desk, the appointment calendar open on her screen, a patient checking in behind her. Same skill. Different list.',
+          'Same skill. Different list. Two panels showing the same front-desk team member at the same desk with the same smile. What she does now: answers when patients call in, books them into the schedule. What she does with the list: calls patients who already know her, books them into the schedule. The skill your team already has does the rest.',
         ),
         p(
           'The only difference is who\'s on the other end: a patient who hasn\'t been in for a while instead of one who just called. That patient needs a slightly different conversation &mdash; a warm reason for the call, a way to talk about what\'s been bothering them, an easy path back in.',
@@ -1613,7 +1613,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         p('In the script, that stall is a button.'),
         image(
           asset('27-think-about-it.jpg'),
-          'A tablet screen shows four tappable objection buttons: I need to think about it, highlighted in teal; Just send me some info; It\'s too expensive; I\'m considering another option. An arrow leads to a card labeled Scripted Response. The stall is a button.',
+          'The four words every caller dreads. A front-desk team member on the phone reaches for a tablet. Panel: what the patient says. Four tappable buttons: I need to think about it, highlighted in teal; Just send me some info; It\'s too expensive; I\'m considering another option. Tap it, the response appears. The stall is a button. The answer is already written.',
         ),
         panel([
           '&ldquo;That\'s completely fair. Can I ask &mdash; what part would you want to think over? The cost, the timing, or just being sure it\'s worth it?&rdquo;',
@@ -1657,7 +1657,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         p('The list wasn\'t the problem. <strong>The pile was.</strong>'),
         image(
           asset('28-never-eight-hundred.jpg'),
-          'On the left, a dense grid of 800 patient files. An arrow narrows into a clean card on the right labeled Calls Due Now, 7, with seven rows, and a smaller line beneath it: 793 in reserve. Nobody can face 800. Everybody can make 7.',
+          'The list is never empty and never overwhelming. Two panels. The pile: a stressed team member beside a monitor of endless rows and a stack of printouts. 800 names, all at once. Nobody knows where to start, so nobody starts. The queue: a relaxed team member on the phone with a short list on screen. 7 calls due now. Work the seven, then done. 793 wait in reserve. Nobody can face 800. Everybody can make 7.',
         ),
         p('Here\'s how the program handles the same 800 names:'),
         steps([
@@ -1714,7 +1714,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         ),
         image(
           asset('29-what-we-wont-do.jpg'),
-          'What the call is not. Three gray cards, each marked with an X: Pressure, A Countdown, Deciding on the Phone. Below them a single teal card with a check: A Number You Can Hold Us To. Pick a time. Bring your skepticism.',
+          'What the call is not. Pick a time. Bring your skepticism. Four cards in a row. Three gray, each marked with an X: Pressure, A Countdown, Deciding on the Phone. One teal card with a check: A Number You Can Hold Us To. No pressure, no clock, no deciding on the phone. Just a number.',
         ),
         checks([
           '<strong>We won\'t pressure you.</strong> If the numbers don\'t work for your practice, we\'ll be the first to say so.',
@@ -1752,7 +1752,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         ),
         image(
           asset('30-new-associate.jpg'),
-          'A young associate chiropractor stands in a clean, quiet treatment room studying a mostly open schedule on a tablet, while shelves of patient folders fill the wall beside him. The warmest patients for a new provider already know the practice.',
+          'A young associate chiropractor stands in a clean, quiet treatment room studying a mostly open schedule on a tablet, while shelves of patient folders fill the wall beside him. Panel: an empty schedule, a full filing cabinet. A new provider with open hours. Hundreds of files who already trust the practice. One phone call, not a campaign. The warmest patients for a new provider already know the practice.',
         ),
         panel([
           'A past patient doesn\'t need to be sold on the practice. They need to be told the practice has room, and given a reason to come in. <strong>That\'s a phone call, not a campaign.</strong>',
@@ -1797,7 +1797,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         ),
         image(
           asset('31-three-endings.jpg'),
-          'A phone icon labeled Every Call branches into three paths: Scheduled, on the books; Not Yet, back in 3 months; No Answer, retry in 4 to 7 days. Nothing lives in anyone\'s memory.',
+          'Every call ends one of three ways. What happens next is already decided. A phone icon labeled Every Call branches into three cards: Scheduled, on the books; Not Yet, back in 3 months; No Answer, retry in 4 to 7 days. Nothing falls through, because nothing lives in anyone\'s memory.',
         ),
         steps([
           [
@@ -1856,7 +1856,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         ),
         image(
           asset('32-ask-your-front-desk.jpg'),
-          'A chiropractor leans on the reception counter asking a question; the front-desk team member pauses mid-shrug with a friendly, uncertain expression, monitor glowing beside her. How many patients haven\'t we seen in over a year?',
+          'A chiropractor leans on the reception counter asking a question; the front-desk team member pauses mid-shrug with a friendly, uncertain expression. Panel: a one-question test. How many patients haven\'t we seen in over a year? If the answer is a shrug, that\'s the whole point. One question tells you whether the list is being worked.',
         ),
         p(
           'The honest answer is usually a pause, a guess, and &ldquo;I could probably run a report.&rdquo; That isn\'t a criticism of your team. It\'s just not a number anyone looks at &mdash; which is exactly why it\'s worth so much.',
@@ -1895,7 +1895,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         ),
         image(
           asset('33-why-your-team-calls.jpg'),
-          'Split image. Left, labeled A Call Center: rows of gray cubicles and headsets under fluorescent light. Right, labeled Your Front Desk: a warm chiropractic reception desk with a team member on the phone. Trust doesn\'t transfer to a stranger.',
+          'The call has to come from your office. Two panels. A call center, rows of gray cubicles under fluorescent light: a stranger\'s voice, reading from a card, has never seen your office. Your front desk, a warm chiropractic reception with a team member on the phone: a name they recognize, knows the practice inside out, can book them on the spot. Trust doesn\'t transfer to a stranger.',
         ),
         compare(
           'A call center',
@@ -1942,7 +1942,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         ),
         image(
           asset('34-month-three.jpg'),
-          'A three-stage timeline: Month 1, first attempts; Month 2, follow-ups arrive; Month 3, the rhythm. A teal line rises across the three stages as the mix shifts from cold calls to warm follow-ups. Month one is a project. Month three is a rhythm.',
+          'What month three looks like. The work per day doesn\'t grow; the results do. Three photo panels of the same front-desk team member: Month 1, first attempts. Month 2, follow-ups arrive. Month 3, the rhythm, with a patient checking in behind her. A teal line rises across the three. Month one is a project. Month three is a rhythm.',
         ),
         steps([
           [
@@ -1996,7 +1996,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         ),
         image(
           asset('35-dont-decide-yet.jpg'),
-          'A desk planner open on a wooden desk in morning light, one time slot circled in teal marker, a pen resting across the page. Booking isn\'t a yes.',
+          'A desk planner open on a wooden desk in morning light, one time slot circled in teal marker, a pen resting across the page. Panel: booking isn\'t a yes. 1, book the call. 2, hear your number. 3, then decide. Decide after the call, not before it.',
         ),
         p(
           'So here\'s a different order. Don\'t decide. Book the call. Bring your list size and your case average. Let us work out the break-even in front of you. <strong>Then</strong> decide.',
@@ -2035,7 +2035,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         ),
         image(
           asset('36-natural-not-improvised.jpg'),
-          'A front-desk team member in a headset mid-conversation, relaxed and smiling, a tablet propped on the desk showing a script with a few large buttons, a plant and natural light beside her. Sounds natural. Isn\'t improvised.',
+          'A front-desk team member in a headset mid-conversation, relaxed and smiling, a tablet propped on the desk showing a script with a few large buttons. Panel: sounds natural, isn\'t improvised. The screen keeps it on track. The caller keeps it human. The patient hears a conversation. Every line is written. None of it sounds read.',
         ),
         panel([
           'The script isn\'t read aloud. Your caller sees the next line and the buttons for what the patient might say, glances down, and talks like a person. <strong>The screen keeps the conversation on track; the caller keeps it human.</strong>',
@@ -2075,7 +2075,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         cta('Already past all of them? Skip straight to the calendar:', 'Skip to the Calendar'),
         image(
           asset('37-every-reason-answered.jpg'),
-          'Six cards, each with a teal check: No Time, Tried It, They Moved On, Seems Desperate, Not Now, Will It Pay. Bring your reason. We\'ll answer it.',
+          'Every reason not to book, answered. Bring yours; we\'ll answer it on the call. Six cards, each with a teal check: No Time, Tried It, They Moved On, Seems Desperate, Not Now, Will It Pay. Still on the fence? Every reason has an answer.',
         ),
         steps([
           [
@@ -2131,7 +2131,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         greet,
         image(
           asset('38-four-sentences.jpg'),
-          'Overhead view of a quiet morning desk: a coffee, a phone face-down, and a notepad with four short handwritten lines beside a pen. Four sentences. One call.',
+          'Overhead view of a quiet morning desk: a coffee, a phone face-down, a pen, a blank notepad. Panel: the whole thing in four sentences. 1, your list is an asset. 2, your team can work it. 3, the system does the remembering. 4, one to three patients covers it. Four sentences. One call.',
         ),
         p('You have hundreds of past patients who liked you and drifted.'),
         p(
@@ -2168,7 +2168,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         cta('If you\'re ready now, this is step one:', 'Start With the Form'),
         image(
           asset('39-after-you-book.jpg'),
-          'Four connected steps: Pick a Time, Pull 3 Numbers, The Call, Your Break-Even. No surprises. Just your numbers.',
+          'What happens after you book. No surprises, just your numbers. Four photo panels in a row: 1, pick a time. 2, pull 3 numbers. 3, the call. 4, your break-even. Four steps. You already know what each one looks like.',
         ),
         steps([
           [
@@ -2216,7 +2216,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         ),
         image(
           asset('40-where-this-leaves-you.jpg'),
-          'A bright chiropractic lobby, busy in a good way: patients of different ages checking in and waiting, the front desk in the middle of it, morning light through the windows. A full schedule from a list you already own.',
+          'A bright chiropractic lobby, busy in a good way: patients of different ages checking in and waiting, the front desk in the middle of it, morning light through the windows. Panel: the whole case. The list is real. Your team can do it. The system remembers. The math is small. The list doesn\'t wait. A full schedule from a list you already own.',
         ),
         p(
           '<strong>The list is real.</strong> Hundreds of people who chose you once, paid you, and drifted for reasons that had nothing to do with you. Many haven\'t found another provider, and a call from a familiar office is the permission plenty of them were waiting for.',
