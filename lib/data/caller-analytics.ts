@@ -5,9 +5,13 @@ import { DISPOSITION_LABELS, type CallDisposition } from '@/lib/types'
 import type { Participant } from '@/lib/types'
 import {
   MIN_BUCKET_SAMPLE,
+  MIN_NICHE_CONVERSATIONS,
   type Bucket,
   type CallAnalytics,
   type MonthRow,
+  type NicheCallerStat,
+  type NicheLeaderRow,
+  type NicheLeaders,
   type NicheRow,
   type TimeInsight,
   type TrainingAudit,
@@ -16,11 +20,14 @@ import {
 
 // Client components import shapes from lib/analytics-types directly; server
 // code can keep importing everything from here.
-export { MIN_BUCKET_SAMPLE }
+export { MIN_BUCKET_SAMPLE, MIN_NICHE_CONVERSATIONS }
 export type {
   Bucket,
   CallAnalytics,
   MonthRow,
+  NicheCallerStat,
+  NicheLeaderRow,
+  NicheLeaders,
   NicheRow,
   TimeInsight,
   TrainingAudit,
@@ -52,6 +59,54 @@ interface CallRow {
   voicemail_left: boolean | null
   created_at: string
   appointment_at: string | null
+}
+
+// ---------- Paged reads ----------
+
+/**
+ * PostgREST returns at most 1,000 rows per request. An active office logs
+ * that many calls within a few months, so every full-history read pages.
+ */
+async function pageAll<T>(
+  build: (from: number, to: number) => PromiseLike<{ data: unknown; error: unknown }>,
+): Promise<T[]> {
+  const PAGE = 1000
+  const all: T[] = []
+  for (let from = 0; ; from += PAGE) {
+    const { data, error } = await build(from, from + PAGE - 1)
+    if (error) throw error
+    const rows = (data ?? []) as T[]
+    all.push(...rows)
+    if (rows.length < PAGE) break
+  }
+  return all
+}
+
+/** contact id -> niche id, fetched in URL-safe chunks. */
+async function contactNiches(
+  contactIds: string[],
+): Promise<Map<string, string | null>> {
+  const supabase = getAdminClient()
+  const map = new Map<string, string | null>()
+  const CHUNK = 200
+  for (let i = 0; i < contactIds.length; i += CHUNK) {
+    const { data, error } = await supabase
+      .from('contacts')
+      .select('id, niche_id')
+      .in('id', contactIds.slice(i, i + CHUNK))
+    if (error) throw error
+    for (const c of data ?? []) map.set(c.id, (c.niche_id as string | null) ?? null)
+  }
+  return map
+}
+
+async function nicheNames(nicheIds: string[]): Promise<Map<string, string>> {
+  if (nicheIds.length === 0) return new Map()
+  const { data } = await getAdminClient()
+    .from('niches')
+    .select('id, name')
+    .in('id', nicheIds)
+  return new Map((data ?? []).map((n) => [n.id, n.name as string]))
 }
 
 // ---------- Eastern-time helpers ----------
@@ -161,34 +216,28 @@ export async function getCallAnalytics(
   const empty = emptyAnalytics()
   if (callerIds.length === 0) return empty
 
-  const { data: callsData } = await supabase
-    .from('reactivation_calls')
-    .select(
-      'id, caller_id, contact_id, disposition, voicemail_left, created_at, appointment_at',
-    )
-    .in('caller_id', callerIds)
-    .order('created_at', { ascending: true })
-  const calls = (callsData ?? []) as CallRow[]
+  const calls = await pageAll<CallRow>((from, to) =>
+    supabase
+      .from('reactivation_calls')
+      .select(
+        'id, caller_id, contact_id, disposition, voicemail_left, created_at, appointment_at',
+      )
+      .in('caller_id', callerIds)
+      .order('created_at', { ascending: true })
+      .order('id')
+      .range(from, to),
+  )
   if (calls.length === 0) return empty
 
   // Niche per contact (for the niche breakdown)
   const contactIds = Array.from(new Set(calls.map((c) => c.contact_id)))
-  const { data: contacts } = await supabase
-    .from('contacts')
-    .select('id, niche_id')
-    .in('id', contactIds)
-  const nicheByContact = new Map(
-    (contacts ?? []).map((c) => [c.id, c.niche_id as string | null]),
-  )
+  const nicheByContact = await contactNiches(contactIds)
   const nicheIds = Array.from(
     new Set(
       Array.from(nicheByContact.values()).filter((n): n is string => !!n),
     ),
   )
-  const { data: niches } = nicheIds.length
-    ? await supabase.from('niches').select('id, name').in('id', nicheIds)
-    : { data: [] as { id: string; name: string }[] }
-  const nicheName = new Map((niches ?? []).map((n) => [n.id, n.name]))
+  const nicheName = await nicheNames(nicheIds)
 
   // ---- summary ----
   const reached = calls.filter((c) => REACHED.has(c.disposition)).length
@@ -389,6 +438,122 @@ export async function getCallAnalytics(
       bestYesMonthWeek: pickInsight(byMonthWeek, 'yesRate', 'max'),
     },
   }
+}
+
+// ---------- Best caller by niche ----------
+
+interface Tally {
+  calls: number
+  reached: number
+  scheduled: number
+}
+
+/**
+ * For every niche the team has called, rank the callers by close rate
+ * (scheduled / reached). Close rate isolates how well someone works the script
+ * once a patient picks up, so it is not skewed by which list they drew.
+ */
+export async function getNicheLeaders(
+  members: Participant[],
+): Promise<NicheLeaders> {
+  const supabase = getAdminClient()
+  const empty: NicheLeaders = { niches: [], activeCallers: 0 }
+  if (members.length === 0) return empty
+
+  const memberIds = members.map((m) => m.id)
+  const calls = await pageAll<
+    Pick<CallRow, 'id' | 'caller_id' | 'contact_id' | 'disposition'>
+  >((from, to) =>
+    supabase
+      .from('reactivation_calls')
+      .select('id, caller_id, contact_id, disposition')
+      .in('caller_id', memberIds)
+      .order('id')
+      .range(from, to),
+  )
+  if (calls.length === 0) return empty
+
+  const nicheByContact = await contactNiches(
+    Array.from(new Set(calls.map((c) => c.contact_id))),
+  )
+  const nicheName = await nicheNames(
+    Array.from(
+      new Set(
+        Array.from(nicheByContact.values()).filter((n): n is string => !!n),
+      ),
+    ),
+  )
+  const memberById = new Map(members.map((m) => [m.id, m]))
+
+  const newTally = (): Tally => ({ calls: 0, reached: 0, scheduled: 0 })
+  const count = (t: Tally, disposition: CallDisposition) => {
+    t.calls += 1
+    if (REACHED.has(disposition)) t.reached += 1
+    if (disposition === 'scheduled') t.scheduled += 1
+  }
+
+  const perNiche = new Map<string, { team: Tally; byCaller: Map<string, Tally> }>()
+  const activeCallers = new Set<string>()
+  for (const c of calls) {
+    activeCallers.add(c.caller_id)
+    const nicheId = nicheByContact.get(c.contact_id)
+    // A contact with no niche has no script, so there is nothing to be good at.
+    if (!nicheId) continue
+    const niche = perNiche.get(nicheId) ?? { team: newTally(), byCaller: new Map() }
+    count(niche.team, c.disposition)
+    const mine = niche.byCaller.get(c.caller_id) ?? newTally()
+    count(mine, c.disposition)
+    niche.byCaller.set(c.caller_id, mine)
+    perNiche.set(nicheId, niche)
+  }
+
+  const rows: NicheLeaderRow[] = []
+  for (const [nicheId, niche] of Array.from(perNiche.entries())) {
+    // Nobody has had a conversation here yet, so there is nothing to rank.
+    if (niche.team.reached === 0) continue
+
+    const callers: NicheCallerStat[] = Array.from(niche.byCaller.entries())
+      .map(([callerId, t]) => {
+        const m = memberById.get(callerId)
+        return {
+          callerId,
+          name: m ? `${m.first_name} ${m.last_name}`.trim() : 'Former caller',
+          isOwner: m?.role === 'owner',
+          ...t,
+          closeRate: pct(t.scheduled, t.reached),
+          qualified: t.reached >= MIN_NICHE_CONVERSATIONS,
+        }
+      })
+      .sort(
+        (a, b) =>
+          Number(b.qualified) - Number(a.qualified) ||
+          b.closeRate - a.closeRate ||
+          b.scheduled - a.scheduled ||
+          b.reached - a.reached,
+      )
+
+    const qualified = callers.filter((c) => c.qualified)
+    let status: NicheLeaderRow['status'] = 'too_few'
+    if (qualified.length >= 2) {
+      status = qualified[0].closeRate > 0 ? 'leader' : 'no_bookings'
+    } else if (qualified.length === 1) {
+      status = 'one_caller'
+    }
+
+    rows.push({
+      nicheId,
+      name: nicheName.get(nicheId) ?? 'Unknown niche',
+      ...niche.team,
+      callers,
+      status,
+    })
+  }
+
+  const statusOrder = { leader: 0, one_caller: 1, no_bookings: 2, too_few: 3 }
+  rows.sort(
+    (a, b) => statusOrder[a.status] - statusOrder[b.status] || b.reached - a.reached,
+  )
+  return { niches: rows, activeCallers: activeCallers.size }
 }
 
 function emptyAnalytics(): CallAnalytics {

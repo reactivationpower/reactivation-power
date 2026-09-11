@@ -7,7 +7,10 @@ import {
   getStaffMembers,
 } from '@/lib/data/participants'
 import { getTeamStats } from '@/lib/data/reactivation'
-import { getCallAnalytics } from '@/lib/data/caller-analytics'
+import {
+  getCallAnalytics,
+  getNicheLeaders,
+} from '@/lib/data/caller-analytics'
 import { PORTAL_WIDTH } from '@/lib/portal-layout'
 import { TeamStatsCards } from '@/components/reactivation/team-stats'
 import {
@@ -15,9 +18,10 @@ import {
   AppointmentsByMonthChart,
 } from '@/components/analytics/call-charts'
 import { InsightGrid, Section } from '@/components/analytics/blocks'
+import { NicheLeaderBoard } from '@/components/analytics/niche-leaders'
 
 export const metadata = {
-  title: 'Analytics — Reactivation Power',
+  title: 'Analytics | Reactivation Power',
 }
 
 export default async function AnalyticsPage() {
@@ -32,10 +36,12 @@ export default async function AnalyticsPage() {
   if (!owner) redirect('/login')
 
   const staff = await getStaffMembers(ownerId)
-  const memberIds = [owner.id, ...staff.map((s) => s.id)]
-  const [teamStats, team] = await Promise.all([
+  const members = [owner, ...staff]
+  const memberIds = members.map((m) => m.id)
+  const [teamStats, team, leaders] = await Promise.all([
     getTeamStats(owner, staff),
     getCallAnalytics(memberIds),
+    getNicheLeaders(members),
   ])
 
   return (
@@ -54,6 +60,8 @@ export default async function AnalyticsPage() {
 
       <TeamStatsCards stats={teamStats} />
 
+      <NicheLeaderBoard data={leaders} />
+
       <div className="flex flex-col gap-4">
         <div>
           <h2 className="text-lg font-semibold text-foreground">
@@ -67,7 +75,7 @@ export default async function AnalyticsPage() {
         <InsightGrid insights={team.insights} />
         <div className="grid gap-6 lg:grid-cols-2">
           <Section
-            title="Activity — last 12 weeks"
+            title="Activity, last 12 weeks"
             description="Dials, conversations, and appointments by week. Gray is effort, teal is reach, green is results."
           >
             <ActivityTrendChart data={team.byWeek} />

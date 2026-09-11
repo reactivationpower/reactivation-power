@@ -32,7 +32,7 @@ import {
 import { TrainingAudit } from '@/components/analytics/training-audit'
 
 export const metadata = {
-  title: 'Caller analytics — Reactivation Power',
+  title: 'Caller analytics | Reactivation Power',
 }
 
 export default async function CallerAnalyticsPage({
@@ -88,7 +88,7 @@ export default async function CallerAnalyticsPage({
             <p className="mt-1 text-sm text-muted-foreground">
               {hasCalls
                 ? `Calling since ${longDate(s.firstCallAt)} · last call ${relativeDay(s.lastCallAt)}`
-                : 'No calls logged yet — the training audit below shows whether they have started.'}
+                : 'No calls logged yet. The training audit below shows whether they have started.'}
             </p>
           </div>
           {s.upcomingAppointments > 0 && (
@@ -109,7 +109,7 @@ export default async function CallerAnalyticsPage({
 
       <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
         <Section
-          title="Activity — last 12 weeks"
+          title="Activity, last 12 weeks"
           description="Dials, conversations, and appointments by week. Gray is effort, teal is reach, green is results."
         >
           <ActivityTrendChart data={analytics.byWeek} />
@@ -152,7 +152,7 @@ export default async function CallerAnalyticsPage({
         </Section>
         <Section
           title="Time of month"
-          description="Scheduled rate by week of the calendar month — do patients say yes more around payday or month-end?"
+          description="Scheduled rate by week of the calendar month. Do patients say yes more around payday or month-end?"
           aside={<SampleNote />}
         >
           <BucketRateChart data={analytics.byMonthWeek} metric="yesRate" />

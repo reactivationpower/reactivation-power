@@ -19,7 +19,7 @@ import { ImportContactsDialog } from '@/components/reactivation/import-contacts-
 import { DEMO_SAMPLE_CSV } from '@/lib/demo/sample-csv'
 
 export const metadata = {
-  title: 'Contacts — Reactivation Power',
+  title: 'Contacts | Reactivation Power',
 }
 
 export default async function ContactsPage() {

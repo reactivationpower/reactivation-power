@@ -9,7 +9,7 @@ import { PORTAL_WIDTH } from '@/lib/portal-layout'
 import { DemoBarServer } from '@/components/demo/demo-bar-server'
 
 export const metadata = {
-  title: 'Reactivation Power — Portal',
+  title: 'Reactivation Power Portal',
 }
 
 export default function PortalLayout({

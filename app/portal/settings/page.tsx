@@ -19,7 +19,7 @@ import { MyProfileForm } from '@/components/portal/my-profile-form'
 import { StageManager } from '@/components/reactivation/stage-manager'
 
 export const metadata = {
-  title: 'Settings — Reactivation Power',
+  title: 'Settings | Reactivation Power',
 }
 
 function SettingsSection({
@@ -91,7 +91,7 @@ export default async function SettingsPage() {
           <>
             <SettingsSection
               title={`${healthcare ? 'Practice' : 'Business'} details`}
-              description="Both fill into the call script automatically — the name as {{practice_name}} and the number as the callback line in the voicemail script."
+              description="Both fill into the call script automatically: the name as {{practice_name}} and the number as the callback line in the voicemail script."
             >
               <div className="flex flex-col gap-4">
                 <PracticeNameForm

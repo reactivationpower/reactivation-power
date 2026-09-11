@@ -39,6 +39,46 @@ export interface NicheRow {
   yesRate: number
 }
 
+/** Conversations a caller needs in a niche before they can lead it. */
+export const MIN_NICHE_CONVERSATIONS = MIN_BUCKET_SAMPLE
+
+export interface NicheCallerStat {
+  callerId: string
+  name: string
+  isOwner: boolean
+  calls: number
+  reached: number
+  scheduled: number
+  /** scheduled / reached, 0-100 */
+  closeRate: number
+  /** reached >= MIN_NICHE_CONVERSATIONS */
+  qualified: boolean
+}
+
+export interface NicheLeaderRow {
+  nicheId: string
+  name: string
+  /** Team-wide totals for this niche */
+  calls: number
+  reached: number
+  scheduled: number
+  /** Everyone who has dialed this niche: qualified callers first, best close rate first */
+  callers: NicheCallerStat[]
+  /**
+   * leader       two or more qualified callers and the top one has booked
+   * one_caller   only one caller is qualified, so there is nobody to compare against
+   * no_bookings  qualified callers exist but none has booked in this niche
+   * too_few      nobody has enough conversations in this niche yet
+   */
+  status: 'leader' | 'one_caller' | 'no_bookings' | 'too_few'
+}
+
+export interface NicheLeaders {
+  niches: NicheLeaderRow[]
+  /** Team members with at least one logged call */
+  activeCallers: number
+}
+
 export interface MonthRow {
   key: string
   label: string

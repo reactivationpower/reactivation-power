@@ -20,7 +20,7 @@ import { TeamStatsCards } from '@/components/reactivation/team-stats'
 import { HowItWorks } from '@/components/reactivation/how-it-works'
 
 export const metadata = {
-  title: 'Dialer — Reactivation Power',
+  title: 'Dialer | Reactivation Power',
 }
 
 export default async function DialerPage() {
