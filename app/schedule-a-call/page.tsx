@@ -1,20 +1,14 @@
 import type { Metadata } from 'next'
-import { CalendarClock, CheckCircle2 } from 'lucide-react'
+import { CalendarCheck, CheckCircle2, ClipboardList } from 'lucide-react'
 import { LeadForm } from '@/components/landing/lead-form'
 import { SiteFooter } from '@/components/site/site-footer'
 import { SiteHeader } from '@/components/site/site-header'
 
 export const metadata: Metadata = {
-  title: 'Schedule a Call — Reactivation Power',
+  title: 'Schedule a Call | Reactivation Power',
   description:
     'Book a free strategy call to see what reactivation could do for your practice.',
 }
-
-/**
- * Set this to your scheduler embed URL (Calendly, Cal.com, etc.)
- * e.g. 'https://calendly.com/your-handle/strategy-call'
- */
-const SCHEDULER_URL: string | null = null
 
 const EXPECT = [
   'A realistic revenue estimate for your inactive list',
@@ -22,6 +16,25 @@ const EXPECT = [
   'The biggest reactivation mistakes to avoid',
 ]
 
+const STEPS = [
+  {
+    icon: ClipboardList,
+    label: 'Tell us about your practice',
+    detail: 'About 30 seconds',
+    current: true,
+  },
+  {
+    icon: CalendarCheck,
+    label: 'Pick a time on our calendar',
+    detail: 'Next screen',
+    current: false,
+  },
+]
+
+/**
+ * Booking runs against a CRM contact, so the form has to come first. Once it
+ * is submitted the visitor lands on the live calendar to choose a slot.
+ */
 export default function ScheduleACallPage() {
   return (
     <div className="flex min-h-svh flex-col bg-background">
@@ -34,7 +47,7 @@ export default function ScheduleACallPage() {
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-pretty text-lg leading-relaxed text-muted-foreground">
               The call takes about 20 minutes. You&apos;ll leave with a
-              realistic picture of what your inactive patient list is worth —
+              realistic picture of what your inactive patient list is worth,
               whether or not we ever work together.
             </p>
           </div>
@@ -53,40 +66,53 @@ export default function ScheduleACallPage() {
             ))}
           </ul>
 
-          <div className="mt-10 w-full">
-            {SCHEDULER_URL ? (
-              <iframe
-                src={SCHEDULER_URL}
-                title="Schedule your strategy call"
-                className="h-[720px] w-full rounded-xl border border-border bg-card"
-              />
-            ) : (
-              <div className="flex flex-col items-center gap-4 rounded-xl border border-dashed border-border bg-card px-6 py-16 text-center">
-                <span className="flex size-14 items-center justify-center rounded-full bg-accent/10">
-                  <CalendarClock
-                    className="size-7 text-accent"
-                    aria-hidden="true"
-                  />
-                </span>
-                <p className="text-lg font-semibold text-foreground">
-                  Online scheduling coming soon
-                </p>
-                <p className="max-w-md text-sm leading-relaxed text-muted-foreground">
-                  Until our calendar is live, fill out the form below and
-                  we&apos;ll reach out within one business day to set up your
-                  call.
-                </p>
-              </div>
-            )}
-          </div>
-
           <div className="mx-auto mt-12 max-w-xl rounded-xl border border-border bg-card p-6 shadow-sm md:p-8">
+            <ol
+              aria-label="Booking steps"
+              className="mb-6 grid grid-cols-2 gap-3 border-b border-border pb-6"
+            >
+              {STEPS.map((step, i) => (
+                <li
+                  key={step.label}
+                  aria-current={step.current ? 'step' : undefined}
+                  className="flex items-start gap-3"
+                >
+                  <span
+                    className={
+                      step.current
+                        ? 'flex size-8 shrink-0 items-center justify-center rounded-full bg-accent text-accent-foreground'
+                        : 'flex size-8 shrink-0 items-center justify-center rounded-full border border-border bg-background text-muted-foreground'
+                    }
+                  >
+                    <step.icon className="size-4" aria-hidden="true" />
+                  </span>
+                  <span className="flex flex-col">
+                    <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                      Step {i + 1}
+                    </span>
+                    <span
+                      className={
+                        step.current
+                          ? 'text-sm font-semibold text-foreground'
+                          : 'text-sm font-medium text-muted-foreground'
+                      }
+                    >
+                      {step.label}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {step.detail}
+                    </span>
+                  </span>
+                </li>
+              ))}
+            </ol>
+
             <h2 className="text-xl font-semibold text-foreground">
-              Prefer we reach out to you?
+              Tell us about your practice
             </h2>
-            <p className="mb-6 mt-1 text-sm text-muted-foreground">
-              Tell us about your practice and we&apos;ll be in touch within one
-              business day.
+            <p className="mb-6 mt-1 text-sm leading-relaxed text-muted-foreground">
+              Our calendar opens on the next screen so you can pick whatever
+              time works best for you.
             </p>
             <LeadForm />
           </div>
