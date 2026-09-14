@@ -1,9 +1,13 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useEffect, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { Eye, RefreshCw, Sparkles } from 'lucide-react'
-import { resetDemo, switchDemoView } from '@/app/actions/demo'
+import {
+  refreshDemoIfStale,
+  resetDemo,
+  switchDemoView,
+} from '@/app/actions/demo'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -30,20 +34,47 @@ export interface DemoIdentity {
  * Thin strip above the portal header, visible ONLY inside the demo account.
  * Presenter can hop between the owner and the four callers (to show the
  * narrower caller view) and rebuild the whole data set with one click.
+ *
+ * When the server says the data is from a previous Eastern day (`stale`),
+ * the bar asks for one refresh through the locked action and re-renders.
+ * Page rendering itself never rebuilds.
  */
 export function DemoBar({
   currentId,
   identities,
   seededLabel,
+  stale = false,
 }: {
   currentId: string
   identities: DemoIdentity[]
   seededLabel: string
+  stale?: boolean
 }) {
   const router = useRouter()
   const [pending, startTransition] = useTransition()
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [status, setStatus] = useState<string | null>(null)
+  const refreshRequested = useRef(false)
+
+  useEffect(() => {
+    if (!stale || refreshRequested.current) return
+    refreshRequested.current = true
+    setStatus('Refreshing demo data for today…')
+    startTransition(async () => {
+      const res = await refreshDemoIfStale()
+      if ('error' in res && res.error) {
+        setStatus(res.error)
+        return
+      }
+      if (res.rebuilt) {
+        setStatus('Demo data refreshed. Every date is now relative to today.')
+        router.refresh()
+        setTimeout(() => setStatus(null), 4000)
+      } else {
+        setStatus(null)
+      }
+    })
+  }, [stale, router])
 
   function onSwitch(id: string) {
     if (!id || id === currentId) return
@@ -61,7 +92,7 @@ export function DemoBar({
         setStatus(res.error)
         return
       }
-      setStatus('Demo data reset — every date is now relative to today.')
+      setStatus('Demo data reset. Every date is now relative to today.')
       router.refresh()
       setTimeout(() => setStatus(null), 4000)
     })
@@ -137,9 +168,9 @@ export function DemoBar({
           <DialogHeader>
             <DialogTitle>Reset the demo data?</DialogTitle>
             <DialogDescription>
-              This rebuilds Ridgeline Chiropractic from scratch — all 100
+              This rebuilds Ridgeline Chiropractic from scratch: all 100
               patients, every call, follow-up, appointment, and training
-              record — with every date relative to today. Anything changed
+              record, with every date relative to today. Anything changed
               during this demo is discarded. Takes a few seconds.
             </DialogDescription>
           </DialogHeader>

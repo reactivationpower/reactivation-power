@@ -501,6 +501,7 @@ async function ensureDemoParticipants() {
       .single(),
     'owner upsert',
   )
+  if (!owner) throw new Error('demo owner upsert: no row returned')
   const ownerId = owner.id as string
 
   // Callers and access grants only depend on the owner id, so they run together.
