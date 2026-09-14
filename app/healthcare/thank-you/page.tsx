@@ -3,6 +3,7 @@ import Image from 'next/image'
 import { CheckCircle2 } from 'lucide-react'
 import { OpportunityCalculator } from '@/components/landing/opportunity-calculator'
 import { parseInactiveCount, parsePatientValue } from '@/lib/opportunity'
+import { publicServiceName } from '@/lib/service-catalog'
 import {
   DEFAULT_TIMEZONE,
   isUsTimezone,
@@ -35,7 +36,11 @@ export default async function ThankYouPage({
   }
 
   const firstName = str('name', 40)
-  const services = str('services', 600).split('|').filter(Boolean).slice(0, 30)
+  const services = str('services', 600)
+    .split('|')
+    .filter(Boolean)
+    .slice(0, 30)
+    .map(publicServiceName)
   const inactiveCount = parseInactiveCount(str('inactive', 12) || undefined)
   const patientValue = parsePatientValue(str('value', 12) || undefined)
 

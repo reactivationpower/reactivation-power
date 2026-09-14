@@ -11,8 +11,10 @@ import {
 } from 'lucide-react'
 import { HeroOpportunity } from '@/components/landing/hero-opportunity'
 import { OpportunityProvider } from '@/components/landing/opportunity-context'
+import { ServicesWeSupport } from '@/components/site/services-we-support'
 import { SiteFooter } from '@/components/site/site-footer'
 import { SiteHeader } from '@/components/site/site-header'
+import { PRACTICE_TYPES_LINE } from '@/lib/service-catalog'
 
 export const metadata: Metadata = {
   title: 'Reactivation Power — Turn Old Patients Into New Revenue',
@@ -76,7 +78,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
             <div className="flex flex-col gap-6">
               <p className="w-fit rounded-full border border-accent/40 bg-accent/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-accent">
-                For Healthcare Practices
+                {PRACTICE_TYPES_LINE}
               </p>
               <h1 className="text-balance text-4xl font-bold leading-tight tracking-tight text-foreground md:text-5xl">
                 Turning old business into new business &amp; new money.
@@ -137,6 +139,9 @@ export default function HomePage() {
             </p>
           </div>
         </section>
+
+        {/* Services we have scripts for */}
+        <ServicesWeSupport className="border-b border-border" />
 
         {/* Three steps */}
         <section className="mx-auto max-w-6xl px-4 py-16 md:px-6 md:py-24">

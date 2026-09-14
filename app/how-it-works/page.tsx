@@ -9,6 +9,7 @@ import {
   Upload,
   UserCheck,
 } from 'lucide-react'
+import { ServicesWeSupport } from '@/components/site/services-we-support'
 import { SiteFooter } from '@/components/site/site-footer'
 import { SiteHeader } from '@/components/site/site-header'
 
@@ -37,7 +38,7 @@ const INCLUDES = [
   {
     icon: UserCheck,
     title: 'Scripts built for your services',
-    body: 'The system covers more than twenty service niches across chiropractic, dental, med spa, and wellness — each with scripting written specifically for that service and that patient.',
+    body: 'The system covers more than twenty services across chiropractic, acupuncture, dental, med spa, and weight loss, each with a script written specifically for that service and that patient.',
   },
 ]
 
@@ -60,26 +61,6 @@ const PROCESS = [
     title: 'Appointments get booked and tracked',
     body: 'Every call is logged with an outcome. Callbacks resurface on schedule, the pipeline updates itself, and you watch recovered revenue accumulate month after month.',
   },
-]
-
-const NICHES = [
-  'Chiropractic',
-  'Decompression',
-  'Neuropathy',
-  'Joint Pain',
-  'Acupuncture',
-  'Massage Therapy',
-  'Gut Health',
-  'Botox',
-  'Skin Tightening',
-  'Cellulite Reduction',
-  'Laser Hair Removal',
-  'Teeth Whitening',
-  'Clear Aligners',
-  'Orthodontics',
-  'Dental Implants',
-  'Weight Loss',
-  'And more',
 ]
 
 export default function HowItWorksPage() {
@@ -168,29 +149,8 @@ export default function HowItWorksPage() {
           </div>
         </section>
 
-        {/* Niches */}
-        <section className="mx-auto max-w-4xl px-4 py-14 text-center md:px-6 md:py-20">
-          <h2 className="text-balance text-3xl font-bold tracking-tight text-foreground md:text-4xl">
-            Built for the services you actually offer
-          </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-pretty text-lg leading-relaxed text-muted-foreground">
-            Every niche gets its own scripting — because a lapsed chiropractic
-            patient and a past Botox client need very different conversations.
-          </p>
-          <ul className="mt-8 flex flex-wrap justify-center gap-2">
-            {NICHES.map((niche) => (
-              <li
-                key={niche}
-                className="rounded-full border border-border bg-card px-4 py-1.5 text-sm font-medium text-foreground"
-              >
-                {niche}
-              </li>
-            ))}
-            <li className="rounded-full border border-accent bg-accent/10 px-4 py-1.5 text-sm font-semibold text-accent">
-              {"Don't see your niche? We'll build it for you."}
-            </li>
-          </ul>
-        </section>
+        {/* Services we have scripts for */}
+        <ServicesWeSupport />
 
         {/* CTA */}
         <section className="border-t border-border bg-card">

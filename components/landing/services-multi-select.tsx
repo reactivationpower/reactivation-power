@@ -2,41 +2,19 @@
 
 import { useState } from 'react'
 import { Check } from 'lucide-react'
+import { SERVICE_GROUPS } from '@/lib/service-catalog'
 
 /**
- * Healthcare niches offered in the course — keep in sync with the niches
- * table, listed in the same sort_order the user portal displays them.
+ * Lead-form service picker. Shows the public label from the catalog but
+ * submits the internal niche name, so GoHighLevel notes and
+ * `landing_leads.services` keep the names existing records already use.
  */
-const HEALTHCARE_SERVICES = [
-  'Chiropractic',
-  'ChiroThin',
-  'Weight Loss (Not ChiroThin)',
-  'Red Light / Body Contouring',
-  'Decompression',
-  'Neuropathy',
-  'Softwave/Shockwave',
-  'Acoustic Wave Therapy',
-  'Joint Pain',
-  'Gut Health',
-  'Massage Therapy',
-  'Acupuncture',
-  'Botox',
-  'Teeth Whitening',
-  'Cellulite Reduction',
-  'Skin Tightening',
-  'Clear Aligners',
-  'Orthodontics / Braces',
-  'Body Waxing',
-  'Laser Hair Removal',
-  'GLP Patients',
-  'Dental Implants',
-] as const
-
 export function ServicesMultiSelect({
   defaultSelected = [],
   error,
   onSelectionChange,
 }: {
+  /** Internal niche names (what the form submits) */
   defaultSelected?: string[]
   /** Validation message from the form; renders the group in its error state */
   error?: string
@@ -44,10 +22,10 @@ export function ServicesMultiSelect({
 }) {
   const [selected, setSelected] = useState<string[]>(defaultSelected)
 
-  function toggle(service: string) {
-    const next = selected.includes(service)
-      ? selected.filter((s) => s !== service)
-      : [...selected, service]
+  function toggle(niche: string) {
+    const next = selected.includes(niche)
+      ? selected.filter((s) => s !== niche)
+      : [...selected, niche]
     setSelected(next)
     onSelectionChange?.(next)
   }
@@ -76,39 +54,48 @@ export function ServicesMultiSelect({
       ))}
 
       <div
-        className={`grid grid-cols-1 gap-1.5 rounded-md sm:grid-cols-2 ${
+        className={`flex flex-col gap-4 rounded-md ${
           error ? 'outline outline-2 outline-offset-4 outline-destructive/50' : ''
         }`}
       >
-        {HEALTHCARE_SERVICES.map((service) => {
-          const checked = selected.includes(service)
-          return (
-            <button
-              key={service}
-              type="button"
-              role="checkbox"
-              aria-checked={checked}
-              onClick={() => toggle(service)}
-              className={`flex items-center gap-2.5 rounded-md border px-3 py-2.5 text-left text-sm transition-colors ${
-                checked
-                  ? 'border-accent bg-accent/10 text-foreground'
-                  : 'border-input bg-card text-foreground hover:bg-muted'
-              }`}
-            >
-              <span
-                className={`flex size-4 shrink-0 items-center justify-center rounded border ${
-                  checked
-                    ? 'border-accent bg-accent text-accent-foreground'
-                    : 'border-input bg-card'
-                }`}
-                aria-hidden="true"
-              >
-                {checked && <Check className="size-3" />}
-              </span>
-              {service}
-            </button>
-          )
-        })}
+        {SERVICE_GROUPS.map((group) => (
+          <div key={group.id} className="flex flex-col gap-1.5">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              {group.title}
+            </p>
+            <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+              {group.services.map((service) => {
+                const checked = selected.includes(service.niche)
+                return (
+                  <button
+                    key={service.niche}
+                    type="button"
+                    role="checkbox"
+                    aria-checked={checked}
+                    onClick={() => toggle(service.niche)}
+                    className={`flex items-center gap-2.5 rounded-md border px-3 py-2.5 text-left text-sm transition-colors ${
+                      checked
+                        ? 'border-accent bg-accent/10 text-foreground'
+                        : 'border-input bg-card text-foreground hover:bg-muted'
+                    }`}
+                  >
+                    <span
+                      className={`flex size-4 shrink-0 items-center justify-center rounded border ${
+                        checked
+                          ? 'border-accent bg-accent text-accent-foreground'
+                          : 'border-input bg-card'
+                      }`}
+                      aria-hidden="true"
+                    >
+                      {checked && <Check className="size-3" />}
+                    </span>
+                    {service.label}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        ))}
       </div>
 
       {error ? (
