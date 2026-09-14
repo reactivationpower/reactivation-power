@@ -110,15 +110,22 @@ export const DEMO_NICHES = [
   { id: '6c23d055-3e82-4f73-b835-7f61f8276a61', name: 'Joint Pain' },
   { id: '5847edee-8fbf-494e-a26f-f5c03007e649', name: 'ChiroThin' },
   { id: '9e6f86fb-f3a9-4cf7-802e-15826e292d66', name: 'Gut Health' },
+  { id: '3f538f36-4aff-43a5-b135-5fdb1edbe6e5', name: 'Neuropathy' },
+  { id: '645460da-9941-4eff-b209-ec11471ca8e8', name: 'Red Light / Body Contouring' },
 ] as const
 
 /**
- * Exactly one patient carries this niche, so it stays out of the niche cycle.
- * She is the first of the new cohort and is imported a few minutes before the
- * rest, so the oldest-first batch release puts her in today's cold calls and
- * a presenter can open the Gut Health script from the dashboard.
+ * Showcase niches: exactly ONE patient each, kept out of the niche cycle.
+ * Index N here is assigned to the Nth name of the new (never-called) cohort
+ * and stamped created_at 08:0N ET, a few minutes before the rest of that
+ * cohort, so the oldest-first batch release always puts these patients in
+ * today's first "Calls Due Now" batch and a presenter can open each script
+ * straight from the dashboard.
+ *   0 Brenda Fairbanks  -> Gut Health
+ *   1 Nicholas Sung     -> Neuropathy
+ *   2 Pamela Redfield   -> Red Light / Body Contouring
  */
-export const DEMO_GUT_HEALTH_NICHE = DEMO_NICHES[4]
+export const DEMO_SHOWCASE_NICHES = [DEMO_NICHES[4], DEMO_NICHES[5], DEMO_NICHES[6]] as const
 
 /** Default (owner_id null) pipeline stages */
 export const DEMO_STAGE_IDS = {
