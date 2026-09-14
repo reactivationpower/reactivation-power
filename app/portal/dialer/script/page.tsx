@@ -13,11 +13,15 @@ import { ScriptViewer } from '@/components/reactivation/script-viewer'
 export default async function PracticeScriptPage({
   searchParams,
 }: {
-  searchParams: Promise<{ screen?: string }>
+  searchParams: Promise<{ screen?: string; from?: string }>
 }) {
-  const { screen } = await searchParams
+  const { screen, from } = await searchParams
   const participant = await getCurrentParticipant()
   if (!participant) redirect(`/login?next=/portal/dialer`)
+
+  const cameFromTraining = from === 'training'
+  const backHref = cameFromTraining ? '/portal' : '/portal/dialer'
+  const backLabel = cameFromTraining ? 'Back to Training' : 'Back to Dialer'
 
   const ownerId = accessOwnerId(participant)
   const sectors = await getOwnerSectors(ownerId)
@@ -32,11 +36,11 @@ export default async function PracticeScriptPage({
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6">
       <Link
-        href="/portal/dialer"
+        href={backHref}
         className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
       >
         <ArrowLeft className="size-4" />
-        Back to Dialer
+        {backLabel}
       </Link>
 
       <div className="mt-4 flex flex-col gap-1">
