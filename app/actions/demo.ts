@@ -6,13 +6,18 @@ import { revalidatePath } from 'next/cache'
 import { getAdminClient } from '@/lib/supabase/admin'
 import { setSessionCookie, getClientIp } from '@/lib/auth/session'
 import { getCurrentParticipant } from '@/lib/data/participants'
-import { demoIsStale, seedDemoData } from '@/lib/demo/seed'
-import { DEMO_OWNER, demoEmail } from '@/lib/demo/config'
+import { ensureDemoSeeded, getDemoOwnerState } from '@/lib/demo/seed'
+
+const DB_UNAVAILABLE =
+  'The demo database is not responding right now. Give it a few seconds and try again.'
 
 /**
  * Presenter enters the shared demo password at /demo. On success we sign them
- * in AS the demo owner (a real participant row flagged is_demo) and, if the
- * data is from a previous day, regenerate it first so every date is current.
+ * in AS the demo owner (a real participant row flagged is_demo). The data is
+ * rebuilt first ONLY when it is genuinely from a previous Eastern day or has
+ * never been built. A failed database read is reported as such, never treated
+ * as "first run", and a rebuild already in progress is waited for, not
+ * started a second time.
  */
 export async function enterDemo(formData: FormData) {
   const password = String(formData.get('password') ?? '')
@@ -20,26 +25,22 @@ export async function enterDemo(formData: FormData) {
   if (!expected) return { error: 'Demo is not configured yet.' }
   if (password !== expected) return { error: 'That password isn\u2019t right.' }
 
-  const supabase = getAdminClient()
-  let { data: owner } = await supabase
-    .from('participants')
-    .select('id, demo_seeded_at, is_demo')
-    .eq('email', demoEmail(DEMO_OWNER.email))
-    .maybeSingle()
-
-  // First run, or a new day: build (or rebuild) the account.
-  if (!owner || demoIsStale(owner.demo_seeded_at)) {
-    await seedDemoData()
-    const r = await supabase
-      .from('participants')
-      .select('id, demo_seeded_at, is_demo')
-      .eq('email', demoEmail(DEMO_OWNER.email))
-      .maybeSingle()
-    owner = r.data
+  const seeded = await ensureDemoSeeded()
+  if (seeded.status === 'error') {
+    console.error('[demo] enter: rebuild check failed:', seeded.message)
+    return { error: DB_UNAVAILABLE }
   }
-  if (!owner) return { error: 'Could not prepare the demo account.' }
 
-  await startSessionAs(owner.id)
+  let ownerId: string
+  try {
+    const owner = await getDemoOwnerState()
+    if (!owner) return { error: 'Could not prepare the demo account.' }
+    ownerId = owner.id
+    await startSessionAs(ownerId)
+  } catch (err) {
+    console.error('[demo] enter: sign-in failed:', err)
+    return { error: DB_UNAVAILABLE }
+  }
   redirect('/portal')
 }
 
@@ -47,7 +48,7 @@ async function startSessionAs(participantId: string) {
   const supabase = getAdminClient()
   const ip = await getClientIp()
   const h = await headers()
-  const { data: session } = await supabase
+  const { data: session, error } = await supabase
     .from('sessions')
     .insert({
       participant_id: participantId,
@@ -56,7 +57,9 @@ async function startSessionAs(participantId: string) {
     })
     .select('id')
     .single()
-  if (!session) throw new Error('session insert failed')
+  if (error || !session) {
+    throw new Error(`session insert failed: ${error?.message ?? 'no row'}`)
+  }
   await setSessionCookie({
     participantId,
     sessionId: session.id,
@@ -71,18 +74,64 @@ async function requireDemoParticipant() {
   return p
 }
 
+/**
+ * A rebuild wipes every demo session, including the presenter's own cookie
+ * session, so after one finishes the presenter is signed back in as whoever
+ * they were viewing as.
+ */
+async function reSignIn(p: { id: string; parent_id: string | null; role: string }) {
+  const ownerId = p.parent_id ?? p.id
+  await startSessionAs(p.role === 'owner' ? ownerId : p.id)
+  revalidatePath('/portal', 'layout')
+}
+
 /** Presenter's "Reset demo data" button. Rebuilds the account from scratch. */
 export async function resetDemo() {
   const p = await requireDemoParticipant()
   if (!p) return { error: 'Not in the demo account.' }
-  const summary = await seedDemoData()
-  // The reset wipes seeded sessions but NOT the presenter's own cookie
-  // session (created by startSessionAs and also demo-owned). Re-mint it so
-  // the presenter stays signed in.
-  const ownerId = p.parent_id ?? p.id
-  await startSessionAs(p.role === 'owner' ? ownerId : p.id)
-  revalidatePath('/portal', 'layout')
-  return { ok: true, summary }
+
+  const result = await ensureDemoSeeded({ force: true })
+  if (result.status === 'error') {
+    console.error('[demo] reset failed:', result.message)
+    return { error: `Reset did not finish. ${result.message}` }
+  }
+  try {
+    await reSignIn(p)
+  } catch (err) {
+    console.error('[demo] reset: re-sign-in failed:', err)
+    return { error: 'Data was rebuilt but signing you back in failed. Open /demo again.' }
+  }
+  return {
+    ok: true,
+    summary: result.status === 'seeded' ? result.summary : undefined,
+  }
+}
+
+/**
+ * Called by the demo bar when a portal page rendered with data from a
+ * previous Eastern day (a tab left open overnight). Page rendering itself
+ * never rebuilds; this is the one client-initiated path, and it goes through
+ * the same lock as everything else.
+ */
+export async function refreshDemoIfStale() {
+  const p = await requireDemoParticipant()
+  if (!p) return { error: 'Not in the demo account.' }
+
+  const result = await ensureDemoSeeded()
+  if (result.status === 'error') {
+    console.error('[demo] refresh failed:', result.message)
+    return { error: DB_UNAVAILABLE }
+  }
+  const rebuilt = result.status !== 'fresh'
+  if (rebuilt) {
+    try {
+      await reSignIn(p)
+    } catch (err) {
+      console.error('[demo] refresh: re-sign-in failed:', err)
+      return { error: 'Data was refreshed but signing you back in failed. Open /demo again.' }
+    }
+  }
+  return { ok: true, rebuilt }
 }
 
 /**

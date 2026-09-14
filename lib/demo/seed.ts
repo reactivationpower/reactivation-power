@@ -1,5 +1,6 @@
 import 'server-only'
 
+import { randomUUID } from 'node:crypto'
 import { getAdminClient } from '@/lib/supabase/admin'
 import { easternWallClockToUtc } from '@/lib/call-time'
 import type { CallDisposition } from '@/lib/types'
@@ -54,11 +55,35 @@ function hashSeed(s: string) {
   return h >>> 0
 }
 
-const rand = mulberry32(hashSeed('ridgeline-chiro-demo-v1'))
+const RNG_SEED = 'ridgeline-chiro-demo-v1'
+let rand = mulberry32(hashSeed(RNG_SEED))
 const pick = <T,>(arr: readonly T[]): T => arr[Math.floor(rand() * arr.length)]
 const chance = (p: number) => rand() < p
 const between = (lo: number, hi: number) =>
   lo + Math.floor(rand() * (hi - lo + 1))
+
+/** Restart the stream so every rebuild tells the identical story, even when
+ *  several rebuilds run inside one long-lived server process. */
+function resetRng() {
+  rand = mulberry32(hashSeed(RNG_SEED))
+}
+
+// ---------- query guard ----------
+
+/**
+ * Every demo query goes through here. A failed read must never be mistaken
+ * for "no rows": that is how a transient 502 once turned into a full rebuild
+ * (and nearly a duplicate demo owner). Throwing aborts the seed cleanly.
+ */
+function must<T>(
+  result: { data: T; error: { message: string } | null },
+  what: string,
+): T {
+  if (result.error) throw new Error(`demo ${what}: ${result.error.message}`)
+  return result.data
+}
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
 // ---------- Eastern-time date helpers ----------
 
@@ -420,19 +445,30 @@ function buildHistory(
 
 export async function wipeDemoData() {
   const supabase = getAdminClient()
-  const { data: demoParticipants } = await supabase
-    .from('participants')
-    .select('id')
-    .eq('is_demo', true)
-  const ids = (demoParticipants ?? []).map((p) => p.id)
+  const demoParticipants = must(
+    await supabase.from('participants').select('id').eq('is_demo', true),
+    'participants lookup',
+  )
+  const ids = (demoParticipants ?? []).map((p) => p.id as string)
   if (ids.length === 0) return
 
   // Contacts cascade to follow_ups + reactivation_calls (FK ON DELETE CASCADE).
-  await supabase.from('contacts').delete().in('owner_id', ids)
-  await supabase.from('activity_events').delete().in('participant_id', ids)
-  await supabase.from('video_progress').delete().in('participant_id', ids)
-  await supabase.from('sessions').delete().in('participant_id', ids)
-  await supabase.from('service_niche_mappings').delete().in('owner_id', ids)
+  // The five tables are independent of each other, so wipe them in parallel.
+  const tables = [
+    'contacts',
+    'activity_events',
+    'video_progress',
+    'sessions',
+    'service_niche_mappings',
+  ] as const
+  const results = await Promise.all([
+    supabase.from('contacts').delete().in('owner_id', ids),
+    supabase.from('activity_events').delete().in('participant_id', ids),
+    supabase.from('video_progress').delete().in('participant_id', ids),
+    supabase.from('sessions').delete().in('participant_id', ids),
+    supabase.from('service_niche_mappings').delete().in('owner_id', ids),
+  ])
+  results.forEach((r, i) => must(r, `wipe ${tables[i]}`))
 }
 
 // ---------- ensure identities ----------
@@ -440,14 +476,8 @@ export async function wipeDemoData() {
 async function ensureDemoParticipants() {
   const supabase = getAdminClient()
 
-  // Owner
-  const { data: existingOwner } = await supabase
-    .from('participants')
-    .select('id')
-    .eq('email', demoEmail(DEMO_OWNER.email))
-    .maybeSingle()
-
-  let ownerId = existingOwner?.id as string | undefined
+  // Owner: one upsert keyed on the unique email creates the row on a brand-new
+  // database and refreshes it on every rebuild after that.
   const ownerRow = {
     first_name: DEMO_OWNER.first,
     last_name: DEMO_OWNER.last,
@@ -463,74 +493,58 @@ async function ensureDemoParticipants() {
     call_batch_size: 7,
     is_business_owner: true,
   }
-  if (ownerId) {
-    await supabase.from('participants').update(ownerRow).eq('id', ownerId)
-  } else {
-    const { data } = await supabase
+  const owner = must(
+    await supabase
       .from('participants')
-      .insert(ownerRow)
+      .upsert(ownerRow, { onConflict: 'email' })
       .select('id')
-      .single()
-    ownerId = data!.id
-  }
+      .single(),
+    'owner upsert',
+  )
+  const ownerId = owner.id as string
 
-  // Callers
+  // Callers and access grants only depend on the owner id, so they run together.
+  const callerRows = DEMO_CALLERS.map((c) => ({
+    first_name: c.first,
+    last_name: c.last,
+    email: demoEmail(c.email),
+    phone: c.phone,
+    parent_id: ownerId,
+    role: 'staff',
+    is_active: true,
+    is_demo: true,
+  }))
+  const [callersRes, nicheRes, courseRes] = await Promise.all([
+    supabase
+      .from('participants')
+      .upsert(callerRows, { onConflict: 'email' })
+      .select('id, email'),
+    supabase.from('niche_access').upsert(
+      DEMO_NICHES.map((n) => ({ participant_id: ownerId, niche_id: n.id })),
+      { onConflict: 'participant_id,niche_id', ignoreDuplicates: true },
+    ),
+    supabase
+      .from('course_access')
+      .upsert(
+        { participant_id: ownerId, course_id: DEMO_COURSE_ID },
+        { onConflict: 'course_id,participant_id', ignoreDuplicates: true },
+      ),
+  ])
+  const savedCallers = must(callersRes, 'callers upsert') ?? []
+  must(nicheRes, 'niche access')
+  must(courseRes, 'course access')
+
+  const idByEmail = new Map(
+    savedCallers.map((r) => [r.email as string, r.id as string]),
+  )
   const callerIds = new Map<string, string>()
   for (const c of DEMO_CALLERS) {
-    const email = demoEmail(c.email)
-    const { data: existing } = await supabase
-      .from('participants')
-      .select('id')
-      .eq('email', email)
-      .maybeSingle()
-    const row = {
-      first_name: c.first,
-      last_name: c.last,
-      email,
-      phone: c.phone,
-      parent_id: ownerId,
-      role: 'staff',
-      is_active: true,
-      is_demo: true,
-    }
-    if (existing) {
-      await supabase.from('participants').update(row).eq('id', existing.id)
-      callerIds.set(c.key, existing.id)
-    } else {
-      const { data } = await supabase
-        .from('participants')
-        .insert(row)
-        .select('id')
-        .single()
-      callerIds.set(c.key, data!.id)
-    }
+    const id = idByEmail.get(demoEmail(c.email))
+    if (!id) throw new Error(`demo callers upsert: ${c.email} missing from response`)
+    callerIds.set(c.key, id)
   }
 
-  // Niche + course access (idempotent)
-  for (const n of DEMO_NICHES) {
-    const { data } = await supabase
-      .from('niche_access')
-      .select('id')
-      .eq('participant_id', ownerId)
-      .eq('niche_id', n.id)
-      .maybeSingle()
-    if (!data)
-      await supabase
-        .from('niche_access')
-        .insert({ participant_id: ownerId, niche_id: n.id })
-  }
-  const { data: ca } = await supabase
-    .from('course_access')
-    .select('id')
-    .eq('participant_id', ownerId)
-    .eq('course_id', DEMO_COURSE_ID)
-    .maybeSingle()
-  if (!ca)
-    await supabase
-      .from('course_access')
-      .insert({ participant_id: ownerId, course_id: DEMO_COURSE_ID })
-
-  return { ownerId: ownerId!, callerIds }
+  return { ownerId, callerIds }
 }
 
 // ---------- seed ----------
@@ -546,6 +560,8 @@ export interface SeedSummary {
 }
 
 export async function seedDemoData(): Promise<SeedSummary> {
+  const startedAt = Date.now()
+  resetRng()
   const supabase = getAdminClient()
   await wipeDemoData()
   const { ownerId, callerIds } = await ensureDemoParticipants()
@@ -579,6 +595,7 @@ export async function seedDemoData(): Promise<SeedSummary> {
     const niche = DEMO_NICHES[nicheCycle[i % nicheCycle.length]]
     const importDay = waveOf(i)
     contacts.push({
+      id: randomUUID(),
       name: `${first} ${last}`,
       phone: fakePhone(),
       email: chance(0.85) ? fakeEmail(first, last) : null,
@@ -604,6 +621,7 @@ export async function seedDemoData(): Promise<SeedSummary> {
     // Always draw the minute so the PRNG stream, and the rest of the story, is unchanged.
     const importMinute = between(5, 40)
     contacts.push({
+      id: randomUUID(),
       name: `${first} ${last}`,
       phone: fakePhone(),
       email: chance(0.85) ? fakeEmail(first, last) : null,
@@ -620,44 +638,32 @@ export async function seedDemoData(): Promise<SeedSummary> {
     })
   }
 
-  const { data: insertedContacts, error: cErr } = await supabase
-    .from('contacts')
-    .insert(contacts)
-    .select('id, created_at')
-  if (cErr) throw new Error(`demo contacts: ${cErr.message}`)
-  const contactIds = insertedContacts!.map((c) => c.id as string)
-
   // ----- histories for the 60 worked patients -----
+  // Ids were assigned up front, so each contact's final stage / notes /
+  // first_call_at is known before it is written and the whole list goes in
+  // with ONE insert instead of insert-then-60-patches.
   const allCalls: SeedCall[] = []
   const allFollowUps: SeedFollowUp[] = []
-  const contactPatches: {
-    id: string
-    stage_id: string
-    do_not_call: boolean
-    notes: string | null
-    first_call_at: string | null
-  }[] = []
   let scheduled = 0
   let reached = 0
 
   for (let i = 0; i < 60; i++) {
-    const cid = contactIds[i]
+    const c = contacts[i]
     const importDay = Math.round(
-      (new Date(contacts[i].created_at).getTime() - Date.now()) / 86_400_000,
+      (new Date(c.created_at).getTime() - Date.now()) / 86_400_000,
     )
-    const h = buildHistory(cid, importDay, callerFor)
+    const h = buildHistory(c.id!, importDay, callerFor)
     allCalls.push(...h.calls)
     allFollowUps.push(...h.followUps)
     if (h.outcome === 'scheduled') scheduled += 1
     if (h.outcome !== 'unreached') reached += 1
-    contactPatches.push({
-      id: cid,
-      stage_id: DEMO_STAGE_IDS[h.stage],
-      do_not_call: h.dnc,
-      notes: h.notes,
-      first_call_at: h.firstCallAt,
-    })
+    c.stage_id = DEMO_STAGE_IDS[h.stage]
+    c.do_not_call = h.dnc
+    c.notes = h.notes
+    c.first_call_at = h.firstCallAt
   }
+
+  must(await supabase.from('contacts').insert(contacts), 'contacts insert')
 
   // ----- make TODAY interesting -----
   // Guarantee a handful of follow-ups land today across morning / midday /
@@ -696,11 +702,13 @@ export async function seedDemoData(): Promise<SeedSummary> {
   // ----- insert calls, then patch follow-up completion ids -----
   // Sort chronologically so ids/created_at read naturally.
   allCalls.sort((a, b) => a.created_at.localeCompare(b.created_at))
-  const { data: insertedCalls, error: callErr } = await supabase
-    .from('reactivation_calls')
-    .insert(allCalls)
-    .select('id, contact_id, created_at')
-  if (callErr) throw new Error(`demo calls: ${callErr.message}`)
+  const insertedCalls = must(
+    await supabase
+      .from('reactivation_calls')
+      .insert(allCalls)
+      .select('id, contact_id, created_at'),
+    'calls insert',
+  )
 
   // Each follow-up marked PENDING was completed by the NEXT call on that
   // contact after the follow-up's created_at.
@@ -718,30 +726,20 @@ export async function seedDemoData(): Promise<SeedSummary> {
     f.completed_call_id = later[0]?.id ?? null
   }
 
-  const { error: fErr } = await supabase.from('follow_ups').insert(allFollowUps)
-  if (fErr) throw new Error(`demo follow-ups: ${fErr.message}`)
-
-  // ----- contact patches -----
-  for (const p of contactPatches) {
-    await supabase
-      .from('contacts')
-      .update({
-        stage_id: p.stage_id,
-        do_not_call: p.do_not_call,
-        notes: p.notes,
-        first_call_at: p.first_call_at,
-      })
-      .eq('id', p.id)
-  }
+  must(await supabase.from('follow_ups').insert(allFollowUps), 'follow-ups insert')
 
   // ----- training history -----
   await seedTraining(ownerId, callers)
 
   // ----- stamp the owner -----
-  await supabase
-    .from('participants')
-    .update({ demo_seeded_at: new Date().toISOString() })
-    .eq('id', ownerId)
+  must(
+    await supabase
+      .from('participants')
+      .update({ demo_seeded_at: new Date().toISOString() })
+      .eq('id', ownerId),
+    'stamp',
+  )
+  console.log(`[demo-seed] rebuilt in ${Date.now() - startedAt}ms`)
 
   const dueToday = allFollowUps.filter(
     (f) =>
@@ -881,9 +879,14 @@ async function seedTraining(ownerId: string, callers: DemoCallerProfile[]) {
     }
   }
 
-  if (sessions.length) await supabase.from('sessions').insert(sessions)
-  if (events.length) await supabase.from('activity_events').insert(events)
-  if (progress.length) await supabase.from('video_progress').insert(progress)
+  const [s, e, pr] = await Promise.all([
+    sessions.length ? supabase.from('sessions').insert(sessions) : null,
+    events.length ? supabase.from('activity_events').insert(events) : null,
+    progress.length ? supabase.from('video_progress').insert(progress) : null,
+  ])
+  if (s) must(s, 'training sessions')
+  if (e) must(e, 'training events')
+  if (pr) must(pr, 'video progress')
 }
 
 // ---------- staleness check ----------
@@ -894,4 +897,171 @@ export function demoIsStale(seededAt: string | null | undefined): boolean {
   const a = etParts(new Date(seededAt))
   const b = etParts(new Date())
   return a.y !== b.y || a.mo !== b.mo || a.d !== b.d
+}
+
+// ---------- one rebuild at a time ----------
+
+/** A lock older than this is assumed abandoned (crashed mid-rebuild). */
+const SEED_LOCK_TTL_MS = 3 * 60_000
+const SEED_WAIT_MS = 90_000
+const SEED_POLL_MS = 1_500
+
+export interface DemoOwnerState {
+  id: string
+  demo_seeded_at: string | null
+  demo_seed_started_at: string | null
+}
+
+/**
+ * Read the demo owner row, retrying briefly on transport errors. Resolves to
+ * `null` ONLY when the query succeeded and found no row. A failed read throws,
+ * so no caller can mistake a database outage for "first run, needs seeding".
+ */
+export async function getDemoOwnerState(
+  attempts = 3,
+): Promise<DemoOwnerState | null> {
+  const supabase = getAdminClient()
+  let lastError = 'unknown error'
+  for (let i = 0; i < attempts; i++) {
+    const { data, error } = await supabase
+      .from('participants')
+      .select('id, demo_seeded_at, demo_seed_started_at')
+      .eq('email', demoEmail(DEMO_OWNER.email))
+      .maybeSingle()
+    if (!error) return (data as DemoOwnerState | null) ?? null
+    lastError = error.message
+    if (i < attempts - 1) await sleep(300 * (i + 1))
+  }
+  throw new Error(`demo owner lookup: ${lastError}`)
+}
+
+function lockIsHeld(owner: DemoOwnerState) {
+  if (!owner.demo_seed_started_at) return false
+  return (
+    Date.now() - new Date(owner.demo_seed_started_at).getTime() <
+    SEED_LOCK_TTL_MS
+  )
+}
+
+/**
+ * A conditional UPDATE is atomic per row: of two racing claims only one sees
+ * the lock column still empty (or expired) and gets its row back.
+ */
+async function claimSeedLock(ownerId: string): Promise<boolean> {
+  const supabase = getAdminClient()
+  const expiredBefore = new Date(Date.now() - SEED_LOCK_TTL_MS).toISOString()
+  const rows = must(
+    await supabase
+      .from('participants')
+      .update({ demo_seed_started_at: new Date().toISOString() })
+      .eq('id', ownerId)
+      .or(
+        `demo_seed_started_at.is.null,demo_seed_started_at.lt.${expiredBefore}`,
+      )
+      .select('id'),
+    'seed lock claim',
+  )
+  return (rows?.length ?? 0) > 0
+}
+
+async function releaseSeedLock(ownerId: string) {
+  const supabase = getAdminClient()
+  // Best effort: if this fails the lock simply expires after SEED_LOCK_TTL_MS.
+  await supabase
+    .from('participants')
+    .update({ demo_seed_started_at: null })
+    .eq('id', ownerId)
+}
+
+/** Wait for a rebuild someone else started to finish. */
+async function waitForSeed(): Promise<'fresh' | 'failed' | 'timeout'> {
+  const deadline = Date.now() + SEED_WAIT_MS
+  while (Date.now() < deadline) {
+    await sleep(SEED_POLL_MS)
+    let owner: DemoOwnerState | null
+    try {
+      owner = await getDemoOwnerState(1)
+    } catch {
+      continue // transport blip while waiting: keep polling
+    }
+    if (!owner) return 'failed'
+    if (!lockIsHeld(owner)) {
+      return demoIsStale(owner.demo_seeded_at) ? 'failed' : 'fresh'
+    }
+  }
+  return 'timeout'
+}
+
+export type EnsureSeedResult =
+  | { status: 'fresh' }
+  | { status: 'seeded'; summary: SeedSummary }
+  | { status: 'waited' }
+  | { status: 'error'; message: string }
+
+const errorMessage = (e: unknown) => (e instanceof Error ? e.message : String(e))
+
+/**
+ * The ONLY place a rebuild may start from. Rebuilds when the demo has never
+ * been seeded, was seeded on a previous Eastern day, or `force` is set. If a
+ * rebuild is already running (a double click, a second presenter, the nightly
+ * cron) this waits for it instead of starting another one on top.
+ */
+export async function ensureDemoSeeded(
+  opts: { force?: boolean } = {},
+): Promise<EnsureSeedResult> {
+  let owner: DemoOwnerState | null
+  try {
+    owner = await getDemoOwnerState()
+  } catch (e) {
+    return { status: 'error', message: errorMessage(e) }
+  }
+
+  // Brand-new database: no owner row exists yet (confirmed by a successful
+  // read), so there is nothing to lock on. Seed directly.
+  if (!owner) {
+    try {
+      return { status: 'seeded', summary: await seedDemoData() }
+    } catch (e) {
+      return { status: 'error', message: errorMessage(e) }
+    }
+  }
+
+  const held = lockIsHeld(owner)
+  if (!opts.force && !held && !demoIsStale(owner.demo_seeded_at)) {
+    return { status: 'fresh' }
+  }
+
+  let claimed = false
+  try {
+    claimed = await claimSeedLock(owner.id)
+  } catch (e) {
+    return { status: 'error', message: errorMessage(e) }
+  }
+
+  if (!claimed) {
+    const outcome = await waitForSeed()
+    if (outcome === 'fresh') return { status: 'waited' }
+    return {
+      status: 'error',
+      message:
+        outcome === 'timeout'
+          ? 'Another rebuild is still running. Give it a minute and try again.'
+          : 'The other rebuild did not finish. Try again.',
+    }
+  }
+
+  try {
+    // Re-check under the lock: whoever held it before us may have just
+    // finished the very rebuild we were about to start.
+    if (!opts.force) {
+      const latest = await getDemoOwnerState()
+      if (latest && !demoIsStale(latest.demo_seeded_at)) return { status: 'fresh' }
+    }
+    const summary = await seedDemoData()
+    return { status: 'seeded', summary }
+  } catch (e) {
+    return { status: 'error', message: errorMessage(e) }
+  } finally {
+    await releaseSeedLock(owner.id)
+  }
 }
