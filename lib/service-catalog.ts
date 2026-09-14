@@ -22,6 +22,12 @@ export interface ServiceGroup {
   title: string
   audience: string
   services: CatalogService[]
+  /**
+   * Display-only lines appended to the card so a buyer sees every service
+   * they typically offer on their own card, even when the underlying niches
+   * live in another group. Never rendered as lead-form checkboxes.
+   */
+  alsoOffered?: string[]
 }
 
 export const PRACTICE_TYPES_LINE =
@@ -42,6 +48,7 @@ export const SERVICE_GROUPS: ServiceGroup[] = [
       { label: 'Massage Therapy', niche: 'Massage Therapy' },
       { label: 'Gut Health', niche: 'Gut Health' },
     ],
+    alsoOffered: ['ChiroThin & Weight Loss Programs'],
   },
   {
     id: 'medspa',
@@ -55,6 +62,7 @@ export const SERVICE_GROUPS: ServiceGroup[] = [
       { label: 'Laser Hair Removal', niche: 'Laser Hair Removal' },
       { label: 'Body Waxing', niche: 'Body Waxing' },
     ],
+    alsoOffered: ['GLP-1 & Weight Loss Programs'],
   },
   {
     id: 'dental',

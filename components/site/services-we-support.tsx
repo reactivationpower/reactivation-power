@@ -80,6 +80,18 @@ export function ServicesWeSupport({
                       {service.label}
                     </li>
                   ))}
+                  {group.alsoOffered?.map((line) => (
+                    <li
+                      key={line}
+                      className="flex items-start gap-2.5 text-sm leading-snug text-foreground"
+                    >
+                      <span
+                        className="mt-1.5 size-1.5 shrink-0 rounded-full bg-accent"
+                        aria-hidden="true"
+                      />
+                      {line}
+                    </li>
+                  ))}
                 </ul>
               </li>
             )
