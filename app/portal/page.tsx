@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { BookOpen, PlayCircle } from 'lucide-react'
+import { PlayCircle } from 'lucide-react'
 import {
   accessOwnerId,
   getCurrentParticipant,
@@ -130,36 +130,6 @@ export default async function PortalHomePage() {
             </Link>
           ))
         )}
-      </div>
-
-      <div className="mt-10">
-        <p className="text-sm font-semibold uppercase tracking-widest text-accent">
-          Put it into practice
-        </p>
-        <Link
-          href="/portal/dialer/script?from=training"
-          className="group mt-3 block rounded-lg border border-border bg-card p-6 transition-colors hover:border-accent"
-        >
-          <div className="flex items-start justify-between gap-4">
-            <h2 className="text-xl font-semibold text-foreground">
-              Practice Script
-            </h2>
-            <BookOpen className="size-6 shrink-0 text-accent" />
-          </div>
-          <p className="mt-2 text-muted-foreground leading-relaxed">
-            Walk through your call script screen by screen and tap the
-            patient&apos;s answers to practice steering the conversation,
-            exactly like a live call, with no patient on the line.
-          </p>
-          <div className="mt-4 flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">
-              Interactive · every script your {entityLabel} has enabled
-            </span>
-            <span className="font-medium text-accent group-hover:underline">
-              Practice →
-            </span>
-          </div>
-        </Link>
       </div>
     </div>
   )

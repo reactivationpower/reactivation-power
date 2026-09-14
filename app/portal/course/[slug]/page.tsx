@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
-import { Lock } from 'lucide-react'
+import { BookOpen, Lock } from 'lucide-react'
 import { VideoThumbnailCard } from '@/components/portal/video-thumbnail-card'
 import {
   accessOwnerId,
@@ -45,6 +45,16 @@ export default async function CoursePage({
 
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-12">
+      <div className="flex justify-end">
+        <Link
+          href={`/portal/dialer/script?from=course&course=${course.slug}`}
+          className="flex items-center gap-2 rounded-md border border-input bg-card px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+        >
+          <BookOpen className="size-4" />
+          Practice Script
+        </Link>
+      </div>
+
       <div className="text-center">
         <p className="text-sm font-semibold uppercase tracking-widest text-accent">
           Video Training

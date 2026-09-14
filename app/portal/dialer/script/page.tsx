@@ -13,15 +13,17 @@ import { ScriptViewer } from '@/components/reactivation/script-viewer'
 export default async function PracticeScriptPage({
   searchParams,
 }: {
-  searchParams: Promise<{ screen?: string; from?: string }>
+  searchParams: Promise<{ screen?: string; from?: string; course?: string }>
 }) {
-  const { screen, from } = await searchParams
+  const { screen, from, course } = await searchParams
   const participant = await getCurrentParticipant()
   if (!participant) redirect(`/login?next=/portal/dialer`)
 
-  const cameFromTraining = from === 'training'
-  const backHref = cameFromTraining ? '/portal' : '/portal/dialer'
-  const backLabel = cameFromTraining ? 'Back to Training' : 'Back to Dialer'
+  // Only a plain slug is allowed back into the href, so the query string can't
+  // steer the link anywhere but a course page.
+  const courseSlug = from === 'course' && course && /^[a-z0-9-]+$/i.test(course) ? course : null
+  const backHref = courseSlug ? `/portal/course/${courseSlug}` : '/portal/dialer'
+  const backLabel = courseSlug ? 'Back to Training' : 'Back to Dialer'
 
   const ownerId = accessOwnerId(participant)
   const sectors = await getOwnerSectors(ownerId)
