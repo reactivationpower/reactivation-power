@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { Eye, RefreshCw, Sparkles } from 'lucide-react'
 import {
   refreshDemoIfStale,
@@ -30,6 +30,21 @@ export interface DemoIdentity {
   role: 'owner' | 'staff'
 }
 
+const UUID_SEGMENT = /\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(\/|$)/i
+
+/** Where the presenter lands after a rebuild when their current page can't survive one. */
+const AFTER_REBUILD_HOME = '/portal/dialer'
+
+/**
+ * A rebuild gives every patient (and their calls) brand-new ids, so any page
+ * addressed by a record id (patient detail, call screen, caller analytics)
+ * would 404 on refresh. Those pages hand off to the dialer; everything else
+ * simply reloads in place.
+ */
+function pathSurvivesRebuild(pathname: string) {
+  return !UUID_SEGMENT.test(pathname)
+}
+
 /**
  * Thin strip above the portal header, visible ONLY inside the demo account.
  * Presenter can hop between the owner and the four callers (to show the
@@ -51,10 +66,21 @@ export function DemoBar({
   stale?: boolean
 }) {
   const router = useRouter()
+  const pathname = usePathname()
   const [pending, startTransition] = useTransition()
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [status, setStatus] = useState<string | null>(null)
   const refreshRequested = useRef(false)
+
+  function showRebuiltData(message: string) {
+    setStatus(message)
+    if (pathSurvivesRebuild(pathname)) {
+      router.refresh()
+    } else {
+      router.replace(AFTER_REBUILD_HOME)
+    }
+    setTimeout(() => setStatus(null), 4000)
+  }
 
   useEffect(() => {
     if (!stale || refreshRequested.current) return
@@ -67,14 +93,13 @@ export function DemoBar({
         return
       }
       if (res.rebuilt) {
-        setStatus('Demo data refreshed. Every date is now relative to today.')
-        router.refresh()
-        setTimeout(() => setStatus(null), 4000)
+        showRebuiltData('Demo data refreshed. Every date is now relative to today.')
       } else {
         setStatus(null)
       }
     })
-  }, [stale, router])
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- runs once per stale flag; pathname is read at that moment
+  }, [stale])
 
   function onSwitch(id: string) {
     if (!id || id === currentId) return
@@ -92,9 +117,7 @@ export function DemoBar({
         setStatus(res.error)
         return
       }
-      setStatus('Demo data reset. Every date is now relative to today.')
-      router.refresh()
-      setTimeout(() => setStatus(null), 4000)
+      showRebuiltData('Demo data reset. Every date is now relative to today.')
     })
   }
 
