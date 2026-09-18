@@ -1,0 +1,108 @@
+Summary
+
+### Action Items
+
+- [ ]  Build subscription payment page on the back-end dashboard to collect card info, charge setup fee, and support customizable amounts
+- [ ]  Add ability to store two cards on file per account and verify they are not duplicates
+- [ ]  Build a commission tracking page in the admin dashboard, filterable by day and time, with per-rep default commission rates and override capability
+- [ ]  Support adding multiple salespeople with individual admin user logins; move the full admin dashboard behind real user authentication
+- [ ]  Build super admin billing view: cash collected, MRR, outstanding billing, failed/collected payments, future payment dates, and card management
+- [ ]  Implement card-on-file management: add cards via public link, set primary vs. secondary, never delete old cards
+- [ ]  Build subscription cancellation flow that displays the agreement end date and notifies the customer of their remaining payment obligation
+- [ ]  Implement immediate account shutoff logic: try card 1 → try card 2 → shut off access and show notice on login if both fail
+- [ ]  Set up Stripe webhook to track billing status, support refunds, subscription cancellation, payment date changes, and auto-dunning
+- [ ]  Build a customer-facing billing page showing outstanding balance and a public link to update/add payment cards
+- [ ]  Set up Resend (or equivalent) for branded transactional emails with logo, including new user login links and agreement delivery
+- [ ]  Migrate admin dashboard authentication to Supabase-based user logins
+- [ ]  Draft and integrate a 12-month service agreement to be sent and signed digitally, including contact fields (full name, business name, address, phone, owner name, owner phone, email)
+
+---
+
+### Sales Strategy: Full Price vs. Subscription
+
+- Jacob (salesperson) should always lead with the **full price pitch**
+- The subscription model is a **last-resort fallback only** — not to be offered simply because someone doesn't close on the first call, as some sales cycles require multiple calls
+- Jacob makes the final determination of whether a prospect will never close on a full-price deal before offering the subscription option
+
+### Subscription Model Structure
+
+- **Setup fee:** Same amount as the monthly fee (suggested ~$475–$495); can be waived or customized at the salesperson's discretion
+- **Monthly payments:** Begin **30 days after** the setup fee is paid; software access starts immediately
+- **Pitch angle:** The setup fee covers onboarding costs; the first 30 days allow the client to get familiar with the platform before billing begins
+- **Contract term:** 12-month agreement; the term clock starts 30 days after setup fee payment; 30-day advance cancellation notice required at end of term
+
+### Technical Requirements: Dashboard & Billing
+
+- **Payment link generation:** Jacob logs in, generates a subscription link tied to a new contact record, and sends it to the prospect
+- **Contact record fields required:** Full name, business name, business address, phone, owner name, owner phone, email
+- **Card management:** Two cards required on file; system must detect and reject duplicate cards; customers can update cards via a public page (new card is added, old card retained)
+- **Commission tracking:** Linked to which salesperson generated and sent the link; filterable reports; configurable default rate per rep with admin override
+- **Failed payment logic:** Try card 1 → try card 2 → if both fail, immediately shut off platform access and display notice
+- **Admin billing dashboard:** Must show cash collected, MRR, outstanding/failed/collected payments, future payment dates, card details, and subscription status
+- **Stripe webhook:** Needed to sync billing status back to the dashboard; supports refunds, cancellations, and payment date changes
+- **Auto-dunning:** Automated retry logic for failed payments on the back end
+- **Authentication:** Full admin dashboard to be secured with real Supabase user logins rather than a single shared password
+- **Branded emails:** Custom-designed emails with company logo for new user creation, login links, and agreement delivery (Resend under consideration)
+- **Scope acknowledgment:** This build is recognized as a significant lift, described as a long process but considered necessary
+
+Notes
+
+Transcript
+
+Of course you've used this in the transcript. Yeah. Gotcha. All right, so meeting with Andrew about pricing structure for reactivation power. We're going to want Jacob to do the full pitch for the full price. If for some reason The person's a brokie or... Jacob makes the determination that the person will absolutely never close on a full price sale then he's going to offer them a Like what would be the equivalent of a monthly subscription, but this should only be done if the salesperson, basically Jacob, makes the determination that this person is never going to close on a full price package. So...
+
+You know, obviously that decision making isn't necessarily a, oh, he's not going to close today on the full price. So I'm going to give him the subscription because obviously some sales cycles take multiple calls. So if there's any thought that the person will close on the full price, we don't offer the subscription model until... the determination is made that they're never going to close on a full price deal.
+
+So the subscription model that would be offered is basically going to be consist of a setup fee And then a monthly fee. The setup fee will be It's the same as the monthly fee.
+
+So set of fees-It's always the same as the monthly fee. OK, so the-So we need to make a page-On the back end of the dashboard, Where just like when we sent him a payment link, to sign up for the full amount, right? That that they can, that it essentially collects their card info And then it charges, you know, when they pay right now, it charges them that setup fee. Once again, you could enter it custom, but it's going to be equivalent to whatever the monthly is.
+
+So if we need to customize that, you know, you can customize it or have the ability to eliminate the setup if you really want to sell. Um... and just roll them into their first monthly payment. But either way, it's gonna be either collect a setup fee and you can have that amount be predetermined and like filled in with a monthly fee, which I think would be really good at like 475 or 495, something like that. And then, um...
+
+They need to be able to, well not they need to be able to, they need to add two cards on file and then we need to make sure that the card that they add on file If the second card is in fact not the same card as the first card, So we need to somehow be able to track that because these people are shady. And then... We need to build out a commission tracking page where if Jacob is logged in to the back end of the dashboard.
+
+and Jacob's the one that generates that link and sends that link off Um... then at that point the person would Uh... Probably need to sign a little agreement for a 12 month service agreement, but that's a 30 day advance notice from the end of the 12 month. So they're required to do 12 months. their payments due on whatever their day of signing is.
+
+And then--Their access to the software. starts 30 days after payment of the setup fee.
+
+No, their access to the software can start immediately, but they don't start making monthly payments for 30 days. Gotcha.
+
+So the length of the contract then is based upon 30 days after the setup fee is paid.
+
+Exactly. So it outlines that they're going to have their first 30 days to get onboarded and the clock isn't going to be ticking. They just paid the setup fee so that we can cover our cost of onboarding them. That way they can get in, get used to it. The whole pitch could literally be we're just covering our costs to make sure that you can get onto the platform. We don't make any money off the first month.
+
+Whether that's true or not, that's to be determined. But that could be a detention. Then after that, They probably need to sign some sort of an agreement. So we probably need to be able to send somebody an agreement. Yep. So rather than Having it be a payment link, it's going to now have to be a contact that's added to a full name. business name, business address, his phone number, Owner name, owner phone number, all of that would get fielded. Email.
+
+Email, yeah, email address.
+
+And then... We would go in and we would send them the agreement. And it would go to them via email. We could set it up via like Resend or something like that. We don't have Resend set up yet, but we could set up Resend. And then...
+
+Well, obviously because of that, then we're going to need probably detailed Account. card information like an account card or an account database in v0 as well right Uh, no.
+
+authentication is going to be handled by superbase for all the users. And then I guess we need to have custom We need to have custom Emails designed like the rest of the site with our logo on it, branded for people when we create them as a new user. Um... That links back to the project for them to log in. And then we need to, like if Jacob sends this out and they sign it, it needs to, we need to have a commission tracker page in like the admin dashboard.
+
+Within the admin dashboard, we would need to be able to filter it by day and by time. And then... We would need to be able to set the commission rate. Um... We should be able to set it atHer sales rep. like a default value, but then also we should be able to go in And I'll have to override that amount if for some reason we need to. And then, um...
+
+We need the ability to add multiple salespeople.
+
+Yeah, we need to be able to add multiple sales people in this, but also get like admin user logins. And then I guess that means that we need to actually put the entire admin dashboard behind a real user login because right now you just log in with the password, don't you? Correct. Or like a, yeah, just one password? Yeah. You don't actually get anything? Um...
+
+And then you need to be able to pull commission reports with the full, like, you should have a... Like as the super admin of the dashboard. You should be able to see cash collected, monthly recurring revenue, outstanding billing, failed payments, collected payments, future payments, future payment dates. what cards they have on file. You can assign a default or like, you know, like the primary versus a secondary card. You can add more cards.
+
+You can send them a link to a public page where when they fill it in, they can replace the card and update it with an old one, but it wouldn't actually replace the old card because we don't want to delete their old card. It would just just add that new card to their file. We need to be able to go to a section that allows them to cancel their subscription. And it would give them when their agreement terminates on that subscription page.
+
+So if they hit cancel, it needs to make them aware that they're still responsible for completing the payment. the remainder of the term.
+
+Yeah, I think that's a-What about, let's just say somebody's payments fail. Do they get immediate shut off? Do they have a 48-hour window for the payment to... Go through before it shut off. What are your thoughts on that?
+
+I think you should get it immediately.
+
+So immediate shut off. So if it tries card one, card one fails, it immediately tries card two, card two fails, then the accounts access to the platform gets immediately shut off and delivers them a notice if they go to log on.
+
+And then we probably need to set up a strike web hook so that you can see the billing status as it returns back. So if somebody refunds a payment or something like that, If somebody does need to have a payment refunded, it could be refunded through there. So we need to have the ability to refund somebody or cancel out a subscription as well. and manage the subscription or change the payment date on the subscription.
+
+You probably also, if the payment fails, you need to have some sort of like auto-dunning feature built in on the back end where it's going to try and run the transaction. and they need to be able to navigate Now have a billing page and that billing page when we have that billing page it's going to be like a outstanding balance is due and we should be able to send like public links so that they can then add a new car or replace you know replace the car but not actually replace it set it as the new default. Um...
+
+And then... Uh... Of course it would then charge the car Um... This is going to be like a humongous lift for all the, I mean, this is like all just like basic stuff just to get it there.
+
+This is gonna be a long... a long process to get it there. Okay. Sounds like it's necessary though. What if you want to do it that way then?
