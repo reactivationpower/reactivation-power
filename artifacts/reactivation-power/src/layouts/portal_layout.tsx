@@ -35,7 +35,6 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
             <form onSubmit={async (e) => {
               e.preventDefault();
               await logout();
-              window.location.href = '/login';
             }}>
               <button
                 type="submit"

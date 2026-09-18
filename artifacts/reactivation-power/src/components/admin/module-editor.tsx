@@ -11,10 +11,12 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import type { ModuleWithVideos } from '@/lib/data/courses'
-import type { Attachment } from '@/lib/types'
+import type { Attachment, Module, Video } from '@/lib/types'
 import { VideoRow } from './video-row'
 import { NewVideoForm } from './new-video-form'
+import { useRouter } from '@/hooks/use-router'
+
+type ModuleWithVideos = Module & { videos: Video[] }
 
 export function ModuleEditor({
   module,
@@ -33,6 +35,7 @@ export function ModuleEditor({
 }) {
   const [editing, setEditing] = useState(false)
   const [pending, startTransition] = useTransition()
+  const router = useRouter()
 
   function save(formData: FormData) {
     formData.set('id', module.id)
@@ -40,6 +43,7 @@ export function ModuleEditor({
     startTransition(async () => {
       await updateModule(formData)
       setEditing(false)
+      router.refresh()
     })
   }
 
@@ -50,6 +54,7 @@ export function ModuleEditor({
     formData.set('status', module.status === 'live' ? 'draft' : 'live')
     startTransition(async () => {
       await updateModule(formData)
+      router.refresh()
     })
   }
 
@@ -102,7 +107,10 @@ export function ModuleEditor({
                 variant="ghost"
                 size="icon"
                 onClick={() =>
-                  startTransition(() => moveModule(module.id, courseId, 'up'))
+                  startTransition(async () => {
+                    await moveModule(module.id, courseId, 'up')
+                    router.refresh()
+                  })
                 }
                 disabled={isFirst || pending}
                 aria-label="Move module up"
@@ -113,7 +121,10 @@ export function ModuleEditor({
                 variant="ghost"
                 size="icon"
                 onClick={() =>
-                  startTransition(() => moveModule(module.id, courseId, 'down'))
+                  startTransition(async () => {
+                    await moveModule(module.id, courseId, 'down')
+                    router.refresh()
+                  })
                 }
                 disabled={isLast || pending}
                 aria-label="Move module down"
@@ -146,7 +157,10 @@ export function ModuleEditor({
                       `Delete module "${module.title}" and all its videos?`,
                     )
                   ) {
-                    startTransition(() => deleteModule(module.id, courseId))
+                    startTransition(async () => {
+                      await deleteModule(module.id, courseId)
+                      router.refresh()
+                    })
                   }
                 }}
                 aria-label="Delete module"

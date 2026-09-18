@@ -1,7 +1,7 @@
 // @ts-nocheck
 
 import { useEffect, useRef, useState, useTransition } from 'react'
-import { useLocation, useParams } from "wouter";
+import { useLocation } from "wouter";
 import { Eye, RefreshCw, Sparkles } from 'lucide-react'
 import {
   refreshDemoIfStale,
@@ -23,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { useRouter } from '@/hooks/use-router'
 
 export interface DemoIdentity {
   id: string
@@ -67,6 +68,7 @@ export function DemoBar({
 }) {
   const [, setLocation] = useLocation();
   const [pathname] = useLocation();
+  const router = useRouter()
   const [pending, startTransition] = useTransition()
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [status, setStatus] = useState<string | null>(null)
@@ -87,7 +89,7 @@ export function DemoBar({
     refreshRequested.current = true
     setStatus('Refreshing demo data for today…')
     startTransition(async () => {
-      const res = null as any; // mocked server data
+      const res = await refreshDemoIfStale()
       if ('error' in res && res.error) {
         setStatus(res.error)
         return
@@ -112,7 +114,7 @@ export function DemoBar({
     setConfirmOpen(false)
     setStatus('Rebuilding demo data…')
     startTransition(async () => {
-      const res = null as any; // mocked server data
+      const res = await resetDemo()
       if ('error' in res && res.error) {
         setStatus(res.error)
         return

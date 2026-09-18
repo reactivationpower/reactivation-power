@@ -1,51 +1,28 @@
 // @ts-nocheck
-import { useParams } from 'wouter';
-
+import { useSearch } from 'wouter'
 import { CheckCircle2 } from 'lucide-react'
 import { OpportunityCalculator } from '@/components/landing/opportunity-calculator'
-import { parseInactiveCount, parsePatientValue } from '@/lib/opportunity'
-import { publicServiceName } from '@/lib/service-catalog'
-import {
-  DEFAULT_TIMEZONE,
-  isUsTimezone,
-  timezoneLabel } from '@/lib/us-timezones'
-
-
-
-function servicesLabel(services: string[]): string {
-  if (services.length === 0) return ''
-  if (services.length === 1) return services[0]
-  if (services.length === 2) return `${services[0]} and ${services[1]}`
-  return `${services[0]}, ${services[1]}, and more`
-}
+import { usePageData } from '@/hooks/use-page-data'
+import { PageError, PageLoading } from '@/components/page-status'
 
 export default function ThankYouPage() {
-  const params = useParams();
-
-  const searchParams = new URLSearchParams(window.location.search);
-  const str = (key: string, max: number) => {
-    const v = searchParams.get(key)
-    return typeof v === 'string' ? v.slice(0, max) : ''
-  }
-
-  const firstName = str('name', 40)
-  const services = str('services', 600)
-    .split('|')
-    .filter(Boolean)
-    .slice(0, 30)
-    .map(publicServiceName)
-  const inactiveCount = parseInactiveCount(str('inactive', 12) || undefined)
-  const patientValue = parsePatientValue(str('value', 12) || undefined)
-
-  const tzParam = str('tz', 40)
-  const timezone = isUsTimezone(tzParam) ? tzParam : DEFAULT_TIMEZONE
-  const slotMs = Date.parse(str('slot', 40))
-  const bookedFor = Number.isNaN(slotMs)
-    ? null
-    : new Intl.DateTimeFormat('en-US', {
-        timeZone: timezone,
-        dateStyle: 'full',
-        timeStyle: 'short'}).format(new Date(slotMs))
+  const search = new URLSearchParams(useSearch())
+  const query = Object.fromEntries(
+    ['name', 'services', 'inactive', 'value', 'tz', 'slot'].map((key) => [
+      key,
+      search.get(key) ?? undefined,
+    ]),
+  )
+  const { data, loading, error } = usePageData<any>(
+    '/healthcare/thank-you',
+    query,
+  )
+  if (loading) return <PageLoading />
+  if (error) return <PageError error={error} />
+  const {
+    firstName, inactiveCount, patientValue, timezone, timezoneLabel, bookedFor,
+    servicesLabel,
+  } = data
 
   return (
     <main className="flex min-h-screen flex-col bg-background">
@@ -75,7 +52,7 @@ export default function ThankYouPage() {
             <p className="mt-4 max-w-2xl text-pretty text-center text-lg leading-relaxed text-muted-foreground">
               Your strategy call is confirmed for{' '}
               <span className="font-semibold text-foreground">{bookedFor}</span>{' '}
-              ({timezoneLabel(timezone)}). Check your email for the details
+               ({timezoneLabel}). Check your email for the details
               &mdash; we look forward to talking with you.
             </p>
           </>
@@ -97,7 +74,7 @@ export default function ThankYouPage() {
           <OpportunityCalculator
             inactiveCount={inactiveCount}
             defaultPatientValue={patientValue}
-            servicesLabel={servicesLabel(services)}
+            servicesLabel={servicesLabel}
           />
         </div>
       </section>

@@ -1,21 +1,16 @@
 // @ts-nocheck
-import {
-  extractSlots,
-  getMasterScript,
-  getNiches,
-  getScriptSections,
-} from '@/lib/data/reactivation'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { NicheManager } from '@/components/admin/niche-manager'
 import { MasterScriptEditor } from '@/components/admin/master-script-editor'
 import { NicheSectionsEditor } from '@/components/admin/niche-sections-editor'
+import { usePageData } from '@/hooks/use-page-data'
+import { PageError, PageLoading } from '@/components/page-status'
 
 export default function AdminReactivationPage() {
-  const niches: any[] = [];
-  const script: any = null;
-  const sections: any[] = [];
-
-  const slots = script ? extractSlots(script.body) : []
+  const { data, loading, error } = usePageData<any>('/admin/reactivation')
+  if (loading) return <PageLoading />
+  if (error) return <PageError error={error} />
+  const { niches, script, sections, slots } = data
 
   return (
     <div className="mx-auto w-full max-w-5xl">

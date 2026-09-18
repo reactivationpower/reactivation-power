@@ -37,6 +37,7 @@ import {
 } from '@/lib/niche-match'
 import type { Niche, ServiceNicheMapping } from '@/lib/types'
 import { cn } from '@/lib/utils'
+import { useRouter } from '@/hooks/use-router'
 
 // ---------- tiny CSV parser (handles quoted fields, CRLF) ----------
 
@@ -297,6 +298,7 @@ export function ImportContactsDialog({
   defaultNicheName,
   demoSampleCsv = null,
 }: Props) {
+  const router = useRouter()
   const [open, setOpen] = useState(false)
   const [step, setStep] = useState<Step>('upload')
   const [fileName, setFileName] = useState<string | null>(null)
@@ -454,7 +456,7 @@ export function ImportContactsDialog({
 
   async function handleFile(file: File | undefined) {
     if (!file) return
-    const text = null as any; // mocked server data
+    const text = await file.text()
     loadText(text, file.name)
   }
 
@@ -572,7 +574,11 @@ export function ImportContactsDialog({
           service_label,
           niche_id: v === NONE ? null : v,
         }))
-      const res = null as any;
+      const res = await importContacts({
+        rows: buildRows(),
+        mappings,
+        forceNicheId: fileNiche !== AUTO ? fileNiche : null,
+      })
       if (res?.error) {
         setError(res.error)
         setStep(returnTo)
@@ -591,6 +597,7 @@ export function ImportContactsDialog({
         notEnabledNiches: res.notEnabledNiches ?? [],
       })
       setStep('done')
+      router.refresh()
     })
   }
 

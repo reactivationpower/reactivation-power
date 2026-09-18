@@ -5,6 +5,7 @@ import { Plus } from 'lucide-react'
 import { createVideo } from '@/app/actions/admin'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { useRouter } from '@/hooks/use-router'
 
 export function NewVideoForm({
   moduleId,
@@ -17,6 +18,7 @@ export function NewVideoForm({
   const [error, setError] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
   const formRef = useRef<HTMLFormElement>(null)
+  const router = useRouter()
 
   if (!open) {
     return (
@@ -40,12 +42,13 @@ export function NewVideoForm({
         formData.set('courseId', courseId)
         setError(null)
         startTransition(async () => {
-          const result = null as any; // mocked server data
+          const result = await createVideo(formData)
           if (result.error) {
             setError(result.error)
           } else {
             formRef.current?.reset()
             setOpen(false)
+            router.refresh()
           }
         })
       }}

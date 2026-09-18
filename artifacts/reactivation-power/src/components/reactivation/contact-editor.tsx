@@ -16,8 +16,9 @@ import {
 import { Switch } from '@/components/ui/switch'
 import { PhoneInput } from '@/components/reactivation/phone-input'
 import { RichTextEditor } from '@/components/reactivation/rich-text-editor'
-import type { ContactWithMeta } from '@/lib/data/reactivation'
 import type { Niche, PipelineStage } from '@/lib/types'
+import { useRouter } from '@/hooks/use-router'
+type ContactWithMeta = any
 
 export function ContactEditor({
   contact,
@@ -28,6 +29,7 @@ export function ContactEditor({
   stages: PipelineStage[]
   niches: Niche[]
 }) {
+  const router = useRouter()
   const [nicheId, setNicheId] = useState(contact.niche_id ?? 'none')
   const [stageId, setStageId] = useState(contact.stage_id ?? '')
   const [dnc, setDnc] = useState(contact.do_not_call)
@@ -50,10 +52,11 @@ export function ContactEditor({
     formData.set('notes', notes)
     setError(null)
     startTransition(async () => {
-      const res = null as any; // mocked server data
+      const res = await updateContact(formData)
       if (res?.error) setError(res.error)
       else {
         setSaved(true)
+        router.refresh()
         setTimeout(() => setSaved(false), 2500)
       }
     })

@@ -1,7 +1,7 @@
 // @ts-nocheck
 
 import { useState, useTransition } from 'react'
-import { useLocation, useParams } from "wouter";
+import { useRouter } from '@/hooks/use-router'
 import { Users, HelpCircle, Pencil } from 'lucide-react'
 import {
   setTeamMemberActive,
@@ -28,7 +28,7 @@ export function TeamManager({
   members: Participant[]
   entityLabel: string
 }) {
-  const [, setLocation] = useLocation();
+  const router = useRouter()
   const [helpOpen, setHelpOpen] = useState(false)
   const [editing, setEditing] = useState<Participant | null>(null)
   const [editError, setEditError] = useState<string | null>(null)
@@ -46,7 +46,7 @@ export function TeamManager({
     setEditSubmitting(true)
     const fd = new FormData(e.currentTarget)
     fd.set('memberId', editing.id)
-    const res = null as any; // mocked server data
+    const res = await updateTeamMember(fd)
     setEditSubmitting(false)
     if (res?.error) {
       setEditError(res.error)
@@ -59,7 +59,7 @@ export function TeamManager({
   function onToggle(member: Participant) {
     setTogglingId(member.id)
     startTransition(async () => {
-      const res = null as any; // mocked server data
+      const res = await setTeamMemberActive(member.id, !member.is_active)
       setTogglingId(null)
       if (res?.error) {
         window.alert(res.error)

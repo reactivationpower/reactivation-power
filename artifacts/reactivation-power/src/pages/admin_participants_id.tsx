@@ -2,22 +2,6 @@
 import { useParams } from 'wouter';
 // import { notFound } from 'next/navigation'
 import { Link } from "wouter";
-import {
-  getParticipantById,
-  getStaffMembers,
-  getAliases,
-  getSessions,
-  accessOwnerId,
-} from '@/lib/data/participants'
-import { getCourses, getAccessibleCourseIds, getCourseTree } from '@/lib/data/courses'
-import {
-  getNiches,
-  getAccessibleNicheIds,
-  getAccountReactivationStats,
-  type AccountReactivationStats,
-} from '@/lib/data/reactivation'
-import { getActivityEvents } from '@/lib/data/analytics'
-import { getAdminClient } from '@/lib/supabase/admin'
 import { formatDateTime, formatDuration } from '@/lib/format'
 import { MAX_STAFF, SECTOR_LABELS, type VideoProgress } from '@/lib/types'
 import { Badge } from '@/components/ui/badge'
@@ -46,6 +30,9 @@ import {
   AlertTriangle,
   CheckCircle2,
 } from 'lucide-react'
+import { usePageData } from '@/hooks/use-page-data'
+import { PageError, PageLoading } from '@/components/page-status'
+import NotFound from '@/pages/not-found'
 
 const EVENT_LABELS: Record<string, string> = {
   login: 'Logged in',
@@ -60,49 +47,16 @@ export default function ParticipantDetailPage() {
   const params = useParams();
 
   const { id } = params
-  const participant = null as any; // mocked server data
-  if (!participant) notFound()
-
-  const ownerId = accessOwnerId(participant)
-  const isOwner = participant.role === 'owner'
-
-  const supabase = getAdminClient()
-  const staff: any[] = [];
-  const aliases: any[] = [];
-  const sessions: any[] = [];
-  const courses: any[] = [];
-  const accessIds: string[] = [];
-  const events: any[] = [];
-  const progressRes: any = { data: [] };
-  const niches: any[] = [];
-  const nicheAccessIds: string[] = [];
-  const nicheAccessSet = new Set(nicheAccessIds)
-  const nichesBySector = new Map<string, typeof niches>()
-  for (const n of niches) {
-    const list = nichesBySector.get(n.sector) ?? []
-    list.push(n)
-    nichesBySector.set(n.sector, list)
-  }
-
-  const progress = (progressRes.data ?? []) as VideoProgress[]
-  const progressByVideo = new Map(progress.map((p) => [p.video_id, p]))
-
-  // Per-course progress for accessible courses
-  const accessSet = new Set(accessIds)
-  const accessibleCourses = courses.filter((c) => accessSet.has(c.id))
-  const courseTrees: any[] = [];
-
-  // Video titles for the activity feed
-  const videoIds = [...new Set(events.map((e) => e.video_id).filter(Boolean))] as string[]
-  const { data: eventVideos } = videoIds.length
-    ? { data: [] }
-    : { data: [] }
-  const videoTitle = new Map((eventVideos ?? []).map((v) => [v.id, v.title]))
-
-  const parent: any = null;
-
-  // Account-level reactivation accountability (owner accounts only)
-  const reactivationStats: any = null;
+  const { data, loading, error, notFound } = usePageData<any>(`/admin/participants/${id}`)
+  if (loading) return <PageLoading />
+  if (notFound) return <NotFound />
+  if (error) return <PageError error={error} />
+  const {
+    participant, ownerId, isOwner, staff, aliases, sessions, courses,
+    accessIds, accessibleCourses, courseTrees, events, progress, niches,
+    nicheAccessSet, nichesBySector, progressByVideo, accessSet, videoTitle,
+    parent, reactivationStats,
+  } = data
 
   return (
     <div className="flex flex-col gap-8">
@@ -182,11 +136,11 @@ export default function ParticipantDetailPage() {
                     <CourseAccessToggle
                       participantId={participant.id}
                       courseId={course.id}
-                      initialGranted={accessSet.has(course.id)}
+                      initialGranted={Boolean(accessSet[course.id])}
                     />
                   ) : (
-                    <Badge variant={accessSet.has(course.id) ? 'default' : 'outline'}>
-                      {accessSet.has(course.id) ? 'Inherited' : 'No access'}
+                    <Badge variant={accessSet[course.id] ? 'default' : 'outline'}>
+                      {accessSet[course.id] ? 'Inherited' : 'No access'}
                     </Badge>
                   )}
                 </div>
@@ -274,7 +228,7 @@ export default function ParticipantDetailPage() {
           {niches.length === 0 ? (
             <p className="text-sm text-muted-foreground">No niches yet.</p>
           ) : (
-            [...nichesBySector.entries()].map(([sector, sectorNiches]) => (
+            Object.entries(nichesBySector).map(([sector, sectorNiches]) => (
               <div key={sector}>
                 <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   {SECTOR_LABELS[sector as keyof typeof SECTOR_LABELS] ??
@@ -293,15 +247,15 @@ export default function ParticipantDetailPage() {
                         <NicheAccessToggle
                           participantId={participant.id}
                           nicheId={niche.id}
-                          initialGranted={nicheAccessSet.has(niche.id)}
+                          initialGranted={Boolean(nicheAccessSet[niche.id])}
                         />
                       ) : (
                         <Badge
                           variant={
-                            nicheAccessSet.has(niche.id) ? 'default' : 'outline'
+                            nicheAccessSet[niche.id] ? 'default' : 'outline'
                           }
                         >
-                          {nicheAccessSet.has(niche.id)
+                          {nicheAccessSet[niche.id]
                             ? 'Inherited'
                             : 'No access'}
                         </Badge>
@@ -344,7 +298,7 @@ export default function ParticipantDetailPage() {
             if (!tree) return null
             const allVideos = tree.modules.flatMap((m) => m.videos)
             const done = allVideos.filter(
-              (v) => progressByVideo.get(v.id)?.completed,
+              (v) => progressByVideo[v.id]?.completed,
             ).length
             const pct =
               allVideos.length > 0
@@ -369,7 +323,7 @@ export default function ParticipantDetailPage() {
                       </p>
                       <div className="flex flex-col gap-1">
                         {mod.videos.map((v) => {
-                          const p = progressByVideo.get(v.id)
+                          const p = progressByVideo[v.id]
                           const percent = Math.round(
                             Number(p?.percent_watched ?? 0),
                           )
@@ -471,10 +425,10 @@ export default function ParticipantDetailPage() {
                       <span className="font-medium">
                         {EVENT_LABELS[e.event_type] ?? e.event_type}
                       </span>
-                      {e.video_id && videoTitle.get(e.video_id) ? (
+                      {e.video_id && videoTitle[e.video_id] ? (
                         <span className="text-muted-foreground">
                           {' — '}
-                          {videoTitle.get(e.video_id)}
+                          {videoTitle[e.video_id]}
                         </span>
                       ) : null}
                       {e.event_type === 'video_progress' &&

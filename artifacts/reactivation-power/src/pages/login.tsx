@@ -1,10 +1,20 @@
 // @ts-nocheck
 
 import { LoginForm } from '@/components/login-form'
+import { useSearch } from 'wouter'
+import { usePageData } from '@/hooks/use-page-data'
+import { PageError, PageLoading } from '@/components/page-status'
 
 
 export default function LoginPage() {
-  const next = new URLSearchParams(window.location.search).get('next') ?? undefined
+  const search = new URLSearchParams(useSearch())
+  const requestedNext = search.get('next') ?? undefined
+  const { data, loading, error } = usePageData<any>('/login', {
+    next: requestedNext,
+  })
+  if (loading) return <PageLoading />
+  if (error) return <PageError error={error} />
+  const { next } = data
 
   return (
     <main className="flex min-h-svh items-center justify-center bg-card px-4 py-8">

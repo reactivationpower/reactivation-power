@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { Link } from "wouter";
 import { ArrowRight, TrendingDown, TrendingUp, Trophy } from 'lucide-react'
-import type { TeamMemberStats } from '@/lib/data/reactivation'
+type TeamMemberStats = any
 
 /** Minimum calls before someone is ranked (keeps small samples fair) */
 const MIN_CALLS_TO_RANK = 10

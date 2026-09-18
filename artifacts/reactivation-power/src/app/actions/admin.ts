@@ -1,20 +1,21 @@
-import { toast } from 'sonner';
+// Thin client stubs for the server actions in artifacts/api-server/src/actions/admin.ts
+import { action } from '@/lib/api'
 
-export type LeadState = any;
-export type LoginState = any;
-export const createParticipant = async (...args: any[]) => { toast.error('Backend operations are disabled in this read-only port.'); return { success: false, error: 'Backend operations are disabled in this read-only port.' }; };
-export const setCourseAccess = async (...args: any[]) => { toast.error('Backend operations are disabled in this read-only port.'); return { success: false, error: 'Backend operations are disabled in this read-only port.' }; };
-export const updateCourse = async (...args: any[]) => { toast.error('Backend operations are disabled in this read-only port.'); return { success: false, error: 'Backend operations are disabled in this read-only port.' }; };
-export const deleteModule = async (...args: any[]) => { toast.error('Backend operations are disabled in this read-only port.'); return { success: false, error: 'Backend operations are disabled in this read-only port.' }; };
-export const moveModule = async (...args: any[]) => { toast.error('Backend operations are disabled in this read-only port.'); return { success: false, error: 'Backend operations are disabled in this read-only port.' }; };
-export const updateModule = async (...args: any[]) => { toast.error('Backend operations are disabled in this read-only port.'); return { success: false, error: 'Backend operations are disabled in this read-only port.' }; };
-export const createCourse = async (...args: any[]) => { toast.error('Backend operations are disabled in this read-only port.'); return { success: false, error: 'Backend operations are disabled in this read-only port.' }; };
-export const createModule = async (...args: any[]) => { toast.error('Backend operations are disabled in this read-only port.'); return { success: false, error: 'Backend operations are disabled in this read-only port.' }; };
-export const createVideo = async (...args: any[]) => { toast.error('Backend operations are disabled in this read-only port.'); return { success: false, error: 'Backend operations are disabled in this read-only port.' }; };
-export const setNicheAccess = async (...args: any[]) => { toast.error('Backend operations are disabled in this read-only port.'); return { success: false, error: 'Backend operations are disabled in this read-only port.' }; };
-export const updateParticipant = async (...args: any[]) => { toast.error('Backend operations are disabled in this read-only port.'); return { success: false, error: 'Backend operations are disabled in this read-only port.' }; };
-export const updateVideo = async (...args: any[]) => { toast.error('Backend operations are disabled in this read-only port.'); return { success: false, error: 'Backend operations are disabled in this read-only port.' }; };
-export const addAttachment = async (...args: any[]) => { toast.error('Backend operations are disabled in this read-only port.'); return { success: false, error: 'Backend operations are disabled in this read-only port.' }; };
-export const deleteAttachment = async (...args: any[]) => { toast.error('Backend operations are disabled in this read-only port.'); return { success: false, error: 'Backend operations are disabled in this read-only port.' }; };
-export const deleteVideo = async (...args: any[]) => { toast.error('Backend operations are disabled in this read-only port.'); return { success: false, error: 'Backend operations are disabled in this read-only port.' }; };
-export const moveVideo = async (...args: any[]) => { toast.error('Backend operations are disabled in this read-only port.'); return { success: false, error: 'Backend operations are disabled in this read-only port.' }; };
+export const createCourse = action<any>('admin', 'createCourse')
+export const updateCourse = action<any>('admin', 'updateCourse')
+export const deleteCourse = action<any>('admin', 'deleteCourse')
+export const createModule = action<any>('admin', 'createModule')
+export const updateModule = action<any>('admin', 'updateModule')
+export const deleteModule = action<any>('admin', 'deleteModule')
+export const moveModule = action<any>('admin', 'moveModule')
+export const createVideo = action<any>('admin', 'createVideo')
+export const updateVideo = action<any>('admin', 'updateVideo')
+export const deleteVideo = action<any>('admin', 'deleteVideo')
+export const moveVideo = action<any>('admin', 'moveVideo')
+export const addAttachment = action<any>('admin', 'addAttachment')
+export const deleteAttachment = action<any>('admin', 'deleteAttachment')
+export const createParticipant = action<any>('admin', 'createParticipant')
+export const updateParticipant = action<any>('admin', 'updateParticipant')
+export const deleteParticipant = action<any>('admin', 'deleteParticipant')
+export const setCourseAccess = action<any>('admin', 'setCourseAccess')
+export const setNicheAccess = action<any>('admin', 'setNicheAccess')

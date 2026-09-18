@@ -5,6 +5,7 @@ import { Building2, Check, Loader2, Pencil } from 'lucide-react'
 import { setPracticeName } from '@/app/actions/reactivation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { useRouter } from '@/hooks/use-router'
 
 interface Props {
   initialName: string | null
@@ -13,6 +14,7 @@ interface Props {
 }
 
 export function PracticeNameForm({ initialName, entityLabel = 'practice' }: Props) {
+  const router = useRouter()
   const [editing, setEditing] = useState(!initialName)
   const [name, setName] = useState(initialName ?? '')
   const [saving, startSaving] = useTransition()
@@ -23,12 +25,13 @@ export function PracticeNameForm({ initialName, entityLabel = 'practice' }: Prop
     startSaving(async () => {
       const formData = new FormData()
       formData.set('practiceName', name)
-      const result = null as any; // mocked server data
+      const result = await setPracticeName(formData)
       if (result?.error) {
         setError(result.error)
         return
       }
       setEditing(false)
+      router.refresh()
     })
   }
 

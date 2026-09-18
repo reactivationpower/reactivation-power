@@ -1,8 +1,7 @@
 // @ts-nocheck
-import { getAdminClient } from '@/lib/supabase/admin'
-import { getCurrentParticipant } from '@/lib/data/participants'
-import { demoIsStale } from '@/lib/demo/seed'
-import { DemoBar, type DemoIdentity } from './demo-bar'
+import { DemoBar } from './demo-bar'
+import { usePageData } from '@/hooks/use-page-data'
+import { PageError } from '@/components/page-status'
 
 /**
  * Renders the demo strip only when the signed-in participant belongs to the
@@ -15,40 +14,9 @@ import { DemoBar, type DemoIdentity } from './demo-bar'
  * rebuild inline on every page render once produced four overlapping rebuilds.
  */
 export function DemoBarServer() {
-  const p = null as any; // mocked server data
-  if (!p || !p.is_demo) return null
-
-  const supabase = getAdminClient()
-  const ownerId = p.role === 'owner' ? p.id : (p.parent_id ?? p.id)
-
-  const ownerRes: any = { data: { demo_seeded_at: null } };
-  const peopleRes: any = { data: [] };
-
-  const seededAt = ownerRes.data?.demo_seeded_at ?? null
-  const stale = !ownerRes.error && demoIsStale(seededAt)
-
-  const identities: DemoIdentity[] = (peopleRes.data ?? []).map((x) => ({
-    id: x.id,
-    label: `${x.first_name} ${x.last_name}`,
-    role: x.role === 'owner' ? 'owner' : 'staff',
-  }))
-
-  const seededLabel = seededAt
-    ? `Data refreshed ${new Date(seededAt).toLocaleString('en-US', {
-        timeZone: 'America/New_York',
-        month: 'short',
-        day: 'numeric',
-        hour: 'numeric',
-        minute: '2-digit',
-      })} ET`
-    : ''
-
-  return (
-    <DemoBar
-      currentId={p.id}
-      identities={identities}
-      seededLabel={seededLabel}
-      stale={stale}
-    />
-  )
+  const { data, loading, error } = usePageData<any>('/portal/_layout')
+  if (loading) return null
+  if (error) return <PageError error={error} />
+  if (!data?.demo) return null
+  return <DemoBar {...data.demo} />
 }

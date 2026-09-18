@@ -2,10 +2,10 @@
 import { useParams } from 'wouter';
 
 import { Link } from "wouter";
-// import { notFound, redirect } from 'next/navigation'
-
-import { getPaymentLinkPublic } from '@/app/actions/payments'
 import { PayCheckout } from '@/components/landing/pay-checkout'
+import { usePageData } from '@/hooks/use-page-data'
+import { PageError, PageLoading } from '@/components/page-status'
+import NotFound from '@/pages/not-found'
 
 
 
@@ -19,9 +19,11 @@ export default function PayPage() {
   const params = useParams();
 
   const { token } = params
-  const link = null as any; // mocked server data
-  if (!link) notFound()
-  if (link.status === 'paid') /* redirect */ (`/pay/${token}/thank-you`)
+  const { data, loading, error, notFound } = usePageData<any>(`/pay/${token}`)
+  if (loading) return <PageLoading />
+  if (notFound) return <NotFound />
+  if (error) return <PageError error={error} />
+  const { link } = data
 
   return (
     <main className="min-h-screen bg-background">

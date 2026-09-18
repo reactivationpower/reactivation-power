@@ -1,8 +1,14 @@
 // @ts-nocheck
 import { LandingPreviewer } from '@/components/admin/landing-previewer'
+import { usePageData } from '@/hooks/use-page-data'
+import { PageError, PageLoading } from '@/components/page-status'
 
 
 export default function AdminLandingPage() {
+  const { loading, error } = usePageData('/admin/landing')
+  if (loading) return <PageLoading />
+  if (error) return <PageError error={error} />
+
   return (
     <div className="flex h-full flex-col gap-4 p-6">
       <header>

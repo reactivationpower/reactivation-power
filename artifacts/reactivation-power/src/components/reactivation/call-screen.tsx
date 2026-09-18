@@ -1,7 +1,6 @@
 // @ts-nocheck
 
 import { useMemo, useState, useTransition } from 'react'
-import { useLocation, useParams } from "wouter";
 import {
   AArrowDown,
   AArrowUp,
@@ -40,7 +39,7 @@ import { CONCERN_OPTIONS } from '@/lib/concern-options'
 import { ScriptFlowPlayer } from '@/components/reactivation/script-flow-player'
 import { DateTimePicker } from '@/components/reactivation/date-time-picker'
 import { cn } from '@/lib/utils'
-import type { CallWithCaller, ContactWithMeta } from '@/lib/data/reactivation'
+import { useRouter } from '@/hooks/use-router'
 import type {
   CallDisposition,
   Niche,
@@ -48,6 +47,8 @@ import type {
   ScriptFlowStep,
   ScriptSection,
 } from '@/lib/types'
+type CallWithCaller = any
+type ContactWithMeta = any
 
 const DISPOSITION_LABELS: Record<string, string> = {
   no_answer: 'No answer',
@@ -103,7 +104,7 @@ export function CallScreen({
   flowSteps,
   flowChoices,
 }: Props) {
-  const [, setLocation] = useLocation();
+  const router = useRouter()
   // Only honor the saved niche if it belongs to this account's sector(s);
   // otherwise fall back to the first available niche.
   const [nicheId, setNicheId] = useState<string>(
@@ -209,7 +210,7 @@ export function CallScreen({
       if (d === 'scheduled' && appointmentAt) {
         formData.set('appointmentAt', appointmentAt.toISOString())
       }
-      const result = null as any; // mocked server data
+      const result = await logCall(formData)
       if (result?.error) {
         setError(result.error)
         return
@@ -219,6 +220,7 @@ export function CallScreen({
       // Don't silently navigate away — confirm the save and let the caller
       // choose where to go next.
       setSavedDisposition(d)
+      router.refresh()
     })
   }
 

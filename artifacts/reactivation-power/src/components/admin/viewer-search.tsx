@@ -1,13 +1,13 @@
 // @ts-nocheck
 
 import { useState } from 'react'
-import { useLocation, useParams } from "wouter";
+import { useRouter } from '@/hooks/use-router'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Search } from 'lucide-react'
 
 export function ViewerSearch({ initialQuery = '' }: { initialQuery?: string }) {
-  const [, setLocation] = useLocation();
+  const router = useRouter()
   const [query, setQuery] = useState(initialQuery)
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {

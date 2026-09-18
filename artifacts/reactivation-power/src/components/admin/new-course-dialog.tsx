@@ -37,7 +37,7 @@ export function NewCourseButton() {
     setError(null)
     formData.set('sector', sector)
     startTransition(async () => {
-      const result = null as any; // mocked server data
+      const result = await createCourse(formData)
       if (result.error) {
         setError(result.error)
       } else {

@@ -34,6 +34,7 @@ import { startManagedUpload, useUpload } from '@/lib/upload-manager'
 import { formatDuration } from '@/lib/format'
 import { adminMediaUrl } from '@/lib/media'
 import type { Attachment, Video } from '@/lib/types'
+import { useRouter } from '@/hooks/use-router'
 
 export function VideoRow({
   video,
@@ -57,6 +58,7 @@ export function VideoRow({
   const [attachmentDialogOpen, setAttachmentDialogOpen] = useState(false)
   const [thumbnailDialogOpen, setThumbnailDialogOpen] = useState(false)
   const [pending, startTransition] = useTransition()
+  const router = useRouter()
   const backfillAttempted = useRef(false)
 
   const label = `${moduleIndex + 1}.${videoIndex + 1}`
@@ -79,19 +81,21 @@ export function VideoRow({
     let cancelled = false
     ;(async () => {
       try {
-        const blob = null as any;
+        const blob = await captureFrameFromSource(
+          adminMediaUrl(video.video_url),
+        )
         if (cancelled) return
         const file = new File([blob], `auto-${video.id}.jpg`, {
           type: 'image/jpeg',
         })
-        throw new Error('File uploads are disabled in this read-only port.')
-        const result = null as any;
+        const result = await uploadFileWithProgress(file, 'thumbnail', () => {})
         if (cancelled) return
         const formData = new FormData()
         formData.set('id', video.id)
         formData.set('courseId', courseId)
         formData.set('thumbnailUrl', result.pathname)
         await updateVideo(formData)
+        router.refresh()
       } catch {
         // Silent: admin can still set a thumbnail manually
       }
@@ -105,7 +109,10 @@ export function VideoRow({
     file: File,
     onProgress: (percent: number) => void,
   ) {
-    const [result, duration] = [{ pathname: '' }, 0];
+    const [result, duration] = await Promise.all([
+      uploadFileWithProgress(file, 'video', onProgress),
+      readVideoDuration(file),
+    ])
     const formData = new FormData()
     formData.set('id', video.id)
     formData.set('courseId', courseId)
@@ -116,11 +123,11 @@ export function VideoRow({
     let objectUrl: string | null = null
     try {
       objectUrl = URL.createObjectURL(file)
-      const frame = null as any; // mocked server data
+      const frame = await captureFrameFromSource(objectUrl)
       const thumbFile = new File([frame], `auto-${video.id}.jpg`, {
         type: 'image/jpeg',
       })
-      const thumb = null as any; // mocked server data
+      const thumb = await uploadFileWithProgress(thumbFile, 'thumbnail', () => {})
       formData.set('thumbnailUrl', thumb.pathname)
     } catch {
       // Thumbnail generation is best-effort; the video upload still saves
@@ -129,6 +136,7 @@ export function VideoRow({
     }
 
     await updateVideo(formData)
+    router.refresh()
   }
 
   /** Runs the upload through the global manager so it survives dialog close */
@@ -151,8 +159,7 @@ export function VideoRow({
     file: File,
     onProgress: (percent: number) => void,
   ) {
-    throw new Error('File uploads are disabled in this read-only port.')
-    const result = null as any;
+    const result = await uploadFileWithProgress(file, 'attachment', onProgress)
     const formData = new FormData()
     formData.set('videoId', video.id)
     formData.set('courseId', courseId)
@@ -161,6 +168,7 @@ export function VideoRow({
     formData.set('fileSize', String(result.fileSize))
     formData.set('fileType', result.fileType)
     await addAttachment(formData)
+    router.refresh()
   }
 
   function handleAttachmentUpload(
@@ -250,9 +258,10 @@ export function VideoRow({
                 variant="ghost"
                 size="icon"
                 onClick={() =>
-                  startTransition(() =>
-                    moveVideo(video.id, video.module_id, courseId, 'up'),
-                  )
+                  startTransition(async () => {
+                    await moveVideo(video.id, video.module_id, courseId, 'up')
+                    router.refresh()
+                  })
                 }
                 disabled={isFirst || pending}
                 aria-label="Move video up"
@@ -263,9 +272,10 @@ export function VideoRow({
                 variant="ghost"
                 size="icon"
                 onClick={() =>
-                  startTransition(() =>
-                    moveVideo(video.id, video.module_id, courseId, 'down'),
-                  )
+                  startTransition(async () => {
+                    await moveVideo(video.id, video.module_id, courseId, 'down')
+                    router.refresh()
+                  })
                 }
                 disabled={isLast || pending}
                 aria-label="Move video down"
@@ -316,7 +326,10 @@ export function VideoRow({
                 className="text-destructive hover:text-destructive"
                 onClick={() => {
                   if (confirm(`Delete video "${video.title}"?`)) {
-                    startTransition(() => deleteVideo(video.id, courseId))
+                    startTransition(async () => {
+                      await deleteVideo(video.id, courseId)
+                      router.refresh()
+                    })
                   }
                 }}
                 aria-label="Delete video"
@@ -346,9 +359,10 @@ export function VideoRow({
               <button
                 type="button"
                 onClick={() =>
-                  startTransition(() =>
-                    deleteAttachment(attachment.id, courseId),
-                  )
+                  startTransition(async () => {
+                    await deleteAttachment(attachment.id, courseId)
+                    router.refresh()
+                  })
                 }
                 className="text-muted-foreground transition-colors hover:text-destructive"
                 aria-label={`Remove ${attachment.file_name}`}

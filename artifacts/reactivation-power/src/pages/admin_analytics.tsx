@@ -1,13 +1,5 @@
 // @ts-nocheck
-import { useParams } from 'wouter';
-import { getCourses, getCourseTree } from '@/lib/data/courses'
-import {
-  getActivityEvents,
-  getAllProgress,
-  getDashboardStats,
-  getViewerRows,
-} from '@/lib/data/analytics'
-import { getAdminClient } from '@/lib/supabase/admin'
+import { useSearch } from 'wouter'
 import { formatDateTime, formatDuration } from '@/lib/format'
 import { Card, CardContent } from '@/components/ui/card'
 import {
@@ -25,6 +17,8 @@ import {
   type CourseStat,
 } from '@/components/admin/course-engagement'
 import { Link } from "wouter";
+import { usePageData } from '@/hooks/use-page-data'
+import { PageError, PageLoading } from '@/components/page-status'
 
 const EVENT_LABELS: Record<string, string> = {
   login: 'Login',
@@ -36,101 +30,16 @@ const EVENT_LABELS: Record<string, string> = {
 }
 
 export default function AnalyticsPage() {
-  const params = useParams();
-
-  const { participant, course, event } = null as any; // mocked server data
-
-  
-  const stats: any = { totalWatchSeconds: 0, videoCompletions: 0, totalSessions: 0, liveCourses: 0, totalCourses: 0, totalVideos: 0 };
-  const courses: any[] = [];
-  const progress: any[] = [];
-  const viewers: any[] = [];
-  const events: any[] = [];
-
-
-  const trees = null as any; // mocked server data
-
-  // Aggregate per-video stats
-  const byVideo = new Map<
-    string,
-    { started: number; completed: number; percentSum: number; watch: number }
-  >()
-  for (const p of progress) {
-    const cur = byVideo.get(p.video_id) ?? {
-      started: 0,
-      completed: 0,
-      percentSum: 0,
-      watch: 0,
-    }
-    cur.started += 1
-    if (p.completed) cur.completed += 1
-    cur.percentSum += Number(p.percent_watched ?? 0)
-    cur.watch += Number(p.seconds_watched ?? 0)
-    byVideo.set(p.video_id, cur)
-  }
-
-  const courseStats: CourseStat[] = trees
-    .filter((t): t is NonNullable<typeof t> => Boolean(t))
-    .map((tree) => {
-      const allVideoIds = tree.modules.flatMap((m) => m.videos.map((v) => v.id))
-      const idSet = new Set(allVideoIds)
-      const starters = new Set(
-        progress.filter((p) => idSet.has(p.video_id)).map((p) => p.participant_id),
-      )
-      const totalWatch = allVideoIds.reduce(
-        (sum, id) => sum + (byVideo.get(id)?.watch ?? 0),
-        0,
-      )
-      // avg completion = completed videos / (videos * starters)
-      const completedCount = allVideoIds.reduce(
-        (sum, id) => sum + (byVideo.get(id)?.completed ?? 0),
-        0,
-      )
-      const denominator = allVideoIds.length * Math.max(starters.size, 1)
-      const avgCompletion =
-        starters.size > 0 ? (completedCount / denominator) * 100 : 0
-
-      return {
-        id: tree.id,
-        title: tree.title,
-        status: tree.status,
-        viewersStarted: starters.size,
-        totalWatch,
-        avgCompletion,
-        modules: tree.modules.map((m) => ({
-          id: m.id,
-          title: m.title,
-          videos: m.videos.map((v) => {
-            const s = byVideo.get(v.id)
-            return {
-              id: v.id,
-              title: v.title,
-              duration: v.duration_seconds ? Number(v.duration_seconds) : null,
-              started: s?.started ?? 0,
-              completed: s?.completed ?? 0,
-              avgPercent: s && s.started > 0 ? s.percentSum / s.started : 0,
-              totalWatch: s?.watch ?? 0,
-            }
-          }),
-        })),
-      }
-    })
-
-  // Names for the activity table
-  const nameOf = new Map(
-    viewers.map((v) => [v.id, `${v.first_name} ${v.last_name}`]),
-  )
-  const supabase = getAdminClient()
-  const videoIds = [
-    ...new Set(events.map((e) => e.video_id).filter(Boolean)),
-  ] as string[]
-  const { data: eventVideos } = videoIds.length
-    ? { data: [] }
-    : { data: [] }
-  const videoTitle = new Map((eventVideos ?? []).map((v) => [v.id, v.title]))
-  const courseTitle = new Map(courses.map((c) => [c.id, c.title]))
-
-  const activeViewers = viewers.filter((v) => v.sessionCount > 0).length
+  const searchParams = new URLSearchParams(useSearch())
+  const participant = searchParams.get('participant') ?? undefined
+  const course = searchParams.get('course') ?? undefined
+  const event = searchParams.get('event') ?? undefined
+  const { data, loading, error } = usePageData<any>('/admin/analytics', {
+    participant, course, event,
+  })
+  if (loading) return <PageLoading />
+  if (error) return <PageError error={error} />
+  const { stats, courses, viewers, events, courseStats, nameOf, videoTitle, courseTitle, activeViewers } = data
 
   return (
     <div className="flex flex-col gap-8">
@@ -224,7 +133,7 @@ export default function AnalyticsPage() {
                           href={`/admin/participants/${e.participant_id}`}
                           className="text-sm font-medium text-primary hover:underline"
                         >
-                          {nameOf.get(e.participant_id) ?? 'Unknown'}
+                          {nameOf[e.participant_id] ?? 'Unknown'}
                         </Link>
                       </TableCell>
                       <TableCell>
@@ -234,7 +143,7 @@ export default function AnalyticsPage() {
                       </TableCell>
                       <TableCell className="max-w-64 truncate text-sm">
                         {e.video_id
-                          ? (videoTitle.get(e.video_id) ?? '—')
+                          ? (videoTitle[e.video_id] ?? '—')
                           : '—'}
                         {e.event_type === 'video_progress' &&
                         e.metadata &&
@@ -250,7 +159,7 @@ export default function AnalyticsPage() {
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {e.course_id
-                          ? (courseTitle.get(e.course_id) ?? '—')
+                          ? (courseTitle[e.course_id] ?? '—')
                           : '—'}
                       </TableCell>
                       <TableCell className="font-mono text-xs">

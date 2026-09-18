@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { CALL_BATCH_SIZES } from '@/lib/types'
+import { useRouter } from '@/hooks/use-router'
 
 interface Props {
   initialSize: number
@@ -22,6 +23,7 @@ interface Props {
  * each "batch" a caller works through.
  */
 export function BatchSizeSelect({ initialSize }: Props) {
+  const router = useRouter()
   const [value, setValue] = useState(String(initialSize))
   const [saving, startSaving] = useTransition()
   const [error, setError] = useState<string | null>(null)
@@ -36,8 +38,9 @@ export function BatchSizeSelect({ initialSize }: Props) {
     setValue(v)
     setError(null)
     startSaving(async () => {
-      const res = null as any; // mocked server data
+      const res = await setCallBatchSize(Number(v))
       if (res?.error) setError(res.error)
+      else router.refresh()
     })
   }
 

@@ -1,15 +1,5 @@
 // @ts-nocheck
-import { useLocation, useParams } from "wouter";
 import { Settings } from 'lucide-react'
-import {
-  accessOwnerId,
-  getCurrentParticipant,
-  getParticipantById,
-  getStaffMembers,
-} from '@/lib/data/participants'
-import { getOwnerNiches, getPipelineStages } from '@/lib/data/reactivation'
-import { getOwnerSectors } from '@/lib/data/courses'
-import { DEFAULT_CALL_BATCH_SIZE } from '@/lib/types'
 import { PORTAL_WIDTH } from '@/lib/portal-layout'
 import { PracticeNameForm } from '@/components/reactivation/practice-name-form'
 import { OfficePhoneForm } from '@/components/reactivation/office-phone-form'
@@ -18,6 +8,8 @@ import { BatchSizeSelect } from '@/components/reactivation/batch-size-select'
 import { TeamManager } from '@/components/reactivation/team-manager'
 import { MyProfileForm } from '@/components/portal/my-profile-form'
 import { StageManager } from '@/components/reactivation/stage-manager'
+import { usePageData } from '@/hooks/use-page-data'
+import { PageError, PageLoading } from '@/components/page-status'
 
 
 function SettingsSection({
@@ -43,21 +35,13 @@ function SettingsSection({
 }
 
 export default function SettingsPage() {
-  const participant = null as any; // mocked server data
-  if (!participant) /* redirect */ ('/login')
-
-  const ownerId = accessOwnerId(participant)
-  const isOwner = participant.role === 'owner'
-  const owner = isOwner ? participant : null as any
-  if (!owner) /* redirect */ ('/login')
-
-  const sectors = null as any; // mocked server data
-  const healthcare = sectors.includes('healthcare')
-  const entityLabel = healthcare ? 'practice' : 'business'
-  const niches: any[] = [];
-  const staff: any[] = [];
-  const stages: any[] = [];
-  const batchSize = owner.call_batch_size ?? DEFAULT_CALL_BATCH_SIZE
+  const { data, loading, error } = usePageData<any>('/portal/settings')
+  if (loading) return <PageLoading />
+  if (error) return <PageError error={error} />
+  const {
+    participant, isOwner, owner, healthcare, entityLabel, niches, staff, stages,
+    batchSize,
+  } = data
 
   return (
     <div className={`${PORTAL_WIDTH} py-8`}>

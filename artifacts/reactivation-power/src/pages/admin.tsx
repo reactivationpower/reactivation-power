@@ -1,46 +1,15 @@
 // @ts-nocheck
 import { Link } from "wouter";
 import { PlayCircle } from 'lucide-react'
-import {
-  formatDuration,
-  getDashboardStats,
-  getMostWatchedVideos,
-  getViewerRows,
-} from '@/lib/data/analytics'
+import { formatDuration } from '@/lib/format'
+import { usePageData } from '@/hooks/use-page-data'
+import { PageError, PageLoading } from '@/components/page-status'
 
 export default function AdminDashboardPage() {
-  const stats = { totalViewers: 0, newViewers7d: 0, totalWatchSeconds: 0, totalSessions: 0, videoCompletions: 0, totalVideos: 0, totalDurationSeconds: 0, liveCourses: 0, totalCourses: 0 };
-  const mostWatched: any[] = [];
-  const viewers: any[] = [];
-
-  const recentViewers = viewers
-    .filter((v) => v.lastSeen)
-    .sort((a, b) => (b.lastSeen! > a.lastSeen! ? 1 : -1))
-    .slice(0, 6)
-
-  const cards = [
-    {
-      label: 'Total Viewers',
-      value: String(stats.totalViewers),
-      sub: `${stats.newViewers7d} new in last 7 days`,
-    },
-    {
-      label: 'Total Watch Time',
-      value: formatDuration(stats.totalWatchSeconds),
-      sub: `${stats.totalSessions} sessions`,
-      accent: true,
-    },
-    {
-      label: 'Video Completions',
-      value: String(stats.videoCompletions),
-      sub: 'across all courses',
-    },
-    {
-      label: 'Content Library',
-      value: `${stats.totalVideos} videos`,
-      sub: `${formatDuration(stats.totalDurationSeconds)} total · ${stats.liveCourses}/${stats.totalCourses} live`,
-    },
-  ]
+  const { data, loading, error } = usePageData<any>('/admin')
+  if (loading) return <PageLoading />
+  if (error) return <PageError error={error} />
+  const { mostWatched, recentViewers, cards } = data
 
   return (
     <div className="mx-auto w-full max-w-7xl">

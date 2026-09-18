@@ -1,7 +1,7 @@
 // @ts-nocheck
 
 import { useState } from 'react'
-import { useLocation, useParams } from "wouter";
+import { useRouter } from '@/hooks/use-router'
 import { UserPlus } from 'lucide-react'
 import { addTeamMember } from '@/app/actions/reactivation'
 import { MAX_STAFF } from '@/lib/types'
@@ -38,7 +38,7 @@ export function AddCallerDialog({
   triggerVariant?: ButtonProps['variant']
   triggerSize?: ButtonProps['size']
 }) {
-  const [, setLocation] = useLocation();
+  const router = useRouter()
   const [open, setOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
@@ -49,7 +49,7 @@ export function AddCallerDialog({
     setError(null)
     setSubmitting(true)
     const fd = new FormData(e.currentTarget)
-    const res = null as any; // mocked server data
+    const res = await addTeamMember(fd)
     setSubmitting(false)
     if (res?.error) {
       setError(res.error)

@@ -10,8 +10,10 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import type { PipelineStage } from '@/lib/types'
+import { useRouter } from '@/hooks/use-router'
 
 export function StageManager({ stages }: { stages: PipelineStage[] }) {
+  const router = useRouter()
   const [newName, setNewName] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
@@ -23,9 +25,12 @@ export function StageManager({ stages }: { stages: PipelineStage[] }) {
     startTransition(async () => {
       const formData = new FormData()
       formData.set('name', name)
-      const res = null as any; // mocked server data
+      const res = await createStage(formData)
       if (res?.error) setError(res.error)
-      else setNewName('')
+      else {
+        setNewName('')
+        router.refresh()
+      }
     })
   }
 
@@ -53,7 +58,10 @@ export function StageManager({ stages }: { stages: PipelineStage[] }) {
                 variant="ghost"
                 size="icon-sm"
                 disabled={pending || i === 0}
-                onClick={() => startTransition(() => moveStage(stage.id, 'up'))}
+                onClick={() => startTransition(async () => {
+                  await moveStage(stage.id, 'up')
+                  router.refresh()
+                })}
                 aria-label={`Move ${stage.name} up`}
               >
                 <ArrowUp className="size-4" />
@@ -63,7 +71,10 @@ export function StageManager({ stages }: { stages: PipelineStage[] }) {
                 size="icon-sm"
                 disabled={pending || i === stages.length - 1}
                 onClick={() =>
-                  startTransition(() => moveStage(stage.id, 'down'))
+                  startTransition(async () => {
+                    await moveStage(stage.id, 'down')
+                    router.refresh()
+                  })
                 }
                 aria-label={`Move ${stage.name} down`}
               >
@@ -78,6 +89,7 @@ export function StageManager({ stages }: { stages: PipelineStage[] }) {
                     if (confirm(`Delete stage "${stage.name}"?`)) {
                       startTransition(async () => {
                         await deleteStage(stage.id)
+                        router.refresh()
                       })
                     }
                   }}

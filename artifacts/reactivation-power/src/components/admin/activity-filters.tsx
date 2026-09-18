@@ -1,6 +1,7 @@
 // @ts-nocheck
 
-import { useLocation, useParams } from "wouter";
+import { useSearch } from 'wouter'
+import { useRouter } from '@/hooks/use-router'
 import {
   Select,
   SelectContent,
@@ -27,16 +28,14 @@ export function ActivityFilters({
   participants: { id: string; name: string }[]
   courses: { id: string; title: string }[]
 }) {
-  const [, setLocation] = useLocation();
-  const searchParams = useSearchParams()
+  const router = useRouter()
+  const searchParams = new URLSearchParams(useSearch())
 
   function setParam(key: string, value: string) {
     const params = new URLSearchParams(searchParams.toString())
     if (value === 'all') params.delete(key)
     else params.set(key, value)
-    setLocation(`/admin/analytics?${params.toString()}#activity`, {
-      scroll: false,
-    })
+    router.replace(`/admin/analytics?${params.toString()}#activity`)
   }
 
   const hasFilters =
@@ -114,7 +113,7 @@ export function ActivityFilters({
           variant="ghost"
           size="sm"
           className="gap-1.5"
-          onClick={() => setLocation('/admin/analytics#activity', { replace: true })}
+          onClick={() => router.replace('/admin/analytics#activity')}
         >
           <X className="size-3.5" />
           Clear filters

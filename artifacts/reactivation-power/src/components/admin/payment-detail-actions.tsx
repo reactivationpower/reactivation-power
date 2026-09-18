@@ -6,7 +6,6 @@ import {
   EmbeddedCheckout,
   EmbeddedCheckoutProvider,
 } from '@stripe/react-stripe-js'
-import { loadStripe } from '@stripe/stripe-js'
 import QRCode from 'qrcode'
 import {
   Copy,
@@ -34,10 +33,9 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { notifyDone, notifyError } from '@/lib/notify'
+import { useRouter } from '@/hooks/use-router'
 
-const stripePromise = loadStripe(
-  'pk_test_mock' as string,
-)
+import { stripePromise } from '@/lib/stripe-client'
 
 function formatUsd(cents: number): string {
   return (cents / 100).toLocaleString('en-US', {
@@ -54,6 +52,7 @@ export function PaymentDetailActions({
   hasAccounts: boolean
 }) {
   const [, setLocation] = useLocation();
+  const router = useRouter()
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null)
   const [charging, setCharging] = useState(false)
   const [provisioning, setProvisioning] = useState(false)
@@ -87,7 +86,7 @@ export function PaymentDetailActions({
 
   async function handleDelete() {
     if (!window.confirm(`Delete the pending link for ${link.name}?`)) return
-    const res = null as any; // mocked server data
+    const res = await deletePaymentLink(link.id)
     if (!res.ok) {
       notifyError(res.error ?? 'Could not delete the link')
       return
@@ -98,7 +97,7 @@ export function PaymentDetailActions({
 
   async function handleProvision() {
     setProvisioning(true)
-    const res = null as any; // mocked server data
+    const res = await provisionAccountsNow(link.id)
     setProvisioning(false)
     if (!res.ok) {
       notifyError(res.error ?? 'Could not create the accounts')

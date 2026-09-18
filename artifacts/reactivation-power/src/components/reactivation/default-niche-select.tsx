@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import type { Niche } from '@/lib/types'
+import { useRouter } from '@/hooks/use-router'
 
 const NONE = '__none__'
 
@@ -24,6 +25,7 @@ interface Props {
  * no service match (and CSVs with no service column) fall back to this.
  */
 export function DefaultNicheSelect({ niches, initialNicheId }: Props) {
+  const router = useRouter()
   const [value, setValue] = useState(initialNicheId ?? NONE)
   const [saving, startSaving] = useTransition()
   const [error, setError] = useState<string | null>(null)
@@ -38,8 +40,9 @@ export function DefaultNicheSelect({ niches, initialNicheId }: Props) {
     setValue(v)
     setError(null)
     startSaving(async () => {
-      const res = null as any; // mocked server data
+      const res = await setDefaultNiche(v === NONE ? '' : v)
       if (res?.error) setError(res.error)
+      else router.refresh()
     })
   }
 

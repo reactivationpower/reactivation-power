@@ -1,43 +1,23 @@
 // @ts-nocheck
 import { useParams } from 'wouter';
 import { Link } from "wouter";
-// import { notFound, redirect } from 'next/navigation'
 import { BookOpen, Lock } from 'lucide-react'
 import { VideoThumbnailCard } from '@/components/portal/video-thumbnail-card'
-import {
-  accessOwnerId,
-  getCurrentParticipant,
-} from '@/lib/data/participants'
-import {
-  getAccessibleCourseIds,
-  getCourseBySlug,
-  getCourseTree,
-} from '@/lib/data/courses'
-import {
-  computeCourseState,
-  getProgressForParticipant,
-} from '@/lib/data/progress'
+import { usePageData } from '@/hooks/use-page-data'
+import { PageError, PageLoading } from '@/components/page-status'
+import NotFound from '@/pages/not-found'
 
 export default function CoursePage() {
   const params = useParams();
 
   const { slug } = params
-  const participant = null as any; // mocked server data
-  if (!participant) /* redirect */ (`/login?next=/portal/course/${slug}`)
-
-  const course = null as any; // mocked server data
-  if (!course || course.status !== 'live') notFound()
-
-  const accessibleIds: string[] = [];
-  if (!accessibleIds.includes(course.id)) {
-    /* redirect */ ('/portal')
-  }
-
-  const tree: any = null; notFound()
-
-  const videoIds = tree.modules.flatMap((m) => m.videos.map((v) => v.id))
-  const progress: any[] = [];
-  const stateByModule = new Map(state.modules.map((m) => [m.moduleId, m]))
+  const { data, loading, error, notFound } = usePageData<any>(
+    `/portal/course/${slug}`,
+  )
+  if (loading) return <PageLoading />
+  if (notFound) return <NotFound />
+  if (error) return <PageError error={error} />
+  const { participant, course, tree, state, stateByModule } = data
 
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-12">
@@ -86,7 +66,7 @@ export default function CoursePage() {
 
       <div className="mt-10 flex flex-col gap-6">
         {tree.modules.map((module, moduleIndex) => {
-          const moduleState = stateByModule.get(module.id)
+          const moduleState = stateByModule[module.id]
           const locked = moduleState?.locked ?? false
           const videoStateById = new Map(
             (moduleState?.videos ?? []).map((v) => [v.videoId, v]),

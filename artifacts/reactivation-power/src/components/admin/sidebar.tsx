@@ -15,7 +15,7 @@ import {
   Plus,
   Users,
 } from 'lucide-react'
-import { logout } from '@/app/actions/auth'
+import { adminLogout } from '@/app/actions/admin-auth'
 import { cn } from '@/lib/utils'
 
 const NAV = [
@@ -124,7 +124,7 @@ export function AdminSidebar() {
           <span className="text-foreground">All systems</span>
           <span className="font-medium text-success">Healthy</span>
         </div>
-        <form action={logout} className="mt-3">
+        <form action={adminLogout} className="mt-3">
           <button
             type="submit"
             className="flex w-full items-center justify-center gap-2 rounded-md border border-input bg-card px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"

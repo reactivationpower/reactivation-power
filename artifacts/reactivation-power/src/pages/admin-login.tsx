@@ -1,14 +1,21 @@
 // @ts-nocheck
 
 import { AdminLoginForm } from '@/components/admin/admin-login-form'
+import { useSearch } from 'wouter'
+import { usePageData } from '@/hooks/use-page-data'
+import { PageError, PageLoading } from '@/components/page-status'
 
 
 
 export default function AdminLoginPage() {
-  const params = useParams();
-
-  const searchParams = new URLSearchParams(window.location.search);
-  const next  = searchParams.get("next ");
+  const searchParams = new URLSearchParams(useSearch())
+  const requestedNext = searchParams.get('next') ?? undefined
+  const { data, loading, error } = usePageData<any>('/admin-login', {
+    next: requestedNext,
+  })
+  if (loading) return <PageLoading />
+  if (error) return <PageError error={error} />
+  const { next } = data
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm">

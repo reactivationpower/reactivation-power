@@ -6,13 +6,10 @@ import {
   EmbeddedCheckout,
   EmbeddedCheckoutProvider,
 } from '@stripe/react-stripe-js'
-import { loadStripe } from '@stripe/stripe-js'
+import { stripePromise } from '@/lib/stripe-client'
 
 import { confirmPayment, startPaymentCheckout } from '@/app/actions/payments'
 
-const stripePromise = loadStripe(
-  'pk_test_mock' as string,
-)
 
 export function PayCheckout({ token }: { token: string }) {
   const [, setLocation] = useLocation();
@@ -31,7 +28,18 @@ export function PayCheckout({ token }: { token: string }) {
     void confirmPayment(token).then(() => {
       setLocation(`/pay/${token}/thank-you`)
     })
-  }, [token, router])
+  }, [token, setLocation])
+
+  if (!stripePromise) {
+    return (
+      <div
+        role="alert"
+        className="rounded-lg border border-destructive/30 bg-destructive/5 p-5 text-sm text-destructive"
+      >
+        Payment checkout is unavailable because Stripe has not been configured.
+      </div>
+    )
+  }
 
   return (
     <div className="overflow-hidden rounded-lg border border-border bg-card">

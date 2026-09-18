@@ -23,8 +23,10 @@ import {
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import type { Niche } from '@/lib/types'
+import { useRouter } from '@/hooks/use-router'
 
 export function AddContactDialog({ niches }: { niches: Niche[] }) {
+  const router = useRouter()
   const [open, setOpen] = useState(false)
   const [nicheId, setNicheId] = useState<string>('none')
   const [error, setError] = useState<string | null>(null)
@@ -39,11 +41,12 @@ export function AddContactDialog({ niches }: { niches: Niche[] }) {
     formData.set('nicheId', nicheId)
     setError(null)
     startTransition(async () => {
-      const res = null as any; // mocked server data
+      const res = await createContact(formData)
       if (res?.error) setError(res.error)
       else {
         setOpen(false)
         setNicheId('none')
+        router.refresh()
       }
     })
   }

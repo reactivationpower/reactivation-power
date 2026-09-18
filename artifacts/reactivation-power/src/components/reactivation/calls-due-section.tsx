@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { PhoneCall } from 'lucide-react'
-import type { QueueItem } from '@/lib/data/reactivation'
+type QueueItem = any
 import { suggestedCallTime, bandIndex } from '@/lib/call-time'
 import { CallQueue } from './call-queue'
 import { AddMoreCalls } from './add-more-calls'

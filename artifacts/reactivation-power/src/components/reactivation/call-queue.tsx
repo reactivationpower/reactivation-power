@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { Link } from "wouter";
 import { Phone, Clock, Lock } from 'lucide-react'
-import type { QueueItem } from '@/lib/data/reactivation'
+type QueueItem = any
 import { suggestedCallTime } from '@/lib/call-time'
 
 /**

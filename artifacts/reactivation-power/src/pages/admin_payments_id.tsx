@@ -4,10 +4,12 @@ import { Link } from "wouter";
 // import { notFound } from 'next/navigation'
 import { ArrowLeft, Mail, Phone } from 'lucide-react'
 
-import { getPaymentDetail } from '@/app/actions/payments'
 import { PaymentDetailActions } from '@/components/admin/payment-detail-actions'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { usePageData } from '@/hooks/use-page-data'
+import { PageError, PageLoading } from '@/components/page-status'
+import NotFound from '@/pages/not-found'
 
 
 function formatUsd(cents: number): string {
@@ -29,13 +31,11 @@ export default function PaymentDetailPage() {
   const params = useParams();
 
   const { id } = params
-  const detail = null as any; // mocked server data
-  if (!detail) notFound()
-
-  const { link, accounts } = detail
-  const isPaid = link.status === 'paid'
-  const owner = accounts.find((a) => a.role === 'owner')
-  const staffAccounts = accounts.filter((a) => a.role === 'staff')
+  const { data, loading, error, notFound } = usePageData<any>(`/admin/payments/${id}`)
+  if (loading) return <PageLoading />
+  if (notFound) return <NotFound />
+  if (error) return <PageError error={error} />
+  const { link, accounts, isPaid, owner, staffAccounts } = data
 
   return (
     <div className="flex flex-col gap-8">

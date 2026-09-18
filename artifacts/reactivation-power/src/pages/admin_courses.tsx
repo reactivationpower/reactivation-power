@@ -1,15 +1,14 @@
 // @ts-nocheck
-import { getAdminClient } from '@/lib/supabase/admin'
-import { getCourses } from '@/lib/data/courses'
 import { CourseCard } from '@/components/admin/course-card'
 import { NewCourseButton } from '@/components/admin/new-course-dialog'
+import { usePageData } from '@/hooks/use-page-data'
+import { PageError, PageLoading } from '@/components/page-status'
 
 export default function AdminCoursesPage() {
-  
-  const courses: any[] = []; // mocked server data
-  const counts: any[] = [];
-  const countMap = new Map();
-
+  const { data, loading, error } = usePageData<any>('/admin/courses')
+  if (loading) return <PageLoading />
+  if (error) return <PageError error={error} />
+  const { courses, countMap } = data
 
   return (
     <div className="mx-auto w-full max-w-7xl">
@@ -43,8 +42,8 @@ export default function AdminCoursesPage() {
             <CourseCard
               key={course.id}
               course={course}
-              moduleCount={countMap.get(course.id)?.modules ?? 0}
-              videoCount={countMap.get(course.id)?.videos ?? 0}
+              moduleCount={countMap[course.id]?.modules ?? 0}
+              videoCount={countMap[course.id]?.videos ?? 0}
             />
           ))}
         </div>

@@ -1,9 +1,9 @@
 // @ts-nocheck
 
-import { useLocation, useParams } from "wouter";
 import { useState, useTransition } from 'react'
 import { Loader2, Plus } from 'lucide-react'
 import { addMoreCalls } from '@/app/actions/reactivation'
+import { useRouter } from '@/hooks/use-router'
 
 interface Props {
   /** Uncalled contacts still held in reserve */
@@ -22,7 +22,7 @@ interface Props {
  * on demand. Only rendered when there are contacts still waiting in reserve.
  */
 export function AddMoreCalls({ waiting, batchSize, variant }: Props) {
-  const [, setLocation] = useLocation();
+  const router = useRouter()
   const [pending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
 
@@ -32,7 +32,7 @@ export function AddMoreCalls({ waiting, batchSize, variant }: Props) {
   function handleClick() {
     setError(null)
     startTransition(async () => {
-      const res = null as any; // mocked server data
+      const res = await addMoreCalls(batchSize)
       if (res?.error) setError(res.error)
       else router.refresh()
     })

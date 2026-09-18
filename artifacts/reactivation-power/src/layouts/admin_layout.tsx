@@ -2,9 +2,14 @@ import type React from 'react'
 import { AdminSidebar } from '@/components/admin/sidebar'
 import { UploadTray } from '@/components/admin/upload-tray'
 import { Toaster } from '@/components/ui/sonner'
-
+import { usePageData } from '@/hooks/use-page-data'
+import { PageError, PageLoading } from '@/components/page-status'
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  const { loading, error } = usePageData('/admin/_layout')
+  if (loading) return <PageLoading />
+  if (error) return <PageError error={error} />
+
   return (
     <div className="flex min-h-screen">
       <AdminSidebar />

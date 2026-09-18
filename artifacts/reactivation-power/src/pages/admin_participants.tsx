@@ -1,46 +1,25 @@
 // @ts-nocheck
-import { useParams } from 'wouter';
+import { useSearch } from 'wouter';
 import { Link } from "wouter";
-import { getViewerRows, formatDuration } from '@/lib/data/analytics'
-import { getAdminClient } from '@/lib/supabase/admin'
+import { formatDuration } from '@/lib/format'
 import { Badge } from '@/components/ui/badge'
 import { NewParticipantButton } from '@/components/admin/new-participant-dialog'
 import { ViewerSearch } from '@/components/admin/viewer-search'
 import { formatDateTime } from '@/lib/format'
+import { usePageData } from '@/hooks/use-page-data'
+import { PageError, PageLoading } from '@/components/page-status'
 
 export default function ViewersPage() {
-  const params = useParams();
-
-  const searchParams = new URLSearchParams(window.location.search);
+  const searchParams = new URLSearchParams(useSearch())
   const q = searchParams.get('q') || '';
   const openNew = searchParams.get('new');
   const status = searchParams.get('status') || 'active';
-  const showDisabled = status === 'disabled'
-  const viewers: any[] = [];
-  const videoCount = 0;
-
-  const query = q.trim().toLowerCase()
-  const filtered = query
-    ? viewers.filter(
-        (v) =>
-          `${v.first_name} ${v.last_name}`.toLowerCase().includes(query) ||
-          v.email.toLowerCase().includes(query) ||
-          (v.phone ?? '').toLowerCase().includes(query),
-      )
-    : viewers
-
-  const allOwners = filtered.filter((v) => v.role === 'owner')
-  const activeCount = allOwners.filter((v) => v.is_active).length
-  const disabledCount = allOwners.length - activeCount
-  const owners = allOwners.filter((v) =>
-    showDisabled ? !v.is_active : v.is_active,
-  )
-  const staffByParent = new Map<string, typeof filtered>()
-  for (const v of viewers.filter((v) => v.role === 'staff')) {
-    const list = staffByParent.get(v.parent_id!) ?? []
-    list.push(v)
-    staffByParent.set(v.parent_id!, list)
-  }
+  const { data, loading, error } = usePageData<any>('/admin/participants', {
+    q, new: openNew ?? undefined, status,
+  })
+  if (loading) return <PageLoading />
+  if (error) return <PageError error={error} />
+  const { showDisabled, viewers, videoCount, query, activeCount, disabledCount, owners, staffByParent } = data
 
   return (
     <div className="mx-auto w-full max-w-7xl">
@@ -140,7 +119,7 @@ export default function ViewersPage() {
               </tr>
             )}
             {owners.map((viewer) => {
-              const staff = staffByParent.get(viewer.id) ?? []
+              const staff = staffByParent[viewer.id] ?? []
               return (
                 <tr
                   key={viewer.id}

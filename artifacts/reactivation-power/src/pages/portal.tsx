@@ -1,44 +1,16 @@
 // @ts-nocheck
 import { Link } from "wouter";
-import { useLocation, useParams } from "wouter";
 import { PlayCircle } from 'lucide-react'
-import {
-  accessOwnerId,
-  getCurrentParticipant,
-  getStaffMembers,
-} from '@/lib/data/participants'
-import {
-  getAccessibleCourses,
-  getCourseTree,
-  getOwnerSectors,
-} from '@/lib/data/courses'
-import {
-  computeCourseState,
-  getProgressForParticipant,
-} from '@/lib/data/progress'
 import { MAX_STAFF } from '@/lib/types'
 import { AddCallerDialog } from '@/components/reactivation/add-caller-dialog'
+import { usePageData } from '@/hooks/use-page-data'
+import { PageError, PageLoading } from '@/components/page-status'
 
 export default function PortalHomePage() {
-  const participant = {
-    id: 'preview-owner',
-    parent_id: null,
-    role: 'owner',
-    first_name: 'Practice',
-    last_name: 'Owner',
-    email: 'preview@reactivationpower.com',
-    is_active: true,
-  } as any
-
-  const ownerId = accessOwnerId(participant)
-  const isOwner = participant.role === 'owner'
-  const courses: any[] = [];
-  const staff: any[] = [];
-  const sectors: string[] = [];
-  const entityLabel = sectors.includes('healthcare') ? 'practice' : 'business'
-  const activeStaff = staff.filter((s) => s.is_active).length
-
-  const withProgress: any[] = [];
+  const { data, loading, error } = usePageData<any>('/portal')
+  if (loading) return <PageLoading />
+  if (error) return <PageError error={error} />
+  const { participant, isOwner, entityLabel, activeStaff, withProgress } = data
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-12">

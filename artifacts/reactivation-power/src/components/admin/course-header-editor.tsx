@@ -8,16 +8,19 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import type { Course } from '@/lib/types'
+import { useRouter } from '@/hooks/use-router'
 
 export function CourseHeaderEditor({ course }: { course: Course }) {
   const [editing, setEditing] = useState(false)
   const [pending, startTransition] = useTransition()
+  const router = useRouter()
 
   function save(formData: FormData) {
     formData.set('id', course.id)
     startTransition(async () => {
       await updateCourse(formData)
       setEditing(false)
+      router.refresh()
     })
   }
 

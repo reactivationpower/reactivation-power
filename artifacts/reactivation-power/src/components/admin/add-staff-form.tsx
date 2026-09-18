@@ -15,6 +15,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { UserPlus } from 'lucide-react'
+import { useRouter } from '@/hooks/use-router'
 
 export function AddStaffForm({
   parentId,
@@ -23,7 +24,7 @@ export function AddStaffForm({
   parentId: string
   disabled?: boolean
 }) {
-  const [, setLocation] = useLocation();
+  const router = useRouter()
   const [open, setOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [pending, setPending] = useState(false)
@@ -34,7 +35,7 @@ export function AddStaffForm({
     setError(null)
     const fd = new FormData(e.currentTarget)
     fd.set('parentId', parentId)
-    const res = null as any; // mocked server data
+    const res = await createParticipant(fd)
     setPending(false)
     if (res?.error) {
       setError(res.error)

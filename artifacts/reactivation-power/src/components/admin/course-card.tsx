@@ -4,6 +4,7 @@ import { Link } from "wouter";
 import { useState, useTransition } from 'react'
 import { Check, Layers, LinkIcon, PlayCircle } from 'lucide-react'
 import { updateCourse } from '@/app/actions/admin'
+import { useRouter } from '@/hooks/use-router'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { notifyDone, notifyError } from '@/lib/notify'
@@ -18,6 +19,7 @@ export function CourseCard({
   moduleCount: number
   videoCount: number
 }) {
+  const router = useRouter()
   const [copied, setCopied] = useState(false)
   const [pending, startTransition] = useTransition()
 
@@ -39,6 +41,7 @@ export function CourseCard({
       formData.set('id', course.id)
       formData.set('status', course.status === 'live' ? 'draft' : 'live')
       await updateCourse(formData)
+      router.refresh()
     })
   }
 

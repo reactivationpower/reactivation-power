@@ -16,6 +16,7 @@ import {
   uploadFileWithProgress,
 } from '@/lib/upload-client'
 import { adminMediaUrl } from '@/lib/media'
+import { useRouter } from '@/hooks/use-router'
 
 type Phase = 'idle' | 'saving' | 'done' | 'error'
 
@@ -41,6 +42,7 @@ export function ThumbnailDialog({
   const [phase, setPhase] = useState<Phase>('idle')
   const [error, setError] = useState<string | null>(null)
   const busy = phase === 'saving'
+  const router = useRouter()
 
   async function saveThumbnail(blob: Blob, fileName: string) {
     setPhase('saving')
@@ -49,14 +51,14 @@ export function ThumbnailDialog({
       const file = new File([blob], fileName, {
         type: blob.type || 'image/jpeg',
       })
-      throw new Error('File uploads are disabled in this read-only port.')
-      const result = null as any;
+      const result = await uploadFileWithProgress(file, 'thumbnail', () => {})
       const formData = new FormData()
       formData.set('id', videoId)
       formData.set('courseId', courseId)
       formData.set('thumbnailUrl', result.pathname)
-      const res = null as any; // mocked server data
+      const res = await updateVideo(formData)
       if (res?.error) throw new Error(res.error)
+      router.refresh()
       setPhase('done')
       setTimeout(() => {
         setPhase('idle')
@@ -75,7 +77,7 @@ export function ThumbnailDialog({
       return
     }
     try {
-      const blob = null as any; // mocked server data
+      const blob = await captureFrameFromElement(video)
       await saveThumbnail(blob, `frame-${videoId}.jpg`)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not capture frame')

@@ -5,15 +5,18 @@
     "tsBuildInfoFile": ".tsbuildinfo",
     "outDir": "dist",
     "rootDir": "src",
-    "types": ["node"]
+    "types": ["node"],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "next/headers": ["src/shims/next-headers.ts"],
+      "next/navigation": ["src/shims/next-navigation.ts"],
+      "next/cache": ["src/shims/next-cache.ts"]
+    }
   },
   "include": ["src"],
   "references": [
-    {
-      "path": "../../lib/db"
-    },
-    {
-      "path": "../../lib/api-zod"
-    }
+    { "path": "../../lib/db" },
+    { "path": "../../lib/api-zod" }
   ]
 }

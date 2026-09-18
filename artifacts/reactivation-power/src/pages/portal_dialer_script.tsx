@@ -1,34 +1,24 @@
 // @ts-nocheck
 import { Link } from "wouter";
-import { useLocation, useParams } from "wouter";
+import { useSearch } from "wouter";
 import { ArrowLeft } from 'lucide-react'
-import {
-  accessOwnerId,
-  getCurrentParticipant,
-  getParticipantById,
-} from '@/lib/data/participants'
-import { getOwnerNiches, getScriptFlow } from '@/lib/data/reactivation'
-import { getOwnerSectors } from '@/lib/data/courses'
 import { ScriptViewer } from '@/components/reactivation/script-viewer'
+import { usePageData } from '@/hooks/use-page-data'
+import { PageError, PageLoading } from '@/components/page-status'
+import NotFound from '@/pages/not-found'
 
 export default function PracticeScriptPage() {
-  const params = useParams();
-
-  const { screen, from, course } = null as any; // mocked server data
-  const participant = null as any; // mocked server data
-  if (!participant) /* redirect */ (`/login?next=/portal/dialer`)
-
-  // Only a plain slug is allowed back into the href, so the query string can't
-  // steer the link anywhere but a course page.
-  const courseSlug = from === 'course' && course && /^[a-z0-9-]+$/i.test(course) ? course : null
-  const backHref = courseSlug ? `/portal/course/${courseSlug}` : '/portal/dialer'
-  const backLabel = courseSlug ? 'Back to Training' : 'Back to Dialer'
-
-  const ownerId = accessOwnerId(participant)
-  const sectors = null as any; // mocked server data
-  const niches: any[] = [];
-  const flow: any = { steps: [], choices: [] };
-  const owner: any = null;
+  const search = new URLSearchParams(useSearch())
+  const query = {
+    screen: search.get('screen') ?? undefined,
+    from: search.get('from') ?? undefined,
+    course: search.get('course') ?? undefined,
+  }
+  const { data, loading, error, notFound } = usePageData<any>('/portal/dialer/script', query)
+  if (loading) return <PageLoading />
+  if (notFound) return <NotFound />
+  if (error) return <PageError error={error} />
+  const { screen, participant, niches, flow, owner, backHref, backLabel } = data
 
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6">

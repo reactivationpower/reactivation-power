@@ -1,20 +1,8 @@
 // @ts-nocheck
 import { useParams } from 'wouter';
 import { Link } from "wouter";
-// import { notFound, redirect } from 'next/navigation'
 import { ArrowLeft, CalendarCheck } from 'lucide-react'
-import {
-  accessOwnerId,
-  getCurrentParticipant,
-  getParticipantById,
-} from '@/lib/data/participants'
-import { getAccessibleCourseIds } from '@/lib/data/courses'
-import {
-  getCallAnalytics,
-  getTrainingAudit,
-  sameAccount,
-  MIN_BUCKET_SAMPLE,
-} from '@/lib/data/caller-analytics'
+import { MIN_BUCKET_SAMPLE } from '@/lib/analytics-types'
 import { PORTAL_WIDTH } from '@/lib/portal-layout'
 import {
   ActivityTrendChart,
@@ -32,26 +20,22 @@ import {
   relativeDay,
 } from '@/components/analytics/blocks'
 import { TrainingAudit } from '@/components/analytics/training-audit'
+import { usePageData } from '@/hooks/use-page-data'
+import { PageError, PageLoading } from '@/components/page-status'
+import NotFound from '@/pages/not-found'
 
 
 export default function CallerAnalyticsPage() {
   const params = useParams();
 
   const { callerId } = params
-  const viewer = null as any; // mocked server data
-  if (!viewer) /* redirect */ ('/login')
-  const ownerId = accessOwnerId(viewer)
-
-  const caller = null as any; // mocked server data
-  // Anyone on the account can view any teammate; nobody can view another account.
-  if (!caller || !sameAccount(caller, ownerId)) notFound()
-
-  const analytics: any = { summary: { calls: 0, upcomingAppointments: 0 }, byWeek: [], dispositions: [], byHour: [], byWeekday: [], byMonthWeek: [], byMonth: [], byNiche: [], insights: [] };
-  const courseIds: string[] = [];
-  const audit = null as any; // mocked server data
-
-  const s = analytics.summary
-  const hasCalls = s.calls > 0
+  const { data, loading, error, notFound } = usePageData<any>(
+    `/portal/analytics/${callerId}`,
+  )
+  if (loading) return <PageLoading />
+  if (notFound) return <NotFound />
+  if (error) return <PageError error={error} />
+  const { caller, analytics, audit, s, hasCalls } = data
 
   return (
     <div className={`${PORTAL_WIDTH} flex flex-col gap-6 py-8`}>

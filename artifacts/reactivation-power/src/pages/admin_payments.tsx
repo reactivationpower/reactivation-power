@@ -1,10 +1,14 @@
 // @ts-nocheck
-import { listPaymentLinks } from '@/app/actions/payments'
 import { PaymentsManager } from '@/components/admin/payments-manager'
+import { usePageData } from '@/hooks/use-page-data'
+import { PageError, PageLoading } from '@/components/page-status'
 
 
 export default function AdminPaymentsPage() {
-  const links = null as any; // mocked server data
+  const { data, loading, error } = usePageData<any>('/admin/payments')
+  if (loading) return <PageLoading />
+  if (error) return <PageError error={error} />
+  const { links } = data
 
   return (
     <div className="flex h-full flex-col gap-4 p-6">

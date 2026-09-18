@@ -1,7 +1,6 @@
 // @ts-nocheck
 
 import { useState, useTransition } from 'react'
-import { useLocation, useParams } from "wouter";
 import { Check } from 'lucide-react'
 import { updateMyProfile } from '@/app/actions/reactivation'
 import type { Participant } from '@/lib/types'
@@ -9,10 +8,11 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { PhoneInput } from '@/components/reactivation/phone-input'
+import { useRouter } from '@/hooks/use-router'
 
 /** Any signed-in user (owner or caller) edits their own name / email / phone. */
 export function MyProfileForm({ participant }: { participant: Participant }) {
-  const [, setLocation] = useLocation();
+  const router = useRouter()
   const [error, setError] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
   const [pending, startTransition] = useTransition()
@@ -20,7 +20,7 @@ export function MyProfileForm({ participant }: { participant: Participant }) {
   function submit(formData: FormData) {
     setError(null)
     startTransition(async () => {
-      const res = null as any; // mocked server data
+      const res = await updateMyProfile(formData)
       if (res?.error) {
         setError(res.error)
         return

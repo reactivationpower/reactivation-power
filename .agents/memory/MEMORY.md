@@ -1,0 +1,1 @@
+- [Next.js port architecture](next-port-architecture.md) — actions via allow-listed RPC + per-page loaders; CRLF sources, headless H.264 limits, placeholder-grep first.

@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { Plus, Trash2 } from 'lucide-react'
 import { createNiche, deleteNiche, updateNiche } from '@/app/actions/reactivation'
+import { useRouter } from '@/hooks/use-router'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
@@ -18,6 +19,7 @@ import { SECTOR_LABELS, type Niche, type Sector } from '@/lib/types'
 const SECTOR_ORDER: Sector[] = ['healthcare', 'home_services']
 
 export function NicheManager({ niches }: { niches: Niche[] }) {
+  const router = useRouter()
   const [newName, setNewName] = useState('')
   const [newSector, setNewSector] = useState<Sector>('healthcare')
   const [error, setError] = useState<string | null>(null)
@@ -31,9 +33,12 @@ export function NicheManager({ niches }: { niches: Niche[] }) {
       const formData = new FormData()
       formData.set('name', name)
       formData.set('sector', newSector)
-      const res = null as any; // mocked server data
+      const res = await createNiche(formData)
       if (res?.error) setError(res.error)
-      else setNewName('')
+      else {
+        setNewName('')
+        router.refresh()
+      }
     })
   }
 
@@ -43,6 +48,7 @@ export function NicheManager({ niches }: { niches: Niche[] }) {
       formData.set('id', niche.id)
       formData.set('isActive', String(active))
       await updateNiche(formData)
+      router.refresh()
     })
   }
 
@@ -54,6 +60,7 @@ export function NicheManager({ niches }: { niches: Niche[] }) {
       formData.set('id', niche.id)
       formData.set('name', trimmed)
       await updateNiche(formData)
+      router.refresh()
     })
   }
 
@@ -62,6 +69,7 @@ export function NicheManager({ niches }: { niches: Niche[] }) {
       return
     startTransition(async () => {
       await deleteNiche(id)
+      router.refresh()
     })
   }
 

@@ -197,7 +197,11 @@ export function BookingCalendar({
     if (!selectedSlot) return
     setBooking(true)
     setBookError(null)
-    const res = null as any;
+    const res = await bookStrategyCall({
+      contactId,
+      slot: selectedSlot,
+      timezone,
+    })
     if (res.ok) {
       // Leave the button in its "Booking…" state while the thank-you page loads
       const url = new URL(thankYouHref, window.location.origin)

@@ -1,36 +1,23 @@
 // @ts-nocheck
 import { useParams } from 'wouter';
 import { Link } from "wouter";
-// import { notFound, redirect } from 'next/navigation'
 import { ArrowLeft, Phone } from 'lucide-react'
-import {
-  accessOwnerId,
-  getCurrentParticipant,
-} from '@/lib/data/participants'
-import {
-  getCallHistory,
-  getContact,
-  getOwnerNiches,
-  getPipelineStages,
-} from '@/lib/data/reactivation'
 import { DISPOSITION_LABELS } from '@/lib/types'
 import { ContactEditor } from '@/components/reactivation/contact-editor'
 import { DeleteContactButton } from '@/components/reactivation/delete-contact-button'
+import { usePageData } from '@/hooks/use-page-data'
+import { PageError, PageLoading } from '@/components/page-status'
+import NotFound from '@/pages/not-found'
 
 export default function ContactProfilePage() {
   const params = useParams();
 
   const { id } = params
-  const participant = null as any; // mocked server data
-  if (!participant) /* redirect */ ('/login')
-  const ownerId = accessOwnerId(participant)
-
-  const contact = null as any; // mocked server data
-  if (!contact || contact.owner_id !== ownerId) notFound()
-
-  const history: any[] = [];
-  const stages: any[] = [];
-  const niches: any[] = [];
+  const { data, loading, error, notFound } = usePageData<any>(`/portal/contacts/${id}`)
+  if (loading) return <PageLoading />
+  if (notFound) return <NotFound />
+  if (error) return <PageError error={error} />
+  const { contact, history, stages, niches } = data
 
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-8">

@@ -1,17 +1,5 @@
 // @ts-nocheck
-import { useLocation, useParams } from "wouter";
 import { BarChart3 } from 'lucide-react'
-import {
-  accessOwnerId,
-  getCurrentParticipant,
-  getParticipantById,
-  getStaffMembers,
-} from '@/lib/data/participants'
-import { getTeamStats } from '@/lib/data/reactivation'
-import {
-  getCallAnalytics,
-  getNicheLeaders,
-} from '@/lib/data/caller-analytics'
 import { PORTAL_WIDTH } from '@/lib/portal-layout'
 import { TeamStatsCards } from '@/components/reactivation/team-stats'
 import {
@@ -20,25 +8,15 @@ import {
 } from '@/components/analytics/call-charts'
 import { InsightGrid, Section } from '@/components/analytics/blocks'
 import { NicheLeaderBoard } from '@/components/analytics/niche-leaders'
+import { usePageData } from '@/hooks/use-page-data'
+import { PageError, PageLoading } from '@/components/page-status'
 
 
 export default function AnalyticsPage() {
-  const participant = null as any; // mocked server data
-  if (!participant) /* redirect */ ('/login')
-
-  const ownerId = accessOwnerId(participant)
-  const owner =
-    participant.role === 'owner'
-      ? participant
-      : null as any
-  if (!owner) /* redirect */ ('/login')
-
-  const staff = null as any; // mocked server data
-  const members = [owner, ...staff]
-  const memberIds = members.map((m) => m.id)
-  const teamStats: any = {};
-  const team: any = { insights: [], byWeek: [], byMonth: [] };
-  const leaders: any[] = [];
+  const { data, loading, error } = usePageData<any>('/portal/analytics')
+  if (loading) return <PageLoading />
+  if (error) return <PageError error={error} />
+  const { teamStats, team, leaders } = data
 
   return (
     <div className={`${PORTAL_WIDTH} flex flex-col gap-8 py-8`}>

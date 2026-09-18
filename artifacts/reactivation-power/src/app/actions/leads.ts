@@ -1,6 +1,12 @@
-import { toast } from 'sonner';
+// Thin client stubs for the server actions in artifacts/api-server/src/actions/leads.ts
+import { action } from '@/lib/api'
 
-export type LeadState = any;
-export type LoginState = any;
-export const lookupZip = async (...args: any[]) => { return { city: 'Anytown', state: 'NY', success: true }; };
-export const submitHealthcareLead = async (...args: any[]) => { toast.error('Backend operations are disabled in this read-only port.'); return { success: false, error: 'Backend operations are disabled in this read-only port.' }; };
+export interface LeadState {
+  error?: string
+  fieldErrors?: Record<string, string>
+  values?: Record<string, string>
+  services?: string[]
+}
+
+export const lookupZip = action<any>('leads', 'lookupZip')
+export const submitHealthcareLead = action<any>('leads', 'submitHealthcareLead')

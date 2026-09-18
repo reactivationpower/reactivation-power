@@ -1,28 +1,28 @@
 // @ts-nocheck
-import { useParams } from 'wouter';
-
 import { Link } from "wouter";
+import { useSearch } from 'wouter'
 import { CalendarClock, CheckCircle2 } from 'lucide-react'
 import { BookingCalendar } from '@/components/landing/booking-calendar'
+import { usePageData } from '@/hooks/use-page-data'
+import { PageError, PageLoading } from '@/components/page-status'
 
 
 
 export default function BookACallPage() {
-  const params = useParams();
-
-  const searchParamsMock = null as any;
-  const contactId =
-    typeof searchParamsMock?.cid === 'string' ? searchParamsMock?.cid?.slice(0, 64) : ''
-  const firstName =
-    typeof params.name === 'string' ? params.name.slice(0, 40) : ''
-
-  // Everything the thank-you page needs to greet them and run the calculator
-  const carried = new URLSearchParams()
-  for (const key of ['name', 'cid', 'inactive', 'value', 'services']) {
-    const v = searchParamsMock?.[key]
-    if (typeof v === 'string' && v) carried.set(key, v.slice(0, 600))
-  }
-  const thankYouHref = `/healthcare/thank-you?${carried.toString()}`
+  const search = new URLSearchParams(useSearch())
+  const query = Object.fromEntries(
+    ['cid', 'name', 'inactive', 'value', 'services'].map((key) => [
+      key,
+      search.get(key) ?? undefined,
+    ]),
+  )
+  const { data, loading, error } = usePageData<any>(
+    '/healthcare/book-a-call',
+    query,
+  )
+  if (loading) return <PageLoading />
+  if (error) return <PageError error={error} />
+  const { contactId, firstName, thankYouHref } = data
 
   return (
     <main className="flex min-h-screen flex-col bg-background">

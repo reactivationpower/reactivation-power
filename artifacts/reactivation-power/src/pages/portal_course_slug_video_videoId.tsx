@@ -1,64 +1,28 @@
 // @ts-nocheck
 import { useParams } from 'wouter';
 import { Link } from "wouter";
-// import { notFound, redirect } from 'next/navigation'
 import { ArrowLeft, Lock, Play } from 'lucide-react'
 import { mediaUrl } from '@/lib/media'
-import {
-  accessOwnerId,
-  getCurrentParticipant,
-} from '@/lib/data/participants'
-import {
-  getAccessibleCourseIds,
-  getAttachmentsForVideos,
-  getCourseBySlug,
-  getCourseTree,
-} from '@/lib/data/courses'
-import {
-  computeCourseState,
-  getProgressForParticipant,
-} from '@/lib/data/progress'
 import { VideoPlayer } from '@/components/portal/video-player'
 import { AttachmentList } from '@/components/portal/attachment-list'
+import { usePageData } from '@/hooks/use-page-data'
+import { PageError, PageLoading } from '@/components/page-status'
+import NotFound from '@/pages/not-found'
 
 export default function VideoPage() {
   const params = useParams();
 
   const { slug, videoId } = params
-  const participant = null as any; // mocked server data
-  if (!participant) /* redirect */ (`/login?next=/portal/course/${slug}`)
-
-  const course = null as any; // mocked server data
-  if (!course || course.status !== 'live') notFound()
-
-  const accessibleIds: string[] = [];
-  if (!accessibleIds.includes(course.id)) /* redirect */ ('/portal')
-
-  const tree: any = null; notFound()
-
-  // Flatten videos in course order
-  const flat = tree.modules.flatMap((m) =>
-    m.videos.map((v) => ({ video: v, module: m })),
+  const { data, loading, error, notFound } = usePageData<any>(
+    `/portal/course/${slug}/video/${videoId}`,
   )
-  const currentIndex = flat.findIndex((f) => f.video.id === videoId)
-  if (currentIndex === -1) notFound()
-  const { video, module } = flat[currentIndex]
-
-  const videoIds = flat.map((f) => f.video.id)
-  const progress: any[] = [];
-  const videoStates = new Map(
-    state.modules.flatMap((m) => m.videos.map((v) => [v.videoId, v])),
-  )
-
-  const currentState = videoStates.get(videoId)
-  if (currentState?.locked) /* redirect */ (`/portal/course/${slug}`)
-
-  const attachments = null as any; // mocked server data
-  const prev = currentIndex > 0 ? flat[currentIndex - 1] : null
-  const next = currentIndex < flat.length - 1 ? flat[currentIndex + 1] : null
-  const nextState = next ? videoStates.get(next.video.id) : null
-
-  const upNext = flat.slice(currentIndex + 1, currentIndex + 6)
+  if (loading) return <PageLoading />
+  if (notFound) return <NotFound />
+  if (error) return <PageError error={error} />
+  const {
+    course, video, module, currentState, attachments, prev, next, upNext,
+    videoStates,
+  } = data
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-10">
@@ -119,7 +83,7 @@ export default function VideoPage() {
               </li>
             )}
             {upNext.map(({ video: nextVideo, module: nextModule }) => {
-              const s = videoStates.get(nextVideo.id)
+              const s = videoStates[nextVideo.id]
               const locked = s?.locked ?? true
               const inner = (
                 <div className="flex h-full items-center gap-3 rounded-lg border border-border bg-card p-3">

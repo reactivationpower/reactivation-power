@@ -2,10 +2,10 @@
 import { useParams } from 'wouter';
 
 import { Link } from "wouter";
-// import { notFound, redirect } from 'next/navigation'
 import { CheckCircle2 } from 'lucide-react'
-
-import { confirmPayment, getPaymentLinkPublic } from '@/app/actions/payments'
+import { usePageData } from '@/hooks/use-page-data'
+import { PageError, PageLoading } from '@/components/page-status'
+import NotFound from '@/pages/not-found'
 
 
 
@@ -19,14 +19,13 @@ export default function ThankYouPage() {
   const params = useParams();
 
   const { token } = params
-  const link = null as any; // mocked server data
-  if (!link) notFound()
-
-  // Verify with Stripe server-side — never trust the URL alone
-  if (link.status !== 'paid') {
-    const { paid } = null as any; // mocked server data
-    if (!paid) /* redirect */ (`/pay/${token}`)
-  }
+  const { data, loading, error, notFound } = usePageData<any>(
+    `/pay/${token}/thank-you`,
+  )
+  if (loading) return <PageLoading />
+  if (notFound) return <NotFound />
+  if (error) return <PageError error={error} />
+  const { link } = data
 
   return (
     <main className="min-h-screen bg-background">

@@ -5,12 +5,14 @@ import { Plus } from 'lucide-react'
 import { createModule } from '@/app/actions/admin'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { useRouter } from '@/hooks/use-router'
 
 export function NewModuleForm({ courseId }: { courseId: string }) {
   const [open, setOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
   const formRef = useRef<HTMLFormElement>(null)
+  const router = useRouter()
 
   if (!open) {
     return (
@@ -32,12 +34,13 @@ export function NewModuleForm({ courseId }: { courseId: string }) {
         formData.set('courseId', courseId)
         setError(null)
         startTransition(async () => {
-          const result = null as any; // mocked server data
+          const result = await createModule(formData)
           if (result.error) {
             setError(result.error)
           } else {
             formRef.current?.reset()
             setOpen(false)
+            router.refresh()
           }
         })
       }}

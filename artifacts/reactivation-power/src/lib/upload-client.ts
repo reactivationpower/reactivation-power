@@ -1,5 +1,7 @@
 // @ts-nocheck
 
+import { upload } from '@vercel/blob/client'
+
 export interface UploadResult {
   pathname: string
   fileName: string
@@ -7,14 +9,37 @@ export interface UploadResult {
   fileType: string
 }
 
+/** Files over this size use multipart upload (parallel parts + retry) */
 const MULTIPART_THRESHOLD = 20 * 1024 * 1024 // 20MB
 
+/**
+ * Upload a file DIRECTLY to Blob storage from the browser and report
+ * progress (0-100). The file never passes through our server — required for
+ * large videos (150MB+), since serverless functions cap request bodies at
+ * ~4.5MB in production. Large files are split into parts that upload in
+ * parallel and retry individually on failure.
+ */
 export async function uploadFileWithProgress(
   file: File,
   kind: 'video' | 'attachment' | 'thumbnail',
   onProgress: (percent: number) => void,
 ): Promise<UploadResult> {
-  throw new Error('File uploads are not implemented in this read-only port.')
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
+  const blob = await upload(`${kind}s/${safeName}`, file, {
+    access: 'private',
+    handleUploadUrl: '/api/upload/token',
+    contentType: file.type || 'application/octet-stream',
+    multipart: file.size > MULTIPART_THRESHOLD,
+    onUploadProgress: ({ percentage }) => {
+      onProgress(Math.round(percentage))
+    },
+  })
+  return {
+    pathname: blob.pathname,
+    fileName: file.name,
+    fileSize: file.size,
+    fileType: file.type,
+  }
 }
 
 export function uploadFile(
@@ -24,6 +49,7 @@ export function uploadFile(
   return uploadFileWithProgress(file, kind, () => {})
 }
 
+/** Draw the current frame of a <video> element to a JPEG blob (max 1280px wide) */
 export function captureFrameFromElement(
   video: HTMLVideoElement,
 ): Promise<Blob> {
@@ -45,6 +71,11 @@ export function captureFrameFromElement(
   })
 }
 
+/**
+ * Load a video source (object URL or same-origin URL), seek to `time`,
+ * and capture that frame as a JPEG blob. Used for auto thumbnails.
+ * Defaults to 1.5s in — the literal first frame is often black (fade-in).
+ */
 export function captureFrameFromSource(
   src: string,
   time = 1.5,
@@ -69,6 +100,7 @@ export function captureFrameFromSource(
       cleanup()
       reject(new Error(message))
     }
+    // Large videos can stall decoding — never hang the save step forever
     const timer = setTimeout(
       () => fail('Thumbnail capture timed out'),
       timeoutMs,
@@ -96,6 +128,7 @@ export function captureFrameFromSource(
   })
 }
 
+/** Read the duration of a local video file before upload (0 on failure) */
 export function readVideoDuration(
   file: File,
   timeoutMs = 15000,
@@ -112,6 +145,7 @@ export function readVideoDuration(
       URL.revokeObjectURL(url)
       resolve(value)
     }
+    // Never hang the save step if metadata refuses to load
     const timer = setTimeout(() => finish(0), timeoutMs)
     video.onloadedmetadata = () => {
       finish(Number.isFinite(video.duration) ? Math.round(video.duration) : 0)

@@ -1,12 +1,15 @@
-import { toast } from 'sonner';
+// Thin client stubs for the server actions in artifacts/api-server/src/actions/payments.ts
+import { action } from '@/lib/api'
 
-export type LeadState = any;
-export type LoginState = any;
-export const confirmPayment = async (...args: any[]) => { toast.error('Backend operations are disabled in this read-only port.'); return { success: false, error: 'Backend operations are disabled in this read-only port.' }; };
-export const deletePaymentLink = async (...args: any[]) => { toast.error('Backend operations are disabled in this read-only port.'); return { success: false, error: 'Backend operations are disabled in this read-only port.' }; };
-export const provisionAccountsNow = async (...args: any[]) => { toast.error('Backend operations are disabled in this read-only port.'); return { success: false, error: 'Backend operations are disabled in this read-only port.' }; };
-export const startPaymentCheckout = async (...args: any[]) => { toast.error('Backend operations are disabled in this read-only port.'); return { success: false, error: 'Backend operations are disabled in this read-only port.' }; };
-export const createPaymentLink = async (...args: any[]) => { toast.error('Backend operations are disabled in this read-only port.'); return { success: false, error: 'Backend operations are disabled in this read-only port.' }; };
-export const listPaymentLinks = async (...args: any[]) => { toast.error('Backend operations are disabled in this read-only port.'); return []; };
-export const getPaymentDetail = async (...args: any[]) => { toast.error('Backend operations are disabled in this read-only port.'); return null; };
-export const getPaymentLinkPublic = async (...args: any[]) => { toast.error('Backend operations are disabled in this read-only port.'); return { success: false, error: 'Backend operations are disabled in this read-only port.' }; };
+export type StaffMember = any
+export type PaymentLink = any
+export type ProvisionedAccount = any
+
+export const createPaymentLink = action<any>('payments', 'createPaymentLink')
+export const listPaymentLinks = action<any>('payments', 'listPaymentLinks')
+export const getPaymentDetail = action<any>('payments', 'getPaymentDetail')
+export const deletePaymentLink = action<any>('payments', 'deletePaymentLink')
+export const startPaymentCheckout = action<any>('payments', 'startPaymentCheckout')
+export const confirmPayment = action<any>('payments', 'confirmPayment')
+export const provisionAccountsNow = action<any>('payments', 'provisionAccountsNow')
+export const getPaymentLinkPublic = action<any>('payments', 'getPaymentLinkPublic')

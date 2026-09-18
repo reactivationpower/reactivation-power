@@ -1,52 +1,27 @@
 // @ts-nocheck
 import { useParams } from 'wouter';
 import { Link } from "wouter";
-// import { notFound, redirect } from 'next/navigation'
 import { ArrowLeft, Lock } from 'lucide-react'
-import {
-  accessOwnerId,
-  getCurrentParticipant,
-  getParticipantById,
-} from '@/lib/data/participants'
-import {
-  getCallHistory,
-  getCallQueue,
-  getContact,
-  getMasterScript,
-  getOwnerNiches,
-  getScriptFlow,
-  getScriptSections,
-} from '@/lib/data/reactivation'
-import { getOwnerSectors } from '@/lib/data/courses'
 import { CallScreen } from '@/components/reactivation/call-screen'
+import { usePageData } from '@/hooks/use-page-data'
+import { PageError, PageLoading } from '@/components/page-status'
+import NotFound from '@/pages/not-found'
 
 export default function CallPage() {
   const params = useParams();
-
   const { contactId } = params
-  const participant = null as any; // mocked server data
-  if (!participant) /* redirect */ (`/login?next=/portal/dialer`)
-
-  const ownerId = accessOwnerId(participant)
-  const contact = null as any; // mocked server data
-  if (!contact || contact.owner_id !== ownerId) notFound()
-
-  const sectors = null as any; // mocked server data
-  const niches: any[] = [];
-  const script: any = null;
-  const sections: any[] = [];
-  const queue: any[] = [];
-  const owner: any = null;
-  const callHistory: any[] = [];
-  const flow: any = null;
-
-  // Next contact in the queue after this one (for "next call" advance)
-  const remaining = queue.filter((q) => q.contact.id !== contactId)
-  const nextContactId = remaining[0]?.contact.id ?? null
+  const { data, loading, error, notFound } = usePageData<any>(`/portal/dialer/call/${contactId}`)
+  if (loading) return <PageLoading />
+  if (notFound) return <NotFound />
+  if (error) return <PageError error={error} />
+  const {
+    participant, contact, niches, script, sections, owner, callHistory,
+    flow, nextContactId, nicheInactive,
+  } = data
 
   // Block calling when the contact's niche isn't active on the account —
   // loading a fallback script would risk running the wrong script live.
-  if (contact.niche && !contact.niche_active) {
+  if (nicheInactive) {
     return (
       <div className="mx-auto w-full max-w-2xl px-4 py-6 sm:px-6">
         <Link

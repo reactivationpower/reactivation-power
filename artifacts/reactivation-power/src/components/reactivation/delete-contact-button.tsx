@@ -1,10 +1,11 @@
 // @ts-nocheck
 
-import { useLocation, useParams } from "wouter";
+import { useLocation } from "wouter";
 import { useTransition } from 'react'
 import { Trash2 } from 'lucide-react'
 import { deleteContact } from '@/app/actions/reactivation'
 import { cn } from '@/lib/utils'
+import { useRouter } from '@/hooks/use-router'
 
 /**
  * Deletes a contact and everything tied to it (call history + follow-ups
@@ -26,6 +27,7 @@ export function DeleteContactButton({
   onDeleted?: () => void
 }) {
   const [, setLocation] = useLocation();
+  const router = useRouter()
   const [pending, startTransition] = useTransition()
 
   function handleClick() {
@@ -34,7 +36,7 @@ export function DeleteContactButton({
     )
     if (!confirmed) return
     startTransition(async () => {
-      const res = null as any; // mocked server data
+      const res = await deleteContact(contactId)
       if (res?.error) {
         window.alert(res.error)
         return

@@ -7,7 +7,6 @@ import {
   EmbeddedCheckout,
   EmbeddedCheckoutProvider,
 } from '@stripe/react-stripe-js'
-import { loadStripe } from '@stripe/stripe-js'
 import QRCode from 'qrcode'
 import {
   ChevronRight,
@@ -41,10 +40,9 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { notifyDone, notifyError } from '@/lib/notify'
+import { useRouter } from '@/hooks/use-router'
 
-const stripePromise = loadStripe(
-  'pk_test_mock' as string,
-)
+import { stripePromise } from '@/lib/stripe-client'
 
 const MAX_STAFF = 5
 
@@ -65,7 +63,9 @@ export function PaymentsManager({
   initialLinks: PaymentLink[]
 }) {
   const [, setLocation] = useLocation();
+  const router = useRouter()
   const [links, setLinks] = useState(initialLinks)
+  useEffect(() => setLinks(initialLinks), [initialLinks])
 
   // Create form state
   const [name, setName] = useState('')
@@ -93,7 +93,13 @@ export function PaymentsManager({
     e.preventDefault()
     setFormError(null)
     setCreating(true)
-    const res = null as any;
+    const res = await createPaymentLink({
+      name,
+      email,
+      phone,
+      staff,
+      amountDollars: Number(amount),
+    })
     setCreating(false)
     if (!res.ok || !res.link) {
       setFormError(res.error ?? 'Something went wrong.')
@@ -165,7 +171,11 @@ export function PaymentsManager({
 
   async function handleQr(link: PaymentLink) {
     try {
-      const dataUrl = null as any;
+      const dataUrl = await QRCode.toDataURL(payUrl(link.token), {
+        width: 320,
+        margin: 2,
+        color: { dark: '#1d3d47', light: '#ffffff' },
+      })
       setQrDataUrl(dataUrl)
       setQrFor(link)
       notifyDone('QR code generated', link.name)
@@ -176,7 +186,7 @@ export function PaymentsManager({
 
   async function handleDelete(link: PaymentLink) {
     if (!window.confirm(`Delete the pending link for ${link.name}?`)) return
-    const res = null as any; // mocked server data
+    const res = await deletePaymentLink(link.id)
     if (!res.ok) {
       notifyError(res.error ?? 'Could not delete the link')
       return

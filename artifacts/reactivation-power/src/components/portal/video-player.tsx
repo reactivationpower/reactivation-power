@@ -3,8 +3,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from "wouter";
 import { ArrowRight, CheckCircle2 } from 'lucide-react'
-import { useLocation, useParams } from "wouter";
 import { Button } from '@/components/ui/button'
+import { useRouter } from '@/hooks/use-router'
+import { apiUrl } from '@/lib/api'
 
 const HEARTBEAT_INTERVAL = 10 // seconds
 const MARK_COMPLETE_THRESHOLD = 75 // % watched before the button enables
@@ -40,7 +41,7 @@ export function VideoPlayer({
   const [completed, setCompleted] = useState(initialCompleted)
   const [percent, setPercent] = useState(0)
   const [marking, setMarking] = useState(false)
-  const [, setLocation] = useLocation();
+  const router = useRouter()
 
   async function sendProgress(
     event: 'heartbeat' | 'start' | 'ended',
@@ -53,9 +54,22 @@ export function VideoPlayer({
     watchedRef.current = 0
 
     try {
-      const res = { ok: true };
+      const res = await fetch(apiUrl('/progress'), {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          videoId,
+          courseId,
+          moduleId,
+          position,
+          duration,
+          secondsDelta,
+          event,
+        }),
+      })
       if (res.ok) {
-        const data = null as any; // mocked server data
+        const data = await res.json()
         if (data.completed && !completed) {
           setCompleted(true)
           router.refresh()

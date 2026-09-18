@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Plus } from 'lucide-react'
+import { useRouter } from '@/hooks/use-router'
 
 export function NewParticipantButton({
   owners,
@@ -30,7 +31,7 @@ export function NewParticipantButton({
   owners: { id: string; name: string }[]
   defaultOpen?: boolean
 }) {
-  const [, setLocation] = useLocation();
+  const router = useRouter()
   const [open, setOpen] = useState(defaultOpen)
   const [parentId, setParentId] = useState<string>('none')
   const [error, setError] = useState<string | null>(null)
@@ -42,7 +43,7 @@ export function NewParticipantButton({
     setError(null)
     const fd = new FormData(e.currentTarget)
     if (parentId !== 'none') fd.set('parentId', parentId)
-    const res = null as any; // mocked server data
+    const res = await createParticipant(fd)
     setPending(false)
     if (res?.error) {
       setError(res.error)

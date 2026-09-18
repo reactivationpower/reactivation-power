@@ -1,6 +1,9 @@
-import { toast } from 'sonner';
+// Thin client stubs for the server actions in artifacts/api-server/src/actions/auth.ts
+import { action } from '@/lib/api'
 
-export type LeadState = any;
-export type LoginState = any;
-export const logout = async (...args: any[]) => { toast.error('Backend operations are disabled in this read-only port.'); return { success: false, error: 'Backend operations are disabled in this read-only port.' }; };
-export const login = async (...args: any[]) => { toast.error('Backend operations are disabled in this read-only port.'); return { success: false, error: 'Backend operations are disabled in this read-only port.' }; };
+export interface LoginState {
+  error?: string
+}
+
+export const login = action<any>('auth', 'login')
+export const logout = action<any>('auth', 'logout')

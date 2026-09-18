@@ -4,9 +4,15 @@ import { EmailPreviewer } from '@/components/admin/email-previewer'
 import { buttonVariants } from '@/components/ui/button'
 import { EMAIL_TEMPLATES } from '@/lib/email-templates'
 import { cn } from '@/lib/utils'
+import { usePageData } from '@/hooks/use-page-data'
+import { PageError, PageLoading } from '@/components/page-status'
 
 
 export default function AdminEmailsPage() {
+  const { loading, error } = usePageData('/admin/emails')
+  if (loading) return <PageLoading />
+  if (error) return <PageError error={error} />
+
   return (
     <div className="flex h-full flex-col gap-4 p-6">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">

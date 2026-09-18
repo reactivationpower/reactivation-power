@@ -3,20 +3,22 @@ import { useParams } from 'wouter';
 import { Link } from "wouter";
 // import { notFound } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
-import { getAttachmentsForVideos, getCourseTree } from '@/lib/data/courses'
 import { CourseHeaderEditor } from '@/components/admin/course-header-editor'
 import { ModuleEditor } from '@/components/admin/module-editor'
 import { NewModuleForm } from '@/components/admin/new-module-form'
+import { usePageData } from '@/hooks/use-page-data'
+import { PageError, PageLoading } from '@/components/page-status'
+import NotFound from '@/pages/not-found'
 
 export default function CourseEditorPage() {
   const params = useParams();
 
   const { id } = params
-  const tree = null as any; // mocked server data
-  if (!tree) notFound()
-
-  const videoIds = tree.modules.flatMap((m) => m.videos.map((v) => v.id))
-  const attachments = null as any; // mocked server data
+  const { data, loading, error, notFound } = usePageData<any>(`/admin/courses/${id}`)
+  if (loading) return <PageLoading />
+  if (notFound) return <NotFound />
+  if (error) return <PageError error={error} />
+  const { tree, attachments } = data
 
   return (
     <div className="mx-auto w-full max-w-6xl">

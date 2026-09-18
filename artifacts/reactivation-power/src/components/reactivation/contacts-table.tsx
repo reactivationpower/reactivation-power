@@ -1,7 +1,7 @@
 // @ts-nocheck
 
 import { Link } from "wouter";
-import { useLocation, useParams } from "wouter";
+import { useLocation } from "wouter";
 import {
   useCallback,
   useEffect,
@@ -20,7 +20,6 @@ import {
   Trash2,
   X,
 } from 'lucide-react'
-import type { ContactWithMeta } from '@/lib/data/reactivation'
 import type { Niche, PipelineStage } from '@/lib/types'
 import { DISPOSITION_LABELS } from '@/lib/types'
 import { formatPhone } from '@/lib/phone'
@@ -37,6 +36,8 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { DeleteContactButton } from '@/components/reactivation/delete-contact-button'
+import { useRouter } from '@/hooks/use-router'
+type ContactWithMeta = any
 
 const ALL = '__all__'
 const DNC = '__dnc__'
@@ -91,6 +92,7 @@ export function ContactsTable({
   canBulkEdit?: boolean
 }) {
   const [, setLocation] = useLocation();
+  const router = useRouter()
   const [query, setQuery] = useState('')
   const [stageFilter, setStageFilter] = useState<string>(ALL)
   const [nicheFilter, setNicheFilter] = useState<string>(ALL)
@@ -205,7 +207,7 @@ export function ContactsTable({
       return
     setBulkError(null)
     startTransition(async () => {
-      const res = null as any; // mocked server data
+      const res = await bulkDeleteContacts(ids)
       if (res?.error) {
         setBulkError(res.error)
         return
@@ -220,7 +222,10 @@ export function ContactsTable({
     if (!bulkNiche) return
     setBulkError(null)
     startTransition(async () => {
-      const res = null as any; // mocked server data
+      const res = await bulkAssignNiche(
+        ids,
+        bulkNiche === NO_NICHE ? null : bulkNiche,
+      )
       if (res?.error) {
         setBulkError(res.error)
         return

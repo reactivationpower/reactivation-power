@@ -1,44 +1,23 @@
 // @ts-nocheck
 import { Link } from "wouter";
-import { useLocation, useParams } from "wouter";
 import { BookOpen, Users } from 'lucide-react'
-import {
-  accessOwnerId,
-  getCurrentParticipant,
-  getParticipantById,
-  getStaffMembers,
-} from '@/lib/data/participants'
-import {
-  getCallQueueState,
-  getOwnerNiches,
-  getTeamStats,
-} from '@/lib/data/reactivation'
-import { getOwnerSectors } from '@/lib/data/courses'
-import { DEFAULT_CALL_BATCH_SIZE } from '@/lib/types'
 import { PORTAL_WIDTH } from '@/lib/portal-layout'
 import { CallsDueSection } from '@/components/reactivation/calls-due-section'
 import { TeamStatsCards } from '@/components/reactivation/team-stats'
 import { HowItWorks } from '@/components/reactivation/how-it-works'
-
+import { usePageData } from '@/hooks/use-page-data'
+import { PageError, PageLoading } from '@/components/page-status'
+import NotFound from '@/pages/not-found'
 
 export default function DialerPage() {
-  const participant = null as any; // mocked server data
-  if (!participant) /* redirect */ ('/login')
-
-  const ownerId = accessOwnerId(participant)
-  const isOwner = participant.role === 'owner'
-
-  const owner = isOwner ? participant : null as any
-  if (!owner) /* redirect */ ('/login')
-
-  const sectors = null as any; // mocked server data
-  const batchSize = owner.call_batch_size ?? DEFAULT_CALL_BATCH_SIZE
-  const queueState: any = { followUps: 0, newCalls: 0, waiting: 0 };
-  const niches: any[] = [];
-  const staff: any[] = [];
-  const teamStats: any[] = [];
-  const { followUps, newCalls, waiting } = queueState
-  const healthcare = sectors.includes('healthcare')
+  const { data, loading, error, notFound } = usePageData<any>('/portal/dialer')
+  if (loading) return <PageLoading />
+  if (notFound) return <NotFound />
+  if (error) return <PageError error={error} />
+  const {
+    isOwner, healthcare, batchSize, niches, teamStats,
+    followUps, newCalls, waiting,
+  } = data
 
   return (
     <div className={`${PORTAL_WIDTH} py-8`}>

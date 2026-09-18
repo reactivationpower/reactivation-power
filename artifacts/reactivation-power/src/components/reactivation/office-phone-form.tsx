@@ -5,6 +5,7 @@ import { Check, Loader2, Pencil, Phone } from 'lucide-react'
 import { setOfficePhone } from '@/app/actions/reactivation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { useRouter } from '@/hooks/use-router'
 
 interface Props {
   initialPhone: string | null
@@ -20,6 +21,7 @@ function maskPhone(raw: string): string {
 }
 
 export function OfficePhoneForm({ initialPhone }: Props) {
+  const router = useRouter()
   const [editing, setEditing] = useState(!initialPhone)
   const [phone, setPhone] = useState(maskPhone(initialPhone ?? ''))
   const [saving, startSaving] = useTransition()
@@ -30,12 +32,13 @@ export function OfficePhoneForm({ initialPhone }: Props) {
     startSaving(async () => {
       const formData = new FormData()
       formData.set('officePhone', phone)
-      const result = null as any; // mocked server data
+      const result = await setOfficePhone(formData)
       if (result?.error) {
         setError(result.error)
         return
       }
       setEditing(false)
+      router.refresh()
     })
   }
 

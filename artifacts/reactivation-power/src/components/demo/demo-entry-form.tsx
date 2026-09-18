@@ -11,7 +11,7 @@ type State = { error?: string }
 const initialState: State = {}
 
 async function submit(_prev: State, formData: FormData): Promise<State> {
-  const res = null as any; // mocked server data
+  const res = await enterDemo(formData)
   return res ?? {}
 }
 
