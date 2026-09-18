@@ -449,6 +449,13 @@
       "sort_order": 1
     },
     {
+      "from_step_key": "f_noise",
+      "label": "URGENT safety issue",
+      "to_step_key": "urgent",
+      "variant": "negative",
+      "sort_order": 2
+    },
+    {
       "from_step_key": "f_rooms",
       "label": "Continue: make it real",
       "to_step_key": "making_it_real",

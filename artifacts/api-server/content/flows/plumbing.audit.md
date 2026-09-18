@@ -77,3 +77,8 @@ look at {{main_concern}}".
 - `open` still offers "“We had it all redone”" → `replaced`; the label is the
   literal thing a customer says and was kept.
 - Med Spa: see `hvac.audit.md` (inactive, no flow rows, untouched).
+- `f_drains` told the caller to press the URGENT button for sewage backing up,
+  but the `f_*` focus screens only offered Continue / callback. Resolved in a
+  follow-up: `f_drains` and `f_sump` now have their own "URGENT safety issue"
+  choice (variant negative) routing to `urgent`, and the `f_sump` coaching note
+  names the button for active basement flooding.

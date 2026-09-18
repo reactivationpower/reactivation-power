@@ -15,5 +15,8 @@ description: Constraints and quirks when rewriting or applying reactivation call
 - Home-services niches had no concern chips at all; chips were added in the same order as the digging_in focus buttons so the tapped chip fills {{main_concern}} on the recommendation screen.
 - Pre-existing dead ends: obj_think / obj_send_info have no outgoing choices in any niche (Skin Tightening, med spa, dental). (hvac/plumbing's unfilled {{asked_by}}/{{practice_phone}} tokens were fixed in the home-services rewrite.)
 
+- Routing additions (new choices) are fine when the task is explicitly a routing task: add the choice object to the JSON with the next sort_order and flows:apply inserts it; re-export afterwards to confirm the JSON round-trips. If a screen's coaching note names the URGENT button, that screen must have its own `urgent` choice.
+- The API Server workflow is often stopped between sessions; a demo sign-in "Request failed (502)" in the player means restart it, not an app bug.
+
 **Why:** Text rewrites must never alter routing (no DDL, routing owned by the product); the tooling only updates text in place.
 **How to apply:** Any script rewrite: export → edit JSON → flows:lint → flows:apply --dry-run → apply → click through in the player with the niche enabled for the demo owner.

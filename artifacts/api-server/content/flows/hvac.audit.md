@@ -105,9 +105,10 @@ falls back to "what's been bothering you the most".
 - `{{asked_by_provider}}` renders as "{{practice_name}} asked me to reach out to
   you personally." because `provider_name` is filled with the practice name;
   for a company that reads fine ("Acme Heating asked me to reach out…").
-- `f_*` focus screens have no "URGENT" button of their own; `f_noise` tells
-  the caller to press it but the button lives on `digging_in` /
-  `resp_problems` / `open`. Pre-existing routing; not changed.
+- `f_noise` told the caller to press the URGENT button, but the `f_*` focus
+  screens only offered Continue / callback. Resolved in a follow-up: `f_noise`
+  now has its own "URGENT safety issue" choice (variant negative) routing to
+  `urgent`, added via the flows JSON + `flows:apply`.
 - Med Spa (healthcare, inactive) has no `script_flow_steps` or
   `script_flow_choices` rows, only 4 legacy `script_sections` slots (out of
   scope). Nothing to keep or rewrite; left untouched.

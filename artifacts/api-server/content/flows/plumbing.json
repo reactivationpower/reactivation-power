@@ -105,7 +105,7 @@
     {
       "step_key": "f_sump",
       "title": "Focus: sump pump",
-      "content": "I'm glad you mentioned that, {{contact_first_name}}. You usually find out a sump pump is broken on the worst possible day. Standing in a wet basement.\n\nWhen was it last tested?\n\n(Let them answer.)\n\nDoes it have a battery backup for when a storm knocks the power out?\n\n(A pump test is quick, and it's the cheapest flood insurance there is.)",
+      "content": "I'm glad you mentioned that, {{contact_first_name}}. You usually find out a sump pump is broken on the worst possible day. Standing in a wet basement.\n\nWhen was it last tested?\n\n(Let them answer.)\n\nDoes it have a battery backup for when a storm knocks the power out?\n\n(A pump test is quick, and it's the cheapest flood insurance there is. Basement flooding right now: press the URGENT button.)",
       "sort_order": 16
     },
     {
@@ -393,6 +393,13 @@
       "sort_order": 1
     },
     {
+      "from_step_key": "f_drains",
+      "label": "URGENT safety issue",
+      "to_step_key": "urgent",
+      "variant": "negative",
+      "sort_order": 2
+    },
+    {
       "from_step_key": "f_fixtures",
       "label": "Continue: make it real",
       "to_step_key": "making_it_real",
@@ -461,6 +468,13 @@
       "to_step_key": "close_callback",
       "variant": "caution",
       "sort_order": 1
+    },
+    {
+      "from_step_key": "f_sump",
+      "label": "URGENT safety issue",
+      "to_step_key": "urgent",
+      "variant": "negative",
+      "sort_order": 2
     },
     {
       "from_step_key": "f_waterheater",
