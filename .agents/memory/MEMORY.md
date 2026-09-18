@@ -4,3 +4,4 @@
 - [Script flow content-as-code](script-flows.md) — player italics need whole-paragraph parens; apply pairs duplicate from+to by sort_order; demo owner lacks most niches; known dead ends.
 - [Stripe modes & billing tables](stripe-modes-and-billing.md) — env keys are LIVE; workspace uses sandbox via Stripe integration, STRIPE_MODE overrides; billing tables in Replit Postgres.
 - [Stripe dunning & webhook verification](stripe-dunning.md) — access keyed on customers.billing_status; Stripe retries are a Dashboard setting; sandbox test recipe without Stripe CLI.
+- [Agreement e-sign flow constraints](agreements-esign.md) — edit/sign linearized in DB, one agreement per link, signed copy sent on completion, Stripe readiness keyed by client secret.

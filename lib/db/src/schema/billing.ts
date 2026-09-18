@@ -50,6 +50,8 @@ export const paymentLinkTermsTable = pgTable(
     repName: text("rep_name"),
     setupFeeCents: integer("setup_fee_cents").notNull().default(0),
     monthlyCents: integer("monthly_cents").notNull().default(0),
+    /** Agreement term; the subscription's agreement window is this many months after the trial. */
+    termMonths: integer("term_months").notNull().default(12),
     stripeCustomerId: text("stripe_customer_id"),
     /** PaymentIntent (setup fee > 0) or SetupIntent (waived) for the primary card. */
     primaryIntentId: text("primary_intent_id"),

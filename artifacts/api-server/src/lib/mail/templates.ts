@@ -77,8 +77,27 @@ export interface AgreementSentData {
   name: string
   agreementTitle: string
   termMonths: number
+  monthlyCents?: number | null
+  setupFeeCents?: number | null
   signUrl: string
   expiresAt?: string | null
+  /** Set when the link is re-sent or the agreement was edited. */
+  resend?: boolean
+}
+
+export interface AgreementSignedData {
+  /** Recipient's first name (customer) or "Team" for admin copies. */
+  name: string
+  signerName: string
+  businessName: string
+  agreementTitle: string
+  termMonths: number
+  monthlyCents: number
+  setupFeeCents: number
+  signedAt: string
+  agreementUrl: string
+  /** True for the copy sent to admins. */
+  adminCopy: boolean
 }
 
 export interface TemplateDataMap {
@@ -88,6 +107,7 @@ export interface TemplateDataMap {
   payment_failed: PaymentFailedData
   subscription_cancelled: SubscriptionCancelledData
   agreement_sent: AgreementSentData
+  agreement_signed: AgreementSignedData
 }
 
 export type TemplateId = keyof TemplateDataMap
@@ -345,29 +365,93 @@ const agreementSent: TemplateDefinition<'agreement_sent'> = {
     signUrl: `${BRAND.siteUrl}/agreements/sample-token`,
     expiresAt: new Date(Date.now() + 7 * 86400000).toISOString(),
   },
-  render: (d) => ({
-    subject: `Please review and sign: ${d.agreementTitle}`,
-    previewText: `Your ${d.termMonths}-month service agreement is ready for signature.`,
-    html: layout(
-      [
-        h1('Your service agreement is ready to sign'),
-        p(`Hi ${esc(d.name.split(' ')[0])},`),
-        p(
-          `Attached below is your <strong>${esc(d.agreementTitle)}</strong>. It covers the ${d.termMonths}-month term, what's included, billing, and how either side can end the agreement. Please read it through, then sign electronically — it takes about two minutes.`,
-        ),
-        button('Review and sign the agreement', d.signUrl),
-        fallbackLink(d.signUrl),
-        panel([
-          d.expiresAt
-            ? `This signing link expires on <strong>${longDate(d.expiresAt)}</strong>. Need more time or have questions about a clause? Just reply to this email.`
-            : `Have questions about a clause? Just reply to this email before you sign.`,
-        ]),
-        small(`You'll receive a signed copy by email as soon as both parties have signed.`),
-        signoff(),
-      ],
-      { previewText: `Your ${d.termMonths}-month service agreement is ready for signature.`, footerNote: SUPPORT_NOTE },
-    ),
-  }),
+  render: (d) => {
+    const rows: Array<[string, string]> = [['Term', `${d.termMonths} months`]]
+    if (d.monthlyCents != null) rows.push(['Monthly amount', money(d.monthlyCents)])
+    if (d.setupFeeCents != null) rows.push(['Setup fee', d.setupFeeCents > 0 ? money(d.setupFeeCents) : 'Waived'])
+    const subject = d.resend
+      ? `Reminder — please review and sign: ${d.agreementTitle}`
+      : `Please review and sign: ${d.agreementTitle}`
+    const preview = `Your ${d.termMonths}-month service agreement is ready for signature.`
+    return {
+      subject,
+      previewText: preview,
+      html: layout(
+        [
+          h1(d.resend ? 'Your service agreement is still waiting for your signature' : 'Your service agreement is ready to sign'),
+          p(`Hi ${esc(d.name.split(' ')[0])},`),
+          p(
+            `Your <strong>${esc(d.agreementTitle)}</strong> is ready on the link below. It covers the ${d.termMonths}-month term, what's included, billing, and how either side can end the agreement. Please read it through, initial each highlighted section and sign electronically — it takes about two minutes. You can do it on your phone or computer.`,
+          ),
+          details(rows),
+          button('Review and sign the agreement', d.signUrl),
+          fallbackLink(d.signUrl),
+          panel([
+            d.expiresAt
+              ? `This signing link expires on <strong>${longDate(d.expiresAt)}</strong>. Need more time or have questions about a clause? Just reply to this email.`
+              : `Have questions about a clause? Just reply to this email before you sign.`,
+          ]),
+          small(`Once you have signed and your enrollment is complete, we'll email you a signed copy with the certificate of completion.`),
+          signoff(),
+        ],
+        { previewText: preview, footerNote: SUPPORT_NOTE },
+      ),
+    }
+  },
+}
+
+const agreementSigned: TemplateDefinition<'agreement_signed'> = {
+  id: 'agreement_signed',
+  name: 'Agreement signed (signed copy)',
+  description: 'Sent to the customer and to admins once the agreement is signed, with the PDF attached and a link to the agreement page.',
+  sample: {
+    name: 'Dr. Michael Chen',
+    signerName: 'Dr. Michael Chen',
+    businessName: 'Chen Family Dental',
+    agreementTitle: 'Reactivation Power 12-Month Service Agreement',
+    termMonths: 12,
+    monthlyCents: 47500,
+    setupFeeCents: 47500,
+    signedAt: new Date().toISOString(),
+    agreementUrl: `${BRAND.siteUrl}/agreements/sample-token`,
+    adminCopy: false,
+  },
+  render: (d) => {
+    const rows: Array<[string, string]> = [
+      ['Business', esc(d.businessName)],
+      ['Signed by', esc(d.signerName)],
+      ['Signed on', longDate(d.signedAt)],
+      ['Term', `${d.termMonths} months`],
+      ['Monthly amount', money(d.monthlyCents)],
+      ['Setup fee', d.setupFeeCents > 0 ? money(d.setupFeeCents) : 'Waived'],
+    ]
+    const preview = d.adminCopy
+      ? `${d.signerName} (${d.businessName}) signed the ${d.termMonths}-month service agreement.`
+      : `Your signed ${d.termMonths}-month service agreement and certificate of completion.`
+    return {
+      subject: d.adminCopy
+        ? `Signed: ${d.businessName} — ${d.agreementTitle}`
+        : `Your signed copy: ${d.agreementTitle}`,
+      previewText: preview,
+      html: layout(
+        [
+          h1(d.adminCopy ? `${esc(d.businessName)} signed their agreement` : 'Your agreement is signed'),
+          p(`Hi ${esc(d.name.split(' ')[0])},`),
+          p(
+            d.adminCopy
+              ? `<strong>${esc(d.signerName)}</strong> has signed the <strong>${esc(d.agreementTitle)}</strong> for ${esc(d.businessName)}. The signed agreement and its certificate of completion are attached and available at the link below.`
+              : `Thank you — your <strong>${esc(d.agreementTitle)}</strong> is signed. Your signed copy, including the certificate of completion, is attached to this email and always available at the link below.`,
+          ),
+          details(rows),
+          button(d.adminCopy ? 'Open the agreement' : 'View your signed agreement', d.agreementUrl),
+          fallbackLink(d.agreementUrl),
+          small(`The certificate of completion records the date, time and device used for each step of the signature.`),
+          signoff(),
+        ],
+        { previewText: preview, footerNote: SUPPORT_NOTE },
+      ),
+    }
+  },
 }
 
 type AnyTemplate = { [K in TemplateId]: TemplateDefinition<K> }[TemplateId]
@@ -379,6 +463,7 @@ export const TEMPLATES: { [K in TemplateId]: TemplateDefinition<K> } = {
   payment_failed: paymentFailed,
   subscription_cancelled: subscriptionCancelled,
   agreement_sent: agreementSent,
+  agreement_signed: agreementSigned,
 }
 
 export const TEMPLATE_IDS = Object.keys(TEMPLATES) as TemplateId[]

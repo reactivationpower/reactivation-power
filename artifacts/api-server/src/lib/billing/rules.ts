@@ -42,10 +42,13 @@ export function isSameCard(primary: CardIdentity, candidate: CardIdentity): bool
 }
 
 /** Trial end / agreement window anchored on the setup-fee payment. */
-export function agreementWindow(setupPaidAt: Date): { agreementStart: Date; agreementEnd: Date } {
+export function agreementWindow(
+  setupPaidAt: Date,
+  termMonths: number = AGREEMENT_MONTHS,
+): { agreementStart: Date; agreementEnd: Date } {
   const agreementStart = new Date(setupPaidAt.getTime() + TRIAL_DAYS * DAY_MS)
   const agreementEnd = new Date(agreementStart)
-  agreementEnd.setUTCMonth(agreementEnd.getUTCMonth() + AGREEMENT_MONTHS)
+  agreementEnd.setUTCMonth(agreementEnd.getUTCMonth() + (termMonths > 0 ? termMonths : AGREEMENT_MONTHS))
   return { agreementStart, agreementEnd }
 }
 

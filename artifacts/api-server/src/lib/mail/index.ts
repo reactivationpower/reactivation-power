@@ -2,13 +2,14 @@ import { appOrigin } from '@/lib/app-origin'
 import { sendEmail, type SendOptions, type SendResult } from './send'
 import type {
   AgreementSentData,
+  AgreementSignedData,
   PaymentFailedData,
   PaymentReceivedData,
   SubscriptionCancelledData,
 } from './templates'
 
 export { sendEmail, fromAddress, DEFAULT_FROM } from './send'
-export type { SendResult, SendOptions } from './send'
+export type { SendResult, SendOptions, EmailAttachment } from './send'
 export * from './templates'
 
 /**
@@ -84,4 +85,12 @@ export function sendAgreementSentEmail(
   options?: SendOptions,
 ): Promise<SendResult> {
   return sendEmail('agreement_sent', to, data, options)
+}
+
+export function sendAgreementSignedEmail(
+  to: string,
+  data: AgreementSignedData,
+  options?: SendOptions,
+): Promise<SendResult> {
+  return sendEmail('agreement_signed', to, data, options)
 }

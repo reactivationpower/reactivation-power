@@ -39,6 +39,9 @@ import { DEFAULT_TIMEZONE, isUsTimezone, timezoneLabel } from "../lib/us-timezon
 import {
   confirmPayment, getPaymentDetail, getPaymentLinkPublic, listPaymentLinks,
 } from "../actions/payments";
+import {
+  agreementTokenForLink, getAgreementDetail, getAgreementForLink, getAgreementPublic, listAgreements,
+} from "../actions/agreements";
 
 type Loader = (req: Request) => Promise<Record<string, unknown>>;
 type AuthKind = "portal" | "admin" | "super_admin" | undefined;
@@ -477,8 +480,23 @@ add("/admin/payments/:id", "admin", async (req) => {
   const isPaid = link.status === "paid";
   const owner = accounts.find((a) => a.role === "owner");
   const staffAccounts = accounts.filter((a) => a.role === "staff");
-  return { id, detail, link, accounts, customer, cards, history, isPaid, owner: owner ?? null, staffAccounts };
+  const agreement = link.type === "subscription" ? await getAgreementForLink(id) : null;
+  return { id, detail, link, accounts, customer, cards, history, isPaid, owner: owner ?? null, staffAccounts, agreement };
 });
+
+add("/admin/agreements", "admin", async (req) => ({
+  agreements: await listAgreements(),
+  status: queryString(req, "status"),
+  rep: queryString(req, "rep"),
+  q: queryString(req, "q"),
+}));
+add("/admin/agreements/:id", "admin", async (req) => {
+  const id = String(req.params.id);
+  const detail = await getAgreementDetail(id);
+  if (!detail) notFound();
+  return { id, detail, stripeMode: getStripeMode() };
+});
+
 
 add("/admin/analytics", "super_admin", async (req) => {
   const participant = queryString(req, "participant");
@@ -528,7 +546,18 @@ add("/pay/:token", undefined, async (req) => {
   const link = await getPaymentLinkPublic(token);
   if (!link) notFound();
   if (link.status === "paid") redirect(`/pay/${token}/thank-you`);
+  // Subscriptions start with the service agreement; the old link routes there.
+  if (link.type === "subscription") {
+    const agreementToken = await agreementTokenForLink(token);
+    if (agreementToken) redirect(`/agreements/${agreementToken}`);
+  }
   return { token, link, stripeMode: getStripeMode() };
+});
+add("/agreements/:token", undefined, async (req) => {
+  const token = String(req.params.token);
+  const agreement = await getAgreementPublic(token);
+  if (!agreement) notFound();
+  return { token, agreement };
 });
 add("/pay/:token/thank-you", undefined, async (req) => {
   const token = String(req.params.token);

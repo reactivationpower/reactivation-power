@@ -18,6 +18,7 @@ import * as reactivation from "../actions/reactivation";
 import * as subscriptions from "../actions/subscriptions";
 import { getAdminSessionFromRequest, satisfies } from "../lib/auth/admin-session";
 import { SESSION_COOKIE_NAME, decodeSession } from "../lib/auth/token";
+import * as agreements from "../actions/agreements";
 
 /**
  * RPC bridge for the former Next.js server actions.
@@ -56,6 +57,7 @@ const MODULES: Record<string, ActionModule> = {
   payments,
   reactivation,
   subscriptions,
+  agreements,
 };
 
 type Auth = "public" | "portal" | "admin" | "super_admin";
@@ -103,6 +105,26 @@ const ACTIONS: Record<string, Record<string, Auth>> = {
     getSubscriptionCheckoutState: "public",
     recordPrimaryCard: "public",
     recordSecondaryCard: "public",
+  },
+  agreements: {
+    // Public signing page (agreement token in the URL is the credential).
+    getAgreementPublic: "public",
+    getAgreementVersion: "public",
+    recordAgreementInitials: "public",
+    signAgreement: "public",
+    getAgreementCheckout: "public",
+    recordAgreementPrimaryCard: "public",
+    recordAgreementSecondaryCard: "public",
+    recordAgreementPaymentFailure: "public",
+    // Admin (each also calls requireAdmin()).
+    getAgreementSendForm: "admin",
+    previewAgreement: "admin",
+    sendAgreement: "admin",
+    updateAgreement: "admin",
+    resendAgreement: "admin",
+    listAgreements: "admin",
+    getAgreementDetail: "admin",
+    getAgreementForLink: "admin",
   },
   admin: {
     createCourse: "super_admin", updateCourse: "super_admin", deleteCourse: "super_admin",

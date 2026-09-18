@@ -21,6 +21,9 @@ import Page_admin_participants from '@/pages/admin_participants';
 import Page_admin_participants_id from '@/pages/admin_participants_id';
 import Page_admin_payments from '@/pages/admin_payments';
 import Page_admin_payments_id from '@/pages/admin_payments_id';
+import Page_admin_agreements from '@/pages/admin_agreements';
+import Page_admin_agreements_id from '@/pages/admin_agreements_id';
+import Page_agreements_token from '@/pages/agreements_token';
 import Page_admin_reactivation from '@/pages/admin_reactivation';
 import Page_admin_team from '@/pages/admin_team';
 import Page_demo from '@/pages/demo';
@@ -138,6 +141,20 @@ function Router() {
           </AdminLayout>
         </RoutedErrorBoundary>
       </Route>
+      <Route path="/admin/agreements">
+        <RoutedErrorBoundary>
+          <AdminLayout>
+            <Page_admin_agreements />
+          </AdminLayout>
+        </RoutedErrorBoundary>
+      </Route>
+      <Route path="/admin/agreements/:id">
+        <RoutedErrorBoundary>
+          <AdminLayout>
+            <Page_admin_agreements_id />
+          </AdminLayout>
+        </RoutedErrorBoundary>
+      </Route>
       <Route path="/admin/team">
         <RoutedErrorBoundary>
           <AdminLayout>
@@ -205,6 +222,13 @@ function Router() {
         <RoutedErrorBoundary>
           <RootLayout>
             <Page_login />
+          </RootLayout>
+        </RoutedErrorBoundary>
+      </Route>
+      <Route path="/agreements/:token">
+        <RoutedErrorBoundary>
+          <RootLayout>
+            <Page_agreements_token />
           </RootLayout>
         </RoutedErrorBoundary>
       </Route>

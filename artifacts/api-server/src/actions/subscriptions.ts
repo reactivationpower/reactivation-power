@@ -17,6 +17,11 @@ import { and, eq, ne } from 'drizzle-orm'
 
 import { PRODUCT_NAME, provisionAccounts, recordIntentPayment } from './payments'
 import { agreementWindow, isSameCard, stageOf, type CheckoutStage } from '@/lib/billing/rules'
+import {
+  agreementAllowsPayment,
+  onSetupFeePaid,
+  onSubscriptionStarted,
+} from '@/lib/agreements/store'
 
 /**
  * Public two-card subscription checkout for a payment link.
@@ -55,7 +60,7 @@ interface LinkRow {
   status: 'pending' | 'paid'
 }
 
-async function loadLink(token: string): Promise<{
+export async function loadLink(token: string): Promise<{
   link: LinkRow
   terms: PaymentLinkTerms
   customer: Customer
@@ -278,6 +283,20 @@ export async function getSubscriptionCheckoutState(token: string): Promise<Subsc
   }
 }
 
+/**
+ * Both card steps at once, for the agreement signing page where the primary
+ * and backup cards sit side by side under the signature. Amount changes made
+ * to the agreement after an intent was created are pushed to the intent.
+ */
+export interface TwoCardCheckoutState {
+  stage: CheckoutStage
+  setupFeeCents: number
+  monthlyCents: number
+  primary: { intentType: 'payment' | 'setup'; clientSecret: string } | null
+  secondary: { clientSecret: string } | null
+  primaryCard: { brand: string; last4: string } | null
+  error?: string
+}
 /** Retrieve the payment method behind a confirmed intent, or null if not confirmed. */
 async function confirmedPaymentMethod(
   intentId: string,
@@ -306,6 +325,8 @@ export async function recordPrimaryCard(token: string): Promise<{ ok: boolean; e
   const { link, terms, customer } = found
   if (terms.completedAt) return { ok: true, stage: 'done' }
   if (terms.setupPaidAt) return { ok: true, stage: 'secondary' }
+  const gate = await agreementAllowsPayment(link.id)
+  if (!gate.ok) return { ok: false, error: gate.error }
   if (!terms.primaryIntentId) return { ok: false, error: 'Checkout has not been started.' }
 
   const confirmed = await confirmedPaymentMethod(terms.primaryIntentId)
@@ -350,6 +371,12 @@ export async function recordPrimaryCard(token: string): Promise<{ ok: boolean; e
     .set({ billingStatus: 'setup_paid', updatedAt: new Date() })
     .where(eq(customersTable.id, customer.id))
 
+  await onSetupFeePaid(link.id, {
+    amountCents: terms.setupFeeCents,
+    card: { brand: card.brand, last4: card.last4 },
+    paidAt,
+  })
+
   if (confirmed.paymentIntent && terms.setupFeeCents > 0) {
     await recordIntentPayment({
       customerId: customer.id,
@@ -369,6 +396,8 @@ export async function recordPrimaryCard(token: string): Promise<{ ok: boolean; e
         description: `${PRODUCT_NAME} — setup fee`,
         paidAt: paidAt.toISOString(),
         receiptUrl,
+        cardBrand: card.brand,
+        cardLast4: card.last4,
       },
       { metadata: { paymentLinkId: link.id, paymentIntentId: confirmed.paymentIntent.id } },
     )
@@ -392,6 +421,8 @@ export async function recordSecondaryCard(token: string): Promise<{
   const { link, terms, customer } = found
   if (terms.completedAt) return { ok: true, stage: 'done' }
   if (!terms.setupPaidAt) return { ok: false, error: 'Add the primary card first.', stage: 'primary' }
+  const gate = await agreementAllowsPayment(link.id)
+  if (!gate.ok) return { ok: false, error: gate.error }
   if (!terms.secondaryIntentId) return { ok: false, error: 'Checkout has not been started.' }
 
   const primary = await activeCardOf(customer.id, link.id, 'primary')
@@ -459,7 +490,7 @@ async function activateSubscription(
 ): Promise<void> {
   const stripeCustomerId = await ensureStripeCustomer(customer, link)
   const setupPaidAt = terms.setupPaidAt ?? new Date()
-  const { agreementStart, agreementEnd } = agreementWindow(setupPaidAt)
+  const { agreementStart, agreementEnd } = agreementWindow(setupPaidAt, terms.termMonths)
 
   let subscription: Stripe.Subscription
   if (terms.stripeSubscriptionId) {
@@ -519,6 +550,100 @@ async function activateSubscription(
 
   // Software access is immediate
   await provisionAccounts(link.id)
+  // The agreement is complete once the subscription exists: PDF + signed copies
+  await onSubscriptionStarted(link.id, { monthlyCents: terms.monthlyCents, firstChargeAt: nextPaymentAt })
   revalidatePath('/admin/payments')
   revalidatePath(`/admin/payments/${link.id}`)
+}
+
+export async function getTwoCardCheckoutState(token: string): Promise<TwoCardCheckoutState | null> {
+  let found = await loadLink(token)
+  if (!found) return null
+  let settleError: string | undefined
+  const pendingStage = stageOf(found.terms)
+  if (
+    (pendingStage === 'primary' && found.terms.primaryIntentId) ||
+    (pendingStage === 'secondary' && found.terms.secondaryIntentId)
+  ) {
+    const settled = pendingStage === 'primary' ? await recordPrimaryCard(token) : await recordSecondaryCard(token)
+    if (settled.ok || (settled as { duplicate?: boolean }).duplicate) {
+      if (!settled.ok) settleError = settled.error
+      found = await loadLink(token)
+      if (!found) return null
+    }
+  }
+  const { link, terms, customer } = found
+  const stage = stageOf(terms)
+  const base = { setupFeeCents: terms.setupFeeCents, monthlyCents: terms.monthlyCents, error: settleError }
+  if (stage === 'done') return { ...base, stage, primary: null, secondary: null, primaryCard: null }
+
+  const stripeCustomerId = await ensureStripeCustomer(customer, link)
+  const metadata = { payment_link_token: link.token, rp_customer_id: customer.id }
+
+  let primary: TwoCardCheckoutState['primary'] = null
+  if (stage === 'primary') {
+    if (terms.setupFeeCents > 0) {
+      let intent: Stripe.PaymentIntent | null = null
+      if (terms.primaryIntentId?.startsWith('pi_')) {
+        intent = await stripe.paymentIntents.retrieve(terms.primaryIntentId)
+        if (!REUSABLE.has(intent.status)) intent = null
+        else if (intent.amount !== terms.setupFeeCents && intent.status !== 'processing') {
+          intent = await stripe.paymentIntents.update(intent.id, { amount: terms.setupFeeCents })
+        }
+      }
+      if (!intent) {
+        intent = await stripe.paymentIntents.create({
+          amount: terms.setupFeeCents,
+          currency: 'usd',
+          customer: stripeCustomerId,
+          payment_method_types: ['card'],
+          setup_future_usage: 'off_session',
+          description: `${PRODUCT_NAME} — setup fee for ${link.name}`,
+          receipt_email: link.email,
+          metadata: { ...metadata, step: 'primary' },
+        })
+        await db.update(paymentLinkTermsTable).set({ primaryIntentId: intent.id }).where(eq(paymentLinkTermsTable.linkId, link.id))
+      }
+      primary = { intentType: 'payment', clientSecret: intent.client_secret! }
+    } else {
+      let intent: Stripe.SetupIntent | null = null
+      if (terms.primaryIntentId?.startsWith('seti_')) {
+        intent = await stripe.setupIntents.retrieve(terms.primaryIntentId)
+        if (!REUSABLE.has(intent.status)) intent = null
+      }
+      if (!intent) {
+        intent = await stripe.setupIntents.create({
+          customer: stripeCustomerId,
+          payment_method_types: ['card'],
+          usage: 'off_session',
+          metadata: { ...metadata, step: 'primary' },
+        })
+        await db.update(paymentLinkTermsTable).set({ primaryIntentId: intent.id }).where(eq(paymentLinkTermsTable.linkId, link.id))
+      }
+      primary = { intentType: 'setup', clientSecret: intent.client_secret! }
+    }
+  }
+
+  let secondaryIntent: Stripe.SetupIntent | null = null
+  if (terms.secondaryIntentId) {
+    secondaryIntent = await stripe.setupIntents.retrieve(terms.secondaryIntentId)
+    if (!REUSABLE.has(secondaryIntent.status)) secondaryIntent = null
+  }
+  if (!secondaryIntent) {
+    secondaryIntent = await stripe.setupIntents.create({
+      customer: stripeCustomerId,
+      payment_method_types: ['card'],
+      usage: 'off_session',
+      metadata: { ...metadata, step: 'secondary' },
+    })
+    await db.update(paymentLinkTermsTable).set({ secondaryIntentId: secondaryIntent.id }).where(eq(paymentLinkTermsTable.linkId, link.id))
+  }
+  const primaryCard = stage === 'secondary' ? await activeCardOf(customer.id, link.id, 'primary') : null
+  return {
+    ...base,
+    stage,
+    primary,
+    secondary: { clientSecret: secondaryIntent.client_secret! },
+    primaryCard: primaryCard ? { brand: primaryCard.brand, last4: primaryCard.last4 } : null,
+  }
 }

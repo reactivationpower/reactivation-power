@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 
 import { PaymentDetailActions } from '@/components/admin/payment-detail-actions'
+import { AgreementCard } from '@/components/admin/agreement-card'
 import { BillingPanel } from '@/components/admin/billing-panel'
 import { StatusPill, TypePill, linkStatus } from '@/components/admin/payments-manager'
 import { Badge } from '@/components/ui/badge'
@@ -72,7 +73,7 @@ export default function PaymentDetailPage() {
   if (loading) return <PageLoading />
   if (notFound) return <NotFound />
   if (error) return <PageError error={error} />
-  const { link, accounts, customer, cards, history = [], isPaid, owner, staffAccounts } = data
+  const { link, accounts, customer, cards, history = [], isPaid, owner, staffAccounts, agreement } = data
   const isSubscription = link.type === 'subscription'
   const status = linkStatus(link)
 
@@ -193,6 +194,7 @@ export default function PaymentDetailPage() {
       <div className="grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         {/* ── Left column: record ─────────────────────────────── */}
         <div className="flex flex-col gap-6">
+          {isSubscription ? <AgreementCard linkId={link.id} agreement={agreement ?? null} /> : null}
           <Card>
             <CardHeader>
               <CardTitle className="text-base">Contact</CardTitle>

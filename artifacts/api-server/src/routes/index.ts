@@ -11,6 +11,7 @@ import uploadRouter from "./upload";
 import configRouter from "./config";
 import webhooksResendRouter from "./webhooks-resend";
 import webhooksStripeRouter from "./webhooks-stripe";
+import agreementsRouter from "./agreements";
 
 const router: IRouter = Router();
 
@@ -20,6 +21,7 @@ router.use(pagesRouter);
 router.use(adminEmailsRouter);
 router.use(cronRouter);
 router.use(mediaRouter);
+router.use(agreementsRouter);
 router.use(progressRouter);
 router.use(templatesRouter);
 router.use(uploadRouter);

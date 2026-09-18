@@ -34,6 +34,14 @@ export interface SendOptions {
   /** Free-form context stored with the log row (ids, amounts). Never secrets or links. */
   metadata?: Record<string, unknown>
   replyTo?: string
+  /** Files to attach (Resend accepts base64 content). */
+  attachments?: EmailAttachment[]
+}
+
+export interface EmailAttachment {
+  filename: string
+  content: Buffer | string
+  contentType?: string
 }
 
 interface ResendSendResponse {
@@ -76,6 +84,15 @@ export async function sendEmail<K extends TemplateId>(
         html: rendered.html,
         text: toPlainText(rendered.html),
         ...(options.replyTo ? { reply_to: options.replyTo } : {}),
+        ...(options.attachments?.length
+          ? {
+              attachments: options.attachments.map((a) => ({
+                filename: a.filename,
+                content: Buffer.isBuffer(a.content) ? a.content.toString('base64') : a.content,
+                ...(a.contentType ? { content_type: a.contentType } : {}),
+              })),
+            }
+          : {}),
         tags: [{ name: 'type', value: type }],
         headers: { 'X-Entity-Ref-ID': logId },
       },
