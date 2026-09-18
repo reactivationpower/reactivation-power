@@ -1,0 +1,390 @@
+{
+  "niche": {
+    "name": "Botox",
+    "sector": "healthcare",
+    "is_active": true,
+    "sort_order": 11
+  },
+  "steps": [
+    {
+      "step_key": "opening_question",
+      "title": "The Opening Question",
+      "content": "So {{contact_first_name}}, how have things been looking since your last treatment with us? Are you still loving how smooth and refreshed everything looks, is it starting to come back a little, or are you pretty much back to where you were before you came in?\n\n(This question has only three possible answers. Click the one you hear.)",
+      "sort_order": 1
+    },
+    {
+      "step_key": "resp_doing_great",
+      "title": "Still Loving It: Celebrate the Win",
+      "content": "I love hearing that, {{contact_first_name}}. That’s exactly what we want. There’s nothing better than catching yourself in a photo or the mirror and liking what you see.\n\nDo you remember how much those lines used to bother you before we treated them? Checking every photo, that one line that drove you crazy? (Let them enjoy the moment. This is their win.)\n\n(Do not pitch the touch-up yet. The file update comes next, and the cadence close follows if nothing else surfaces.)",
+      "sort_order": 2
+    },
+    {
+      "step_key": "resp_coming_back",
+      "title": "Starting to Come Back: Normalize, Then Update the File",
+      "content": "{{contact_first_name}}, that is completely normal, honestly, you’re right on track. The treatment naturally wears off starting around the three-month mark as the movement comes back. It’s not the results failing, it’s just how it works for everyone.\n\nI remember how great you looked and how happy you were the last time you were in. (Let them respond. Be warm, no alarm. This is routine, not a problem.)\n\n(Do not pitch the touch-up yet. The file update comes next, and the close follows if nothing else surfaces.)",
+      "sort_order": 3
+    },
+    {
+      "step_key": "resp_fully_back",
+      "title": "Fully Back: Warm Empathy, Then Update the File",
+      "content": "{{contact_first_name}}, I completely understand, and please don’t feel bad, that is exactly what happens when a little more time goes by between visits. The movement comes back, and the lines follow. It’s completely normal, and it is very easy to fix.\n\nI remember how great you looked and how happy you were the last time you were in. (Let them respond. Be warm. If they express frustration about it wearing off, reassure: that’s just how it works for everyone, and it has nothing to do with anything they did wrong.)\n\n(Do not pitch the touch-up yet. The file update comes next, and the close follows if nothing else surfaces.)",
+      "sort_order": 4
+    },
+    {
+      "step_key": "masseter_bonus",
+      "title": "One More Thing: The Jaw Clenching Question",
+      "content": "Perfect, you’re all set for (day) at (time).\n\n(If you already asked the jaw question during the file update, skip it, just confirm the appointment warmly and end the call.)\n\nOh, one quick thing while I have you, {{contact_first_name}}, because almost nobody realizes this is connected: have you noticed any jaw clenching, teeth grinding, or tension headaches, especially toward the end of a stressful day?\n\nIf YES: You know, that’s actually something we can very often help with. The same treatment, just in the jaw muscles. It relaxes the clenching, and a lot of patients say their headaches ease up too. I’ll make a note on your file so {{rec_pronoun}} can take a look at it when you’re in, no commitment, just worth a look while you’re here.\n\nIf NO: No problem at all. I just always ask, because so many people live with it for years without knowing it’s treatable. We’ll see you (day) at (time), {{contact_first_name}}. We can’t wait to see you!\n\n(Either way, the call ends warm, with the appointment confirmed.)",
+      "sort_order": 5
+    },
+    {
+      "step_key": "transition_still",
+      "title": "The Transition: Update the File",
+      "content": "Now {{contact_first_name}}, while I have you on the phone, I’d like to ask you a few quick questions so we get your file completely up to date. Is that okay?\n\n(Wait for the yes before starting the questions.)",
+      "sort_order": 6
+    },
+    {
+      "step_key": "transition",
+      "title": "The Transition: Update the File",
+      "content": "Now {{contact_first_name}}, while I have you on the phone, I’d like to ask you a few quick questions so we get your file completely up to date. Is that okay?\n\n(Wait for the yes before starting the questions.)",
+      "sort_order": 7
+    },
+    {
+      "step_key": "digging_in_still",
+      "title": "The Six Questions: Update the File",
+      "content": "(Ask these in order. Critical: write down everything they mention. You’ll read it back before the recommendation.)\n\nNow, you mentioned you’re still loving the results. I love hearing that. One thing I’ll ask, just because we’re right around that point in the cycle: have you noticed even a tiny bit of movement starting to sneak back, maybe just in certain expressions, or is it still completely smooth?\n\nHow’s your skin been treating you lately, with the season change, any dryness, texture, sun spots, or anything that’s just been annoying you?\n\nHave you ever been curious about any of the other treatments we do, or seen something online or heard about something from a friend that you wished you could ask a professional about instead of the internet?\n\nOne thing we ask everyone, because people are surprised we treat it. Any jaw clenching, teeth grinding, or tension headaches, even mild ones?\n\nAnything coming up on the calendar, a wedding, a reunion, a vacation, photos, that you’d want to look and feel your absolute best for?\n\nLast one, and it’s my favorite. If you could wave a wand and tweak or refresh just one thing about your skin or your look, no judgment, what would it be?\n\n(If they mentioned anything at all, read it back and click the first button. If truly nothing surfaced, fall through to the cadence close. That’s still a great call.)",
+      "sort_order": 8
+    },
+    {
+      "step_key": "digging_in",
+      "title": "The Six Questions: Update the File",
+      "content": "(Ask these in order. Critical: write down everything they mention. You’ll read it back before the recommendation.)\n\nYou mentioned it’s been coming back. Can I ask when you first started noticing it? Right around the three-month mark, or has it been a while now?\n\nHow’s your skin been treating you lately, with the season change, any dryness, texture, sun spots, or anything that’s just been annoying you?\n\nHave you ever been curious about any of the other treatments we do, or seen something online or heard about something from a friend that you wished you could ask a professional about instead of the internet?\n\nOne thing we ask everyone, because people are surprised we treat it. Any jaw clenching, teeth grinding, or tension headaches, even mild ones?\n\nAnything coming up on the calendar, a wedding, a reunion, a vacation, photos, that you’d want to look and feel your absolute best for?\n\nLast one, and it’s my favorite. If you could wave a wand and tweak or refresh just one thing about your skin or your look, no judgment, what would it be?\n\n(If they mentioned anything beyond the touch-up itself, read it back and click the first button. If the touch-up is the whole story, fall through to the close.)",
+      "sort_order": 9
+    },
+    {
+      "step_key": "review",
+      "title": "The Review & Bridge to Emotion",
+      "content": "{{contact_first_name}}, let me make sure I've got this right. (Recap what they told you: how long it's been on your mind, how often you notice it, and how it's been affecting them.) Did I get that right?\n\nAnd it sounds like what you'd really love is to feel good every time you catch your reflection, not to think twice about it, is that fair to say?\n\n(Forward-looking, warm, never shaming. About 95% say yes. That yes is the moment.)",
+      "sort_order": 9
+    },
+    {
+      "step_key": "making_it_real",
+      "title": "Making It Real",
+      "content": "(Take the concern they named and make it present with three questions, in order. Write down their answers. You’ll use them in the next section.)\n\nHow long has that been on your mind? Just recently, a few months, or has it been bugging you for a while now?\n\nHow often do you notice it? Every time you look in the mirror, mostly in photos, or just now and then?\n\nAnd the last thing I’d like to ask is how it affects you. When you notice it, what does it do to how you feel about yourself? Getting ready in the morning, in pictures, walking into a room? (Let them open up. Do not rush.)\n\nThen respond with empathy: Thank you for sharing that. It makes complete sense, and that is exactly the kind of thing {{rec_pronoun}} help people with every single day.",
+      "sort_order": 10
+    },
+    {
+      "step_key": "bridge_no",
+      "title": "They Hesitate: Uncover Why",
+      "content": "{{contact_first_name}}, help me understand. What's holding you back from coming in to take a look? Is it the timing, or is there something else on your mind?\n\n(Ask this easygoing and curious, not pushy. You're simply trying to understand what's getting in the way so you can help. Then stop and let them tell you.)\n\nWhat are your thoughts about that?",
+      "sort_order": 11
+    },
+    {
+      "step_key": "recommendation",
+      "title": "The Magic Question & Recommendation",
+      "content": "{{contact_first_name}}, it sounds like it might be worth having {{rec_obj}} take a look. Can I make a recommendation?\n\n(Wait for yes.)\n\nMy recommendation is that we get you back in so {{rec_pronoun}} can see where things are and talk through what you’d like to refresh. And I’ll tell you the same thing I tell everyone: if {{rec_pronoun}} think there’s something {{rec_pronoun}} can do to help you, {{rec_pronoun}}’ll let you know, and {{rec_pronoun}}’d be honored if you let {{rec_obj}}. And if for some reason {{rec_pronoun}} don’t think it’s the right fit, {{rec_pronoun}}’ll tell you that too, because the last thing {{rec_pronoun}} want to do is waste your time or your money. Does that sound reasonable?\n\n(Ask “does that sound reasonable”, never “does that sound good.” Click what you hear next.)",
+      "sort_order": 11
+    },
+    {
+      "step_key": "cadence_close",
+      "title": "Nothing Surfaced: Protect the Results Close",
+      "content": "{{contact_first_name}}, I’m really glad everything’s still looking the way you want it. That’s exactly what we like to hear.\n\nNow, there is one thing I want to mention before I let you go. It’s been at least three months since your last visit, and three months is right about when things usually start to soften. The movement slowly comes back before the lines do. And here’s the sneaky part: because it fades so gradually, you’re usually the last one to notice it happening. Does that make sense?\n\n(Wait for the yes. If they hesitate, use the button below to uncover the real concern.)\n\n{{contact_first_name}}, can I make a recommendation? (Wait for the yes.)\n\nMy recommendation is we get your touch-up on the books now, just ahead of that softening. That way the results stay seamless and nobody ever sees the in-between stage. Does that sound reasonable?\n\n(Wait for the yes.)\n\nOkay, let’s find you a time. I have (day) at (time) or (day) at (time). Which is better for you?",
+      "sort_order": 12
+    },
+    {
+      "step_key": "obj_cost",
+      "title": "Objection: Cost",
+      "content": "{{contact_first_name}}, I completely understand, and here's something a lot of people don't realize: maintaining your results typically requires fewer units than starting over does. Fewer units means less cost, so staying on schedule is actually the more affordable way to do this.\n\nAnd just so you feel totally comfortable. When you come in, before anything is done, we'll go over exactly how many units we think you'd need and exactly what that would cost. Nothing happens until you've seen the numbers and you're happy with them. And of course, if there are any discounts or specials running when you're in, we'll absolutely apply those for you too.\n\nConfirm and continue: Does that make sense? (Wait for the yes.) Okay, let's find you a time. I have (day) or (day), which is better for you?",
+      "sort_order": 13
+    },
+    {
+      "step_key": "touchup_close",
+      "title": "Touch-Up Is the Story: The Close",
+      "content": "Well {{contact_first_name}}, the nice thing is you already know exactly what to expect, and getting back to that refreshed look you loved is a single visit away. If we catch it now, we’re maintaining a result instead of starting over, and that’s the easiest version of this there is.\n\nLet’s get you back on the books. I have (day) at (time) or (day) at (time). Which is better for you?",
+      "sort_order": 13
+    },
+    {
+      "step_key": "obj_time",
+      "title": "Objection: “I don’t have time”",
+      "content": "Gosh, I'm really glad you let me know that, {{contact_first_name}}, because I know time is a real commodity for you. If you want, we can cut down on the chitchat when you come in and just get down to business, so we get you in and out as fast as possible. A touch-up visit is quick to begin with, and if we know time is tight, we'll have everything ready the moment you walk through the door.\n\nConfirm and continue: Does that help? (Wait for the yes.) Okay, let's find you a time. I have (day) or (day), which is better for you?",
+      "sort_order": 15
+    },
+    {
+      "step_key": "obj_last_longer",
+      "title": "Objection: I thought it would last longer",
+      "content": "I completely understand, and that's a great thing to bring up. The effect naturally wears off over a few months as the movement comes back, which is completely normal, and that's exactly why most patients come back in on a regular basis, and what {{rec_pronoun}} can map out with you in person.\n\nConfirm and continue: Does that make sense? (Wait for a fast yes.) Do you have any other questions or concerns?",
+      "sort_order": 100
+    },
+    {
+      "step_key": "obj_other_treatment",
+      "title": "Objection: I’m thinking about fillers or something else",
+      "content": "That makes total sense, and that's exactly the kind of thing {{rec_pronoun}} can talk through with you at the appointment to see what fits best.\n\nConfirm and continue: Does that make sense? (Wait for a fast yes.) Do you have any other questions or concerns?",
+      "sort_order": 101
+    },
+    {
+      "step_key": "obj_think",
+      "title": "Objection: I need to think about it",
+      "content": "That's completely fair, {{contact_first_name}}. Can I ask what part you'd want to think over? Sometimes it's the cost, sometimes the timing, and sometimes people just want to be sure it's right for them, which one is closest for you?\n\n(Listen, their answer usually points to one of the other buttons below. If it stays general, keep going.)\n\nThe nice thing is, coming in is really just information. You'd get a look at what's possible and exactly what it would involve, and then you get to decide with real answers instead of wondering. No pressure either way.\n\nConfirm and continue: Does that make sense? (Wait for a fast yes.) Do you have any other questions or concerns?",
+      "sort_order": 130
+    },
+    {
+      "step_key": "obj_send_info",
+      "title": "Objection: Just send me information",
+      "content": "I'd be glad to get you some information, {{contact_first_name}}. The one thing I'd say is that a link or a flyer can only tell you so much. It can't really show you what's possible for you specifically. That's what a quick visit is for: you get a look at your options and answers that actually apply to you. So let me get you on the schedule first, no pressure, and you'll have real answers to go on.\n\nConfirm and continue: Does that make sense? (Wait for a fast yes.) Do you have any other questions or concerns?",
+      "sort_order": 131
+    }
+  ],
+  "choices": [
+    {
+      "from_step_key": "bridge_no",
+      "label": "They’re okay to move forward",
+      "to_step_key": "recommendation",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "bridge_no",
+      "label": "Another reason: dig deeper",
+      "to_step_key": "uncover",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "cadence_close",
+      "label": "They picked a time: one more thing (bonus question)",
+      "to_step_key": "masseter_bonus",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "cadence_close",
+      "label": "Hesitant or soft no: uncover the real concern",
+      "to_step_key": "uncover",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "digging_in",
+      "label": "The questions uncovered something beyond the touch-up",
+      "to_step_key": "making_it_real",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "digging_in",
+      "label": "The touch-up is the whole story: go to the close",
+      "to_step_key": "touchup_close",
+      "variant": "positive",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "digging_in_still",
+      "label": "The questions uncovered something: they named a concern",
+      "to_step_key": "making_it_real",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "digging_in_still",
+      "label": "Nothing surfaced: protect the results",
+      "to_step_key": "cadence_close",
+      "variant": "positive",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "making_it_real",
+      "label": "You’ve responded with empathy: ask the Magic Question",
+      "to_step_key": "review",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_last_longer",
+      "label": "Resolved: re-ask the scheduling question",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_last_longer",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "obj_other_treatment",
+      "label": "Resolved: re-ask the scheduling question",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_other_treatment",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "opening_question",
+      "label": "“Still loving how it looks”",
+      "to_step_key": "resp_doing_great",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "opening_question",
+      "label": "“It’s starting to come back a little”",
+      "to_step_key": "resp_coming_back",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "opening_question",
+      "label": "“Pretty much back to where I was”",
+      "to_step_key": "resp_fully_back",
+      "variant": "negative",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "\"Sounds reasonable\". Go to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "Hesitant or soft no: uncover the real concern",
+      "to_step_key": "uncover",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "resp_coming_back",
+      "label": "Continue: update their file",
+      "to_step_key": "transition",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "resp_doing_great",
+      "label": "Continue: update their file",
+      "to_step_key": "transition_still",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "resp_fully_back",
+      "label": "Continue: update their file",
+      "to_step_key": "transition",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "review",
+      "label": "They said yes: magic question",
+      "to_step_key": "recommendation",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "review",
+      "label": "Not quite / they hesitate",
+      "to_step_key": "bridge_no",
+      "variant": "negative",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "touchup_close",
+      "label": "They picked a time: one more thing (bonus question)",
+      "to_step_key": "masseter_bonus",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "touchup_close",
+      "label": "Hesitant or soft no: uncover the real concern",
+      "to_step_key": "uncover",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "transition",
+      "label": "They said okay: start the questions",
+      "to_step_key": "digging_in",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "transition_still",
+      "label": "They said okay: start the questions",
+      "to_step_key": "digging_in_still",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "They’re ready: schedule",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I thought it would last longer”",
+      "to_step_key": "obj_last_longer",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I’m thinking about fillers or something else”",
+      "to_step_key": "obj_other_treatment",
+      "variant": "objection",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "Cost",
+      "to_step_key": "obj_cost",
+      "variant": "objection",
+      "sort_order": 3
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I don’t have time”",
+      "to_step_key": "obj_time",
+      "variant": "objection",
+      "sort_order": 4
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I need to talk to my spouse”",
+      "to_step_key": "obj_spouse",
+      "variant": "objection",
+      "sort_order": 5
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I'm considering another option”",
+      "to_step_key": "obj_other_option",
+      "variant": "objection",
+      "sort_order": 6
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I need to think about it”",
+      "to_step_key": "obj_think",
+      "variant": "objection",
+      "sort_order": 7
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“Just send me some info”",
+      "to_step_key": "obj_send_info",
+      "variant": "objection",
+      "sort_order": 8
+    }
+  ]
+}

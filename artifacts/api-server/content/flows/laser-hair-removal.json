@@ -1,0 +1,405 @@
+{
+  "niche": {
+    "name": "Laser Hair Removal",
+    "sector": "healthcare",
+    "is_active": true,
+    "sort_order": 18
+  },
+  "steps": [
+    {
+      "step_key": "opening_question",
+      "title": "The Opening Question",
+      "content": "So {{contact_first_name}}, how have things been going since you finished your laser hair removal treatments with us? Are the treated areas still smooth and staying clear and you're loving it, has a little regrowth started to creep back, or are you pretty much back to shaving or waxing the way you were before you started with us?\n\n(This question has only three possible answers. Click the one you hear.)",
+      "sort_order": 1
+    },
+    {
+      "step_key": "resp_doing_great",
+      "title": "Still Smooth: Celebrate the Win",
+      "content": "I love hearing that, {{contact_first_name}}. That’s exactly what we want. There’s nothing better than just being done with it: no razors in the shower, no planning around it, just smooth.\n\nDo you remember what it was like before? The constant shaving, the ingrowns, the stubble by the end of the day? (Let them enjoy the moment. This is their win.)\n\n(Do not pitch anything yet. The file update comes next, and the close follows if nothing else surfaces.)",
+      "sort_order": 2
+    },
+    {
+      "step_key": "resp_coming_back",
+      "title": "Some Regrowth: Normalize, Then Update the File",
+      "content": "{{contact_first_name}}, that is completely normal, and honestly, it has nothing to do with the treatment not working. Hair grows in cycles, and each session can only catch the follicles that are actively growing that day. The ones you’re seeing now were dormant back then, or they’re new ones your hormones have recruited since.\n\nI remember how thrilled you were with how smooth everything was. (Let them respond. Be warm, no alarm. This is routine, not a failure.)\n\n(Do not pitch anything yet. The file update comes next, and the close follows if nothing else surfaces.)",
+      "sort_order": 3
+    },
+    {
+      "step_key": "resp_fully_back",
+      "title": "Feels Like It All Came Back: Warm Empathy, Then Update the File",
+      "content": "{{contact_first_name}}, I completely understand how frustrating that feels, and there’s a real reason for it. The follicles we treated are gone for good, but hair grows in cycles, and over time your hormones recruit new follicles that were dormant when we treated you. It’s not that the treatment failed. It’s new growth filling in.\n\nI remember how happy you were with the areas we finished. (Let them respond. Be warm. If they’re frustrated, reassure them: the progress they made is still theirs.)\n\n(Do not pitch anything yet. The file update comes next, and the close follows if nothing else surfaces.)",
+      "sort_order": 4
+    },
+    {
+      "step_key": "other_areas_bonus",
+      "title": "One More Thing: The Other Areas Question",
+      "content": "Perfect, you’re all set for (day) at (time).\n\n(If you already covered other areas during the file update, skip the question, just confirm the appointment warmly and end the call.)\n\nOh, one quick thing while I have you, {{contact_first_name}}, because it’s the thing I hear again and again: once one area is done, it’s usually the OTHER areas you start noticing. Is there anywhere else you’ve been thinking about? Underarms, legs, bikini line, face, back, anywhere you’re still shaving or plucking?\n\nIf YES: That’s so common, once you know what it’s like to just be done with an area, the rest gets old fast. I’ll make a note on your file so {{rec_pronoun}} can talk through it with you when you’re in, no commitment, just worth a look while you’re here.\n\nIf NO: No problem at all. I just always ask, because so many people don’t realize we can treat almost anywhere. We’ll see you (day) at (time), {{contact_first_name}}. We can’t wait to see you!\n\n(Either way, the call ends warm, with the appointment confirmed.)",
+      "sort_order": 5
+    },
+    {
+      "step_key": "transition_still",
+      "title": "The Transition: Update the File",
+      "content": "Now {{contact_first_name}}, while I have you on the phone, I’d like to ask you a few quick questions so we get your file completely up to date. Is that okay?\n\n(Wait for the yes before starting the questions.)",
+      "sort_order": 6
+    },
+    {
+      "step_key": "transition",
+      "title": "The Transition: Update the File",
+      "content": "Now {{contact_first_name}}, while I have you on the phone, I’d like to ask you a few quick questions so we get your file completely up to date. Is that okay?\n\n(Wait for the yes before starting the questions.)",
+      "sort_order": 7
+    },
+    {
+      "step_key": "digging_in_still",
+      "title": "The Six Questions: Update the File",
+      "content": "(Ask these in order. Critical: write down everything they mention. You’ll read it back before the recommendation.)\n\nNow, you mentioned everything’s still smooth. I love hearing that. One thing I’ll ask: is it still completely clear, or have you spotted even a stray hair or two starting to pop up here and there?\n\nHow’s the skin itself been in the treated areas? Any irritation, texture, or anything that’s been annoying you?\n\nIs there any area you’re still shaving, waxing, or plucking? Underarms, legs, bikini line, face, back, anywhere you’ve thought about being done with too?\n\nHave you ever been curious about any of the other treatments we do, or seen something online or heard about something from a friend that you wished you could ask a professional about instead of the internet?\n\nAnything coming up on the calendar, a wedding, a vacation, a beach trip, photos, that you’d want to be completely ready for?\n\nLast one, and it’s my favorite. If you could wave a wand and change just one thing about your skin or your routine, no judgment, what would it be?\n\n(If they mentioned anything at all, read it back and click the first button. If truly nothing surfaced, fall through to the maintenance close. That’s still a great call.)",
+      "sort_order": 8
+    },
+    {
+      "step_key": "digging_in",
+      "title": "The Six Questions: Update the File",
+      "content": "(Ask these in order. Critical: write down everything they mention. You’ll read it back before the recommendation.)\n\nYou mentioned some regrowth, which areas are you seeing it in, and when did you first start noticing it?\n\nHow’s the skin itself been in those areas? Any irritation, ingrowns from shaving in between, or anything else that’s been annoying you?\n\nIs there any area you’re still shaving, waxing, or plucking? Underarms, legs, bikini line, face, back, anywhere you’ve thought about being done with too?\n\nHave you ever been curious about any of the other treatments we do, or seen something online or heard about something from a friend that you wished you could ask a professional about instead of the internet?\n\nAnything coming up on the calendar, a wedding, a vacation, a beach trip, photos, that you’d want to be completely ready for?\n\nLast one, and it’s my favorite. If you could wave a wand and change just one thing about your skin or your routine, no judgment, what would it be?\n\n(If they mentioned anything beyond the regrowth itself, read it back and click the first button. If catching the regrowth is the whole story, fall through to the close.)",
+      "sort_order": 9
+    },
+    {
+      "step_key": "review",
+      "title": "The Review & Bridge to Emotion",
+      "content": "{{contact_first_name}}, let me make sure I've got this right. (Recap what they told you: how long it's been going on, how often, and how it's been affecting them.) Did I get that right?\n\nAnd it sounds like you'd really just love to get back to that feeling of not having to think about it. Is that fair to say?\n\n(Warm, not pushy. About 95% say yes. That yes is the moment.)",
+      "sort_order": 9
+    },
+    {
+      "step_key": "making_it_real",
+      "title": "Making It Real",
+      "content": "{{contact_first_name}}, what I’d like to do now is ask you a few quick questions about {{main_concern}}, so I can get your file fully updated. It’ll only take a minute.\n\n(Take the concern they named and make it real with three questions, in order. Pause after each and let them fully answer.)\n\nHow long has that been on your mind? A few weeks, a couple months, longer?\n\n(Let them answer, then:) “[Repeat their answer back]? That’s a long time to have something quietly chipping away at how you feel about yourself. Would you agree that’s not really OK?”\n\nIs it something you notice here and there, pretty much every time you look in the mirror at this point, or maybe you’re feeling like you should shave the area once or twice every month, regardless of if you actually do it? (Let them answer. “That’s a lot.”)\n\nAnd the last thing I’d like to ask is how it affects you day to day. But first, do me a favor: think of a day you felt really good about how you looked, maybe an event, an outfit that worked, photos you actually liked. Now think of a day it really got to you. Do you have those two days in your head?\n\n(Wait for the yes. Then:) “On that harder day, how does it change things? What you wear, how comfortable you feel around people, at work, out with friends?” (Let them open up. Do not rush.)\n\nThen respond with empathy: Thank you for sharing that with me. It makes complete sense, and that’s exactly the kind of thing {{rec_pronoun}} help people with every single day.",
+      "sort_order": 10
+    },
+    {
+      "step_key": "bridge_no",
+      "title": "They Hesitate: Uncover Why",
+      "content": "{{contact_first_name}}, you did mention {{main_concern}} is something you'd like to feel better about. I don't want to assume anything. Is the timing just not right, or is there something else on your mind that's holding you back from taking a look?\n\n(Warm and easygoing, no pressure, and never restate the concern back at them. You're just trying to understand what's in the way. Then stop and let them answer.)\n\nWhat are your thoughts about that?",
+      "sort_order": 11
+    },
+    {
+      "step_key": "recommendation",
+      "title": "The Magic Question & Recommendation",
+      "content": "{{contact_first_name}}, it sounds to me like {{main_concern}} isn’t just a small thing. It may also be affecting how comfortable and confident you feel around the people in your life. Do you see how that could be the case?\n\n(Wait for their answer. If they say no or hesitate: “That’s completely fair, but it’s clearly been on your mind, and that’s reason enough.” Then continue.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for yes.)\n\nMy recommendation is that we get you set up with an appointment so {{rec_pronoun}} can take a look and see if there’s something {{rec_pronoun}} can do to help you with {{main_concern}}. If {{rec_pronoun}} can help you, {{rec_pronoun}}’ll let you know, and {{rec_pronoun}}’d be honored if you let {{rec_obj}}. And if {{rec_pronoun}} don’t think it’s the right fit, {{rec_pronoun}}’ll let you know that as well, because {{rec_pronoun}}’re not here to waste anybody’s time or money. Does that sound reasonable?",
+      "sort_order": 11
+    },
+    {
+      "step_key": "cadence_close",
+      "title": "Nothing Surfaced: Stay Ahead of It Close",
+      "content": "{{contact_first_name}}, I’m really glad you’re still loving the results. That’s exactly what we like to hear.\n\nNow, there is one thing I want to mention before I let you go. Hair grows in cycles, and every so often your hormones recruit a few brand-new follicles that were dormant when we treated you. It always starts as just a few stray hairs, and because they show up so gradually, most people don’t notice until it’s turned into real regrowth. Does that make sense?\n\n(Wait for the yes. If they hesitate, use the button below to uncover the real concern.)\n\n{{contact_first_name}}, can I make a recommendation? (Wait for the yes.)\n\nMy recommendation is we get you in for one quick maintenance session. That way those few stray hairs never get the chance to turn into real regrowth. Does that sound reasonable?\n\n(Wait for the yes.)\n\nOkay, let’s find you a time. I have (day) at (time) or (day) at (time). Which is better for you?",
+      "sort_order": 12
+    },
+    {
+      "step_key": "comeback_close",
+      "title": "Catching the Regrowth Is the Story: The Close",
+      "content": "{{contact_first_name}}, thank you for that. Your file is completely up to date.\n\nAnd here’s the good news: this is exactly what maintenance sessions are for. We don’t start from zero, it’s a fraction of what you did the first time around, and every session from here puts you further ahead than you’ve ever been. Does that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation? (Wait for the yes.)\n\nMy recommendation is we get you in for one quick maintenance session now, while that new batch of follicles is active, and you’re right back to smooth. Does that sound reasonable?\n\n(Wait for the yes.)\n\nOkay, let’s get you back on the books. I have (day) at (time) or (day) at (time). Which is better for you?",
+      "sort_order": 13
+    },
+    {
+      "step_key": "obj_permanent",
+      "title": "Objection: I thought it was supposed to be permanent",
+      "content": "I completely understand, and that's a great question. Laser hair removal reduces hair, but some regrowth can happen over time, especially with things like hormones or if the full series wasn't finished. That's exactly why coming in makes sense, so {{rec_pronoun}} can look at the whole picture and talk through the best plan to get you back on track.\n\nConfirm and continue: Does that make sense? (Wait for a fast yes.) Do you have any other questions or concerns?",
+      "sort_order": 100
+    },
+    {
+      "step_key": "obj_frustrated",
+      "title": "Objection: I’m frustrated it came back",
+      "content": "I completely understand, and please don't be hard on yourself. Some regrowth is common and it's exactly why we reach out, with no judgment at all. {{rec_pronoun_cap}}'d simply love to help you get back to where you were.\n\nConfirm and continue: Does that make sense? (Wait for a fast yes.) Do you have any other questions or concerns?",
+      "sort_order": 101
+    },
+    {
+      "step_key": "obj_did_it_work",
+      "title": "Objection: Did it even work last time / does it last?",
+      "content": "(Acknowledge it warmly. Never make guaranteed-results or permanence claims on the call.)\n\nThat's a completely fair question, {{contact_first_name}}, and it's exactly the kind of thing {{rec_pronoun}}'ll want to talk through in person, so they can look at the whole picture and what would help it hold.\n\nConfirm and continue: Does that make sense? (Wait for a fast yes.) Do you have any other questions or concerns?",
+      "sort_order": 102
+    },
+    {
+      "step_key": "obj_think",
+      "title": "Objection: I need to think about it",
+      "content": "That's completely fair, {{contact_first_name}}. Can I ask what part you'd want to think over? Sometimes it's the cost, sometimes the timing, and sometimes people just want to be sure it's right for them, which one is closest for you?\n\n(Listen, their answer usually points to one of the other buttons below. If it stays general, keep going.)\n\nThe nice thing is, coming in is really just information. You'd get a look at what's possible and exactly what it would involve, and then you get to decide with real answers instead of wondering. No pressure either way.\n\nConfirm and continue: Does that make sense? (Wait for a fast yes.) Do you have any other questions or concerns?",
+      "sort_order": 130
+    },
+    {
+      "step_key": "obj_send_info",
+      "title": "Objection: Just send me information",
+      "content": "I'd be glad to get you some information, {{contact_first_name}}. The one thing I'd say is that a link or a flyer can only tell you so much. It can't really show you what's possible for you specifically. That's what a quick visit is for: you get a look at your options and answers that actually apply to you. So let me get you on the schedule first, no pressure, and you'll have real answers to go on.\n\nConfirm and continue: Does that make sense? (Wait for a fast yes.) Do you have any other questions or concerns?",
+      "sort_order": 131
+    }
+  ],
+  "choices": [
+    {
+      "from_step_key": "bridge_no",
+      "label": "They’re okay to move forward",
+      "to_step_key": "recommendation",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "bridge_no",
+      "label": "Another reason: dig deeper",
+      "to_step_key": "uncover",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "cadence_close",
+      "label": "They picked a time: one more thing (bonus question)",
+      "to_step_key": "other_areas_bonus",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "cadence_close",
+      "label": "Hesitant or soft no: uncover the real concern",
+      "to_step_key": "uncover",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "comeback_close",
+      "label": "They picked a time: one more thing (bonus question)",
+      "to_step_key": "other_areas_bonus",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "comeback_close",
+      "label": "Hesitant or soft no: uncover the real concern",
+      "to_step_key": "uncover",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "digging_in",
+      "label": "The questions uncovered something beyond the regrowth",
+      "to_step_key": "making_it_real",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "digging_in",
+      "label": "Catching the regrowth is the whole story: go to the close",
+      "to_step_key": "comeback_close",
+      "variant": "positive",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "digging_in_still",
+      "label": "The questions uncovered something: they named a concern",
+      "to_step_key": "making_it_real",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "digging_in_still",
+      "label": "Nothing surfaced: stay ahead of it",
+      "to_step_key": "cadence_close",
+      "variant": "positive",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "making_it_real",
+      "label": "You’ve responded with empathy: ask the Magic Question",
+      "to_step_key": "review",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_did_it_work",
+      "label": "Resolved: re-ask the scheduling question",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_did_it_work",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_frustrated",
+      "label": "Resolved: re-ask the scheduling question",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_frustrated",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_permanent",
+      "label": "Resolved: re-ask the scheduling question",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_permanent",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "opening_question",
+      "label": "“Still smooth and loving it”",
+      "to_step_key": "resp_doing_great",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "opening_question",
+      "label": "“A little regrowth is creeping back”",
+      "to_step_key": "resp_coming_back",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "opening_question",
+      "label": "“Pretty much back to shaving or waxing”",
+      "to_step_key": "resp_fully_back",
+      "variant": "negative",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "\"Sounds reasonable\". Go to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "Hesitant or soft no: uncover the real concern",
+      "to_step_key": "uncover",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "resp_coming_back",
+      "label": "Continue: update their file",
+      "to_step_key": "transition",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "resp_doing_great",
+      "label": "Continue: update their file",
+      "to_step_key": "transition_still",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "resp_fully_back",
+      "label": "Continue: update their file",
+      "to_step_key": "transition",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "review",
+      "label": "They said yes: magic question",
+      "to_step_key": "recommendation",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "review",
+      "label": "Not quite / they hesitate",
+      "to_step_key": "bridge_no",
+      "variant": "negative",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "transition",
+      "label": "They said okay: start the questions",
+      "to_step_key": "digging_in",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "transition_still",
+      "label": "They said okay: start the questions",
+      "to_step_key": "digging_in_still",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "They’re ready: schedule",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I thought it was supposed to be permanent”",
+      "to_step_key": "obj_permanent",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I’m frustrated it came back”",
+      "to_step_key": "obj_frustrated",
+      "variant": "objection",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“Did it even work last time / does it last?”",
+      "to_step_key": "obj_did_it_work",
+      "variant": "objection",
+      "sort_order": 3
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "Cost or insurance",
+      "to_step_key": "obj_cost",
+      "variant": "objection",
+      "sort_order": 4
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I don’t have time”",
+      "to_step_key": "obj_time",
+      "variant": "objection",
+      "sort_order": 5
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I need to talk to my spouse”",
+      "to_step_key": "obj_spouse",
+      "variant": "objection",
+      "sort_order": 6
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I'm considering another option”",
+      "to_step_key": "obj_other_option",
+      "variant": "objection",
+      "sort_order": 7
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I need to think about it”",
+      "to_step_key": "obj_think",
+      "variant": "objection",
+      "sort_order": 8
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“Just send me some info”",
+      "to_step_key": "obj_send_info",
+      "variant": "objection",
+      "sort_order": 9
+    }
+  ]
+}

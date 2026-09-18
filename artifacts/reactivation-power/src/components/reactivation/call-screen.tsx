@@ -186,7 +186,7 @@ export function CallScreen({
   const firstName = contact.name.split(' ')[0]
   const vmBusiness = practiceName?.trim() || 'our office'
   const vmCallback = officePhone?.trim() || '(your office number)'
-  const voicemailScript = `Hi ${firstName}, this is ${callerName} from ${vmBusiness}, and we're doing file updates on patients we haven't seen in a while. If you could do me a favor and give me a call back at this number, ${vmCallback}, when you have a few minutes, I'd really appreciate it. Thanks in advance, and have a great day!`
+  const voicemailScript = `Hi ${firstName}, this is ${callerName} from ${vmBusiness}. We're updating files for patients we haven't seen in a while, and yours came up. Could you call me back at ${vmCallback} when you have a few minutes? Thanks, and have a great day.`
 
   const previousNotes = callHistory.filter((c) => c.notes?.trim())
 

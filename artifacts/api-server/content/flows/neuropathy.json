@@ -1,0 +1,604 @@
+{
+  "niche": {
+    "name": "Neuropathy",
+    "sector": "healthcare",
+    "is_active": true,
+    "sort_order": 5
+  },
+  "steps": [
+    {
+      "step_key": "opening_question",
+      "title": "The Opening Question",
+      "content": "So {{contact_first_name}}, how have things been going since you finished the neuropathy program with us? Are the numbness and tingling still under control and you're feeling good and getting around well, has a little of it started to creep back, or are you pretty much back to where you were before you started with us?\n\n(This question has only three possible answers. Click the one you hear.)",
+      "sort_order": 1
+    },
+    {
+      "step_key": "resp_doing_great",
+      "title": "Doing Great: Celebrate the Win",
+      "content": "That’s wonderful to hear, {{contact_first_name}}. That’s exactly what we like to hear. We’re so happy you’re still experiencing the benefits of the treatment and that your symptoms are still doing better. Nerve health is one of those things where the wins are hard-earned, and you earned this one.\n\nDo you remember how bad it was before you started coming in and we were able to help you?\n\n(Let them answer. Let them relive the win before you move on.)",
+      "sort_order": 2
+    },
+    {
+      "step_key": "resp_coming_back",
+      "title": "Starting to Creep Back",
+      "content": "{{contact_first_name}}, I appreciate you sharing that. Nerve issues can be stubborn, and once the program ends they can sometimes try to work their way back. I remember how much better you were doing, and I’m sure you remember that feeling too, right?\n\n(Let them confirm, with zero judgment.)",
+      "sort_order": 3
+    },
+    {
+      "step_key": "resp_fully_back",
+      "title": "It’s Fully Back",
+      "content": "{{contact_first_name}}, I’m so sorry to hear that. Nerve issues can be stubborn, and once the program ends they can sometimes try to work their way back. It’s exactly why we make these check-in calls. I remember how much better you were doing, and I’m sure you remember that feeling too, right?\n\n(Let them confirm, be warm and non-judgmental, and do NOT try to book yet.)",
+      "sort_order": 4
+    },
+    {
+      "step_key": "permission_questions",
+      "title": "Ask Permission for the Questions",
+      "content": "{{contact_first_name}}, thank you so much for that information. While I have you on the phone, I’d like to go ahead and finish updating your file by asking you a few quick questions. Is that okay?\n\n(Wait for the yes. Almost everyone says yes. You asked permission, and it’s their file.)",
+      "sort_order": 6
+    },
+    {
+      "step_key": "transition",
+      "title": "The Transition: Acknowledge and Ask Permission",
+      "content": "Now {{contact_first_name}}, obviously I know you said {{complaint_reference}} has been coming back, and we’re absolutely going to talk about that. But while I have you on the phone, I’d like to ask you a few additional questions so we get your file completely up to date. Is that okay?\n\n(Wait for the yes before starting the questions.)",
+      "sort_order": 6
+    },
+    {
+      "step_key": "digging_in",
+      "title": "The Seven Questions: Update the File",
+      "content": "(Critical: write down every symptom they mention as you go. You’ll recap them in a moment.)\n\nFirst, have you noticed any burning, tingling, or pins-and-needles anywhere, even somewhere new? A lot of people tell us it started in their toes and then one day they realized their fingertips were doing it too, or it crept from the ball of the foot up toward the ankle. Sometimes it’s only at night when you first lie down, and you’ve just gotten used to waiting it out.\n\nNext, any numbness? Places where the feeling just isn’t what it used to be? This is the kind of thing where you can’t quite feel the gas pedal the way you should, you don’t notice a stone in your shoe until you take it off, or things slip out of your fingers a little more often than they used to.\n\nHow about your balance and steadiness? Maybe you find yourself reaching for the handrail every time now, taking the stairs a little slower, or feeling unsure on uneven ground. Grass, gravel, a dark hallway at night on the way to the bathroom.\n\nHow has your sleep been? For a lot of people with nerve symptoms, the burning or restlessness kicks in right when their head hits the pillow. The sheets bother their feet, or they’re up at two in the morning walking it off.\n\nAny cramping, weakness, or heaviness in your legs or hands? Maybe your legs feel dead-tired after a short walk, your grip gives out on a jar lid, or you get charley horses at night.\n\nAre you having any pain, stiffness, or discomfort anywhere else in your body, even if you’ve learned to live with it? Back, knees, shoulders? The kind of thing you’ve just chalked up to getting older?\n\nAnd finally, are you currently taking anything for the nerves or anything else? Prescription or over the counter? I mean the gabapentin or Lyrica if you’re on it, but also the little everyday things people don’t count: the Advil, the sleep aid, the vitamins and supplements you take regularly.\n\n(If they mentioned anything at all, use the notes you took during the questions and ask:)\n\nNow {{contact_first_name}}, you just told me about (read back the issues they mentioned, e.g. “your sleep’s been rough and your back’s been bothering you”). If you could completely eliminate just one of those problems and never have it bother you again, which one would you choose?\n\n(If they genuinely mentioned nothing, skip this question and use the “genuinely nothing” path below.)",
+      "sort_order": 7
+    },
+    {
+      "step_key": "digging_in_returning",
+      "title": "The Seven Questions: Update the File",
+      "content": "(Critical: write down every symptom they mention as you go. You’ll recap them in a moment.)\n\nFirst, have you noticed any burning, tingling, or pins-and-needles anywhere, even somewhere new? A lot of people tell us it started in their toes and then one day they realized their fingertips were doing it too, or it crept from the ball of the foot up toward the ankle. Sometimes it’s only at night when you first lie down, and you’ve just gotten used to waiting it out.\n\nNext, any numbness? Places where the feeling just isn’t what it used to be? This is the kind of thing where you can’t quite feel the gas pedal the way you should, you don’t notice a stone in your shoe until you take it off, or things slip out of your fingers a little more often than they used to.\n\nHow about your balance and steadiness? Maybe you find yourself reaching for the handrail every time now, taking the stairs a little slower, or feeling unsure on uneven ground. Grass, gravel, a dark hallway at night on the way to the bathroom.\n\nHow has your sleep been? For a lot of people with nerve symptoms, the burning or restlessness kicks in right when their head hits the pillow. The sheets bother their feet, or they’re up at two in the morning walking it off.\n\nAny cramping, weakness, or heaviness in your legs or hands? Maybe your legs feel dead-tired after a short walk, your grip gives out on a jar lid, or you get charley horses at night.\n\nAre you having any pain, stiffness, or discomfort anywhere else in your body, even if you’ve learned to live with it? Back, knees, shoulders? The kind of thing you’ve just chalked up to getting older?\n\nAnd finally, are you currently taking anything for the nerves or anything else? Prescription or over the counter? I mean the gabapentin or Lyrica if you’re on it, but also the little everyday things people don’t count: the Advil, the sleep aid, the vitamins and supplements you take regularly.\n\n(Use the notes you took during the questions, then ask:)\n\nNow {{contact_first_name}}, you just told me about (read back the issues they mentioned, e.g. “your sleep’s been rough and your back’s been bothering you”), and I know you also said the symptoms we treated you for are coming back. If you could completely eliminate just one of those problems, or stop your old symptoms from coming back, and never have it bother you again, which one would you choose?",
+      "sort_order": 7
+    },
+    {
+      "step_key": "making_it_real",
+      "title": "Making It Real",
+      "content": "{{contact_first_name}}, what I’d like to do now is ask you a few quick questions about {{main_concern}}, so I can get your file fully updated. It’ll only take a minute.\n\n(Take the concern they named and make it real with three questions, in order. Write down or make note of their answers. You will use them in the next section. After each question, pause and let them fully answer. React like a human: “I see,” “Wow,” “That’s a lot.”)\n\nHow long have you been experiencing it? A few days, a few weeks, or longer than that? Just a day or two, a few weeks, a month or two, or longer than that?\n\n(Let them answer, then:) “[Repeat their answer back]? Would you agree with me that dealing with something like that for that long really isn’t OK?”\n\n(If they shrug it off, “oh, I just deal with it”:) “You know, even a bottle of Tylenol says if it lasts more than a week or so, you should have it looked at. You’ve been dealing with this a lot longer than that.”\n\nIs that something that you notice only once or twice a month, or is it happening more often than that?\n\n(Let them answer, then:)\n\n“And when you are experiencing it, does it seem to be more like first thing in the morning, the middle of the day, while you’re at work, by the end of the day? Or do you feel it multiple times a day, or is it there all day?”\n\n(Let them answer, then:) “That’s a lot. And honestly, having it that often isn’t just not OK. It’s not normal. Wouldn’t you agree?”\n\nAnd the last thing I’d like to ask is how it’s impacting you. But first, do me a favor: think of a day when you felt great, {{main_concern}} wasn’t in the picture, you were full of energy, everything was clicking. Now think of the absolute worst day you’ve had with it. Do you have those two days in your head?\n\n(Wait for the yes. Then walk the worst day through three areas, pausing after each:)\n\n“On that worst day, what about work? Could you go? And if you did, were you as productive as usual? Were you as enjoyable to be around?” (Let them respond. “I see.”)\n\n“What about at home? Were you fully engaged with the people around you, or did you kind of want to be left alone?” (Let them respond. “That’s really not OK.”)\n\n“And the things you enjoy. Your hobbies, getting together with friends, family things. What happens to those when it’s at its worst?” (Let them open up. Do not rush.)\n\nThen respond with empathy: Thank you for sharing that with me. It makes complete sense, and that’s exactly the kind of thing {{rec_pronoun}} help people with every single day.",
+      "sort_order": 8
+    },
+    {
+      "step_key": "recommendation",
+      "title": "The Magic Question & Recommendation",
+      "content": "{{contact_first_name}}, it sounds to me like {{main_concern}} isn’t just affecting you. It may also be affecting the people you care about, keeping you from the things you enjoy doing, maybe even getting in the way at work. Do you see how that could actually be the case?\n\n(Wait for their answer. If they say no or hesitate: “That’s completely fair, and honestly, I’m glad it hasn’t spilled over into the rest of your life. But it’s still been bothering you, and that’s reason enough.” Then continue.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for yes.)\n\nMy recommendation is that we get you set up with an appointment so {{rec_pronoun}} can take a look at you and see if there’s something {{rec_pronoun}} can do to help you with {{main_concern}}. If {{rec_pronoun}} can help you, {{rec_pronoun}}’ll let you know, and {{rec_pronoun}}’d be honored if you let {{rec_obj}}. And if {{rec_pronoun}} don’t think {{rec_pronoun}} can help, {{rec_pronoun}}’ll let you know that as well, because {{rec_pronoun}}’re not here to waste anybody’s time or money. Does that sound reasonable?",
+      "sort_order": 10
+    },
+    {
+      "step_key": "bridge_no",
+      "title": "They Hesitate: Uncover Why",
+      "content": "{{contact_first_name}}, you did tell me {{main_concern}} has been showing up and getting to you.\n\nSo help me understand. Why wouldn't you want to have it evaluated? What's keeping you from getting it looked at?\n\n(Say this with genuine, confused curiosity, never pushy, and never arguing. You honestly can't see why they wouldn't want something looked at that they just told you is a problem, based on how bad they described it. Then stop talking and let them give you the real reason.)\n\nWhat are your thoughts about that?",
+      "sort_order": 11
+    },
+    {
+      "step_key": "lapsed_commitment",
+      "title": "Nothing Found: The Commitment Question",
+      "content": "{{contact_first_name}}, I am so glad you’re doing so well, and we’re thrilled to hear it.\n\nLet me ask you this. I remember when you first came into the office, you told us your goal wasn’t just to quiet the symptoms down. It was to keep your nerves healthy so this never took over your life again. Can I ask what changed that led you to stop coming in for your check-ins?\n\n(Let them answer. Listen all the way through. Don’t argue with whatever they say. Acknowledge it warmly.)\n\n(Then tap the button below that’s closest to the reason they shared. It will give you a natural, conversational way to respond before inviting them back onto the schedule.)",
+      "sort_order": 16
+    },
+    {
+      "step_key": "obj_came_back_stopped",
+      "title": "Objection: The symptoms came back as soon as I stopped",
+      "content": "I completely understand. Nerve issues can be stubborn, and once you’re off the program they can sometimes try to work their way back. That's exactly why coming in makes sense, so {{rec_pronoun}} can look at the whole picture and talk through the best plan to get you back on track and help you stay ahead of it.\n\nConfirm and continue: Does that make sense? (Wait for a fast yes.) Do you have any other questions or concerns?",
+      "sort_order": 100
+    },
+    {
+      "step_key": "obj_frustrated",
+      "title": "Objection: I’m frustrated it came back",
+      "content": "Please don't be. This happens to almost everyone whose symptoms return, and it's exactly why we reach out, with no judgment at all. {{rec_pronoun_cap}}'d simply love to help you get back to where you were.\n\nConfirm and continue: Does that make sense? (Wait for a fast yes.) Do you have any other questions or concerns?",
+      "sort_order": 101
+    },
+    {
+      "step_key": "obj_bad_experience",
+      "title": "Objection: Side effects or a bad experience before",
+      "content": "(Acknowledge it warmly and explain that's exactly the kind of thing {{rec_pronoun}}'ll want to talk through in person, so {{rec_pronoun}} can look at the whole picture. Never give medical advice on the call.)\n\n{{contact_first_name}}, I completely understand, and I'm glad you told me. That's exactly the kind of thing {{rec_pronoun}}'ll want to talk through with you in person so you can look at the whole picture together.\n\nConfirm and continue: Does that make sense? (Wait for a fast yes.) Do you have any other questions or concerns?",
+      "sort_order": 102
+    },
+    {
+      "step_key": "lapsed_felt_fine",
+      "title": "If They Say: \"I Was Feeling Fine\"",
+      "content": "That makes total sense, {{contact_first_name}}, and honestly, that’s the best reason there is. When you feel good, coming in stops feeling urgent. Here’s the funny thing about it, though. Feeling that good is actually the result of the care you did. Nerves heal quietly, and they can slip quietly too. The check-ins are what keep them healthy and keep you feeling this way.\n\nDoes that make sense?\n\n(Let them answer. Wait for them to respond before moving on.)\n\nWas there anything else that was holding you back, or was that pretty much it?\n\n(Let them answer. If they raise another reason, go back and tap the button for it. If that was it, continue.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for yes.)\n\nMy recommendation is that we go ahead and get you back on the schedule so you can keep feeling as good as you do right now. Does that sound reasonable?",
+      "sort_order": 103
+    },
+    {
+      "step_key": "lapsed_cost",
+      "title": "If They Say: Cost or Insurance",
+      "content": "{{contact_first_name}}, I completely understand. That’s real, and I’m glad you told me. What a lot of our practice members have found is that check-in visits are spaced out and cost a fraction of what it takes to fix a problem that’s been sliding for months. And you’re not committing to anything. It’s simply a visit so {{rec_pronoun}} can check on your nerves and make sure you’re holding your progress.\n\nDoes that make sense?\n\n(Let them answer. Wait for them to respond before moving on.)\n\n(Do NOT improvise pricing, packages, or discounts on the call. Let the office handle specifics.)\n\nWas there anything else that was holding you back, or was that pretty much it?\n\n(Let them answer. If they raise another reason, go back and tap the button for it. If that was it, continue.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for yes.)\n\nMy recommendation is that we go ahead and get you back on the schedule. Does that sound reasonable?",
+      "sort_order": 104
+    },
+    {
+      "step_key": "lapsed_busy",
+      "title": "If They Say: \"Life Got Busy\"",
+      "content": "Oh, I completely hear you, {{contact_first_name}}. Life fills up fast, and this is exactly the kind of thing that quietly slips off the calendar. No guilt at all; it happens to everyone. The nice part is that a check-in visit is quick, and we can find a time that actually works around your schedule instead of adding to it.\n\nDoes that make sense?\n\n(Let them answer. Wait for them to respond before moving on.)\n\nWas there anything else that was holding you back, or was that pretty much it?\n\n(Let them answer. If they raise another reason, go back and tap the button for it. If that was it, continue.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for yes.)\n\nMy recommendation is that we go ahead and get you back on the schedule at a time that’s easy for you. Does that sound reasonable?",
+      "sort_order": 105
+    },
+    {
+      "step_key": "lapsed_wait_pain",
+      "title": "If They Say: \"I'll Come Back If It Comes Back\"",
+      "content": "That’s a fair way to think about it, {{contact_first_name}}, and I get it. The only thing I’d gently share is that with nerves, symptoms are usually the last thing to show up, by the time the tingling or numbness comes back, things have often been slipping underneath for a while. Catching it at a check-in usually means a quick visit and you’re on your way, instead of the time and treatment it takes once nerves have been sliding for months.\n\nDoes that make sense?\n\n(Let them answer. Wait for them to respond before moving on.)\n\nWas there anything else that was holding you back, or was that pretty much it?\n\n(Let them answer. If they raise another reason, go back and tap the button for it. If that was it, continue.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for yes.)\n\nMy recommendation is that we go ahead and get you back on the schedule so we stay ahead of it instead of behind it. Does that sound reasonable?",
+      "sort_order": 106
+    },
+    {
+      "step_key": "lapsed_moved",
+      "title": "If They Say: They Moved or Tried Another Provider",
+      "content": "That’s completely understandable, {{contact_first_name}}. Things change, and there’s nothing wrong with that. If you’re still in the area, {{rec_pronoun}}'d love to see you again. Your whole history is right here in your file, so we can pick up exactly where you left off instead of starting from scratch.\n\nDoes that make sense?\n\n(Let them answer. Wait for them to respond before moving on.)\n\nWas there anything else that was holding you back, or was that pretty much it?\n\n(Let them answer. If they raise another reason, go back and tap the button for it. If that was it, continue.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for yes.)\n\nMy recommendation is that we go ahead and get you back on the schedule. Does that sound reasonable?",
+      "sort_order": 107
+    },
+    {
+      "step_key": "transition_fully_back",
+      "title": "The Transition: Acknowledge and Ask Permission",
+      "content": "Now {{contact_first_name}}, obviously I know you said {{complaint_reference}} is pretty much back to where it was, and we’re absolutely going to talk about that. But while I have you on the phone, I’d like to ask you a few additional questions so we get your file completely up to date. Is that okay?\n\n(Wait for the yes before starting the questions.)",
+      "sort_order": 108
+    },
+    {
+      "step_key": "digging_in_fully_back",
+      "title": "The Seven Questions: Update the File",
+      "content": "(Critical: write down every symptom they mention as you go. You’ll recap them in a moment.)\n\nFirst, have you noticed any burning, tingling, or pins-and-needles anywhere, even somewhere new? A lot of people tell us it started in their toes and then one day they realized their fingertips were doing it too, or it crept from the ball of the foot up toward the ankle. Sometimes it’s only at night when you first lie down, and you’ve just gotten used to waiting it out.\n\nNext, any numbness? Places where the feeling just isn’t what it used to be? This is the kind of thing where you can’t quite feel the gas pedal the way you should, you don’t notice a stone in your shoe until you take it off, or things slip out of your fingers a little more often than they used to.\n\nHow about your balance and steadiness? Maybe you find yourself reaching for the handrail every time now, taking the stairs a little slower, or feeling unsure on uneven ground. Grass, gravel, a dark hallway at night on the way to the bathroom.\n\nHow has your sleep been? For a lot of people with nerve symptoms, the burning or restlessness kicks in right when their head hits the pillow. The sheets bother their feet, or they’re up at two in the morning walking it off.\n\nAny cramping, weakness, or heaviness in your legs or hands? Maybe your legs feel dead-tired after a short walk, your grip gives out on a jar lid, or you get charley horses at night.\n\nAre you having any pain, stiffness, or discomfort anywhere else in your body, even if you’ve learned to live with it? Back, knees, shoulders? The kind of thing you’ve just chalked up to getting older?\n\nAnd finally, are you currently taking anything for the nerves or anything else? Prescription or over the counter? I mean the gabapentin or Lyrica if you’re on it, but also the little everyday things people don’t count: the Advil, the sleep aid, the vitamins and supplements you take regularly.\n\n(Use the notes you took during the questions, then ask:)\n\nNow {{contact_first_name}}, you just told me about (read back the issues they mentioned, e.g. “your sleep’s been rough and your back’s been bothering you”), and I know you also said the symptoms we treated you for are pretty much back. If you could completely eliminate just one of those problems, or get rid of the symptoms that have come back, and never have it bother you again, which one would you choose?",
+      "sort_order": 110
+    },
+    {
+      "step_key": "obj_think",
+      "title": "Objection: I need to think about it",
+      "content": "That's completely fair, {{contact_first_name}}. Can I ask what part you'd want to think over? Sometimes it's the cost, sometimes the timing, and sometimes people just want to be sure it's worth coming in, which one is closest for you?\n\n(Listen, their answer usually points to one of the other buttons below. If it stays general, keep going.)\n\nHonestly, coming in is really just information. {{rec_pronoun_cap}} takes a look, you find out exactly what's going on with {{main_concern}}, and then you get to decide with real answers instead of wondering. And if we can't help you, we'll tell you that too.\n\nConfirm and continue: Does that make sense? (Wait for a fast yes.) Do you have any other questions or concerns?",
+      "sort_order": 130
+    },
+    {
+      "step_key": "obj_send_info",
+      "title": "Objection: Just send me information",
+      "content": "I'd be glad to get you some information, {{contact_first_name}}. The one thing I'd say is that a flyer or a link can only tell you so much. It can't actually look at what's going on with {{main_concern}} for you specifically. That's really what the visit is for: {{rec_pronoun}} takes a look and you get answers that apply to you, not just general information. So let me get you on the schedule first, and you'll have real answers to go on.\n\nConfirm and continue: Does that make sense? (Wait for a fast yes.) Do you have any other questions or concerns?",
+      "sort_order": 131
+    }
+  ],
+  "choices": [
+    {
+      "from_step_key": "bridge_no",
+      "label": "They’re okay to move forward",
+      "to_step_key": "recommendation",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "bridge_no",
+      "label": "“The symptoms came back as soon as I stopped”",
+      "to_step_key": "obj_came_back_stopped",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "bridge_no",
+      "label": "“I’m frustrated it came back”",
+      "to_step_key": "obj_frustrated",
+      "variant": "objection",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "bridge_no",
+      "label": "Side effects or a bad experience before",
+      "to_step_key": "obj_bad_experience",
+      "variant": "objection",
+      "sort_order": 3
+    },
+    {
+      "from_step_key": "bridge_no",
+      "label": "Cost or insurance",
+      "to_step_key": "obj_cost",
+      "variant": "objection",
+      "sort_order": 4
+    },
+    {
+      "from_step_key": "bridge_no",
+      "label": "“I don’t have time”",
+      "to_step_key": "obj_time",
+      "variant": "objection",
+      "sort_order": 5
+    },
+    {
+      "from_step_key": "bridge_no",
+      "label": "“I need to talk to my spouse”",
+      "to_step_key": "obj_spouse",
+      "variant": "objection",
+      "sort_order": 6
+    },
+    {
+      "from_step_key": "bridge_no",
+      "label": "Another reason: dig deeper",
+      "to_step_key": "uncover",
+      "variant": "caution",
+      "sort_order": 7
+    },
+    {
+      "from_step_key": "digging_in",
+      "label": "The questions uncovered something: they named their biggest issue",
+      "to_step_key": "making_it_real",
+      "variant": "caution",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "digging_in",
+      "label": "Genuinely nothing: doing great across the board",
+      "to_step_key": "lapsed_commitment",
+      "variant": "positive",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "digging_in_fully_back",
+      "label": "The questions uncovered something: they named their biggest issue",
+      "to_step_key": "making_it_real",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "digging_in_returning",
+      "label": "The questions uncovered something: they named their biggest issue",
+      "to_step_key": "making_it_real",
+      "variant": "caution",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "lapsed_busy",
+      "label": "Sounds reasonable: get them scheduled",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "lapsed_busy",
+      "label": "They shared another reason: go back and pick it",
+      "to_step_key": "lapsed_commitment",
+      "variant": "default",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "lapsed_commitment",
+      "label": "\"I was feeling fine. Didn't think I needed it\"",
+      "to_step_key": "lapsed_felt_fine",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "lapsed_commitment",
+      "label": "Cost or insurance",
+      "to_step_key": "lapsed_cost",
+      "variant": "default",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "lapsed_commitment",
+      "label": "Life got busy",
+      "to_step_key": "lapsed_busy",
+      "variant": "default",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "lapsed_commitment",
+      "label": "\"I'll come back if it comes back\"",
+      "to_step_key": "lapsed_wait_pain",
+      "variant": "default",
+      "sort_order": 3
+    },
+    {
+      "from_step_key": "lapsed_commitment",
+      "label": "Moved or tried another provider",
+      "to_step_key": "lapsed_moved",
+      "variant": "default",
+      "sort_order": 4
+    },
+    {
+      "from_step_key": "lapsed_cost",
+      "label": "Sounds reasonable: get them scheduled",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "lapsed_cost",
+      "label": "They shared another reason: go back and pick it",
+      "to_step_key": "lapsed_commitment",
+      "variant": "default",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "lapsed_felt_fine",
+      "label": "Sounds reasonable: get them scheduled",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "lapsed_felt_fine",
+      "label": "They shared another reason: go back and pick it",
+      "to_step_key": "lapsed_commitment",
+      "variant": "default",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "lapsed_moved",
+      "label": "Sounds reasonable: get them scheduled",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "lapsed_moved",
+      "label": "They shared another reason: go back and pick it",
+      "to_step_key": "lapsed_commitment",
+      "variant": "default",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "lapsed_wait_pain",
+      "label": "Sounds reasonable: get them scheduled",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "lapsed_wait_pain",
+      "label": "They shared another reason: go back and pick it",
+      "to_step_key": "lapsed_commitment",
+      "variant": "default",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_bad_experience",
+      "label": "Resolved: re-ask the scheduling question",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_bad_experience",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_came_back_stopped",
+      "label": "Resolved: re-ask the scheduling question",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_came_back_stopped",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_frustrated",
+      "label": "Resolved: re-ask the scheduling question",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_frustrated",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "opening_question",
+      "label": "“Still under control, feeling good”",
+      "to_step_key": "resp_doing_great",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "opening_question",
+      "label": "“A little is starting to creep back”",
+      "to_step_key": "resp_coming_back",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "opening_question",
+      "label": "“Pretty much back to where I was”",
+      "to_step_key": "resp_fully_back",
+      "variant": "negative",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "permission_questions",
+      "label": "They said okay: ask the seven questions",
+      "to_step_key": "digging_in",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“Yes, that sounds reasonable”",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "Hesitant or soft no",
+      "to_step_key": "uncover",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“The symptoms came back as soon as I stopped”",
+      "to_step_key": "obj_came_back_stopped",
+      "variant": "objection",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“I’m frustrated it came back”",
+      "to_step_key": "obj_frustrated",
+      "variant": "objection",
+      "sort_order": 3
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "Side effects or a bad experience before",
+      "to_step_key": "obj_bad_experience",
+      "variant": "objection",
+      "sort_order": 4
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "Cost or insurance",
+      "to_step_key": "obj_cost",
+      "variant": "objection",
+      "sort_order": 5
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“I don’t have time”",
+      "to_step_key": "obj_time",
+      "variant": "objection",
+      "sort_order": 6
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“I need to talk to my spouse”",
+      "to_step_key": "obj_spouse",
+      "variant": "objection",
+      "sort_order": 7
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“I'm considering another option”",
+      "to_step_key": "obj_other_option",
+      "variant": "objection",
+      "sort_order": 8
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“I need to think about it”",
+      "to_step_key": "obj_think",
+      "variant": "objection",
+      "sort_order": 9
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“Just send me some info”",
+      "to_step_key": "obj_send_info",
+      "variant": "objection",
+      "sort_order": 10
+    },
+    {
+      "from_step_key": "resp_doing_great",
+      "label": "They remember: ask permission for a few questions",
+      "to_step_key": "permission_questions",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "resp_fully_back",
+      "label": "Continue to the transition",
+      "to_step_key": "transition_fully_back",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "review",
+      "label": "They said yes: magic question",
+      "to_step_key": "recommendation",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "review",
+      "label": "Not quite / they hesitate",
+      "to_step_key": "bridge_no",
+      "variant": "negative",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "transition",
+      "label": "They said okay: dig in",
+      "to_step_key": "digging_in_returning",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "transition_fully_back",
+      "label": "They said okay: dig in",
+      "to_step_key": "digging_in_fully_back",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "They’re ready: schedule",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“The symptoms came back as soon as I stopped”",
+      "to_step_key": "obj_came_back_stopped",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I’m frustrated it came back”",
+      "to_step_key": "obj_frustrated",
+      "variant": "objection",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "Side effects or a bad experience before",
+      "to_step_key": "obj_bad_experience",
+      "variant": "objection",
+      "sort_order": 3
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "Cost or insurance",
+      "to_step_key": "obj_cost",
+      "variant": "objection",
+      "sort_order": 4
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I don’t have time”",
+      "to_step_key": "obj_time",
+      "variant": "objection",
+      "sort_order": 5
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I need to talk to my spouse”",
+      "to_step_key": "obj_spouse",
+      "variant": "objection",
+      "sort_order": 6
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I'm considering another option”",
+      "to_step_key": "obj_other_option",
+      "variant": "objection",
+      "sort_order": 7
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I need to think about it”",
+      "to_step_key": "obj_think",
+      "variant": "objection",
+      "sort_order": 8
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“Just send me some info”",
+      "to_step_key": "obj_send_info",
+      "variant": "objection",
+      "sort_order": 9
+    }
+  ]
+}

@@ -173,7 +173,7 @@ export const CONCERN_OPTIONS: Record<string, ConcernOption[]> = {
   ],
   'Skin Tightening': [
     { label: 'Jawline / neck', spoken: 'that jawline and neck area' },
-    { label: 'Arms', spoken: 'the crepey skin on your arms' },
+    { label: 'Arms', spoken: 'the thin-looking skin on your arms' },
     { label: 'Above the knees', spoken: 'that spot above the knees' },
     { label: 'Chest', spoken: 'the chest area' },
     { label: 'Backs of hands', spoken: 'the backs of your hands' },

@@ -26,6 +26,13 @@ Training portal + patient-reactivation dialer for healthcare/service businesses:
 - Auth levels for actions/pages: `admin` = any active admin (sales reps only get `/admin/payments*`), `super_admin` = everything else. Team management at `/admin/team` (invite, role, rate, deactivate, one-time invite/reset link). Invite emails use Supabase's default mailer (built-in SMTP is rate-limited); when sending fails the UI shows a shareable link that our own `completeAdminInvite` verifies via `verifyOtp(token_hash)`.
 - "View portal as client": super admins can open a participant's portal (`actions/admin-view-as.ts`); the portal session is tagged `impersonatedBy` and shows a banner; session rows get `user_agent` prefix `admin-view-as:`.
 
+## Call scripts (content as code)
+
+- **Start every script change at `docs/SCRIPT_STYLE_GUIDE.md`.** It holds the voice rules, the step skeleton, token and routing rules, before/after examples, and the batch-rewrite loop.
+- Script flows (Supabase `script_flow_steps` / `script_flow_choices`) are mirrored in the repo at `artifacts/api-server/content/flows/<niche-slug>.json` plus `general.json` (shared, `niche_id` null). The player resolves a niche row with the same `step_key` over the general one.
+- Commands (`pnpm --filter @workspace/api-server run …`): `flows:export` (DB → JSON), `flows:lint [slug…]` (style rules, exit 1 on errors), `flows:apply [--dry-run] (--all | slug…)` (JSON → DB, idempotent upsert matched by step_key / from+to, never deletes, refuses bad routes or unknown tokens). Tooling lives in `artifacts/api-server/scripts/flows/` and runs with plain `node` (type stripping).
+- General + Skin Tightening are the rewritten reference; other niches are exported as-is and still fail lint until their batch rewrite. Concern chips for the question screens: `artifacts/reactivation-power/src/lib/concern-options.ts`.
+
 ## Transactional email (Resend)
 
 - Sent through the Resend connector via `@replit/connectors-sdk` (`ReplitConnectors().proxy("resend", ...)`); the connector key is send-only, so domains/tracking are managed in the Resend dashboard. Code: `artifacts/api-server/src/lib/mail/` (`layout.ts` branded shell, `templates.ts` the six templates + sample data, `send.ts` `sendEmail()` which **never throws**, `index.ts` typed senders such as `sendPortalWelcomeEmail`, `sendPaymentFailedEmail`, `sendSubscriptionCancelledEmail`, `sendAgreementSentEmail`). Payment-failed / cancelled / agreement senders are ready for the billing and e-signature flows to call.
