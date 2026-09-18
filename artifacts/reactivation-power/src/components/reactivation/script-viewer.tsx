@@ -138,6 +138,7 @@ export function ScriptViewer({
         steps={steps}
         choices={choices}
         nicheId={nicheId || null}
+        sector={niches.find((n) => n.id === nicheId)?.sector ?? null}
         extras={extras}
         fontSize={FONT_SIZES[sizeIndex]}
         initialStepKey={initialStepKey}

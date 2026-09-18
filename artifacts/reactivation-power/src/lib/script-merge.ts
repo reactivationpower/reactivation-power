@@ -1,9 +1,30 @@
 // @ts-nocheck
-import type { ScriptSection } from '@/lib/types'
+import type { ScriptSection, Sector } from '@/lib/types'
 
 /** Generic lead-in used wherever {{complaint_reference}} appears mid-sentence
- * and no condition is documented, so the script never shows a raw bracket. */
+ * and no condition is documented, so the script never shows a raw bracket.
+ * This is the healthcare phrasing (the patient came in to the practice). */
 export const COMPLAINT_FALLBACK = 'what you originally came in for'
+
+/** Home-services phrasing: the technician went out to the customer's house,
+ * so "came in for" reads wrong — the company "came out for" the job. */
+export const HOME_SERVICES_COMPLAINT_FALLBACK = 'what we originally came out for'
+
+/** Pick the generic {{complaint_reference}} phrase for a niche's sector.
+ * Unknown/missing sectors keep the healthcare wording. */
+export function complaintFallbackFor(sector?: Sector | null): string {
+  return sector === 'home_services'
+    ? HOME_SERVICES_COMPLAINT_FALLBACK
+    : COMPLAINT_FALLBACK
+}
+
+/** True when a spoken concern is one of the generic fallback phrases rather
+ * than a real complaint, regardless of sector. */
+export function isComplaintFallback(spoken: string | undefined | null): boolean {
+  return (
+    spoken === COMPLAINT_FALLBACK || spoken === HOME_SERVICES_COMPLAINT_FALLBACK
+  )
+}
 
 /** Normalize an office-entered condition into spoken form: lowercase it
  * (unless it looks like an acronym) and prepend "the" when there's no

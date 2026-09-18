@@ -98,9 +98,10 @@ falls back to "what's been bothering you the most".
 
 ## Left as found / for review
 
-- The player always prepends an "Original complaint" chip whose fallback
+- ~~The player always prepends an "Original complaint" chip whose fallback
   phrase is "what you originally came in for" (`script-merge.ts`). That reads
-  oddly for a house call. It is player code, so it was not changed here.
+  oddly for a house call.~~ Resolved: the player now keys the fallback on the
+  niche sector, so home-services niches speak "what we originally came out for".
 - `{{asked_by_provider}}` renders as "{{practice_name}} asked me to reach out to
   you personally." because `provider_name` is filled with the practice name;
   for a company that reads fine ("Acme Heating asked me to reach out…").

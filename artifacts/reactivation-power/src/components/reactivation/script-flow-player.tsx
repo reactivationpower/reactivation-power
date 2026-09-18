@@ -15,7 +15,8 @@ import {
   type ConcernOption,
 } from '@/lib/concern-options'
 import {
-  COMPLAINT_FALLBACK,
+  complaintFallbackFor,
+  isComplaintFallback,
   mergeScript,
   stripComplaintClause,
 } from '@/lib/script-merge'
@@ -24,12 +25,18 @@ import type {
   ScriptFlowChoice,
   ScriptFlowStep,
   ScriptFlowVariant,
+  Sector,
 } from '@/lib/types'
 
 interface Props {
   steps: ScriptFlowStep[]
   choices: ScriptFlowChoice[]
   nicheId: string | null
+  /** Sector of the selected niche. Home-services niches get a house-call
+   * phrasing for the generic "Original complaint" chip ("what we originally
+   * came out for"); healthcare (the default) keeps "what you originally came
+   * in for". */
+  sector?: Sector | null
   extras: Record<string, string>
   fontSize: number
   /** Optional deep link: start the player at this step instead of the first screen. */
@@ -146,6 +153,7 @@ export function ScriptFlowPlayer({
   steps,
   choices,
   nicheId,
+  sector,
   extras,
   fontSize,
   initialStepKey,
@@ -264,10 +272,11 @@ export function ScriptFlowPlayer({
   //    "especially with ..." clause is dropped entirely instead.
   // The generic fallback phrase doesn't count as a real complaint here:
   // "especially with" clauses read awkwardly with it, so they still drop.
+  const complaintFallback = complaintFallbackFor(sector)
   const concernSpoken = concern?.spoken?.trim()
   const hasComplaint = Boolean(
     extras.complaint_reference ||
-      (concernSpoken && concernSpoken !== COMPLAINT_FALLBACK),
+      (concernSpoken && !isComplaintFallback(concernSpoken)),
   )
 
   const effectiveExtras = useMemo(
@@ -276,11 +285,11 @@ export function ScriptFlowPlayer({
       complaint_reference:
         extras.complaint_reference ||
         concern?.spoken?.trim() ||
-        COMPLAINT_FALLBACK,
+        complaintFallback,
       ...extras,
       main_concern: concern?.spoken?.trim() || CONCERN_FALLBACK,
     }),
-    [extras, parentMode, concern],
+    [extras, parentMode, concern, complaintFallback],
   )
 
   const paragraphs = useMemo(() => {
@@ -349,8 +358,8 @@ export function ScriptFlowPlayer({
         spoken: documented,
       }
     }
-    return { label: 'Original complaint', spoken: COMPLAINT_FALLBACK }
-  }, [extras.complaint_reference])
+    return { label: 'Original complaint', spoken: complaintFallback }
+  }, [extras.complaint_reference, complaintFallback])
 
   if (!step) {
     return (
