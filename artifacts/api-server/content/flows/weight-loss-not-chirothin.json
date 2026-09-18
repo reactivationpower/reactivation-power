@@ -9,145 +9,145 @@
     {
       "step_key": "opening_question",
       "title": "The Opening Question",
-      "content": "So {{contact_first_name}}, how have things been going since you finished the weight loss program with us? Are you still keeping the weight off and feeling great, has a little started to creep back, or are you pretty much back to where you were before you started?\n\n(This question has only three possible answers. Click the one you hear.)",
+      "content": "So {{contact_first_name}}, how have things been since you finished the weight loss program with us? I usually hear one of three things. Still keeping the weight off, a little starting to creep back, or pretty much back to where you started. Which one is closest for you?\n\n(Only three answers. Tap the one you hear.)",
       "sort_order": 1
     },
     {
       "step_key": "resp_doing_great",
-      "title": "Kept It Off: Credit the Maintenance Work",
-      "content": "{{contact_first_name}}, that is FANTASTIC, and I want you to really hear this: keeping the weight off tells me you’ve been working the maintenance strategy, and that puts you in a group most people never reach. The weight loss was the program; keeping it off. That part was YOU.\n\nDo you remember where you started? The number on the scale that finally made you pick up the phone? (Let them enjoy this. They earned it twice.)",
+      "title": "Kept It Off",
+      "content": "That's great to hear, {{contact_first_name}}. Losing the weight was the program. Keeping it off is you. Your notes say you were really happy when you finished. Is it still feeling that way?\n\n(Let them answer. Let them enjoy it.)",
       "sort_order": 2
     },
     {
       "step_key": "resp_coming_back",
-      "title": "Some Crept Back: The Short-Course Path",
-      "content": "{{contact_first_name}}, I’m really glad you told me, and here’s the most important thing I’ll say on this call: a little creep-back almost never means the program didn’t work. It usually just means life pulled you away from the maintenance rhythm, and the plan is DESIGNED to be picked back up.\n\n(Let them respond. Zero blame, zero disappointment in your voice, “life happened” is the whole frame.)\n\nAnd by the way. A lot of my patients tell me they tried other things in between: the shots, the programs, the apps. How about you? (Soft fish. Ask it lightly. If they mention GLP medications or injections, use the “They mentioned trying GLP/injections” button below. There’s a whole conversation for that.)\n\nWell {{contact_first_name}}, I’m really glad I caught you, because this is exactly the kind of thing we want to know about.\n\n(Do not pitch anything here, no programs, no timelines, no promises. The file update questions come next, and whatever matters most to them will surface there.)",
+      "title": "A Little Crept Back",
+      "content": "Thanks for telling me, {{contact_first_name}}. A little creeping back almost never means the program didn't work. It usually means life pulled you away from the routine. The plan is built to be picked back up.\n\n(Let them answer. No blame in your voice.)\n\nA lot of people try other things in between, like the shots or an app. Did you try anything like that?\n\n(Ask it lightly. If they mention GLP shots or injections, tap that button below.)\n\nI'm glad I caught you. This is the kind of thing we want to know about.\n\n(Do not pitch anything yet. The file questions come next.)",
       "sort_order": 3
     },
     {
       "step_key": "resp_fully_back",
-      "title": "Mostly or All Back: The Full-Round Path, Maintenance First",
-      "content": "{{contact_first_name}}, thank you for being honest with me, and please hear this before anything else: you did not fail, and your body is not broken. Here’s what I know for certain: the program worked on your body. You lost the weight. That’s proven. What didn’t happen was the maintenance piece, and that’s the part we’re going to get right this time.\n\n(Let them respond fully. Zero blame. The maintenance drift is “life happened,” never “you didn’t follow it.”)\n\nAnd by the way. A lot of my patients tell me they tried other things in between: the shots, the programs, the apps. How about you? (Soft fish. Ask it lightly. If they mention GLP medications or injections, use the “They mentioned trying GLP/injections” button below. There’s a whole conversation for that.)\n\nWell {{contact_first_name}}, I’m really glad I caught you, because this is exactly the kind of thing we want to know about.\n\n(Do not pitch anything here, no programs, no round-two framing, no promises. The file update questions come next, and whatever matters most to them will surface there.)",
+      "title": "Mostly or All Back",
+      "content": "Thank you for being honest with me, {{contact_first_name}}. You did not fail. The program worked, and you lost the weight. What didn't happen was the follow-up, and that's the part we get right this time.\n\n(Let them answer. No blame. It's \"life happened,\" never \"you didn't follow it.\")\n\nA lot of people try other things in between, like the shots or an app. Did you try anything like that?\n\n(Ask it lightly. If they mention GLP shots or injections, tap that button below.)\n\nI'm glad I caught you. This is the kind of thing we want to know about.\n\n(Do not pitch anything yet. The file questions come next.)",
       "sort_order": 4
     },
     {
       "step_key": "glp_boomerang",
-      "title": "They Tried GLPs In Between: The Boomerang Conversation",
-      "content": "(This patient has now watched TWO approaches “fail” them. Their silent objection is “nothing keeps the weight off. Why bother?” Your job: absolve the switch, reframe both regains as one lesson, and position round two as the completion.)\n\n{{contact_first_name}}, honestly. I completely understand why you tried it. The results those medications produce while you’re on them are real, and half the country was talking about them. You don’t owe anyone an apology for trying.\n\n(Pause. This kills any sheepishness they’re carrying about having left. No smugness, ever.)\n\nBut can I share what I think you actually learned from the whole experience? The medication worked right up until it stopped, because it was doing the work FOR you, and it left the day it left. Our program worked too, but it came with something the injections never had: a maintenance strategy, the part that teaches your body and your habits how to KEEP the result. That’s the piece that didn’t get its turn last time.\n\nSo no. Your body isn’t broken, and it’s not true that nothing works. You’ve now proven two things: our program takes the weight off your body, and nothing keeps it off without a maintenance strategy. Round two is where we put those two lessons together, and this time the maintenance piece is the headline, not the fine print.\n\n(Do not pitch or schedule here. Continue into the file update, whatever matters most to them will surface in the questions.)",
+      "title": "They Tried GLP Shots In Between",
+      "content": "(They have watched two approaches \"fail\" them. Take the shame off first. No smugness.)\n\nI understand why you tried it, {{contact_first_name}}. Those medications do work while you're on them, and everyone was talking about them. You don't owe anyone an apology.\n\n(Pause.)\n\nCan I share what I think you learned from all of it? The medication did the work for you, so the results left when it did. Our program worked too, and it came with a plan for keeping the weight off. That's the part that didn't get its turn last time.\n\nSo your body isn't broken, and it's not true that nothing works. You've proven the weight loss program takes the weight off. Round two is where we focus on keeping it off.\n\n(Do not pitch or schedule here. Continue to the file questions.)",
       "sort_order": 5
     },
     {
       "step_key": "booked_wrap",
-      "title": "Booked: Wrap Up Warm",
-      "content": "Perfect, you’re all set for (day) at (time), {{contact_first_name}}.\n\nCome in exactly as you are, no pre-visit dieting, no weigh-in anxiety, none of that. We’ll take a look together, size things exactly right for where you are today, and get you back onto the strategy that keeps it off for good.\n\nWe can’t wait to see you!",
+      "title": "Booked: Wrap Up",
+      "content": "Perfect, you're all set for (day) at (time), {{contact_first_name}}.\n\nCome in just as you are. No dieting before the visit, and no worrying about the scale. We'll take a look together and get you back on the plan that keeps it off.\n\nWe look forward to seeing you.",
       "sort_order": 6
     },
     {
       "step_key": "review",
-      "title": "The Review & Bridge to Emotion",
-      "content": "{{contact_first_name}}, let me make sure I've got this right. (Recap what they told you: how long it's been going on, how often, and how it's been affecting them.) Did I get that right?\n\nAnd it sounds like what you'd really love is to get back to feeling the way you did when things were going well. Is that fair to say?\n\n(About 95% say yes. That yes is the moment. Don't rush past it.)",
+      "title": "The Review",
+      "content": "{{contact_first_name}}, let me make sure I have this right.\n\n(Recap what they told you: how long, how often, how it affects them.)\n\nDid I get that right?\n\nAnd it sounds like you'd like to get back to how you felt when things were going well. Is that fair to say?\n\n(Most people say yes. Tap what you hear.)",
       "sort_order": 9
     },
     {
       "step_key": "bridge_no",
-      "title": "They Hesitate: Uncover Why",
-      "content": "{{contact_first_name}}, you did mention {{main_concern}} is something you'd like to feel better about. I don't want to assume anything. Is the timing just not right, or is there something else on your mind that's holding you back from taking a look?\n\n(Warm and easygoing, no pressure, and never restate the concern back at them. You're just trying to understand what's in the way. Then stop and let them answer.)\n\nWhat are your thoughts about that?",
+      "title": "They Hesitate: Find Out Why",
+      "content": "{{contact_first_name}}, you said {{main_concern}} is something you'd like to feel better about. I don't want to assume anything. Is it the timing, or is something else holding you back?\n\n(Stay easy about it. No pressure. Do not repeat the concern back at them. Let them answer.)",
       "sort_order": 11
     },
     {
       "step_key": "transition",
-      "title": "The Transition: Update the File",
-      "content": "Now {{contact_first_name}}, while I have you on the phone, I’d like to ask you a few additional questions so we get your file completely up to date. Is that okay?\n\n(Wait for the yes before starting the questions.)",
+      "title": "The Transition: Ask Permission",
+      "content": "{{contact_first_name}}, while I have you, I'd like to get your file up to date. Can I ask you a few quick questions?\n\n(Wait for the yes.)",
       "sort_order": 20
     },
     {
       "step_key": "digging_in",
-      "title": "The Twelve Questions: Update the File",
-      "content": "(Ask these in order. Critical: write down every symptom or concern they mention. You’ll read it back on the next screen.)\n\nYou mentioned some of it’s come back. Can I ask about how much we’re talking, and when you started noticing it creeping up? Was it gradual, or did something change? A stressful season, an injury, a schedule shift?\n\nAre the eating habits you built during the program still mostly in place, or has life pulled you back toward some of the old patterns?\n\nHow’s your energy been through the day, still strong, or have you noticed the afternoon crashes creeping back in? Needing coffee or a little sugar boost to get through the afternoon?\n\nHow have you been sleeping? Falling asleep okay, staying asleep, waking up rested?\n\nDo you ever feel irritable, or do you feel that you’re under a lot of stress?\n\nDo you find yourself suffering with allergy or sinus problems, even if you think it’s normal?\n\nNow that you’re carrying less weight than when you started, or even if some has come back, how has your body been feeling overall? Any aches or pains that have shown up or changed?\n\nAre you experiencing any pain, stiffness, or soreness in the neck, mid-back, or low back, even if it’s mild, lasts less than five minutes, and goes away on its own?\n\nWhat about your knees, hips, or feet? Anything that complains on stairs, first thing in the morning, or after you’ve been on them a while?\n\nIs there anything you’ve cut back on? Walking, the gym, playing with the kids or grandkids, because something starts hurting when you push it?\n\nHave you been experiencing any headaches, even if they’re mild, last less than five minutes, and go away on their own?\n\nAnd finally, are you taking any medications, either prescribed or over the counter, even if it’s only once or twice a week?\n\n(If they mentioned anything at all, use the notes you took during the questions and ask:)\n\nNow {{contact_first_name}}, you just told me about (read back the issues they mentioned, e.g. “your sleep’s been rough and your back’s been bothering you”). What I’d like to know is: which one of these bothers you the most? In other words, if you could get rid of one of these and never have it bother you again, which one would you like it to be?\n\n(If they genuinely mentioned nothing new, skip this question and pick the path below that fits.)",
+      "title": "The Questions: Update the File",
+      "content": "(Ask these in order. Write down everything they mention. You'll read it back in a moment.)\n\nYou said some of the weight has come back. About how much are we talking?\n\nAre the eating habits you built during the program still mostly in place?\n\nHow's your energy through the day, any afternoon crashes?\n\nHow have you been sleeping?\n\nDo you feel irritable or under a lot of stress?\n\nAny allergy or sinus problems, even ones you think are normal?\n\nAny pain, stiffness, or soreness in your neck or back, even if it's mild?\n\nWhat about your knees, hips, or feet?\n\nAny headaches, even mild ones that go away on their own?\n\nAnd are you taking any medications, prescribed or over the counter?\n\n(Read back what they mentioned, then ask:)\n\n{{contact_first_name}}, of those, which one bothers you the most?\n\n(Tap their answer below. If they named nothing new, use the weight-focus button.)",
       "sort_order": 21
     },
     {
       "step_key": "making_it_real",
       "title": "Making It Real",
-      "content": "{{contact_first_name}}, what I’d like to do now is ask you a few quick questions about {{main_concern}}, so I can get your file fully updated. It’ll only take a minute.\n\n(Take the concern they named and make it real with three questions, in order. Write down or make note of their answers. You will use them in the next section. After each question, pause and let them fully answer. React like a human: “I see,” “Wow,” “That’s a lot.”)\n\nHow long has that been going on? A few weeks, a couple months, since you finished the program, or longer than that?\n\n(Let them answer, then:) “[Repeat their answer back]? Would you agree with me that dealing with something like that for that long really isn’t OK?”\n\n(If they shrug it off, “oh, I just deal with it”:) “You worked hard for those results. Watching them slip away for that long isn’t something you should just have to accept.”\n\nAnd is it something you notice once in a while, or is it on your mind pretty much every day at this point, getting dressed, seeing photos, stepping on the scale?\n\n(Let them answer, then:) “That’s a lot. And honestly, carrying that around every day isn’t just not OK. It’s not something you have to live with. Wouldn’t you agree?”\n\nAnd the last thing I’d like to ask is how it’s impacting you. But first, do me a favor: think of a day when you felt great. You were at the weight you wanted, full of energy, everything clicking. Now think of the day you’ve felt the most frustrated with it. Do you have those two days in your head?\n\n(Wait for the yes. Then walk that frustrating day through three areas, pausing after each:)\n\n“On that day, what about work? Were you as productive as usual, as enjoyable to be around?” (Let them respond. “I see.”)\n\n“What about at home? Were you fully engaged with the people around you, or did you kind of want to be left alone?” (Let them respond. “That’s really not OK.”)\n\n“And the things you enjoy. Your hobbies, getting together with friends, family things. What happens to those on days like that?” (Let them open up. Do not rush.)\n\nThen respond with empathy: Thank you for sharing that with me. It makes complete sense, and that’s exactly the kind of thing {{rec_pronoun}} help people with every single day.",
+      "content": "{{contact_first_name}}, I'd like to ask a few quick questions about {{main_concern}} so your file is up to date. It'll only take a minute.\n\n(Ask these three questions in order. Write down the answers. Pause after each.)\n\nHow long has that been going on?\n\n(Let them answer. Repeat it back.)\n\nThat's a long time to watch something you worked for slip.\n\n(If they shrug it off, say \"You worked hard for those results. You shouldn't have to just accept that.\")\n\nIs it something you notice once in a while, or is it on your mind pretty much every day?\n\n(Let them answer.)\n\nThink of a day you felt great, at the weight you wanted and full of energy. Now think of a day you felt the most frustrated with it. Do you have those two days in your head?\n\n(Wait for the yes.)\n\nOn that harder day, how does it affect your work, your home life, or the things you enjoy?\n\n(Let them open up. Do not rush.)\n\nThank you for sharing that. It makes sense, and it's something we help people with all the time.",
       "sort_order": 22
     },
     {
       "step_key": "making_it_real_nw",
       "title": "Making It Real",
-      "content": "{{contact_first_name}}, what I’d like to do now is ask you a few quick questions about {{main_concern}}, so I can get your file fully updated. It’ll only take a minute.\n\n(Take the concern they named and make it real with three questions, in order. Write down or make note of their answers. You will use them in the next section. After each question, pause and let them fully answer. React like a human: “I see,” “Wow,” “That’s a lot.”)\n\nHow long has that been going on? A few days, a few weeks, or longer than that?\n\n(Let them answer, then:) “[Repeat their answer back]? Would you agree with me that dealing with something like that for that long really isn’t OK?”\n\n(If they shrug it off, “oh, I just deal with it”:) “You put real work into taking care of your health. Putting up with this for that long isn’t something you should just have to accept.”\n\nIs that something that you notice only once or twice a month, or is it happening more often than that?\n\n(Let them answer, then:)\n\n“And when you are experiencing it, does it seem to be more like first thing in the morning, the middle of the day, while you’re at work, by the end of the day? Or do you feel it multiple times a day, or is it there all day?”\n\n(Let them answer, then:) “That’s a lot. And honestly, dealing with it that often isn’t just not OK. It’s not normal. Wouldn’t you agree?”\n\nAnd the last thing I’d like to ask is how it’s impacting you. But first, do me a favor: think of a day when you felt great. Full of energy, moving well, everything clicking. Now think of the day it’s bothered you the most. Do you have those two days in your head?\n\n(Wait for the yes. Then walk that frustrating day through three areas, pausing after each:)\n\n“On that day, what about work? Were you as productive as usual, as enjoyable to be around?” (Let them respond. “I see.”)\n\n“What about at home? Were you fully engaged with the people around you, or did you kind of want to be left alone?” (Let them respond. “That’s really not OK.”)\n\n“And the things you enjoy. Your hobbies, getting together with friends, family things. What happens to those on days like that?” (Let them open up. Do not rush.)\n\nThen respond with empathy: Thank you for sharing that with me. It makes complete sense, and that’s exactly the kind of thing {{rec_pronoun}} help people with every single day.",
+      "content": "{{contact_first_name}}, I'd like to ask a few quick questions about {{main_concern}} so your file is up to date. It'll only take a minute.\n\n(Ask these three questions in order. Write down the answers. Pause after each.)\n\nHow long has that been going on?\n\n(Let them answer. Repeat it back.)\n\nThat's a long time to put up with something.\n\n(If they shrug it off, say \"You put real work into your health. You shouldn't have to just accept that.\")\n\nIs it something you notice once or twice a month, or more often than that?\n\n(Let them answer.)\n\nWhen it shows up, is it more in the morning, midday, or by the end of the day?\n\n(Let them answer.)\n\nThink of a day you felt great, full of energy and moving well. Now think of the day it bothered you the most. Do you have those two days in your head?\n\n(Wait for the yes.)\n\nOn that harder day, how does it affect your work, your home life, or the things you enjoy?\n\n(Let them open up. Do not rush.)\n\nThank you for sharing that. It makes sense, and it's something we help people with all the time.",
       "sort_order": 23
     },
     {
       "step_key": "recommendation",
-      "title": "The Magic Question & Recommendation",
-      "content": "{{contact_first_name}}, it sounds to me like {{main_concern}} isn’t just affecting you. It may also be affecting the people you care about, keeping you from the things you enjoy doing, maybe even getting in the way at work. Do you see how that could actually be the case?\n\n(Wait for their answer. If they say no or hesitate: “That’s completely fair, and honestly, I’m glad it hasn’t spilled over into the rest of your life. But it’s still been bothering you, and that’s reason enough.” Then continue.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for yes.)\n\nMy recommendation is that we get you set up with an appointment so {{rec_pronoun}} can take a look at you and see if there’s something {{rec_pronoun}} can do to help you with {{main_concern}}. If {{rec_pronoun}} can help you, {{rec_pronoun}}’ll let you know, and {{rec_pronoun}}’d be honored if you let {{rec_obj}}. And if {{rec_pronoun}} don’t think {{rec_pronoun}} can help, {{rec_pronoun}}’ll let you know that as well, because {{rec_pronoun}}’re not here to waste anybody’s time or money. Does that sound reasonable?",
+      "title": "The Recommendation",
+      "content": "{{contact_first_name}}, it sounds like {{main_concern}} isn't just affecting you. It may be getting in the way at home or at work too. Do you see how that could be the case?\n\n(Wait for the answer. If they hesitate, say \"That's fair. It's still been bothering you, and that's reason enough.\" Then continue.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nMy recommendation is that we get you in so {{provider_name}} can take a look at {{main_concern}}. If we can help, we'll tell you. If it's not the right fit, we'll tell you that too. Does that sound reasonable?\n\n(Tap what you hear.)",
       "sort_order": 23
     },
     {
       "step_key": "recommendation_weight_focus",
-      "title": "The Weight-Focus Recommendation",
-      "content": "{{contact_first_name}}, can I say something? You’ve already done the hardest part. You proved you can lose the weight, because you did it. What’s happening now isn’t a failure, it’s just drift, and drift is a lot easier to fix than starting from zero. Does that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for yes.)\n\nMy recommendation is that we get you set up with an appointment so {{rec_pronoun}} can take a look at where things are and help you get back to where you were. If {{rec_pronoun}} can help you, {{rec_pronoun}}’ll let you know, and {{rec_pronoun}}’d be honored if you let {{rec_obj}}. And if {{rec_pronoun}} don’t think {{rec_pronoun}} can help, {{rec_pronoun}}’ll let you know that as well, because {{rec_pronoun}}’re not here to waste anybody’s time or money. Does that sound reasonable?",
+      "title": "The Recommendation: Weight Focus",
+      "content": "{{contact_first_name}}, can I say something? You've already done the hardest part. You proved you can lose the weight, because you did it. What's happening now is drift, and drift is easier to fix than starting over. Does that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nMy recommendation is that we get you in so {{provider_name}} can see where things are. Then we help you get back to where you were. If we can help, we'll tell you. If it's not the right fit, we'll tell you that too. Does that sound reasonable?\n\n(Tap what you hear.)",
       "sort_order": 23
     },
     {
       "step_key": "maintenance_close",
-      "title": "Kept It Off: The Recalibration Close",
-      "content": "Well {{contact_first_name}}, that’s actually part of why I’m calling. The maintenance strategy works best with an occasional recalibration. A quick check-in where we look at where you are, make sure the guidelines still fit your life, and tune anything that needs tuning. Think of it as protecting the win.\n\nLet’s get you on the schedule. {{rec_pronoun_cap}} have time this week on (day) at (time) or (day) at (time). Which is better for you?",
+      "title": "Kept It Off: The Check-In Close",
+      "content": "{{contact_first_name}}, that's part of why I'm calling. The plan works best with a check-in now and then. We look at where you are and make sure the guidelines still fit your life. Think of it as protecting the win.\n\nLet's get you on the schedule. We have time this week on (day) at (time) or (day) at (time). Which is better for you?",
       "sort_order": 24
     },
     {
       "step_key": "obj_do_it_myself",
-      "title": "Objection: I should be able to do it myself this time",
-      "content": "I completely understand, and that's a great mindset. A lot of people feel that way, and what coming back in does is simply give you the support and structure that made it work the first time, which is exactly what {{rec_pronoun}} can map out with you.\n\nConfirm and continue: Does that make sense? (Wait for a fast yes.) Do you have any other questions or concerns?",
+      "title": "Objection: “I should do it myself this time”",
+      "content": "I understand, and that's a good mindset. Coming back in just gives you the support and structure that made it work the first time. We can map that out with you.\n\nWould that help?\n\n(Wait for the yes.)",
       "sort_order": 100
     },
     {
       "step_key": "obj_embarrassed",
-      "title": "Objection: I’m embarrassed I gained it back",
-      "content": "Please don't be. There's no judgment here at all. Life has a way of throwing curveballs at even the best routines, and the important thing is you already know the protocol works for you. You did it once; your body's proven it can do it. {{rec_pronoun_cap}}'d simply love to help you get back to where you were.\n\nConfirm and continue: Does that make sense? (Wait for a fast yes.) Do you have any other questions or concerns?",
+      "title": "Objection: “I’m embarrassed I gained it back”",
+      "content": "Please don't be. There's no judgment here. Life gets in the way of even the best routines. The important thing is you already know the program works for you. We'd just like to help you get back to where you were.\n\nWould you be open to that?",
       "sort_order": 101
     },
     {
       "step_key": "obj_cost_weight",
-      "title": "Objection: Cost (Weight Is Their Focus)",
-      "content": "(Acknowledge it, then reframe around what the result was worth to them. You are scheduling an evaluation, not asking them to commit to anything today.)\n\n{{contact_first_name}}, I completely understand. I want to be clear. This first step is simply an appointment so {{rec_pronoun}} can take a look. You’re not committing to anything. Can I ask? How much does getting back there matter to you? The way you felt in your clothes, the confidence when you saw yourself in photos, the compliments, the energy, feeling good in your own skin again. That version of you?\n\n(Pause and let them answer. This is the question that does the work.)\n\nAnd here’s something a lot of people don’t realize: depending on where things stand, you may not need the full protocol again. If only some of the weight has come back, the doctor can often size you into a much shorter course, and a shorter course means a much smaller investment than the first time around. That’s exactly what the appointment figures out.\n\n(Do NOT improvise pricing, packages, or discounts on the call. Let the office handle specifics.)\n\nConfirm and continue: Does that make sense? (Wait for a fast yes.) Do you have any other questions or concerns?",
+      "title": "Objection: Cost (weight is the focus)",
+      "content": "I understand, {{contact_first_name}}. This first visit is just a look. You're not committing to anything. Can I ask how much getting back there matters to you? The way you felt in your clothes, the energy, all of it.\n\n(Let them answer. This is the question that does the work.)\n\nOne more thing. Depending on where things stand, you may not need the full program again. If only some of the weight came back, a shorter course is often enough. That's what the visit figures out.\n\n(Do not quote prices, packages, or discounts. The office handles that.)\n\nCan we at least get you in so we can see where you're at?",
       "sort_order": 102
     },
     {
       "step_key": "transition_kept",
-      "title": "The Transition: Update the File",
-      "content": "Now {{contact_first_name}}, while I have you on the phone, I’d like to ask you a few additional questions so we get your file completely up to date. Is that okay?\n\n(Wait for the yes before starting the questions.)",
+      "title": "The Transition: Ask Permission",
+      "content": "{{contact_first_name}}, while I have you, I'd like to get your file up to date. Can I ask you a few quick questions?\n\n(Wait for the yes.)",
       "sort_order": 103
     },
     {
       "step_key": "digging_in_kept",
-      "title": "The Eleven Questions: Update the File",
-      "content": "(Ask these in order. Critical: write down every symptom or concern they mention. You’ll read it back on the next screen.)\n\nAre the eating habits you built during the program still mostly in place, or has life pulled you back toward some of the old patterns?\n\nHow’s your energy been through the day, still strong, or have you noticed the afternoon crashes creeping back in? Needing coffee or a little sugar boost to get through the afternoon?\n\nHow have you been sleeping? Falling asleep okay, staying asleep, waking up rested?\n\nDo you ever feel irritable, or do you feel that you’re under a lot of stress?\n\nDo you find yourself suffering with allergy or sinus problems, even if you think it’s normal?\n\nNow that you’re carrying less weight than when you started, or even if some has come back, how has your body been feeling overall? Any aches or pains that have shown up or changed?\n\nAre you experiencing any pain, stiffness, or soreness in the neck, mid-back, or low back, even if it’s mild, lasts less than five minutes, and goes away on its own?\n\nWhat about your knees, hips, or feet? Anything that complains on stairs, first thing in the morning, or after you’ve been on them a while?\n\nIs there anything you’ve cut back on? Walking, the gym, playing with the kids or grandkids, because something starts hurting when you push it?\n\nHave you been experiencing any headaches, even if they’re mild, last less than five minutes, and go away on their own?\n\nAnd finally, are you taking any medications, either prescribed or over the counter, even if it’s only once or twice a week?\n\n(If they mentioned anything at all, use the notes you took during the questions and ask:)\n\nNow {{contact_first_name}}, you just told me about (read back the issues they mentioned, e.g. “your sleep’s been rough and your back’s been bothering you”). What I’d like to know is: which one of these bothers you the most? In other words, if you could get rid of one of these and never have it bother you again, which one would you like it to be?\n\n(If they genuinely mentioned nothing new, skip this question and pick the path below that fits.)",
+      "title": "The Questions: Update the File",
+      "content": "(Ask these in order. Write down everything they mention. You'll read it back in a moment.)\n\nIs the weight still holding steady, or has any started to creep back?\n\nAre the eating habits you built during the program still mostly in place?\n\nHow's your energy through the day, any afternoon crashes?\n\nHow have you been sleeping?\n\nDo you feel irritable or under a lot of stress?\n\nAny allergy or sinus problems, even ones you think are normal?\n\nAny pain, stiffness, or soreness in your neck or back, even if it's mild?\n\nWhat about your knees, hips, or feet?\n\nAny headaches, even mild ones that go away on their own?\n\nAnd are you taking any medications, prescribed or over the counter?\n\n(Read back what they mentioned, then ask:)\n\n{{contact_first_name}}, of those, which one bothers you the most?\n\n(Tap their answer below. If nothing new came up, use the check-in close.)",
       "sort_order": 105
     },
     {
       "step_key": "obj_nw_thought_behind_me",
-      "title": "Objection: I thought that was behind me",
-      "content": "I completely understand, and that's a great thing to bring up. These things can creep back over time with everyday wear and tear. It doesn't mean anything went wrong. And that's exactly the kind of thing {{rec_pronoun}}'ll want to look at with you in person.\n\nConfirm and continue: Does that make sense? (Wait for a fast yes.) Do you have any other questions or concerns?",
+      "title": "Objection: “I thought that was behind me”",
+      "content": "That's a fair thing to bring up. These things can creep back over time with everyday wear and tear. It doesn't mean anything went wrong. That's the kind of thing we'd want to look at in person.\n\nCan we get you in for a look?\n\n(Wait for the yes.)",
       "sort_order": 106
     },
     {
       "step_key": "obj_nw_chiro_didnt_help",
-      "title": "Objection: I've seen a chiropractor: it didn't help",
-      "content": "That's completely fair, {{contact_first_name}}, and I'm glad you told me. No two offices approach this the same way. A lot of it comes down to finding what's actually driving the problem in the first place, and that's exactly what the evaluation is for.\n\nAnd I want to be clear. If we can help you with {{main_concern}}, we'll let you know and be honored if you let us. And if this isn't something we can help with, we'll tell you that too. We're not here to waste anybody's time or money.\n\nConfirm and continue: Does that make sense? (Wait for a fast yes.) Do you have any other questions or concerns?",
+      "title": "Objection: “I’ve seen a chiropractor. It didn’t help”",
+      "content": "That's fair, {{contact_first_name}}, and I'm glad you told me. No two offices approach this the same way. A lot of it comes down to finding what's really causing the problem. That's what the visit is for.\n\nIf we can help with {{main_concern}}, we'll tell you. If we can't, we'll tell you that too.\n\nIs there anything else on your mind?",
       "sort_order": 107
     },
     {
       "step_key": "obj_think",
-      "title": "Objection: I need to think about it",
-      "content": "That's completely fair, {{contact_first_name}}. Can I ask what part you'd want to think over? Sometimes it's the cost, sometimes the timing, and sometimes people just want to be sure it's the right fit, which one is closest for you?\n\n(Listen, their answer usually points to one of the other buttons below. If it stays general, keep going.)\n\nHonestly, coming in is really just information. We take a look at where you're at with {{main_concern}}, you find out exactly what your options are, and then you get to decide with real answers instead of wondering. And if it's not the right fit, we'll tell you that too.\n\nConfirm and continue: Does that make sense? (Wait for a fast yes.) Do you have any other questions or concerns?",
+      "title": "Objection: “I need to think about it”",
+      "content": "That's fair, {{contact_first_name}}. Can I ask what part you'd want to think over? Sometimes it's the cost, sometimes the timing, and sometimes people want to be sure it's the right fit.\n\n(Listen. Their answer usually points to one of the buttons below. If it stays general, keep going.)\n\nComing in is really just information. We look at where you're at with {{main_concern}}, and you decide with real answers. If it's not the right fit, we'll tell you.\n\nDoes that help?",
       "sort_order": 130
     },
     {
       "step_key": "obj_send_info",
-      "title": "Objection: Just send me information",
-      "content": "I'd be glad to get you some information, {{contact_first_name}}. The one thing I'd say is that a link or a flyer can only tell you so much. It can't look at where you're actually at and what would work best for you. That's really what the visit is for: we take a look and you get answers that apply to you, not just general information. So let me get you on the schedule first, and you'll have real answers to go on.\n\nConfirm and continue: Does that make sense? (Wait for a fast yes.) Do you have any other questions or concerns?",
+      "title": "Objection: “Just send me some info”",
+      "content": "I'd be glad to send you some information, {{contact_first_name}}. The one thing I'd say is that a flyer can only tell you so much. It can't look at where you're at right now. That's what the visit is for. So let me get you on the schedule first, and then I'll send the information along.\n\nDoes that work for you?",
       "sort_order": 131
     }
   ],
@@ -161,35 +161,35 @@
     },
     {
       "from_step_key": "bridge_no",
-      "label": "Another reason: dig deeper",
+      "label": "Another reason: find out what it is",
       "to_step_key": "uncover",
       "variant": "caution",
       "sort_order": 1
     },
     {
       "from_step_key": "digging_in",
-      "label": "The questions uncovered something: they named their biggest issue",
+      "label": "They named a concern: make it real",
       "to_step_key": "making_it_real",
       "variant": "default",
       "sort_order": 0
     },
     {
       "from_step_key": "digging_in",
-      "label": "Nothing new surfaced: weight is the focus, make the recommendation",
+      "label": "Nothing new: the weight is the focus",
       "to_step_key": "recommendation_weight_focus",
       "variant": "caution",
       "sort_order": 1
     },
     {
       "from_step_key": "digging_in_kept",
-      "label": "The questions uncovered something: they named their biggest issue",
+      "label": "They named a concern: make it real",
       "to_step_key": "making_it_real",
       "variant": "default",
       "sort_order": 0
     },
     {
       "from_step_key": "digging_in_kept",
-      "label": "Nothing surfaced: the recalibration close",
+      "label": "Nothing new: the check-in close",
       "to_step_key": "maintenance_close",
       "variant": "positive",
       "sort_order": 1
@@ -203,35 +203,35 @@
     },
     {
       "from_step_key": "maintenance_close",
-      "label": "They picked a time: wrap up warm",
+      "label": "They picked a time",
       "to_step_key": "booked_wrap",
       "variant": "positive",
       "sort_order": 0
     },
     {
       "from_step_key": "maintenance_close",
-      "label": "Hesitant or soft no: uncover the real concern",
+      "label": "Hesitant or soft no",
       "to_step_key": "uncover",
       "variant": "caution",
       "sort_order": 1
     },
     {
       "from_step_key": "making_it_real",
-      "label": "You’ve responded with empathy: ask the Magic Question",
+      "label": "Continue: the review",
       "to_step_key": "review",
       "variant": "default",
       "sort_order": 0
     },
     {
       "from_step_key": "making_it_real_nw",
-      "label": "You’ve responded with empathy: ask the Magic Question",
+      "label": "Continue: the review",
       "to_step_key": "review",
       "variant": "default",
       "sort_order": 0
     },
     {
       "from_step_key": "obj_cost_weight",
-      "label": "Resolved: re-ask the scheduling question",
+      "label": "Resolved: schedule",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0
@@ -245,7 +245,7 @@
     },
     {
       "from_step_key": "obj_do_it_myself",
-      "label": "Resolved: re-ask the scheduling question",
+      "label": "Resolved: schedule",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 1
@@ -259,7 +259,7 @@
     },
     {
       "from_step_key": "obj_embarrassed",
-      "label": "Resolved: re-ask the scheduling question",
+      "label": "Resolved: schedule",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0
@@ -273,7 +273,7 @@
     },
     {
       "from_step_key": "obj_nw_chiro_didnt_help",
-      "label": "Resolved: re-ask the scheduling question",
+      "label": "Resolved: schedule",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0
@@ -287,7 +287,7 @@
     },
     {
       "from_step_key": "obj_nw_thought_behind_me",
-      "label": "Resolved: re-ask the scheduling question",
+      "label": "Resolved: schedule",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0
@@ -322,28 +322,28 @@
     },
     {
       "from_step_key": "recommendation",
-      "label": "\"Sounds reasonable\". Go to scheduling",
+      "label": "“Yes, that sounds reasonable”",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0
     },
     {
       "from_step_key": "recommendation",
-      "label": "Hesitant or soft no: uncover the real concern",
+      "label": "Hesitant or soft no",
       "to_step_key": "uncover",
       "variant": "caution",
       "sort_order": 1
     },
     {
       "from_step_key": "recommendation_weight_focus",
-      "label": "\"Sounds reasonable\". Go to scheduling",
+      "label": "“Yes, that sounds reasonable”",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0
     },
     {
       "from_step_key": "recommendation_weight_focus",
-      "label": "Hesitant or soft no: uncover the real concern",
+      "label": "Hesitant or soft no",
       "to_step_key": "uncover",
       "variant": "caution",
       "sort_order": 1
@@ -357,7 +357,7 @@
     },
     {
       "from_step_key": "resp_coming_back",
-      "label": "They mentioned trying GLP/injections after leaving",
+      "label": "“I tried the shots in between”",
       "to_step_key": "glp_boomerang",
       "variant": "objection",
       "sort_order": 2
@@ -378,14 +378,14 @@
     },
     {
       "from_step_key": "resp_fully_back",
-      "label": "They mentioned trying GLP/injections after leaving",
+      "label": "“I tried the shots in between”",
       "to_step_key": "glp_boomerang",
       "variant": "objection",
       "sort_order": 2
     },
     {
       "from_step_key": "review",
-      "label": "They said yes: magic question",
+      "label": "They said yes: make the recommendation",
       "to_step_key": "recommendation",
       "variant": "positive",
       "sort_order": 0
@@ -441,21 +441,21 @@
     },
     {
       "from_step_key": "uncover",
-      "label": "“I've seen a chiropractor before. It didn't help”",
+      "label": "“I’ve seen a chiropractor before. It didn’t help”",
       "to_step_key": "obj_nw_chiro_didnt_help",
       "variant": "objection",
       "sort_order": 2
     },
     {
       "from_step_key": "uncover",
-      "label": "Cost: their focus is something else (back, sleep, etc.)",
+      "label": "Cost (their focus is something else)",
       "to_step_key": "obj_cost",
       "variant": "objection",
       "sort_order": 3
     },
     {
       "from_step_key": "uncover",
-      "label": "Cost: the weight is what they want handled",
+      "label": "Cost (the weight is the focus)",
       "to_step_key": "obj_cost_weight",
       "variant": "objection",
       "sort_order": 4
@@ -476,7 +476,7 @@
     },
     {
       "from_step_key": "uncover",
-      "label": "“I'm considering another option”",
+      "label": "“I’m considering another option”",
       "to_step_key": "obj_other_option",
       "variant": "objection",
       "sort_order": 7
