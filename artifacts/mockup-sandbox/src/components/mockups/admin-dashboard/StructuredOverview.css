@@ -1,0 +1,73 @@
+.so-root {
+  font-feature-settings: 'ss01', 'cv11';
+}
+
+.so-mono {
+  font-family: 'Geist Mono', 'Geist Mono Fallback', ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.so-focus:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.so-nav-active {
+  box-shadow: inset 2px 0 0 0 var(--accent-foreground);
+}
+
+/* Metric strip: hairline dividers between cells instead of separate cards */
+.so-strip-cell + .so-strip-cell {
+  border-top: 1px solid var(--border);
+}
+
+@media (min-width: 640px) {
+  .so-strip-cell:nth-child(n + 3) {
+    border-top: 1px solid var(--border);
+  }
+  .so-strip-cell:nth-child(2n) {
+    border-left: 1px solid var(--border);
+  }
+  .so-strip-cell:nth-child(2) {
+    border-top: 0;
+  }
+}
+
+@media (min-width: 1280px) {
+  .so-strip-cell {
+    border-top: 0 !important;
+  }
+  .so-strip-cell + .so-strip-cell {
+    border-left: 1px solid var(--border);
+  }
+}
+
+.so-strip-cell {
+  transition: background-color 150ms ease;
+}
+.so-strip-cell:hover {
+  background-color: color-mix(in oklch, var(--muted) 60%, transparent);
+}
+
+/* Tables */
+.so-table thead th {
+  background-color: color-mix(in oklch, var(--muted) 70%, var(--card));
+  border-bottom: 1px solid var(--border);
+}
+
+.so-row {
+  transition: background-color 120ms ease;
+}
+.so-row + .so-row td {
+  border-top: 1px solid var(--border);
+}
+.so-row:hover {
+  background-color: color-mix(in oklch, var(--muted) 55%, transparent);
+}
+
+.so-link {
+  transition: color 120ms ease;
+}
+.so-link:hover {
+  color: var(--accent);
+}

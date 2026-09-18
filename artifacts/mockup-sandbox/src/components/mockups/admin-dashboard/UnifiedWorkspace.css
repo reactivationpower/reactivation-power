@@ -1,0 +1,69 @@
+/* Unified workspace variant: one connected surface, hairline divisions. */
+
+.uw-sidebar {
+  border-right: 1px solid var(--border);
+}
+
+.uw-sheet {
+  box-shadow: 0 1px 2px oklch(0.279 0.041 260.031 / 0.04);
+}
+
+/* Metric strip: shared vertical hairlines that adapt to the grid breakpoints */
+.uw-metric {
+  position: relative;
+  transition: background-color 160ms ease;
+}
+.uw-metric:hover {
+  background-color: color-mix(in oklch, var(--muted) 55%, transparent);
+}
+.uw-metric + .uw-metric {
+  border-left: 1px solid var(--border);
+}
+@media (max-width: 1279px) {
+  .uw-metric:nth-child(3) {
+    border-left: 0;
+  }
+  .uw-metric:nth-child(-n + 2) {
+    border-bottom: 1px solid var(--border);
+  }
+}
+
+/* List rows: hairline between rows, none after the last */
+.uw-rows > .uw-row + .uw-row {
+  border-top: 1px solid var(--border);
+}
+.uw-row {
+  transition: background-color 160ms ease;
+}
+.uw-row:hover {
+  background-color: color-mix(in oklch, var(--muted) 55%, transparent);
+}
+
+/* Shared divider between the two lists */
+.uw-lists-secondary {
+  border-top: 1px solid var(--border);
+}
+@media (min-width: 1024px) {
+  .uw-lists-secondary {
+    border-top: 0;
+    border-left: 1px solid var(--border);
+  }
+}
+
+/* Keyboard focus that stays visible on tight surfaces */
+.uw-focus:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* Narrow layouts: sidebar collapses to a top-stacked rail */
+@media (max-width: 767px) {
+  .uw-root {
+    flex-direction: column;
+  }
+  .uw-sidebar {
+    width: 100%;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+}
