@@ -51,6 +51,7 @@ import Page_portal_settings from '@/pages/portal_settings';
 import Page_schedule_a_call from '@/pages/schedule-a-call';
 import Page_training_demo from '@/pages/training-demo';
 import Page_training_demo_video_2 from '@/pages/training-demo_video-2';
+import Page_admin_commissions from '@/pages/admin_commissions';
 
 const queryClient = new QueryClient();
 
@@ -159,6 +160,13 @@ function Router() {
         <RoutedErrorBoundary>
           <AdminLayout>
             <Page_admin_team />
+          </AdminLayout>
+        </RoutedErrorBoundary>
+      </Route>
+      <Route path="/admin/commissions">
+        <RoutedErrorBoundary>
+          <AdminLayout>
+            <Page_admin_commissions />
           </AdminLayout>
         </RoutedErrorBoundary>
       </Route>

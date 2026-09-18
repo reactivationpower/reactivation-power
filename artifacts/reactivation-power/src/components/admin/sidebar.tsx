@@ -4,6 +4,7 @@
 import { Link } from "wouter";
 import { useLocation, useParams } from "wouter";
 import {
+  BadgeDollarSign,
   BarChart3,
   ClipboardList,
   CreditCard,
@@ -22,8 +23,7 @@ import { cn } from '@/lib/utils'
 
 /**
  * Sidebar navigation by role. Sales reps only get the sales-facing sections
- * (payments today; customers and commissions arrive with later work), super
- * admins get everything.
+ * (payments, agreements and their own commissions), super admins get everything.
  */
 const NAV: { group: string; items: { href: string; label: string; icon: any; roles?: AdminRole[] }[] }[] = [
   {
@@ -39,6 +39,7 @@ const NAV: { group: string; items: { href: string; label: string; icon: any; rol
       { href: '/admin/emails', label: 'Email Templates', icon: Mail, roles: ['super_admin'] },
       { href: '/admin/payments', label: 'Payments', icon: CreditCard },
       { href: '/admin/agreements', label: 'Agreements', icon: FilePenLine },
+      { href: '/admin/commissions', label: 'Commissions', icon: BadgeDollarSign },
       { href: '/admin/landing', label: 'Landing Pages', icon: Globe, roles: ['super_admin'] },
     ],
   },

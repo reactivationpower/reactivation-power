@@ -42,6 +42,7 @@ import {
 import {
   agreementTokenForLink, getAgreementDetail, getAgreementForLink, getAgreementPublic, listAgreements,
 } from "../actions/agreements";
+import { listCommissions } from "../actions/commissions";
 
 type Loader = (req: Request) => Promise<Record<string, unknown>>;
 type AuthKind = "portal" | "admin" | "super_admin" | undefined;
@@ -497,6 +498,14 @@ add("/admin/agreements/:id", "admin", async (req) => {
   return { id, detail, stripeMode: getStripeMode() };
 });
 
+add("/admin/commissions", "admin", async (req) => {
+  const report = await listCommissions({
+    repId: queryString(req, "rep"), from: queryString(req, "from"), to: queryString(req, "to"),
+    paid: queryString(req, "paid") as "paid" | "unpaid" | undefined,
+    saleType: queryString(req, "type") as never,
+  });
+  return { report };
+});
 
 add("/admin/analytics", "super_admin", async (req) => {
   const participant = queryString(req, "participant");

@@ -17,6 +17,7 @@ import { stripe } from '@/lib/stripe'
 import { logger } from '@/lib/logger'
 import { getAdminClient } from '@/lib/supabase/admin'
 import { billingStatusAfterPayment, cardToRetry, isAccessBlocked, reconcileAccess, subscriptionNextPaymentAt } from './rules'
+import { generateCommissionForHistory, isCommissionable } from './commissions'
 
 /**
  * Failed-payment policy ("dunning") and the billing ledger.
@@ -146,9 +147,14 @@ function rankOf(cards: CustomerCard[], paymentMethodId: string | null): Customer
   return cards.find((c) => c.stripePaymentMethodId === paymentMethodId) ?? null
 }
 
-/** Append a ledger row. */
+/**
+ * Append a ledger row. Collected payments and refunds also produce their
+ * commission entry here, so every path that writes the ledger (checkout,
+ * webhooks, dunning retries, admin refunds) is covered.
+ */
 export async function recordHistory(row: Omit<NewPaymentHistory, 'id'>): Promise<void> {
-  await db.insert(paymentHistoryTable).values({ id: newId(), ...row }).onConflictDoNothing()
+  const [inserted] = await db.insert(paymentHistoryTable).values({ id: newId(), ...row }).onConflictDoNothing().returning()
+  if (inserted && isCommissionable(inserted)) await generateCommissionForHistory(inserted)
 }
 
 /** Payment method ids that have a recorded decline on this invoice. */

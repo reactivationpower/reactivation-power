@@ -19,6 +19,7 @@ import * as subscriptions from "../actions/subscriptions";
 import { getAdminSessionFromRequest, satisfies } from "../lib/auth/admin-session";
 import { SESSION_COOKIE_NAME, decodeSession } from "../lib/auth/token";
 import * as agreements from "../actions/agreements";
+import * as commissions from "../actions/commissions";
 
 /**
  * RPC bridge for the former Next.js server actions.
@@ -51,6 +52,7 @@ const MODULES: Record<string, ActionModule> = {
   auth,
   billing,
   booking,
+  commissions,
   demo,
   leads,
   mail,
@@ -81,6 +83,11 @@ const ACTIONS: Record<string, Record<string, Auth>> = {
     changeBillingDate: "admin", retryCustomerPayment: "admin",
   },
   booking: { getAvailability: "public", bookStrategyCall: "public" },
+  commissions: {
+    // Reps are scoped to their own entries inside listCommissions.
+    listCommissions: "admin",
+    overrideCommission: "super_admin", setCommissionsPaid: "super_admin", generateMissingCommissions: "super_admin",
+  },
   leads: { lookupZip: "public", submitHealthcareLead: "public" },
   demo: {
     enterDemo: "public",

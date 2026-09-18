@@ -1,0 +1,7 @@
+---
+name: Running one-off api-server scripts / seeding admins
+description: How to run a throwaway TypeScript script against api-server libs (path aliases, pino), and how to create test admin accounts without email.
+---
+- Plain `node foo.ts` cannot resolve the `@/` alias or `@workspace/db`. Bundle the script with esbuild first: a tiny build.mjs placed *inside* `artifacts/api-server/scripts/` (so `esbuild` resolves), `bundle: true, format: esm, tsconfig: artifacts/api-server/tsconfig.json`, and externalize `pino`, `pino-pretty`, `thread-stream`, `pg-native` — bundling pino's transport throws ERR_AMBIGUOUS_MODULE_SYNTAX. Run with `NODE_ENV=production` to keep logs quiet. Delete the script afterwards (checkpoints commit everything under the repo).
+- Test admin accounts: `supabase.auth.admin.createUser({ email, password, email_confirm: true, app_metadata: { admin_role, admin_active: true, default_commission_rate, invited_by: null } })` gives an immediately usable login without sending an invite email. Admin login page is `/admin-login` (not `/admin/login`); the RPC is `POST /api/actions/admin-auth/adminLogin` with `args: [null, { __formData: [[k, v], ...] }]`. Delete the users with `auth.admin.deleteUser` when done.
+- Never ask the user for their own admin password to verify a feature — make a temporary account instead.

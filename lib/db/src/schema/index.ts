@@ -2,3 +2,4 @@
 export * from "./email-log";
 export * from "./billing";
 export * from "./agreements";
+export * from "./commissions";
