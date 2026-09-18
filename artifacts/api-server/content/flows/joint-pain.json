@@ -8,153 +8,153 @@
   "steps": [
     {
       "step_key": "opening_question",
-      "title": "The Opening Question",
-      "content": "So {{contact_first_name}}, how have things been going since you finished your care with us for your joint pain? Are you still feeling good and moving well with the pain staying away, has a little of it started to creep back, or are you pretty much back to where you were before you started with us?\n\n(This question has only three possible answers. Click the one you hear.)",
+      "title": "Opening Question",
+      "content": "So {{contact_first_name}}, how have your joints felt since you finished care with us? I usually hear one of three things. Still feeling good, some pain returning, or pretty much back to where you started. Which one is closest for you?\n\n(Only three answers. Tap the one you hear.)",
       "sort_order": 1
     },
     {
       "step_key": "resp_doing_great",
-      "title": "Doing Great: Celebrate the Win",
-      "content": "That’s wonderful to hear, {{contact_first_name}}. That’s exactly what we like to hear. Joints that feel good are freedom. Plain and simple.\n\nDo you remember how bad it was before you started coming in and we were able to help you?\n\n(Let them answer. Let them relive the win before you move on.)",
+      "title": "Still Feeling Good",
+      "content": "That's great to hear, {{contact_first_name}}. Your notes say we helped with {{complaint_reference}}. Is it nice to move without that pain getting in the way?\n\n(Let them answer.)",
       "sort_order": 2
     },
     {
       "step_key": "resp_coming_back",
-      "title": "Starting to Creep Back",
-      "content": "{{contact_first_name}}, I’m so sorry to hear that. Joint pain can be stubborn, and once care ends it can sometimes try to flare back up. It’s exactly why we make these check-in calls. I remember how much relief you had, and I’m sure you remember that feeling too, right?\n\n(Wait for them to respond.)\n\nWhat do you think brought it back? Was there a new injury or strain, has something changed in your life, or do you think it’s just one of those stubborn things slowly trying to work its way back?\n\nLet them answer, be warm and non-judgmental, and do NOT try to book yet.",
+      "title": "Pain Starting to Return",
+      "content": "I'm sorry to hear that, {{contact_first_name}}. Joint pain can return after care ends. Your notes say you had made good progress. What do you think brought it back?\n\n(Let them answer. Stay warm. Do not book yet.)",
       "sort_order": 3
     },
     {
       "step_key": "resp_fully_back",
-      "title": "It’s Fully Back",
-      "content": "{{contact_first_name}}, I’m so sorry to hear that. Joint pain can be stubborn, and once care ends it can sometimes try to flare back up. It’s exactly why we make these check-in calls. I remember how much relief you had, and I’m sure you remember that feeling too, right? What do you think brought it back? Was there a new injury or strain, has something changed in your life, or do you think it’s just one of those stubborn things slowly trying to work its way back?\n\nLet them answer, be warm and non-judgmental, and do NOT try to book yet.",
+      "title": "Pain Fully Back",
+      "content": "I'm sorry to hear that, {{contact_first_name}}. Joint pain can return after care ends. Your notes say you had made good progress. Was there a new injury, or did it return slowly?\n\n(Let them answer. Stay warm. Do not book yet.)",
       "sort_order": 4
     },
     {
       "step_key": "permission_questions",
-      "title": "Ask Permission for the Questions",
-      "content": "{{contact_first_name}}, thank you so much for that information. While I have you on the phone, I’d like to go ahead and finish updating your file by asking you a few quick questions. Is that okay?\n\n(Wait for the yes. Almost everyone says yes. You asked permission, and it’s their file.)",
+      "title": "Ask Permission",
+      "content": "{{contact_first_name}}, I'm updating your file while we talk. Can I ask a few questions about your joints?\n\n(Wait for the yes.)",
       "sort_order": 6
     },
     {
       "step_key": "transition",
-      "title": "The Transition: Acknowledge and Ask Permission",
-      "content": "Now {{contact_first_name}}, obviously I know you said {{complaint_reference}} has been coming back, and we’re absolutely going to talk about that. But while I have you on the phone, I’d like to ask you a few additional questions so we get your file completely up to date. Is that okay?\n\n(Wait for the yes before starting the questions.)",
+      "title": "Ask Permission",
+      "content": "{{contact_first_name}}, we'll come back to {{complaint_reference}}. First, can I ask a few joint questions so your file is current?\n\n(Wait for the yes.)",
       "sort_order": 6
     },
     {
       "step_key": "digging_in",
-      "title": "The Seven Questions: Update the File",
-      "content": "(Critical: write down every joint and symptom they mention as you go. You’ll recap them in a moment.)\n\nFirst, other than the joint we treated, is there any OTHER joint that’s been talking to you? A knee, a hip, a shoulder, your hands? A lot of people tell us that when one joint hurts, they shift their weight and a different one starts complaining.\n\nHave you been experiencing any pain, stiffness, or soreness anywhere in your neck, mid-back, or low back, or any other areas of your body? Even if it’s mild, lasts less than five minutes, and goes away on its own.\n\nHow about your mornings? Any stiffness when you first get out of bed, where those first few steps feel like the Tin Man until things loosen up?\n\nWhat about stairs, kneeling, or getting up out of a low chair? Anything you’ve started doing differently, like taking stairs one at a time or planning which chair to sit in?\n\nAny swelling or achiness after activity? The knee that puffs up after a walk, the shoulder that throbs the night after yard work?\n\nHow’s your grip and your hands? Jar lids, doorknobs, buttons? Those little things are usually the first place hands show wear.\n\nHave you given anything up? Golf, gardening, getting down on the floor with the grandkids, not because you can’t, but because you pay for it for two days afterward?\n\nAnd finally, what are you taking for it? Prescription or over the counter? I mean the everyday stuff people don’t count: the Advil bottle in the kitchen AND the one in the car, the Tylenol before bed, the creams and rubs.\n\n(If they mentioned anything at all, use the notes you took during the questions and ask:)\n\nNow {{contact_first_name}}, you just told me about (read back the issues they mentioned, e.g. “your sleep’s been rough and your back’s been bothering you”). If you could completely eliminate just one of those problems and never have it bother you again, which one would you choose?\n\n(If they genuinely mentioned nothing, skip this question and use the “genuinely nothing” path below.)",
+      "title": "Joint Questions",
+      "content": "(Write down every concern they name.)\n\nIs either knee bothering you?\n\nHow about either hip?\n\nIs either shoulder bothering you?\n\nAny trouble with your hands or grip?\n\nAny neck or back pain?\n\nAny morning stiffness?\n\nAny swelling after activity?\n\nAre you taking any medications for joint pain?\n\nOf those, which one bothers you the most?\n\n(Tap their answer below.)",
       "sort_order": 7
     },
     {
       "step_key": "digging_in_returning",
-      "title": "The Seven Questions: Update the File",
-      "content": "(Critical: write down every joint and symptom they mention as you go. You’ll recap them in a moment.)\n\nFirst, other than the joint we treated, is there any OTHER joint that’s been talking to you? A knee, a hip, a shoulder, your hands? A lot of people tell us that when one joint hurts, they shift their weight and a different one starts complaining.\n\nHave you been experiencing any pain, stiffness, or soreness anywhere in your neck, mid-back, or low back, or any other areas of your body? Even if it’s mild, lasts less than five minutes, and goes away on its own.\n\nHow about your mornings? Any stiffness when you first get out of bed, where those first few steps feel like the Tin Man until things loosen up?\n\nWhat about stairs, kneeling, or getting up out of a low chair? Anything you’ve started doing differently, like taking stairs one at a time or planning which chair to sit in?\n\nAny swelling or achiness after activity? The knee that puffs up after a walk, the shoulder that throbs the night after yard work?\n\nHow’s your grip and your hands? Jar lids, doorknobs, buttons? Those little things are usually the first place hands show wear.\n\nHave you given anything up? Golf, gardening, getting down on the floor with the grandkids, not because you can’t, but because you pay for it for two days afterward?\n\nAnd finally, what are you taking for it? Prescription or over the counter? I mean the everyday stuff people don’t count: the Advil bottle in the kitchen AND the one in the car, the Tylenol before bed, the creams and rubs.\n\n(Use the notes you took during the questions, then ask:)\n\nNow {{contact_first_name}}, you just told me about (read back the issues they mentioned, e.g. “your sleep’s been rough and your back’s been bothering you”), and I know you also said the symptoms we treated you for are coming back. If you could completely eliminate just one of those problems, or stop your old symptoms from coming back, and never have it bother you again, which one would you choose?",
+      "title": "Joint Questions",
+      "content": "(Write down every concern they name.)\n\nIs either knee bothering you?\n\nHow about either hip?\n\nIs either shoulder bothering you?\n\nAny trouble with your hands or grip?\n\nAny neck or back pain?\n\nAny morning stiffness?\n\nAny swelling after activity?\n\nAre you taking any medications for joint pain?\n\nBetween these and what returned, which one bothers you the most?\n\n(Tap their answer below.)",
       "sort_order": 7
     },
     {
       "step_key": "making_it_real",
-      "title": "Making It Real",
-      "content": "{{contact_first_name}}, what I’d like to do now is ask you a few quick questions about {{main_concern}}, so I can get your file fully updated. It’ll only take a minute.\n\n(Take the concern they named and make it real with three questions, in order. Write down or make note of their answers. You will use them in the next section. After each question, pause and let them fully answer. React like a human: “I see,” “Wow,” “That’s a lot.”)\n\nHow long have you been experiencing it? A few days, a few weeks, or longer than that? Just a day or two, a few weeks, a month or two, or longer than that?\n\n(Let them answer, then:) “[Repeat their answer back]? Would you agree with me that dealing with something like that for that long really isn’t OK?”\n\n(If they shrug it off, “oh, I just deal with it”:) “You know, even a bottle of Tylenol says if it lasts more than a week or so, you should have it looked at. You’ve been dealing with this a lot longer than that.”\n\nIs that something that you notice only once or twice a month, or is it happening more often than that?\n\n(Let them answer, then:)\n\n“And when you are experiencing it, does it seem to be more like first thing in the morning, the middle of the day, while you’re at work, by the end of the day? Or do you feel it multiple times a day, or is it there all day?”\n\n(Let them answer, then:) “That’s a lot. And honestly, having it that often isn’t just not OK. It’s not normal. Wouldn’t you agree?”\n\nAnd the last thing I’d like to ask is how it’s impacting you. But first, do me a favor: think of a day when you felt great, {{main_concern}} wasn’t in the picture, you were full of energy, everything was clicking. Now think of the absolute worst day you’ve had with it. Do you have those two days in your head?\n\n(Wait for the yes. Then walk the worst day through three areas, pausing after each:)\n\n“On that worst day, what about work? Could you go? And if you did, were you as productive as usual? Were you as enjoyable to be around?” (Let them respond. “I see.”)\n\n“What about at home? Were you fully engaged with the people around you, or did you kind of want to be left alone?” (Let them respond. “That’s really not OK.”)\n\n“And the things you enjoy. Your hobbies, getting together with friends, family things. What happens to those when it’s at its worst?” (Let them open up. Do not rush.)\n\nThen respond with empathy: Thank you for sharing that with me. It makes complete sense, and that’s exactly the kind of thing {{rec_pronoun}} help people with every single day.",
+      "title": "Understand the Concern",
+      "content": "{{contact_first_name}}, I'd like to ask about {{main_concern}} so your file is current.\n\n(Ask these three questions in order. Pause after each.)\n\nHow long has that been bothering you?\n\n(Let them answer.)\n\nIs it happening here and there, or most days?\n\n(Let them answer.)\n\nHow does it affect your day or the things you enjoy?\n\n(Let them open up. Do not rush.)\n\nThank you for sharing that. It makes sense.",
       "sort_order": 8
     },
     {
       "step_key": "recommendation",
-      "title": "The Magic Question & Recommendation",
-      "content": "{{contact_first_name}}, it sounds to me like {{main_concern}} isn’t just affecting you. It may also be affecting the people you care about, keeping you from the things you enjoy doing, maybe even getting in the way at work. Do you see how that could actually be the case?\n\n(Wait for their answer. If they say no or hesitate: “That’s completely fair, and honestly, I’m glad it hasn’t spilled over into the rest of your life. But it’s still been bothering you, and that’s reason enough.” Then continue.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for yes.)\n\nMy recommendation is that we get you set up with an appointment so {{rec_pronoun}} can take a look at you and see if there’s something {{rec_pronoun}} can do to help you with {{main_concern}}. If {{rec_pronoun}} can help you, {{rec_pronoun}}’ll let you know, and {{rec_pronoun}}’d be honored if you let {{rec_obj}}. And if {{rec_pronoun}} don’t think {{rec_pronoun}} can help, {{rec_pronoun}}’ll let you know that as well, because {{rec_pronoun}}’re not here to waste anybody’s time or money. Does that sound reasonable?",
+      "title": "The Recommendation",
+      "content": "{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you in so {{provider_name}} can take a look at {{main_concern}}. If we can help, we'll explain your options. If not, we'll tell you that too. Does that sound reasonable?\n\n(Tap what you hear.)",
       "sort_order": 10
     },
     {
       "step_key": "bridge_no",
-      "title": "They Hesitate: Uncover Why",
-      "content": "{{contact_first_name}}, you did tell me {{main_concern}} has been showing up and getting to you.\n\nSo help me understand. Why wouldn't you want to have it evaluated? What's keeping you from getting it looked at?\n\n(Say this with genuine, confused curiosity, never pushy, and never arguing. You honestly can't see why they wouldn't want something looked at that they just told you is a problem, based on how bad they described it. Then stop talking and let them give you the real reason.)\n\nWhat are your thoughts about that?",
+      "title": "They Hesitate",
+      "content": "{{contact_first_name}}, you said {{main_concern}} has been bothering you. I don't want to assume anything. Is it timing, or is something else holding you back?\n\n(Let them answer. Do not argue.)",
       "sort_order": 11
     },
     {
       "step_key": "lapsed_commitment",
-      "title": "Nothing Found: The Commitment Question",
-      "content": "{{contact_first_name}}, I am so glad you’re doing so well, and we’re thrilled to hear it.\n\nLet me ask you this. I remember when you first came into the office, you told us your goal wasn’t just to quiet that joint down. It was to stay active and keep doing the things you love without paying for it afterward. Can I ask what changed that led you to stop coming in for your check-ins?\n\n(Let them answer. Listen all the way through. Don’t argue with whatever they say. Acknowledge it warmly.)\n\n(Then tap the button below that’s closest to the reason they shared. It will give you a natural, conversational way to respond before inviting them back onto the schedule.)",
+      "title": "Why Did They Stop?",
+      "content": "{{contact_first_name}}, I'm glad your joints are still feeling good.\n\nCan I ask what changed that led you to stop coming in for check-ins?\n\n(Let them answer. Do not argue.)\n\n(Tap the reason they shared.)",
       "sort_order": 16
     },
     {
       "step_key": "obj_came_back_stopped",
-      "title": "Objection: It came back after I stopped",
-      "content": "I completely understand. Joint pain can be stubborn, and once you’re off your care it can sometimes try to flare back up. That's exactly why coming in makes sense, so {{rec_pronoun}} can look at the whole picture and talk through the best plan to get you back on track and help you hold your progress.\n\nConfirm and continue: Does that make sense? (Wait for a fast yes.) Do you have any other questions or concerns?",
+      "title": "Objection: Pain Returned",
+      "content": "That can happen after care stops. A visit lets us see what's changed and talk through your options.\n\nCan we get you in for that look?",
       "sort_order": 100
     },
     {
       "step_key": "obj_getting_older",
-      "title": "Objection: I’m just getting older, I have to live with it",
-      "content": "I hear that a lot, and please don't feel like you just have to put up with it. So many people feel and move a lot better once {{rec_pronoun}} take another look. That's exactly what the appointment is for.\n\nConfirm and continue: Does that make sense? (Wait for a fast yes.) Do you have any other questions or concerns?",
+      "title": "Objection: Getting Older",
+      "content": "Getting older does not mean you have to ignore joint pain. We can look at what's happening and discuss what may help.\n\nWould you be open to that?",
       "sort_order": 101
     },
     {
       "step_key": "obj_managing_own",
-      "title": "Objection: I’ve been managing with pain relievers",
-      "content": "I understand, and that can get you by, but I know how much better you felt when you weren't having to rely on that. Coming in is the best way to get {{rec_poss}} eyes on it and get you back to real relief.\n\nConfirm and continue: Does that make sense? (Wait for a fast yes.) Do you have any other questions or concerns?",
+      "title": "Objection: Pain Relievers",
+      "content": "I understand. Pain relievers may help for a while. A visit lets us look at the joint itself.\n\nCan we at least take a look?",
       "sort_order": 102
     },
     {
       "step_key": "lapsed_felt_fine",
-      "title": "If They Say: \"I Was Feeling Fine\"",
-      "content": "That makes total sense, {{contact_first_name}}, and honestly, that’s the best reason there is. When you feel good, coming in stops feeling urgent. Here’s the funny thing about it, though. Feeling that good is actually the result of the care you did. Those joints feel this good because of the work you put in. The check-ins are what keep them moving well and keep you doing the things you love.\n\nDoes that make sense?\n\n(Let them answer. Wait for them to respond before moving on.)\n\nWas there anything else that was holding you back, or was that pretty much it?\n\n(Let them answer. If they raise another reason, go back and tap the button for it. If that was it, continue.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for yes.)\n\nMy recommendation is that we go ahead and get you back on the schedule so you can keep feeling as good as you do right now. Does that sound reasonable?",
+      "title": "Reason: Feeling Fine",
+      "content": "That makes sense, {{contact_first_name}}. When your joints feel good, coming in stops feeling urgent. Check-ins help us notice changes before they disrupt your routine.\n\nDoes that sound right?\n\n(Let them answer.)\n\nWas anything else holding you back?\n\n(If they share another reason, tap it. Otherwise, continue.)\n\nCan I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get a joint check-in on the schedule. Does that sound reasonable?",
       "sort_order": 103
     },
     {
       "step_key": "lapsed_cost",
-      "title": "If They Say: Cost or Insurance",
-      "content": "{{contact_first_name}}, I completely understand. That’s real, and I’m glad you told me. What a lot of our practice members have found is that check-in visits are spaced out and cost a fraction of what it takes to fix a problem that’s been sliding for months. And you’re not committing to anything. It’s simply a visit so {{rec_pronoun}} can take a look at those joints and make sure you’re holding your progress.\n\nDoes that make sense?\n\n(Let them answer. Wait for them to respond before moving on.)\n\n(Do NOT improvise pricing, packages, or discounts on the call. Let the office handle specifics.)\n\nWas there anything else that was holding you back, or was that pretty much it?\n\n(Let them answer. If they raise another reason, go back and tap the button for it. If that was it, continue.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for yes.)\n\nMy recommendation is that we go ahead and get you back on the schedule. Does that sound reasonable?",
+      "title": "Reason: Cost or Insurance",
+      "content": "I understand, {{contact_first_name}}. You're not committing to treatment. The first step is a visit to check how your joints are doing.\n\nDoes that seem fair?\n\n(Let them answer.)\n\n(Do not quote prices, packages, or discounts.)\n\nWas anything else holding you back?\n\n(If they share another reason, tap it. Otherwise, continue.)\n\nCan I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get that joint check-in scheduled. Does that sound reasonable?",
       "sort_order": 104
     },
     {
       "step_key": "lapsed_busy",
-      "title": "If They Say: \"Life Got Busy\"",
-      "content": "Oh, I completely hear you, {{contact_first_name}}. Life fills up fast, and this is exactly the kind of thing that quietly slips off the calendar. No guilt at all; it happens to everyone. The nice part is that a check-in visit is quick, and we can find a time that actually works around your schedule instead of adding to it.\n\nDoes that make sense?\n\n(Let them answer. Wait for them to respond before moving on.)\n\nWas there anything else that was holding you back, or was that pretty much it?\n\n(Let them answer. If they raise another reason, go back and tap the button for it. If that was it, continue.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for yes.)\n\nMy recommendation is that we go ahead and get you back on the schedule at a time that’s easy for you. Does that sound reasonable?",
+      "title": "Reason: Life Got Busy",
+      "content": "I hear you, {{contact_first_name}}. Life fills up fast, and check-ins get pushed down the list. We can find a time that works around your schedule.\n\nWould that help?\n\n(Let them answer.)\n\nWas anything else holding you back?\n\n(If they share another reason, tap it. Otherwise, continue.)\n\nCan I make a recommendation?\n\n(Wait for the yes.)\n\nLet's find an easy time for a joint check-in. Does that sound reasonable?",
       "sort_order": 105
     },
     {
       "step_key": "lapsed_wait_pain",
-      "title": "If They Say: \"I'll Come Back If It Comes Back\"",
-      "content": "That’s a fair way to think about it, {{contact_first_name}}, and I get it. The only thing I’d gently share is that with joints, pain is usually the last thing to show up, by the time it hurts, it’s often been building for a while underneath. Catching it at a check-in usually means a quick visit and you’re on your way, instead of the time and treatment it takes once a joint has been slipping for months.\n\nDoes that make sense?\n\n(Let them answer. Wait for them to respond before moving on.)\n\nWas there anything else that was holding you back, or was that pretty much it?\n\n(Let them answer. If they raise another reason, go back and tap the button for it. If that was it, continue.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for yes.)\n\nMy recommendation is that we go ahead and get you back on the schedule so we stay ahead of it instead of behind it. Does that sound reasonable?",
+      "title": "Reason: Waiting for Pain",
+      "content": "That's fair, {{contact_first_name}}. Joint changes can begin before they interfere with your day. A check-in lets us see how things are holding up.\n\nWould a quick check-in work?\n\n(Let them answer.)\n\nWas anything else holding you back?\n\n(If they share another reason, tap it. Otherwise, continue.)\n\nCan I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get a joint check-in on the schedule. Does that sound reasonable?",
       "sort_order": 106
     },
     {
       "step_key": "lapsed_moved",
-      "title": "If They Say: They Moved or Tried Another Provider",
-      "content": "That’s completely understandable, {{contact_first_name}}. Things change, and there’s nothing wrong with that. If you’re still in the area, {{rec_pronoun}}'d love to see you again. Your whole history is right here in your file, so we can pick up exactly where you left off instead of starting from scratch.\n\nDoes that make sense?\n\n(Let them answer. Wait for them to respond before moving on.)\n\nWas there anything else that was holding you back, or was that pretty much it?\n\n(Let them answer. If they raise another reason, go back and tap the button for it. If that was it, continue.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for yes.)\n\nMy recommendation is that we go ahead and get you back on the schedule. Does that sound reasonable?",
+      "title": "Reason: Moved or Switched",
+      "content": "That's understandable, {{contact_first_name}}. Things change. If you're nearby, your joint care history is still in your file here.\n\nWould you like us to take another look?\n\n(Let them answer.)\n\nWas anything else holding you back?\n\n(If they share another reason, tap it. Otherwise, continue.)\n\nCan I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get a joint check-in on the schedule. Does that sound reasonable?",
       "sort_order": 107
     },
     {
       "step_key": "transition_fully_back",
-      "title": "The Transition: Acknowledge and Ask Permission",
-      "content": "Now {{contact_first_name}}, obviously I know you said {{complaint_reference}} is pretty much back to where it was, and we’re absolutely going to talk about that. But while I have you on the phone, I’d like to ask you a few additional questions so we get your file completely up to date. Is that okay?\n\n(Wait for the yes before starting the questions.)",
+      "title": "Ask Permission",
+      "content": "{{contact_first_name}}, we'll come back to {{complaint_reference}}. First, can I ask a few joint questions so your file is current?\n\n(Wait for the yes.)",
       "sort_order": 108
     },
     {
       "step_key": "digging_in_fully_back",
-      "title": "The Seven Questions: Update the File",
-      "content": "(Critical: write down every joint and symptom they mention as you go. You’ll recap them in a moment.)\n\nFirst, other than the joint we treated, is there any OTHER joint that’s been talking to you? A knee, a hip, a shoulder, your hands? A lot of people tell us that when one joint hurts, they shift their weight and a different one starts complaining.\n\nHave you been experiencing any pain, stiffness, or soreness anywhere in your neck, mid-back, or low back, or any other areas of your body? Even if it’s mild, lasts less than five minutes, and goes away on its own.\n\nHow about your mornings? Any stiffness when you first get out of bed, where those first few steps feel like the Tin Man until things loosen up?\n\nWhat about stairs, kneeling, or getting up out of a low chair? Anything you’ve started doing differently, like taking stairs one at a time or planning which chair to sit in?\n\nAny swelling or achiness after activity? The knee that puffs up after a walk, the shoulder that throbs the night after yard work?\n\nHow’s your grip and your hands? Jar lids, doorknobs, buttons? Those little things are usually the first place hands show wear.\n\nHave you given anything up? Golf, gardening, getting down on the floor with the grandkids, not because you can’t, but because you pay for it for two days afterward?\n\nAnd finally, what are you taking for it? Prescription or over the counter? I mean the everyday stuff people don’t count: the Advil bottle in the kitchen AND the one in the car, the Tylenol before bed, the creams and rubs.\n\n(Use the notes you took during the questions, then ask:)\n\nNow {{contact_first_name}}, you just told me about (read back the issues they mentioned, e.g. “your sleep’s been rough and your back’s been bothering you”), and I know you also said the symptoms we treated you for are pretty much back. If you could completely eliminate just one of those problems, or get rid of the symptoms that have come back, and never have it bother you again, which one would you choose?",
+      "title": "Joint Questions",
+      "content": "(Write down every concern they name.)\n\nIs either knee bothering you?\n\nHow about either hip?\n\nIs either shoulder bothering you?\n\nAny trouble with your hands or grip?\n\nAny neck or back pain?\n\nAny morning stiffness?\n\nAny swelling after activity?\n\nAre you taking any medications for joint pain?\n\nBetween these and the pain that's back, which one bothers you the most?\n\n(Tap their answer below.)",
       "sort_order": 110
     },
     {
       "step_key": "obj_think",
-      "title": "Objection: I need to think about it",
-      "content": "That's completely fair, {{contact_first_name}}. Can I ask what part you'd want to think over? Sometimes it's the cost, sometimes the timing, and sometimes people just want to be sure it's worth coming in, which one is closest for you?\n\n(Listen, their answer usually points to one of the other buttons below. If it stays general, keep going.)\n\nHonestly, coming in is really just information. {{rec_pronoun_cap}} takes a look, you find out exactly what's going on with {{main_concern}}, and then you get to decide with real answers instead of wondering. And if we can't help you, we'll tell you that too.\n\nConfirm and continue: Does that make sense? (Wait for a fast yes.) Do you have any other questions or concerns?",
+      "title": "Objection: Needs Time",
+      "content": "That's fair, {{contact_first_name}}. What part would you like to think over?\n\n(Listen. Tap the matching reason if they name one.)\n\nA visit gives you information about {{main_concern}}. Then you can decide what feels right.\n\nDoes that help?",
       "sort_order": 130
     },
     {
       "step_key": "obj_send_info",
-      "title": "Objection: Just send me information",
-      "content": "I'd be glad to get you some information, {{contact_first_name}}. The one thing I'd say is that a flyer or a link can only tell you so much. It can't actually look at what's going on with {{main_concern}} for you specifically. That's really what the visit is for: {{rec_pronoun}} takes a look and you get answers that apply to you, not just general information. So let me get you on the schedule first, and you'll have real answers to go on.\n\nConfirm and continue: Does that make sense? (Wait for a fast yes.) Do you have any other questions or concerns?",
+      "title": "Objection: Send Information",
+      "content": "I'd be glad to send information, {{contact_first_name}}. General information cannot show what's happening with {{main_concern}}. A visit gives us a chance to look at it.\n\nCould we schedule the visit first?",
       "sort_order": 131
     }
   ],
   "choices": [
     {
       "from_step_key": "bridge_no",
-      "label": "They’re okay to move forward",
+      "label": "Ready to move forward",
       "to_step_key": "recommendation",
       "variant": "positive",
       "sort_order": 0
@@ -203,49 +203,49 @@
     },
     {
       "from_step_key": "bridge_no",
-      "label": "Another reason: dig deeper",
+      "label": "“Something else”",
       "to_step_key": "uncover",
       "variant": "caution",
       "sort_order": 7
     },
     {
       "from_step_key": "digging_in",
-      "label": "The questions uncovered something: they named their biggest issue",
+      "label": "They named their biggest concern",
       "to_step_key": "making_it_real",
       "variant": "caution",
       "sort_order": 0
     },
     {
       "from_step_key": "digging_in",
-      "label": "Genuinely nothing: doing great across the board",
+      "label": "Nothing is bothering them",
       "to_step_key": "lapsed_commitment",
       "variant": "positive",
       "sort_order": 1
     },
     {
       "from_step_key": "digging_in_fully_back",
-      "label": "The questions uncovered something: they named their biggest issue",
+      "label": "They named their biggest concern",
       "to_step_key": "making_it_real",
       "variant": "default",
       "sort_order": 0
     },
     {
       "from_step_key": "digging_in_returning",
-      "label": "The questions uncovered something: they named their biggest issue",
+      "label": "They named their biggest concern",
       "to_step_key": "making_it_real",
       "variant": "caution",
       "sort_order": 0
     },
     {
       "from_step_key": "lapsed_busy",
-      "label": "Sounds reasonable: get them scheduled",
+      "label": "“Yes, that sounds reasonable”",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0
     },
     {
       "from_step_key": "lapsed_busy",
-      "label": "They shared another reason: go back and pick it",
+      "label": "“Something else”",
       "to_step_key": "lapsed_commitment",
       "variant": "default",
       "sort_order": 1
@@ -287,126 +287,126 @@
     },
     {
       "from_step_key": "lapsed_cost",
-      "label": "Sounds reasonable: get them scheduled",
+      "label": "“Yes, that sounds reasonable”",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0
     },
     {
       "from_step_key": "lapsed_cost",
-      "label": "They shared another reason: go back and pick it",
+      "label": "“Something else”",
       "to_step_key": "lapsed_commitment",
       "variant": "default",
       "sort_order": 1
     },
     {
       "from_step_key": "lapsed_felt_fine",
-      "label": "Sounds reasonable: get them scheduled",
+      "label": "“Yes, that sounds reasonable”",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0
     },
     {
       "from_step_key": "lapsed_felt_fine",
-      "label": "They shared another reason: go back and pick it",
+      "label": "“Something else”",
       "to_step_key": "lapsed_commitment",
       "variant": "default",
       "sort_order": 1
     },
     {
       "from_step_key": "lapsed_moved",
-      "label": "Sounds reasonable: get them scheduled",
+      "label": "“Yes, that sounds reasonable”",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0
     },
     {
       "from_step_key": "lapsed_moved",
-      "label": "They shared another reason: go back and pick it",
+      "label": "“Something else”",
       "to_step_key": "lapsed_commitment",
       "variant": "default",
       "sort_order": 1
     },
     {
       "from_step_key": "lapsed_wait_pain",
-      "label": "Sounds reasonable: get them scheduled",
+      "label": "“Yes, that sounds reasonable”",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0
     },
     {
       "from_step_key": "lapsed_wait_pain",
-      "label": "They shared another reason: go back and pick it",
+      "label": "“Something else”",
       "to_step_key": "lapsed_commitment",
       "variant": "default",
       "sort_order": 1
     },
     {
       "from_step_key": "obj_came_back_stopped",
-      "label": "Resolved: re-ask the scheduling question",
+      "label": "“Yes, we can take a look”",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0
     },
     {
       "from_step_key": "obj_came_back_stopped",
-      "label": "Another concern came up",
+      "label": "“I have another concern”",
       "to_step_key": "uncover",
       "variant": "objection",
       "sort_order": 1
     },
     {
       "from_step_key": "obj_getting_older",
-      "label": "Resolved: re-ask the scheduling question",
+      "label": "“Yes, I’m open to that”",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0
     },
     {
       "from_step_key": "obj_getting_older",
-      "label": "Another concern came up",
+      "label": "“I have another concern”",
       "to_step_key": "uncover",
       "variant": "objection",
       "sort_order": 1
     },
     {
       "from_step_key": "obj_managing_own",
-      "label": "Resolved: re-ask the scheduling question",
+      "label": "“Yes, take a look”",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0
     },
     {
       "from_step_key": "obj_managing_own",
-      "label": "Another concern came up",
+      "label": "“I have another concern”",
       "to_step_key": "uncover",
       "variant": "objection",
       "sort_order": 1
     },
     {
       "from_step_key": "opening_question",
-      "label": "“Still feeling good and moving well”",
+      "label": "“Still feeling good”",
       "to_step_key": "resp_doing_great",
       "variant": "positive",
       "sort_order": 0
     },
     {
       "from_step_key": "opening_question",
-      "label": "“A little has started to creep back”",
+      "label": "“Some pain is returning”",
       "to_step_key": "resp_coming_back",
       "variant": "caution",
       "sort_order": 1
     },
     {
       "from_step_key": "opening_question",
-      "label": "“Pretty much back to where I was”",
+      "label": "“Pretty much back where I started”",
       "to_step_key": "resp_fully_back",
       "variant": "negative",
       "sort_order": 2
     },
     {
       "from_step_key": "permission_questions",
-      "label": "They said okay: ask the seven questions",
+      "label": "“Yes”",
       "to_step_key": "digging_in",
       "variant": "default",
       "sort_order": 0
@@ -490,21 +490,21 @@
     },
     {
       "from_step_key": "resp_doing_great",
-      "label": "They remember: ask permission for a few questions",
+      "label": "“Yes”",
       "to_step_key": "permission_questions",
       "variant": "default",
       "sort_order": 0
     },
     {
       "from_step_key": "resp_fully_back",
-      "label": "Continue to the transition",
+      "label": "They answered",
       "to_step_key": "transition_fully_back",
       "variant": "default",
       "sort_order": 0
     },
     {
       "from_step_key": "review",
-      "label": "They said yes: magic question",
+      "label": "“Yes, that’s fair”",
       "to_step_key": "recommendation",
       "variant": "positive",
       "sort_order": 0
@@ -518,21 +518,21 @@
     },
     {
       "from_step_key": "transition",
-      "label": "They said okay: dig in",
+      "label": "“Yes”",
       "to_step_key": "digging_in_returning",
       "variant": "default",
       "sort_order": 0
     },
     {
       "from_step_key": "transition_fully_back",
-      "label": "They said okay: dig in",
+      "label": "“Yes”",
       "to_step_key": "digging_in_fully_back",
       "variant": "default",
       "sort_order": 0
     },
     {
       "from_step_key": "uncover",
-      "label": "They’re ready: schedule",
+      "label": "Ready to schedule",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0

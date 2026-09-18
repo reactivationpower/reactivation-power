@@ -8,212 +8,212 @@
   "steps": [
     {
       "step_key": "opening_question",
-      "title": "The Opening Question",
-      "content": "So {{contact_first_name}}, how have things been going since your last massage with us, especially with {{complaint_reference}}? Are you still feeling pretty loose and relaxed, has the tension started to creep back, or are you pretty much back to where you were before you started coming in?\n\n(This question has only three possible answers. Click the one you hear.)",
+      "title": "Opening Question",
+      "content": "So {{contact_first_name}}, how have you felt since your last massage with us? I usually hear one of three things. Still loose and relaxed, tension starting to return, or back to where you started. Which one is closest for you?\n\n(Only three answers. Tap the one you hear.)",
       "sort_order": 1
     },
     {
       "step_key": "resp_doing_great",
-      "title": "Still Feeling Good: Celebrate the Win",
-      "content": "I love hearing that, {{contact_first_name}}. That’s exactly what we want. There’s nothing like walking out of a massage feeling two inches taller.\n\nIsn’t that the best feeling? Sleeping better, the neck and shoulders staying quiet instead of building all week? (Let them enjoy the moment. This is their win.)\n\n(Do not pitch anything yet. The file update comes next, and the close follows if nothing else surfaces.)",
+      "title": "Still Feeling Good",
+      "content": "That's great to hear, {{contact_first_name}}. Your notes say massage helped you feel loose and relaxed. Are you still feeling that way?\n\n(Let them answer. Do not book yet.)",
       "sort_order": 2
     },
     {
       "step_key": "resp_coming_back",
-      "title": "Tension Creeping Back: Normalize, Then Update the File",
-      "content": "{{contact_first_name}}, that is completely normal. That’s just what muscles do when the routine gets interrupted. Life keeps loading tension in; the massage was what kept taking it back out.\n\nI remember how good you felt when you were coming in regularly. (Let them respond. Be warm, no alarm. This is routine, not a failure.)\n\n(Do not pitch anything yet. The file update comes next, and the close follows if nothing else surfaces.)",
+      "title": "Tension Starting to Return",
+      "content": "That happens, {{contact_first_name}}. Tension can build again when regular massages stop. Your notes say massage was helping before. Where are you noticing the tension now?\n\n(Let them answer. Stay warm. Do not book yet.)",
       "sort_order": 3
     },
     {
       "step_key": "resp_fully_back",
-      "title": "Tension Fully Back: Warm Empathy, Then Update the File",
-      "content": "{{contact_first_name}}, I completely understand. Life keeps loading tension in, and the massage was what kept taking it back out. When that stops, life gets busy, self-care slides to the bottom of the list, and the tension quietly moves back in like it never left.\n\nDo you remember how different you felt when you were coming in? The sleep, the headaches staying away, actually feeling relaxed in your own shoulders? (Let them respond. Chances are they’ve been missing it more than they realized.)\n\n(Do not pitch anything yet. The file update comes next, and the close follows if nothing else surfaces.)",
+      "title": "Tension Fully Back",
+      "content": "I'm sorry to hear that, {{contact_first_name}}. Tension often builds again when regular massages stop. Your notes say massage was helping before. What changed after you stopped coming in?\n\n(Let them answer. Stay warm. Do not book yet.)",
       "sort_order": 4
     },
     {
       "step_key": "focus_areas_bonus",
-      "title": "One More Thing: The Focus Areas Question",
-      "content": "Perfect, you’re all set for (day) at (time).\n\n(If you already covered their focus areas during the file update, skip the question, just note the areas on their file, confirm the appointment warmly, and end the call.)\n\nOh, one quick thing while I have you, {{contact_first_name}}, so we can make this session count: has anything new been talking to you lately? The neck and shoulders from the desk, the low back, headaches at the end of the day, a hip or leg that’s been tight?\n\nIf YES: Perfect, I’ll make a note on your file so your therapist can focus right where you need it the moment you’re on the table. No wasted minutes.\n\nIf NO: No problem at all. A full-body reset it is. We’ll see you (day) at (time), {{contact_first_name}}. We can’t wait to see you!\n\n(Either way, the call ends warm, with the appointment confirmed.)",
+      "title": "Confirm Focus Areas",
+      "content": "Perfect. You're set for (day) at (time).\n\n(If focus areas are already in the notes, skip the next question.)\n\nBefore we finish, is there anything you want your therapist to focus on?\n\n(Note their answer on the file.)\n\nWe'll see you on (day) at (time), {{contact_first_name}}.",
       "sort_order": 5
     },
     {
       "step_key": "transition_still",
-      "title": "The Transition: Update the File",
-      "content": "Now {{contact_first_name}}, while I have you on the phone, I’d like to ask you a few quick questions so we get your file completely up to date. Is that okay?\n\n(Wait for the yes before starting the questions.)",
+      "title": "Ask Permission",
+      "content": "{{contact_first_name}}, can I ask a few quick questions to update your massage notes?\n\n(Wait for the yes.)",
       "sort_order": 6
     },
     {
       "step_key": "transition",
-      "title": "The Transition: Update the File",
-      "content": "Now {{contact_first_name}}, while I have you on the phone, I’d like to ask you a few quick questions so we get your file completely up to date. Is that okay?\n\n(Wait for the yes before starting the questions.)",
+      "title": "Ask Permission",
+      "content": "{{contact_first_name}}, we'll come back to that tension. First, can I ask a few questions to update your massage notes?\n\n(Wait for the yes.)",
       "sort_order": 7
     },
     {
       "step_key": "digging_in_still",
-      "title": "The Six Questions: Update the File",
-      "content": "(Ask these in order. Critical: write down everything they mention. You’ll read it back before the recommendation.)\n\nNow, you mentioned you’re still feeling loose. I love hearing that. One thing I’ll ask: I know it’s been a little while since we’ve seen you. What have you been doing for the tension in the meantime? Stretching, the foam roller, just pushing through?\n\nWhere does your body talk to you first these days? The neck and shoulders, the low back, a hip or leg, even if it’s just a whisper right now?\n\nHow have you been sleeping? Falling asleep okay, staying asleep, waking up rested?\n\nAny headaches sneaking in? End of the day, behind the eyes, that kind of thing?\n\nHas anything changed in your routine lately? A new desk setup, more driving or travel, new workouts, more stress at work or home?\n\nLast one, and it’s my favorite. If you could wave a wand and make one ache or one source of tension disappear forever, what would it be?\n\n(If they mentioned anything at all, read it back and click the first button. If truly nothing surfaced, fall through to the rhythm close. That’s still a great call.)",
+      "title": "Questions: Still Feeling Good",
+      "content": "(Ask in order. Write down even small concerns.)\n\nAny neck or shoulder tension?\n\nAny low back tension?\n\nHave you had any headaches?\n\nHow has your sleep been?\n\nHow has your stress been?\n\nOf those, which one bothers you the most?\n\n(Tap their answer below.)",
       "sort_order": 8
     },
     {
       "step_key": "digging_in",
-      "title": "The Six Questions: Update the File",
-      "content": "(Ask these in order. Critical: write down everything they mention. You’ll read it back before the recommendation.)\n\nYou mentioned the tension is back, especially with {{complaint_reference}}. Where do you feel it first and worst? The neck and shoulders, the low back, somewhere else?\n\nWhen did you start noticing it coming back? Recently, or has it been building for a while?\n\nHow have you been sleeping through it? Falling asleep okay, staying asleep, waking up rested?\n\nAny headaches sneaking in? End of the day, behind the eyes, that kind of thing?\n\nHas anything changed in your routine lately? A new desk setup, more driving or travel, new workouts, more stress at work or home?\n\nLast one, and it’s my favorite. If you could wave a wand and make one ache or one source of tension disappear forever, what would it be?\n\n(If they mentioned anything beyond the tension itself, read it back and click the first button. If getting the tension handled is the whole story, fall through to the close.)",
+      "title": "Questions: Tension Is Back",
+      "content": "(Ask in order. Write down every concern.)\n\nAny neck or shoulder tension?\n\nAny low back tension?\n\nHave you had any headaches?\n\nHow has your sleep been?\n\nHow has your stress been?\n\nBetween {{complaint_reference}} and these concerns, which one bothers you the most?\n\n(Tap their answer below.)",
       "sort_order": 9
     },
     {
       "step_key": "review",
-      "title": "The Review & Bridge to Emotion",
-      "content": "{{contact_first_name}}, let me make sure I've got this right. (Recap what they told you: how long it's been going on, how often, and how it's been affecting them.) Did I get that right?\n\nAnd it sounds like what you'd really love is to get back to feeling the way you did when things were going well. Is that fair to say?\n\n(About 95% say yes. That yes is the moment. Don't rush past it.)",
+      "title": "Review Their Answers",
+      "content": "{{contact_first_name}}, let me make sure I have this right.\n\n(Recap how long, how often, and how it affects them.)\n\nDid I get that right?\n\nIt sounds like you'd like to feel loose and comfortable again. Is that fair to say?\n\n(Tap what you hear.)",
       "sort_order": 9
     },
     {
       "step_key": "making_it_real",
       "title": "Making It Real",
-      "content": "{{contact_first_name}}, what I’d like to do now is ask you a few quick questions about {{main_concern}}, so I can get your file fully updated. It’ll only take a minute.\n\n(Take the concern they named and make it real with three questions, in order. Write down or make note of their answers. You will use them in the next section. After each question, pause and let them fully answer. React like a human: “I see,” “Wow,” “That’s a lot.”)\n\nHow long have you been experiencing it? A few days, a few weeks, or longer than that? Just a day or two, a few weeks, a month or two, or longer than that?\n\n(Let them answer, then:) “[Repeat their answer back]? Would you agree with me that dealing with something like that for that long really isn’t OK?”\n\n(If they shrug it off, “oh, I just deal with it”:) “You know, even a bottle of Tylenol says if it lasts more than a week or so, you should have it looked at. You’ve been dealing with this a lot longer than that.”\n\nIs that something that you notice only once or twice a month, or is it happening more often than that?\n\n(Let them answer, then:)\n\n“And when you are experiencing it, does it seem to be more like first thing in the morning, the middle of the day, while you’re at work, by the end of the day? Or do you feel it multiple times a day, or is it there all day?”\n\n(Let them answer, then:) “That’s a lot. And honestly, having it that often isn’t just not OK. It’s not normal. Wouldn’t you agree?”\n\nAnd the last thing I’d like to ask is how it’s impacting you. But first, do me a favor: think of a day when you felt great, {{main_concern}} wasn’t in the picture, you were full of energy, everything was clicking. Now think of the absolute worst day you’ve had with it. Do you have those two days in your head?\n\n(Wait for the yes. Then walk the worst day through three areas, pausing after each:)\n\n“On that worst day, what about work? Could you go? And if you did, were you as productive as usual? Were you as enjoyable to be around?” (Let them respond. “I see.”)\n\n“What about at home? Were you fully engaged with the people around you, or did you kind of want to be left alone?” (Let them respond. “That’s really not OK.”)\n\n“And the things you enjoy. Your hobbies, getting together with friends, family things. What happens to those when it’s at its worst?” (Let them open up. Do not rush.)\n\nThen respond with empathy: Thank you for sharing that with me. It makes complete sense, and that’s exactly the kind of thing {{rec_pronoun}} help people with every single day.",
+      "content": "{{contact_first_name}}, I'd like to ask three questions about {{main_concern}}. This will help us update your massage notes.\n\n(Ask in order. Pause after each question.)\n\nHow long has that been bothering you?\n\n(Let them answer.)\n\nHow often do you notice it?\n\n(Let them answer.)\n\nWhen it's bothering you, how does it affect your work, sleep, or daily plans?\n\n(Let them answer. Do not rush.)\n\nThank you for sharing that. It helps us understand what you need.",
       "sort_order": 10
     },
     {
       "step_key": "bridge_no",
-      "title": "They Hesitate: Uncover Why",
-      "content": "{{contact_first_name}}, you did tell me {{main_concern}} has been showing up and getting to you.\n\nSo help me understand. Why wouldn't you want to have it looked at? What's keeping you from getting it taken care of?\n\n(Say this with genuine, confused curiosity, never pushy, and never arguing. You honestly can't see why they wouldn't want something looked at that they just told you is a problem, based on how bad they described it. Then stop talking and let them give you the real reason.)\n\nWhat are your thoughts about that?",
+      "title": "They Hesitate",
+      "content": "{{contact_first_name}}, you said {{main_concern}} has been bothering you. I don't want to assume anything. What's holding you back from booking a massage?\n\n(Stay easy. Let them answer.)",
       "sort_order": 11
     },
     {
       "step_key": "recommendation",
-      "title": "The Magic Question & Recommendation",
-      "content": "{{contact_first_name}}, it sounds to me like {{main_concern}} isn’t just affecting you. It may also be affecting the people you care about, keeping you from the things you enjoy doing, maybe even getting in the way at work. Do you see how that could actually be the case?\n\n(Wait for their answer. If they say no or hesitate: “That’s completely fair, and honestly, I’m glad it hasn’t spilled over into the rest of your life. But it’s still been bothering you, and that’s reason enough.” Then continue.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for yes.)\n\nMy recommendation is that we get you set up with an appointment so {{rec_pronoun}} can take a look at you and see if there’s something {{rec_pronoun}} can do to help you with {{main_concern}}. If {{rec_pronoun}} can help you, {{rec_pronoun}}’ll let you know, and {{rec_pronoun}}’d be honored if you let {{rec_obj}}. And if {{rec_pronoun}} don’t think {{rec_pronoun}} can help, {{rec_pronoun}}’ll let you know that as well, because {{rec_pronoun}}’re not here to waste anybody’s time or money. Does that sound reasonable?",
+      "title": "The Recommendation",
+      "content": "{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you in so {{provider_name}} can work on {{main_concern}}. We can adjust the massage around what you need. Does that sound reasonable?\n\n(Tap what you hear.)",
       "sort_order": 11
     },
     {
       "step_key": "cadence_close",
-      "title": "Nothing Surfaced: Protect the Rhythm Close",
-      "content": "{{contact_first_name}}, I’m really glad you’re still feeling loose and relaxed. That’s exactly what we like to hear.\n\nNow, there is one thing I want to mention before I let you go. Muscle tension is sneaky. It rebuilds so gradually you don’t notice it happening. The stress, the desk, the phone, the driving. Day by day it all settles back into the same spots, and by the time you FEEL it, it’s been building for weeks. Regular sessions keep you ahead of it, so the tension never gets a head start. Most of our clients tell me the rhythm is the whole secret. It’s so much easier to stay loose than to get loose. Does that make sense?\n\n(Wait for the yes. If they hesitate, use the button below to uncover the real concern.)\n\n{{contact_first_name}}, can I make a recommendation? (Wait for the yes.)\n\nMy recommendation is we get you back on a regular rhythm, starting with one session now. That way the tension never gets a head start again. After all, like we’ve all heard, an ounce of prevention is worth a pound of cure. Does that sound reasonable?\n\n(Wait for the yes.)\n\nOkay, let’s find you a time. I have (day) at (time) or (day) at (time). Which is better for you?",
+      "title": "Nothing Found: Keep the Rhythm",
+      "content": "{{contact_first_name}}, I'm glad you're still feeling loose and relaxed. Regular massages can help keep tension from building again.\n\nCan I recommend booking your next massage now?\n\n(Wait for the answer.)\n\nWe have (day) at (time) or (day) at (time). Which works better?",
       "sort_order": 12
     },
     {
       "step_key": "comeback_close",
-      "title": "Getting Loose Again Is the Story: The Close",
-      "content": "{{contact_first_name}}, thank you for that. Your file is completely up to date.\n\nAnd here’s the good news: your body remembers. The work we did before isn’t lost, and it comes back faster the second time. But tension that’s had this long to settle in won’t undo itself, and catching it now is a lot easier than waiting until your shoulders are up around your ears. Does that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation? (Wait for the yes.)\n\nMy recommendation is we get you in for that first session now to knock the worst of it down, and then set up a rhythm that keeps it from ever piling up like this again. Does that sound reasonable?\n\n(Wait for the yes.)\n\nOkay, let’s get you back on the books. I have (day) at (time) or (day) at (time). Which is better for you?",
+      "title": "Tension Is Back: Book a Massage",
+      "content": "{{contact_first_name}}, thank you. Your massage notes are up to date.\n\nTension can keep building when massage stops. Coming in now gives us a chance to work on it.\n\nCan I recommend booking a massage now?\n\n(Wait for the answer.)\n\nWe have (day) at (time) or (day) at (time). Which works better?",
       "sort_order": 13
     },
     {
       "step_key": "obj_time",
       "title": "Objection: “I don’t have time”",
-      "content": "I completely understand, {{contact_first_name}}. Life gets busy. But here’s the nice thing: when we catch things early, a shorter session will often get the job done instead of a full-length one, so coming in now can actually end up saving you time. And either way, we’ll work around your schedule.\n\nConfirm and continue: Does that make sense? (Wait for a fast yes.) Do you have any other questions or concerns?",
+      "content": "I understand, {{contact_first_name}}. Life gets busy. We'll work around your schedule and find a massage length that fits.\n\nWould that help?",
       "sort_order": 15
     },
     {
       "step_key": "obj_fell_out_habit",
-      "title": "Objection: I fell out of the habit / it’s been too long",
-      "content": "I completely understand, and that can happen from time to time. Life gets busy and it's easy to fall out of the rhythm. That's exactly why coming in makes sense: we'll get you right back to feeling loose and relaxed, and the more regular you are the easier it is to stay ahead of the tension.\n\nConfirm and continue: Does that make sense? (Wait for a fast yes.) Do you have any other questions or concerns?",
+      "title": "Objection: “I fell out of the habit”",
+      "content": "That happens. Life gets busy, and massage gets pushed down the list. We can start with one visit and go from there.\n\nCould we find a time that works?",
       "sort_order": 100
     },
     {
       "step_key": "obj_luxury",
-      "title": "Objection: It’s kind of a luxury / I feel guilty spending on it",
-      "content": "I hear that a lot, and I'd gently say taking care of your stress and tension isn't a luxury. It's part of feeling and functioning your best, and you told me how much better you felt when you were coming in.\n\nConfirm and continue: Does that make sense? (Wait for a fast yes.) Do you have any other questions or concerns?",
+      "title": "Objection: “Massage feels like a luxury”",
+      "content": "That's fair. Massage can also be a way to care for ongoing stress and tension. Your notes say it helped before.\n\nWould one session feel manageable?",
       "sort_order": 101
     },
     {
       "step_key": "obj_living_with_it",
       "title": "Objection: I’ve just been living with the tension",
-      "content": "I understand, and you can get used to it, but I know how much better you felt when that tension was gone. Coming back in is the easiest way to get back to feeling loose again.\n\nConfirm and continue: Does that make sense? (Wait for a fast yes.) Do you have any other questions or concerns?",
+      "content": "I understand. It's easy to get used to tension. A massage gives us a chance to work on what's bothering you.\n\nAre you open to trying one visit?",
       "sort_order": 102
     },
     {
       "step_key": "obj_think",
-      "title": "Objection: I need to think about it",
-      "content": "That's completely fair, {{contact_first_name}}. Can I ask what part you'd want to think over? Sometimes it's the cost, sometimes the timing, and sometimes people just want to be sure it's worth coming in, which one is closest for you?\n\n(Listen, their answer usually points to one of the other buttons below. If it stays general, keep going.)\n\nHonestly, coming in is really just information. {{rec_pronoun_cap}} takes a look, you find out exactly what's going on with {{main_concern}}, and then you get to decide with real answers instead of wondering. And if we can't help you, we'll tell you that too.\n\nConfirm and continue: Does that make sense? (Wait for a fast yes.) Do you have any other questions or concerns?",
+      "title": "Objection: “I need to think”",
+      "content": "That's fair, {{contact_first_name}}. What part would you like to think over?\n\n(Listen. Tap another objection if they name one.)\n\nYou can start with one massage and decide what feels right afterward.\n\nDoes that make it easier?",
       "sort_order": 130
     },
     {
       "step_key": "obj_send_info",
-      "title": "Objection: Just send me information",
-      "content": "I'd be glad to get you some information, {{contact_first_name}}. The one thing I'd say is that a flyer or a link can only tell you so much. It can't actually look at what's going on with {{main_concern}} for you specifically. That's really what the visit is for: {{rec_pronoun}} takes a look and you get answers that apply to you, not just general information. So let me get you on the schedule first, and you'll have real answers to go on.\n\nConfirm and continue: Does that make sense? (Wait for a fast yes.) Do you have any other questions or concerns?",
+      "title": "Objection: “Send me information”",
+      "content": "I'd be glad to send information, {{contact_first_name}}. A massage is adjusted to your tension and comfort. A quick conversation cannot show exactly what will suit you.\n\nCan we also hold a time for you?",
       "sort_order": 131
     }
   ],
   "choices": [
     {
       "from_step_key": "bridge_no",
-      "label": "They’re okay to move forward",
+      "label": "“I’m okay moving forward”",
       "to_step_key": "recommendation",
       "variant": "positive",
       "sort_order": 0
     },
     {
       "from_step_key": "bridge_no",
-      "label": "Another reason: dig deeper",
+      "label": "Another concern came up",
       "to_step_key": "uncover",
       "variant": "caution",
       "sort_order": 1
     },
     {
       "from_step_key": "cadence_close",
-      "label": "They picked a time: one more thing (bonus question)",
+      "label": "They picked a time",
       "to_step_key": "focus_areas_bonus",
       "variant": "positive",
       "sort_order": 0
     },
     {
       "from_step_key": "cadence_close",
-      "label": "Hesitant or soft no: uncover the real concern",
+      "label": "Hesitant or soft no",
       "to_step_key": "uncover",
       "variant": "caution",
       "sort_order": 1
     },
     {
       "from_step_key": "comeback_close",
-      "label": "They picked a time: one more thing (bonus question)",
+      "label": "They picked a time",
       "to_step_key": "focus_areas_bonus",
       "variant": "positive",
       "sort_order": 0
     },
     {
       "from_step_key": "comeback_close",
-      "label": "Hesitant or soft no: uncover the real concern",
+      "label": "Hesitant or soft no",
       "to_step_key": "uncover",
       "variant": "caution",
       "sort_order": 1
     },
     {
       "from_step_key": "digging_in",
-      "label": "The questions uncovered something beyond the tension",
+      "label": "They named another concern",
       "to_step_key": "making_it_real",
       "variant": "default",
       "sort_order": 0
     },
     {
       "from_step_key": "digging_in",
-      "label": "Getting loose again is the whole story: go to the close",
+      "label": "Only the returning tension",
       "to_step_key": "comeback_close",
       "variant": "positive",
       "sort_order": 1
     },
     {
       "from_step_key": "digging_in_still",
-      "label": "The questions uncovered something: they named a concern",
+      "label": "They named a concern",
       "to_step_key": "making_it_real",
       "variant": "default",
       "sort_order": 0
     },
     {
       "from_step_key": "digging_in_still",
-      "label": "Nothing surfaced: protect the rhythm",
+      "label": "Nothing is bothering them",
       "to_step_key": "cadence_close",
       "variant": "positive",
       "sort_order": 1
     },
     {
       "from_step_key": "making_it_real",
-      "label": "You’ve responded with empathy: ask the Magic Question",
+      "label": "Answers reviewed",
       "to_step_key": "review",
       "variant": "default",
       "sort_order": 0
     },
     {
       "from_step_key": "obj_fell_out_habit",
-      "label": "Resolved: re-ask the scheduling question",
+      "label": "Concern resolved",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 1
@@ -227,7 +227,7 @@
     },
     {
       "from_step_key": "obj_living_with_it",
-      "label": "Resolved: re-ask the scheduling question",
+      "label": "Concern resolved",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0
@@ -241,7 +241,7 @@
     },
     {
       "from_step_key": "obj_luxury",
-      "label": "Resolved: re-ask the scheduling question",
+      "label": "Concern resolved",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 1
@@ -276,42 +276,42 @@
     },
     {
       "from_step_key": "recommendation",
-      "label": "\"Sounds reasonable\". Go to scheduling",
+      "label": "“Yes, that sounds reasonable”",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0
     },
     {
       "from_step_key": "recommendation",
-      "label": "Hesitant or soft no: uncover the real concern",
+      "label": "Hesitant or soft no",
       "to_step_key": "uncover",
       "variant": "caution",
       "sort_order": 1
     },
     {
       "from_step_key": "resp_coming_back",
-      "label": "Continue: update their file",
+      "label": "They agreed to continue",
       "to_step_key": "transition",
       "variant": "default",
       "sort_order": 0
     },
     {
       "from_step_key": "resp_doing_great",
-      "label": "Continue: update their file",
+      "label": "They agreed to continue",
       "to_step_key": "transition_still",
       "variant": "default",
       "sort_order": 0
     },
     {
       "from_step_key": "resp_fully_back",
-      "label": "Continue: update their file",
+      "label": "They agreed to continue",
       "to_step_key": "transition",
       "variant": "default",
       "sort_order": 0
     },
     {
       "from_step_key": "review",
-      "label": "They said yes: magic question",
+      "label": "“Yes, that’s right”",
       "to_step_key": "recommendation",
       "variant": "positive",
       "sort_order": 0
@@ -325,21 +325,21 @@
     },
     {
       "from_step_key": "transition",
-      "label": "They said okay: start the questions",
+      "label": "“Yes, that’s okay”",
       "to_step_key": "digging_in",
       "variant": "default",
       "sort_order": 0
     },
     {
       "from_step_key": "transition_still",
-      "label": "They said okay: start the questions",
+      "label": "“Yes, that’s okay”",
       "to_step_key": "digging_in_still",
       "variant": "default",
       "sort_order": 0
     },
     {
       "from_step_key": "uncover",
-      "label": "They’re ready: schedule",
+      "label": "“I’m ready to schedule”",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0
@@ -367,7 +367,7 @@
     },
     {
       "from_step_key": "uncover",
-      "label": "Cost",
+      "label": "Cost or insurance",
       "to_step_key": "obj_cost",
       "variant": "objection",
       "sort_order": 4
