@@ -9,121 +9,121 @@
     {
       "step_key": "opening_question",
       "title": "The Opening Question",
-      "content": "So {{contact_first_name}}, how have things been going since you had your teeth whitening done with us? Is your smile still looking bright and white and you're loving it, has a little staining started to creep back, or are you pretty much back to where you were before you started with us?\n\n(This question has only three possible answers. Click the one you hear.)",
+      "content": "So {{contact_first_name}}, how have things been since your whitening with us? I usually hear one of three things. Still bright and white, a little staining coming back, or pretty much back to how it was. Which one is closest for you?\n\n(Only three answers. Tap the one you hear.)",
       "sort_order": 1
     },
     {
       "step_key": "resp_doing_great",
-      "title": "Still Bright: Celebrate the Win",
-      "content": "I love hearing that, {{contact_first_name}}. That’s exactly what we want. There’s nothing like catching your smile in a photo and actually loving it.\n\nDo you remember how much it bothered you before? Holding back in pictures, noticing it every time you looked in the mirror? (Let them enjoy the moment. This is their win.)\n\n(Do not pitch anything yet. The file update comes next, and the close follows if nothing else surfaces.)",
+      "title": "Still Bright",
+      "content": "That's great to hear, {{contact_first_name}}. Your notes say the color was really bothering you before we treated it. Is it nice to catch your smile in a photo and like it?\n\n(Let them answer. This is their win.)\n\n(Do not offer anything yet. Update the file first.)",
       "sort_order": 2
     },
     {
       "step_key": "resp_coming_back",
-      "title": "Starting to Dull: Normalize, Then Update the File",
-      "content": "{{contact_first_name}}, that is completely normal, honestly, you’re right on track. Everyday life re-stains teeth for everyone: the morning coffee, the tea, the glass of wine with dinner. It has nothing to do with the whitening not working. It worked beautifully. It’s just that life keeps happening to your teeth.\n\nI remember how much you loved your results when you were in. (Let them respond. Be warm, no alarm. This is routine, not a problem.)\n\n(Do not pitch anything yet. The file update comes next, and the close follows if nothing else surfaces.)",
+      "title": "A Little Staining Coming Back",
+      "content": "That happens, {{contact_first_name}}, and you're right on track. Everyday life stains teeth for everyone. Coffee, tea, and wine all add a little over time. It's not the whitening failing. Your notes say you were really happy with the results. Does that sound right?\n\n(Let them confirm. Stay warm. This is routine, not a problem.)\n\n(Do not offer anything yet. Update the file first.)",
       "sort_order": 3
     },
     {
       "step_key": "resp_fully_back",
-      "title": "Back to Where It Was: Warm Empathy, Then Update the File",
-      "content": "{{contact_first_name}}, I completely understand. Staining is cumulative: every coffee, every tea, every glass of wine adds a little, and after enough time it settles back in. It’s completely normal, and it is very easy to fix.\n\nI remember how great your smile looked and how happy you were when you saw the results. (Let them respond. Be warm. If they express frustration about it coming back, reassure: that’s just how teeth work for everyone, and it has nothing to do with anything they did wrong.)\n\n(Do not pitch anything yet. The file update comes next, and the close follows if nothing else surfaces.)",
+      "title": "Pretty Much Back to Before",
+      "content": "I understand, {{contact_first_name}}, and please don't feel bad. Staining builds up. Every coffee and every glass of wine adds a little, and after enough time it settles back in. That's how teeth work for everyone, and it's easy to fix. Your notes say you were really happy with the results. What kept you from coming back in?\n\n(Let them answer. Stay warm. It's nothing they did wrong.)\n\n(Do not offer anything yet. Update the file first.)",
       "sort_order": 4
     },
     {
       "step_key": "sensitivity_bonus",
-      "title": "One More Thing: The Sensitivity Question",
-      "content": "Perfect, you’re all set for (day) at (time).\n\n(If you already covered sensitivity during the file update, skip the question, just confirm the appointment warmly and end the call, noting any sensitivity on their file.)\n\nOh, one quick thing while I have you, {{contact_first_name}}, because it makes a real difference in how comfortable your visit is: have you noticed any sensitivity to hot or cold, with your coffee, ice water, that kind of thing?\n\nIf YES: I’m really glad you told me. That’s super common, and there’s a lot we can do about it. We’ll plan your visit around it: a desensitizing treatment beforehand makes the whole experience much more comfortable. I’ll make a note on your file so {{rec_pronoun}} can take care of that when you’re in.\n\nIf NO: Perfect, that makes everything easy. We’ll see you (day) at (time), {{contact_first_name}}. We can’t wait to see that smile!\n\n(Either way, the call ends warm, with the appointment confirmed.)",
+      "title": "One More Thing: Sensitivity",
+      "content": "Perfect, you're all set for (day) at (time).\n\n(If you already asked about sensitivity during the file update, skip the question. Confirm the appointment and end the call.)\n\nOne quick thing while I have you, {{contact_first_name}}. Have you noticed any sensitivity to hot or cold, like with coffee or ice water?\n\n(Let them answer.)\n\n(If yes, read the next line.)\n\nI'm glad you told me. That's common, and there's a lot we can do about it. I'll make a note so {{provider_name}} can plan your visit around it and keep it comfortable.\n\n(If no, read the next line.)\n\nPerfect, that makes everything easy. We'll see you (day) at (time), {{contact_first_name}}. Have a great day.\n\n(Either way, end the call with the appointment confirmed.)",
       "sort_order": 5
     },
     {
       "step_key": "transition_still",
-      "title": "The Transition: Update the File",
-      "content": "Now {{contact_first_name}}, while I have you on the phone, I’d like to ask you a few quick questions so we get your file completely up to date. Is that okay?\n\n(Wait for the yes before starting the questions.)",
+      "title": "Ask Permission for the Questions",
+      "content": "{{contact_first_name}}, I'm updating your file anyway. Can I ask you a few quick questions so it's up to date?\n\n(Wait for the yes.)",
       "sort_order": 6
     },
     {
       "step_key": "transition",
-      "title": "The Transition: Update the File",
-      "content": "Now {{contact_first_name}}, while I have you on the phone, I’d like to ask you a few quick questions so we get your file completely up to date. Is that okay?\n\n(Wait for the yes before starting the questions.)",
+      "title": "Ask Permission for the Questions",
+      "content": "{{contact_first_name}}, we'll come back to the staining in a moment. First, can I ask you a few quick questions so your file is up to date?\n\n(Wait for the yes.)",
       "sort_order": 7
     },
     {
       "step_key": "digging_in_still",
-      "title": "The Six Questions: Update the File",
-      "content": "(Ask these in order. Critical: write down everything they mention. You’ll read it back before the recommendation. Never give dental advice on the call.)\n\nNow, you mentioned your smile is still looking bright. I love hearing that. One thing I’ll ask, just because staining is so sneaky: is it still as bright as day one, or have you noticed even a shade of dulling, maybe in certain light or in photos?\n\nHow about the daily stainers? Coffee, tea, red wine? Still enjoying them the same as always? (No judgment. We just note it on the file so we know what your smile is up against.)\n\nHave you noticed any sensitivity to hot or cold, with your coffee, ice water, that kind of thing?\n\nBeyond the brightness, is there anything else about your smile you’ve ever wondered about or wished were different? Anything you’d want a professional’s opinion on?\n\nAnything coming up on the calendar, a wedding, a reunion, photos, a big interview, that you’d want your smile camera-ready for?\n\nLast one, and it’s my favorite. If you could wave a wand and change just one thing about your smile, no judgment, what would it be?\n\n(If they mentioned anything at all, read it back and click the first button. If truly nothing surfaced, fall through to the stay-ahead close. That’s still a great call.)",
+      "title": "The Questions: Update the File",
+      "content": "(Write down everything they mention. You'll recap it in a moment. Do not give dental advice on the call.)\n\nFirst, the brightness. Is it still as bright as day one, or have you noticed a little dulling in photos?\n\nHow about coffee, tea, or red wine, still enjoying those about the same?\n\nAny sensitivity to hot or cold?\n\nIs there anything else about your smile you've wished were different?\n\nAny big event coming up you'd want your smile ready for?\n\n(Recap what you wrote down, then ask:)\n\n{{contact_first_name}}, of those, which one would you most like to take care of?\n\n(Tap their answer below. If nothing came up, that's still a good call. Use the second button.)",
       "sort_order": 8
     },
     {
       "step_key": "digging_in",
-      "title": "The Six Questions: Update the File",
-      "content": "(Ask these in order. Critical: write down everything they mention. You’ll read it back before the recommendation. Never give dental advice on the call.)\n\nYou mentioned some staining has come back. When did you start noticing it, and is it everywhere or mostly in certain spots?\n\nHow about the daily stainers? Coffee, tea, red wine? Still enjoying them the same as always? (No judgment. We just note it on the file so we know what your smile is up against.)\n\nHave you noticed any sensitivity to hot or cold, with your coffee, ice water, that kind of thing?\n\nBeyond the brightness, is there anything else about your smile you’ve ever wondered about or wished were different? Anything you’d want a professional’s opinion on?\n\nAnything coming up on the calendar, a wedding, a reunion, photos, a big interview, that you’d want your smile camera-ready for?\n\nLast one, and it’s my favorite. If you could wave a wand and change just one thing about your smile, no judgment, what would it be?\n\n(If they mentioned anything beyond the staining itself, read it back and click the first button. If getting the brightness back is the whole story, fall through to the close.)",
+      "title": "The Questions: Update the File",
+      "content": "(Write down everything they mention. You'll recap it in a moment. Do not give dental advice on the call.)\n\nFirst, the staining. When did you start noticing it?\n\nHow about coffee, tea, or red wine, still enjoying those about the same?\n\nAny sensitivity to hot or cold?\n\nIs there anything else about your smile you've wished were different?\n\nAny big event coming up you'd want your smile ready for?\n\n(Recap what you wrote down, including the staining, then ask:)\n\n{{contact_first_name}}, between the staining and anything else you mentioned, which one would you most like to take care of?\n\n(Tap their answer below. If getting the brightness back is the whole story, use the second button.)",
       "sort_order": 9
     },
     {
       "step_key": "review",
-      "title": "The Review & Bridge to Emotion",
-      "content": "{{contact_first_name}}, let me make sure I've got this right. (Recap what they told you: how long it's been on your mind, how often you notice it, and how it's been affecting them.) Did I get that right?\n\nAnd it sounds like what you'd really love is to feel good every time you catch your reflection, not to think twice about it, is that fair to say?\n\n(Forward-looking, warm, never shaming. About 95% say yes. That yes is the moment.)",
+      "title": "The Review",
+      "content": "{{contact_first_name}}, let me make sure I have this right.\n\n(Recap what they told you: how long, how often, how it affects them.)\n\nDid I get that right?\n\nAnd it sounds like you'd like to feel good every time you catch your smile in a photo. Is that fair to say?\n\n(Most people say yes. Tap what you hear.)",
       "sort_order": 9
     },
     {
       "step_key": "making_it_real",
       "title": "Making It Real",
-      "content": "(Take the concern they named and make it present with three questions, in order. Write down their answers. You’ll use them in the next section.)\n\nHow long has that been on your mind? Just recently, a few months, or has it been bugging you for a while now?\n\nHow often do you notice it? Every time you look in the mirror, every photo, or just now and then?\n\nAnd the last thing I’d like to ask is how it affects you. When you notice it, what does it do? Do you hold back in photos, cover your smile, think about it in conversations? (Let them open up. Do not rush.)\n\nThen respond with empathy: Thank you for sharing that. It makes complete sense, and that is exactly the kind of thing {{rec_pronoun}} help people with every single day.",
+      "content": "{{contact_first_name}}, I'd like to ask a few quick questions about what you just told me. It'll only take a minute.\n\n(Ask these three questions in order. Pause after each and let them answer.)\n\nHow long has that been on your mind?\n\n(Let them answer. Repeat it back.)\n\nHow often do you notice it, here and there or pretty much every photo?\n\n(Let them answer.)\n\nWhen you notice it, how does it change things, like holding back in photos or covering your smile?\n\n(Let them open up. Do not rush.)\n\nThank you for sharing that. It makes sense, and it's something we help people with all the time.",
       "sort_order": 10
     },
     {
       "step_key": "bridge_no",
-      "title": "They Hesitate: Uncover Why",
-      "content": "{{contact_first_name}}, help me understand. What's holding you back from coming in to take a look? Is it the timing, or is there something else on your mind?\n\n(Ask this easygoing and curious, not pushy. You're simply trying to understand what's getting in the way so you can help. Then stop and let them tell you.)\n\nWhat are your thoughts about that?",
+      "title": "They Hesitate: Find Out Why",
+      "content": "{{contact_first_name}}, I don't want to assume anything. Is it the timing, or is something else holding you back?\n\n(Stay easy about it. No pressure. Let them answer.)",
       "sort_order": 11
     },
     {
       "step_key": "recommendation",
-      "title": "The Magic Question & Recommendation",
-      "content": "{{contact_first_name}}, it sounds like it might be worth having {{rec_obj}} take a look at that. Can I make a recommendation?\n\n(Wait for yes.)\n\nMy recommendation is that we get you back in so {{rec_pronoun}} can take a look at what you just told me about and see if there’s something {{rec_pronoun}} can do to take care of it for you. And I’ll tell you the same thing I tell everyone: if {{rec_pronoun}} think there’s something {{rec_pronoun}} can do to help you, {{rec_pronoun}}’ll let you know, and {{rec_pronoun}}’d be honored if you let {{rec_obj}}. And if for some reason {{rec_pronoun}} don’t think it’s the right fit, {{rec_pronoun}}’ll tell you that too, because the last thing {{rec_pronoun}} want to do is waste your time or your money. Does that sound reasonable?\n\n(Ask “does that sound reasonable”, never “does that sound good.” Click what you hear next.)",
+      "title": "The Recommendation",
+      "content": "{{contact_first_name}}, it sounds like that's worth a look. Can I make a recommendation?\n\n(Wait for the yes.)\n\nMy recommendation is that we get you back in so {{provider_name}} can take a look at that. If we can help, we'll tell you. If it's not the right fit, we'll tell you that too. Does that sound reasonable?\n\n(Say \"does that sound reasonable\", not \"does that sound good\". Tap what you hear.)",
       "sort_order": 11
     },
     {
       "step_key": "cadence_close",
-      "title": "Nothing Surfaced: Stay Ahead of It Close",
-      "content": "{{contact_first_name}}, I’m really glad your smile is still looking bright. That’s exactly what we like to hear.\n\nNow, there is one thing I want to mention before I let you go. Here’s the sneaky thing about staining. It creeps back so gradually you never see it happening. The coffee, the tea, the red wine. Day by day it dulls things just a shade at a time, and because you see your own smile every day, you’re always the last one to notice. Usually the first time people realize it is that moment of looking at a photo and wondering where the brightness went. Does that make sense?\n\n(Wait for the yes. If they hesitate, use the button below to uncover the real concern.)\n\n{{contact_first_name}}, can I make a recommendation? (Wait for the yes.)\n\nMy recommendation is we get you in for a quick touch-up. That way you stay ahead of the staining instead of chasing it. Does that sound reasonable?\n\n(Wait for the yes.)\n\nOkay, let’s find you a time. I have (day) at (time) or (day) at (time). Which is better for you?",
+      "title": "Nothing Found: Stay Ahead of It",
+      "content": "{{contact_first_name}}, I'm glad your smile is still looking bright.\n\nOne thing before I let you go. Staining comes back so slowly that you never see it happening. Coffee, tea, and wine dull things a shade at a time. Because you see your own smile every day, you're usually the last one to notice. Does that make sense?\n\n(Wait for the yes. If they hesitate, use the second button.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nMy recommendation is that we get you in for a quick touch-up. That way you stay ahead of the staining instead of chasing it. Does that sound reasonable?\n\n(Wait for the yes.)\n\nOkay, let's find you a time. I have (day) at (time) or (day) at (time). Which is better for you?",
       "sort_order": 12
     },
     {
       "step_key": "comeback_close",
-      "title": "Getting the Brightness Back Is the Story: The Close",
-      "content": "{{contact_first_name}}, here’s something most people don’t realize: the whitening you did before is still working for you underneath. What’s settled in since is newer surface stain sitting on top of it, and newer stain lifts a lot easier than years of buildup. So getting your brightness back is a much smaller job than it was the first time around. Does that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation? (Wait for the yes.)\n\nMy recommendation is we get you in for that touch-up now. Getting back to that bright smile you loved is a single visit away. Does that sound reasonable?\n\n(Wait for the yes.)\n\nOkay, let’s get you back on the books. I have (day) at (time) or (day) at (time). Which is better for you?",
+      "title": "Brightness Is the Whole Story: The Close",
+      "content": "{{contact_first_name}}, the nice thing is the whitening you did before is still working underneath. What's settled in since is newer surface stain, and newer stain lifts much easier than years of buildup. So getting the brightness back is a smaller job than the first time. Does that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nMy recommendation is that we get you in for that touch-up now. Getting back to that bright smile is one visit away. Does that sound reasonable?\n\n(Wait for the yes.)\n\nOkay, let's get you back on the books. I have (day) at (time) or (day) at (time). Which is better for you?",
       "sort_order": 13
     },
     {
       "step_key": "obj_last_longer",
-      "title": "Objection: I thought it would last longer",
-      "content": "I completely understand, and that's a great point. Whitening looks amazing but teeth naturally restain over time with coffee, wine, and everyday foods. That's exactly why coming in makes sense, so {{rec_pronoun}} can take a look and talk through the best way to get your smile bright again and help it last.\n\nConfirm and continue: Does that make sense? (Wait for a fast yes.) Do you have any other questions or concerns?",
+      "title": "Objection: “I thought it would last longer”",
+      "content": "That's a fair thing to bring up. Whitening looks great, but teeth pick up stain again over time from coffee, wine, and everyday foods. That's why coming in makes sense. {{provider_name}} can talk through how to get it bright again and help it last.\n\nDoes that make sense?\n\n(Wait for the yes.)",
       "sort_order": 100
     },
     {
       "step_key": "obj_embarrassed",
-      "title": "Objection: I’m embarrassed it stained back up",
-      "content": "Please don't be. Staining is cumulative; every coffee, tea, and glass of wine adds a little over time, and it's exactly why we reach out, with no judgment at all. {{rec_pronoun_cap}}'d simply love to help you get your smile back to where it was.\n\nConfirm and continue: Does that make sense? (Wait for a fast yes.) Do you have any other questions or concerns?",
+      "title": "Objection: “I’m embarrassed it stained back up”",
+      "content": "Please don't be. Staining builds up for everyone, one coffee at a time. That's the reason we call, and there's no judgment at all. We'd just like to help you get your smile back to where it was.\n\nWould you be open to that?\n\n(Wait for the yes.)",
       "sort_order": 101
     },
     {
       "step_key": "obj_sensitivity",
       "title": "Objection: Sensitivity or a bad experience before",
-      "content": "I completely understand, and that's exactly the kind of thing {{rec_pronoun}}'ll want to talk through in person, so {{rec_pronoun}} can look at the whole picture and make it comfortable. (Never give dental advice on the call.)\n\nConfirm and continue: Does that make sense? (Wait for a fast yes.) Do you have any other questions or concerns?",
+      "content": "I'm glad you told me. That's the kind of thing {{provider_name}} will want to talk through in person. That way we can look at the whole picture and keep it comfortable.\n\n(Do not give dental advice on the call.)\n\nIs there anything else on your mind?",
       "sort_order": 102
     },
     {
       "step_key": "obj_think",
-      "title": "Objection: I need to think about it",
-      "content": "That's completely fair, {{contact_first_name}}. Can I ask what part you'd want to think over? Sometimes it's the cost, sometimes the timing, and sometimes people just want to be sure it's right for them, which one is closest for you?\n\n(Listen, their answer usually points to one of the other buttons below. If it stays general, keep going.)\n\nThe nice thing is, coming in is really just information. You'd get a look at what's possible and exactly what it would involve, and then you get to decide with real answers instead of wondering. No pressure either way.\n\nConfirm and continue: Does that make sense? (Wait for a fast yes.) Do you have any other questions or concerns?",
+      "title": "Objection: “I need to think about it”",
+      "content": "That's fair, {{contact_first_name}}. Can I ask what part you'd want to think over? Sometimes it's the cost, sometimes the timing, and sometimes people just want to be sure it's right for them.\n\n(Listen. Their answer usually points to one of the other objections. If it stays general, keep going.)\n\nComing in is really just information. You'd see what's possible and what it would involve, and then you decide with real answers. No pressure either way.\n\nDoes that help?",
       "sort_order": 130
     },
     {
       "step_key": "obj_send_info",
-      "title": "Objection: Just send me information",
-      "content": "I'd be glad to get you some information, {{contact_first_name}}. The one thing I'd say is that a link or a flyer can only tell you so much. It can't really show you what's possible for you specifically. That's what a quick visit is for: you get a look at your options and answers that actually apply to you. So let me get you on the schedule first, no pressure, and you'll have real answers to go on.\n\nConfirm and continue: Does that make sense? (Wait for a fast yes.) Do you have any other questions or concerns?",
+      "title": "Objection: “Just send me some info”",
+      "content": "I'd be glad to send you some information, {{contact_first_name}}. The one thing I'd say is that a flyer can only tell you so much. It can't show you what's possible for you specifically. That's what a quick visit is for. So let me get you on the schedule first, and then I'll send the information along.\n\nIs that okay?",
       "sort_order": 131
     }
   ],
@@ -144,35 +144,35 @@
     },
     {
       "from_step_key": "cadence_close",
-      "label": "They picked a time: one more thing (bonus question)",
+      "label": "They picked a time: ask the sensitivity question",
       "to_step_key": "sensitivity_bonus",
       "variant": "positive",
       "sort_order": 0
     },
     {
       "from_step_key": "cadence_close",
-      "label": "Hesitant or soft no: uncover the real concern",
+      "label": "Hesitant or soft no",
       "to_step_key": "uncover",
       "variant": "caution",
       "sort_order": 1
     },
     {
       "from_step_key": "comeback_close",
-      "label": "They picked a time: one more thing (bonus question)",
+      "label": "They picked a time: ask the sensitivity question",
       "to_step_key": "sensitivity_bonus",
       "variant": "positive",
       "sort_order": 0
     },
     {
       "from_step_key": "comeback_close",
-      "label": "Hesitant or soft no: uncover the real concern",
+      "label": "Hesitant or soft no",
       "to_step_key": "uncover",
       "variant": "caution",
       "sort_order": 1
     },
     {
       "from_step_key": "digging_in",
-      "label": "The questions uncovered something beyond the staining",
+      "label": "They named something beyond the staining",
       "to_step_key": "making_it_real",
       "variant": "default",
       "sort_order": 0
@@ -186,28 +186,28 @@
     },
     {
       "from_step_key": "digging_in_still",
-      "label": "The questions uncovered something: they named a concern",
+      "label": "They named a concern",
       "to_step_key": "making_it_real",
       "variant": "default",
       "sort_order": 0
     },
     {
       "from_step_key": "digging_in_still",
-      "label": "Nothing surfaced: stay ahead of it",
+      "label": "Nothing found: stay ahead of it",
       "to_step_key": "cadence_close",
       "variant": "positive",
       "sort_order": 1
     },
     {
       "from_step_key": "making_it_real",
-      "label": "You’ve responded with empathy: ask the Magic Question",
+      "label": "Continue to the review",
       "to_step_key": "review",
       "variant": "default",
       "sort_order": 0
     },
     {
       "from_step_key": "obj_embarrassed",
-      "label": "Resolved: re-ask the scheduling question",
+      "label": "Resolved: back to scheduling",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0
@@ -221,7 +221,7 @@
     },
     {
       "from_step_key": "obj_last_longer",
-      "label": "Resolved: re-ask the scheduling question",
+      "label": "Resolved: back to scheduling",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 1
@@ -235,7 +235,7 @@
     },
     {
       "from_step_key": "obj_sensitivity",
-      "label": "Resolved: re-ask the scheduling question",
+      "label": "Resolved: back to scheduling",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0
@@ -256,28 +256,28 @@
     },
     {
       "from_step_key": "opening_question",
-      "label": "“Some staining has crept back”",
+      "label": "“A little staining is coming back”",
       "to_step_key": "resp_coming_back",
       "variant": "caution",
       "sort_order": 1
     },
     {
       "from_step_key": "opening_question",
-      "label": "“Pretty much back to where I was”",
+      "label": "“Pretty much back to how it was”",
       "to_step_key": "resp_fully_back",
       "variant": "negative",
       "sort_order": 2
     },
     {
       "from_step_key": "recommendation",
-      "label": "\"Sounds reasonable\". Go to scheduling",
+      "label": "“Yes, that sounds reasonable”",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0
     },
     {
       "from_step_key": "recommendation",
-      "label": "Hesitant or soft no: uncover the real concern",
+      "label": "Hesitant or soft no",
       "to_step_key": "uncover",
       "variant": "caution",
       "sort_order": 1
@@ -305,7 +305,7 @@
     },
     {
       "from_step_key": "review",
-      "label": "They said yes: magic question",
+      "label": "They said yes: make the recommendation",
       "to_step_key": "recommendation",
       "variant": "positive",
       "sort_order": 0
@@ -319,14 +319,14 @@
     },
     {
       "from_step_key": "transition",
-      "label": "They said okay: start the questions",
+      "label": "They said okay: ask the questions",
       "to_step_key": "digging_in",
       "variant": "default",
       "sort_order": 0
     },
     {
       "from_step_key": "transition_still",
-      "label": "They said okay: start the questions",
+      "label": "They said okay: ask the questions",
       "to_step_key": "digging_in_still",
       "variant": "default",
       "sort_order": 0

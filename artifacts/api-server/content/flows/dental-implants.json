@@ -9,97 +9,97 @@
     {
       "step_key": "opening_question",
       "title": "The Opening Question",
-      "content": "So {{contact_first_name}}, how have things been with your implant since we last saw you? Is everything still feeling rock solid and you’re chewing on it like a natural tooth, have you noticed anything a little off, like tenderness, bleeding when you brush, or food catching around it, or is something actively bothering you?\n\n(This question has only three possible answers. Click the one you hear.)",
+      "content": "So {{contact_first_name}}, how has the implant been since we last saw you? I usually hear one of three things. Rock solid, something feels a little off, or something is bothering you. Which one is closest?\n\n(Only three answers. Tap the one you hear.)",
       "sort_order": 1
     },
     {
       "step_key": "resp_doing_great",
-      "title": "Rock Solid: Celebrate the Win",
-      "content": "I love hearing that, {{contact_first_name}}. That’s exactly what a well-placed implant should feel like: so natural you forget which tooth it is. That means the work, and the investment you made in it, is paying off every single day.\n\n(Celebrate genuinely, then move to the permission ask.)",
+      "title": "Rock Solid",
+      "content": "That's great to hear, {{contact_first_name}}. That's what a well-placed implant should feel like, so natural you forget which tooth it is. It means the work you invested in is paying off.\n\n(Let them enjoy it. Then ask permission for the questions.)",
       "sort_order": 2
     },
     {
       "step_key": "resp_coming_back",
-      "title": "Something a Little Off: Normalize, Then Update the File",
-      "content": "{{contact_first_name}}, I’m really glad you mentioned that. The gum tissue around an implant needs its own dedicated attention, and little changes like that can develop quietly, even for people who take great care of their teeth; it’s not anything you did wrong, and it’s exactly why we check in. The good news is that when these things are caught early, they’re usually simple to resolve.\n\nWhat do you think got in the way of coming in? Was it life getting busy, feeling like the implant didn’t need checkups anymore, or something else?\n\n(Let them answer. Do NOT try to book yet.)",
+      "title": "Something Feels a Little Off",
+      "content": "I'm glad you mentioned that, {{contact_first_name}}. The gum around an implant needs its own attention, and small changes can start without you noticing. It's not anything you did wrong, and it's the reason we check in. When these things are caught early, they're usually simple to take care of. What got in the way of coming in, life getting busy or feeling like the implant didn't need checkups?\n\n(Let them answer. Do not try to book yet.)",
       "sort_order": 3
     },
     {
       "step_key": "resp_fully_back",
-      "title": "Actively Bothering Them: Normalize, Then Update the File",
-      "content": "{{contact_first_name}}, I’m glad you told me, and please hear this: it’s not anything you did wrong. The gum and bone around an implant are living tissue, and these things can start quietly, even for people who take great care of their teeth. I remember how happy you were when it was finished, and the good news is that the sooner we look at it, the simpler it usually is to resolve.\n\nWhat do you think got in the way of coming in? Was it life getting busy, feeling like the implant didn’t need checkups anymore, or something else?\n\n(Let them answer, be warm and non-judgmental, and do NOT try to book yet.)",
+      "title": "Something Is Bothering Them",
+      "content": "I'm glad you told me, {{contact_first_name}}. It's not anything you did wrong. The gum and bone around an implant are living tissue. Things can start there without you noticing. The sooner we look, the simpler it usually is to take care of. What got in the way of coming in, life getting busy or feeling like the implant didn't need checkups?\n\n(Let them answer. Stay warm. Do not try to book yet.)",
       "sort_order": 4
     },
     {
       "step_key": "permission_questions",
       "title": "Ask Permission for the Questions",
-      "content": "{{contact_first_name}}, while I have you on the phone, I’d like to ask you a few quick questions so we get your file completely up to date. Is that okay?\n\n(Wait for the yes. Almost everyone says yes. You asked permission, and it’s their file. And remember why these questions matter: most people stop thinking about an implant the moment it feels solid. The questions are how you find what they’d never think to mention.)",
+      "content": "{{contact_first_name}}, I'm updating your file anyway. Can I ask you a few quick questions so it's up to date?\n\n(Wait for the yes. Most people stop thinking about an implant once it feels solid. The questions find what they'd never think to mention.)",
       "sort_order": 6
     },
     {
       "step_key": "transition",
-      "title": "The Transition: Acknowledge and Ask Permission",
-      "content": "Now {{contact_first_name}}, obviously I know you said you’ve noticed some changes, and we’re absolutely going to talk about that. But while I have you on the phone, I’d like to ask you a few additional questions so we get your file completely up to date. Is that okay?\n\n(Wait for the yes before starting the questions.)",
+      "title": "Ask Permission for the Questions",
+      "content": "{{contact_first_name}}, we'll come back to what you noticed in a moment. First, can I ask you a few quick questions so your file is up to date?\n\n(Wait for the yes.)",
       "sort_order": 6
     },
     {
       "step_key": "digging_in",
       "title": "The Questions: Update the File",
-      "content": "(Critical: write down everything they mention as you go. You’ll recap it in a moment.)\n\nFirst, around the implant itself. Any tenderness, swelling, or bleeding when you brush or floss near it? The gum around an implant is quiet. Small changes there matter more than most people realize.\n\nDo you ever notice food catching or packing around the implant, or does floss snag anywhere near it?\n\nHow does your bite feel on it? Are you chewing on that side like normal, or do you catch yourself favoring the other side?\n\nHow about the rest of your teeth? Any sensitivity, gum bleeding, or anything a dentist has flagged since we last saw you?\n\nWhen was your last professional cleaning? Here or anywhere?\n\nAnd how do you feel about your smile these days, still smiling with confidence in photos?\n\nFinally, any changes in your health or medications since we last saw you? Anything new your physician has you on?\n\n(Recap what you wrote down, including what they mentioned at the start of the call, then ask:)\n\nNow {{contact_first_name}}, between what you mentioned at the start and everything we just talked through. If you could completely fix just one of these and never think about it again, which one would you choose?\n\n(If what they mentioned at the start is the only thing on the list, that’s the answer. Continue to Making It Real with it.)",
+      "content": "(Write down everything they mention. You'll recap it in a moment.)\n\nFirst, around the implant. Any tenderness, swelling, or bleeding when you brush or floss near it?\n\nDo you ever notice food catching around it, or floss snagging nearby?\n\nHow does your bite feel on it, chewing on that side like normal?\n\nHow about the rest of your teeth, any sensitivity or gum bleeding?\n\nWhen was your last professional cleaning, here or anywhere?\n\nHow do you feel about your smile these days, still smiling in photos?\n\nFinally, any changes in your health or medications since we last saw you?\n\n(Recap what you wrote down, including what they mentioned at the start, then ask:)\n\n{{contact_first_name}}, between what you mentioned first and anything else, which one would you most like to take care of?\n\n(If what they mentioned at the start is the only thing on the list, that's the answer. Tap the button and continue.)",
       "sort_order": 7
     },
     {
       "step_key": "digging_in_still",
       "title": "The Questions: Update the File",
-      "content": "(Critical: write down everything they mention as you go. You’ll recap it in a moment.)\n\nFirst, around the implant itself. Any tenderness, swelling, or bleeding when you brush or floss near it? Even when everything feels solid, the gum around an implant is quiet. Small changes there matter more than most people realize.\n\nDo you ever notice food catching or packing around the implant, or does floss snag anywhere near it?\n\nHow does your bite feel on it? Chewing on that side like normal?\n\nHow about the rest of your teeth? Any sensitivity, gum bleeding, or anything a dentist has flagged since we last saw you?\n\nWhen was your last professional cleaning? Here or anywhere?\n\nAnd how do you feel about your smile these days, still smiling with confidence in photos?\n\nFinally, any changes in your health or medications since we last saw you? Anything new your physician has you on?\n\n(If they mentioned anything at all, recap what you wrote down, then ask:)\n\nNow {{contact_first_name}}, you just told me about those things. If you could completely fix just one of them and never think about it again, which one would you choose?",
+      "content": "(Write down everything they mention. You'll recap it in a moment.)\n\nFirst, around the implant. Any tenderness, swelling, or bleeding when you brush or floss near it?\n\nDo you ever notice food catching around it, or floss snagging nearby?\n\nHow does your bite feel on it, chewing on that side like normal?\n\nHow about the rest of your teeth, any sensitivity or gum bleeding?\n\nWhen was your last professional cleaning, here or anywhere?\n\nHow do you feel about your smile these days, still smiling in photos?\n\nFinally, any changes in your health or medications since we last saw you?\n\n(Recap what you wrote down, then ask:)\n\n{{contact_first_name}}, of those, which one would you most like to take care of?\n\n(Tap their answer below. If nothing came up, that's still a good call. Use the second button.)",
       "sort_order": 7
     },
     {
       "step_key": "making_it_real",
       "title": "Making It Real",
-      "content": "(Take the concern they named and make it present with three questions, in order.)\n\nHow long has that been going on or getting worse? A few weeks, a couple months?\n\nIs it here and there, or pretty much every day at this point?\n\nWhen it's bothering you, how does it affect your meals, your confidence, the things you like to do? (Let them open up. Do not rush.)\n\nThen respond with empathy: Thank you for sharing that, it makes complete sense, and that is exactly the kind of thing {{rec_pronoun}} help people with every single day.",
+      "content": "(Ask these three questions in order. Pause after each and let them answer.)\n\nHow long has that been going on, a few weeks or a couple of months?\n\n(Let them answer. Repeat it back.)\n\nIs it here and there, or pretty much every day at this point?\n\n(Let them answer.)\n\nWhen it's bothering you, how does it affect things, like meals or the things you like to do?\n\n(Let them open up. Do not rush.)\n\nThank you for sharing that. It makes sense, and it's something we help people with all the time.",
       "sort_order": 8
     },
     {
       "step_key": "recommendation",
-      "title": "The Magic Question & Recommendation",
-      "content": "{{contact_first_name}}, here’s what a quick implant health check does. {{rec_pronoun_cap}} take a look at the implant and the gum and bone holding it, give that area the dedicated attention a regular cleaning doesn’t always cover, and catch anything small before it ever has a chance to become something big. And if everything’s as solid as it feels, {{rec_pronoun}}’ll tell you that too, because the last thing {{rec_pronoun}} want to do is waste your time or your money. Does that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for yes.)\n\nBased on everything you’ve told me, my recommendation is that we get you in for that quick implant health check. Does that sound reasonable?\n\n(Ask \"does that sound reasonable\", never \"does that sound good.\" Click what you hear next.)",
+      "title": "The Recommendation",
+      "content": "{{contact_first_name}}, a quick implant health check does one thing. {{provider_name}} looks at the implant and the gum and bone holding it. That catches anything small before it becomes something big. If everything is as solid as it feels, we'll tell you that too. Does that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nMy recommendation is that we get you in for that quick implant health check. Does that sound reasonable?\n\n(Say \"does that sound reasonable\", not \"does that sound good\". Tap what you hear.)",
       "sort_order": 10
     },
     {
       "step_key": "bridge_no",
-      "title": "They Hesitate: Uncover Why",
-      "content": "{{contact_first_name}}, help me understand. What's holding you back from coming in to take a look? Is it the timing, or is there something else on your mind?\n\n(Ask this easygoing and curious, not pushy. You're simply trying to understand what's getting in the way so you can help. Then stop and let them tell you.)\n\nWhat are your thoughts about that?",
+      "title": "They Hesitate: Find Out Why",
+      "content": "{{contact_first_name}}, I don't want to assume anything. Is it the timing, or is something else holding you back?\n\n(Stay easy about it. No pressure. Let them answer.)",
       "sort_order": 11
     },
     {
       "step_key": "lapsed_commitment",
       "title": "Nothing Found: Protect the Investment",
-      "content": "{{contact_first_name}}, I’m glad everything is feeling solid, and we’re thrilled to hear it.\n\n(A moment ago they told you when their last professional cleaning was. Use that answer here instead of asking again. No judgment either way: once an implant feels natural, people stop thinking about it. That’s a sign the work was done well.)\n\n{{contact_first_name}}, here’s the thing about implants. The implant itself is built to last, but the gum and bone holding it are living tissue, and the early warning signs there are silent; you won’t feel them until they’ve had time to work. And even a regular cleaning doesn’t always include a dedicated look at the implant itself. A quick check confirms it’s as healthy as it feels, and protects the investment you made in it. Does that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nLet’s get you in for that quick check so it stays exactly the way it is. Does that sound reasonable?",
+      "content": "{{contact_first_name}}, I'm glad everything is feeling solid.\n\n(They already told you when their last cleaning was. Use that answer instead of asking again. No judgment either way.)\n\nOne thing before I let you go. The implant itself is built to last, but the gum and bone holding it are living tissue. The early warning signs there don't hurt, so you won't feel them until later. A regular cleaning doesn't always include a close look at the implant. A quick check confirms it's as healthy as it feels. Does that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you in for that quick check so it stays the way it is. Does that sound reasonable?",
       "sort_order": 16
     },
     {
       "step_key": "obj_permanent",
-      "title": "Objection: I thought implants were permanent",
-      "content": "{{contact_first_name}}, that’s a great question, and you’re half right. The implant itself is permanent; it’s the strongest thing in your mouth. But the gum and bone holding it are living tissue, and they need the same professional care your natural teeth do. Think of it like a great roof. The roof itself is solid for decades, but you still keep the gutters clear so water never gets a chance to work on it. The check is how we keep the permanent part permanent.\n\nConfirm and continue: Does that make sense? (Wait for the yes.) Okay, let’s find you a time. I have (day) at (time) or (day) at (time). Which is better for you?",
+      "title": "Objection: “I thought implants were permanent”",
+      "content": "{{contact_first_name}}, that's a fair question, and you're half right. The implant itself is permanent. The gum and bone holding it are living tissue, and they need the same care your natural teeth do. Think of a good roof. The roof lasts for decades, but you still keep the gutters clear. The check is how we keep the permanent part permanent.\n\nDoes that make sense?\n\n(Wait for the yes.)",
       "sort_order": 100
     },
     {
       "step_key": "obj_embarrassed",
-      "title": "Objection: Embarrassed they haven’t been in",
-      "content": "{{contact_first_name}}, please don’t be. There’s truly no judgment here. Once an implant feels solid, it’s the most natural thing in the world to stop thinking about it, honestly, that’s a sign the work was done well, not that you did anything wrong. It’s exactly why we check in. Let’s just get your file current and keep it feeling that way.\n\nConfirm and continue: Does that make sense? (Wait for the yes.) Okay, let’s find you a time. I have (day) at (time) or (day) at (time). Which is better for you?",
+      "title": "Objection: “I’m embarrassed I haven’t been in”",
+      "content": "{{contact_first_name}}, please don't be. There's no judgment here. Once an implant feels solid, it's natural to stop thinking about it. That's a sign the work was done well. It's the reason we check in. Let's just get your file current and keep it feeling that way.\n\nWould you be open to that?\n\n(Wait for the yes.)",
       "sort_order": 101
     },
     {
       "step_key": "obj_think",
-      "title": "Objection: I need to think about it",
-      "content": "That's completely fair, {{contact_first_name}}. Can I ask what part you'd want to think over? Sometimes it's the cost, sometimes the timing, and sometimes people just want to be sure it's the right move, which one is closest for you?\n\n(Listen, their answer usually points to one of the other buttons below. If it stays general, keep going.)\n\nThe nice thing is, coming in is really just information. You'd find out exactly what the options look like and what it would involve, and then you get to make the decision with real answers instead of wondering. And if it's not the right fit, we'll tell you that too.\n\nConfirm and continue: Does that make sense? (Wait for a fast yes.) Do you have any other questions or concerns?",
+      "title": "Objection: “I need to think about it”",
+      "content": "That's fair, {{contact_first_name}}. Can I ask what part you'd want to think over? Sometimes it's the cost, sometimes the timing, and sometimes people just want to be sure it's the right move.\n\n(Listen. Their answer usually points to one of the other objections. If it stays general, keep going.)\n\nComing in is really just information. You'd find out what the options look like and what it would involve, and then you decide with real answers. If it's not the right fit, we'll tell you that too.\n\nDoes that help?",
       "sort_order": 130
     },
     {
       "step_key": "obj_send_info",
-      "title": "Objection: Just send me information",
-      "content": "I'd be glad to get you some information, {{contact_first_name}}. The one thing I'd say is that a link or a flyer can only tell you so much. It can't look at your specific situation. That's really what the visit is for: you find out exactly what the options look like for you and get answers that apply to you. So let me get you on the schedule first, and you'll have real answers to go on.\n\nConfirm and continue: Does that make sense? (Wait for a fast yes.) Do you have any other questions or concerns?",
+      "title": "Objection: “Just send me some info”",
+      "content": "I'd be glad to send you some information, {{contact_first_name}}. The one thing I'd say is that a flyer can only tell you so much. It can't look at your implant. That's what the visit is for. So let me get you on the schedule first, and then I'll send the information along.\n\nIs that okay?",
       "sort_order": 131
     }
   ],
@@ -155,35 +155,35 @@
     },
     {
       "from_step_key": "digging_in",
-      "label": "Continue with what they chose",
+      "label": "They named a concern: continue",
       "to_step_key": "making_it_real",
       "variant": "positive",
       "sort_order": 0
     },
     {
       "from_step_key": "digging_in_still",
-      "label": "The questions uncovered something: they named their biggest issue",
+      "label": "They named a concern",
       "to_step_key": "making_it_real",
       "variant": "caution",
       "sort_order": 0
     },
     {
       "from_step_key": "digging_in_still",
-      "label": "Genuinely nothing: doing great across the board",
+      "label": "Nothing found: protect the investment",
       "to_step_key": "lapsed_commitment",
       "variant": "positive",
       "sort_order": 1
     },
     {
       "from_step_key": "lapsed_commitment",
-      "label": "Continue: schedule the implant health check",
+      "label": "They said yes: schedule the check",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0
     },
     {
       "from_step_key": "obj_embarrassed",
-      "label": "Resolved: re-ask the scheduling question",
+      "label": "Resolved: back to scheduling",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0
@@ -197,7 +197,7 @@
     },
     {
       "from_step_key": "obj_permanent",
-      "label": "Resolved: re-ask the scheduling question",
+      "label": "Resolved: back to scheduling",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0
@@ -211,7 +211,7 @@
     },
     {
       "from_step_key": "opening_question",
-      "label": "“Rock solid, everything feels great”",
+      "label": "“Rock solid”",
       "to_step_key": "resp_doing_great",
       "variant": "positive",
       "sort_order": 0
@@ -225,7 +225,7 @@
     },
     {
       "from_step_key": "opening_question",
-      "label": "“Something’s actively bothering me”",
+      "label": "“Something is bothering me”",
       "to_step_key": "resp_fully_back",
       "variant": "negative",
       "sort_order": 2
@@ -309,14 +309,14 @@
     },
     {
       "from_step_key": "resp_doing_great",
-      "label": "Celebrate: then ask permission for a few questions",
+      "label": "Ask permission for a few questions",
       "to_step_key": "permission_questions",
       "variant": "default",
       "sort_order": 0
     },
     {
       "from_step_key": "review",
-      "label": "They said yes: magic question",
+      "label": "They said yes: make the recommendation",
       "to_step_key": "recommendation",
       "variant": "positive",
       "sort_order": 0

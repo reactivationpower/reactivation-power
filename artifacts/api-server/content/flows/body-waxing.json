@@ -9,127 +9,127 @@
     {
       "step_key": "opening_question",
       "title": "The Opening Question",
-      "content": "So {{contact_first_name}}, how have things been going since your last waxing with us? Has the hair been slow coming back and you’re still feeling pretty smooth, has some of it started to creep back, or are you pretty much back to shaving and dealing with it the way you were before you started coming in?\n\n(This question has only three possible answers. Click the one you hear.)",
+      "content": "So {{contact_first_name}}, how have things been since your last wax with us? I usually hear one of three things. Still pretty smooth, some of it starting to come back, or pretty much back to shaving. Which one is closest for you?\n\n(Only three answers. Tap the one you hear.)",
       "sort_order": 1
     },
     {
       "step_key": "resp_doing_great",
-      "title": "Still Smooth: Celebrate the Win",
-      "content": "I love hearing that, {{contact_first_name}}. Your skin is really holding onto the results, and that’s the payoff of all those visits: the hair comes back slower, finer, and softer every time. There’s nothing like that smooth feeling lasting this long.\n\nDo you remember what it was like when you were coming in regularly? How the hair kept coming in finer and softer every time, how much longer you stayed smooth? (Let them enjoy the moment. This is their win.)\n\n(Do not pitch anything yet. The file update comes next, and the close follows if nothing else surfaces.)",
+      "title": "Still Smooth",
+      "content": "That's great to hear, {{contact_first_name}}. That's the payoff of regular visits. The hair comes in finer and slower every time. Is it nice to have it last this long?\n\n(Let them answer. This is their win.)\n\n(Do not offer anything yet. Update the file first.)",
       "sort_order": 2
     },
     {
       "step_key": "resp_coming_back",
-      "title": "Growth Coming Back: Normalize, Then Update the File",
-      "content": "{{contact_first_name}}, that’s completely normal. That’s just what hair does when the waxing rhythm gets interrupted. The good news is you haven’t lost everything: your skin remembers, and getting back on schedule brings that finer, sparser growth back faster than starting from scratch.\n\nI remember how much you loved staying ahead of it. (Let them respond. Be warm, no alarm. This is routine, not a problem.)\n\n(Do not pitch anything yet. The file update comes next, and the close follows if nothing else surfaces.)",
+      "title": "Some of It Coming Back",
+      "content": "That happens, {{contact_first_name}}. That's just what hair does when the waxing routine gets interrupted. The good news is you haven't lost the progress. Getting back on schedule brings that finer growth back faster than starting from scratch. Your notes say you were really happy staying ahead of it. Does that sound right?\n\n(Let them confirm. Stay warm. This is routine, not a problem.)\n\n(Do not offer anything yet. Update the file first.)",
       "sort_order": 3
     },
     {
       "step_key": "resp_fully_back",
-      "title": "Back to Shaving: Warm Empathy, Then Update the File",
-      "content": "{{contact_first_name}}, I completely understand. Life gets busy, and the razor is right there in the shower. Please don’t feel bad; you’d be amazed how many of my favorite clients have taken a razor detour and come back.\n\nDo you remember why you switched to waxing in the first place? The stubble by the end of the day, the razor burn, the ingrowns? (Let them respond. Chances are shaving has reminded them of all of it.)\n\n(Do not pitch anything yet. The file update comes next, and the close follows if nothing else surfaces.)",
+      "title": "Back to Shaving",
+      "content": "I understand, {{contact_first_name}}. Life gets busy, and the razor is right there in the shower. Please don't feel bad. A lot of our clients take a break and come back. What made you switch to waxing in the first place?\n\n(Let them answer. Shaving has probably reminded them of the stubble and the ingrowns.)\n\n(Do not offer anything yet. Update the file first.)",
       "sort_order": 4
     },
     {
       "step_key": "other_areas_bonus",
-      "title": "One More Thing: The Other Areas Question",
-      "content": "Perfect, you’re all set for (day) at (time).\n\n(If you already covered other areas during the file update, skip the question, just confirm the appointment warmly and end the call.)\n\nOh, one quick thing while I have you, {{contact_first_name}}: is there any other area you’ve been thinking about adding? Brows, lip, underarms, legs, back, anywhere you’re still shaving or plucking between visits?\n\nIf YES: Perfect, I’ll make a note on your file so we can fit it into the same visit if you’d like. It’s usually just a few extra minutes when we’re already in there, no commitment, we’ll talk it through when you’re in.\n\nIf NO: No problem at all. I just always ask, because it’s usually easier to add an area to a visit you’re already making. We’ll see you (day) at (time), {{contact_first_name}}. We can’t wait to see you!\n\n(Either way, the call ends warm, with the appointment confirmed.)",
+      "title": "One More Thing: Other Areas",
+      "content": "Perfect, you're all set for (day) at (time).\n\n(If you already covered other areas during the file update, skip the question. Confirm the appointment and end the call.)\n\nOne quick thing while I have you, {{contact_first_name}}. Is there another area you've thought about adding, anywhere you're still shaving or plucking between visits?\n\n(Let them answer.)\n\n(If yes, read the next line.)\n\nGreat, I'll make a note so we can fit it into the same visit if you'd like. It's usually just a few extra minutes. No commitment, we'll talk it through when you're in.\n\n(If no, read the next line.)\n\nNo problem. I always ask, because it's easier to add an area to a visit you're already making. We'll see you (day) at (time), {{contact_first_name}}. Have a great day.\n\n(Either way, end the call with the appointment confirmed.)",
       "sort_order": 5
     },
     {
       "step_key": "transition_still",
-      "title": "The Transition: Update the File",
-      "content": "Now {{contact_first_name}}, while I have you on the phone, I’d like to ask you a few quick questions so we get your file completely up to date. Is that okay?\n\n(Wait for the yes before starting the questions.)",
+      "title": "Ask Permission for the Questions",
+      "content": "{{contact_first_name}}, I'm updating your file anyway. Can I ask you a few quick questions so it's up to date?\n\n(Wait for the yes.)",
       "sort_order": 6
     },
     {
       "step_key": "transition",
-      "title": "The Transition: Update the File",
-      "content": "Now {{contact_first_name}}, while I have you on the phone, I’d like to ask you a few quick questions so we get your file completely up to date. Is that okay?\n\n(Wait for the yes before starting the questions.)",
+      "title": "Ask Permission for the Questions",
+      "content": "{{contact_first_name}}, we'll come back to getting you on the schedule in a moment. First, can I ask you a few quick questions so your file is up to date?\n\n(Wait for the yes.)",
       "sort_order": 7
     },
     {
       "step_key": "digging_in_still",
-      "title": "The Six Questions: Update the File",
-      "content": "(Ask these in order. Critical: write down everything they mention. You’ll read it back before the recommendation.)\n\nNow, you mentioned you’re still keeping up. I love hearing that. One thing I’ll ask: are you still on your regular four-to-six-week rhythm, or has the gap been stretching a little lately?\n\nHow’s your skin been doing between visits? Any irritation, ingrowns, or sensitivity anywhere?\n\nIs there any area you’re still shaving or plucking between visits? Brows, lip, underarms, legs, back, anywhere you’ve thought about adding?\n\nHave you ever been curious about any of the other services we offer, or seen something online or heard about something from a friend that you wished you could ask a professional about instead of the internet?\n\nAnything coming up on the calendar, a wedding, a vacation, a beach trip, photos, that you’d want to be completely smooth and ready for?\n\nLast one, and it’s my favorite. If you could wave a wand and change just one thing about your routine or your skin, no judgment, what would it be?\n\n(If they mentioned anything at all, read it back and click the first button. If truly nothing surfaced, fall through to the rhythm close. That’s still a great call.)",
+      "title": "The Questions: Update the File",
+      "content": "(Write down everything they mention. You'll recap it in a moment.)\n\nFirst, your routine. Are you still coming in every four to six weeks, or has the gap slipped a little?\n\nHow has your skin been between visits, any irritation or ingrowns?\n\nNext, a few spots people are often still shaving or plucking. Your brows?\n\nYour lip or anywhere else on your face?\n\nYour underarms?\n\nYour legs?\n\nYour back?\n\nIs there another service you've been curious about?\n\n(Recap what you wrote down, then ask:)\n\n{{contact_first_name}}, of those, which one would you most like to take care of?\n\n(Tap their answer below. If nothing came up, that's still a good call. Use the second button.)",
       "sort_order": 8
     },
     {
       "step_key": "digging_in",
-      "title": "The Six Questions: Update the File",
-      "content": "(Ask these in order. Critical: write down everything they mention. You’ll read it back before the recommendation.)\n\nYou mentioned some of it’s come back. When did the rhythm slip? Just recently, or has it been a while now?\n\nHow’s your skin been doing since? Any irritation, ingrowns, or sensitivity from shaving in between?\n\nIs there any area you’re still shaving or plucking? Brows, lip, underarms, legs, back, anywhere you’ve thought about adding?\n\nHave you ever been curious about any of the other services we offer, or seen something online or heard about something from a friend that you wished you could ask a professional about instead of the internet?\n\nAnything coming up on the calendar, a wedding, a vacation, a beach trip, photos, that you’d want to be completely smooth and ready for?\n\nLast one, and it’s my favorite. If you could wave a wand and change just one thing about your routine or your skin, no judgment, what would it be?\n\n(If they mentioned anything beyond getting back on the schedule, read it back and click the first button. If getting back on track is the whole story, fall through to the close.)",
+      "title": "The Questions: Update the File",
+      "content": "(Write down everything they mention. You'll recap it in a moment.)\n\nFirst, your routine slipped a little. When did that start?\n\nHow has your skin been since, any irritation or ingrowns from shaving?\n\nNext, a few spots people are often still shaving or plucking. Your brows?\n\nYour lip or anywhere else on your face?\n\nYour underarms?\n\nYour legs?\n\nYour back?\n\nIs there another service you've been curious about?\n\n(Recap what you wrote down, including the routine, then ask:)\n\n{{contact_first_name}}, between the schedule and anything else you mentioned, which one would you most like to take care of?\n\n(Tap their answer below. If getting back on schedule is the whole story, use the second button.)",
       "sort_order": 9
     },
     {
       "step_key": "review",
-      "title": "The Review & Bridge to Emotion",
-      "content": "{{contact_first_name}}, let me make sure I've got this right. (Recap what they told you: how long it's been going on, how often, and how it's been affecting them.) Did I get that right?\n\nAnd it sounds like you'd really just love to get back to that feeling of not having to think about it. Is that fair to say?\n\n(Warm, not pushy. About 95% say yes. That yes is the moment.)",
+      "title": "The Review",
+      "content": "{{contact_first_name}}, let me make sure I have this right.\n\n(Recap what they told you: how long, how often, how it affects them.)\n\nDid I get that right?\n\nAnd it sounds like you'd like to get back to not having to think about it. Is that fair to say?\n\n(Most people say yes. Tap what you hear.)",
       "sort_order": 9
     },
     {
       "step_key": "making_it_real",
       "title": "Making It Real",
-      "content": "{{contact_first_name}}, what I’d like to do now is ask you a few quick questions about {{main_concern}}, so I can get your file fully updated. It’ll only take a minute.\n\n(Take the concern they named and make it real with three questions, in order. Pause after each and let them fully answer.)\n\nHow long has that been on your mind? A few weeks, a couple months, longer?\n\n(Let them answer, then:) “[Repeat their answer back]? That’s a long time to have something quietly chipping away at how you feel about yourself. Would you agree that’s not really OK?”\n\nIs it something you notice here and there, pretty much every time you look in the mirror at this point, or maybe you’re feeling like the area needs to be taken care of again, regardless of if you’ve actually gotten around to it? (Let them answer. “That’s a lot.”)\n\nAnd the last thing I’d like to ask is how it affects you day to day. But first, do me a favor: think of a day you felt really good about how you looked, maybe an event, an outfit that worked, photos you actually liked. Now think of a day it really got to you. Do you have those two days in your head?\n\n(Wait for the yes. Then:) “On that harder day, how does it change things? What you wear, how comfortable you feel around people, at work, out with friends?” (Let them open up. Do not rush.)\n\nThen respond with empathy: Thank you for sharing that with me. It makes complete sense, and that’s exactly the kind of thing {{rec_pronoun}} help people with every single day.",
+      "content": "{{contact_first_name}}, I'd like to ask a few quick questions about {{main_concern}} so your file is up to date. It'll only take a minute.\n\n(Ask these three questions in order. Pause after each and let them answer.)\n\nHow long has that been on your mind?\n\n(Let them answer. Repeat it back.)\n\nThat's a long time to have something bothering you.\n\nIs it something you notice here and there, or pretty much every time you get ready?\n\n(Let them answer.)\n\nThink of a day you felt really good about how you looked. Now think of a day it really got to you. Do you have those two days in your head?\n\n(Wait for the yes.)\n\nOn that harder day, how does it change things, like what you wear or how you feel around people?\n\n(Let them open up. Do not rush.)\n\nThank you for sharing that. It makes sense, and it's something we help people with all the time.",
       "sort_order": 10
     },
     {
       "step_key": "bridge_no",
-      "title": "They Hesitate: Uncover Why",
-      "content": "{{contact_first_name}}, you did mention {{main_concern}} is something you'd like to feel better about. I don't want to assume anything. Is the timing just not right, or is there something else on your mind that's holding you back from taking a look?\n\n(Warm and easygoing, no pressure, and never restate the concern back at them. You're just trying to understand what's in the way. Then stop and let them answer.)\n\nWhat are your thoughts about that?",
+      "title": "They Hesitate: Find Out Why",
+      "content": "{{contact_first_name}}, you said {{main_concern}} is something you'd like to feel better about. I don't want to assume anything. Is it the timing, or is something else holding you back?\n\n(Stay easy about it. No pressure. Do not repeat the concern back at them. Let them answer.)",
       "sort_order": 11
     },
     {
       "step_key": "recommendation",
-      "title": "The Magic Question & Recommendation",
-      "content": "{{contact_first_name}}, it sounds to me like {{main_concern}} isn’t just a small thing. It may also be affecting how comfortable and confident you feel around the people in your life. Do you see how that could be the case?\n\n(Wait for their answer. If they say no or hesitate: “That’s completely fair, but it’s clearly been on your mind, and that’s reason enough.” Then continue.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for yes.)\n\nMy recommendation is that we get you set up with an appointment so {{rec_pronoun}} can take a look and see if there’s something {{rec_pronoun}} can do to help you with {{main_concern}}. If {{rec_pronoun}} can help you, {{rec_pronoun}}’ll let you know, and {{rec_pronoun}}’d be honored if you let {{rec_obj}}. And if {{rec_pronoun}} don’t think it’s the right fit, {{rec_pronoun}}’ll let you know that as well, because {{rec_pronoun}}’re not here to waste anybody’s time or money. Does that sound reasonable?",
+      "title": "The Recommendation",
+      "content": "{{contact_first_name}}, it sounds like {{main_concern}} isn't just a small thing. It may be affecting how comfortable you feel around people. Do you see how that could be the case?\n\n(Wait for the answer. If they hesitate, say \"That's fair. It's clearly been on your mind, and that's reason enough.\" Then continue.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nMy recommendation is that we get you in so {{provider_name}} can take a look and talk through {{main_concern}}. If we can help, we'll tell you. If it's not the right fit, we'll tell you that too. Does that sound reasonable?\n\n(Tap what you hear.)",
       "sort_order": 11
     },
     {
       "step_key": "cadence_close",
-      "title": "Nothing Surfaced: Protect the Rhythm Close",
-      "content": "{{contact_first_name}}, I’m really glad everything’s still feeling smooth. That’s exactly what we like to hear.\n\nNow, there is one thing I want to mention before I let you go. Waxing works on a rhythm, every four to six weeks, right when the new growth is the perfect length. Staying on that rhythm is what keeps the hair coming in finer and sparser, and it’s honestly what makes each visit more comfortable than the last. Once the rhythm breaks, the hair goes back to coming in coarse, and all that progress starts to unwind. Does that make sense?\n\n(Wait for the yes. If they hesitate, use the button below to uncover the real concern.)\n\n{{contact_first_name}}, can I make a recommendation? (Wait for the yes.)\n\nMy recommendation is we get you back on that four-to-six-week rhythm starting now. That way you never lose the progress you’ve made, and every visit stays as comfortable as the last. Does that sound reasonable?\n\n(Wait for the yes.)\n\nOkay, let’s find you a time. I have (day) at (time) or (day) at (time). Which is better for you?",
+      "title": "Nothing Found: Protect the Routine",
+      "content": "{{contact_first_name}}, I'm glad everything is still feeling smooth.\n\nOne thing before I let you go. Waxing works best every four to six weeks, right when the new growth is the perfect length. Staying on that schedule keeps the hair coming in finer, and each visit gets more comfortable. Once the gap stretches, the hair goes back to coming in coarse. Does that make sense?\n\n(Wait for the yes. If they hesitate, use the second button.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nMy recommendation is that we get your next visit on the books now. That way you never lose the progress you've made. Does that sound reasonable?\n\n(Wait for the yes.)\n\nOkay, let's find you a time. I have (day) at (time) or (day) at (time). Which is better for you?",
       "sort_order": 12
     },
     {
       "step_key": "comeback_close",
-      "title": "Getting Back Is the Story: The Close",
-      "content": "{{contact_first_name}}, thank you for that. Your file is completely up to date.\n\nAnd here’s the nice thing: getting back is easy. We’re not starting over, just picking back up. And a little insider tip. The growth you have right now is probably just about the perfect length for a wax. Any longer and it gets more uncomfortable, so this is actually the ideal window. Does that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation? (Wait for the yes.)\n\nMy recommendation is we get you in while you’re in that window. One visit and you’re back to weeks of smooth instead of hours. Does that sound reasonable?\n\n(Wait for the yes.)\n\nOkay, let’s get you back on the books. I have (day) at (time) or (day) at (time). Which is better for you?",
+      "title": "Getting Back on Schedule Is the Whole Story: The Close",
+      "content": "{{contact_first_name}}, thank you for that. Your file is up to date.\n\nThe nice thing is getting back is easy. We're not starting over, just picking up where you left off. And the growth you have right now is probably about the perfect length for a wax. Any longer and it gets less comfortable, so this is a good window. Does that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nMy recommendation is that we get you in while you're in that window. One visit and you're back to weeks of smooth instead of hours. Does that sound reasonable?\n\n(Wait for the yes.)\n\nOkay, let's get you back on the books. I have (day) at (time) or (day) at (time). Which is better for you?",
       "sort_order": 13
     },
     {
       "step_key": "obj_fell_out",
-      "title": "Objection: I fell out of the habit / it’s been too long",
-      "content": "I completely understand, and that can happen from time to time. Life gets busy and it's easy to fall out of the rhythm. That's exactly why coming in makes sense: we'll get you right back on track and back to smooth, and the more regular you are the finer it tends to come in.\n\nConfirm and continue: Does that make sense? (Wait for a fast yes.) Do you have any other questions or concerns?",
+      "title": "Objection: “I fell out of the habit”",
+      "content": "I understand, and that happens. Life gets busy, and it's easy to fall out of the routine. That's the reason we call. We'll get you right back on track, and the more regular you are, the finer it comes in.\n\nDoes that make sense?\n\n(Wait for the yes.)",
       "sort_order": 100
     },
     {
       "step_key": "obj_hurt_more",
-      "title": "Objection: Doesn’t it hurt more after a break?",
-      "content": "I hear that a lot, and it's a great question. That first appointment back is exactly the kind of thing our team makes as comfortable as possible, and the more regular you stay the easier it gets over time. That's something they'll walk you through when you come in.\n\nConfirm and continue: Does that make sense? (Wait for a fast yes.) Do you have any other questions or concerns?",
+      "title": "Objection: “Doesn’t it hurt more after a break?”",
+      "content": "That's a fair question. That first visit back is something our team is careful to make as comfortable as possible. The more regular you stay after that, the easier it gets. They'll walk you through it when you're in.\n\nWould you be open to that?\n\n(Wait for the yes.)",
       "sort_order": 101
     },
     {
       "step_key": "obj_shaving_easier",
-      "title": "Objection: I’ve just been shaving, it’s easier",
-      "content": "I understand, and shaving is quick, but I know the stubble, the ingrowns, and doing it every day or two got old for you. That's why you loved being smooth for weeks. Coming back in is the easiest way to get out of that daily grind again.\n\nConfirm and continue: Does that make sense? (Wait for a fast yes.) Do you have any other questions or concerns?",
+      "title": "Objection: “I’ve just been shaving, it’s easier”",
+      "content": "I understand. Shaving is quick, but the stubble and the ingrowns tend to get old fast. That's usually why people switch to waxing in the first place. Coming back in is the easiest way out of that daily grind.\n\nIs there anything else on your mind?",
       "sort_order": 102
     },
     {
       "step_key": "obj_cost",
       "title": "Objection: Cost",
-      "content": "{{contact_first_name}}, I completely understand, and can I share the way most of my clients think about it? One wax buys you weeks of completely smooth, versus shaving that’s back by dinnertime, and when you add up razors, creams, and the time in the shower every couple of days, the gap is a lot smaller than it feels. Plus, the longer you stay with it, the finer and sparser the hair comes back, so the visits themselves get quicker and more comfortable.\n\nAnd just so you feel totally comfortable. Pricing is completely straightforward, and if there are any packages or specials running when you come in, we’ll absolutely make sure you get those.\n\n(Do NOT quote specific prices on the call. Let the front desk handle exact numbers.)\n\nConfirm and continue: Does that make sense? (Wait for the yes.) Okay, let’s find you a time. I have (day) at (time) or (day) at (time). Which is better for you?",
+      "content": "I understand, {{contact_first_name}}. One wax buys you weeks of smooth, while shaving is back by dinnertime. Once you add up razors, creams, and the time in the shower, the gap is smaller than it feels. And the longer you keep it up, the finer the hair comes in, so visits get quicker.\n\n(Do not quote prices, packages, or discounts on the call. The office handles that.)\n\nDoes that seem fair?",
       "sort_order": 103
     },
     {
       "step_key": "obj_think",
-      "title": "Objection: I need to think about it",
-      "content": "That's completely fair, {{contact_first_name}}. Can I ask what part you'd want to think over? Sometimes it's the cost, sometimes the timing, and sometimes people just want to be sure it's right for them, which one is closest for you?\n\n(Listen, their answer usually points to one of the other buttons below. If it stays general, keep going.)\n\nThe nice thing is, coming in is really just information. You'd get a look at what's possible and exactly what it would involve, and then you get to decide with real answers instead of wondering. No pressure either way.\n\nConfirm and continue: Does that make sense? (Wait for a fast yes.) Do you have any other questions or concerns?",
+      "title": "Objection: “I need to think about it”",
+      "content": "That's fair, {{contact_first_name}}. Can I ask what part you'd want to think over? Sometimes it's the cost, sometimes the timing, and sometimes people just want to be sure it's right for them.\n\n(Listen. Their answer usually points to one of the other objections. If it stays general, keep going.)\n\nComing in is really just information. You'd see what's possible and what it would involve, and then you decide with real answers. No pressure either way.\n\nDoes that help?",
       "sort_order": 130
     },
     {
       "step_key": "obj_send_info",
-      "title": "Objection: Just send me information",
-      "content": "I'd be glad to get you some information, {{contact_first_name}}. The one thing I'd say is that a link or a flyer can only tell you so much. It can't really show you what's possible for you specifically. That's what a quick visit is for: you get a look at your options and answers that actually apply to you. So let me get you on the schedule first, no pressure, and you'll have real answers to go on.\n\nConfirm and continue: Does that make sense? (Wait for a fast yes.) Do you have any other questions or concerns?",
+      "title": "Objection: “Just send me some info”",
+      "content": "I'd be glad to send you some information, {{contact_first_name}}. The one thing I'd say is that a flyer can only tell you so much. It can't show you what's possible for you specifically. That's what a quick visit is for. So let me get you on the schedule first, and then I'll send the information along.\n\nIs that okay?",
       "sort_order": 131
     }
   ],
@@ -150,70 +150,70 @@
     },
     {
       "from_step_key": "cadence_close",
-      "label": "They picked a time: one more thing (bonus question)",
+      "label": "They picked a time: ask about other areas",
       "to_step_key": "other_areas_bonus",
       "variant": "positive",
       "sort_order": 0
     },
     {
       "from_step_key": "cadence_close",
-      "label": "Hesitant or soft no: uncover the real concern",
+      "label": "Hesitant or soft no",
       "to_step_key": "uncover",
       "variant": "caution",
       "sort_order": 1
     },
     {
       "from_step_key": "comeback_close",
-      "label": "They picked a time: one more thing (bonus question)",
+      "label": "They picked a time: ask about other areas",
       "to_step_key": "other_areas_bonus",
       "variant": "positive",
       "sort_order": 0
     },
     {
       "from_step_key": "comeback_close",
-      "label": "Hesitant or soft no: uncover the real concern",
+      "label": "Hesitant or soft no",
       "to_step_key": "uncover",
       "variant": "caution",
       "sort_order": 1
     },
     {
       "from_step_key": "digging_in",
-      "label": "The questions uncovered something beyond getting back on track",
+      "label": "They named something beyond getting back on schedule",
       "to_step_key": "making_it_real",
       "variant": "default",
       "sort_order": 0
     },
     {
       "from_step_key": "digging_in",
-      "label": "Getting back on track is the whole story: go to the close",
+      "label": "Getting back on schedule is the whole story: go to the close",
       "to_step_key": "comeback_close",
       "variant": "positive",
       "sort_order": 1
     },
     {
       "from_step_key": "digging_in_still",
-      "label": "The questions uncovered something: they named a concern",
+      "label": "They named a concern",
       "to_step_key": "making_it_real",
       "variant": "default",
       "sort_order": 0
     },
     {
       "from_step_key": "digging_in_still",
-      "label": "Nothing surfaced: protect the rhythm",
+      "label": "Nothing found: protect the routine",
       "to_step_key": "cadence_close",
       "variant": "positive",
       "sort_order": 1
     },
     {
       "from_step_key": "making_it_real",
-      "label": "You’ve responded with empathy: ask the Magic Question",
+      "label": "Continue to the review",
       "to_step_key": "review",
       "variant": "default",
       "sort_order": 0
     },
     {
       "from_step_key": "obj_fell_out",
-      "label": "Resolved: re-ask the scheduling question",
+      "label": "Resolved: back to scheduling",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0
@@ -227,7 +227,7 @@
     },
     {
       "from_step_key": "obj_hurt_more",
-      "label": "Resolved: re-ask the scheduling question",
+      "label": "Resolved: back to scheduling",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0
@@ -241,7 +241,7 @@
     },
     {
       "from_step_key": "obj_shaving_easier",
-      "label": "Resolved: re-ask the scheduling question",
+      "label": "Resolved: back to scheduling",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 1
@@ -255,14 +255,14 @@
     },
     {
       "from_step_key": "opening_question",
-      "label": "“Still feeling pretty smooth”",
+      "label": "“Still pretty smooth”",
       "to_step_key": "resp_doing_great",
       "variant": "positive",
       "sort_order": 0
     },
     {
       "from_step_key": "opening_question",
-      "label": "“Some of it’s started to creep back”",
+      "label": "“Some of it’s starting to come back”",
       "to_step_key": "resp_coming_back",
       "variant": "caution",
       "sort_order": 1
@@ -276,14 +276,14 @@
     },
     {
       "from_step_key": "recommendation",
-      "label": "\"Sounds reasonable\". Go to scheduling",
+      "label": "“Yes, that sounds reasonable”",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0
     },
     {
       "from_step_key": "recommendation",
-      "label": "Hesitant or soft no: uncover the real concern",
+      "label": "Hesitant or soft no",
       "to_step_key": "uncover",
       "variant": "caution",
       "sort_order": 1
@@ -311,7 +311,7 @@
     },
     {
       "from_step_key": "review",
-      "label": "They said yes: magic question",
+      "label": "They said yes: make the recommendation",
       "to_step_key": "recommendation",
       "variant": "positive",
       "sort_order": 0
@@ -325,14 +325,14 @@
     },
     {
       "from_step_key": "transition",
-      "label": "They said okay: start the questions",
+      "label": "They said okay: ask the questions",
       "to_step_key": "digging_in",
       "variant": "default",
       "sort_order": 0
     },
     {
       "from_step_key": "transition_still",
-      "label": "They said okay: start the questions",
+      "label": "They said okay: ask the questions",
       "to_step_key": "digging_in_still",
       "variant": "default",
       "sort_order": 0
@@ -346,7 +346,7 @@
     },
     {
       "from_step_key": "uncover",
-      "label": "“I fell out of the habit / it’s been too long”",
+      "label": "“I fell out of the habit”",
       "to_step_key": "obj_fell_out",
       "variant": "objection",
       "sort_order": 1

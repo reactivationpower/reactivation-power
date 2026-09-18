@@ -182,6 +182,20 @@ export const CONCERN_OPTIONS: Record<string, ConcernOption[]> = {
       spoken: 'the areas where the skin didn\u2019t keep up',
     },
   ],
+  // One chip per question on the Botox question screen, in question order.
+  Botox: [
+    { label: 'Lines coming back', spoken: 'the lines coming back' },
+    { label: 'Dryness / sun spots', spoken: 'the dryness and sun spots' },
+    {
+      label: 'Jaw clenching / headaches',
+      spoken: 'the jaw clenching and headaches',
+    },
+    { label: 'An upcoming event', spoken: 'that event you have coming up' },
+    {
+      label: 'A treatment they asked about',
+      spoken: 'that treatment you\u2019ve been curious about',
+    },
+  ],
   'Cellulite Reduction': [
     { label: 'Backs of thighs', spoken: 'the backs of your thighs' },
     { label: 'Buttocks', spoken: 'the buttocks area' },

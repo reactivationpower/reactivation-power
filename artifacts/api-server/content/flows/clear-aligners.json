@@ -9,115 +9,115 @@
     {
       "step_key": "opening_question",
       "title": "The Opening Question",
-      "content": "So {{contact_first_name}}, how have things been since {{pt_you}} finished {{pt_your}} aligner treatment with us? Are the teeth still holding straight and {{pt_they_are}} happy with the smile, have you noticed a little shifting starting to creep in, or {{pt_moved_back_q}}?\n\n(This question has only three possible answers. Click the one you hear.)",
+      "content": "So {{contact_first_name}}, how have things been since {{pt_you}} finished the aligners with us? I usually hear one of three things. Still holding straight, a little shifting starting, or moved back quite a bit. Which one is closest?\n\n(Only three answers. Tap the one you hear.)",
       "sort_order": 1
     },
     {
       "step_key": "resp_doing_great",
-      "title": "Still Holding Straight: Celebrate the Win",
-      "content": "I love hearing that, {{contact_first_name}}. That’s the retainer doing exactly what it’s supposed to do, and it means the work {{pt_you}} put in is still paying off. A straight smile that stays straight is the whole goal.\n\n(Celebrate genuinely, then move to the permission ask.)",
+      "title": "Still Holding Straight",
+      "content": "That's great to hear, {{contact_first_name}}. That's the retainer doing its job, and it means the work {{pt_you}} put in is still paying off. A straight smile that stays straight is the whole goal.\n\n(Let them enjoy it. Then ask permission for the questions.)",
       "sort_order": 2
     },
     {
       "step_key": "resp_coming_back",
-      "title": "Some Shifting: Normalize, Then Update the File",
-      "content": "{{contact_first_name}}, that’s completely normal. Teeth naturally want to drift back toward where they started, especially when life gets in the way of retainer wear; {{pt_no_fault}}, and it’s exactly why we check in. The good news is that when shifting is caught early, it’s usually much easier to correct.\n\nWhat do you think made it start creeping back? Was it the retainers wearing out, life getting busy, or something else?\n\n(Let them answer. Do NOT try to book yet.)",
+      "title": "A Little Shifting",
+      "content": "That's common, {{contact_first_name}}. Teeth want to drift back toward where they started, especially when retainer wear slips, and {{pt_no_fault}}. It's the reason we check in. When shifting is caught early, it's usually much easier to correct. What do you think made it start, the retainers wearing out or life getting busy?\n\n(Let them answer. Do not try to book yet.)",
       "sort_order": 3
     },
     {
       "step_key": "resp_fully_back",
-      "title": "Moved Back Quite a Bit: Normalize, Then Update the File",
-      "content": "{{contact_first_name}}, that’s completely normal. Teeth naturally want to drift back toward where they started once the retainer routine slips; {{pt_no_fault}}, and it’s exactly why we check in. I remember how great that smile looked when {{pt_you}} finished, {{pt_proud}}.\n\nWhat do you think made it come back? Was it the retainers wearing out, life getting busy, or something else?\n\n(Let them answer. Do NOT try to book yet. Be warm and non-judgmental.)",
+      "title": "Moved Back Quite a Bit",
+      "content": "That's common, {{contact_first_name}}, and please don't feel bad. Teeth want to drift back toward where they started once the retainer routine slips, and {{pt_no_fault}}. It's the reason we check in. Your notes say {{pt_you}} finished with a smile to be proud of. What do you think made it come back, the retainers wearing out or life getting busy?\n\n(Let them answer. Stay warm. Do not try to book yet.)",
       "sort_order": 4
     },
     {
       "step_key": "permission_questions",
       "title": "Ask Permission for the Questions",
-      "content": "{{contact_first_name}}, while I have you on the phone, I’d like to ask you a few quick questions so we get {{pt_your_file}} completely up to date. Teeth are sneaky. They move so slowly you never catch them doing it, so these questions matter more than people think. Is that okay?\n\n(Wait for the yes. Almost everyone says yes. You asked permission, and it’s their file.)",
+      "content": "{{contact_first_name}}, I'm updating {{pt_your_file}} anyway. Can I ask a few quick questions about how the teeth are holding up? They move so slowly that nobody catches it happening.\n\n(Wait for the yes.)",
       "sort_order": 6
     },
     {
       "step_key": "transition",
-      "title": "The Transition: Acknowledge and Ask Permission",
-      "content": "Now {{contact_first_name}}, obviously I know you said you’ve noticed some changes with {{pt_your}} teeth, and we’re absolutely going to talk about that. But while I have you on the phone, I’d like to ask you a few additional questions so we get {{pt_your_file}} completely up to date. Is that okay?\n\n(Wait for the yes before starting the questions.)",
+      "title": "Ask Permission for the Questions",
+      "content": "{{contact_first_name}}, we'll come back to the shifting in a moment. First, can I ask a few quick questions so {{pt_your_file}} is up to date?\n\n(Wait for the yes.)",
       "sort_order": 6
     },
     {
       "step_key": "digging_in",
       "title": "The Questions: Update the File",
-      "content": "(Critical: write down everything they mention as you go. You’ll recap it in a moment.)\n\nFirst, have you noticed any more shifting or crowding since we last spoke? Teeth are like books on a shelf, once they start to lean, they keep leaning, and most people notice it in photos before they notice it in the mirror.\n\n{{pt_floss_q}}\n\n{{pt_bite_q}}\n\n{{pt_jaw_q}} A bite that’s off has a sneaky way of showing up everywhere but the teeth.\n\n{{pt_al_photos_q}}\n\nFinally, any changes in dental health since we last saw {{pt_them}}? New dental work, gum concerns, anything the dentist has flagged?\n\n(Recap what you wrote down, including the shifting they mentioned at the start, then ask:)\n\nNow {{contact_first_name}}, between the shifting you mentioned and everything we just talked through. If you could completely fix just one of these and never think about it again, which one would you choose?\n\n(If the shifting is the only thing on the list, that’s the answer. Continue to Making It Real with it.)",
+      "content": "(Write down everything they mention. You'll recap it in a moment.)\n\nFirst, the shifting. Is it mostly the front teeth, or crowding coming back?\n\nHow about flossing, any tight spots where the floss catches or shreds?\n\nAny changes in {{pt_your}} bite, like teeth hitting differently or chewing more on one side?\n\nAny jaw soreness, clicking, or headaches in the morning?\n\nHow does {{pt_your}} smile feel in photos these days, still showing it off?\n\nFinally, any new dental work or anything the dentist has flagged since we last saw {{pt_them}}?\n\n(Recap what you wrote down, including the shifting, then ask:)\n\n{{contact_first_name}}, between the shifting and anything else you mentioned, which one would you most like to take care of?\n\n(If the shifting is the only thing on the list, that's the answer. Tap the button and continue.)",
       "sort_order": 7
     },
     {
       "step_key": "digging_in_still",
       "title": "The Questions: Update the File",
-      "content": "(Critical: write down everything they mention as you go. You’ll recap it in a moment.)\n\nFirst, are the retainers still going in at night, or has the routine been slipping a little? No judgment either way. Teeth are like books on a shelf, and the retainer is the bookend that keeps them from leaning.\n\n{{pt_floss_q}}\n\n{{pt_bite_q}}\n\n{{pt_jaw_q}} A bite that’s off has a sneaky way of showing up everywhere but the teeth.\n\n{{pt_al_photos_q}}\n\nFinally, any changes in dental health since we last saw {{pt_them}}? New dental work, gum concerns, anything the dentist has flagged?\n\n(If they mentioned anything at all, recap what you wrote down, then ask:)\n\nNow {{contact_first_name}}, you just told me about those things. If you could completely fix just one of them and never think about it again, which one would you choose?",
+      "content": "(Write down everything they mention. You'll recap it in a moment.)\n\nFirst, the retainers. Are they still going in at night, or has the routine slipped a little?\n\nHow about flossing, any tight spots where the floss catches or shreds?\n\nAny changes in {{pt_your}} bite, like teeth hitting differently or chewing more on one side?\n\nAny jaw soreness, clicking, or headaches in the morning?\n\nHow does {{pt_your}} smile feel in photos these days, still showing it off?\n\nFinally, any new dental work or anything the dentist has flagged since we last saw {{pt_them}}?\n\n(Recap what you wrote down, then ask:)\n\n{{contact_first_name}}, of those, which one would you most like to take care of?\n\n(Tap their answer below. If nothing came up, that's still a good call. Use the second button.)",
       "sort_order": 7
     },
     {
       "step_key": "making_it_real",
       "title": "Making It Real",
-      "content": "(Take the concern they named and make it present with three questions, in order.)\n\n{{pt_mir_q1}}? Since we last spoke, or longer?\n\n{{pt_mir_q2}}?\n\n{{pt_mir_q3}}? (Let them open up. Do not rush.)\n\nThen respond with empathy: Thank you for sharing that, it makes complete sense, and that's exactly the kind of thing we help people with every single day.",
+      "content": "(Ask these three questions in order. Pause after each and let them answer.)\n\nHow long has that been on {{pt_your}} mind, since we last spoke or longer?\n\n(Let them answer. Repeat it back.)\n\nDoes it come up here and there, or pretty much every time?\n\n(Let them answer.)\n\nWhen it's on {{pt_your}} mind, how does it affect things, like confidence or photos?\n\n(Let them open up. Do not rush.)\n\nThank you for sharing that. It makes sense, and it's something we help people with all the time.",
       "sort_order": 8
     },
     {
       "step_key": "review",
-      "title": "The Review & Bridge to Emotion",
-      "content": "{{contact_first_name}}, let me make sure I've got this right. (Recap what they told you: how long, how often, how it affects them.) Did I get that right?\n\nAnd it sounds like {{pt_bridge_q}}. Is that fair to say?\n\n(About 95% say yes. That yes is the moment.)",
+      "title": "The Review",
+      "content": "{{contact_first_name}}, let me make sure I have this right.\n\n(Recap what they told you: how long, how often, how it affects them.)\n\nDid I get that right?\n\nAnd it sounds like you'd love to see {{pt_them}} showing off that smile again without a second thought. Is that fair to say?\n\n(Most people say yes. Tap what you hear.)",
       "sort_order": 9
     },
     {
       "step_key": "recommendation",
-      "title": "The Magic Question & Recommendation",
-      "content": "{{contact_first_name}}, a quick scan shows us exactly where the teeth stand compared to where {{pt_you}} finished. If it’s minor, often a refreshed retainer or a short refinement is all it takes to get things back on track, and if everything’s holding better than you think, we’ll tell you that too, because we’re not here to waste your time or your money. Does that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for yes.)\n\nBased on everything you’ve told me, my recommendation is that we {{pt_get_you_in}} for that quick scan. Does that sound reasonable?\n\n(Ask \"does that sound reasonable\", never \"does that sound good.\" Click what you hear next.)",
+      "title": "The Recommendation",
+      "content": "{{contact_first_name}}, a quick scan shows us where the teeth stand compared to where {{pt_you}} finished. If it's minor, a refreshed retainer or a short refinement is often all it takes. If everything is holding better than you think, we'll tell you that too. Does that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nMy recommendation is that we {{pt_get_you_in}} for that quick scan. Does that sound reasonable?\n\n(Say \"does that sound reasonable\", not \"does that sound good\". Tap what you hear.)",
       "sort_order": 10
     },
     {
       "step_key": "bridge_no",
-      "title": "They Hesitate: Uncover Why",
-      "content": "{{contact_first_name}}, help me understand. What's holding you back from letting us {{pt_get_you_in}} to take a look? Is it the timing, or is there something else on your mind?\n\n(Ask this easygoing and curious, not pushy. You're simply trying to understand what's getting in the way so you can help. Then stop and let them tell you.)\n\nWhat are your thoughts about that?",
+      "title": "They Hesitate: Find Out Why",
+      "content": "{{contact_first_name}}, I don't want to assume anything. Is it the timing, or is something else holding you back?\n\n(Stay easy about it. No pressure. Let them answer.)",
       "sort_order": 11
     },
     {
       "step_key": "lapsed_commitment",
       "title": "Nothing Found: The Retainer Check",
-      "content": "{{contact_first_name}}, I’m glad everything else is in good shape, and we’re thrilled to hear it.\n\nLet me ask you one last thing. How are the retainers holding up? Still going in at night, or has that kind of fallen out of the routine?\n\n(Let them answer. No judgment either way. Retainer habits slip, and retainers themselves stretch and wear out over time.)\n\n{{contact_first_name}}, even when everything feels like it’s holding, retainers age. They stretch, warp, and wear thin, and teeth will quietly take advantage of that. The easiest way to protect {{pt_invested}} is a quick check: we take a current scan, make sure everything is actually holding where it should, and if the retainers need refreshing we handle it right there. Does that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nLet’s {{pt_get_you_in}} so we can check those retainers, and that smile stays exactly where it belongs. Does that sound reasonable?",
+      "content": "{{contact_first_name}}, I'm glad everything is in good shape.\n\nOne thing before I let you go. Even when everything feels like it's holding, retainers age. They stretch, warp, and wear thin, and teeth take advantage of that. A quick check with a current scan makes sure everything is holding where it should. If the retainers need refreshing, we handle it right there. Does that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nLet's {{pt_get_you_in}} so we can check those retainers and keep that smile where it belongs. Does that sound reasonable?",
       "sort_order": 16
     },
     {
       "step_key": "scheduling",
-      "title": "Scheduling: Two Yes-Yes Options",
-      "content": "Wonderful, {{contact_first_name}}. {{rec_pronoun_cap}} have consultation times available this week on (day) and (day). Do mornings or afternoons work better for you?\n\n(Let them answer.)\n\nPerfect, I have a (time) and a (time) available, which is better?\n\n(Let them answer.)\n\nGreat, I've got you down for (day) at (time).\n\n(Always offer two yes-yes options within 48 hours. Before the call, know your two days and two times so you can fill these in without hesitating. Once booked, add your notes and press the green \"Scheduled\" button below to log the call.)",
+      "title": "Scheduling: Two Options",
+      "content": "Wonderful, {{contact_first_name}}. We have times this week on (day) and (day). Do mornings or afternoons work better for you?\n\n(Let them answer.)\n\nPerfect, I have (time) and (time). Which is better?\n\n(Let them answer.)\n\nGreat, I have you down for (day) at (time).\n\n(Always offer two options within 48 hours. Know your two days and two times before the call. Once booked, add your notes and press the green \"Scheduled\" button below to log the call.)",
       "sort_order": 17
     },
     {
       "step_key": "mode_parent",
       "title": "Parent Mode",
-      "content": "(Parent mode is on, every screen from here uses parent/guardian wording automatically.)",
+      "content": "(Parent mode is on. Every screen from here uses parent or guardian wording automatically.)",
       "sort_order": 99
     },
     {
       "step_key": "obj_start_over",
-      "title": "Objection: Start all over?",
-      "content": "{{contact_first_name}}, that’s the number one thing people worry about, and here’s the honest answer: usually not. When shifting is caught reasonably early, it’s often a much shorter refinement. A handful of trays, not a whole new treatment. The scan tells us exactly where things stand, and that’s the point of coming in: you’ll know precisely what it would take before deciding anything.\n\n(Do NOT quote specific prices or promise treatment lengths on the call. The scan determines that.)\n\nConfirm and continue: Does that make sense? (Wait for the yes.) Okay, let’s find you a time. I have (day) at (time) or (day) at (time). Which is better for you?",
+      "title": "Objection: “Start all over?”",
+      "content": "{{contact_first_name}}, that's the number one worry, and the answer is usually not. When shifting is caught early, it's often a short refinement, a handful of trays instead of a whole new treatment. The scan tells us where things stand, so you know what it would take before deciding anything.\n\n(Do not quote prices or promise treatment lengths on the call. The scan determines that.)\n\nDoes that make sense?\n\n(Wait for the yes.)",
       "sort_order": 100
     },
     {
       "step_key": "obj_embarrassed",
       "title": "Objection: The retainer routine slipped",
-      "content": "{{contact_first_name}}, please don’t be. There’s truly no judgment here. Teeth naturally want to drift back toward where they started the moment the retainer routine slips. That’s just how teeth behave, and {{pt_no_fault}}. It’s exactly why we check in. I remember how great that smile looked when {{pt_you}} finished, and we’d simply love to help {{pt_them}} protect it.\n\nConfirm and continue: Does that make sense? (Wait for the yes.) Okay, let’s find you a time. I have (day) at (time) or (day) at (time). Which is better for you?",
+      "content": "{{contact_first_name}}, please don't be. There's no judgment here. Teeth drift back the moment the retainer routine slips. That's how teeth behave, and {{pt_no_fault}}. It's the reason we check in, and we'd like to help {{pt_them}} protect that smile.\n\nWould you be open to that?\n\n(Wait for the yes.)",
       "sort_order": 101
     },
     {
       "step_key": "obj_think",
-      "title": "Objection: I need to think about it",
-      "content": "That's completely fair, {{contact_first_name}}. Can I ask what part you'd want to think over? Sometimes it's the cost, sometimes the timing, and sometimes people just want to be sure it's the right move, which one is closest for you?\n\n(Listen, their answer usually points to one of the other buttons below. If it stays general, keep going.)\n\nThe nice thing is, coming in is really just information. You'd find out exactly what the options look like and what it would involve, and then you get to make the decision with real answers instead of wondering. And if it's not the right fit, we'll tell you that too.\n\nConfirm and continue: Does that make sense? (Wait for a fast yes.) Do you have any other questions or concerns?",
+      "title": "Objection: “I need to think about it”",
+      "content": "That's fair, {{contact_first_name}}. Can I ask what part you'd want to think over? Sometimes it's the cost, sometimes the timing, and sometimes people just want to be sure it's the right move.\n\n(Listen. Their answer usually points to one of the other objections. If it stays general, keep going.)\n\nComing in is really just information. You'd find out what the options look like and what it would involve, and then you decide with real answers. If it's not the right fit, we'll tell you that too.\n\nDoes that help?",
       "sort_order": 130
     },
     {
       "step_key": "obj_send_info",
-      "title": "Objection: Just send me information",
-      "content": "I'd be glad to get you some information, {{contact_first_name}}. The one thing I'd say is that a link or a flyer can only tell you so much. It can't look at your specific situation. That's really what the visit is for: you find out exactly what the options look like for you and get answers that apply to you. So let me get you on the schedule first, and you'll have real answers to go on.\n\nConfirm and continue: Does that make sense? (Wait for a fast yes.) Do you have any other questions or concerns?",
+      "title": "Objection: “Just send me some info”",
+      "content": "I'd be glad to send you some information, {{contact_first_name}}. The one thing I'd say is that a flyer can only tell you so much. It can't look at {{pt_your}} teeth. That's what the visit is for. So let me get you on the schedule first, and then I'll send the information along.\n\nIs that okay?",
       "sort_order": 131
     }
   ],
@@ -173,28 +173,28 @@
     },
     {
       "from_step_key": "digging_in",
-      "label": "Continue with what they chose",
+      "label": "They named a concern: continue",
       "to_step_key": "making_it_real",
       "variant": "positive",
       "sort_order": 1
     },
     {
       "from_step_key": "digging_in_still",
-      "label": "The questions uncovered something: they named their biggest issue",
+      "label": "They named a concern",
       "to_step_key": "making_it_real",
       "variant": "caution",
       "sort_order": 0
     },
     {
       "from_step_key": "digging_in_still",
-      "label": "Genuinely nothing: doing great across the board",
+      "label": "Nothing found: the retainer check",
       "to_step_key": "lapsed_commitment",
       "variant": "positive",
       "sort_order": 1
     },
     {
       "from_step_key": "lapsed_commitment",
-      "label": "They shared: schedule the check",
+      "label": "They said yes: schedule the check",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0
@@ -208,7 +208,7 @@
     },
     {
       "from_step_key": "obj_embarrassed",
-      "label": "Resolved: re-ask the scheduling question",
+      "label": "Resolved: back to scheduling",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0
@@ -222,7 +222,7 @@
     },
     {
       "from_step_key": "obj_start_over",
-      "label": "Resolved: re-ask the scheduling question",
+      "label": "Resolved: back to scheduling",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0
@@ -243,7 +243,7 @@
     },
     {
       "from_step_key": "open",
-      "label": "Speaking with the patient themselves (adult)",
+      "label": "Speaking with the patient (adult)",
       "to_step_key": "opening_question",
       "variant": "default",
       "sort_order": 1
@@ -257,7 +257,7 @@
     },
     {
       "from_step_key": "opening_question",
-      "label": "“A little shifting creeping in”",
+      "label": "“A little shifting is starting”",
       "to_step_key": "resp_coming_back",
       "variant": "caution",
       "sort_order": 1
@@ -348,14 +348,14 @@
     },
     {
       "from_step_key": "resp_doing_great",
-      "label": "Celebrate: then ask permission for a few questions",
+      "label": "Ask permission for a few questions",
       "to_step_key": "permission_questions",
       "variant": "default",
       "sort_order": 0
     },
     {
       "from_step_key": "review",
-      "label": "They said yes: magic question",
+      "label": "They said yes: make the recommendation",
       "to_step_key": "recommendation",
       "variant": "positive",
       "sort_order": 0
