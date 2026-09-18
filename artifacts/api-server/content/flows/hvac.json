@@ -8,260 +8,260 @@
   "steps": [
     {
       "step_key": "open",
-      "title": "The Professional Open",
-      "content": "Hi, this is {{caller_name}} with {{practice_name}}. Is {{contact_first_name}} available, please?\n\nHi {{contact_first_name}}, the reason I'm calling is that we're updating our service records on customers we haven't seen in a while, and we came across yours. {{asked_by}} check in on your heating and cooling system and make sure everything's still doing what it should. Do you have a quick minute?",
+      "title": "The open",
+      "content": "Hi, this is {{caller_name}} with {{practice_name}}. Is {{contact_first_name}} available, please?\n\nHi {{contact_first_name}}. We're updating our service records on customers we haven't seen in a while, and yours came up. {{asked_by_provider}} I wanted to check that your heating and cooling is still doing what it should. Do you have a quick minute?",
       "sort_order": 0
     },
     {
       "step_key": "opening_question",
-      "title": "The Opening Question",
-      "content": "So {{contact_first_name}}, how has the system been treating you since we were last out? Is everything still running great, is it starting to act up a little, or are you having real problems with it?\n\n(This question has only three possible answers. Click the one you hear.)",
+      "title": "The opening question",
+      "content": "So {{contact_first_name}}, how has the system been since we were last out? I usually hear one of three things. Still running great, starting to act up a little, or real problems. Which one is closest for you?\n\n(Click the one you hear.)",
       "sort_order": 1
     },
     {
       "step_key": "resp_great",
-      "title": "It’s Still Running Great",
-      "content": "That's great to hear, {{contact_first_name}}. That's exactly what we like to hear.\n\nLet me ask you this while I have you: when was the last time the system was actually looked at or serviced? Was it recently, has it been a while, or are you not really sure?",
+      "title": "Still running great",
+      "content": "That's great to hear, {{contact_first_name}}. That's what we like to hear.\n\nWhile I have you, when was the system last looked at or serviced?\n\n(Let them answer. Click the closest one: recent, a while, or not sure.)",
       "sort_order": 2
     },
     {
       "step_key": "resp_acting_up",
-      "title": "It’s Starting to Act Up",
-      "content": "{{contact_first_name}}, I appreciate you telling me that, and honestly, that does happen over time. The good news is you caught it while it's still a little thing, and little things are a whole lot easier to deal with than big ones.\n\n(Let them respond.)",
+      "title": "Starting to act up",
+      "content": "I appreciate you telling me that, {{contact_first_name}}. That does happen over time. The good news is you caught it while it's still small. Small things are a lot easier to fix than big ones.\n\n(Let them respond.)",
       "sort_order": 3
     },
     {
       "step_key": "resp_problems",
-      "title": "They’re Having Real Problems",
-      "content": "{{contact_first_name}}, I'm sorry to hear that. That's frustrating, and I'm glad we called when we did. What's been going on?\n\nLet them answer. Be empathetic and listen. Do NOT try to book anything yet. If they describe a gas smell, burning smell, sparking, or carbon monoxide alarm, use the URGENT button.",
+      "title": "Real problems",
+      "content": "I'm sorry to hear that, {{contact_first_name}}. That's frustrating, and I'm glad we called when we did. What's been going on?\n\n(Let them answer. Listen. Do not book anything yet.)\n\n(Gas smell, burning smell, sparking, or a carbon monoxide alarm: press the URGENT button.)",
       "sort_order": 4
     },
     {
       "step_key": "svc_recent",
-      "title": "Serviced Recently: Stay Ahead of It",
-      "content": "{{contact_first_name}}, that's fantastic. You're doing exactly what most people don't, and it's why everything is still running great.\n\nLet me ask you one more thing: even with everything running well, are you noticing any little early signs? A room that never feels quite right, a new noise, bills creeping up. Anything you'd want to stay ahead of?",
+      "title": "Serviced recently",
+      "content": "That's great, {{contact_first_name}}. Most people don't keep up with it, and it's why yours is still running well.\n\nOne more thing. Even with everything running well, have you noticed any small early signs? A room that never feels right, a new noise, or bills going up.\n\n(Let them answer.)",
       "sort_order": 5
     },
     {
       "step_key": "svc_while",
-      "title": "It’s Been a While",
-      "content": "About how long would you say?\n\nLet them answer.\n\nThat's really common. These systems just quietly do their job, so it's easy for time to get away from you.\n\nCan I share why I ask? (Wait for their response.)\n\nThe longer a system goes without being looked at, the more likely there's something small waiting to be found. A worn part, a dirty coil, something simple. Caught now, those are quick, inexpensive fixes, and a freshly serviced system runs more efficiently, so it costs less on your utility bill every month. Left alone, that same small stuff is what turns into the expensive breakdown, usually on the hottest or coldest day of the year.\n\nDoes that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for yes.)\n\nSince it's been a while, I'd suggest having us give the system a complete check and service. That way you know everything is operating the way it should, and if it all looks great, that's good news too.\n\nDoes that sound reasonable?\n\n(Wait for the yes.)\n\nGreat, let me see what we have available.\n\n(Opportunities to note: preventive maintenance, AC tune-up, heating tune-up, maintenance agreement, system health evaluation.)",
+      "title": "It’s been a while",
+      "content": "About how long would you say?\n\n(Let them answer.)\n\nThat's common. These systems just do their job, so time gets away from you.\n\nCan I share why I ask?\n\n(Wait for the yes.)\n\nThe longer a system goes without a look, the more likely something small is waiting to be found. A worn part, a dirty coil, something simple. Caught now, those are quick, cheap fixes. A freshly serviced system also runs better, so it costs less every month. Left alone, that small stuff turns into the big breakdown. Usually on the hottest or coldest day of the year.\n\nDoes that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nSince it's been a while, I'd suggest we give the system a full check and service. Then you know it's running the way it should. If it all looks great, that's good news too.\n\nDoes that sound reasonable?\n\n(Wait for the yes.)\n\nGreat, let me see what we have available.\n\n(Things to note for the visit: tune-up, maintenance agreement, system check.)",
       "sort_order": 6
     },
     {
       "step_key": "svc_unknown",
-      "title": "Doesn’t Know When It Was Serviced",
-      "content": "No problem, honestly, most people don't keep track of that. These systems are kind of out of sight, out of mind until something goes wrong.\n\nCan I share why I ask? (Wait for their response.)\n\nTwo reasons, really. A system that's been serviced runs more efficiently, so it actually costs you less on your utility bill every month. And the bigger one. When a technician catches a small issue early, like a worn part, it's usually a quick, inexpensive fix. It's the small stuff nobody catches that turns into the expensive breakdown, and that always seems to happen on the hottest or coldest day of the year.\n\nDoes that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for yes.)\n\nSince nobody's sure where the system stands, I'd suggest having us give it a complete check. That way you know exactly what shape it's in, and if everything looks great, that's good news too.\n\nDoes that sound reasonable?\n\n(Wait for the yes.)\n\nGreat, let me see what we have available.",
+      "title": "Doesn’t know when it was serviced",
+      "content": "No problem, most people don't keep track of that. These systems are out of sight, out of mind until something goes wrong.\n\nCan I share why I ask?\n\n(Wait for the yes.)\n\nTwo reasons. A serviced system runs better, so it costs you less every month. And the bigger one. When a technician catches a small problem early, it's usually a quick, cheap fix. The small stuff nobody catches is what turns into the big breakdown. That always seems to happen on the hottest or coldest day of the year.\n\nDoes that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nSince nobody's sure where the system stands, I'd suggest we give it a full check. Then you know what shape it's in. If it all looks great, that's good news too.\n\nDoes that sound reasonable?\n\n(Wait for the yes.)\n\nGreat, let me see what we have available.",
       "sort_order": 7
     },
     {
       "step_key": "maint_rec",
-      "title": "The Maintenance Plan Pivot",
-      "content": "That's great that you're staying on top of it, honestly, you're ahead of most people.\n\nCan I share a thought? (Wait for their response.)\n\nThe hardest part of maintenance isn't the service itself. It's remembering to schedule it. Life gets busy, a season slips by, and that's usually when something small gets missed. The whole point of a maintenance plan is that you never have to remember. We remember for you, it stays on a consistent schedule, and small issues get caught while they're still quick, inexpensive fixes. Plus a regularly serviced system runs more efficiently, so it costs less to operate month to month.\n\nDoes that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for yes.)\n\nSince you're already taking care of the system, it may make sense to have us handle the regular maintenance for you going forward. That way it's off your plate entirely.\n\nDoes that sound reasonable?\n\n(Wait for the yes.)\n\nGreat, let me see what we have available.\n\n(Opportunities to note: preventive maintenance, AC tune-up, heating tune-up, maintenance agreement, system health evaluation.)",
+      "title": "Maintenance plan",
+      "content": "That's great that you're staying on top of it. You're ahead of most people.\n\nCan I share a thought?\n\n(Wait for the yes.)\n\nThe hardest part of maintenance isn't the service. It's remembering to schedule it. Life gets busy, a season slips by, and something small gets missed. With a maintenance plan you never have to remember. We remember for you. It stays on a regular schedule, and small things get caught while they're still cheap to fix. A regularly serviced system also costs less to run.\n\nDoes that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nSince you're already taking care of the system, let us handle the regular maintenance from here. That way it's off your plate.\n\nDoes that sound reasonable?\n\n(Wait for the yes.)\n\nGreat, let me see what we have available.\n\n(Things to note for the visit: tune-up, maintenance agreement, system check.)",
       "sort_order": 8
     },
     {
       "step_key": "transition",
-      "title": "The Transition",
-      "content": "Well {{contact_first_name}}, that's exactly why I'm glad we connected today. Let me ask you a few quick questions so I can update your service records properly. Is that okay?",
+      "title": "The transition",
+      "content": "Well {{contact_first_name}}, I'm glad we connected today. Can I ask you a few quick questions so I can update your service records?\n\n(Wait for the yes.)",
       "sort_order": 9
     },
     {
       "step_key": "digging_in",
-      "title": "Digging In: Update the Records",
-      "content": "{{contact_first_name}}, while I have you, let me just run through a few quick things so we have an accurate picture, okay?\n\n(Ask about each one at a time, acknowledge briefly, and note which ones come up. Do not dig into any single one yet.)\n\nIs the heating and cooling keeping up? Does the house actually get to the temperature you set?\n\nAny rooms that are always hotter or colder than the rest of the house?\n\nHow’s the air itself? Any dust building up fast, allergies acting up, or air that feels too humid or too dry?\n\nAny new noises or smells when it kicks on? Rattles, squeals, anything like that?\n\nHave you noticed the utility bills creeping up compared to last year?\n\nIs it turning on and off more often than it used to, or running constantly?\n\nHow’s the thermostat? Easy to work with, doing what you tell it?\n\nRemind me how old the system is. Has it had a birthday recently?\n\nRecap and focus: So {{contact_first_name}}, it sounds like the biggest things are X, Y, and Z. Is that right? Of everything we just talked about, which one bothers you the most?\n\n(Their answer is the heart of the call. Click the one they name.)",
+      "title": "Questions: update the records",
+      "content": "Can I ask you a few quick things while I have you, {{contact_first_name}}?\n\n(Ask one at a time. Note which ones come up. Do not dig into any single one yet.)\n\nIs the heating and cooling keeping up with what you set?\n\nAny rooms that are always hotter or colder than the rest?\n\nHow about dust, allergies, or humidity in the house?\n\nAny new noises or smells when it kicks on?\n\nHave the bills been higher than last year?\n\nHow old is the system, roughly?\n\nAnd how's the thermostat, is it doing what you tell it?\n\nSo it sounds like the big ones are (the ones they named). Is that right?\n\nOf those, which one bothers you the most?\n\n(Tap the chip and click the button for the one they name.)",
       "sort_order": 10
     },
     {
       "step_key": "f_comfort",
-      "title": "Focus: Comfort: Not Cooling or Heating Properly",
-      "content": "That's one of the most common things we hear, {{contact_first_name}}, and the frustrating part is you're still paying full price on the utility bill for comfort you're not getting.\n\nQuick question. Is it the whole house, or worse in certain areas? And does it struggle more on the really hot or really cold days?\n\n(Note their answers. This tells the technician exactly where to start.)",
+      "title": "Focus: not heating or cooling right",
+      "content": "That's one of the most common things we hear, {{contact_first_name}}. The frustrating part is you're still paying full price for comfort you're not getting.\n\nIs it the whole house, or worse in certain rooms?\n\n(Let them answer.)\n\nDoes it struggle more on the really hot or really cold days?\n\n(Note their answers. This tells the technician where to start.)",
       "sort_order": 11
     },
     {
       "step_key": "f_rooms",
-      "title": "Focus: Uneven Rooms & Airflow",
-      "content": "{{contact_first_name}}, that's such a common one, and people live with it for years thinking it's just how the house is. It's usually not. It's almost always an airflow issue, and those are very fixable.\n\nWhich rooms are the problem ones? And is it worse in summer, winter, or both?\n\n(Note their answers for the technician.)",
+      "title": "Focus: hot and cold rooms",
+      "content": "That's a common one, {{contact_first_name}}. People live with it for years thinking that's just how the house is. It usually isn't. Most of the time it's an airflow problem, and those are very fixable.\n\nWhich rooms are the problem ones?\n\n(Let them answer.)\n\nIs it worse in summer, winter, or both?\n\n(Note their answers for the technician.)",
       "sort_order": 12
     },
     {
       "step_key": "f_air",
-      "title": "Focus: Air Quality & Humidity",
-      "content": "I'm glad you brought that up, {{contact_first_name}}. The system isn't just about temperature, it's about the air your family breathes all day.\n\nIs it more the dust and allergies, or does the air feel off, too sticky in summer, too dry in winter?\n\n(Note their answers. Filtration, humidity, and duct issues each have different fixes.)",
+      "title": "Focus: air quality and humidity",
+      "content": "I'm glad you brought that up, {{contact_first_name}}. The system isn't just about temperature. It's the air your family breathes all day.\n\nIs it more the dust and allergies, or how the air feels?\n\n(Let them answer. Sticky in summer or dry in winter means humidity.)\n\n(Note their answers. Filters, humidity, and ducts each have a different fix.)",
       "sort_order": 13
     },
     {
       "step_key": "f_noise",
-      "title": "Focus: Noises & Smells",
-      "content": "{{contact_first_name}}, I'm really glad you mentioned that. A new noise or smell is the system's way of telling you something changed. Caught early, it's usually a small, inexpensive part. Ignored, it's how the expensive breakdowns start. Always on the hottest or coldest day of the year.\n\nWhat does it sound like, and when do you notice it? When it first kicks on, or the whole time it's running?\n\n(If they describe a burning smell or sparking, use the URGENT button.)",
+      "title": "Focus: noises and smells",
+      "content": "I'm glad you mentioned that, {{contact_first_name}}. A new noise or smell means something changed. Caught early, it's usually a small, cheap part. Ignored, it's how the big breakdowns start.\n\nWhat does it sound like?\n\n(Let them answer.)\n\nWhen do you notice it, when it first kicks on or the whole time?\n\n(Burning smell or sparking: press the URGENT button.)",
       "sort_order": 14
     },
     {
       "step_key": "f_bills",
-      "title": "Focus: Rising Utility Bills",
-      "content": "{{contact_first_name}}, that's actually one of the most useful things you could have told me. When bills creep up and nothing else changed, it almost always means the system is working harder than it should to do the same job, and you're paying for that extra effort every single month.\n\nAbout how much higher would you say they are. A little, or noticeably?\n\n(The visit usually pays for itself here. Note their answer.)",
+      "title": "Focus: higher bills",
+      "content": "That's a useful thing to know, {{contact_first_name}}. When bills go up and nothing else changed, the system is working harder to do the same job. You're paying for that extra effort every month.\n\nAbout how much higher would you say they are?\n\n(Let them answer. Note it. The visit usually pays for itself here.)",
       "sort_order": 15
     },
     {
       "step_key": "f_age",
-      "title": "Focus: Older System & Breakdown Worry",
-      "content": "That's a really smart thing to be thinking about, {{contact_first_name}}. Here's the honest truth about older systems: age alone isn't the problem. It's not knowing what shape it's in. Some fifteen-year-old systems have years left; some have a part that's about to let go in the middle of July.\n\nThe difference between a planned decision and an emergency replacement is knowing ahead of time. Have you had anyone actually assess where it stands?",
+      "title": "Focus: older system",
+      "content": "That's a smart thing to think about, {{contact_first_name}}. Age alone isn't the problem. It's not knowing what shape it's in. Some fifteen-year-old systems have years left. Some have a part about to let go in the middle of July.\n\nKnowing ahead of time is what turns an emergency into a planned decision. Has anyone taken a real look at where it stands?\n\n(Let them answer.)",
       "sort_order": 16
     },
     {
       "step_key": "f_thermostat",
-      "title": "Focus: Thermostat",
-      "content": "{{contact_first_name}}, thermostat trouble is sneaky, sometimes it's the thermostat, and sometimes it's the system not responding the way it should. Either way, you're not getting the comfort you're asking for.\n\nWhat's it doing, not holding the temperature, hard to program, or just not matching how the house actually feels?\n\n(Note their answer for the technician.)",
+      "title": "Focus: thermostat",
+      "content": "Thermostat trouble is tricky, {{contact_first_name}}. Sometimes it's the thermostat, and sometimes it's the system not responding. Either way, you're not getting the comfort you're asking for.\n\nWhat's it doing?\n\n(Let them answer. Not holding the temperature, hard to program, or not matching how the house feels.)\n\n(Note their answer for the technician.)",
       "sort_order": 17
     },
     {
       "step_key": "making_it_real",
-      "title": "Making It Real",
-      "content": "(Take the concern they named and make it present with three questions, in order.)\n\nHow long has that been going on? A few weeks, a month or two?\n\nIs it here and there, or is it pretty much every day at this point?\n\nWhen it acts up, how does it affect things? The comfort of the house? Sleep? The utility bills? (Let them open up. Do not rush.)\n\nThen respond with empathy: Thank you for sharing that. That makes complete sense, and that's exactly the kind of thing our technicians help people with every single day.",
+      "title": "Making it real",
+      "content": "(Three questions about the problem they named, in order.)\n\nHow long has that been going on?\n\n(Let them answer. Repeat it back.)\n\nIs it here and there, or pretty much every day now?\n\n(Let them answer.)\n\nWhen it acts up, how does it affect things at home?\n\n(Let them answer. Comfort, sleep, the bills. Do not rush.)\n\nThank you for telling me that. Our technicians see this all the time.",
       "sort_order": 18
     },
     {
       "step_key": "review",
-      "title": "The Review & Bridge",
-      "content": "{{contact_first_name}}, let me make sure I've got this right. (Recap what they told you: how long, how often, and how it affects them.) Did I get that right?\n\nAnd it sounds like what you'd really love is for the system to just be something you never have to think about. Is that fair to say?\n\n(Almost everyone says yes. That yes is the moment.)",
+      "title": "Review and bridge",
+      "content": "{{contact_first_name}}, let me make sure I've got this right.\n\n(Recap what they told you: how long, how often, and how it affects them.)\n\nDid I get that right?\n\n(Wait for the yes.)\n\nIt sounds like you'd really like the system to be something you never have to think about. Is that fair to say?\n\n(Wait for the yes.)",
       "sort_order": 19
     },
     {
       "step_key": "recommendation",
-      "title": "The Magic Question & Recommendation",
-      "content": "{{contact_first_name}}, here's how this works: one of our technicians comes out, takes a look at the system, and sees exactly what's going on. And while they're out there, they'll give the whole system a complete once-over, so if anything else is going on, you'll know about it before it becomes a problem. And if it all checks out great, we'll tell you that too. We're not here to waste your time or your money. Does that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for yes.)\n\nBased on everything you've told me, my recommendation is that we get one of our technicians out to take that look. Does that sound reasonable?\n\n(Ask \"does that sound reasonable\", never \"does that sound good.\" Click what you hear next.)",
+      "title": "Recommendation",
+      "content": "{{contact_first_name}}, here's how this works. One of our technicians comes out and takes a look at {{main_concern}}. While they're there, they give the whole system a once-over. If anything else is going on, you'll know before it becomes a problem. If it all checks out, we'll tell you that too. Does that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nMy recommendation is that we get a technician out to take that look. Does that sound reasonable?\n\n(Say \"reasonable\", not \"good\". Click what you hear.)",
       "sort_order": 20
     },
     {
       "step_key": "uncover",
-      "title": "Uncover the Real Concern",
-      "content": "I understand, {{contact_first_name}}. Let me ask. What is it that would keep you from taking care of something you've told me is bothering you?\n\n(Listen. Their real answer is almost always one of the buttons below.)",
+      "title": "Uncover the real concern",
+      "content": "I understand, {{contact_first_name}}. Can I ask what would keep you from taking care of something that's bothering you?\n\n(Listen. Their real answer is almost always one of the buttons below.)",
       "sort_order": 21
     },
     {
       "step_key": "obj_price",
-      "title": "Objection: Cost",
-      "content": "{{contact_first_name}}, I completely understand. I want to be clear. This first step is simply having a technician come take a look so you know exactly where things stand. You're not committing to anything today. And knowing is what protects you. It's the small stuff nobody catches that turns into the expensive problem later.\n\n(Do NOT improvise pricing or discounts on the call. Let the office handle specifics.)\n\nConfirm and continue: Does that make sense? (Wait for a fast yes.) Do you have any other questions or concerns?",
+      "title": "Objection: cost",
+      "content": "I understand, {{contact_first_name}}. This first step is just having a technician take a look. You're not committing to anything today. Knowing where things stand is what protects you. The small stuff nobody catches is what gets expensive later.\n\n(Do not quote prices or discounts. The office handles that.)\n\nWould it be okay to at least get the look on the calendar?\n\n(Wait for the yes.)",
       "sort_order": 22
     },
     {
       "step_key": "obj_think",
       "title": "Objection: “I need to think about it”",
-      "content": "That's completely fair, {{contact_first_name}}. Can I ask what part you'd want to think over? Sometimes it's the cost, sometimes it's the timing, and sometimes people just aren't sure it's worth a visit, which one is closest for you?\n\n(Listen, their answer usually turns into one of the other buttons. If it stays vague, continue below.)\n\nThe nice thing is, the visit is just information. You'll know exactly what shape the system is in, and then you can think it over with real answers instead of guesses.\n\nConfirm and continue: Does that make sense? (Wait for a fast yes.) Do you have any other questions or concerns?",
+      "content": "That's fair, {{contact_first_name}}. Can I ask which part you'd want to think over?\n\n(Let them answer. Cost, timing, or not sure it's worth a visit. Their answer usually turns into one of the buttons below.)\n\nThe nice thing is, the visit is just information. Then you can think it over with real answers instead of guesses.\n\nDoes that sound fair?",
       "sort_order": 23
     },
     {
       "step_key": "obj_spouse",
       "title": "Objection: “I need to talk to my spouse”",
-      "content": "That makes complete sense, {{contact_first_name}}. What most people find helpful is having the technician take a look first. That way you'll both have real information to decide with, instead of guessing.\n\nConfirm and continue: Does that make sense? (Wait for a fast yes.) Do you have any other questions or concerns?",
+      "content": "That's fair, {{contact_first_name}}. Most people find it helps to have the technician take a look first. That way you both have real information to decide with.\n\nWould that work?",
       "sort_order": 24
     },
     {
       "step_key": "obj_busy",
-      "title": "Objection: “I’m too busy / no time”",
-      "content": "I completely understand, {{contact_first_name}}. Life gets busy. The nice thing is, you don't have to do anything for this one: our technician does the work, and we'll schedule it around whatever works for you.\n\nConfirm and continue: Does that make sense? (Wait for a fast yes.) Do you have any other questions or concerns?",
+      "title": "Objection: too busy",
+      "content": "I understand, {{contact_first_name}}. Life gets busy. You don't have to do anything for this one. Our technician does the work, and we schedule it around you.\n\nIs there a day that's usually easier for you?",
       "sort_order": 25
     },
     {
       "step_key": "not_interested",
-      "title": "“Not Interested”",
-      "content": "No problem at all, {{contact_first_name}}. I'm not calling to sell you anything today. We're just updating our records on customers we haven't seen in a while, and {{practice_name}} wanted to make sure the system is still treating you right. Can I ask just one quick question? Is everything still running the way it should?\n\n(A genuine question, asked warmly, re-opens most of these calls. Click what you hear.)",
+      "title": "“Not interested”",
+      "content": "No problem at all, {{contact_first_name}}. I'm not calling to sell you anything today. We're updating our records on customers we haven't seen in a while. {{practice_name}} just wanted to make sure the system is still treating you right. Can I ask one quick question?\n\n(Wait for the yes.)\n\nIs everything still running the way it should?\n\n(A real question, asked warmly, re-opens most of these calls. Click what you hear.)",
       "sort_order": 26
     },
     {
       "step_key": "scheduling",
-      "title": "Scheduling: Two Yes-Yes Options",
-      "content": "Wonderful, {{contact_first_name}}. {{rec_pronoun_cap}} have time this week on (day) and (day). Do mornings or afternoons work better for you?\n\n(Let them answer.)\n\nPerfect, I have a (time) and a (time) available, which is better?\n\n(Let them answer.)\n\nGreat, I've got you down for (day) at (time).\n\n(Always offer two yes-yes options within 48 hours. Before the call, know your two days and two times so you can fill these in without hesitating. Click what happens next.)",
+      "title": "Scheduling",
+      "content": "Great, {{contact_first_name}}. We have time this week on (day) and (day). Do mornings or afternoons work better for you?\n\n(Let them answer.)\n\nPerfect. I have a (time) and a (time). Which is better?\n\n(Let them answer.)\n\nGreat, I've got you down for (day) at (time).\n\n(Have two days and two times ready before the call, both within 48 hours. Click what happens next.)",
       "sort_order": 27
     },
     {
       "step_key": "confirm",
-      "title": "Confirming the Appointment",
-      "content": "Perfect, {{contact_first_name}}. Let me just confirm a couple of quick things: the best number to reach you is the one I called, right? And the address we have on file is still current? Great, and will you be home for the visit, or should the technician plan to meet someone else?\n\n(Confirm phone, address, and who'll be there. Click what happens next.)",
+      "title": "Confirming the appointment",
+      "content": "Perfect, {{contact_first_name}}. Let me confirm a couple of quick things. The best number to reach you is the one I called, right?\n\n(Let them answer.)\n\nAnd the address we have on file is still current?\n\n(Let them answer.)\n\nWill you be home for the visit, or should the technician plan to meet someone else?\n\n(Confirm phone, address, and who'll be there. Click what happens next.)",
       "sort_order": 28
     },
     {
       "step_key": "final_discovery",
-      "title": "Final Discovery",
-      "content": "One last thing, {{contact_first_name}}. Besides what we talked about, is there anything else around the house you'd like the technician to look at while they're out there? Anything at all, even little stuff you've been putting off?\n\n(This is where extra value gets found. Note anything they mention for the visit.)",
+      "title": "Final discovery",
+      "content": "One last thing, {{contact_first_name}}. Is there anything else around the house you'd like the technician to look at while they're out? Even little stuff you've been putting off.\n\n(Note anything they mention for the visit.)",
       "sort_order": 29
     },
     {
       "step_key": "close_appt",
-      "title": "Closing the Call: Appointment Set",
-      "content": "{{contact_first_name}}, you're all set for the visit. Our technician will take a good look at everything, and like I said, if it all checks out great, that's exactly what we'll tell you. Thanks so much for the time today, and we'll see you soon!\n\n(Add your notes and press the green \"Scheduled\" button below to log the call.)",
+      "title": "Close: appointment set",
+      "content": "{{contact_first_name}}, you're all set. Our technician will take a good look at everything. If it all checks out, that's what we'll tell you. Thanks for your time today, and we'll see you soon.\n\n(Add your notes and press the green \"Scheduled\" button below.)",
       "sort_order": 30
     },
     {
       "step_key": "close_callback",
-      "title": "Closing the Call: Callback Set",
-      "content": "No problem at all, {{contact_first_name}}. When would be a better time for me to give you a call back? (Pin down a real day and time, don't settle for \"sometime.\")\n\nPerfect, I'll give you a call then. Thanks so much, and have a great rest of your day!\n\n(Add your notes, then press \"Spoke. Call back later\" below and pick the date they gave you.)",
+      "title": "Close: callback set",
+      "content": "No problem at all, {{contact_first_name}}. When would be a better time for me to call you back?\n\n(Pin down a real day and time. Do not settle for \"sometime\".)\n\nPerfect, I'll call you then. Thanks, and have a great rest of your day.\n\n(Add your notes, then press \"Spoke. Call back later\" below and pick the date they gave you.)",
       "sort_order": 31
     },
     {
       "step_key": "close_no",
-      "title": "Closing the Call: Not Now",
-      "content": "No problem at all, {{contact_first_name}}. I appreciate you taking the time today. If anything ever comes up with the system, you know right where we are. Have a wonderful rest of your day!\n\n(Add your notes and log the call with the disposition that fits.)",
+      "title": "Close: not now",
+      "content": "No problem at all, {{contact_first_name}}. I appreciate your time today. If anything ever comes up with the system, you know where we are. Have a great rest of your day.\n\n(Add your notes and log the call with the disposition that fits.)",
       "sort_order": 32
     },
     {
       "step_key": "voicemail",
       "title": "Voicemail",
-      "content": "Hi {{contact_first_name}}, this is {{caller_name}} with {{practice_name}}. We're updating our service records on customers we haven't seen in a while, and I wanted to check in on your heating and cooling system. Nothing urgent. I'd just love to make sure everything's still running the way it should. Please give me a call back at {{practice_phone}}. Again, this is {{caller_name}} with {{practice_name}} at {{practice_phone}}. Thanks, and have a great day!\n\n(Press the \"Voicemail\" button below to log the call. The system will schedule the retry automatically.)",
+      "content": "Hi {{contact_first_name}}, this is {{caller_name}} with {{practice_name}}. We're updating our service records on customers we haven't seen in a while, and yours came up. Nothing urgent. I just want to make sure your heating and cooling is still running the way it should. Could you call me back at (your office number) when you have a few minutes? Again, this is {{caller_name}} with {{practice_name}}. Thanks, and have a great day.\n\n(Press the \"Voicemail\" button below to log the call. The retry is scheduled automatically.)",
       "sort_order": 33
     },
     {
       "step_key": "gatekeeper",
-      "title": "Someone Else Answered",
-      "content": "Oh hi. This is {{caller_name}} with {{practice_name}}. We're just updating our service records and I was hoping to catch {{contact_first_name}} for a quick minute. Are they around?\n\n(If they ask what it's about: \"We take care of the system at the house, and we're just checking in on our customers.\" Warm, brief, no pitch to the gatekeeper.)",
+      "title": "Someone else answered",
+      "content": "Oh hi. This is {{caller_name}} with {{practice_name}}. We're updating our service records, and I was hoping to catch {{contact_first_name}} for a quick minute. Are they around?\n\n(If they ask what it's about: \"We take care of the system at the house, and we're checking in on our customers.\" Keep it brief. No pitch.)",
       "sort_order": 34
     },
     {
       "step_key": "why_calling",
-      "title": "“Why Are You Calling?” / “Is This Sales?”",
-      "content": "That's a fair question, {{contact_first_name}}, and no, I'm not calling to sell you anything today. We're updating our service records on customers we haven't seen in a while, and {{practice_name}} asked me to check in and make sure the system is still treating you right. That's really it. So, how has it been running?\n\n(Honest, relaxed, no defensiveness. Click what you hear.)",
+      "title": "“Why are you calling?” / “Is this sales?”",
+      "content": "That's a fair question, {{contact_first_name}}, and no, I'm not selling anything today. We're updating our service records on customers we haven't seen in a while. {{practice_name}} asked me to check that the system is still treating you right. That's really it. So, how has it been holding up?\n\n(Stay relaxed. Click what you hear.)",
       "sort_order": 35
     },
     {
       "step_key": "recovery",
-      "title": "Service Recovery: They Weren’t Happy",
-      "content": "{{contact_first_name}}, I'm really sorry to hear that, and I'm glad you told me. Can I ask what happened? (Listen fully. Do not interrupt, do not defend. Let them get it all out, then:) Thank you for telling me that. I'm going to make sure {{practice_name}} hears about it personally.\n\n{{contact_first_name}}, I know we can't undo that experience, but I'd love the chance to make it right. Would you be open to letting us take another look, and if you're not thrilled this time, you'll never hear from us again?\n\n(A sincere apology plus a low-risk offer wins back more customers than any discount.)",
+      "title": "Service recovery: they weren’t happy",
+      "content": "I'm really sorry to hear that, {{contact_first_name}}, and I'm glad you told me. Can I ask what happened?\n\n(Listen fully. Do not interrupt or defend. Let them get it all out.)\n\nThank you for telling me that. I'm going to make sure {{practice_name}} hears about it personally.\n\nI know we can't undo that. I'd like the chance to make it right. Would you be open to letting us take another look? If you're not happy this time, you won't hear from us again.\n\n(A real apology plus a low-risk offer wins back more customers than any discount.)",
       "sort_order": 36
     },
     {
       "step_key": "competitor",
-      "title": "They Use Another Company Now",
-      "content": "Oh, that's completely fair, {{contact_first_name}}. I'm glad you've got someone taking care of it. Can I ask, just for our records? Was there anything about your experience with us that made you switch? (Listen. If there was a problem, treat it as service recovery.)\n\nWell, I appreciate the honesty. If anything ever changes, or you'd like a second opinion on a big repair, we'd love the chance to earn you back. Have a wonderful day!",
+      "title": "They use another company now",
+      "content": "That's fair, {{contact_first_name}}. I'm glad you've got someone taking care of it. Just for our records, was there anything about your experience with us that made you switch?\n\n(Listen. If there was a problem, treat it as service recovery.)\n\nI appreciate the honesty. If anything changes, or you'd like a second opinion on a big repair, we're here. Have a great day.",
       "sort_order": 37
     },
     {
       "step_key": "replaced",
-      "title": "They Replaced the System",
-      "content": "Oh, congratulations on the new system, {{contact_first_name}}! Can I ask who put it in for you? (If it was us, celebrate it. If not, stay warm, no guilt.)\n\nYou know, even a brand-new system needs regular maintenance to keep the warranty valid and keep it running at peak efficiency. Most manufacturers actually require it. Is anyone taking care of that for you yet?\n\n(A new system is a maintenance-plan conversation, not a lost customer.)",
+      "title": "They replaced the system",
+      "content": "Congratulations on the new system, {{contact_first_name}}. Can I ask who put it in for you?\n\n(If it was us, celebrate it. If not, stay warm.)\n\nEven a brand-new system needs regular maintenance to keep the warranty valid and run its best. Most manufacturers require it. Is anyone taking care of that for you yet?\n\n(A new system is a maintenance-plan conversation, not a lost customer.)",
       "sort_order": 38
     },
     {
       "step_key": "property",
-      "title": "Moved, Renting, or Property Changes",
-      "content": "Oh, thanks for letting me know, {{contact_first_name}}. Just so I update our records right. Did you move, or is the property being rented out now?\n\n(If they moved: wish them well, ask if the new owner might want our info, and log the call. If they're the landlord: they still own the system. Continue the conversation about keeping it in good shape between tenants.)",
+      "title": "Moved, renting, or property changes",
+      "content": "Thanks for letting me know, {{contact_first_name}}. Just so I update our records right, did you move, or is the property rented out now?\n\n(Moved: wish them well, ask if the new owner might want our info, and log the call.)\n\n(Landlord: they still own the system. Keep going about keeping it in good shape between tenants.)",
       "sort_order": 39
     },
     {
       "step_key": "wrong_number",
-      "title": "Wrong Number",
-      "content": "Oh, I apologize for the confusion. I was trying to reach {{contact_first_name}}. Sorry to bother you, and have a great day!\n\n(Log the call with a note that the number is wrong so we don't call it again.)",
+      "title": "Wrong number",
+      "content": "I apologize for the confusion. I was trying to reach {{contact_first_name}}. Sorry to bother you, and have a great day.\n\n(Log the call with a note that the number is wrong so we don't call it again.)",
       "sort_order": 40
     },
     {
       "step_key": "dnc",
-      "title": "“Don’t Call Me Again”",
-      "content": "I completely understand, and I'll make sure of it right now. You won't hear from us again. Thank you for your time, and have a good day.\n\n(Press the \"Do Not Call\" button below immediately. This is a legal requirement, not a judgment call.)",
+      "title": "“Don’t call me again”",
+      "content": "I understand, and I'll take care of that right now. You won't hear from us again. Thank you for your time, and have a good day.\n\n(Press the \"Do Not Call\" button below right away. This is a legal requirement.)",
       "sort_order": 41
     },
     {
       "step_key": "urgent",
-      "title": "URGENT: Safety First",
-      "content": "{{contact_first_name}}, stop me right there. Your safety comes first.\n\nIf you smell gas, or your carbon monoxide alarm is going off: please hang up with me, get everyone out of the house, and call your gas company's emergency line or 911 right away. Everything else can wait.\n\nIf it's a burning smell or sparking: turn the system off at the thermostat and the breaker, and let's get a technician out to you as an emergency call. Today.\n\n(Follow your company's emergency dispatch procedure. Do not continue the reactivation script.)",
+      "title": "URGENT: safety first",
+      "content": "{{contact_first_name}}, stop me right there. Your safety comes first.\n\nIf you smell gas or your carbon monoxide alarm is going off, please hang up with me now. Get everyone out of the house. Then call your gas company's emergency line or 911. Everything else can wait.\n\nIf it's a burning smell or sparking, turn the system off at the thermostat and the breaker. We'll get a technician out to you as an emergency call today.\n\n(Follow your company's emergency dispatch procedure. Do not continue this script.)",
       "sort_order": 42
     }
   ],
@@ -310,7 +310,7 @@
     },
     {
       "from_step_key": "digging_in",
-      "label": "“It’s not cooling / heating like it should”",
+      "label": "“It’s not heating or cooling right”",
       "to_step_key": "f_comfort",
       "variant": "caution",
       "sort_order": 0
@@ -324,7 +324,7 @@
     },
     {
       "from_step_key": "digging_in",
-      "label": "Dust, allergies, humidity, or air quality",
+      "label": "Dust, allergies, or humidity",
       "to_step_key": "f_air",
       "variant": "caution",
       "sort_order": 2
@@ -338,7 +338,7 @@
     },
     {
       "from_step_key": "digging_in",
-      "label": "“The bills keep creeping up”",
+      "label": "“The bills have gone up”",
       "to_step_key": "f_bills",
       "variant": "caution",
       "sort_order": 4
@@ -905,7 +905,7 @@
     },
     {
       "from_step_key": "review",
-      "label": "They said yes: magic question",
+      "label": "They said yes: recommendation",
       "to_step_key": "recommendation",
       "variant": "positive",
       "sort_order": 0
@@ -919,7 +919,7 @@
     },
     {
       "from_step_key": "scheduling",
-      "label": "“None of those times work”. Set a callback",
+      "label": "“None of those times work”: set a callback",
       "to_step_key": "close_callback",
       "variant": "caution",
       "sort_order": 1
@@ -940,14 +940,14 @@
     },
     {
       "from_step_key": "svc_recent",
-      "label": "Yes: something small came up",
+      "label": "“Yes, something small”",
       "to_step_key": "transition",
       "variant": "caution",
       "sort_order": 0
     },
     {
       "from_step_key": "svc_recent",
-      "label": "No: everything really is great",
+      "label": "“No, everything really is great”",
       "to_step_key": "maint_rec",
       "variant": "positive",
       "sort_order": 1

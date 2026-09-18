@@ -8,260 +8,260 @@
   "steps": [
     {
       "step_key": "open",
-      "title": "The Professional Open",
-      "content": "Hi, this is {{caller_name}} with {{practice_name}}. Is {{contact_first_name}} available, please?\n\nHi {{contact_first_name}}, the reason I'm calling is that we're updating our service records on customers we haven't seen in a while, and we came across yours. {{asked_by}} check in on your home's plumbing and make sure everything's still doing what it should. Do you have a quick minute?",
+      "title": "The open",
+      "content": "Hi, this is {{caller_name}} with {{practice_name}}. Is {{contact_first_name}} available, please?\n\nHi {{contact_first_name}}. We're updating our service records on customers we haven't seen in a while, and yours came up. {{asked_by_provider}} I wanted to check that your home's plumbing is still doing what it should. Do you have a quick minute?",
       "sort_order": 0
     },
     {
       "step_key": "opening_question",
-      "title": "The Opening Question",
-      "content": "So {{contact_first_name}}, how has the plumbing been treating you since we were last out? Is everything still running great, is it starting to act up a little, or are you having real problems with it?\n\n(This question has only three possible answers. Click the one you hear.)",
+      "title": "The opening question",
+      "content": "So {{contact_first_name}}, how has the plumbing been since we were last out? I usually hear one of three things. Still running great, starting to act up a little, or real problems. Which one is closest for you?\n\n(Click the one you hear.)",
       "sort_order": 1
     },
     {
       "step_key": "resp_great",
-      "title": "It’s Still Running Great",
-      "content": "That's great to hear, {{contact_first_name}}. That's exactly what we like to hear.\n\nLet me ask you this while I have you: when was the last time the plumbing was actually looked at or serviced? Was it recently, has it been a while, or are you not really sure?",
+      "title": "Still running great",
+      "content": "That's great to hear, {{contact_first_name}}. That's what we like to hear.\n\nWhile I have you, when was the plumbing last looked at or serviced?\n\n(Let them answer. Click the closest one: recent, a while, or not sure.)",
       "sort_order": 2
     },
     {
       "step_key": "resp_acting_up",
-      "title": "It’s Starting to Act Up",
-      "content": "{{contact_first_name}}, I appreciate you telling me that, and honestly, that does happen over time. The good news is you caught it while it's still a little thing, and little things are a whole lot easier to deal with than big ones.\n\n(Let them respond.)",
+      "title": "Starting to act up",
+      "content": "I appreciate you telling me that, {{contact_first_name}}. That does happen over time. The good news is you caught it while it's still small. Small things are a lot easier to fix than big ones.\n\n(Let them respond.)",
       "sort_order": 3
     },
     {
       "step_key": "resp_problems",
-      "title": "They’re Having Real Problems",
-      "content": "{{contact_first_name}}, I'm sorry to hear that. That's frustrating, and I'm glad we called when we did. What's been going on?\n\nLet them answer. Be empathetic and listen. Do NOT try to book anything yet. If they describe sewage backing up, a major active leak, flooding, or a gas smell, use the URGENT button.",
+      "title": "Real problems",
+      "content": "I'm sorry to hear that, {{contact_first_name}}. That's frustrating, and I'm glad we called when we did. What's been going on?\n\n(Let them answer. Listen. Do not book anything yet.)\n\n(Sewage backing up, a big active leak, flooding, or a gas smell: press the URGENT button.)",
       "sort_order": 4
     },
     {
       "step_key": "svc_recent",
-      "title": "Serviced Recently: Stay Ahead of It",
-      "content": "{{contact_first_name}}, that's fantastic. You're doing exactly what most people don't, and it's why everything is still running great.\n\nLet me ask you one more thing: even with everything running well, are you noticing any little early signs? A drain that’s gotten slow, a faucet that drips, hot water that runs out faster than it used to. Anything you'd want to stay ahead of?",
+      "title": "Serviced recently",
+      "content": "That's great, {{contact_first_name}}. Most people don't keep up with it, and it's why yours is still running well.\n\nOne more thing. Even with everything running well, have you noticed any small early signs? A drain that's gotten slow, a faucet that drips, or hot water that runs out sooner.\n\n(Let them answer.)",
       "sort_order": 5
     },
     {
       "step_key": "svc_while",
-      "title": "It’s Been a While",
-      "content": "About how long would you say?\n\nLet them answer.\n\nThat's really common. Plumbing just quietly does its job, so it's easy for time to get away from you.\n\nCan I share why I ask? (Wait for their response.)\n\nThe longer plumbing goes without being looked at, the more likely there's something small waiting to be found. A worn valve, a slow drip, a water heater that's building up sediment. Caught now, those are quick, inexpensive fixes, and small leaks alone can quietly add to your water bill every month. Left alone, that same small stuff is what turns into water damage or the emergency call, and that never happens at a convenient time.\n\nDoes that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for yes.)\n\nSince it's been a while, I'd suggest having us go through the plumbing in the home, the water heater, the drains, the shutoff valves, that way you know everything is in good shape, and if it all looks great, that's good news too.\n\nDoes that sound reasonable?\n\n(Wait for the yes.)\n\nGreat, let me see what we have available.\n\n(Opportunities to note: whole-home plumbing inspection, water heater flush, maintenance agreement, main shutoff valve check.)",
+      "title": "It’s been a while",
+      "content": "About how long would you say?\n\n(Let them answer.)\n\nThat's common. Plumbing just does its job, so time gets away from you.\n\nCan I share why I ask?\n\n(Wait for the yes.)\n\nThe longer plumbing goes without a look, the more likely something small is waiting to be found. A worn valve, a slow drip, a water heater full of sediment. Caught now, those are quick, cheap fixes. Small leaks alone can add to your water bill every month. Left alone, that small stuff turns into water damage or the emergency call. That never happens at a convenient time.\n\nDoes that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nSince it's been a while, I'd suggest we go through the plumbing in the home. The water heater, the drains, the shutoff valves. Then you know it's all in good shape. If it all looks great, that's good news too.\n\nDoes that sound reasonable?\n\n(Wait for the yes.)\n\nGreat, let me see what we have available.\n\n(Things to note for the visit: whole-home inspection, water heater flush, maintenance agreement, main shutoff check.)",
       "sort_order": 6
     },
     {
       "step_key": "svc_unknown",
-      "title": "Doesn’t Know When It Was Serviced",
-      "content": "No problem, honestly, most people don't keep track of that. Plumbing is out of sight, out of mind until something goes wrong.\n\nCan I share why I ask? (Wait for their response.)\n\nTwo reasons, really. Things like a slow drip or a running toilet quietly add to your water bill every single month. Money you're spending without getting anything for it. And the bigger one. When a plumber catches a small issue early, like a worn valve or a slow leak under a sink, it's usually a quick, inexpensive fix. It's the small stuff nobody catches that turns into water damage or the emergency call, and that never happens at a convenient time.\n\nDoes that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for yes.)\n\nSince nobody's sure where things stand, I'd suggest having us give the plumbing a complete check, the water heater, the drains, the shutoff valves, that way you know exactly what shape everything is in, and if it all looks great, that's good news too.\n\nDoes that sound reasonable?\n\n(Wait for the yes.)\n\nGreat, let me see what we have available.",
+      "title": "Doesn’t know when it was serviced",
+      "content": "No problem, most people don't keep track of that. Plumbing is out of sight, out of mind until something goes wrong.\n\nCan I share why I ask?\n\n(Wait for the yes.)\n\nTwo reasons. A slow drip or a running toilet adds to your water bill every month. That's money for nothing. And the bigger one. When a plumber catches a small problem early, it's usually a quick, cheap fix. The small stuff nobody catches is what turns into water damage or the emergency call. That never happens at a convenient time.\n\nDoes that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nSince nobody's sure where things stand, I'd suggest we give the plumbing a full check. The water heater, the drains, the shutoff valves. Then you know what shape it's all in. If it all looks great, that's good news too.\n\nDoes that sound reasonable?\n\n(Wait for the yes.)\n\nGreat, let me see what we have available.",
       "sort_order": 7
     },
     {
       "step_key": "maint_rec",
-      "title": "The Maintenance Plan Pivot",
-      "content": "That's great that you're staying on top of it, honestly, you're ahead of most people.\n\nCan I share a thought? (Wait for their response.)\n\nThe hardest part of taking care of plumbing isn't the service itself. It's remembering to schedule it. Life gets busy, a year slips by, and that's usually when something small gets missed. The whole point of a regular plan is that you never have to remember. We remember for you, it stays on a consistent schedule, and small issues get caught while they're still quick, inexpensive fixes instead of water damage or emergency repairs.\n\nDoes that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for yes.)\n\nSince you're already taking care of the home, it may make sense to have us handle the regular plumbing checks for you going forward. That way it's off your plate entirely.\n\nDoes that sound reasonable?\n\n(Wait for the yes.)\n\nGreat, let me see what we have available.\n\n(Opportunities to note: whole-home plumbing inspection, water heater flush, maintenance agreement, main shutoff valve check.)",
+      "title": "Maintenance plan",
+      "content": "That's great that you're staying on top of it. You're ahead of most people.\n\nCan I share a thought?\n\n(Wait for the yes.)\n\nThe hardest part of taking care of plumbing isn't the service. It's remembering to schedule it. Life gets busy, a year slips by, and something small gets missed. With a regular plan you never have to remember. We remember for you. It stays on a schedule, and small things get caught before they turn into water damage.\n\nDoes that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nSince you're already taking care of the home, let us handle the regular plumbing checks from here. That way it's off your plate.\n\nDoes that sound reasonable?\n\n(Wait for the yes.)\n\nGreat, let me see what we have available.\n\n(Things to note for the visit: whole-home inspection, water heater flush, maintenance agreement, main shutoff check.)",
       "sort_order": 8
     },
     {
       "step_key": "transition",
-      "title": "The Transition",
-      "content": "Well {{contact_first_name}}, that's exactly why I'm glad we connected today. Let me ask you a few quick questions so I can update your service records properly. Is that okay?",
+      "title": "The transition",
+      "content": "Well {{contact_first_name}}, I'm glad we connected today. Can I ask you a few quick questions so I can update your service records?\n\n(Wait for the yes.)",
       "sort_order": 9
     },
     {
       "step_key": "digging_in",
-      "title": "Digging In: Update the Records",
-      "content": "{{contact_first_name}}, while I have you, let me just run through a few quick things so we have an accurate picture, okay?\n\n(Ask about each one at a time, acknowledge briefly, and note which ones come up. Do not dig into any single one yet.)\n\nHow’s the hot water? Plenty for everyone, or does it run out faster than it used to?\n\nAny drains that have gotten slow, or clogs that keep coming back?\n\nAny faucets dripping, or toilets that run on their own?\n\nHave you noticed the water bill creeping up without a reason?\n\nHow’s the water pressure? Strong everywhere, or weak in places?\n\nHow’s the water itself? Any taste, smell, or hard-water spots on dishes and fixtures?\n\nIf you have a sump pump, when’s the last time anyone checked it actually works?\n\nAnything you’ve just been living with. A disposal that jams, a fixture you’ve been meaning to replace?\n\nRecap and focus: So {{contact_first_name}}, it sounds like the biggest things are X, Y, and Z. Is that right? Of everything we just talked about, which one bothers you the most?\n\n(Their answer is the heart of the call. Click the one they name.)",
+      "title": "Questions: update the records",
+      "content": "Can I ask you a few quick things while I have you, {{contact_first_name}}?\n\n(Ask one at a time. Note which ones come up. Do not dig into any single one yet.)\n\nHow's the hot water, does it run out sooner than it used to?\n\nAny drains that are slow, or clogs that keep coming back?\n\nAny faucets dripping, or toilets that run on their own?\n\nHow's the water pressure around the house?\n\nHow about the water itself, any taste, smell, or hard-water spots?\n\nIf you have a sump pump, when was it last tested?\n\nAnd anything you've been living with, like a disposal that jams or a project you've put off?\n\nSo it sounds like the big ones are (the ones they named). Is that right?\n\nOf those, which one bothers you the most?\n\n(Tap the chip and click the button for the one they name.)",
       "sort_order": 10
     },
     {
       "step_key": "f_waterheater",
-      "title": "Focus: Water Heater & Hot Water",
-      "content": "{{contact_first_name}}, that's the one we hear most, and nobody should be rationing hot water in their own house.\n\nQuick question. Does it run out faster than it used to, take forever to warm up, or both? And do you happen to know how old the water heater is?\n\n(Age matters a lot here. Note their answers for the plumber.)",
+      "title": "Focus: water heater and hot water",
+      "content": "That's the one we hear most, {{contact_first_name}}. Nobody should be rationing hot water in their own house.\n\nDoes it run out sooner, or take a long time to warm up?\n\n(Let them answer.)\n\nDo you know how old the water heater is?\n\n(Age matters a lot here. Note their answers for the plumber.)",
       "sort_order": 11
     },
     {
       "step_key": "f_drains",
-      "title": "Focus: Drains & Sewer",
-      "content": "I'm glad you mentioned that, {{contact_first_name}}. Here's the thing about clogs that keep coming back: the plunger is treating the symptom, not the cause. When the same drain clogs over and over, something further down the line is catching things, and it only builds.\n\nIs it one drain, or more than one? And how often is it happening at this point?\n\n(More than one drain, or sewage smells, can mean the main line. Note it. If sewage is backing up, use the URGENT button.)",
+      "title": "Focus: drains and sewer",
+      "content": "I'm glad you mentioned that, {{contact_first_name}}. The plunger treats the symptom, not the cause. When the same drain clogs over and over, something further down is catching things. It only builds.\n\nIs it one drain, or more than one?\n\n(Let them answer.)\n\nHow often is it happening now?\n\n(More than one drain, or sewage smells, can mean the main line. Note it. Sewage backing up: press the URGENT button.)",
       "sort_order": 12
     },
     {
       "step_key": "f_leaks",
-      "title": "Focus: Leaks, Drips & Running Toilets",
-      "content": "{{contact_first_name}}, that little drip is quieter than it is cheap. A running toilet alone can waste two hundred gallons a day, and it all shows up on the water bill.\n\nWhich is it? A faucet dripping, a toilet running, or have you noticed the bill creeping up without knowing why?\n\n(A rising bill with no visible leak can mean a hidden one. Note their answers.)",
+      "title": "Focus: drips and running toilets",
+      "content": "That little drip costs more than it sounds, {{contact_first_name}}. A running toilet alone can waste two hundred gallons a day. It all shows up on the water bill.\n\nIs it a faucet dripping, or a toilet running?\n\n(Let them answer.)\n\nHas the water bill gone up without a clear reason?\n\n(A higher bill with no visible leak can mean a hidden one. Note their answers.)",
       "sort_order": 13
     },
     {
       "step_key": "f_pressure",
-      "title": "Focus: Water Pressure & Aging Pipes",
-      "content": "That's a really useful one to know, {{contact_first_name}}. Weak pressure is annoying, but it's also information, especially in an older home, it can mean the pipes themselves are narrowing from the inside.\n\nIs it everywhere in the house, or just certain faucets? And do you happen to know how old the house's plumbing is?\n\n(Whole-house pressure loss in an older home is worth a real look. Note their answers.)",
+      "title": "Focus: water pressure and older pipes",
+      "content": "That's a useful one to know, {{contact_first_name}}. Weak pressure is annoying, but it also tells us something. In an older home it can mean the pipes are narrowing from the inside.\n\nIs it everywhere in the house, or just certain faucets?\n\n(Let them answer.)\n\nDo you know how old the home's plumbing is?\n\n(Whole-house pressure loss in an older home is worth a real look. Note their answers.)",
       "sort_order": 14
     },
     {
       "step_key": "f_quality",
-      "title": "Focus: Water Quality",
-      "content": "I'm glad you brought that up, {{contact_first_name}}. You use that water for everything: drinking, cooking, bathing the kids.\n\nIs it more the taste or smell, or the hard-water side? Spots on the dishes, scale on the fixtures, soap that won't lather right?\n\n(Hard water also quietly shortens the life of the water heater and fixtures. Note their answers.)",
+      "title": "Focus: water quality",
+      "content": "I'm glad you brought that up, {{contact_first_name}}. You use that water for everything. Drinking, cooking, bathing the kids.\n\nIs it more the taste and smell, or the hard-water side?\n\n(Let them answer. Hard water means spots on dishes, scale on fixtures, soap that won't lather.)\n\n(Hard water also shortens the life of the water heater and fixtures. Note their answers.)",
       "sort_order": 15
     },
     {
       "step_key": "f_sump",
-      "title": "Focus: Sump Pump",
-      "content": "{{contact_first_name}}, I'm really glad you mentioned that. The thing about a sump pump is you only find out it's broken on the worst possible day, standing in a wet basement.\n\nWhen's the last time anyone actually tested it? And does it have a battery backup for when storms knock the power out?\n\n(A pump test is quick, and it's the cheapest flood insurance there is.)",
+      "title": "Focus: sump pump",
+      "content": "I'm glad you mentioned that, {{contact_first_name}}. You usually find out a sump pump is broken on the worst possible day. Standing in a wet basement.\n\nWhen was it last tested?\n\n(Let them answer.)\n\nDoes it have a battery backup for when a storm knocks the power out?\n\n(A pump test is quick, and it's the cheapest flood insurance there is.)",
       "sort_order": 16
     },
     {
       "step_key": "f_fixtures",
-      "title": "Focus: Fixtures, Disposal & Projects",
-      "content": "That's great to know, {{contact_first_name}}, whether it's a disposal that's given up, a fixture that's past its prime, or a bathroom you've been dreaming about, that's exactly the kind of thing we love to help with.\n\nTell me a little more. What have you been living with, or what's the project?\n\n(Note the details. Project conversations are appointments, not phone quotes.)",
+      "title": "Focus: fixtures, disposal, and projects",
+      "content": "That's good to know, {{contact_first_name}}. A disposal that's given up, a fixture past its prime, or a bathroom you've been planning. We help with all of it.\n\nTell me a little more. What have you been living with, or what's the project?\n\n(Note the details. Projects are appointments, not phone quotes.)",
       "sort_order": 17
     },
     {
       "step_key": "making_it_real",
-      "title": "Making It Real",
-      "content": "(Take the concern they named and make it present with three questions, in order.)\n\nHow long has that been going on? A few weeks, a month or two?\n\nIs it here and there, or is it pretty much every day at this point?\n\nWhen it acts up, how does it affect things? The morning routine? The water bill? Worry about water damage? (Let them open up. Do not rush.)\n\nThen respond with empathy: Thank you for sharing that. That makes complete sense, and that's exactly the kind of thing our plumbers help people with every single day.",
+      "title": "Making it real",
+      "content": "(Three questions about the problem they named, in order.)\n\nHow long has that been going on?\n\n(Let them answer. Repeat it back.)\n\nIs it here and there, or pretty much every day now?\n\n(Let them answer.)\n\nWhen it acts up, how does it affect things at home?\n\n(Let them answer. The morning routine, the water bill, worry about water damage. Do not rush.)\n\nThank you for telling me that. Our plumbers see this all the time.",
       "sort_order": 18
     },
     {
       "step_key": "review",
-      "title": "The Review & Bridge",
-      "content": "{{contact_first_name}}, let me make sure I've got this right. (Recap what they told you: how long, how often, and how it affects them.) Did I get that right?\n\nAnd it sounds like what you'd really love is for the plumbing to just be something you never have to think about. Is that fair to say?\n\n(Almost everyone says yes. That yes is the moment.)",
+      "title": "Review and bridge",
+      "content": "{{contact_first_name}}, let me make sure I've got this right.\n\n(Recap what they told you: how long, how often, and how it affects them.)\n\nDid I get that right?\n\n(Wait for the yes.)\n\nIt sounds like you'd really like the plumbing to be something you never have to think about. Is that fair to say?\n\n(Wait for the yes.)",
       "sort_order": 19
     },
     {
       "step_key": "recommendation",
-      "title": "The Magic Question & Recommendation",
-      "content": "{{contact_first_name}}, here's how this works: one of our plumbers comes out, takes a look at it, and sees exactly what's going on. And while they're out there, they'll give the whole house’s plumbing a complete once-over, so if anything else is going on, you'll know about it before it becomes a problem. And if it all checks out great, we'll tell you that too. We're not here to waste your time or your money. Does that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for yes.)\n\nBased on everything you've told me, my recommendation is that we get one of our plumbers out to take that look. Does that sound reasonable?\n\n(Ask \"does that sound reasonable\", never \"does that sound good.\" Click what you hear next.)",
+      "title": "Recommendation",
+      "content": "{{contact_first_name}}, here's how this works. One of our plumbers comes out and takes a look at {{main_concern}}. While they're there, they give the home's plumbing a once-over. If anything else is going on, you'll know before it becomes a problem. If it all checks out, we'll tell you that too. Does that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nMy recommendation is that we get a plumber out to take that look. Does that sound reasonable?\n\n(Say \"reasonable\", not \"good\". Click what you hear.)",
       "sort_order": 20
     },
     {
       "step_key": "uncover",
-      "title": "Uncover the Real Concern",
-      "content": "I understand, {{contact_first_name}}. Let me ask. What is it that would keep you from taking care of something you've told me is bothering you?\n\n(Listen. Their real answer is almost always one of the buttons below.)",
+      "title": "Uncover the real concern",
+      "content": "I understand, {{contact_first_name}}. Can I ask what would keep you from taking care of something that's bothering you?\n\n(Listen. Their real answer is almost always one of the buttons below.)",
       "sort_order": 21
     },
     {
       "step_key": "obj_price",
-      "title": "Objection: Cost",
-      "content": "{{contact_first_name}}, I completely understand. I want to be clear. This first step is simply having a plumber come take a look so you know exactly where things stand. You're not committing to anything today. And knowing is what protects you. It's the small stuff nobody catches that turns into the expensive problem later.\n\n(Do NOT improvise pricing or discounts on the call. Let the office handle specifics.)\n\nConfirm and continue: Does that make sense? (Wait for a fast yes.) Do you have any other questions or concerns?",
+      "title": "Objection: cost",
+      "content": "I understand, {{contact_first_name}}. This first step is just having a plumber take a look. You're not committing to anything today. Knowing where things stand is what protects you. The small stuff nobody catches is what gets expensive later.\n\n(Do not quote prices or discounts. The office handles that.)\n\nWould it be okay to at least get the look on the calendar?\n\n(Wait for the yes.)",
       "sort_order": 22
     },
     {
       "step_key": "obj_think",
       "title": "Objection: “I need to think about it”",
-      "content": "That's completely fair, {{contact_first_name}}. Can I ask what part you'd want to think over? Sometimes it's the cost, sometimes it's the timing, and sometimes people just aren't sure it's worth a visit, which one is closest for you?\n\n(Listen, their answer usually turns into one of the other buttons. If it stays vague, continue below.)\n\nThe nice thing is, the visit is just information. You'll know exactly what shape the plumbing is in, and then you can think it over with real answers instead of guesses.\n\nConfirm and continue: Does that make sense? (Wait for a fast yes.) Do you have any other questions or concerns?",
+      "content": "That's fair, {{contact_first_name}}. Can I ask which part you'd want to think over?\n\n(Let them answer. Cost, timing, or not sure it's worth a visit. Their answer usually turns into one of the buttons below.)\n\nThe nice thing is, the visit is just information. Then you can think it over with real answers instead of guesses.\n\nDoes that sound fair?",
       "sort_order": 23
     },
     {
       "step_key": "obj_spouse",
       "title": "Objection: “I need to talk to my spouse”",
-      "content": "That makes complete sense, {{contact_first_name}}. What most people find helpful is having the plumber take a look first. That way you'll both have real information to decide with, instead of guessing.\n\nConfirm and continue: Does that make sense? (Wait for a fast yes.) Do you have any other questions or concerns?",
+      "content": "That's fair, {{contact_first_name}}. Most people find it helps to have the plumber take a look first. That way you both have real information to decide with.\n\nWould that work?",
       "sort_order": 24
     },
     {
       "step_key": "obj_busy",
-      "title": "Objection: “I’m too busy / no time”",
-      "content": "I completely understand, {{contact_first_name}}. Life gets busy. The nice thing is, you don't have to do anything for this one: our plumber does the work, and we'll schedule it around whatever works for you.\n\nConfirm and continue: Does that make sense? (Wait for a fast yes.) Do you have any other questions or concerns?",
+      "title": "Objection: too busy",
+      "content": "I understand, {{contact_first_name}}. Life gets busy. You don't have to do anything for this one. Our plumber does the work, and we schedule it around you.\n\nIs there a day that's usually easier for you?",
       "sort_order": 25
     },
     {
       "step_key": "not_interested",
-      "title": "“Not Interested”",
-      "content": "No problem at all, {{contact_first_name}}. I'm not calling to sell you anything today. We're just updating our records on customers we haven't seen in a while, and {{practice_name}} wanted to make sure the plumbing is still treating you right. Can I ask just one quick question? Is everything still running the way it should?\n\n(A genuine question, asked warmly, re-opens most of these calls. Click what you hear.)",
+      "title": "“Not interested”",
+      "content": "No problem at all, {{contact_first_name}}. I'm not calling to sell you anything today. We're updating our records on customers we haven't seen in a while. {{practice_name}} just wanted to make sure the plumbing is still treating you right. Can I ask one quick question?\n\n(Wait for the yes.)\n\nIs everything still running the way it should?\n\n(A real question, asked warmly, re-opens most of these calls. Click what you hear.)",
       "sort_order": 26
     },
     {
       "step_key": "scheduling",
-      "title": "Scheduling: Two Yes-Yes Options",
-      "content": "Wonderful, {{contact_first_name}}. {{rec_pronoun_cap}} have time this week on (day) and (day). Do mornings or afternoons work better for you?\n\n(Let them answer.)\n\nPerfect, I have a (time) and a (time) available, which is better?\n\n(Let them answer.)\n\nGreat, I've got you down for (day) at (time).\n\n(Always offer two yes-yes options within 48 hours. Before the call, know your two days and two times so you can fill these in without hesitating. Click what happens next.)",
+      "title": "Scheduling",
+      "content": "Great, {{contact_first_name}}. We have time this week on (day) and (day). Do mornings or afternoons work better for you?\n\n(Let them answer.)\n\nPerfect. I have a (time) and a (time). Which is better?\n\n(Let them answer.)\n\nGreat, I've got you down for (day) at (time).\n\n(Have two days and two times ready before the call, both within 48 hours. Click what happens next.)",
       "sort_order": 27
     },
     {
       "step_key": "confirm",
-      "title": "Confirming the Appointment",
-      "content": "Perfect, {{contact_first_name}}. Let me just confirm a couple of quick things: the best number to reach you is the one I called, right? And the address we have on file is still current? Great, and will you be home for the visit, or should the plumber plan to meet someone else?\n\n(Confirm phone, address, and who'll be there. Click what happens next.)",
+      "title": "Confirming the appointment",
+      "content": "Perfect, {{contact_first_name}}. Let me confirm a couple of quick things. The best number to reach you is the one I called, right?\n\n(Let them answer.)\n\nAnd the address we have on file is still current?\n\n(Let them answer.)\n\nWill you be home for the visit, or should the plumber plan to meet someone else?\n\n(Confirm phone, address, and who'll be there. Click what happens next.)",
       "sort_order": 28
     },
     {
       "step_key": "final_discovery",
-      "title": "Final Discovery",
-      "content": "One last thing, {{contact_first_name}}. Besides what we talked about, is there anything else around the house you'd like the plumber to look at while they're out there? Anything at all, even little stuff you've been putting off?\n\n(This is where extra value gets found. Note anything they mention for the visit.)",
+      "title": "Final discovery",
+      "content": "One last thing, {{contact_first_name}}. Is there anything else around the house you'd like the plumber to look at while they're out? Even little stuff you've been putting off.\n\n(Note anything they mention for the visit.)",
       "sort_order": 29
     },
     {
       "step_key": "close_appt",
-      "title": "Closing the Call: Appointment Set",
-      "content": "{{contact_first_name}}, you're all set for the visit. Our plumber will take a good look at everything, and like I said, if it all checks out great, that's exactly what we'll tell you. Thanks so much for the time today, and we'll see you soon!\n\n(Add your notes and press the green \"Scheduled\" button below to log the call.)",
+      "title": "Close: appointment set",
+      "content": "{{contact_first_name}}, you're all set. Our plumber will take a good look at everything. If it all checks out, that's what we'll tell you. Thanks for your time today, and we'll see you soon.\n\n(Add your notes and press the green \"Scheduled\" button below.)",
       "sort_order": 30
     },
     {
       "step_key": "close_callback",
-      "title": "Closing the Call: Callback Set",
-      "content": "No problem at all, {{contact_first_name}}. When would be a better time for me to give you a call back? (Pin down a real day and time, don't settle for \"sometime.\")\n\nPerfect, I'll give you a call then. Thanks so much, and have a great rest of your day!\n\n(Add your notes, then press \"Spoke. Call back later\" below and pick the date they gave you.)",
+      "title": "Close: callback set",
+      "content": "No problem at all, {{contact_first_name}}. When would be a better time for me to call you back?\n\n(Pin down a real day and time. Do not settle for \"sometime\".)\n\nPerfect, I'll call you then. Thanks, and have a great rest of your day.\n\n(Add your notes, then press \"Spoke. Call back later\" below and pick the date they gave you.)",
       "sort_order": 31
     },
     {
       "step_key": "close_no",
-      "title": "Closing the Call: Not Now",
-      "content": "No problem at all, {{contact_first_name}}. I appreciate you taking the time today. If anything ever comes up with the plumbing, you know right where we are. Have a wonderful rest of your day!\n\n(Add your notes and log the call with the disposition that fits.)",
+      "title": "Close: not now",
+      "content": "No problem at all, {{contact_first_name}}. I appreciate your time today. If anything ever comes up with the plumbing, you know where we are. Have a great rest of your day.\n\n(Add your notes and log the call with the disposition that fits.)",
       "sort_order": 32
     },
     {
       "step_key": "voicemail",
       "title": "Voicemail",
-      "content": "Hi {{contact_first_name}}, this is {{caller_name}} with {{practice_name}}. We're updating our service records on customers we haven't seen in a while, and I wanted to check in on your home's plumbing. Nothing urgent. I'd just love to make sure everything's still running the way it should. Please give me a call back at {{practice_phone}}. Again, this is {{caller_name}} with {{practice_name}} at {{practice_phone}}. Thanks, and have a great day!\n\n(Press the \"Voicemail\" button below to log the call. The system will schedule the retry automatically.)",
+      "content": "Hi {{contact_first_name}}, this is {{caller_name}} with {{practice_name}}. We're updating our service records on customers we haven't seen in a while, and yours came up. Nothing urgent. I just want to make sure your home's plumbing is still running the way it should. Could you call me back at (your office number) when you have a few minutes? Again, this is {{caller_name}} with {{practice_name}}. Thanks, and have a great day.\n\n(Press the \"Voicemail\" button below to log the call. The retry is scheduled automatically.)",
       "sort_order": 33
     },
     {
       "step_key": "gatekeeper",
-      "title": "Someone Else Answered",
-      "content": "Oh hi. This is {{caller_name}} with {{practice_name}}. We're just updating our service records and I was hoping to catch {{contact_first_name}} for a quick minute. Are they around?\n\n(If they ask what it's about: \"We take care of the plumbing at the house, and we're just checking in on our customers.\" Warm, brief, no pitch to the gatekeeper.)",
+      "title": "Someone else answered",
+      "content": "Oh hi. This is {{caller_name}} with {{practice_name}}. We're updating our service records, and I was hoping to catch {{contact_first_name}} for a quick minute. Are they around?\n\n(If they ask what it's about: \"We take care of the plumbing at the house, and we're checking in on our customers.\" Keep it brief. No pitch.)",
       "sort_order": 34
     },
     {
       "step_key": "why_calling",
-      "title": "“Why Are You Calling?” / “Is This Sales?”",
-      "content": "That's a fair question, {{contact_first_name}}, and no, I'm not calling to sell you anything today. We're updating our service records on customers we haven't seen in a while, and {{practice_name}} asked me to check in and make sure the plumbing is still treating you right. That's really it. So, how has it been running?\n\n(Honest, relaxed, no defensiveness. Click what you hear.)",
+      "title": "“Why are you calling?” / “Is this sales?”",
+      "content": "That's a fair question, {{contact_first_name}}, and no, I'm not selling anything today. We're updating our service records on customers we haven't seen in a while. {{practice_name}} asked me to check that the plumbing is still treating you right. That's really it. So, how has it been holding up?\n\n(Stay relaxed. Click what you hear.)",
       "sort_order": 35
     },
     {
       "step_key": "recovery",
-      "title": "Service Recovery: They Weren’t Happy",
-      "content": "{{contact_first_name}}, I'm really sorry to hear that, and I'm glad you told me. Can I ask what happened? (Listen fully. Do not interrupt, do not defend. Let them get it all out, then:) Thank you for telling me that. I'm going to make sure {{practice_name}} hears about it personally.\n\n{{contact_first_name}}, I know we can't undo that experience, but I'd love the chance to make it right. Would you be open to letting us take another look, and if you're not thrilled this time, you'll never hear from us again?\n\n(A sincere apology plus a low-risk offer wins back more customers than any discount.)",
+      "title": "Service recovery: they weren’t happy",
+      "content": "I'm really sorry to hear that, {{contact_first_name}}, and I'm glad you told me. Can I ask what happened?\n\n(Listen fully. Do not interrupt or defend. Let them get it all out.)\n\nThank you for telling me that. I'm going to make sure {{practice_name}} hears about it personally.\n\nI know we can't undo that. I'd like the chance to make it right. Would you be open to letting us take another look? If you're not happy this time, you won't hear from us again.\n\n(A real apology plus a low-risk offer wins back more customers than any discount.)",
       "sort_order": 36
     },
     {
       "step_key": "competitor",
-      "title": "They Use Another Company Now",
-      "content": "Oh, that's completely fair, {{contact_first_name}}. I'm glad you've got someone taking care of it. Can I ask, just for our records? Was there anything about your experience with us that made you switch? (Listen. If there was a problem, treat it as service recovery.)\n\nWell, I appreciate the honesty. If anything ever changes, or you'd like a second opinion on a big repair, we'd love the chance to earn you back. Have a wonderful day!",
+      "title": "They use another company now",
+      "content": "That's fair, {{contact_first_name}}. I'm glad you've got someone taking care of it. Just for our records, was there anything about your experience with us that made you switch?\n\n(Listen. If there was a problem, treat it as service recovery.)\n\nI appreciate the honesty. If anything changes, or you'd like a second opinion on a big repair, we're here. Have a great day.",
       "sort_order": 37
     },
     {
       "step_key": "replaced",
-      "title": "They Had the Plumbing Redone",
-      "content": "Oh, that's great to hear, {{contact_first_name}}. New plumbing is a big investment in the house. Can I ask who did the work for you? (If it was us, celebrate it. If not, stay warm, no guilt.)\n\nEven with new work, things like water heaters and drains still need an eye kept on them to protect that investment. Is anyone taking care of that for you?\n\n(New work is a maintenance conversation, not a lost customer.)",
+      "title": "They had the plumbing redone",
+      "content": "That's great to hear, {{contact_first_name}}. New plumbing is a big investment in the house. Can I ask who did the work for you?\n\n(If it was us, celebrate it. If not, stay warm.)\n\nEven with new work, water heaters and drains still need an eye kept on them. Is anyone taking care of that for you?\n\n(New work is a maintenance conversation, not a lost customer.)",
       "sort_order": 38
     },
     {
       "step_key": "property",
-      "title": "Moved, Renting, or Property Changes",
-      "content": "Oh, thanks for letting me know, {{contact_first_name}}. Just so I update our records right. Did you move, or is the property being rented out now?\n\n(If they moved: wish them well, ask if the new owner might want our info, and log the call. If they're the landlord: they still own the plumbing. Continue the conversation about keeping it in good shape between tenants.)",
+      "title": "Moved, renting, or property changes",
+      "content": "Thanks for letting me know, {{contact_first_name}}. Just so I update our records right, did you move, or is the property rented out now?\n\n(Moved: wish them well, ask if the new owner might want our info, and log the call.)\n\n(Landlord: they still own the plumbing. Keep going about keeping it in good shape between tenants.)",
       "sort_order": 39
     },
     {
       "step_key": "wrong_number",
-      "title": "Wrong Number",
-      "content": "Oh, I apologize for the confusion. I was trying to reach {{contact_first_name}}. Sorry to bother you, and have a great day!\n\n(Log the call with a note that the number is wrong so we don't call it again.)",
+      "title": "Wrong number",
+      "content": "I apologize for the confusion. I was trying to reach {{contact_first_name}}. Sorry to bother you, and have a great day.\n\n(Log the call with a note that the number is wrong so we don't call it again.)",
       "sort_order": 40
     },
     {
       "step_key": "dnc",
-      "title": "“Don’t Call Me Again”",
-      "content": "I completely understand, and I'll make sure of it right now. You won't hear from us again. Thank you for your time, and have a good day.\n\n(Press the \"Do Not Call\" button below immediately. This is a legal requirement, not a judgment call.)",
+      "title": "“Don’t call me again”",
+      "content": "I understand, and I'll take care of that right now. You won't hear from us again. Thank you for your time, and have a good day.\n\n(Press the \"Do Not Call\" button below right away. This is a legal requirement.)",
       "sort_order": 41
     },
     {
       "step_key": "urgent",
-      "title": "URGENT: Safety First",
-      "content": "{{contact_first_name}}, stop me right there. Let's take care of you first.\n\nIf you smell gas: please hang up with me, get everyone out of the house, and call your gas company's emergency line or 911 right away.\n\nIf sewage is backing up or water is actively flooding: shut off the main water valve if you can get to it safely, and let's get a plumber out to you as an emergency call. Today.\n\n(Follow your company's emergency dispatch procedure. Do not continue the reactivation script.)",
+      "title": "URGENT: safety first",
+      "content": "{{contact_first_name}}, stop me right there. Let's take care of you first.\n\nIf you smell gas, please hang up with me now. Get everyone out of the house. Then call your gas company's emergency line or 911.\n\nIf sewage is backing up or water is flooding, shut off the main water valve. Only if you can reach it safely. We'll get a plumber out to you as an emergency call today.\n\n(Follow your company's emergency dispatch procedure. Do not continue this script.)",
       "sort_order": 42
     }
   ],
@@ -310,7 +310,7 @@
     },
     {
       "from_step_key": "digging_in",
-      "label": "Water heater / hot water issues",
+      "label": "Hot water running out",
       "to_step_key": "f_waterheater",
       "variant": "caution",
       "sort_order": 0
@@ -331,28 +331,28 @@
     },
     {
       "from_step_key": "digging_in",
-      "label": "Low water pressure or aging pipes",
+      "label": "Low water pressure or older pipes",
       "to_step_key": "f_pressure",
       "variant": "caution",
       "sort_order": 3
     },
     {
       "from_step_key": "digging_in",
-      "label": "Water quality or hard water",
+      "label": "Water taste, smell, or hard water",
       "to_step_key": "f_quality",
       "variant": "caution",
       "sort_order": 4
     },
     {
       "from_step_key": "digging_in",
-      "label": "Sump pump concerns",
+      "label": "Sump pump",
       "to_step_key": "f_sump",
       "variant": "caution",
       "sort_order": 5
     },
     {
       "from_step_key": "digging_in",
-      "label": "Disposal, fixtures, or remodel plans",
+      "label": "Disposal, fixtures, or a project",
       "to_step_key": "f_fixtures",
       "variant": "caution",
       "sort_order": 6
@@ -905,7 +905,7 @@
     },
     {
       "from_step_key": "review",
-      "label": "They said yes: magic question",
+      "label": "They said yes: recommendation",
       "to_step_key": "recommendation",
       "variant": "positive",
       "sort_order": 0
@@ -919,7 +919,7 @@
     },
     {
       "from_step_key": "scheduling",
-      "label": "“None of those times work”. Set a callback",
+      "label": "“None of those times work”: set a callback",
       "to_step_key": "close_callback",
       "variant": "caution",
       "sort_order": 1
@@ -940,14 +940,14 @@
     },
     {
       "from_step_key": "svc_recent",
-      "label": "Yes: something small came up",
+      "label": "“Yes, something small”",
       "to_step_key": "transition",
       "variant": "caution",
       "sort_order": 0
     },
     {
       "from_step_key": "svc_recent",
-      "label": "No: everything really is great",
+      "label": "“No, everything really is great”",
       "to_step_key": "maint_rec",
       "variant": "positive",
       "sort_order": 1

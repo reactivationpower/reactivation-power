@@ -266,6 +266,26 @@ export const CONCERN_OPTIONS: Record<string, ConcernOption[]> = {
     { label: 'Headaches', spoken: 'your headaches' },
     { label: 'Medications', spoken: 'your reliance on all those pills' },
   ],
+  // Home services: the "patient" is a customer and the chips are the problems
+  // a homeowner names on the questions screen, one per focus branch.
+  HVAC: [
+    { label: 'Not heating or cooling right', spoken: 'the heating and cooling not keeping up' },
+    { label: 'Hot or cold rooms', spoken: 'those hot and cold rooms' },
+    { label: 'Dust, allergies, or humidity', spoken: 'the dust and the air in the house' },
+    { label: 'New noises or smells', spoken: 'that new noise' },
+    { label: 'Higher bills', spoken: 'those higher bills' },
+    { label: 'Older system', spoken: 'the age of the system' },
+    { label: 'Thermostat', spoken: 'the thermostat' },
+  ],
+  Plumbing: [
+    { label: 'Hot water running out', spoken: 'the hot water running out' },
+    { label: 'Slow drains or clogs', spoken: 'those slow drains' },
+    { label: 'Drips or running toilets', spoken: 'that drip' },
+    { label: 'Low water pressure', spoken: 'the water pressure' },
+    { label: 'Water taste, smell, or hard water', spoken: 'the water quality' },
+    { label: 'Sump pump', spoken: 'the sump pump' },
+    { label: 'Disposal, fixtures, or a project', spoken: 'that project' },
+  ],
 }
 
 /** Fallback used when the caller never taps a chip — keeps every sentence
