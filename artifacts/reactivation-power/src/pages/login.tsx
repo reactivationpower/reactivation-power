@@ -9,6 +9,8 @@ import { PageError, PageLoading } from '@/components/page-status'
 export default function LoginPage() {
   const search = new URLSearchParams(useSearch())
   const requestedNext = search.get('next') ?? undefined
+  // Welcome emails link here with the account email prefilled.
+  const prefillEmail = search.get('email') ?? undefined
   const { data, loading, error } = usePageData<any>('/login', {
     next: requestedNext,
   })
@@ -32,7 +34,7 @@ export default function LoginPage() {
           </p>
         </div>
         <div className="rounded-xl border bg-card p-6 shadow-sm">
-          <LoginForm next={next} />
+          <LoginForm next={next} email={prefillEmail} />
         </div>
         <p className="mt-6 text-center text-xs text-muted-foreground text-pretty">
           Don&apos;t have access? Contact your administrator to be added.

@@ -6,6 +6,7 @@ import { requireAdmin } from '@/lib/auth/admin-session'
 import { getAdminClient } from '@/lib/supabase/admin'
 import { stripe } from '@/lib/stripe'
 import { MAX_STAFF } from '@/lib/types'
+import { sendPaymentReceivedEmail, sendPortalWelcomeEmail } from '@/lib/mail'
 
 const PRODUCT_NAME = 'Reactivation Power Access'
 
@@ -107,6 +108,13 @@ async function provisionAccounts(linkId: string): Promise<string | null> {
       return null
     }
     ownerId = created.id
+    await sendPortalWelcomeEmail({
+      participantId: created.id,
+      firstName: first,
+      email,
+      role: 'owner',
+      source: 'payment',
+    })
   }
 
   // Staff members become sub-accounts under the owner
@@ -122,14 +130,29 @@ async function provisionAccounts(linkId: string): Promise<string | null> {
       .maybeSingle()
     if (dupe) continue
     const staffName = splitName(member.name || staffEmail.split('@')[0])
-    const { error } = await supabase.from('participants').insert({
-      first_name: staffName.first,
-      last_name: staffName.last,
+    const { data: staffRow, error } = await supabase
+      .from('participants')
+      .insert({
+        first_name: staffName.first,
+        last_name: staffName.last,
+        email: staffEmail,
+        parent_id: ownerId,
+        role: 'staff',
+      })
+      .select('id')
+      .single()
+    if (error || !staffRow) {
+      console.error('[v0] provision staff failed:', error?.message)
+      continue
+    }
+    await sendPortalWelcomeEmail({
+      participantId: staffRow.id,
+      firstName: staffName.first,
       email: staffEmail,
-      parent_id: ownerId,
       role: 'staff',
+      ownerName: String(link.name),
+      source: 'payment',
     })
-    if (error) console.error('[v0] provision staff failed:', error.message)
   }
 
   await supabase
@@ -306,7 +329,7 @@ export async function confirmPayment(
   const supabase = getAdminClient()
   const { data: link } = await supabase
     .from('payment_links')
-    .select('id, status, stripe_session_id')
+    .select('id, status, stripe_session_id, name, email, amount_cents')
     .eq('token', token)
     .maybeSingle()
 
@@ -319,10 +342,22 @@ export async function confirmPayment(
       link.stripe_session_id,
     )
     if (session.payment_status === 'paid') {
+      const paidAt = new Date().toISOString()
       await supabase
         .from('payment_links')
-        .update({ status: 'paid', paid_at: new Date().toISOString() })
+        .update({ status: 'paid', paid_at: paidAt })
         .eq('id', link.id)
+      await sendPaymentReceivedEmail(
+        String(link.email),
+        {
+          name: String(link.name),
+          amountCents: Number(link.amount_cents),
+          description: PRODUCT_NAME,
+          paidAt,
+          receiptUrl: await stripeReceiptUrl(session.payment_intent),
+        },
+        { metadata: { paymentLinkId: link.id, stripeSessionId: session.id } },
+      )
       // Payment is recorded first, then the portal accounts are created
       await provisionAccounts(link.id)
       revalidatePath('/admin/payments')
@@ -333,6 +368,22 @@ export async function confirmPayment(
     console.error('[v0] confirmPayment failed:', err)
   }
   return { paid: false }
+}
+
+/** Hosted Stripe receipt for a checkout session's charge, if Stripe has one. */
+async function stripeReceiptUrl(
+  paymentIntent: string | { id: string } | null | undefined,
+): Promise<string | null> {
+  const id = typeof paymentIntent === 'string' ? paymentIntent : paymentIntent?.id
+  if (!id) return null
+  try {
+    const intent = await stripe.paymentIntents.retrieve(id, { expand: ['latest_charge'] })
+    const charge = intent.latest_charge
+    return charge && typeof charge !== 'string' ? (charge.receipt_url ?? null) : null
+  } catch (err) {
+    console.error('[v0] receipt lookup failed:', err)
+    return null
+  }
 }
 
 /**

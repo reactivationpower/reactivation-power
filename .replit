@@ -24,3 +24,4 @@ timeoutMs = 20000
 [userenv.shared]
 SUPABASE_URL = "https://jbdymqqpolkoevyypjxd.supabase.co"
 SUPER_ADMIN_EMAIL = "drstrotheide@gmail.com"
+RESEND_FROM = "Reactivation Power <noreply@reactivationpower.com>"

@@ -9,6 +9,7 @@ import progressRouter from "./progress";
 import templatesRouter from "./templates";
 import uploadRouter from "./upload";
 import configRouter from "./config";
+import webhooksResendRouter from "./webhooks-resend";
 
 const router: IRouter = Router();
 
@@ -22,5 +23,6 @@ router.use(progressRouter);
 router.use(templatesRouter);
 router.use(uploadRouter);
 router.use(configRouter);
+router.use(webhooksResendRouter);
 
 export default router;

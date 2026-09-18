@@ -10,6 +10,7 @@ import * as auth from "../actions/auth";
 import * as booking from "../actions/booking";
 import * as demo from "../actions/demo";
 import * as leads from "../actions/leads";
+import * as mail from "../actions/mail";
 import * as payments from "../actions/payments";
 import * as reactivation from "../actions/reactivation";
 import { getAdminSessionFromRequest, satisfies } from "../lib/auth/admin-session";
@@ -47,6 +48,7 @@ const MODULES: Record<string, ActionModule> = {
   booking,
   demo,
   leads,
+  mail,
   payments,
   reactivation,
 };
@@ -61,8 +63,9 @@ const ACTIONS: Record<string, Record<string, Auth>> = {
   },
   "admin-team": {
     listTeam: "super_admin", inviteTeamMember: "super_admin", updateTeamMember: "super_admin",
-    setTeamMemberActive: "super_admin", getTeamInviteLink: "super_admin",
+    setTeamMemberActive: "super_admin", getTeamInviteLink: "super_admin", resendTeamInvite: "super_admin",
   },
+  mail: { listTransactionalTemplates: "super_admin", sendTestEmail: "super_admin", listEmailLog: "super_admin" },
   "admin-view-as": { viewAsParticipant: "super_admin" },
   auth: { login: "public", logout: "public" },
   booking: { getAvailability: "public", bookStrategyCall: "public" },

@@ -4,6 +4,7 @@ import { isAdminRole } from '@/lib/auth/admin-token'
 import {
   countActiveSuperAdmins,
   createInviteLink,
+  emailInviteLink,
   getAdminUserById,
   inviteAdminUser,
   listAdminUsers,
@@ -32,7 +33,8 @@ export async function inviteTeamMember(formData: FormData): Promise<InviteResult
   if (!EMAIL_RE.test(email)) throw new Error('Please enter a valid email address.')
   if (!isAdminRole(role)) throw new Error('Unknown role.')
   return inviteAdminUser({
-    email, name, role, defaultCommissionRate: rate, invitedBy: actor.userId,
+    email, name, role, defaultCommissionRate: rate,
+    invitedBy: actor.userId, invitedByName: actor.name ?? actor.email,
   })
 }
 
@@ -82,4 +84,12 @@ export async function getTeamInviteLink(formData: FormData): Promise<{ link: str
   const id = String(formData.get('id') ?? '')
   if (!id) throw new Error('Missing user id.')
   return { link: await createInviteLink(id) }
+}
+
+/** Email a fresh one-time set-password link to a team member. */
+export async function resendTeamInvite(formData: FormData): Promise<InviteResult> {
+  const actor = await requireAdmin('super_admin')
+  const id = String(formData.get('id') ?? '')
+  if (!id) throw new Error('Missing user id.')
+  return emailInviteLink(id, actor.name ?? actor.email)
 }

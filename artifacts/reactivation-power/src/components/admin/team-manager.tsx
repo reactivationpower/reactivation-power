@@ -1,11 +1,12 @@
 // @ts-nocheck
 
 import { useState, useTransition } from 'react'
-import { Copy, Link2, Loader2, MoreHorizontal, Plus, UserMinus, UserCheck } from 'lucide-react'
+import { Copy, Link2, Loader2, Mail, MoreHorizontal, Plus, UserMinus, UserCheck } from 'lucide-react'
 
 import {
   getTeamInviteLink,
   inviteTeamMember,
+  resendTeamInvite,
   setTeamMemberActive,
   updateTeamMember,
   type AdminUser,
@@ -116,6 +117,23 @@ export function TeamManager({
     })
   }
 
+  function emailInvite(member: AdminUser) {
+    startTransition(async () => {
+      try {
+        const fd = new FormData()
+        fd.set('id', member.id)
+        const result = await resendTeamInvite(fd)
+        if (result.emailSent) {
+          notifyDone('Invite emailed', `${member.email} will receive a fresh link to set their password.`)
+        } else if (result.inviteLink) {
+          setLinkDialog({ email: member.email, link: result.inviteLink, emailError: result.emailError })
+        }
+      } catch (err) {
+        notifyError('Could not send the invite', errorMessage(err))
+      }
+    })
+  }
+
   function inviteLink(member: AdminUser) {
     startTransition(async () => {
       try {
@@ -213,6 +231,10 @@ export function TeamManager({
                           <MoreHorizontal className="size-4" />
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => emailInvite(m)}>
+                            <Mail className="size-4" />
+                            {m.lastSignInAt ? 'Email password reset' : 'Resend invite email'}
+                          </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => inviteLink(m)}>
                             <Link2 className="size-4" />
                             {m.lastSignInAt ? 'Password reset link' : 'Copy invite link'}

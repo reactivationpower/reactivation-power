@@ -29,7 +29,15 @@ app.set("trust proxy", true);
 // The SPA is served from the same origin through the shared proxy, so no CORS
 // is needed; credentialed cross-origin access is deliberately not allowed.
 app.use(cookieParser());
-app.use(express.json({ limit: "10mb" }));
+app.use(
+  express.json({
+    limit: "10mb",
+    // Webhook signature checks (Resend/Svix) need the exact bytes received.
+    verify: (req, _res, buf) => {
+      (req as express.Request & { rawBody?: Buffer }).rawBody = buf;
+    },
+  }),
+);
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/api", router);

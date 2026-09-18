@@ -125,7 +125,10 @@ add("/admin/_layout", "admin", async (req) => {
   if (!session) redirect("/admin-login");
   return { admin: { userId: session.userId, email: session.email, name: session.name, role: session.role } };
 });
-add("/admin/emails", "super_admin", async () => ({}));
+add("/admin/emails", "super_admin", async (req) => {
+  const session = await getAdminSessionFromRequest(req);
+  return { adminEmail: session?.email ?? null };
+});
 add("/admin/landing", "super_admin", async () => ({}));
 add("/admin/team", "super_admin", async (req) => {
   const session = await getAdminSessionFromRequest(req);

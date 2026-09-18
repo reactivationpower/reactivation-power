@@ -1,2 +1,3 @@
 - [Next.js port architecture](next-port-architecture.md) — actions via allow-listed RPC + per-page loaders; CRLF sources, headless H.264 limits, placeholder-grep first.
 - [Supabase admin accounts](supabase-admin-accounts.md) — no DDL access to Supabase; admin roles live in auth app_metadata; invite needs manual-link fallback; Base UI menu API.
+- [Transactional email via Resend](transactional-email.md) — send-only connector key, unverified links. subdomain + RESEND_FROM override, email_log in Replit Postgres, Tabs needs explicit flex-col.

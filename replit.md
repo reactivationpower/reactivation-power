@@ -7,7 +7,7 @@ Training portal + patient-reactivation dialer for healthcare/service businesses:
 - Workflows: `artifacts/api-server: API Server` (Express, `/api/*`) and `artifacts/reactivation-power: web` (Vite SPA at `/`). Restart both after server changes.
 - `pnpm run typecheck` — full typecheck. Verify artifacts with `pnpm --filter @workspace/<pkg> run typecheck`, not `build`.
 - Data: Supabase project `jbdymqqpolkoevyypjxd` (service-role access, `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY`). Media (videos, thumbnails, attachments): Vercel Blob (`BLOB_READ_WRITE_TOKEN`).
-- Other env: `SESSION_SECRET` (cookie signing), `SUPER_ADMIN_EMAIL` (bootstrap super admin, seeded at API start; optional `SUPER_ADMIN_INITIAL_PASSWORD` creates it ready to sign in), `DEMO_PASSWORD`, `STRIPE_SECRET_KEY`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` (served to the SPA by `GET /api/config`), `GHL_*` (GoHighLevel booking), `CRON_SECRET`.
+- Other env: `SESSION_SECRET` (cookie signing), `SUPER_ADMIN_EMAIL` (bootstrap super admin, seeded at API start; optional `SUPER_ADMIN_INITIAL_PASSWORD` creates it ready to sign in), `DEMO_PASSWORD`, `STRIPE_SECRET_KEY`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` (served to the SPA by `GET /api/config`), `GHL_*` (GoHighLevel booking), `CRON_SECRET`, `RESEND_FROM` / `RESEND_WEBHOOK_SECRET` (see Transactional email).
 - Original Next.js source is kept in `.migration-backup/` for reference.
 
 ## Where things live
@@ -25,6 +25,14 @@ Training portal + patient-reactivation dialer for healthcare/service businesses:
 - The `tp_admin` cookie carries `{ userId, email, name, role }`; use `requireAdmin('admin' | 'super_admin')` from `lib/auth/admin-session.ts` inside actions to get the acting admin and stamp records with `userId`.
 - Auth levels for actions/pages: `admin` = any active admin (sales reps only get `/admin/payments*`), `super_admin` = everything else. Team management at `/admin/team` (invite, role, rate, deactivate, one-time invite/reset link). Invite emails use Supabase's default mailer (built-in SMTP is rate-limited); when sending fails the UI shows a shareable link that our own `completeAdminInvite` verifies via `verifyOtp(token_hash)`.
 - "View portal as client": super admins can open a participant's portal (`actions/admin-view-as.ts`); the portal session is tagged `impersonatedBy` and shows a banner; session rows get `user_agent` prefix `admin-view-as:`.
+
+## Transactional email (Resend)
+
+- Sent through the Resend connector via `@replit/connectors-sdk` (`ReplitConnectors().proxy("resend", ...)`); the connector key is send-only, so domains/tracking are managed in the Resend dashboard. Code: `artifacts/api-server/src/lib/mail/` (`layout.ts` branded shell, `templates.ts` the six templates + sample data, `send.ts` `sendEmail()` which **never throws**, `index.ts` typed senders such as `sendPortalWelcomeEmail`, `sendPaymentFailedEmail`, `sendSubscriptionCancelledEmail`, `sendAgreementSentEmail`). Payment-failed / cancelled / agreement senders are ready for the billing and e-signature flows to call.
+- Sender: code default `noreply@links.reactivationpower.com`; overridden by env `RESEND_FROM`. `RESEND_FROM` is currently set to `noreply@reactivationpower.com` because only the apex domain is verified in Resend — delete the env var once `links.reactivationpower.com` is verified.
+- Every send is logged to `email_log` in the **Replit Postgres** (`lib/db/src/schema/email-log.ts`, drizzle; `pnpm --filter @workspace/db run push` after schema changes). Failures are also `logger.error`'d. Resend webhook `POST /api/webhooks/resend` (`routes/webhooks-resend.ts`) verifies the Svix signature with `RESEND_WEBHOOK_SECRET` and fills delivered/opened/clicked/bounced on the row — to enable, add the webhook in Resend pointing at the production URL and turn on open/click tracking for the domain.
+- Admin UI: `/admin/emails` → "Account emails" tab (`components/admin/transactional-emails.tsx`): live preview, test send, recent-sends log. Actions: `mail.listTransactionalTemplates / sendTestEmail / listEmailLog` (super admin).
+- Hooks: portal accounts created by payment provisioning, admin "Add Participant", or an owner adding a caller send `portal_welcome` (login link is `/login?email=…`, prefilled); admin invites and "Resend invite email" send `admin_invite` (Supabase's own mailer is no longer used; a manual link is returned only if the send fails); `confirmPayment` sends `payment_received` with Stripe's hosted receipt URL.
 
 ## Architecture decisions
 

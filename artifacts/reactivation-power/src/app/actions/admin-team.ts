@@ -27,3 +27,4 @@ export const inviteTeamMember = action<InviteResult>('admin-team', 'inviteTeamMe
 export const updateTeamMember = action<AdminUser>('admin-team', 'updateTeamMember')
 export const setTeamMemberActive = action<AdminUser>('admin-team', 'setTeamMemberActive')
 export const getTeamInviteLink = action<{ link: string }>('admin-team', 'getTeamInviteLink')
+export const resendTeamInvite = action<InviteResult>('admin-team', 'resendTeamInvite')

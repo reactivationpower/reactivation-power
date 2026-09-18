@@ -21,15 +21,23 @@ const auth = {
       users.push(user)
       return { data: { user }, error: null }
     }),
-    inviteUserByEmail: vi.fn(async (email: string): Promise<any> => {
-      const user = { id: `u${users.length + 1}`, email, created_at: 'now', app_metadata: {} }
-      users.push(user)
-      return { data: { user }, error: null }
-    }),
     generateLink: vi.fn<(opts: any) => Promise<any>>(),
   },
 }
 vi.mock('@/lib/supabase/admin', () => ({ getAdminClient: () => ({ auth }) }))
+const sendEmail = vi.fn<(...args: any[]) => Promise<any>>()
+vi.mock('@/lib/mail/send', () => ({ sendEmail: (...args: any[]) => sendEmail(...args) }))
+
+function generateLinkCreatesUser() {
+  auth.admin.generateLink.mockImplementation(async (opts: any) => {
+    if (opts.type === 'invite') {
+      const user = { id: `u${users.length + 1}`, email: opts.email, created_at: 'now', app_metadata: {} }
+      users.push(user)
+      return { data: { user, properties: {} }, error: null }
+    }
+    return { data: { properties: { hashed_token: 'SECRET-TOKEN' } }, error: null }
+  })
+}
 
 const mod = await import('@/lib/data/admin-users')
 const log = { info: vi.fn(), warn: vi.fn() }
@@ -83,15 +91,8 @@ describe('seedSuperAdmin is non-reviving', () => {
   })
 
   it('never logs an invite link when the invite email fails', async () => {
-    auth.admin.inviteUserByEmail.mockResolvedValueOnce({ data: { user: null }, error: { message: 'rate limit' } })
-    auth.admin.generateLink.mockImplementation(async (opts: any) => {
-      if (opts.type === 'invite') {
-        const user = { id: 'u1', email: opts.email, created_at: 'now', app_metadata: {} }
-        users.push(user)
-        return { data: { user, properties: {} }, error: null }
-      }
-      return { data: { properties: { hashed_token: 'SECRET-TOKEN' } }, error: null }
-    })
+    generateLinkCreatesUser()
+    sendEmail.mockResolvedValueOnce({ ok: false, logId: 'l1', error: 'domain not verified' })
     expect(await mod.seedSuperAdmin(log)).toBe('created_email_failed')
     const logged = JSON.stringify([...log.info.mock.calls, ...log.warn.mock.calls])
     expect(logged).not.toContain('SECRET-TOKEN')
@@ -116,5 +117,40 @@ describe('live profile cache', () => {
 
     await mod.setAdminUserActive('boot', false)
     expect((await mod.getLiveAdminProfile('boot'))?.active).toBe(false)
+  })
+})
+
+describe('inviteAdminUser', () => {
+  beforeEach(() => {
+    users.length = 0
+    vi.clearAllMocks()
+    generateLinkCreatesUser()
+  })
+
+  it('sends the branded invite through our mailer and withholds the manual link', async () => {
+    sendEmail.mockResolvedValueOnce({ ok: true, logId: 'l1', providerId: 're_1' })
+    const result = await mod.inviteAdminUser({
+      email: 'Rep@Example.org', name: 'Jordan Lee', role: 'sales_rep',
+      defaultCommissionRate: 10, invitedBy: 'boot', invitedByName: 'Boss',
+    })
+    expect(sendEmail).toHaveBeenCalledTimes(1)
+    const [type, to, data] = sendEmail.mock.calls[0]
+    expect(type).toBe('admin_invite')
+    expect(to).toBe('rep@example.org')
+    expect(data.inviteUrl).toContain('token_hash=SECRET-TOKEN')
+    expect(data.invitedByName).toBe('Boss')
+    expect(result.emailSent).toBe(true)
+    expect(result.inviteLink).toBeNull()
+    expect(result.user.role).toBe('sales_rep')
+  })
+
+  it('returns the one-time link for manual sharing when sending fails', async () => {
+    sendEmail.mockResolvedValueOnce({ ok: false, logId: 'l1', error: 'Resend responded 403' })
+    const result = await mod.inviteAdminUser({
+      email: 'rep@example.org', name: null, role: 'sales_rep', defaultCommissionRate: 0, invitedBy: 'boot',
+    })
+    expect(result.emailSent).toBe(false)
+    expect(result.inviteLink).toContain('/admin-login?token_hash=SECRET-TOKEN')
+    expect(result.emailError).toBe('Resend responded 403')
   })
 })

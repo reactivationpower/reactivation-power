@@ -2,6 +2,7 @@
 import { revalidatePath } from 'next/cache'
 import { getAdminClient } from '@/lib/supabase/admin'
 import { MAX_STAFF } from '@/lib/types'
+import { sendPortalWelcomeEmail } from '@/lib/mail'
 
 function slugify(title: string): string {
   return title
@@ -323,6 +324,23 @@ export async function createParticipant(formData: FormData) {
       return { error: 'A participant with this email already exists' }
     return { error: error.message }
   }
+  let ownerName: string | null = null
+  if (parentId) {
+    const { data: owner } = await supabase
+      .from('participants')
+      .select('first_name, last_name')
+      .eq('id', parentId)
+      .maybeSingle()
+    if (owner) ownerName = `${owner.first_name} ${owner.last_name}`.trim()
+  }
+  await sendPortalWelcomeEmail({
+    participantId: data.id,
+    firstName,
+    email,
+    role: parentId ? 'staff' : 'owner',
+    ownerName,
+    source: 'admin',
+  })
   revalidatePath('/admin/participants')
   return { id: data.id }
 }

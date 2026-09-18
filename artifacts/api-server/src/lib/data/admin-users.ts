@@ -1,6 +1,8 @@
 import { createClient, type SupabaseClient, type User } from '@supabase/supabase-js'
 import { getAdminClient } from '@/lib/supabase/admin'
 import { isAdminRole, type AdminRole } from '@/lib/auth/admin-token'
+import { appOrigin } from '@/lib/app-origin'
+import { sendEmail } from '@/lib/mail/send'
 
 /**
  * Admin (staff) accounts live in Supabase Auth. The admin profile — role,
@@ -140,14 +142,7 @@ export function normalizeRate(input: unknown): number {
   return Math.min(100, Math.max(0, Math.round(n * 100) / 100))
 }
 
-/** Public app origin used to build invite links. */
-export function appOrigin(): string {
-  const explicit = process.env.APP_URL?.trim().replace(/\/$/, '')
-  if (explicit) return explicit
-  const domain = process.env.REPLIT_DOMAINS?.split(',')[0]?.trim() || process.env.REPLIT_DEV_DOMAIN
-  if (domain) return `https://${domain}`
-  return 'http://localhost:5173'
-}
+export { appOrigin }
 
 /** Set-password URL that verifies a Supabase one-time token hash server-side. */
 function inviteUrl(tokenHash: string): string {
@@ -156,7 +151,7 @@ function inviteUrl(tokenHash: string): string {
 
 export interface InviteResult {
   user: AdminUser
-  /** True if Supabase accepted the invite email for delivery. */
+  /** True if the branded invite email was accepted for delivery. */
   emailSent: boolean
   /** Fallback link to share manually when the email could not be sent. */
   inviteLink: string | null
@@ -169,6 +164,7 @@ export async function inviteAdminUser(input: {
   role: AdminRole
   defaultCommissionRate: number
   invitedBy: string | null
+  invitedByName?: string | null
 }): Promise<InviteResult> {
   const supabase = getAdminClient()
   const email = input.email.trim().toLowerCase()
@@ -179,36 +175,19 @@ export async function inviteAdminUser(input: {
   }
 
   let user: User | null = existing
-  let emailSent = false
-  let emailError: string | null = null
 
   if (!user) {
-    // Supabase sends its default invite email; the link lands on /admin-login
-    // where the invite token is turned into a set-password form.
-    const invited = await supabase.auth.admin.inviteUserByEmail(email, {
-      data: input.name ? { full_name: input.name } : undefined,
-      redirectTo: `${appOrigin()}/admin-login`,
+    // Create the auth user without triggering Supabase's own mailer; the
+    // branded invite goes out through Resend below.
+    const created = await supabase.auth.admin.generateLink({
+      type: 'invite',
+      email,
+      options: { data: input.name ? { full_name: input.name } : undefined },
     })
-    if (invited.error) {
-      emailError = invited.error.message
-      // The user may not have been created if sending failed; create them
-      // without an email so a manual link can be shared instead.
-      user = await findAuthUserByEmail(email)
-      if (!user) {
-        const created = await supabase.auth.admin.generateLink({
-          type: 'invite',
-          email,
-          options: { data: input.name ? { full_name: input.name } : undefined },
-        })
-        if (created.error || !created.data.user) {
-          throw new Error(`Could not create the admin account: ${created.error?.message ?? 'unknown error'}`)
-        }
-        user = created.data.user
-      }
-    } else {
-      user = invited.data.user
-      emailSent = true
+    if (created.error || !created.data.user) {
+      throw new Error(`Could not create the admin account: ${created.error?.message ?? 'unknown error'}`)
     }
+    user = created.data.user
   }
 
   const updated = await supabase.auth.admin.updateUserById(user.id, {
@@ -227,9 +206,40 @@ export async function inviteAdminUser(input: {
   const admin = toAdminUser(updated.data.user)
   if (!admin) throw new Error('Admin profile could not be read back.')
 
-  let inviteLink: string | null = null
-  if (!emailSent) inviteLink = await createInviteLink(admin.id)
-  return { user: admin, emailSent, inviteLink, emailError }
+  // One-time set-password link, delivered by our branded email. If sending
+  // fails the link is handed back so the UI can offer it for manual sharing.
+  const inviteLink = await createInviteLink(admin.id)
+  const sent = await sendEmail('admin_invite', admin.email, {
+    name: admin.name,
+    role: admin.role,
+    invitedByName: input.invitedByName ?? null,
+    inviteUrl: inviteLink,
+  }, { metadata: { adminUserId: admin.id, invitedBy: input.invitedBy } })
+  return {
+    user: admin,
+    emailSent: sent.ok,
+    inviteLink: sent.ok ? null : inviteLink,
+    emailError: sent.ok ? null : (sent.error ?? 'Email could not be sent'),
+  }
+}
+
+/** Email a fresh one-time set-password link to an existing admin. */
+export async function emailInviteLink(userId: string, invitedByName: string | null): Promise<InviteResult> {
+  const admin = await getAdminUserById(userId)
+  if (!admin) throw new Error('Admin user not found.')
+  const inviteLink = await createInviteLink(admin.id)
+  const sent = await sendEmail('admin_invite', admin.email, {
+    name: admin.name,
+    role: admin.role,
+    invitedByName,
+    inviteUrl: inviteLink,
+  }, { metadata: { adminUserId: admin.id, resend: true } })
+  return {
+    user: admin,
+    emailSent: sent.ok,
+    inviteLink: sent.ok ? null : inviteLink,
+    emailError: sent.ok ? null : (sent.error ?? 'Email could not be sent'),
+  }
 }
 
 /**

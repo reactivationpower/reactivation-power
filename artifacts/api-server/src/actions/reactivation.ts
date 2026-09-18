@@ -15,6 +15,7 @@ import { easternWallClockToUtc } from '@/lib/call-time'
 import { sanitizeNotes } from '@/lib/notes-html'
 import type { CallDisposition } from '@/lib/types'
 import { CALL_BATCH_SIZES, RETRY_WINDOW_MONTHS, MAX_STAFF } from '@/lib/types'
+import { sendPortalWelcomeEmail } from '@/lib/mail'
 
 // ---------- Admin: niches ----------
 
@@ -737,19 +738,31 @@ export async function addTeamMember(formData: FormData) {
     return { error: `You can have up to ${MAX_STAFF} active callers.` }
   }
 
-  const { error } = await supabase.from('participants').insert({
-    first_name: firstName,
-    last_name: lastName,
-    email,
-    phone: phone || null,
-    parent_id: participant.id,
-    role: 'staff',
-  })
-  if (error) {
-    if (error.code === '23505')
+  const { data: member, error } = await supabase
+    .from('participants')
+    .insert({
+      first_name: firstName,
+      last_name: lastName,
+      email,
+      phone: phone || null,
+      parent_id: participant.id,
+      role: 'staff',
+    })
+    .select('id')
+    .single()
+  if (error || !member) {
+    if (error?.code === '23505')
       return { error: 'Someone with this email already exists.' }
-    return { error: error.message }
+    return { error: error?.message ?? 'Could not add the caller.' }
   }
+  await sendPortalWelcomeEmail({
+    participantId: member.id,
+    firstName,
+    email,
+    role: 'staff',
+    ownerName: `${participant.first_name} ${participant.last_name}`.trim(),
+    source: 'portal',
+  })
   revalidatePath('/portal', 'layout')
   return {}
 }

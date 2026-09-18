@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label'
 
 const initialState: LoginState = {}
 
-export function LoginForm({ next }: { next?: string }) {
+export function LoginForm({ next, email }: { next?: string; email?: string }) {
   const [state, formAction, pending] = useActionState(login, initialState)
 
   return (
@@ -44,6 +44,7 @@ export function LoginForm({ next }: { next?: string }) {
           type="email"
           autoComplete="email"
           placeholder="john@company.com"
+          defaultValue={email ?? ''}
           required
         />
         <p className="text-xs text-muted-foreground">
