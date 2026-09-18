@@ -118,53 +118,13 @@ export function PaymentDetailActions({
 
   return (
     <>
-      <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-card p-4">
-        <Button
-          variant="outline"
-          size="sm"
-          className="bg-transparent"
-          onClick={handleCopy}
-        >
-          <Copy className="size-3.5" />
-          Copy link
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          className="bg-transparent"
-          onClick={() => window.open(payUrl(), '_blank', 'noopener')}
-        >
-          <ExternalLink className="size-3.5" />
-          Open link
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          className="bg-transparent"
-          onClick={handleQr}
-        >
-          <QrCode className="size-3.5" />
-          QR code
-        </Button>
-
+      <div className="flex flex-wrap items-center gap-2">
         {!isPaid ? (
-          <>
-            <Button size="sm" onClick={() => setCharging(true)}>
-              <CreditCard className="size-3.5" />
-              Charge card now
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-destructive hover:text-destructive"
-              onClick={handleDelete}
-            >
-              <Trash2 className="size-3.5" />
-              Delete
-            </Button>
-          </>
+          <Button size="sm" onClick={() => setCharging(true)}>
+            <CreditCard className="size-3.5" />
+            Charge card now
+          </Button>
         ) : null}
-
         {isPaid && !hasAccounts ? (
           <Button size="sm" onClick={handleProvision} disabled={provisioning}>
             {provisioning ? (
@@ -174,6 +134,46 @@ export function PaymentDetailActions({
             )}
             Create accounts now
           </Button>
+        ) : null}
+        <Button
+          variant="outline"
+          size="sm"
+          className="bg-transparent"
+          onClick={handleCopy}
+        >
+          <Copy className="size-3.5" />
+          Copy link
+        </Button>
+        {!isPaid ? (
+          <>
+            <Button
+              variant="outline"
+              size="sm"
+              className="bg-transparent"
+              onClick={() => window.open(payUrl(), '_blank', 'noopener')}
+            >
+              <ExternalLink className="size-3.5" />
+              Open link
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="bg-transparent"
+              onClick={handleQr}
+            >
+              <QrCode className="size-3.5" />
+              QR code
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="ml-auto text-destructive hover:text-destructive"
+              onClick={handleDelete}
+            >
+              <Trash2 className="size-3.5" />
+              Delete
+            </Button>
+          </>
         ) : null}
       </div>
 

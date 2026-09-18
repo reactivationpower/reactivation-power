@@ -11,13 +11,13 @@ export default function AdminPaymentsPage() {
   const { links } = data
 
   return (
-    <div className="flex h-full flex-col gap-4 p-6">
+    <div className="flex h-full flex-col gap-6">
       <header>
         <h1 className="text-2xl font-semibold text-foreground">Payments</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Create custom payment links for Reactivation Power Access. Charge a
-          card on our end, or share the link, open it, or show a QR code for
-          the buyer to scan.
+          Everyone who has been sent a payment link for Reactivation Power
+          Access. Open a row for the full account record, or use the row menu
+          for quick actions.
         </p>
       </header>
       <div className="min-h-0 flex-1">
