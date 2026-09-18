@@ -7,11 +7,13 @@ import { logout } from '@/app/actions/auth'
 import { PortalNav, SettingsNavLink } from '@/components/portal/portal-nav'
 import { PORTAL_WIDTH } from '@/lib/portal-layout'
 import { DemoBarServer } from '@/components/demo/demo-bar-server'
+import { ViewAsBanner } from '@/components/portal/view-as-banner'
 
 
 export default function PortalLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col">
+      <ViewAsBanner />
       <Suspense fallback={null}>
         <DemoBarServer />
       </Suspense>

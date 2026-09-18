@@ -2,7 +2,8 @@ import { Router, type IRouter, type Request, type Response } from "express";
 import { runWithRequestContext } from "../lib/request-context";
 import { isNotFoundSignal, isRedirectSignal, notFound, redirect } from "../shims/next-navigation";
 import { logger } from "../lib/logger";
-import { ADMIN_COOKIE_NAME, decodeAdminSession } from "../lib/auth/admin-token";
+import { adminHomeFor, getAdminSessionFromRequest, satisfies } from "../lib/auth/admin-session";
+import { listAdminUsers } from "../lib/data/admin-users";
 import { SESSION_COOKIE_NAME, decodeSession } from "../lib/auth/token";
 import { getSession } from "../lib/auth/session";
 import {
@@ -38,7 +39,7 @@ import {
 } from "../actions/payments";
 
 type Loader = (req: Request) => Promise<Record<string, unknown>>;
-type AuthKind = "portal" | "admin" | undefined;
+type AuthKind = "portal" | "admin" | "super_admin" | undefined;
 const router: IRouter = Router();
 
 /**
@@ -68,11 +69,14 @@ function add(path: string, auth: AuthKind, loader: Loader): void {
           if (!token || !decodeSession(token)) {
             redirect(`/login?next=${encodeURIComponent(originalPath(req))}`);
           }
-        } else if (auth === "admin") {
-          const token = req.cookies?.[ADMIN_COOKIE_NAME] as string | undefined;
-          if (!token || !decodeAdminSession(token)) {
+        } else if (auth === "admin" || auth === "super_admin") {
+          const session = await getAdminSessionFromRequest(req);
+          if (!session) {
             redirect(`/admin-login?next=${encodeURIComponent(originalPath(req))}`);
           }
+          // Sales reps only get the pages marked "admin"; everything else is
+          // super-admin only and sends them to their landing page.
+          if (!satisfies(session.role, auth)) redirect(adminHomeFor(session.role));
         }
         return loader(req);
       });
@@ -93,7 +97,8 @@ function add(path: string, auth: AuthKind, loader: Loader): void {
 add("/portal/_layout", "portal", async () => {
   const participant = await getCurrentParticipant();
   if (!participant) redirect("/login");
-  if (!participant.is_demo) return { participant, demo: null };
+  const viewingAs = (await getSession())?.impersonatedBy ?? null;
+  if (!participant.is_demo) return { participant, demo: null, viewingAs };
   const ownerId = accessOwnerId(participant);
   const supabase = getAdminClient();
   const [ownerRes, peopleRes] = await Promise.all([
@@ -112,19 +117,31 @@ add("/portal/_layout", "portal", async () => {
       timeZone: "America/New_York", month: "short", day: "numeric", hour: "numeric", minute: "2-digit",
     })} ET`
     : "";
-  return { participant, demo: { currentId: participant.id, identities, seededLabel, stale: !ownerRes.error && demoIsStale(seededAt) } };
+  return { participant, viewingAs, demo: { currentId: participant.id, identities, seededLabel, stale: !ownerRes.error && demoIsStale(seededAt) } };
 });
 
-add("/admin/_layout", "admin", async () => ({}));
-add("/admin/emails", "admin", async () => ({}));
-add("/admin/landing", "admin", async () => ({}));
+add("/admin/_layout", "admin", async (req) => {
+  const session = await getAdminSessionFromRequest(req);
+  if (!session) redirect("/admin-login");
+  return { admin: { userId: session.userId, email: session.email, name: session.name, role: session.role } };
+});
+add("/admin/emails", "super_admin", async () => ({}));
+add("/admin/landing", "super_admin", async () => ({}));
+add("/admin/team", "super_admin", async (req) => {
+  const session = await getAdminSessionFromRequest(req);
+  return { members: await listAdminUsers(), currentUserId: session?.userId ?? null };
+});
 
 add("/login", undefined, async (req) => {
   const session = await getSession();
   if (session) redirect("/portal");
   return { next: queryString(req, "next") };
 });
-add("/admin-login", undefined, async (req) => ({ next: queryString(req, "next") }));
+add("/admin-login", undefined, async (req) => {
+  const session = await getAdminSessionFromRequest(req);
+  if (session && !queryString(req, "token_hash")) redirect(adminHomeFor(session.role));
+  return { next: queryString(req, "next") };
+});
 
 add("/portal", "portal", async () => {
   const participant = await getCurrentParticipant();
@@ -329,7 +346,7 @@ add("/portal/analytics/:callerId", "portal", async (req) => {
 
 add("/portal/reactivation", "portal", async () => redirect("/portal/dialer"));
 
-add("/admin", "admin", async () => {
+add("/admin", "super_admin", async () => {
   const [stats, mostWatched, viewers] = await Promise.all([
     getDashboardStats(), getMostWatchedVideos(), getViewerRows(),
   ]);
@@ -344,7 +361,7 @@ add("/admin", "admin", async () => {
   return { stats, mostWatched, viewers, recentViewers, cards };
 });
 
-add("/admin/courses", "admin", async () => {
+add("/admin/courses", "super_admin", async () => {
   const courses = await getCourses();
   const supabase = getAdminClient();
   const counts = await Promise.all(courses.map(async (course) => {
@@ -360,7 +377,7 @@ add("/admin/courses", "admin", async () => {
   return { courses, counts, countMap: Object.fromEntries(counts.map((c) => [c.courseId, c])) };
 });
 
-add("/admin/courses/:id", "admin", async (req) => {
+add("/admin/courses/:id", "super_admin", async (req) => {
   const id = String(req.params.id);
   const tree = await getCourseTree(id);
   if (!tree) notFound();
@@ -369,7 +386,7 @@ add("/admin/courses/:id", "admin", async (req) => {
   return { id, tree, videoIds, attachments };
 });
 
-add("/admin/participants", "admin", async (req) => {
+add("/admin/participants", "super_admin", async (req) => {
   const q = queryString(req, "q") ?? "";
   const openNew = queryString(req, "new");
   const status = queryString(req, "status") ?? "active";
@@ -396,7 +413,7 @@ add("/admin/participants", "admin", async (req) => {
   return { q, openNew, status, showDisabled, viewers, videoCount, query, filtered, allOwners, activeCount, disabledCount, owners, staffByParent };
 });
 
-add("/admin/participants/:id", "admin", async (req) => {
+add("/admin/participants/:id", "super_admin", async (req) => {
   const id = String(req.params.id);
   const participant = await getParticipantById(id);
   if (!participant) notFound();
@@ -432,7 +449,7 @@ add("/admin/participants/:id", "admin", async (req) => {
     videoIds, eventVideos: eventVideos ?? [], videoTitle, parent, reactivationStats };
 });
 
-add("/admin/reactivation", "admin", async () => {
+add("/admin/reactivation", "super_admin", async () => {
   const [niches, script, sections] = await Promise.all([getNiches(), getMasterScript(), getScriptSections()]);
   const slots = script ? extractSlots(script.body) : [];
   return { niches, script, sections, slots };
@@ -450,7 +467,7 @@ add("/admin/payments/:id", "admin", async (req) => {
   return { id, detail, link, accounts, isPaid, owner: owner ?? null, staffAccounts };
 });
 
-add("/admin/analytics", "admin", async (req) => {
+add("/admin/analytics", "super_admin", async (req) => {
   const participant = queryString(req, "participant");
   const course = queryString(req, "course");
   const event = queryString(req, "event");

@@ -1,9 +1,8 @@
 
 import { randomBytes } from 'crypto'
 import { revalidatePath } from 'next/cache'
-import { cookies } from 'next/headers'
 
-import { ADMIN_COOKIE_NAME, decodeAdminSession } from '@/lib/auth/admin-token'
+import { requireAdmin } from '@/lib/auth/admin-session'
 import { getAdminClient } from '@/lib/supabase/admin'
 import { stripe } from '@/lib/stripe'
 import { MAX_STAFF } from '@/lib/types'
@@ -41,14 +40,6 @@ export interface ProvisionedAccount {
   email: string
   role: 'owner' | 'staff'
   is_active: boolean
-}
-
-async function requireAdmin(): Promise<void> {
-  const store = await cookies()
-  const token = store.get(ADMIN_COOKIE_NAME)?.value
-  if (!token || !decodeAdminSession(token)) {
-    throw new Error('Unauthorized')
-  }
 }
 
 function sanitizeStaff(input: unknown): StaffMember[] {

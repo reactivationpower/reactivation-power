@@ -4,12 +4,12 @@ import Busboy from "busboy";
 import { Router, type IRouter, type Request, type Response } from "express";
 import { logger } from "@/lib/logger";
 import { runWithRequestContext } from "@/lib/request-context";
-import { ADMIN_COOKIE_NAME, decodeAdminSession } from "@/lib/auth/admin-token";
+import { getAdminSessionFromRequest } from "@/lib/auth/admin-session";
 
-/** Uploads are only performed from the admin UI, which carries the admin cookie. */
-function isAdmin(req: Request): boolean {
-  const token = req.cookies?.[ADMIN_COOKIE_NAME] as string | undefined;
-  return Boolean(token && decodeAdminSession(token));
+/** Uploads (course media) are only performed by super admins from the admin UI. */
+async function isAdmin(req: Request): Promise<boolean> {
+  const session = await getAdminSessionFromRequest(req);
+  return session?.role === "super_admin";
 }
 
 const router: IRouter = Router();
@@ -94,7 +94,7 @@ function readMultipart(req: Request): Promise<MultipartUpload | null> {
 }
 
 router.post("/upload/token", async (req: Request, res: Response) => {
-  if (!isAdmin(req)) {
+  if (!(await isAdmin(req))) {
     res.status(401).json({ error: "Unauthorized" });
     return;
   }
@@ -123,7 +123,7 @@ router.post("/upload/token", async (req: Request, res: Response) => {
 });
 
 router.post("/upload", async (req: Request, res: Response) => {
-  if (!isAdmin(req)) {
+  if (!(await isAdmin(req))) {
     res.status(401).json({ error: "Unauthorized" });
     return;
   }

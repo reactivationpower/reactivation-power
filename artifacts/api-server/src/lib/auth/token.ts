@@ -7,6 +7,8 @@ export interface SessionPayload {
   participantId: string
   sessionId: string
   issuedAt: number
+  /** Set when a super admin opened this portal account via "View as client". */
+  impersonatedBy?: { userId: string; email: string }
 }
 
 function secret(): string {

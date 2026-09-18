@@ -22,6 +22,7 @@ import Page_admin_participants_id from '@/pages/admin_participants_id';
 import Page_admin_payments from '@/pages/admin_payments';
 import Page_admin_payments_id from '@/pages/admin_payments_id';
 import Page_admin_reactivation from '@/pages/admin_reactivation';
+import Page_admin_team from '@/pages/admin_team';
 import Page_demo from '@/pages/demo';
 import Page_healthcare from '@/pages/healthcare';
 import Page_healthcare_book_a_call from '@/pages/healthcare_book-a-call';
@@ -134,6 +135,13 @@ function Router() {
         <RoutedErrorBoundary>
           <AdminLayout>
             <Page_admin_payments_id />
+          </AdminLayout>
+        </RoutedErrorBoundary>
+      </Route>
+      <Route path="/admin/team">
+        <RoutedErrorBoundary>
+          <AdminLayout>
+            <Page_admin_team />
           </AdminLayout>
         </RoutedErrorBoundary>
       </Route>

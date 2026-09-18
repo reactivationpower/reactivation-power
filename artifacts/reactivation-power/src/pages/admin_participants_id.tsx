@@ -19,6 +19,7 @@ import { CourseAccessToggle } from '@/components/admin/course-access-toggle'
 import { NicheAccessToggle } from '@/components/admin/niche-access-toggle'
 import { AddStaffForm } from '@/components/admin/add-staff-form'
 import { ParticipantActiveToggle } from '@/components/admin/participant-active-toggle'
+import { ViewAsButton } from '@/components/admin/view-as-button'
 import {
   ArrowLeft,
   Mail,
@@ -103,10 +104,13 @@ export default function ParticipantDetailPage() {
               ) : null}
             </div>
           </div>
-          <ParticipantActiveToggle
-            participantId={participant.id}
-            initialActive={participant.is_active}
-          />
+          <div className="flex items-center gap-4">
+            <ViewAsButton participantId={participant.id} name={participant.first_name} />
+            <ParticipantActiveToggle
+              participantId={participant.id}
+              initialActive={participant.is_active}
+            />
+          </div>
         </div>
       </div>
 

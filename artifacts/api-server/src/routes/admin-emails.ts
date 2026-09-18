@@ -1,6 +1,6 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { strToU8, zipSync } from "fflate";
-import { ADMIN_COOKIE_NAME, decodeAdminSession } from "@/lib/auth/admin-token";
+import { getAdminSessionFromRequest } from "@/lib/auth/admin-session";
 import {
   EMAIL_AUDIENCES,
   isEmailAudienceId,
@@ -97,8 +97,8 @@ ${sets.map(buildSection).join("\n")}
 
 router.get("/admin/emails/export", async (req: Request, res: Response) => {
   await runWithRequestContext(req, res, async () => {
-    const token = req.cookies?.[ADMIN_COOKIE_NAME] as string | undefined;
-    if (!token || !decodeAdminSession(token)) {
+    const session = await getAdminSessionFromRequest(req);
+    if (!session || session.role !== "super_admin") {
       res.status(401).send("Unauthorized");
       return;
     }

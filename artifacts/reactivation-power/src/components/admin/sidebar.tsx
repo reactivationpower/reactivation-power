@@ -13,35 +13,49 @@ import {
   Mail,
   PhoneCall,
   Plus,
+  ShieldCheck,
   Users,
 } from 'lucide-react'
-import { adminLogout } from '@/app/actions/admin-auth'
+import { adminLogout, type AdminIdentity, type AdminRole } from '@/app/actions/admin-auth'
 import { cn } from '@/lib/utils'
 
-const NAV = [
+/**
+ * Sidebar navigation by role. Sales reps only get the sales-facing sections
+ * (payments today; customers and commissions arrive with later work), super
+ * admins get everything.
+ */
+const NAV: { group: string; items: { href: string; label: string; icon: any; roles?: AdminRole[] }[] }[] = [
   {
     group: 'Dashboard',
-    items: [{ href: '/admin', label: 'Dashboard', icon: LayoutGrid }],
+    items: [{ href: '/admin', label: 'Dashboard', icon: LayoutGrid, roles: ['super_admin'] }],
   },
   {
     group: 'Operations',
     items: [
-      { href: '/admin/courses', label: 'Courses', icon: ClipboardList },
-      { href: '/admin/participants', label: 'Viewers', icon: Users },
-      { href: '/admin/reactivation', label: 'Reactivation', icon: PhoneCall },
-      { href: '/admin/emails', label: 'Email Templates', icon: Mail },
+      { href: '/admin/courses', label: 'Courses', icon: ClipboardList, roles: ['super_admin'] },
+      { href: '/admin/participants', label: 'Viewers', icon: Users, roles: ['super_admin'] },
+      { href: '/admin/reactivation', label: 'Reactivation', icon: PhoneCall, roles: ['super_admin'] },
+      { href: '/admin/emails', label: 'Email Templates', icon: Mail, roles: ['super_admin'] },
       { href: '/admin/payments', label: 'Payments', icon: CreditCard },
-      { href: '/admin/landing', label: 'Landing Pages', icon: Globe },
+      { href: '/admin/landing', label: 'Landing Pages', icon: Globe, roles: ['super_admin'] },
     ],
   },
   {
     group: 'Insights',
-    items: [{ href: '/admin/analytics', label: 'Analytics', icon: BarChart3 }],
+    items: [{ href: '/admin/analytics', label: 'Analytics', icon: BarChart3, roles: ['super_admin'] }],
+  },
+  {
+    group: 'Settings',
+    items: [{ href: '/admin/team', label: 'Team', icon: ShieldCheck, roles: ['super_admin'] }],
   },
 ]
 
-export function AdminSidebar() {
+export function AdminSidebar({ admin }: { admin: AdminIdentity | null }) {
   const [pathname] = useLocation();
+  const role: AdminRole = admin?.role ?? 'sales_rep'
+  const nav = NAV
+    .map((group) => ({ ...group, items: group.items.filter((i) => !i.roles || i.roles.includes(role)) }))
+    .filter((group) => group.items.length > 0)
 
   return (
     <aside className="flex w-64 shrink-0 flex-col border-r border-border bg-sidebar">
@@ -65,6 +79,7 @@ export function AdminSidebar() {
         </div>
       </div>
 
+      {role === 'super_admin' ? (
       <div className="px-4 pb-2">
         <Link
           href="/admin/participants?new=1"
@@ -74,9 +89,10 @@ export function AdminSidebar() {
           Add Participant
         </Link>
       </div>
+      ) : null}
 
       <nav className="flex-1 overflow-y-auto px-4 py-2">
-        {NAV.map((group) => (
+        {nav.map((group) => (
           <div key={group.group} className="mb-4">
             <p className="mb-1 px-2 py-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground">
               {group.group}

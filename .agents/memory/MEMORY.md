@@ -1,1 +1,2 @@
 - [Next.js port architecture](next-port-architecture.md) — actions via allow-listed RPC + per-page loaders; CRLF sources, headless H.264 limits, placeholder-grep first.
+- [Supabase admin accounts](supabase-admin-accounts.md) — no DDL access to Supabase; admin roles live in auth app_metadata; invite needs manual-link fallback; Base UI menu API.

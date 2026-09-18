@@ -3,6 +3,8 @@ import { runWithRequestContext } from "../lib/request-context";
 import { isNotFoundSignal, isRedirectSignal } from "../shims/next-navigation";
 import { logger } from "../lib/logger";
 import * as adminAuth from "../actions/admin-auth";
+import * as adminTeam from "../actions/admin-team";
+import * as adminViewAs from "../actions/admin-view-as";
 import * as admin from "../actions/admin";
 import * as auth from "../actions/auth";
 import * as booking from "../actions/booking";
@@ -10,7 +12,7 @@ import * as demo from "../actions/demo";
 import * as leads from "../actions/leads";
 import * as payments from "../actions/payments";
 import * as reactivation from "../actions/reactivation";
-import { ADMIN_COOKIE_NAME, decodeAdminSession } from "../lib/auth/admin-token";
+import { getAdminSessionFromRequest, satisfies } from "../lib/auth/admin-session";
 import { SESSION_COOKIE_NAME, decodeSession } from "../lib/auth/token";
 
 /**
@@ -26,7 +28,9 @@ import { SESSION_COOKIE_NAME, decodeSession } from "../lib/auth/token";
  *   { ok: false, error }              thrown error
  *
  * Only actions listed in ACTIONS are callable, each behind a route-level auth
- * requirement ("public" | "portal" | "admin") enforced before the action runs.
+ * requirement ("public" | "portal" | "admin" | "super_admin") enforced before
+ * the action runs. "admin" is any active admin (super admin or sales rep);
+ * "super_admin" is super admins only.
  * In Next.js these functions were only reachable from proxy-protected pages;
  * over HTTP every action must be gated explicitly. Actions additionally keep
  * their own finer-grained checks (participant ownership, demo account, ...).
@@ -36,6 +40,8 @@ type ActionModule = Record<string, unknown>;
 
 const MODULES: Record<string, ActionModule> = {
   "admin-auth": adminAuth,
+  "admin-team": adminTeam,
+  "admin-view-as": adminViewAs,
   admin,
   auth,
   booking,
@@ -45,11 +51,19 @@ const MODULES: Record<string, ActionModule> = {
   reactivation,
 };
 
-type Auth = "public" | "portal" | "admin";
+type Auth = "public" | "portal" | "admin" | "super_admin";
 
 /** Allow-list: module -> action -> required auth. Anything else is 404. */
 const ACTIONS: Record<string, Record<string, Auth>> = {
-  "admin-auth": { adminLogin: "public", adminLogout: "public" },
+  "admin-auth": {
+    adminLogin: "public", completeAdminInvite: "public", adminLogout: "public",
+    getCurrentAdmin: "admin",
+  },
+  "admin-team": {
+    listTeam: "super_admin", inviteTeamMember: "super_admin", updateTeamMember: "super_admin",
+    setTeamMemberActive: "super_admin", getTeamInviteLink: "super_admin",
+  },
+  "admin-view-as": { viewAsParticipant: "super_admin" },
   auth: { login: "public", logout: "public" },
   booking: { getAvailability: "public", bookStrategyCall: "public" },
   leads: { lookupZip: "public", submitHealthcareLead: "public" },
@@ -72,17 +86,17 @@ const ACTIONS: Record<string, Record<string, Auth>> = {
     provisionAccountsNow: "admin",
   },
   admin: {
-    createCourse: "admin", updateCourse: "admin", deleteCourse: "admin",
-    createModule: "admin", updateModule: "admin", deleteModule: "admin", moveModule: "admin",
-    createVideo: "admin", updateVideo: "admin", deleteVideo: "admin", moveVideo: "admin",
-    addAttachment: "admin", deleteAttachment: "admin",
-    createParticipant: "admin", updateParticipant: "admin", deleteParticipant: "admin",
-    setCourseAccess: "admin", setNicheAccess: "admin",
+    createCourse: "super_admin", updateCourse: "super_admin", deleteCourse: "super_admin",
+    createModule: "super_admin", updateModule: "super_admin", deleteModule: "super_admin", moveModule: "super_admin",
+    createVideo: "super_admin", updateVideo: "super_admin", deleteVideo: "super_admin", moveVideo: "super_admin",
+    addAttachment: "super_admin", deleteAttachment: "super_admin",
+    createParticipant: "super_admin", updateParticipant: "super_admin", deleteParticipant: "super_admin",
+    setCourseAccess: "super_admin", setNicheAccess: "super_admin",
   },
   reactivation: {
     // Global niche / script management (admin area).
-    createNiche: "admin", updateNiche: "admin", deleteNiche: "admin",
-    updateMasterScript: "admin", saveScriptSection: "admin",
+    createNiche: "super_admin", updateNiche: "super_admin", deleteNiche: "super_admin",
+    updateMasterScript: "super_admin", saveScriptSection: "super_admin",
     // Account-scoped (each action resolves the participant from the session).
     createStage: "portal", moveStage: "portal", deleteStage: "portal",
     createContact: "portal", updateContact: "portal", deleteContact: "portal",
@@ -94,11 +108,11 @@ const ACTIONS: Record<string, Record<string, Auth>> = {
   },
 };
 
-function isAuthorized(req: Request, auth: Auth): boolean {
+async function isAuthorized(req: Request, auth: Auth): Promise<boolean> {
   if (auth === "public") return true;
-  if (auth === "admin") {
-    const token = req.cookies?.[ADMIN_COOKIE_NAME] as string | undefined;
-    return Boolean(token && decodeAdminSession(token));
+  if (auth === "admin" || auth === "super_admin") {
+    const session = await getAdminSessionFromRequest(req);
+    return Boolean(session && satisfies(session.role, auth));
   }
   const token = req.cookies?.[SESSION_COOKIE_NAME] as string | undefined;
   return Boolean(token && decodeSession(token));
@@ -126,7 +140,7 @@ router.post("/actions/:module/:fn", async (req: Request, res: Response) => {
     res.status(404).json({ ok: false, error: "Unknown action" });
     return;
   }
-  if (!isAuthorized(req, auth)) {
+  if (!(await isAuthorized(req, auth))) {
     res.status(401).json({ ok: false, error: "Unauthorized" });
     return;
   }

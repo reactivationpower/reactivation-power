@@ -3,10 +3,27 @@ import { createHmac, timingSafeEqual } from 'crypto'
 export const ADMIN_COOKIE_NAME = 'tp_admin'
 export const ADMIN_SESSION_MAX_AGE = 60 * 60 * 24 * 7 // 7 days
 
-interface AdminPayload {
-  role: 'admin'
+export type AdminRole = 'super_admin' | 'sales_rep'
+export const ADMIN_ROLES: readonly AdminRole[] = ['super_admin', 'sales_rep']
+
+export function isAdminRole(value: unknown): value is AdminRole {
+  return typeof value === 'string' && (ADMIN_ROLES as readonly string[]).includes(value)
+}
+
+/**
+ * Identity carried by the signed admin cookie. `userId` is the Supabase Auth
+ * user id, so server actions can stamp records with the acting admin.
+ */
+export interface AdminPayload {
+  v: 2
+  userId: string
+  email: string
+  name: string | null
+  role: AdminRole
   issuedAt: number
 }
+
+export type AdminIdentity = Pick<AdminPayload, 'userId' | 'email' | 'name' | 'role'>
 
 function secret(): string {
   const s = process.env.SESSION_SECRET || process.env.SUPABASE_JWT_SECRET
@@ -20,12 +37,16 @@ function sign(data: string): string {
     .digest('base64url')
 }
 
-export function encodeAdminSession(): string {
-  const payload: AdminPayload = { role: 'admin', issuedAt: Date.now() }
+export function encodeAdminSession(identity: AdminIdentity): string {
+  const payload: AdminPayload = { v: 2, ...identity, issuedAt: Date.now() }
   const data = Buffer.from(JSON.stringify(payload)).toString('base64url')
   return `${data}.${sign(data)}`
 }
 
+/**
+ * Verify the cookie signature and shape. Legacy (shared-password) cookies
+ * have no user id and are rejected, which signs everyone out once.
+ */
 export function decodeAdminSession(token: string): AdminPayload | null {
   const dot = token.lastIndexOf('.')
   if (dot === -1) return null
@@ -38,11 +59,22 @@ export function decodeAdminSession(token: string): AdminPayload | null {
     if (a.length !== b.length || !timingSafeEqual(a, b)) return null
     const payload = JSON.parse(
       Buffer.from(data, 'base64url').toString(),
-    ) as AdminPayload
-    if (payload.role !== 'admin') return null
+    ) as Partial<AdminPayload>
+    if (payload.v !== 2) return null
+    if (typeof payload.userId !== 'string' || !payload.userId) return null
+    if (typeof payload.email !== 'string') return null
+    if (!isAdminRole(payload.role)) return null
+    if (typeof payload.issuedAt !== 'number') return null
     if (Date.now() - payload.issuedAt > ADMIN_SESSION_MAX_AGE * 1000)
       return null
-    return payload
+    return {
+      v: 2,
+      userId: payload.userId,
+      email: payload.email,
+      name: typeof payload.name === 'string' ? payload.name : null,
+      role: payload.role,
+      issuedAt: payload.issuedAt,
+    }
   } catch {
     return null
   }
