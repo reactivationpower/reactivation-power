@@ -2,6 +2,12 @@
 //   node scripts/flows/apply.ts skin-tightening general   # one or more files
 //   node scripts/flows/apply.ts --all                       # every file
 //   node scripts/flows/apply.ts --dry-run skin-tightening   # show the diff only
+//   node scripts/flows/apply.ts --create-niches fillers     # also insert a missing niche row
+//
+// --create-niches: when a file's niche name is not in the niches table yet,
+// insert it from the file's "niche" block (name, sector, is_active,
+// sort_order) instead of refusing. Matching is by name, so re-running never
+// duplicates the row; an existing niche row is never modified.
 //
 // Matching rules (never duplicates, never deletes):
 //   steps    niche + step_key
@@ -42,6 +48,7 @@ interface NicheRow {
 const args = process.argv.slice(2)
 const dryRun = args.includes('--dry-run')
 const all = args.includes('--all')
+const createNiches = args.includes('--create-niches')
 const requested = args.filter((a) => !a.startsWith('--'))
 
 function choiceKey(c: FlowChoice): string {
@@ -56,7 +63,7 @@ function short(s: string, n = 70): string {
 async function main() {
   const slugs = all ? listSlugs() : requested
   if (slugs.length === 0) {
-    console.error('usage: node scripts/flows/apply.ts [--dry-run] (--all | <slug> ...)')
+    console.error('usage: node scripts/flows/apply.ts [--dry-run] [--create-niches] (--all | <slug> ...)')
     process.exit(2)
   }
 
@@ -102,11 +109,36 @@ async function main() {
     let nicheId: string | null = null
     if (slug !== GENERAL_SLUG) {
       if (!file.niche) throw new Error(`${slug}.json has no niche block`)
-      const id = nicheByName.get(file.niche.name.toLowerCase())
+      let id = nicheByName.get(file.niche.name.toLowerCase())
+      if (!id && createNiches) {
+        const meta = file.niche
+        if (dryRun) {
+          console.log(
+            `\n== ${slug}: (dry run) would create niche "${meta.name}" (${meta.sector}, sort_order ${meta.sort_order}); its steps and choices would all be inserts`,
+          )
+          continue
+        }
+        const { data, error } = await supabase
+          .from('niches')
+          .insert({
+            name: meta.name,
+            sector: meta.sector,
+            is_active: meta.is_active,
+            sort_order: meta.sort_order,
+          })
+          .select('id')
+          .single()
+        if (error || !data) {
+          throw new Error(`create niche "${meta.name}": ${error?.message ?? 'no row returned'}`)
+        }
+        id = data.id as string
+        nicheByName.set(meta.name.toLowerCase(), id)
+        console.log(`\n== ${slug}: created niche "${meta.name}" (${id})`)
+      }
       if (!id) {
         throw new Error(
           `${slug}.json: niche "${file.niche.name}" does not exist in the niches table. ` +
-            'Create the niche in the admin first, then apply.',
+            'Create the niche in the admin first, or re-run with --create-niches.',
         )
       }
       nicheId = id

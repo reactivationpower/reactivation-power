@@ -1,0 +1,238 @@
+{
+  "niche": {
+    "name": "Fillers",
+    "sector": "healthcare",
+    "is_active": true,
+    "sort_order": 24
+  },
+  "steps": [
+    {
+      "step_key": "opening_question",
+      "title": "The Opening Question",
+      "content": "So {{contact_first_name}}, how have things been since your filler with us? I usually hear one of three things. Still happy with how it looks, it's starting to soften, or it's pretty much gone. Which one is closest for you?\n\n(Only three answers. Tap the one you hear.)",
+      "sort_order": 1
+    },
+    {
+      "step_key": "resp_doing_great",
+      "title": "Still Happy With It",
+      "content": "That's great to hear, {{contact_first_name}}. Your notes say you were happy with how it turned out. Is it nice to look in the mirror and not think about it anymore?\n\n(Let them answer.)",
+      "sort_order": 2
+    },
+    {
+      "step_key": "resp_coming_back",
+      "title": "Starting to Soften",
+      "content": "That happens, {{contact_first_name}}. Filler softens over time, and the face keeps changing on its own. It's not anything you did wrong. Your notes say you were happy with how it turned out. What kept you from coming back in?\n\n(Let them answer. Stay warm. Do not book yet.)",
+      "sort_order": 3
+    },
+    {
+      "step_key": "resp_fully_back",
+      "title": "Pretty Much Gone",
+      "content": "I'm sorry to hear that, {{contact_first_name}}. Filler does soften and wear off over time. It's not anything you did wrong. Your notes say you were happy with the result. Was it cost, timing, or something else that kept you from coming back?\n\n(Let them answer. Stay warm. Do not book yet.)",
+      "sort_order": 4
+    },
+    {
+      "step_key": "permission_questions",
+      "title": "Ask Permission for the Questions",
+      "content": "{{contact_first_name}}, I'm updating your file anyway. Can I ask you a few questions about anything else you've noticed?\n\n(Wait for the yes. It's their file, so almost everyone says yes.)",
+      "sort_order": 6
+    },
+    {
+      "step_key": "transition",
+      "title": "The Transition: Ask Permission",
+      "content": "{{contact_first_name}}, you said the result has softened. We'll come back to that. First, can I ask you a few quick questions so your file is up to date?\n\n(Wait for the yes.)",
+      "sort_order": 6
+    },
+    {
+      "step_key": "digging_in",
+      "title": "The Questions: Update the File",
+      "content": "(Write down every area they name. You'll recap them in a moment.)\n\nFirst, your lips. Have they thinned out again, or are they still where you want them?\n\nHow about your cheeks, any volume loss making them look flatter than they used to?\n\nWhat about the smile lines, the ones that run from your nose to the corners of your mouth?\n\nAny hollows under your eyes that make you look tired when you're not?\n\nHow about your jawline and chin, anything there you'd like more defined?\n\nAny little lines around your mouth, the kind lipstick settles into?\n\nHow about the lines on your forehead or between your brows?\n\nAnd the skin itself, has it been looking rough or dull lately?\n\nAny sun spots or uneven tone showing up?\n\nLast one. Any loosening or sagging, especially along the jaw or neck?\n\n(Recap what you wrote down, then ask:)\n\n{{contact_first_name}}, of those, which one bothers you the most?\n\n(Tap their answer below.)",
+      "sort_order": 7
+    },
+    {
+      "step_key": "digging_in_concern",
+      "title": "The Questions: Update the File",
+      "content": "(They already named one area. Write down every area they name, including that one.)\n\nFirst, your lips. Have they thinned out again, or are they still where you want them?\n\nHow about your cheeks, any volume loss making them look flatter than they used to?\n\nWhat about the smile lines, the ones that run from your nose to the corners of your mouth?\n\nAny hollows under your eyes that make you look tired when you're not?\n\nHow about your jawline and chin, anything there you'd like more defined?\n\nAny little lines around your mouth, the kind lipstick settles into?\n\nHow about the lines on your forehead or between your brows?\n\nAnd the skin itself, has it been looking rough or dull lately?\n\nAny sun spots or uneven tone showing up?\n\nLast one. Any loosening or sagging, especially along the jaw or neck?\n\n(Recap everything, including what they mentioned at the start, then ask:)\n\n{{contact_first_name}}, between what you mentioned earlier and these, which one bothers you the most?\n\n(Tap their answer below.)",
+      "sort_order": 7
+    },
+    {
+      "step_key": "making_it_real",
+      "title": "Making It Real",
+      "content": "{{contact_first_name}}, I'd like to ask a few quick questions about {{main_concern}} so your file is up to date. It'll only take a minute.\n\n(Ask these three questions in order. Pause after each and let them answer.)\n\nHow long has that been on your mind?\n\n(Let them answer. Repeat it back.)\n\nThat's a long time to have something bothering you.\n\nIs it something you notice now and then, or pretty much every time you see a photo of yourself?\n\n(Let them answer.)\n\nThink of a day you felt really good about how you looked. Now think of a day it really got to you. Do you have those two days in your head?\n\n(Wait for the yes.)\n\nOn that harder day, how does it change things, like how you feel in photos or around people?\n\n(Let them open up. Do not rush.)\n\nThank you for sharing that. It makes sense, and it's something we help people with all the time.",
+      "sort_order": 8
+    },
+    {
+      "step_key": "review",
+      "title": "The Review",
+      "content": "{{contact_first_name}}, let me make sure I have this right.\n\n(Recap what they told you: how long, how often, how it affects them.)\n\nDid I get that right?\n\nAnd it sounds like you'd really like to look in the mirror and feel good about it again. Is that fair to say?\n\n(Most people say yes. Tap what you hear.)",
+      "sort_order": 9
+    },
+    {
+      "step_key": "recommendation",
+      "title": "The Recommendation",
+      "content": "{{contact_first_name}}, it sounds like {{main_concern}} isn't just a small thing. It may be affecting how you feel about yourself around people. Do you see how that could be the case?\n\n(Wait for the answer. If they hesitate, say \"That's fair. It's clearly been on your mind, and that's reason enough.\" Then continue.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nMy recommendation is that we get you in so {{provider_name}} can take a look at {{main_concern}}. If we can help, we'll tell you. If it's not the right fit, we'll tell you that too. Does that sound reasonable?\n\n(Tap what you hear.)",
+      "sort_order": 10
+    },
+    {
+      "step_key": "bridge_no",
+      "title": "They Hesitate: Find Out Why",
+      "content": "{{contact_first_name}}, you said {{main_concern}} is something you'd like to feel better about. I don't want to assume anything. Is it the timing, or is something else holding you back?\n\n(Stay easy about it. No pressure. Do not repeat the concern back at them. Let them answer.)",
+      "sort_order": 11
+    },
+    {
+      "step_key": "lapsed_commitment",
+      "title": "Nothing Found: Why Did They Stop?",
+      "content": "{{contact_first_name}}, I'm glad you're still happy with it.\n\nCan I ask what changed that led you to stop coming in?\n\n(Let them answer. Listen all the way through. Do not argue with it.)\n\nFiller softens slowly, so most people don't notice it going until it's gone. A check-in now and then keeps the look you like. Does that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you in for a check-in so you keep the look you have. Does that sound reasonable?",
+      "sort_order": 16
+    },
+    {
+      "step_key": "obj_faded",
+      "title": "Objection: “It wore off, so what’s the point?”",
+      "content": "That's fair. Filler is meant to soften over time, and the face keeps changing on its own. That's why a check-in makes sense, so we can see where things are now and what would help.\n\nCan we get you in for a look?",
+      "sort_order": 100
+    },
+    {
+      "step_key": "obj_no_difference",
+      "title": "Objection: “I didn’t see enough of a difference”",
+      "content": "I appreciate you telling me. That's the kind of thing we'd want to talk through in person. That way {{provider_name}} can hear what you were hoping for and see what would get you closer.\n\n(Do not promise results on the call.)\n\nIs there anything else on your mind?",
+      "sort_order": 101
+    },
+    {
+      "step_key": "obj_overdone",
+      "title": "Objection: “I’m nervous about looking overdone”",
+      "content": "That's a common worry, and it's a good one to say out loud. Most people want to look rested, not different. Coming in is where you get to say exactly that, and we listen.\n\n(Do not promise a look on the call.)\n\nWould it help to come in and talk it through first?",
+      "sort_order": 102
+    },
+    {
+      "step_key": "obj_went_elsewhere",
+      "title": "Objection: “I went somewhere else”",
+      "content": "That's okay, {{contact_first_name}}. I'm glad you kept it up. Your whole history is here, including what was done and where. We can pick up right where you left off.\n\n(Stay easy. Do not ask why they left.)\n\nWould you be open to coming back in?",
+      "sort_order": 103
+    },
+    {
+      "step_key": "lapsed_felt_fine",
+      "title": "If They Say: “I was happy with my results”",
+      "content": "That makes sense, {{contact_first_name}}, and that's the best reason there is. When you like what you see, coming back stops feeling urgent. The thing with filler is that it softens so slowly you don't notice it going. Does that make sense?\n\n(Let them answer.)\n\nWas there anything else holding you back, or was that pretty much it?\n\n(If they raise another reason, go back and tap the button for it. If that was it, continue.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nMy recommendation is that we get you back on the schedule so you keep the look you like. Does that sound reasonable?",
+      "sort_order": 104
+    },
+    {
+      "step_key": "lapsed_cost",
+      "title": "If They Say: Cost or Budget",
+      "content": "I understand, {{contact_first_name}}, and I'm glad you told me. A check-in is just a look. You're not committing to anything. It's one visit so we can see how everything is holding.\n\nDoes that seem fair?\n\n(Let them answer.)\n\n(Do not quote prices, packages, or discounts. The office handles that.)\n\nWas there anything else holding you back, or was that pretty much it?\n\n(If they raise another reason, go back and tap the button for it. If that was it, continue.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nMy recommendation is that we get you back on the schedule. Does that sound reasonable?",
+      "sort_order": 105
+    },
+    {
+      "step_key": "lapsed_busy",
+      "title": "If They Say: “Life got busy”",
+      "content": "I hear you, {{contact_first_name}}. Life fills up fast, and this kind of thing gets pushed down the list. It happens to everyone. A check-in visit is quick, and we can find a time that works around your schedule.\n\nWould that work?\n\n(Let them answer.)\n\nWas there anything else holding you back, or was that pretty much it?\n\n(If they raise another reason, go back and tap the button for it. If that was it, continue.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nMy recommendation is that we get you back on the schedule at a time that's easy for you. Does that sound reasonable?",
+      "sort_order": 106
+    },
+    {
+      "step_key": "lapsed_wait",
+      "title": "If They Say: “I’ll come back when it wears off”",
+      "content": "That's a fair way to think about it, {{contact_first_name}}. The one thing I'd share is that filler goes slowly. By the time you notice it's gone, it's been going for a while. It's easier to keep the look you have than to start over.\n\nDoes that sound right?\n\n(Let them answer.)\n\nWas there anything else holding you back, or was that pretty much it?\n\n(If they raise another reason, go back and tap the button for it. If that was it, continue.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nMy recommendation is that we get you back on the schedule before it's gone. Does that sound reasonable?",
+      "sort_order": 107
+    },
+    {
+      "step_key": "lapsed_moved",
+      "title": "If They Say: They Moved or Tried Another Provider",
+      "content": "That's understandable, {{contact_first_name}}. Things change. If you're still in the area, we'd love to see you again. Your whole history is in your file, so we can pick up right where you left off.\n\nWould that be okay?\n\n(Let them answer.)\n\nWas there anything else holding you back, or was that pretty much it?\n\n(If they raise another reason, go back and tap the button for it. If that was it, continue.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nMy recommendation is that we get you back on the schedule. Does that sound reasonable?",
+      "sort_order": 108
+    },
+    {
+      "step_key": "obj_think",
+      "title": "Objection: “I need to think about it”",
+      "content": "That's fair, {{contact_first_name}}. Can I ask what part you'd want to think over? Sometimes it's the cost, sometimes the timing, and sometimes people just want to be sure it's right for them.\n\n(Listen. Their answer usually points to one of the buttons below. If it stays general, keep going.)\n\nComing in is really just information. You'd see what's possible and what it would involve, and then you decide with real answers. No pressure either way.\n\nDoes that help?",
+      "sort_order": 130
+    },
+    {
+      "step_key": "obj_send_info",
+      "title": "Objection: “Just send me some info”",
+      "content": "I'd be glad to send you some information, {{contact_first_name}}. The one thing I'd say is that a flyer can only tell you so much. It can't show you what's possible for you specifically. That's what a quick visit is for. So let me get you on the schedule first, and then I'll send the information along.\n\nDoes that work for you?",
+      "sort_order": 131
+    }
+  ],
+  "choices": [
+    { "from_step_key": "opening_question", "label": "“Still happy with how it looks”", "to_step_key": "resp_doing_great", "variant": "positive", "sort_order": 0 },
+    { "from_step_key": "opening_question", "label": "“It’s starting to soften”", "to_step_key": "resp_coming_back", "variant": "caution", "sort_order": 1 },
+    { "from_step_key": "opening_question", "label": "“It’s pretty much gone”", "to_step_key": "resp_fully_back", "variant": "negative", "sort_order": 2 },
+
+    { "from_step_key": "resp_doing_great", "label": "They agreed: ask permission for a few questions", "to_step_key": "permission_questions", "variant": "default", "sort_order": 0 },
+    { "from_step_key": "resp_coming_back", "label": "Continue to the transition", "to_step_key": "transition", "variant": "default", "sort_order": 0 },
+    { "from_step_key": "resp_fully_back", "label": "Continue to the transition", "to_step_key": "transition", "variant": "default", "sort_order": 0 },
+    { "from_step_key": "permission_questions", "label": "They said okay: ask the questions", "to_step_key": "digging_in", "variant": "default", "sort_order": 0 },
+    { "from_step_key": "transition", "label": "They said okay: dig in", "to_step_key": "digging_in_concern", "variant": "default", "sort_order": 0 },
+
+    { "from_step_key": "digging_in", "label": "They named something that bothers them", "to_step_key": "making_it_real", "variant": "caution", "sort_order": 0 },
+    { "from_step_key": "digging_in", "label": "Nothing found: happy across the board", "to_step_key": "lapsed_commitment", "variant": "positive", "sort_order": 1 },
+    { "from_step_key": "digging_in_concern", "label": "They named something new or bigger", "to_step_key": "making_it_real", "variant": "default", "sort_order": 0 },
+    { "from_step_key": "digging_in_concern", "label": "Nothing new: it’s what they already mentioned", "to_step_key": "making_it_real", "variant": "default", "sort_order": 1 },
+    { "from_step_key": "making_it_real", "label": "Continue to the review", "to_step_key": "review", "variant": "default", "sort_order": 0 },
+    { "from_step_key": "review", "label": "They said yes: make the recommendation", "to_step_key": "recommendation", "variant": "positive", "sort_order": 0 },
+    { "from_step_key": "review", "label": "Not quite / they hesitate", "to_step_key": "bridge_no", "variant": "negative", "sort_order": 1 },
+
+    { "from_step_key": "recommendation", "label": "“Yes, that sounds reasonable”", "to_step_key": "scheduling", "variant": "positive", "sort_order": 0 },
+    { "from_step_key": "recommendation", "label": "Hesitant or soft no", "to_step_key": "uncover", "variant": "caution", "sort_order": 1 },
+    { "from_step_key": "recommendation", "label": "“It wore off, so what’s the point?”", "to_step_key": "obj_faded", "variant": "objection", "sort_order": 2 },
+    { "from_step_key": "recommendation", "label": "“I didn’t see enough of a difference”", "to_step_key": "obj_no_difference", "variant": "objection", "sort_order": 3 },
+    { "from_step_key": "recommendation", "label": "“I’m nervous about looking overdone”", "to_step_key": "obj_overdone", "variant": "objection", "sort_order": 4 },
+    { "from_step_key": "recommendation", "label": "“I went somewhere else”", "to_step_key": "obj_went_elsewhere", "variant": "objection", "sort_order": 5 },
+    { "from_step_key": "recommendation", "label": "Cost or insurance", "to_step_key": "obj_cost", "variant": "objection", "sort_order": 6 },
+    { "from_step_key": "recommendation", "label": "“I don’t have time”", "to_step_key": "obj_time", "variant": "objection", "sort_order": 7 },
+    { "from_step_key": "recommendation", "label": "“I need to talk to my spouse”", "to_step_key": "obj_spouse", "variant": "objection", "sort_order": 8 },
+    { "from_step_key": "recommendation", "label": "“I’m considering another option”", "to_step_key": "obj_other_option", "variant": "objection", "sort_order": 9 },
+    { "from_step_key": "recommendation", "label": "“I need to think about it”", "to_step_key": "obj_think", "variant": "objection", "sort_order": 10 },
+    { "from_step_key": "recommendation", "label": "“Just send me some info”", "to_step_key": "obj_send_info", "variant": "objection", "sort_order": 11 },
+
+    { "from_step_key": "uncover", "label": "They’re ready: schedule", "to_step_key": "scheduling", "variant": "positive", "sort_order": 0 },
+    { "from_step_key": "uncover", "label": "“It wore off, so what’s the point?”", "to_step_key": "obj_faded", "variant": "objection", "sort_order": 1 },
+    { "from_step_key": "uncover", "label": "“I didn’t see enough of a difference”", "to_step_key": "obj_no_difference", "variant": "objection", "sort_order": 2 },
+    { "from_step_key": "uncover", "label": "“I’m nervous about looking overdone”", "to_step_key": "obj_overdone", "variant": "objection", "sort_order": 3 },
+    { "from_step_key": "uncover", "label": "“I went somewhere else”", "to_step_key": "obj_went_elsewhere", "variant": "objection", "sort_order": 4 },
+    { "from_step_key": "uncover", "label": "Cost or insurance", "to_step_key": "obj_cost", "variant": "objection", "sort_order": 5 },
+    { "from_step_key": "uncover", "label": "“I don’t have time”", "to_step_key": "obj_time", "variant": "objection", "sort_order": 6 },
+    { "from_step_key": "uncover", "label": "“I need to talk to my spouse”", "to_step_key": "obj_spouse", "variant": "objection", "sort_order": 7 },
+    { "from_step_key": "uncover", "label": "“I’m considering another option”", "to_step_key": "obj_other_option", "variant": "objection", "sort_order": 8 },
+    { "from_step_key": "uncover", "label": "“I need to think about it”", "to_step_key": "obj_think", "variant": "objection", "sort_order": 9 },
+    { "from_step_key": "uncover", "label": "“Just send me some info”", "to_step_key": "obj_send_info", "variant": "objection", "sort_order": 10 },
+
+    { "from_step_key": "bridge_no", "label": "They’re okay to move forward", "to_step_key": "recommendation", "variant": "positive", "sort_order": 0 },
+    { "from_step_key": "bridge_no", "label": "“It wore off, so what’s the point?”", "to_step_key": "obj_faded", "variant": "objection", "sort_order": 1 },
+    { "from_step_key": "bridge_no", "label": "“I didn’t see enough of a difference”", "to_step_key": "obj_no_difference", "variant": "objection", "sort_order": 2 },
+    { "from_step_key": "bridge_no", "label": "“I’m nervous about looking overdone”", "to_step_key": "obj_overdone", "variant": "objection", "sort_order": 3 },
+    { "from_step_key": "bridge_no", "label": "“I went somewhere else”", "to_step_key": "obj_went_elsewhere", "variant": "objection", "sort_order": 4 },
+    { "from_step_key": "bridge_no", "label": "Cost or insurance", "to_step_key": "obj_cost", "variant": "objection", "sort_order": 5 },
+    { "from_step_key": "bridge_no", "label": "“I don’t have time”", "to_step_key": "obj_time", "variant": "objection", "sort_order": 6 },
+    { "from_step_key": "bridge_no", "label": "“I need to talk to my spouse”", "to_step_key": "obj_spouse", "variant": "objection", "sort_order": 7 },
+    { "from_step_key": "bridge_no", "label": "Another reason: dig deeper", "to_step_key": "uncover", "variant": "caution", "sort_order": 8 },
+
+    { "from_step_key": "obj_faded", "label": "Resolved: back to scheduling", "to_step_key": "scheduling", "variant": "positive", "sort_order": 0 },
+    { "from_step_key": "obj_faded", "label": "Another concern came up", "to_step_key": "uncover", "variant": "objection", "sort_order": 1 },
+    { "from_step_key": "obj_no_difference", "label": "Resolved: back to scheduling", "to_step_key": "scheduling", "variant": "positive", "sort_order": 0 },
+    { "from_step_key": "obj_no_difference", "label": "Another concern came up", "to_step_key": "uncover", "variant": "objection", "sort_order": 1 },
+    { "from_step_key": "obj_overdone", "label": "Resolved: back to scheduling", "to_step_key": "scheduling", "variant": "positive", "sort_order": 0 },
+    { "from_step_key": "obj_overdone", "label": "Another concern came up", "to_step_key": "uncover", "variant": "objection", "sort_order": 1 },
+    { "from_step_key": "obj_went_elsewhere", "label": "Resolved: back to scheduling", "to_step_key": "scheduling", "variant": "positive", "sort_order": 0 },
+    { "from_step_key": "obj_went_elsewhere", "label": "Another concern came up", "to_step_key": "uncover", "variant": "objection", "sort_order": 1 },
+    { "from_step_key": "obj_think", "label": "Resolved: back to scheduling", "to_step_key": "scheduling", "variant": "positive", "sort_order": 0 },
+    { "from_step_key": "obj_think", "label": "Another concern came up", "to_step_key": "uncover", "variant": "objection", "sort_order": 1 },
+    { "from_step_key": "obj_send_info", "label": "Resolved: back to scheduling", "to_step_key": "scheduling", "variant": "positive", "sort_order": 0 },
+    { "from_step_key": "obj_send_info", "label": "Another concern came up", "to_step_key": "uncover", "variant": "objection", "sort_order": 1 },
+
+    { "from_step_key": "lapsed_commitment", "label": "They shared a reason: back to scheduling", "to_step_key": "scheduling", "variant": "positive", "sort_order": 0 },
+    { "from_step_key": "lapsed_commitment", "label": "“I was happy with my results”", "to_step_key": "lapsed_felt_fine", "variant": "default", "sort_order": 1 },
+    { "from_step_key": "lapsed_commitment", "label": "Cost or budget", "to_step_key": "lapsed_cost", "variant": "default", "sort_order": 2 },
+    { "from_step_key": "lapsed_commitment", "label": "“Life got busy”", "to_step_key": "lapsed_busy", "variant": "default", "sort_order": 3 },
+    { "from_step_key": "lapsed_commitment", "label": "“I’ll come back when it wears off”", "to_step_key": "lapsed_wait", "variant": "default", "sort_order": 4 },
+    { "from_step_key": "lapsed_commitment", "label": "Moved or tried another provider", "to_step_key": "lapsed_moved", "variant": "default", "sort_order": 5 },
+    { "from_step_key": "lapsed_felt_fine", "label": "Sounds reasonable: back to scheduling", "to_step_key": "scheduling", "variant": "default", "sort_order": 0 },
+    { "from_step_key": "lapsed_felt_fine", "label": "Another reason came up: go back and pick it", "to_step_key": "lapsed_commitment", "variant": "default", "sort_order": 1 },
+    { "from_step_key": "lapsed_cost", "label": "Sounds reasonable: back to scheduling", "to_step_key": "scheduling", "variant": "default", "sort_order": 0 },
+    { "from_step_key": "lapsed_cost", "label": "Another reason came up: go back and pick it", "to_step_key": "lapsed_commitment", "variant": "default", "sort_order": 1 },
+    { "from_step_key": "lapsed_busy", "label": "Sounds reasonable: back to scheduling", "to_step_key": "scheduling", "variant": "default", "sort_order": 0 },
+    { "from_step_key": "lapsed_busy", "label": "Another reason came up: go back and pick it", "to_step_key": "lapsed_commitment", "variant": "default", "sort_order": 1 },
+    { "from_step_key": "lapsed_wait", "label": "Sounds reasonable: back to scheduling", "to_step_key": "scheduling", "variant": "default", "sort_order": 0 },
+    { "from_step_key": "lapsed_wait", "label": "Another reason came up: go back and pick it", "to_step_key": "lapsed_commitment", "variant": "default", "sort_order": 1 },
+    { "from_step_key": "lapsed_moved", "label": "Sounds reasonable: back to scheduling", "to_step_key": "scheduling", "variant": "default", "sort_order": 0 },
+    { "from_step_key": "lapsed_moved", "label": "Another reason came up: go back and pick it", "to_step_key": "lapsed_commitment", "variant": "default", "sort_order": 1 }
+  ]
+}
