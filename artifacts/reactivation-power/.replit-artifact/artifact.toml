@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Reactivation Power"
+description = "A healthcare practice reactivation platform with public lead-generation pages, training courses, progress tracking, call workflows, payments, and administrative management tools."
+version = "1.0.0"
+id = "artifacts/reactivation-power"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 21363
+
+[services.development]
+run = "pnpm --filter @workspace/reactivation-power run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/reactivation-power", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/reactivation-power/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21363"
+BASE_PATH = "/"
