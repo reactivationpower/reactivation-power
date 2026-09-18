@@ -1,6 +1,8 @@
 
 import { getAdminClient } from '@/lib/supabase/admin'
-import { getSession } from '@/lib/auth/session'
+import { redirect } from 'next/navigation'
+import { getSession, type SessionPayload } from '@/lib/auth/session'
+import { billingBlockForOwner } from '@/lib/billing/dunning'
 import type { Participant, ParticipantAlias, Session } from '@/lib/types'
 
 export async function getParticipantById(
@@ -27,13 +29,54 @@ export async function getParticipantByEmail(
   return data as Participant | null
 }
 
-/** Current logged-in participant based on the session cookie */
+/**
+ * Current logged-in participant based on the session cookie.
+ *
+ * Portal access is also gated on billing: when the owning customer is
+ * past due or canceled, the owner and all staff are sent to the login page
+ * with a billing notice instead of getting data.
+ */
 export async function getCurrentParticipant(): Promise<Participant | null> {
   const session = await getSession()
   if (!session) return null
+  const participant = await participantIfBillingAllows(session)
+  if (participant === 'blocked') {
+    const p = await getParticipantById(session.participantId)
+    redirect(billingLoginPath(p?.email))
+  }
+  return participant
+}
+
+/**
+ * The participant behind a session, or `'blocked'` when the account is shut
+ * off for billing. Non-page routes (media, progress, RPC auth) use this so a
+ * paused account cannot keep fetching paid content with an existing cookie.
+ */
+export async function participantIfBillingAllows(
+  session: Pick<SessionPayload, 'participantId'>,
+): Promise<Participant | null | 'blocked'> {
   const participant = await getParticipantById(session.participantId)
   if (!participant || !participant.is_active) return null
+  if (!participant.is_demo) {
+    const block = await billingBlockForOwner(accessOwnerId(participant))
+    if (block) return 'blocked'
+  }
   return participant
+}
+
+/** Session for a signed-in portal account that is active and not billing-blocked. */
+export async function getAllowedSession(): Promise<SessionPayload | null> {
+  const session = await getSession()
+  if (!session) return null
+  const participant = await participantIfBillingAllows(session)
+  return participant && participant !== 'blocked' ? session : null
+}
+
+/** Login page URL that shows the billing notice for a shut-off account. */
+export function billingLoginPath(email?: string | null): string {
+  const params = new URLSearchParams({ reason: 'billing' })
+  if (email) params.set('email', email)
+  return `/login?${params.toString()}`
 }
 
 /**

@@ -7,11 +7,14 @@ import {
   getClientIp,
   setSessionCookie,
 } from '@/lib/auth/session'
-import { getParticipantByEmail } from '@/lib/data/participants'
+import { accessOwnerId, getParticipantByEmail } from '@/lib/data/participants'
+import { billingBlockForOwner } from '@/lib/billing/dunning'
 import { logEvent } from '@/lib/data/activity'
 
 export interface LoginState {
   error?: string
+  /** Set when the account is shut off for a billing problem (owner or staff). */
+  billing?: { reason: string; status: string; email: string }
 }
 
 function norm(v: string | null | undefined): string {
@@ -37,6 +40,18 @@ export async function login(
     return {
       error:
         'This email is not registered. Please contact your administrator for access.',
+    }
+  }
+
+  // Billing gate: a past-due or canceled customer locks out the owner and
+  // every staff account underneath them until an invoice is paid.
+  if (!participant.is_demo) {
+    const block = await billingBlockForOwner(accessOwnerId(participant))
+    if (block) {
+      return {
+        error: 'There is a billing issue on this account, so access is paused.',
+        billing: { reason: block.reason, status: block.status, email: block.email },
+      }
     }
   }
 

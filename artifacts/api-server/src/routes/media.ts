@@ -1,7 +1,7 @@
 import { Readable } from "node:stream";
 import { get } from "@vercel/blob";
 import { Router, type IRouter, type Request, type Response } from "express";
-import { getSession } from "@/lib/auth/session";
+import { getAllowedSession } from "@/lib/data/participants";
 import { getAdminSessionFromRequest } from "@/lib/auth/admin-session";
 import { logger } from "@/lib/logger";
 import { runWithRequestContext } from "@/lib/request-context";
@@ -18,7 +18,9 @@ router.get("/media", async (req: Request, res: Response) => {
       res.status(400).json({ error: "Missing pathname" });
       return;
     }
-    if (!isAdmin && !(await getSession())) {
+    // Portal viewers must be active and not shut off for billing — a paused
+    // account keeps its cookie but must not keep streaming paid content.
+    if (!isAdmin && !(await getAllowedSession())) {
       res.status(401).json({ error: "Unauthorized" });
       return;
     }

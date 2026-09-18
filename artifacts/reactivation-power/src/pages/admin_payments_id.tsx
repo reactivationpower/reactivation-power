@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 
 import { PaymentDetailActions } from '@/components/admin/payment-detail-actions'
+import { BillingPanel } from '@/components/admin/billing-panel'
 import { StatusPill, TypePill, linkStatus } from '@/components/admin/payments-manager'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -71,7 +72,7 @@ export default function PaymentDetailPage() {
   if (loading) return <PageLoading />
   if (notFound) return <NotFound />
   if (error) return <PageError error={error} />
-  const { link, accounts, customer, cards, isPaid, owner, staffAccounts } = data
+  const { link, accounts, customer, cards, history = [], isPaid, owner, staffAccounts } = data
   const isSubscription = link.type === 'subscription'
   const status = linkStatus(link)
 
@@ -339,6 +340,10 @@ export default function PaymentDetailPage() {
                 )}
               </CardContent>
             </Card>
+          ) : null}
+
+          {customer && (isPaid || history.length > 0) ? (
+            <BillingPanel link={link} customer={customer} history={history} />
           ) : null}
 
           {isSubscription ? (

@@ -15,7 +15,7 @@ import {
 } from '@workspace/db'
 import { and, eq, ne } from 'drizzle-orm'
 
-import { PRODUCT_NAME, provisionAccounts } from './payments'
+import { PRODUCT_NAME, provisionAccounts, recordIntentPayment } from './payments'
 import { agreementWindow, isSameCard, stageOf, type CheckoutStage } from '@/lib/billing/rules'
 
 /**
@@ -351,6 +351,14 @@ export async function recordPrimaryCard(token: string): Promise<{ ok: boolean; e
     .where(eq(customersTable.id, customer.id))
 
   if (confirmed.paymentIntent && terms.setupFeeCents > 0) {
+    await recordIntentPayment({
+      customerId: customer.id,
+      linkId: link.id,
+      paymentIntent: confirmed.paymentIntent,
+      description: `${PRODUCT_NAME} — setup fee`,
+      occurredAt: paidAt,
+      cardRank: 'primary',
+    })
     const charge = confirmed.paymentIntent.latest_charge
     const receiptUrl = charge && typeof charge !== 'string' ? (charge.receipt_url ?? null) : null
     await sendPaymentReceivedEmail(

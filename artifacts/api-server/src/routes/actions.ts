@@ -1,12 +1,14 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { runWithRequestContext } from "../lib/request-context";
 import { isNotFoundSignal, isRedirectSignal } from "../shims/next-navigation";
+import { participantIfBillingAllows } from "../lib/data/participants";
 import { logger } from "../lib/logger";
 import * as adminAuth from "../actions/admin-auth";
 import * as adminTeam from "../actions/admin-team";
 import * as adminViewAs from "../actions/admin-view-as";
 import * as admin from "../actions/admin";
 import * as auth from "../actions/auth";
+import * as billing from "../actions/billing";
 import * as booking from "../actions/booking";
 import * as demo from "../actions/demo";
 import * as leads from "../actions/leads";
@@ -46,6 +48,7 @@ const MODULES: Record<string, ActionModule> = {
   "admin-view-as": adminViewAs,
   admin,
   auth,
+  billing,
   booking,
   demo,
   leads,
@@ -70,6 +73,11 @@ const ACTIONS: Record<string, Record<string, Auth>> = {
   mail: { listTransactionalTemplates: "super_admin", sendTestEmail: "super_admin", listEmailLog: "super_admin" },
   "admin-view-as": { viewAsParticipant: "super_admin" },
   auth: { login: "public", logout: "public" },
+  billing: {
+    // Admin billing actions on a customer record (each stamps the acting admin).
+    refundPayment: "admin", cancelSubscription: "admin", resumeSubscription: "admin",
+    changeBillingDate: "admin", retryCustomerPayment: "admin",
+  },
   booking: { getAvailability: "public", bookStrategyCall: "public" },
   leads: { lookupZip: "public", submitHealthcareLead: "public" },
   demo: {
@@ -126,7 +134,11 @@ async function isAuthorized(req: Request, auth: Auth): Promise<boolean> {
     return Boolean(session && satisfies(session.role, auth));
   }
   const token = req.cookies?.[SESSION_COOKIE_NAME] as string | undefined;
-  return Boolean(token && decodeSession(token));
+  const session = token ? decodeSession(token) : null;
+  if (!session) return false;
+  // Portal RPC is also closed to accounts shut off for billing.
+  const participant = await participantIfBillingAllows(session);
+  return Boolean(participant && participant !== "blocked");
 }
 
 function decodeArg(arg: unknown): unknown {

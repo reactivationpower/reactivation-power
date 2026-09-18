@@ -4,6 +4,7 @@ import { getOwnerNiches } from "@/lib/data/reactivation";
 import { getOwnerSectors } from "@/lib/data/courses";
 import { suggestNicheForService } from "@/lib/niche-match";
 import { runWithRequestContext } from "@/lib/request-context";
+import { isRedirectSignal } from "@/shims/next-navigation";
 
 const router: IRouter = Router();
 
@@ -74,7 +75,11 @@ function sampleEmail(first: string, last: string): string {
 
 router.get("/templates/contacts", async (req: Request, res: Response) => {
   await runWithRequestContext(req, res, async () => {
-    const participant = await getCurrentParticipant();
+    // A billing-blocked account redirects; for a file download that is a 401.
+    const participant = await getCurrentParticipant().catch((err) => {
+      if (isRedirectSignal(err)) return null;
+      throw err;
+    });
     if (!participant) {
       res.status(401).send("Not signed in");
       return;

@@ -1,6 +1,7 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { getAdminClient } from "@/lib/supabase/admin";
-import { getSession, getClientIp } from "@/lib/auth/session";
+import { getClientIp } from "@/lib/auth/session";
+import { getAllowedSession } from "@/lib/data/participants";
 import { logEvent } from "@/lib/data/activity";
 import { COMPLETION_THRESHOLD } from "@/lib/types";
 import { logger } from "@/lib/logger";
@@ -10,7 +11,7 @@ const router: IRouter = Router();
 
 router.post("/progress", async (req: Request, res: Response) => {
   await runWithRequestContext(req, res, async () => {
-    const session = await getSession();
+    const session = await getAllowedSession();
     if (!session) {
       res.status(401).json({ error: "Unauthorized" });
       return;

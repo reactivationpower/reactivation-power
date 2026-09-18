@@ -3,3 +3,4 @@
 - [Transactional email via Resend](transactional-email.md) — send-only connector key, unverified links. subdomain + RESEND_FROM override, email_log in Replit Postgres, Tabs needs explicit flex-col.
 - [Script flow content-as-code](script-flows.md) — player italics need whole-paragraph parens; apply pairs duplicate from+to by sort_order; demo owner lacks most niches; known dead ends.
 - [Stripe modes & billing tables](stripe-modes-and-billing.md) — env keys are LIVE; workspace uses sandbox via Stripe integration, STRIPE_MODE overrides; billing tables in Replit Postgres.
+- [Stripe dunning & webhook verification](stripe-dunning.md) — access keyed on customers.billing_status; Stripe retries are a Dashboard setting; sandbox test recipe without Stripe CLI.

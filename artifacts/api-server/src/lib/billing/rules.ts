@@ -84,3 +84,97 @@ export function cleanCustomer(
   if (!value.email || !EMAIL_RE.test(value.email)) return { ok: false, error: 'A valid email is required.' }
   return { ok: true, value }
 }
+
+// ── Dunning / access rules ─────────────────────────────────────────────────
+
+export interface RetryCard {
+  rank: 'primary' | 'secondary'
+  stripePaymentMethodId: string
+}
+
+/**
+ * The next card to try for an invoice, given every card that has already
+ * declined on it. Policy: primary once, then secondary once, then stop —
+ * never back to a card that already failed this invoice. Stripe emits a
+ * fresh `invoice.payment_failed` for each attempt we make, so anything that
+ * alternated between the two cards would loop forever.
+ */
+export function cardToRetry<T extends RetryCard>(cards: T[], failedPaymentMethodIds: Iterable<string | null | undefined>): T | null {
+  const failed = new Set<string>()
+  for (const id of failedPaymentMethodIds) if (id) failed.add(id)
+  const primary = cards.find((c) => c.rank === 'primary') ?? null
+  const secondary = cards.find((c) => c.rank === 'secondary') ?? null
+  // Unknown failed card (e.g. Stripe charged a method we do not track):
+  // treat it as the primary having been tried.
+  if (failed.size === 0 || ![...failed].some((id) => id === primary?.stripePaymentMethodId || id === secondary?.stripePaymentMethodId)) {
+    return secondary ?? null
+  }
+  if (secondary && !failed.has(secondary.stripePaymentMethodId)) return secondary
+  return null
+}
+
+export type AccessReconciliation = 'block' | 'restore' | 'none'
+
+/**
+ * What a subscription status event means for portal access, decided from
+ * *fresh* Stripe state rather than the event payload: webhooks arrive out of
+ * order, so a stale `past_due` must not re-lock a customer whose invoice
+ * the backup card already paid.
+ */
+export function reconcileAccess(input: {
+  subscriptionStatus: string
+  openInvoices: number
+  billingStatus: string
+}): AccessReconciliation {
+  const blocked = isAccessBlocked(input.billingStatus)
+  if (input.subscriptionStatus === 'active' || input.subscriptionStatus === 'trialing') {
+    if (input.openInvoices > 0) return 'none'
+    if (blocked) return 'restore'
+    return input.billingStatus === 'active' || input.billingStatus === 'trialing' ? 'none' : 'restore'
+  }
+  if (input.subscriptionStatus === 'past_due' || input.subscriptionStatus === 'unpaid') {
+    return !blocked && input.openInvoices > 0 ? 'block' : 'none'
+  }
+  return 'none'
+}
+
+/** Billing statuses that shut the portal off for the owner and all staff. */
+export function isAccessBlocked(billingStatus: string): boolean {
+  return billingStatus === 'past_due' || billingStatus === 'canceled'
+}
+
+/** Customer status once an invoice is paid, from the subscription's status. */
+export function billingStatusAfterPayment(subscriptionStatus: string | null): 'trialing' | 'active' {
+  return subscriptionStatus === 'trialing' ? 'trialing' : 'active'
+}
+
+interface SubscriptionLike {
+  status: string
+  trial_end: number | null
+  items: { data: { current_period_end: number }[] }
+}
+
+/** When Stripe will next try to bill this subscription. */
+export function subscriptionNextPaymentAt(sub: SubscriptionLike): Date | null {
+  if (sub.status === 'canceled') return null
+  if (sub.status === 'trialing' && sub.trial_end) return new Date(sub.trial_end * 1000)
+  const end = sub.items.data[0]?.current_period_end
+  return end ? new Date(end * 1000) : null
+}
+
+/** A next-billing-date change must be in the future; Stripe rejects the past. */
+export function validateBillingDate(date: Date, now = new Date()): string | null {
+  if (Number.isNaN(date.getTime())) return 'Pick a valid date.'
+  if (date.getTime() <= now.getTime() + 60 * 60 * 1000) return 'The next billing date must be at least an hour from now.'
+  if (date.getTime() > now.getTime() + 366 * 24 * 60 * 60 * 1000) return 'The next billing date cannot be more than a year out.'
+  return null
+}
+
+/** Refund amount check against what is still refundable on the charge. */
+export function validateRefundAmount(amountCents: number | null | undefined, refundableCents: number): string | null {
+  if (refundableCents <= 0) return 'This payment has already been fully refunded.'
+  if (amountCents == null) return null // full refund of the remainder
+  if (!Number.isInteger(amountCents) || amountCents <= 0) return 'Enter a refund amount greater than $0.'
+  if (amountCents > refundableCents) return `You can refund at most ${(refundableCents / 100).toFixed(2)} on this payment.`
+  return null
+}

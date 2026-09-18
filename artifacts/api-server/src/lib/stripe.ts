@@ -118,6 +118,16 @@ export function getStripePublishableKey(): string | null {
   return current().publishableKey
 }
 
+/**
+ * Signing secret for the webhook endpoint of the active mode. Test and live
+ * endpoints are registered separately in Stripe, so they carry separate
+ * secrets: STRIPE_TEST_WEBHOOK_SECRET (sandbox) / STRIPE_WEBHOOK_SECRET (live).
+ */
+export function getStripeWebhookSecret(): string | null {
+  const key = current().mode === 'test' ? 'STRIPE_TEST_WEBHOOK_SECRET' : 'STRIPE_WEBHOOK_SECRET'
+  return process.env[key]?.trim() || null
+}
+
 /** The Stripe client for the active mode. */
 export const stripe: Stripe = new Proxy({} as Stripe, {
   get(_target, prop) {

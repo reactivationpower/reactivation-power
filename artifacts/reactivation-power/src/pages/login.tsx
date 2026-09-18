@@ -4,6 +4,7 @@ import { LoginForm } from '@/components/login-form'
 import { useSearch } from 'wouter'
 import { usePageData } from '@/hooks/use-page-data'
 import { PageError, PageLoading } from '@/components/page-status'
+import { BillingNotice } from '@/components/billing-notice'
 
 
 export default function LoginPage() {
@@ -16,7 +17,10 @@ export default function LoginPage() {
   })
   if (loading) return <PageLoading />
   if (error) return <PageError error={error} />
-  const { next } = data
+  const { next, billing } = data
+  // Portal loaders send a shut-off account here with ?reason=billing; the
+  // loader also reports the block when the session cookie was still present.
+  const billingNotice = billing ?? (search.get('reason') === 'billing' ? { reason: null, email: prefillEmail ?? null } : null)
 
   return (
     <main className="flex min-h-svh items-center justify-center bg-card px-4 py-8">
@@ -33,6 +37,11 @@ export default function LoginPage() {
             Sign in with your registered email to access your courses.
           </p>
         </div>
+        {billingNotice ? (
+          <div className="mb-4">
+            <BillingNotice reason={billingNotice.reason} email={billingNotice.email ?? prefillEmail ?? null} />
+          </div>
+        ) : null}
         <div className="rounded-xl border bg-card p-6 shadow-sm">
           <LoginForm next={next} email={prefillEmail} />
         </div>

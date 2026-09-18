@@ -5,7 +5,8 @@ import { logger } from "../lib/logger";
 import { adminHomeFor, getAdminSessionFromRequest, satisfies } from "../lib/auth/admin-session";
 import { listAdminUsers } from "../lib/data/admin-users";
 import { SESSION_COOKIE_NAME, decodeSession } from "../lib/auth/token";
-import { getSession } from "../lib/auth/session";
+import { clearSessionCookie, getSession } from "../lib/auth/session";
+import { billingBlockForOwner } from "../lib/billing/dunning";
 import {
   accessOwnerId, getAliases, getCurrentParticipant, getParticipantById,
   getSessions, getStaffMembers,
@@ -138,8 +139,16 @@ add("/admin/team", "super_admin", async (req) => {
 
 add("/login", undefined, async (req) => {
   const session = await getSession();
-  if (session) redirect("/portal");
-  return { next: queryString(req, "next") };
+  if (session) {
+    // A signed-in account that is shut off for billing lands here from the
+    // portal; clear its cookie so it does not bounce back and forth.
+    const participant = await getParticipantById(session.participantId);
+    const block = participant && !participant.is_demo ? await billingBlockForOwner(accessOwnerId(participant)) : null;
+    if (!block) redirect("/portal");
+    await clearSessionCookie();
+    return { next: queryString(req, "next"), billing: { reason: block.reason, status: block.status, email: block.email } };
+  }
+  return { next: queryString(req, "next"), billing: null };
 });
 add("/admin-login", undefined, async (req) => {
   const session = await getAdminSessionFromRequest(req);
@@ -464,11 +473,11 @@ add("/admin/payments/:id", "admin", async (req) => {
   const id = String(req.params.id);
   const detail = await getPaymentDetail(id);
   if (!detail) notFound();
-  const { link, accounts, customer, cards } = detail;
+  const { link, accounts, customer, cards, history } = detail;
   const isPaid = link.status === "paid";
   const owner = accounts.find((a) => a.role === "owner");
   const staffAccounts = accounts.filter((a) => a.role === "staff");
-  return { id, detail, link, accounts, customer, cards, isPaid, owner: owner ?? null, staffAccounts };
+  return { id, detail, link, accounts, customer, cards, history, isPaid, owner: owner ?? null, staffAccounts };
 });
 
 add("/admin/analytics", "super_admin", async (req) => {

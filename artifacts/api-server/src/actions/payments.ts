@@ -6,18 +6,21 @@ import { canDeleteLink, cleanCustomer, type CustomerInput } from '@/lib/billing/
 import { requireAdmin } from '@/lib/auth/admin-session'
 import { getAdminClient } from '@/lib/supabase/admin'
 import { stripe } from '@/lib/stripe'
+import { cardFromIntent, recordHistory } from '@/lib/billing/dunning'
 import { MAX_STAFF } from '@/lib/types'
 import { sendPaymentReceivedEmail, sendPortalWelcomeEmail } from '@/lib/mail'
 import {
   customerCardsTable,
   customersTable,
   db,
+  paymentHistoryTable,
   paymentLinkTermsTable,
   type Customer,
   type CustomerCard,
+  type PaymentHistory,
   type PaymentLinkTerms,
 } from '@workspace/db'
-import { and, eq, inArray } from 'drizzle-orm'
+import { and, desc, eq, inArray } from 'drizzle-orm'
 
 export const PRODUCT_NAME = 'Reactivation Power Access'
 
@@ -53,6 +56,9 @@ export interface PaymentLink {
   agreement_start: string | null
   agreement_end: string | null
   completed_at: string | null
+  /** Scheduled cancellation (end of term), if any. */
+  cancel_at: string | null
+  canceled_at: string | null
   /** Where a subscription link is in its checkout. */
   stage: 'primary' | 'secondary' | 'done'
   business_name: string | null
@@ -85,7 +91,33 @@ export interface CustomerRecord {
   email: string
   stripe_customer_id: string | null
   billing_status: string
+  billing_blocked_at: string | null
+  billing_issue: string | null
+  participant_id: string | null
   created_by_name: string | null
+}
+
+/** One row of the customer's billing ledger (charges, refunds, changes). */
+export interface PaymentHistoryEntry {
+  id: string
+  kind: PaymentHistory['kind']
+  status: PaymentHistory['status']
+  amount_cents: number
+  currency: string
+  description: string
+  failure_message: string | null
+  card_rank: string | null
+  card_brand: string | null
+  card_last4: string | null
+  stripe_invoice_id: string | null
+  stripe_payment_intent_id: string | null
+  stripe_charge_id: string | null
+  stripe_refund_id: string | null
+  source: PaymentHistory['source']
+  actor_admin_name: string | null
+  occurred_at: string
+  /** Cents still refundable on this charge (only for successful charges). */
+  refundable_cents: number
 }
 
 const LINK_COLUMNS =
@@ -133,7 +165,33 @@ function toCustomerRecord(c: Customer): CustomerRecord {
     email: c.email,
     stripe_customer_id: c.stripeCustomerId,
     billing_status: c.billingStatus,
+    billing_blocked_at: iso(c.billingBlockedAt),
+    billing_issue: c.billingIssue,
+    participant_id: c.participantId,
     created_by_name: c.createdByName,
+  }
+}
+
+export function toHistoryEntry(h: PaymentHistory, refundedCents = 0): PaymentHistoryEntry {
+  return {
+    id: h.id,
+    kind: h.kind,
+    status: h.status,
+    amount_cents: h.amountCents,
+    currency: h.currency,
+    description: h.description,
+    failure_message: h.failureMessage,
+    card_rank: h.cardRank,
+    card_brand: h.cardBrand,
+    card_last4: h.cardLast4,
+    stripe_invoice_id: h.stripeInvoiceId,
+    stripe_payment_intent_id: h.stripePaymentIntentId,
+    stripe_charge_id: h.stripeChargeId,
+    stripe_refund_id: h.stripeRefundId,
+    source: h.source,
+    actor_admin_name: h.actorAdminName,
+    occurred_at: h.occurredAt.toISOString(),
+    refundable_cents: h.status === 'succeeded' && h.stripeChargeId ? Math.max(0, h.amountCents - refundedCents) : 0,
   }
 }
 
@@ -179,6 +237,8 @@ async function mergeLinks(rows: Record<string, unknown>[]): Promise<PaymentLink[
       agreement_start: iso(t?.agreementStart),
       agreement_end: iso(t?.agreementEnd),
       completed_at: iso(t?.completedAt),
+      cancel_at: iso(t?.cancelAt),
+      canceled_at: iso(t?.canceledAt),
       stage: stageOf(t),
       business_name: c?.businessName || null,
     }
@@ -293,6 +353,21 @@ export async function provisionAccounts(linkId: string): Promise<string | null> 
       provisioned_at: new Date().toISOString(),
     })
     .eq('id', link.id)
+
+  // The billing gate resolves a portal login to its customer through this id.
+  if (ownerId) {
+    const [terms] = await db
+      .select({ customerId: paymentLinkTermsTable.customerId })
+      .from(paymentLinkTermsTable)
+      .where(eq(paymentLinkTermsTable.linkId, String(link.id)))
+      .limit(1)
+    if (terms) {
+      await db
+        .update(customersTable)
+        .set({ participantId: ownerId, updatedAt: new Date() })
+        .where(eq(customersTable.id, terms.customerId))
+    }
+  }
 
   revalidatePath('/admin/participants')
   return ownerId ?? null
@@ -443,6 +518,7 @@ export async function getPaymentDetail(id: string): Promise<{
   accounts: ProvisionedAccount[]
   customer: CustomerRecord | null
   cards: CardOnFile[]
+  history: PaymentHistoryEntry[]
 } | null> {
   await requireAdmin()
   const supabase = getAdminClient()
@@ -456,6 +532,7 @@ export async function getPaymentDetail(id: string): Promise<{
 
   let customer: CustomerRecord | null = null
   let cards: CardOnFile[] = []
+  let history: PaymentHistoryEntry[] = []
   if (link.customer_id) {
     const [c] = await db.select().from(customersTable).where(eq(customersTable.id, link.customer_id)).limit(1)
     if (c) customer = toCustomerRecord(c)
@@ -465,6 +542,19 @@ export async function getPaymentDetail(id: string): Promise<{
       .where(and(eq(customerCardsTable.customerId, link.customer_id), eq(customerCardsTable.active, true)))
       .orderBy(customerCardsTable.rank)
     cards = cardRows.map(toCardOnFile)
+    const historyRows = await db
+      .select()
+      .from(paymentHistoryTable)
+      .where(eq(paymentHistoryTable.customerId, link.customer_id))
+      .orderBy(desc(paymentHistoryTable.occurredAt), desc(paymentHistoryTable.createdAt))
+      .limit(200)
+    const refundedByCharge = new Map<string, number>()
+    for (const h of historyRows) {
+      if (h.kind === 'refund' && h.stripeChargeId) {
+        refundedByCharge.set(h.stripeChargeId, (refundedByCharge.get(h.stripeChargeId) ?? 0) + h.amountCents)
+      }
+    }
+    history = historyRows.map((h) => toHistoryEntry(h, h.stripeChargeId ? refundedByCharge.get(h.stripeChargeId) ?? 0 : 0))
   }
 
   let accounts: ProvisionedAccount[] = []
@@ -476,7 +566,7 @@ export async function getPaymentDetail(id: string): Promise<{
       .order('role', { ascending: true })
     accounts = (rows as ProvisionedAccount[]) ?? []
   }
-  return { link, accounts, customer, cards }
+  return { link, accounts, customer, cards, history }
 }
 
 /** Delete a pending payment link. Paid links are kept as records. */
@@ -599,7 +689,7 @@ export async function confirmPayment(
         .from('payment_links')
         .update({ status: 'paid', paid_at: paidAt })
         .eq('id', link.id)
-      await markOneTimePaid(String(link.id), paidAt)
+      await markOneTimePaid(String(link.id), paidAt, session.payment_intent)
       await sendPaymentReceivedEmail(
         String(link.email),
         {
@@ -624,7 +714,11 @@ export async function confirmPayment(
 }
 
 /** Record completion on the billing terms + customer for a one-time link. */
-async function markOneTimePaid(linkId: string, paidAt: string): Promise<void> {
+async function markOneTimePaid(
+  linkId: string,
+  paidAt: string,
+  paymentIntent: string | { id: string } | null | undefined,
+): Promise<void> {
   try {
     const [terms] = await db
       .update(paymentLinkTermsTable)
@@ -636,9 +730,61 @@ async function markOneTimePaid(linkId: string, paidAt: string): Promise<void> {
         .update(customersTable)
         .set({ billingStatus: 'paid', updatedAt: new Date() })
         .where(eq(customersTable.id, terms.customerId))
+      await recordIntentPayment({
+        customerId: terms.customerId,
+        linkId,
+        paymentIntent,
+        description: `${PRODUCT_NAME} — full price`,
+        occurredAt: new Date(paidAt),
+      })
     }
   } catch (err) {
     console.error('[v0] markOneTimePaid failed:', err)
+  }
+}
+
+/**
+ * Ledger row for a one-off PaymentIntent (full-price purchase or setup fee)
+ * so it shows in the billing history and can be refunded from the dashboard.
+ */
+export async function recordIntentPayment(input: {
+  customerId: string
+  linkId: string
+  paymentIntent: string | { id: string } | null | undefined
+  description: string
+  occurredAt: Date
+  cardRank?: 'primary' | 'secondary'
+}): Promise<void> {
+  const id = typeof input.paymentIntent === 'string' ? input.paymentIntent : input.paymentIntent?.id
+  if (!id) return
+  try {
+    const intent = await stripe.paymentIntents.retrieve(id, { expand: ['latest_charge', 'payment_method'] })
+    const used = cardFromIntent(intent)
+    const [dupe] = await db
+      .select({ id: paymentHistoryTable.id })
+      .from(paymentHistoryTable)
+      .where(and(eq(paymentHistoryTable.stripePaymentIntentId, intent.id), eq(paymentHistoryTable.status, 'succeeded')))
+      .limit(1)
+    if (dupe) return
+    await recordHistory({
+      customerId: input.customerId,
+      linkId: input.linkId,
+      kind: 'invoice_paid',
+      status: 'succeeded',
+      amountCents: intent.amount_received || intent.amount,
+      currency: intent.currency,
+      description: input.description,
+      cardRank: input.cardRank ?? null,
+      cardBrand: used.brand,
+      cardLast4: used.last4,
+      stripePaymentMethodId: used.paymentMethodId,
+      stripePaymentIntentId: intent.id,
+      stripeChargeId: used.chargeId,
+      source: 'webhook',
+      occurredAt: input.occurredAt,
+    })
+  } catch (err) {
+    console.error('[v0] recordIntentPayment failed:', err)
   }
 }
 

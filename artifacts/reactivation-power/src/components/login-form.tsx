@@ -5,6 +5,7 @@ import { login, type LoginState } from '@/app/actions/auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { BillingNotice } from '@/components/billing-notice'
 
 const initialState: LoginState = {}
 
@@ -61,7 +62,10 @@ export function LoginForm({ next, email }: { next?: string; email?: string }) {
           placeholder="(555) 123-4567"
         />
       </div>
-      {state.error && (
+      {state.billing ? (
+        <BillingNotice reason={state.billing.reason} email={state.billing.email} />
+      ) : null}
+      {state.error && !state.billing && (
         <p
           role="alert"
           className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive"

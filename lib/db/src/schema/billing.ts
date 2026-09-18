@@ -1,4 +1,4 @@
-import { boolean, index, integer, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { boolean, index, integer, pgTable, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
 
 /**
  * Billing records live in the Replit Postgres. The Supabase `payment_links`
@@ -24,12 +24,18 @@ export const customersTable = pgTable(
     email: text("email").notNull(),
     stripeCustomerId: text("stripe_customer_id"),
     billingStatus: text("billing_status").$type<BillingStatus>().notNull().default("none"),
+    /** Supabase participant id of the portal owner provisioned for this customer. */
+    participantId: text("participant_id"),
+    /** Set while portal access is shut off for a billing problem. */
+    billingBlockedAt: timestamp("billing_blocked_at", { withTimezone: true }),
+    /** Human-readable reason shown on the login notice (last decline message). */
+    billingIssue: text("billing_issue"),
     createdById: text("created_by_id"),
     createdByName: text("created_by_name"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [index("customers_email_idx").on(t.email)],
+  (t) => [index("customers_email_idx").on(t.email), index("customers_participant_idx").on(t.participantId)],
 );
 
 /** One row per payment link (keyed by the Supabase payment_links.id). */
@@ -56,6 +62,9 @@ export const paymentLinkTermsTable = pgTable(
     agreementStart: timestamp("agreement_start", { withTimezone: true }),
     agreementEnd: timestamp("agreement_end", { withTimezone: true }),
     completedAt: timestamp("completed_at", { withTimezone: true }),
+    /** Scheduled cancellation (Stripe cancel_at / cancel_at_period_end). */
+    cancelAt: timestamp("cancel_at", { withTimezone: true }),
+    canceledAt: timestamp("canceled_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index("payment_link_terms_customer_idx").on(t.customerId), index("payment_link_terms_token_idx").on(t.token)],
@@ -80,6 +89,78 @@ export const customerCardsTable = pgTable(
   (t) => [index("customer_cards_customer_idx").on(t.customerId)],
 );
 
+/**
+ * Every Stripe webhook event we have seen, keyed by Stripe's event id, so a
+ * redelivered event is acknowledged without being processed twice.
+ */
+export const stripeEventsTable = pgTable("stripe_events", {
+  id: text("id").primaryKey(),
+  type: text("type").notNull(),
+  livemode: boolean("livemode").notNull().default(false),
+  status: text("status").$type<StripeEventStatus>().notNull().default("processing"),
+  error: text("error"),
+  receivedAt: timestamp("received_at", { withTimezone: true }).notNull().defaultNow(),
+  processedAt: timestamp("processed_at", { withTimezone: true }),
+});
+
+export type StripeEventStatus = "processing" | "processed" | "ignored" | "failed";
+
+export type PaymentHistoryKind =
+  | "invoice_paid"
+  | "invoice_failed"
+  | "refund"
+  | "subscription_updated"
+  | "subscription_canceled"
+  | "billing_date_changed"
+  | "cancellation_scheduled";
+
+export type PaymentHistoryStatus = "succeeded" | "failed" | "refunded" | "info";
+
+/**
+ * Human-readable billing ledger per customer: every charge attempt, refund
+ * and subscription change, with the card used and the admin who acted.
+ */
+export const paymentHistoryTable = pgTable(
+  "payment_history",
+  {
+    id: text("id").primaryKey(),
+    customerId: text("customer_id").notNull(),
+    linkId: text("link_id"),
+    kind: text("kind").$type<PaymentHistoryKind>().notNull(),
+    status: text("status").$type<PaymentHistoryStatus>().notNull(),
+    amountCents: integer("amount_cents").notNull().default(0),
+    currency: text("currency").notNull().default("usd"),
+    description: text("description").notNull().default(""),
+    failureMessage: text("failure_message"),
+    cardRank: text("card_rank").$type<CardRank>(),
+    cardBrand: text("card_brand"),
+    cardLast4: text("card_last4"),
+    stripePaymentMethodId: text("stripe_payment_method_id"),
+    stripeEventId: text("stripe_event_id"),
+    stripeInvoiceId: text("stripe_invoice_id"),
+    stripePaymentIntentId: text("stripe_payment_intent_id"),
+    stripeChargeId: text("stripe_charge_id"),
+    stripeRefundId: text("stripe_refund_id"),
+    stripeSubscriptionId: text("stripe_subscription_id"),
+    /** Where the record came from: webhook, dunning retry, cron or an admin. */
+    source: text("source").$type<PaymentHistorySource>().notNull().default("webhook"),
+    actorAdminId: text("actor_admin_id"),
+    actorAdminName: text("actor_admin_name"),
+    occurredAt: timestamp("occurred_at", { withTimezone: true }).notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index("payment_history_customer_idx").on(t.customerId),
+    index("payment_history_invoice_idx").on(t.stripeInvoiceId),
+    uniqueIndex("payment_history_refund_idx").on(t.stripeRefundId),
+  ],
+);
+
+export type PaymentHistorySource = "webhook" | "dunning" | "cron" | "admin";
+
 export type Customer = typeof customersTable.$inferSelect;
+export type StripeEvent = typeof stripeEventsTable.$inferSelect;
+export type PaymentHistory = typeof paymentHistoryTable.$inferSelect;
+export type NewPaymentHistory = typeof paymentHistoryTable.$inferInsert;
 export type PaymentLinkTerms = typeof paymentLinkTermsTable.$inferSelect;
 export type CustomerCard = typeof customerCardsTable.$inferSelect;

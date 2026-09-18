@@ -10,6 +10,7 @@ import templatesRouter from "./templates";
 import uploadRouter from "./upload";
 import configRouter from "./config";
 import webhooksResendRouter from "./webhooks-resend";
+import webhooksStripeRouter from "./webhooks-stripe";
 
 const router: IRouter = Router();
 
@@ -24,5 +25,6 @@ router.use(templatesRouter);
 router.use(uploadRouter);
 router.use(configRouter);
 router.use(webhooksResendRouter);
+router.use(webhooksStripeRouter);
 
 export default router;

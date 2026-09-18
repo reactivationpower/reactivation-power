@@ -32,7 +32,7 @@ app.use(cookieParser());
 app.use(
   express.json({
     limit: "10mb",
-    // Webhook signature checks (Resend/Svix) need the exact bytes received.
+    // Webhook signature checks (Stripe, Resend/Svix) need the exact bytes received.
     verify: (req, _res, buf) => {
       (req as express.Request & { rawBody?: Buffer }).rawBody = buf;
     },
