@@ -13,3 +13,7 @@ export const startPaymentCheckout = action<any>('payments', 'startPaymentCheckou
 export const confirmPayment = action<any>('payments', 'confirmPayment')
 export const provisionAccountsNow = action<any>('payments', 'provisionAccountsNow')
 export const getPaymentLinkPublic = action<any>('payments', 'getPaymentLinkPublic')
+export type CustomerInput = any
+export type OfferInput = any
+export type CardOnFile = any
+export type CustomerRecord = any

@@ -22,18 +22,15 @@ import {
   Search,
   Trash2,
   UserPlus,
-  X,
 } from 'lucide-react'
 
 import {
   confirmPayment,
-  createPaymentLink,
   deletePaymentLink,
   listPaymentLinks,
   provisionAccountsNow,
   startPaymentCheckout,
   type PaymentLink,
-  type StaffMember,
 } from '@/app/actions/payments'
 import { Button } from '@/components/ui/button'
 import {
@@ -51,7 +48,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { NewCustomerLinkDialog } from '@/components/admin/new-customer-link-dialog'
 import {
   Table,
   TableBody,
@@ -65,10 +62,8 @@ import { useRouter } from '@/hooks/use-router'
 
 import { stripePromise } from '@/lib/stripe-client'
 
-const MAX_STAFF = 5
-
 type StatusFilter = 'all' | 'pending' | 'paid'
-type SortKey = 'name' | 'amount_cents' | 'status' | 'created_at' | 'paid_at'
+type SortKey = 'name' | 'amount_cents' | 'status' | 'created_at' | 'paid_at' | 'type' | 'rep_name' | 'next_payment_at'
 type SortDir = 'asc' | 'desc'
 
 function formatUsd(cents: number): string {
@@ -91,23 +86,55 @@ function payUrl(token: string): string {
   return `${window.location.origin}/pay/${token}`
 }
 
-export function StatusPill({ status }: { status: 'paid' | 'pending' }) {
+/** Status of a link: paid, pending, or (subscription) setup paid but second card still missing. */
+export function linkStatus(link: PaymentLink): 'paid' | 'pending' | 'setup_paid' {
+  if (link.status === 'paid') return 'paid'
+  if (link.type === 'subscription' && link.stage === 'secondary') return 'setup_paid'
+  return 'pending'
+}
+
+export function StatusPill({ status }: { status: 'paid' | 'pending' | 'setup_paid' }) {
+  const paid = status === 'paid'
+  const partial = status === 'setup_paid'
   return (
     <span
       className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-        status === 'paid'
+        paid
           ? 'bg-success/15 text-success'
-          : 'bg-muted text-muted-foreground'
+          : partial
+            ? 'bg-amber-500/15 text-amber-700'
+            : 'bg-muted text-muted-foreground'
       }`}
     >
       <span
         className={`size-1.5 rounded-full ${
-          status === 'paid' ? 'bg-success' : 'bg-muted-foreground/60'
+          paid ? 'bg-success' : partial ? 'bg-amber-500' : 'bg-muted-foreground/60'
         }`}
       />
-      {status === 'paid' ? 'Paid' : 'Pending'}
+      {paid ? 'Paid' : partial ? 'Setup paid · 2nd card' : 'Pending'}
     </span>
   )
+}
+
+export function TypePill({ type }: { type: 'one_time' | 'subscription' }) {
+  return (
+    <span
+      className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium ${
+        type === 'subscription'
+          ? 'border-primary/30 bg-primary/5 text-primary'
+          : 'border-border bg-card text-muted-foreground'
+      }`}
+    >
+      {type === 'subscription' ? 'Subscription' : 'One-time'}
+    </span>
+  )
+}
+
+/** Amount line for the table: setup + monthly for subscriptions. */
+export function amountLabel(link: PaymentLink): string {
+  if (link.type !== 'subscription') return formatUsd(link.amount_cents)
+  const setup = link.setup_fee_cents > 0 ? `${formatUsd(link.setup_fee_cents)} setup` : 'No setup fee'
+  return `${setup} · ${formatUsd(link.monthly_cents)}/mo`
 }
 
 export function PaymentsManager({
@@ -126,58 +153,13 @@ export function PaymentsManager({
   const [sortKey, setSortKey] = useState<SortKey>('created_at')
   const [sortDir, setSortDir] = useState<SortDir>('desc')
 
-  // Create form state
   const [createOpen, setCreateOpen] = useState(false)
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [phone, setPhone] = useState('')
-  const [amount, setAmount] = useState('')
-  const [staff, setStaff] = useState<StaffMember[]>([])
-  const [creating, setCreating] = useState(false)
-  const [formError, setFormError] = useState<string | null>(null)
 
   // Per-link UI state
   const [qrFor, setQrFor] = useState<PaymentLink | null>(null)
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null)
   const [chargeFor, setChargeFor] = useState<PaymentLink | null>(null)
   const [provisioningId, setProvisioningId] = useState<string | null>(null)
-
-  const maskPhone = (raw: string) => {
-    const d = raw.replace(/\D/g, '').slice(0, 10)
-    if (d.length <= 3) return d
-    if (d.length <= 6) return `(${d.slice(0, 3)}) ${d.slice(3)}`
-    return `(${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6)}`
-  }
-
-  async function handleCreate(e: React.FormEvent) {
-    e.preventDefault()
-    setFormError(null)
-    setCreating(true)
-    const res = await createPaymentLink({
-      name,
-      email,
-      phone,
-      staff,
-      amountDollars: Number(amount),
-    })
-    setCreating(false)
-    if (!res.ok || !res.link) {
-      setFormError(res.error ?? 'Something went wrong.')
-      notifyError('Could not create the link', res.error)
-      return
-    }
-    setLinks((prev) => [res.link as PaymentLink, ...prev])
-    setName('')
-    setEmail('')
-    setPhone('')
-    setAmount('')
-    setStaff([])
-    setCreateOpen(false)
-    notifyDone(
-      'Payment link created',
-      `${res.link.name} — ${formatUsd(res.link.amount_cents)}`,
-    )
-  }
 
   /** Re-read the list from the server after a status change. */
   async function refreshLinks() {
@@ -208,7 +190,9 @@ export function PaymentsManager({
         for (const l of fresh) {
           if (l.status === 'paid' && wasPending.has(l.id)) {
             notifyDone(
-              `Payment received — ${formatUsd(l.amount_cents)}`,
+              l.type === 'subscription'
+                ? `Subscription started — ${formatUsd(l.monthly_cents)}/mo`
+                : `Payment received — ${formatUsd(l.amount_cents)}`,
               `${l.name} just paid. Portal accounts are ready.`,
             )
           }
@@ -291,6 +275,8 @@ export function PaymentsManager({
         l.name,
         l.email,
         l.phone ?? '',
+        l.business_name ?? '',
+        l.rep_name ?? '',
         ...(l.staff ?? []).flatMap((s) => [s.name ?? '', s.email ?? '']),
       ]
         .join(' ')
@@ -307,8 +293,8 @@ export function PaymentsManager({
           bv = b.name.toLowerCase()
           break
         case 'amount_cents':
-          av = a.amount_cents
-          bv = b.amount_cents
+          av = a.type === 'subscription' ? a.monthly_cents : a.amount_cents
+          bv = b.type === 'subscription' ? b.monthly_cents : b.amount_cents
           break
         case 'status':
           av = a.status
@@ -321,6 +307,18 @@ export function PaymentsManager({
         case 'paid_at':
           av = a.paid_at ? new Date(a.paid_at).getTime() : 0
           bv = b.paid_at ? new Date(b.paid_at).getTime() : 0
+          break
+        case 'type':
+          av = a.type
+          bv = b.type
+          break
+        case 'rep_name':
+          av = (a.rep_name ?? '').toLowerCase()
+          bv = (b.rep_name ?? '').toLowerCase()
+          break
+        case 'next_payment_at':
+          av = a.next_payment_at ? new Date(a.next_payment_at).getTime() : 0
+          bv = b.next_payment_at ? new Date(b.next_payment_at).getTime() : 0
           break
       }
       if (av < bv) return -1 * dir
@@ -337,8 +335,6 @@ export function PaymentsManager({
     }),
     [links],
   )
-
-  const staffCanAdd = staff.length < MAX_STAFF
 
   function sortHead(label: string, column: SortKey, className = '') {
     const active = sortKey === column
@@ -414,7 +410,7 @@ export function PaymentsManager({
         <div className="ml-auto">
           <Button onClick={() => setCreateOpen(true)}>
             <Plus className="size-4" />
-            New payment link
+            New customer
           </Button>
         </div>
       </div>
@@ -436,19 +432,22 @@ export function PaymentsManager({
             </div>
             <Button size="sm" onClick={() => setCreateOpen(true)}>
               <Plus className="size-3.5" />
-              New payment link
+              New customer
             </Button>
           </div>
         ) : (
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent">
-                {sortHead('Person', 'name', 'pl-4')}
+                {sortHead('Customer', 'name', 'pl-4')}
                 <TableHead>Email / phone</TableHead>
+                {sortHead('Type', 'type')}
                 {sortHead('Amount', 'amount_cents', 'text-right [&>button]:justify-end [&>button]:w-full')}
                 {sortHead('Status', 'status')}
+                {sortHead('Rep', 'rep_name')}
                 {sortHead('Created', 'created_at')}
                 {sortHead('Paid', 'paid_at')}
+                {sortHead('Next payment', 'next_payment_at')}
                 <TableHead className="w-12 pr-2">
                   <span className="sr-only">Actions</span>
                 </TableHead>
@@ -458,7 +457,7 @@ export function PaymentsManager({
               {visible.length === 0 ? (
                 <TableRow className="hover:bg-transparent">
                   <TableCell
-                    colSpan={7}
+                    colSpan={10}
                     className="py-10 text-center text-sm text-muted-foreground"
                   >
                     No payments match{query.trim() ? ` “${query.trim()}”` : ''}
@@ -485,6 +484,11 @@ export function PaymentsManager({
                           <span className="font-medium text-foreground">
                             {link.name}
                           </span>
+                          {link.business_name ? (
+                            <span className="text-xs text-muted-foreground">
+                              {link.business_name}
+                            </span>
+                          ) : null}
                           {link.staff.length > 0 ? (
                             <span className="text-xs text-muted-foreground">
                               +{link.staff.length} staff
@@ -502,12 +506,15 @@ export function PaymentsManager({
                           ) : null}
                         </div>
                       </TableCell>
-                      <TableCell className="text-right font-medium tabular-nums">
-                        {formatUsd(link.amount_cents)}
+                      <TableCell>
+                        <TypePill type={link.type} />
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap text-right font-medium tabular-nums">
+                        {amountLabel(link)}
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-col items-start gap-0.5">
-                          <StatusPill status={link.status} />
+                          <StatusPill status={linkStatus(link)} />
                           {needsProvision ? (
                             <span className="text-[11px] text-amber-600">
                               Accounts not created
@@ -515,11 +522,17 @@ export function PaymentsManager({
                           ) : null}
                         </div>
                       </TableCell>
+                      <TableCell className="max-w-[140px] truncate text-sm text-muted-foreground">
+                        {link.rep_name ?? '—'}
+                      </TableCell>
                       <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
                         {formatDate(link.created_at)}
                       </TableCell>
                       <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
                         {formatDate(link.paid_at)}
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
+                        {link.type === 'subscription' ? formatDate(link.next_payment_at) : '—'}
                       </TableCell>
                       <TableCell
                         className="pr-2 text-right"
@@ -566,13 +579,17 @@ export function PaymentsManager({
                                   <QrCode />
                                   Show QR code
                                 </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem
-                                  onClick={() => setChargeFor(link)}
-                                >
-                                  <CreditCard />
-                                  Charge card now
-                                </DropdownMenuItem>
+                                {link.type !== 'subscription' ? (
+                                  <>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem
+                                      onClick={() => setChargeFor(link)}
+                                    >
+                                      <CreditCard />
+                                      Charge card now
+                                    </DropdownMenuItem>
+                                  </>
+                                ) : null}
                               </>
                             ) : null}
                             {needsProvision ? (
@@ -591,7 +608,7 @@ export function PaymentsManager({
                                 </DropdownMenuItem>
                               </>
                             ) : null}
-                            {!isPaid ? (
+                            {!isPaid && linkStatus(link) === 'pending' ? (
                               <>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem
@@ -621,146 +638,11 @@ export function PaymentsManager({
         </p>
       ) : null}
 
-      {/* ── Create dialog ───────────────────────────────────── */}
-      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent className="max-h-[90vh] max-w-md overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>New payment link</DialogTitle>
-            <DialogDescription>
-              Product: Reactivation Power Access
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleCreate} className="flex flex-col gap-4">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="pay-name">Customer name</Label>
-              <Input
-                id="pay-name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Dr. Jane Smith"
-                required
-              />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="pay-email">Email</Label>
-              <Input
-                id="pay-email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="jane@practice.com"
-                required
-              />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="pay-phone">Phone</Label>
-              <Input
-                id="pay-phone"
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(maskPhone(e.target.value))}
-                placeholder="(555) 555-1234"
-              />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="pay-amount">Amount (USD)</Label>
-              <Input
-                id="pay-amount"
-                type="number"
-                min="0.5"
-                step="0.01"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder="4997.00"
-                required
-              />
-            </div>
-
-            {/* Staff members */}
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center justify-between">
-                <Label>Staff members</Label>
-                <span className="text-xs text-muted-foreground">
-                  {staff.length}/{MAX_STAFF}
-                </span>
-              </div>
-              {staff.map((s, i) => (
-                <div key={i} className="flex items-start gap-2">
-                  <div className="grid flex-1 gap-2">
-                    <Input
-                      value={s.name}
-                      onChange={(e) =>
-                        setStaff((prev) =>
-                          prev.map((p, j) =>
-                            j === i ? { ...p, name: e.target.value } : p,
-                          ),
-                        )
-                      }
-                      placeholder={`Staff ${i + 1} name`}
-                      aria-label={`Staff ${i + 1} name`}
-                    />
-                    <Input
-                      type="email"
-                      value={s.email}
-                      onChange={(e) =>
-                        setStaff((prev) =>
-                          prev.map((p, j) =>
-                            j === i ? { ...p, email: e.target.value } : p,
-                          ),
-                        )
-                      }
-                      placeholder={`Staff ${i + 1} email`}
-                      aria-label={`Staff ${i + 1} email`}
-                    />
-                  </div>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    aria-label={`Remove staff ${i + 1}`}
-                    onClick={() =>
-                      setStaff((prev) => prev.filter((_, j) => j !== i))
-                    }
-                  >
-                    <X className="size-4" />
-                  </Button>
-                </div>
-              ))}
-              {staffCanAdd && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="w-fit bg-transparent"
-                  onClick={() =>
-                    setStaff((prev) => [...prev, { name: '', email: '' }])
-                  }
-                >
-                  <Plus className="size-3.5" />
-                  Add staff member
-                </Button>
-              )}
-            </div>
-
-            {formError && (
-              <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                {formError}
-              </p>
-            )}
-
-            <Button type="submit" disabled={creating}>
-              {creating ? (
-                <>
-                  <Loader2 className="size-4 animate-spin" />
-                  Creating…
-                </>
-              ) : (
-                'Create payment link'
-              )}
-            </Button>
-          </form>
-        </DialogContent>
-      </Dialog>
+      <NewCustomerLinkDialog
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        onCreated={(link) => setLinks((prev) => [link, ...prev])}
+      />
 
       {/* ── QR dialog ───────────────────────────────────────── */}
       <Dialog

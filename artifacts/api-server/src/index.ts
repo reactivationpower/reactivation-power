@@ -1,6 +1,7 @@
 import app from "./app";
 import { logger } from "./lib/logger";
 import { seedSuperAdmin } from "./lib/data/admin-users";
+import { initStripe } from "./lib/stripe";
 
 const rawPort = process.env["PORT"];
 
@@ -16,12 +17,20 @@ if (Number.isNaN(port) || port <= 0) {
   throw new Error(`Invalid PORT value: "${rawPort}"`);
 }
 
-app.listen(port, (err) => {
-  if (err) {
-    logger.error({ err }, "Error listening on port");
-    process.exit(1);
-  }
+initStripe()
+  .then((stripeMode) => {
+    logger.info({ stripeMode }, "Stripe ready");
+    app.listen(port, (err) => {
+      if (err) {
+        logger.error({ err }, "Error listening on port");
+        process.exit(1);
+      }
 
-  logger.info({ port }, "Server listening");
-  seedSuperAdmin(logger).catch((err) => logger.error({ err }, "super admin seed failed"));
-});
+      logger.info({ port }, "Server listening");
+      seedSuperAdmin(logger).catch((err) => logger.error({ err }, "super admin seed failed"));
+    });
+  })
+  .catch((err) => {
+    logger.error({ err }, "Stripe initialisation failed");
+    process.exit(1);
+  });

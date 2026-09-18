@@ -1,14 +1,25 @@
 
 import { randomBytes } from 'crypto'
 import { revalidatePath } from 'next/cache'
+import { canDeleteLink, cleanCustomer, type CustomerInput } from '@/lib/billing/rules'
 
 import { requireAdmin } from '@/lib/auth/admin-session'
 import { getAdminClient } from '@/lib/supabase/admin'
 import { stripe } from '@/lib/stripe'
 import { MAX_STAFF } from '@/lib/types'
 import { sendPaymentReceivedEmail, sendPortalWelcomeEmail } from '@/lib/mail'
+import {
+  customerCardsTable,
+  customersTable,
+  db,
+  paymentLinkTermsTable,
+  type Customer,
+  type CustomerCard,
+  type PaymentLinkTerms,
+} from '@workspace/db'
+import { and, eq, inArray } from 'drizzle-orm'
 
-const PRODUCT_NAME = 'Reactivation Power Access'
+export const PRODUCT_NAME = 'Reactivation Power Access'
 
 export interface StaffMember {
   name: string
@@ -28,6 +39,53 @@ export interface PaymentLink {
   created_at: string
   participant_id: string | null
   provisioned_at: string | null
+  // ── Billing terms (Replit Postgres, null for legacy links) ──
+  type: 'one_time' | 'subscription'
+  customer_id: string | null
+  rep_id: string | null
+  rep_name: string | null
+  setup_fee_cents: number
+  monthly_cents: number
+  setup_paid_at: string | null
+  stripe_subscription_id: string | null
+  subscription_status: string | null
+  next_payment_at: string | null
+  agreement_start: string | null
+  agreement_end: string | null
+  completed_at: string | null
+  /** Where a subscription link is in its checkout. */
+  stage: 'primary' | 'secondary' | 'done'
+  business_name: string | null
+}
+
+export type { CustomerInput } from '@/lib/billing/rules'
+
+export type OfferInput =
+  | { type: 'one_time'; amountDollars: number }
+  | { type: 'subscription'; monthlyDollars: number; setupFeeDollars: number }
+
+export interface CardOnFile {
+  id: string
+  brand: string
+  last4: string
+  exp_month: number | null
+  exp_year: number | null
+  rank: 'primary' | 'secondary'
+  active: boolean
+}
+
+export interface CustomerRecord {
+  id: string
+  full_name: string
+  business_name: string
+  business_address: string
+  phone: string
+  owner_name: string
+  owner_phone: string
+  email: string
+  stripe_customer_id: string | null
+  billing_status: string
+  created_by_name: string | null
 }
 
 const LINK_COLUMNS =
@@ -54,6 +112,79 @@ function sanitizeStaff(input: unknown): StaffMember[] {
     .filter((s) => s.name || s.email)
 }
 
+const iso = (d: Date | null | undefined): string | null => (d ? d.toISOString() : null)
+
+function stageOf(t: PaymentLinkTerms | undefined): PaymentLink['stage'] {
+  if (!t || t.type !== 'subscription') return t?.completedAt ? 'done' : 'primary'
+  if (t.completedAt) return 'done'
+  if (t.setupPaidAt) return 'secondary'
+  return 'primary'
+}
+
+function toCustomerRecord(c: Customer): CustomerRecord {
+  return {
+    id: c.id,
+    full_name: c.fullName,
+    business_name: c.businessName,
+    business_address: c.businessAddress,
+    phone: c.phone,
+    owner_name: c.ownerName,
+    owner_phone: c.ownerPhone,
+    email: c.email,
+    stripe_customer_id: c.stripeCustomerId,
+    billing_status: c.billingStatus,
+    created_by_name: c.createdByName,
+  }
+}
+
+function toCardOnFile(c: CustomerCard): CardOnFile {
+  return {
+    id: c.id,
+    brand: c.brand,
+    last4: c.last4,
+    exp_month: c.expMonth,
+    exp_year: c.expYear,
+    rank: c.rank,
+    active: c.active,
+  }
+}
+
+/** Combine Supabase link rows with their billing terms + customer. */
+async function mergeLinks(rows: Record<string, unknown>[]): Promise<PaymentLink[]> {
+  const ids = rows.map((r) => String(r.id))
+  const terms = ids.length
+    ? await db.select().from(paymentLinkTermsTable).where(inArray(paymentLinkTermsTable.linkId, ids))
+    : []
+  const termsById = new Map(terms.map((t) => [t.linkId, t]))
+  const customerIds = [...new Set(terms.map((t) => t.customerId))]
+  const customers = customerIds.length
+    ? await db.select().from(customersTable).where(inArray(customersTable.id, customerIds))
+    : []
+  const customerById = new Map(customers.map((c) => [c.id, c]))
+  return rows.map((r) => {
+    const t = termsById.get(String(r.id))
+    const c = t ? customerById.get(t.customerId) : undefined
+    return {
+      ...(r as unknown as PaymentLink),
+      type: t?.type ?? 'one_time',
+      customer_id: t?.customerId ?? null,
+      rep_id: t?.repId ?? null,
+      rep_name: t?.repName ?? null,
+      setup_fee_cents: t?.setupFeeCents ?? 0,
+      monthly_cents: t?.monthlyCents ?? 0,
+      setup_paid_at: iso(t?.setupPaidAt),
+      stripe_subscription_id: t?.stripeSubscriptionId ?? null,
+      subscription_status: t?.subscriptionStatus ?? null,
+      next_payment_at: iso(t?.nextPaymentAt),
+      agreement_start: iso(t?.agreementStart),
+      agreement_end: iso(t?.agreementEnd),
+      completed_at: iso(t?.completedAt),
+      stage: stageOf(t),
+      business_name: c?.businessName || null,
+    }
+  })
+}
+
 /** Split a single display name into first / last for the participants table. */
 function splitName(full: string): { first: string; last: string } {
   const parts = full.trim().split(/\s+/).filter(Boolean)
@@ -70,7 +201,7 @@ function splitName(full: string): { first: string; last: string } {
  * is reused rather than duplicated, and any failure here is logged
  * without disturbing the payment record itself.
  */
-async function provisionAccounts(linkId: string): Promise<string | null> {
+export async function provisionAccounts(linkId: string): Promise<string | null> {
   const supabase = getAdminClient()
   const { data: link } = await supabase
     .from('payment_links')
@@ -167,28 +298,90 @@ async function provisionAccounts(linkId: string): Promise<string | null> {
   return ownerId ?? null
 }
 
-/** Create a payment link with a unique, unguessable token. */
+function toCents(dollars: unknown): number {
+  return Math.round(Number(dollars) * 100)
+}
+
+/** Find the customer with this email or create one; refresh details either way. */
+async function upsertCustomer(
+  c: CustomerInput,
+  rep: { userId: string; name: string | null; email: string },
+): Promise<Customer> {
+  const fields = {
+    fullName: c.fullName,
+    businessName: c.businessName,
+    businessAddress: c.businessAddress,
+    phone: c.phone,
+    ownerName: c.ownerName,
+    ownerPhone: c.ownerPhone,
+    email: c.email,
+    updatedAt: new Date(),
+  }
+  const [existing] = await db.select().from(customersTable).where(eq(customersTable.email, c.email)).limit(1)
+  if (existing) {
+    const [updated] = await db
+      .update(customersTable)
+      .set(fields)
+      .where(eq(customersTable.id, existing.id))
+      .returning()
+    return updated
+  }
+  const [created] = await db
+    .insert(customersTable)
+    .values({
+      id: randomBytes(16).toString('hex'),
+      ...fields,
+      createdById: rep.userId,
+      createdByName: rep.name || rep.email,
+    })
+    .returning()
+  return created
+}
+
+/**
+ * Create a customer record plus a payment link with a unique, unguessable
+ * token. The link is attributed to the signed-in admin (the rep).
+ */
 export async function createPaymentLink(input: {
-  name: string
-  email: string
-  phone?: string
+  customer: CustomerInput
   staff?: StaffMember[]
-  amountDollars: number
+  offer: OfferInput
 }): Promise<{ ok: boolean; error?: string; link?: PaymentLink }> {
-  await requireAdmin()
+  const rep = await requireAdmin()
 
-  const name = input.name?.trim().slice(0, 120)
-  const email = input.email?.trim().slice(0, 254)
-  const phone = input.phone?.trim().slice(0, 32) || null
-  const amountCents = Math.round(Number(input.amountDollars) * 100)
+  const cleaned = cleanCustomer(input.customer)
+  if (!cleaned.ok) return { ok: false, error: cleaned.error }
+  const customerInput = cleaned.value
 
-  if (!name) return { ok: false, error: 'Name is required.' }
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
-    return { ok: false, error: 'A valid email is required.' }
-  if (!Number.isFinite(amountCents) || amountCents < 50)
-    return { ok: false, error: 'Amount must be at least $0.50.' }
-  if (amountCents > 99999999)
-    return { ok: false, error: 'Amount is too large.' }
+  const offer = input.offer
+  let amountCents: number
+  let setupFeeCents = 0
+  let monthlyCents = 0
+  if (offer?.type === 'subscription') {
+    monthlyCents = toCents(offer.monthlyDollars)
+    setupFeeCents = toCents(offer.setupFeeDollars)
+    if (!Number.isFinite(monthlyCents) || monthlyCents < 50)
+      return { ok: false, error: 'Monthly amount must be at least $0.50.' }
+    if (!Number.isFinite(setupFeeCents) || setupFeeCents < 0)
+      return { ok: false, error: 'Setup fee cannot be negative.' }
+    if (setupFeeCents > 0 && setupFeeCents < 50)
+      return { ok: false, error: 'Setup fee must be $0 (waived) or at least $0.50.' }
+    if (monthlyCents > 99999999 || setupFeeCents > 99999999)
+      return { ok: false, error: 'Amount is too large.' }
+    // Supabase's payment_links.amount_cents must be > 0; payment_link_terms is
+    // the source of truth for subscription amounts, so for a waived setup fee
+    // we store the monthly amount here purely to satisfy that constraint.
+    amountCents = setupFeeCents > 0 ? setupFeeCents : monthlyCents
+  } else if (offer?.type === 'one_time') {
+    amountCents = toCents(offer.amountDollars)
+    if (!Number.isFinite(amountCents) || amountCents < 50)
+      return { ok: false, error: 'Amount must be at least $0.50.' }
+    if (amountCents > 99999999) return { ok: false, error: 'Amount is too large.' }
+  } else {
+    return { ok: false, error: 'Choose full price or subscription.' }
+  }
+
+  const customer = await upsertCustomer(customerInput, rep)
 
   const token = randomBytes(16).toString('base64url')
   const supabase = getAdminClient()
@@ -196,9 +389,9 @@ export async function createPaymentLink(input: {
     .from('payment_links')
     .insert({
       token,
-      name,
-      email,
-      phone,
+      name: customerInput.fullName,
+      email: customerInput.email,
+      phone: customerInput.phone || null,
       staff: sanitizeStaff(input.staff),
       amount_cents: amountCents,
     })
@@ -208,8 +401,28 @@ export async function createPaymentLink(input: {
     console.error('[v0] createPaymentLink failed:', error?.message)
     return { ok: false, error: 'Could not create the payment link.' }
   }
+
+  try {
+    await db.insert(paymentLinkTermsTable).values({
+      linkId: String(data.id),
+      token,
+      customerId: customer.id,
+      type: offer.type,
+      repId: rep.userId,
+      repName: rep.name || rep.email,
+      setupFeeCents,
+      monthlyCents,
+      stripeCustomerId: customer.stripeCustomerId,
+    })
+  } catch (err) {
+    console.error('[v0] createPaymentLink terms failed:', err)
+    await supabase.from('payment_links').delete().eq('id', data.id)
+    return { ok: false, error: 'Could not save the offer terms.' }
+  }
+
   revalidatePath('/admin/payments')
-  return { ok: true, link: data as unknown as PaymentLink }
+  const [link] = await mergeLinks([data as Record<string, unknown>])
+  return { ok: true, link }
 }
 
 /** List all payment links, newest first. */
@@ -221,13 +434,15 @@ export async function listPaymentLinks(): Promise<PaymentLink[]> {
     .select(LINK_COLUMNS)
     .order('created_at', { ascending: false })
     .limit(200)
-  return (data as unknown as PaymentLink[]) ?? []
+  return mergeLinks((data as Record<string, unknown>[]) ?? [])
 }
 
 /** Fetch one payment link plus the portal accounts it provisioned. */
 export async function getPaymentDetail(id: string): Promise<{
   link: PaymentLink
   accounts: ProvisionedAccount[]
+  customer: CustomerRecord | null
+  cards: CardOnFile[]
 } | null> {
   await requireAdmin()
   const supabase = getAdminClient()
@@ -237,7 +452,20 @@ export async function getPaymentDetail(id: string): Promise<{
     .eq('id', id)
     .maybeSingle()
   if (!data) return null
-  const link = data as unknown as PaymentLink
+  const [link] = await mergeLinks([data as Record<string, unknown>])
+
+  let customer: CustomerRecord | null = null
+  let cards: CardOnFile[] = []
+  if (link.customer_id) {
+    const [c] = await db.select().from(customersTable).where(eq(customersTable.id, link.customer_id)).limit(1)
+    if (c) customer = toCustomerRecord(c)
+    const cardRows = await db
+      .select()
+      .from(customerCardsTable)
+      .where(and(eq(customerCardsTable.customerId, link.customer_id), eq(customerCardsTable.active, true)))
+      .orderBy(customerCardsTable.rank)
+    cards = cardRows.map(toCardOnFile)
+  }
 
   let accounts: ProvisionedAccount[] = []
   if (link.participant_id) {
@@ -248,7 +476,7 @@ export async function getPaymentDetail(id: string): Promise<{
       .order('role', { ascending: true })
     accounts = (rows as ProvisionedAccount[]) ?? []
   }
-  return { link, accounts }
+  return { link, accounts, customer, cards }
 }
 
 /** Delete a pending payment link. Paid links are kept as records. */
@@ -256,13 +484,30 @@ export async function deletePaymentLink(
   id: string,
 ): Promise<{ ok: boolean; error?: string }> {
   await requireAdmin()
+  // A subscription link whose setup fee has been charged is no longer just a
+  // link: money has moved and a card is on file. Deleting it would strand a
+  // paying customer, so it is refused here regardless of what the UI shows.
+  const [terms] = await db
+    .select({ setupPaidAt: paymentLinkTermsTable.setupPaidAt, completedAt: paymentLinkTermsTable.completedAt })
+    .from(paymentLinkTermsTable)
+    .where(eq(paymentLinkTermsTable.linkId, id))
+    .limit(1)
+  if (!canDeleteLink(terms)) {
+    return {
+      ok: false,
+      error: 'This link cannot be deleted: the setup fee has already been charged. Cancel or refund it in Stripe instead.',
+    }
+  }
   const supabase = getAdminClient()
-  const { error } = await supabase
+  const { data: deleted, error } = await supabase
     .from('payment_links')
     .delete()
     .eq('id', id)
     .eq('status', 'pending')
+    .select('id')
   if (error) return { ok: false, error: 'Could not delete the link.' }
+  if (!deleted || deleted.length === 0) return { ok: false, error: 'Only pending links can be deleted.' }
+  await db.delete(paymentLinkTermsTable).where(eq(paymentLinkTermsTable.linkId, id))
   revalidatePath('/admin/payments')
   return { ok: true }
 }
@@ -284,6 +529,13 @@ export async function startPaymentCheckout(
     .maybeSingle()
 
   if (!link || link.status === 'paid') return null
+  const [terms] = await db
+    .select({ type: paymentLinkTermsTable.type })
+    .from(paymentLinkTermsTable)
+    .where(eq(paymentLinkTermsTable.linkId, String(link.id)))
+    .limit(1)
+  // Subscription links go through the two-card flow in actions/subscriptions.ts
+  if (terms?.type === 'subscription') return null
 
   const session = await stripe.checkout.sessions.create(
     {
@@ -347,6 +599,7 @@ export async function confirmPayment(
         .from('payment_links')
         .update({ status: 'paid', paid_at: paidAt })
         .eq('id', link.id)
+      await markOneTimePaid(String(link.id), paidAt)
       await sendPaymentReceivedEmail(
         String(link.email),
         {
@@ -368,6 +621,25 @@ export async function confirmPayment(
     console.error('[v0] confirmPayment failed:', err)
   }
   return { paid: false }
+}
+
+/** Record completion on the billing terms + customer for a one-time link. */
+async function markOneTimePaid(linkId: string, paidAt: string): Promise<void> {
+  try {
+    const [terms] = await db
+      .update(paymentLinkTermsTable)
+      .set({ completedAt: new Date(paidAt), setupPaidAt: new Date(paidAt) })
+      .where(eq(paymentLinkTermsTable.linkId, linkId))
+      .returning({ customerId: paymentLinkTermsTable.customerId })
+    if (terms) {
+      await db
+        .update(customersTable)
+        .set({ billingStatus: 'paid', updatedAt: new Date() })
+        .where(eq(customersTable.id, terms.customerId))
+    }
+  } catch (err) {
+    console.error('[v0] markOneTimePaid failed:', err)
+  }
 }
 
 /** Hosted Stripe receipt for a checkout session's charge, if Stripe has one. */
@@ -405,17 +677,34 @@ export async function getPaymentLinkPublic(token: string): Promise<{
   name: string
   amountCents: number
   status: 'pending' | 'paid'
+  type: 'one_time' | 'subscription'
+  setupFeeCents: number
+  monthlyCents: number
+  stage: 'primary' | 'secondary' | 'done'
+  businessName: string | null
+  nextPaymentAt: string | null
+  agreementStart: string | null
+  agreementEnd: string | null
 } | null> {
   const supabase = getAdminClient()
   const { data } = await supabase
     .from('payment_links')
-    .select('name, amount_cents, status')
+    .select(LINK_COLUMNS)
     .eq('token', token)
     .maybeSingle()
   if (!data) return null
+  const [link] = await mergeLinks([data as Record<string, unknown>])
   return {
-    name: data.name,
-    amountCents: data.amount_cents,
-    status: data.status,
+    name: link.name,
+    amountCents: link.amount_cents,
+    status: link.status,
+    type: link.type,
+    setupFeeCents: link.setup_fee_cents,
+    monthlyCents: link.monthly_cents,
+    stage: link.stage,
+    businessName: link.business_name,
+    nextPaymentAt: link.next_payment_at,
+    agreementStart: link.agreement_start,
+    agreementEnd: link.agreement_end,
   }
 }

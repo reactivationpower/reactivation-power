@@ -119,7 +119,7 @@ export function PaymentDetailActions({
   return (
     <>
       <div className="flex flex-wrap items-center gap-2">
-        {!isPaid ? (
+        {!isPaid && link.type !== 'subscription' ? (
           <Button size="sm" onClick={() => setCharging(true)}>
             <CreditCard className="size-3.5" />
             Charge card now
@@ -164,15 +164,17 @@ export function PaymentDetailActions({
               <QrCode className="size-3.5" />
               QR code
             </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="ml-auto text-destructive hover:text-destructive"
-              onClick={handleDelete}
-            >
-              <Trash2 className="size-3.5" />
-              Delete
-            </Button>
+            {!link.setup_paid_at ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="ml-auto text-destructive hover:text-destructive"
+                onClick={handleDelete}
+              >
+                <Trash2 className="size-3.5" />
+                Delete
+              </Button>
+            ) : null}
           </>
         ) : null}
       </div>

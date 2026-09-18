@@ -13,6 +13,7 @@ import * as leads from "../actions/leads";
 import * as mail from "../actions/mail";
 import * as payments from "../actions/payments";
 import * as reactivation from "../actions/reactivation";
+import * as subscriptions from "../actions/subscriptions";
 import { getAdminSessionFromRequest, satisfies } from "../lib/auth/admin-session";
 import { SESSION_COOKIE_NAME, decodeSession } from "../lib/auth/token";
 
@@ -51,6 +52,7 @@ const MODULES: Record<string, ActionModule> = {
   mail,
   payments,
   reactivation,
+  subscriptions,
 };
 
 type Auth = "public" | "portal" | "admin" | "super_admin";
@@ -87,6 +89,12 @@ const ACTIONS: Record<string, Record<string, Auth>> = {
     getPaymentDetail: "admin",
     deletePaymentLink: "admin",
     provisionAccountsNow: "admin",
+  },
+  subscriptions: {
+    // Token-based public two-card subscription checkout.
+    getSubscriptionCheckoutState: "public",
+    recordPrimaryCard: "public",
+    recordSecondaryCard: "public",
   },
   admin: {
     createCourse: "super_admin", updateCourse: "super_admin", deleteCourse: "super_admin",

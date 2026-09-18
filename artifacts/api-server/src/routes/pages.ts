@@ -29,6 +29,7 @@ import {
   getServiceMappings, getTeamStats,
 } from "../lib/data/reactivation";
 import { getAdminClient } from "../lib/supabase/admin";
+import { getStripeMode } from "../lib/stripe";
 import { DEFAULT_CALL_BATCH_SIZE } from "../lib/types";
 import { demoIsStale } from "../lib/demo/seed";
 import { parseInactiveCount, parsePatientValue } from "../lib/opportunity";
@@ -458,16 +459,16 @@ add("/admin/reactivation", "super_admin", async () => {
   return { niches, script, sections, slots };
 });
 
-add("/admin/payments", "admin", async () => ({ links: await listPaymentLinks() }));
+add("/admin/payments", "admin", async () => ({ links: await listPaymentLinks(), stripeMode: getStripeMode() }));
 add("/admin/payments/:id", "admin", async (req) => {
   const id = String(req.params.id);
   const detail = await getPaymentDetail(id);
   if (!detail) notFound();
-  const { link, accounts } = detail;
+  const { link, accounts, customer, cards } = detail;
   const isPaid = link.status === "paid";
   const owner = accounts.find((a) => a.role === "owner");
   const staffAccounts = accounts.filter((a) => a.role === "staff");
-  return { id, detail, link, accounts, isPaid, owner: owner ?? null, staffAccounts };
+  return { id, detail, link, accounts, customer, cards, isPaid, owner: owner ?? null, staffAccounts };
 });
 
 add("/admin/analytics", "super_admin", async (req) => {
@@ -518,13 +519,14 @@ add("/pay/:token", undefined, async (req) => {
   const link = await getPaymentLinkPublic(token);
   if (!link) notFound();
   if (link.status === "paid") redirect(`/pay/${token}/thank-you`);
-  return { token, link };
+  return { token, link, stripeMode: getStripeMode() };
 });
 add("/pay/:token/thank-you", undefined, async (req) => {
   const token = String(req.params.token);
   const link = await getPaymentLinkPublic(token);
   if (!link) notFound();
   let confirmation: Awaited<ReturnType<typeof confirmPayment>> | null = null;
+  if (link.status !== "paid" && link.type === "subscription") redirect(`/pay/${token}`);
   if (link.status !== "paid") {
     confirmation = await confirmPayment(token);
     if (!confirmation.paid) redirect(`/pay/${token}`);

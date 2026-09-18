@@ -2,3 +2,4 @@
 - [Supabase admin accounts](supabase-admin-accounts.md) — no DDL access to Supabase; admin roles live in auth app_metadata; invite needs manual-link fallback; Base UI menu API.
 - [Transactional email via Resend](transactional-email.md) — send-only connector key, unverified links. subdomain + RESEND_FROM override, email_log in Replit Postgres, Tabs needs explicit flex-col.
 - [Script flow content-as-code](script-flows.md) — player italics need whole-paragraph parens; apply pairs duplicate from+to by sort_order; demo owner lacks most niches; known dead ends.
+- [Stripe modes & billing tables](stripe-modes-and-billing.md) — env keys are LIVE; workspace uses sandbox via Stripe integration, STRIPE_MODE overrides; billing tables in Replit Postgres.

@@ -2,15 +2,17 @@
 import { Link, useParams } from 'wouter'
 import {
   ArrowLeft,
+  CalendarClock,
   Check,
   CircleDashed,
+  CreditCard,
   ExternalLink,
   Link2,
   Users,
 } from 'lucide-react'
 
 import { PaymentDetailActions } from '@/components/admin/payment-detail-actions'
-import { StatusPill } from '@/components/admin/payments-manager'
+import { StatusPill, TypePill, linkStatus } from '@/components/admin/payments-manager'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { usePageData } from '@/hooks/use-page-data'
@@ -23,6 +25,11 @@ function formatUsd(cents: number): string {
     style: 'currency',
     currency: 'USD',
   })
+}
+
+function formatDay(iso: string | null): string {
+  if (!iso) return '—'
+  return new Date(iso).toLocaleDateString('en-US', { dateStyle: 'medium' })
 }
 
 function formatWhen(iso: string | null): string {
@@ -64,7 +71,9 @@ export default function PaymentDetailPage() {
   if (loading) return <PageLoading />
   if (notFound) return <NotFound />
   if (error) return <PageError error={error} />
-  const { link, accounts, isPaid, owner, staffAccounts } = data
+  const { link, accounts, customer, cards, isPaid, owner, staffAccounts } = data
+  const isSubscription = link.type === 'subscription'
+  const status = linkStatus(link)
 
   const activity: {
     label: string
@@ -73,17 +82,44 @@ export default function PaymentDetailPage() {
     detail?: string
   }[] = [
     {
-      label: 'Payment link created',
+      label: isSubscription ? 'Subscription link created' : 'Payment link created',
       at: link.created_at,
       done: true,
-      detail: `${formatUsd(link.amount_cents)} · Reactivation Power Access`,
+      detail: isSubscription
+        ? `${formatUsd(link.monthly_cents)}/mo · ${
+            link.setup_fee_cents > 0 ? `${formatUsd(link.setup_fee_cents)} setup` : 'setup waived'
+          }${link.rep_name ? ` · by ${link.rep_name}` : ''}`
+        : `${formatUsd(link.amount_cents)} · Reactivation Power Access${link.rep_name ? ` · by ${link.rep_name}` : ''}`,
     },
-    {
-      label: isPaid ? 'Payment received' : 'Awaiting payment',
-      at: isPaid ? link.paid_at : null,
-      done: isPaid,
-      detail: isPaid ? formatUsd(link.amount_cents) : 'Link is still open',
-    },
+    ...(isSubscription
+      ? [
+          {
+            label: link.setup_paid_at
+              ? link.setup_fee_cents > 0
+                ? 'Setup fee paid · primary card saved'
+                : 'Primary card saved'
+              : 'Awaiting primary card',
+            at: link.setup_paid_at,
+            done: Boolean(link.setup_paid_at),
+            detail: link.setup_fee_cents > 0 ? formatUsd(link.setup_fee_cents) : 'Setup fee waived',
+          },
+          {
+            label: link.completed_at ? 'Backup card saved · subscription started' : 'Awaiting backup card',
+            at: link.completed_at,
+            done: Boolean(link.completed_at),
+            detail: link.completed_at
+              ? `First charge ${formatDay(link.next_payment_at)}`
+              : 'Second card must differ from the primary',
+          },
+        ]
+      : [
+          {
+            label: isPaid ? 'Payment received' : 'Awaiting payment',
+            at: isPaid ? link.paid_at : null,
+            done: isPaid,
+            detail: isPaid ? formatUsd(link.amount_cents) : 'Link is still open',
+          },
+        ]),
     {
       label: link.provisioned_at
         ? 'Portal accounts created'
@@ -115,20 +151,37 @@ export default function PaymentDetailPage() {
               <h1 className="text-2xl font-semibold tracking-tight text-foreground">
                 {link.name}
               </h1>
-              <StatusPill status={link.status} />
+              <StatusPill status={status} />
+              <TypePill type={link.type} />
             </div>
             <p className="mt-1 text-sm text-muted-foreground">
+              {customer?.business_name ? `${customer.business_name} · ` : ''}
               {link.email}
               {link.phone ? ` · ${link.phone}` : ''}
             </p>
           </div>
           <div className="text-right">
-            <p className="text-2xl font-semibold tabular-nums tracking-tight">
-              {formatUsd(link.amount_cents)}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {isPaid ? `Paid ${formatWhen(link.paid_at)}` : 'Not yet paid'}
-            </p>
+            {isSubscription ? (
+              <>
+                <p className="text-2xl font-semibold tabular-nums tracking-tight">
+                  {formatUsd(link.monthly_cents)}
+                  <span className="text-sm font-normal text-muted-foreground">/mo</span>
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {link.setup_fee_cents > 0 ? `${formatUsd(link.setup_fee_cents)} setup` : 'Setup fee waived'}
+                  {link.setup_paid_at ? ` · paid ${formatWhen(link.setup_paid_at)}` : ' · not yet paid'}
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="text-2xl font-semibold tabular-nums tracking-tight">
+                  {formatUsd(link.amount_cents)}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {isPaid ? `Paid ${formatWhen(link.paid_at)}` : 'Not yet paid'}
+                </p>
+              </>
+            )}
           </div>
         </div>
         <div className="mt-4">
@@ -164,7 +217,30 @@ export default function PaymentDetailPage() {
                   )}
                 </Field>
                 <Field label="Business">
-                  <span className="text-muted-foreground">—</span>
+                  {customer?.business_name || <span className="text-muted-foreground">—</span>}
+                </Field>
+                <div className="sm:col-span-2">
+                  <Field label="Business address">
+                    {customer?.business_address || <span className="text-muted-foreground">—</span>}
+                  </Field>
+                </div>
+                <Field label="Owner">
+                  {customer?.owner_name || <span className="text-muted-foreground">—</span>}
+                </Field>
+                <Field label="Owner phone">
+                  {customer?.owner_phone ? (
+                    <a href={`tel:${customer.owner_phone}`} className="hover:underline">
+                      {customer.owner_phone}
+                    </a>
+                  ) : (
+                    <span className="text-muted-foreground">—</span>
+                  )}
+                </Field>
+                <Field label="Rep">
+                  {link.rep_name || <span className="text-muted-foreground">—</span>}
+                </Field>
+                <Field label="Stripe customer" mono>
+                  {customer?.stripe_customer_id || <span className="font-sans text-sm text-muted-foreground">Not created yet</span>}
                 </Field>
               </dl>
             </CardContent>
@@ -177,15 +253,33 @@ export default function PaymentDetailPage() {
             <CardContent>
               <dl className="grid gap-4 sm:grid-cols-2">
                 <Field label="Product">Reactivation Power Access</Field>
-                <Field label="Amount">
-                  <span className="font-medium tabular-nums">
-                    {formatUsd(link.amount_cents)}
-                  </span>
+                <Field label="Offer">
+                  <TypePill type={link.type} />
                 </Field>
+                {isSubscription ? (
+                  <>
+                    <Field label="Setup fee">
+                      <span className="font-medium tabular-nums">
+                        {link.setup_fee_cents > 0 ? formatUsd(link.setup_fee_cents) : 'Waived'}
+                      </span>
+                    </Field>
+                    <Field label="Monthly">
+                      <span className="font-medium tabular-nums">{formatUsd(link.monthly_cents)}</span>
+                    </Field>
+                  </>
+                ) : (
+                  <Field label="Amount">
+                    <span className="font-medium tabular-nums">
+                      {formatUsd(link.amount_cents)}
+                    </span>
+                  </Field>
+                )}
                 <Field label="Status">
-                  <StatusPill status={link.status} />
+                  <StatusPill status={status} />
                 </Field>
-                <Field label="Payment date">{formatWhen(link.paid_at)}</Field>
+                <Field label={isSubscription ? 'Setup paid' : 'Payment date'}>
+                  {formatWhen(isSubscription ? link.setup_paid_at : link.paid_at)}
+                </Field>
                 <div className="sm:col-span-2">
                   <Field label="Payment link">
                     <span className="inline-flex max-w-full items-center gap-1.5">
@@ -205,6 +299,82 @@ export default function PaymentDetailPage() {
               </dl>
             </CardContent>
           </Card>
+
+          {isSubscription ? (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <CalendarClock className="size-4 text-muted-foreground" />
+                  Subscription
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {!link.stripe_subscription_id ? (
+                  <p className="text-sm text-muted-foreground">
+                    {link.setup_paid_at
+                      ? 'Setup fee paid. The subscription starts once the backup card is added.'
+                      : 'The subscription is created after checkout — setup fee plus two cards on file.'}
+                  </p>
+                ) : (
+                  <dl className="grid gap-4 sm:grid-cols-2">
+                    <Field label="Status">
+                      <Badge variant={link.subscription_status === 'trialing' || link.subscription_status === 'active' ? 'default' : 'outline'}>
+                        {link.subscription_status === 'trialing'
+                          ? 'Active · in 30-day window'
+                          : (link.subscription_status ?? 'unknown')}
+                      </Badge>
+                    </Field>
+                    <Field label="Next payment">
+                      <span className="font-medium">{formatDay(link.next_payment_at)}</span>
+                      <span className="text-muted-foreground"> · {formatUsd(link.monthly_cents)}</span>
+                    </Field>
+                    <Field label="Agreement start">{formatDay(link.agreement_start)}</Field>
+                    <Field label="Agreement end">{formatDay(link.agreement_end)}</Field>
+                    <div className="sm:col-span-2">
+                      <Field label="Stripe subscription" mono>
+                        {link.stripe_subscription_id}
+                      </Field>
+                    </div>
+                  </dl>
+                )}
+              </CardContent>
+            </Card>
+          ) : null}
+
+          {isSubscription ? (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <CreditCard className="size-4 text-muted-foreground" />
+                  Cards on file ({cards.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {cards.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No cards yet — they are saved during checkout.</p>
+                ) : (
+                  <ul className="divide-y divide-border rounded-md border border-border">
+                    {cards.map((c) => (
+                      <li key={c.id} className="flex items-center justify-between gap-4 px-4 py-2.5">
+                        <span className="flex items-center gap-2 text-sm font-medium capitalize">
+                          <CreditCard className="size-4 text-muted-foreground" />
+                          {c.brand} •••• {c.last4}
+                          {c.exp_month && c.exp_year ? (
+                            <span className="text-xs font-normal text-muted-foreground">
+                              exp {String(c.exp_month).padStart(2, '0')}/{String(c.exp_year).slice(-2)}
+                            </span>
+                          ) : null}
+                        </span>
+                        <Badge variant={c.rank === 'primary' ? 'default' : 'secondary'}>
+                          {c.rank === 'primary' ? 'Primary' : 'Secondary'}
+                        </Badge>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </CardContent>
+            </Card>
+          ) : null}
 
           <Card>
             <CardHeader>
