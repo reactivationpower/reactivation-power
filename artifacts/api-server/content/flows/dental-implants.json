@@ -79,6 +79,12 @@
       "sort_order": 11
     },
     {
+      "step_key": "uncover",
+      "title": "Uncover the Real Concern",
+      "content": "Okay, {{contact_first_name}}. I'm not going to push you on it. What's the part giving you pause?\n\n(Let them answer. Then tap what you hear.)",
+      "sort_order": 12
+    },
+    {
       "step_key": "lapsed_commitment",
       "title": "Nothing Found: Protect the Investment",
       "content": "{{contact_first_name}}, I'm glad everything is feeling solid.\n\n(They already told you when their last cleaning was. Use that answer instead of asking again. No judgment either way.)\n\nOne thing before I let you go. The implant itself is built to last, but the gum and bone holding it are living tissue. The early warning signs there don't hurt, so you won't feel them until later. A regular cleaning doesn't always include a close look at the implant. A quick check confirms it's as healthy as it feels. Does that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you in for that quick check so it stays the way it is. Does that sound reasonable?",
@@ -87,25 +93,49 @@
     {
       "step_key": "obj_permanent",
       "title": "Objection: “I thought implants were permanent”",
-      "content": "{{contact_first_name}}, that's a fair question, and you're half right. The implant itself is permanent. The gum and bone holding it are living tissue, and they need the same care your natural teeth do. Think of a good roof. The roof lasts for decades, but you still keep the gutters clear. The check is how we keep the permanent part permanent.\n\nDoes that make sense?\n\n(Wait for the yes.)",
+      "content": "{{contact_first_name}}, that's a fair question, and you're half right.\n\nCan I ask, has anything changed around it, like the gum feeling different or food catching?\n\n(Let them answer. Do not give dental advice on the call.)\n\nThe implant itself is permanent. The gum and bone holding it are living tissue, and they need the same care your natural teeth do. Think of a good roof. It lasts for decades, but you still keep the gutters clear. Problems around an implant start small and cost little to catch early. Left alone, they cost a lot.\n\nThe check is how {{provider_name}} keeps the permanent part permanent.\n\nWould it help to know it's solid, instead of assuming?",
       "sort_order": 100
     },
     {
       "step_key": "obj_embarrassed",
       "title": "Objection: “I’m embarrassed I haven’t been in”",
-      "content": "{{contact_first_name}}, please don't be. There's no judgment here. Once an implant feels solid, it's natural to stop thinking about it. That's a sign the work was done well. It's the reason we check in. Let's just get your file current and keep it feeling that way.\n\nWould you be open to that?\n\n(Wait for the yes.)",
+      "content": "Please don't be, {{contact_first_name}}. Nobody here is keeping score.\n\nCan I ask, was it one thing that got in the way, or did it just drift off the list?\n\n(Let them answer. Stay warm.)\n\nOnce an implant feels solid, it's natural to stop thinking about it. That's a sign the work was done well, not something you did wrong. The only thing embarrassment does is keep people away until a small thing becomes a big one.\n\n{{provider_name}} would rather see you now than a year from now. We'd take a look at the implant and the gum around it and get your file current.\n\nWould it feel better to just get that first step done?",
       "sort_order": 101
+    },
+    {
+      "step_key": "obj_other_option",
+      "title": "Objection: “I’m considering another option”",
+      "content": "That's fair. Can I ask what you're looking at, like a general dentist, another office, or just leaving it?\n\n(Let them answer. Do not knock the other option.)\n\nThose can all make sense, and some people do well combining them. The part that's hard to compare from home is whether the implant is still solid underneath. {{provider_name}} already has your file, the scans and what was placed, so you're not starting over here.\n\nCome in, get a straight answer on where things stand, and then compare. If the other option turns out to be the better fit, you'll be choosing it for a reason.\n\nIs that a fair way to decide?",
+      "sort_order": 120
+    },
+    {
+      "step_key": "obj_cost",
+      "title": "Objection: Cost",
+      "content": "I understand, {{contact_first_name}}. Is it the cost of the check itself, or the worry that it’ll turn into a big bill?\n\n(Let them answer. Do not quote prices, packages, or discounts. The office handles that.)\n\nThis first check is one appointment, not a treatment. You'll hear what anything past that costs before you decide on it. And since you've been here before, we're not starting from scratch, and starting from scratch is the expensive part.\n\nThe other side of it is what waiting is already costing you, the things you mentioned a minute ago. That's the part I'd hate to see keep adding up.\n\nCan we at least get the look on the calendar?",
+      "sort_order": 121
+    },
+    {
+      "step_key": "obj_time",
+      "title": "Objection: “I don’t have time”",
+      "content": "I hear you, {{contact_first_name}}. Is it finding time for the first check, or the worry about a run of appointments like before?\n\n(Let them answer.)\n\nRight now we're only talking about one check. {{provider_name}} looks at the implant and tells you what it would take from there. Most of the time that’s nothing more than a clean bill of health. If something’s starting, you’ll hear that up front so you can decide. Nobody is signing you up for anything on the phone.\n\nWe'll fit that first check around your schedule, not the other way around.\n\nCould you find a short window for that?",
+      "sort_order": 122
+    },
+    {
+      "step_key": "obj_spouse",
+      "title": "Objection: “I need to talk to my spouse”",
+      "content": "Of course. Is it more about the money side, or do you two just make these decisions together?\n\n(Let them answer. If it's money, use the cost answer.)\n\nThat's fair, and I'm not asking you to commit to anything they'd need to weigh in on. Right now, all you can tell them is that the implant is due a look. After the check, you can tell them what's going on and what it would take. That's an easier conversation to have. And if they'd like to come along, they're welcome.\n\nCan we pencil it in, and you can move it after you two talk?",
+      "sort_order": 123
     },
     {
       "step_key": "obj_think",
       "title": "Objection: “I need to think about it”",
-      "content": "That's fair, {{contact_first_name}}. Can I ask what part you'd want to think over? Sometimes it's the cost, sometimes the timing, and sometimes people just want to be sure it's the right move.\n\n(Listen. Their answer usually points to one of the other objections. If it stays general, keep going.)\n\nComing in is really just information. You'd find out what the options look like and what it would involve, and then you decide with real answers. If it's not the right fit, we'll tell you that too.\n\nDoes that help?",
+      "content": "That's fair, {{contact_first_name}}. Usually when someone says that, there's one specific thing on their mind. What's the part you'd want to think over?\n\n(Let them answer. If they name cost, time, or another reason, tap that button.)\n\nOkay. I'm not trying to rush you. The one thing I'd say is that the implant is due a look. It's been that way for a while, and it hasn't sorted itself out on its own. The check is how you get the information you'd be thinking with. You can think it over just as easily after you know what's going on.\n\nWould it be easier to think it over once you have the answers?",
       "sort_order": 130
     },
     {
       "step_key": "obj_send_info",
       "title": "Objection: “Just send me some info”",
-      "content": "I'd be glad to send you some information, {{contact_first_name}}. The one thing I'd say is that a flyer can only tell you so much. It can't look at your implant. That's what the visit is for. So let me get you on the schedule first, and then I'll send the information along.\n\nIs that okay?",
+      "content": "I can do that, {{contact_first_name}}. What would you want it to cover, so I send the right thing?\n\n(Let them answer. If they name cost, time, or another reason, tap that button.)\n\nI'll be straight with you, though. Anything I send is going to be general. It can't tell you what's realistic for the implant specifically. That takes {{provider_name}} looking at the implant and the gum around it, and that's one short check.\n\nLet's do both. I'll send the information, and we'll put a time on the calendar. If what I send answers your question, you can call and cancel, no problem.\n\nDoes doing both work for you?",
       "sort_order": 131
     }
   ],
@@ -188,6 +218,20 @@
       "sort_order": 0
     },
     {
+      "from_step_key": "obj_cost",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_cost",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
       "from_step_key": "obj_embarrassed",
       "label": "Resolved: back to scheduling",
       "to_step_key": "scheduling",
@@ -196,6 +240,20 @@
     },
     {
       "from_step_key": "obj_embarrassed",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_other_option",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_other_option",
       "label": "Another concern came up",
       "to_step_key": "uncover",
       "variant": "objection",
@@ -230,6 +288,20 @@
       "sort_order": 1
     },
     {
+      "from_step_key": "obj_spouse",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_spouse",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
       "from_step_key": "obj_think",
       "label": "Resolved: back to scheduling",
       "to_step_key": "scheduling",
@@ -238,6 +310,20 @@
     },
     {
       "from_step_key": "obj_think",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_time",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_time",
       "label": "Another concern came up",
       "to_step_key": "uncover",
       "variant": "objection",

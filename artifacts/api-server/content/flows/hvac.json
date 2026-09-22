@@ -135,31 +135,31 @@
     {
       "step_key": "uncover",
       "title": "Uncover the real concern",
-      "content": "I understand, {{contact_first_name}}. Can I ask what would keep you from taking care of something that's bothering you?\n\n(Listen. Their real answer is almost always one of the buttons below.)",
+      "content": "Okay, {{contact_first_name}}. I'm not going to push you on it. What's the part giving you pause?\n\n(Let them answer. Then tap what you hear.)",
       "sort_order": 21
     },
     {
       "step_key": "obj_price",
       "title": "Objection: cost",
-      "content": "I understand, {{contact_first_name}}. This first step is just having a technician take a look. You're not committing to anything today. Knowing where things stand is what protects you. The small stuff nobody catches is what gets expensive later.\n\n(Do not quote prices or discounts. The office handles that.)\n\nWould it be okay to at least get the look on the calendar?\n\n(Wait for the yes.)",
+      "content": "I understand, {{contact_first_name}}. Is it the cost of the visit itself, or the worry it'll turn into a big repair bill?\n\n(Let them answer. Do not quote prices or discounts. The office handles that.)\n\nThe first step is having a technician take a look at {{main_concern}}. You're not committing to anything, and you'll hear what any work would cost before it happens. The small stuff nobody catches is what gets expensive later. A look now is the cheap version.\n\nThe other side of it is what that's already costing you, the things you mentioned a minute ago. That's the part I'd hate to see keep adding up.\n\nWould it be okay to at least get the look on the calendar?",
       "sort_order": 22
     },
     {
       "step_key": "obj_think",
       "title": "Objection: “I need to think about it”",
-      "content": "That's fair, {{contact_first_name}}. Can I ask which part you'd want to think over?\n\n(Let them answer. Cost, timing, or not sure it's worth a visit. Their answer usually turns into one of the buttons below.)\n\nThe nice thing is, the visit is just information. Then you can think it over with real answers instead of guesses.\n\nDoes that sound fair?",
+      "content": "That's fair, {{contact_first_name}}. Usually when someone says that, there's one specific thing on their mind. What's the part you'd want to think over?\n\n(Let them answer. If they name cost, time, or another reason, tap that button.)\n\nOkay. I'm not trying to rush you. The one thing I'd say is that {{main_concern}} has been going on for a while now. It's had time to sort itself out on its own, and it hasn't. The visit is how you get the information you'd be thinking with. You can think it over just as easily after you know what the technician found.\n\nWould it be easier to think it over once you have the answers?",
       "sort_order": 23
     },
     {
       "step_key": "obj_spouse",
       "title": "Objection: “I need to talk to my spouse”",
-      "content": "That's fair, {{contact_first_name}}. Most people find it helps to have the technician take a look first. That way you both have real information to decide with.\n\nWould that work?",
+      "content": "Of course. Is it more about the money side, or do you two just make these decisions together?\n\n(Let them answer. If it's money, use the cost answer.)\n\nThat's fair, and I'm not asking you to commit to anything they'd need to weigh in on. Right now, all you can tell them is that {{main_concern}} is still going on. After the visit, you can tell them what the technician found and what it would take. That's an easier conversation to have. And if they'd rather be home for it, we'll schedule around that.\n\nCan we pencil it in, and you can move it after you two talk?",
       "sort_order": 24
     },
     {
       "step_key": "obj_busy",
       "title": "Objection: too busy",
-      "content": "I understand, {{contact_first_name}}. Life gets busy. You don't have to do anything for this one. Our technician does the work, and we schedule it around you.\n\nIs there a day that's usually easier for you?",
+      "content": "I hear you, {{contact_first_name}}. Is it finding a time to be home, or the thought of one more thing on the list?\n\n(Let them answer.)\n\nThis is the one thing on the list you don't have to do yourself. Our technician does the work, you point at {{main_concern}}, and we schedule it around you, not the other way around. Waiting doesn't make it go away. It usually makes it a bigger job on a worse day.\n\nIs there a day of the week that's usually easier for you?",
       "sort_order": 25
     },
     {

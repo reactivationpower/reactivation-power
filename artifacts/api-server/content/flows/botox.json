@@ -91,10 +91,10 @@
       "sort_order": 12
     },
     {
-      "step_key": "obj_cost",
-      "title": "Objection: Cost",
-      "content": "I understand, {{contact_first_name}}. A lot of people don't realize this. Keeping up results usually takes fewer units than starting over. Fewer units means less cost.\n\nWhen you come in, we'll go over how many units you'd need and what it costs. That happens before anything is done. Nothing happens until you're happy with the numbers.\n\n(Do not quote prices, packages, or discounts on the call. The office handles that.)\n\nDoes that seem fair?",
-      "sort_order": 13
+      "step_key": "uncover",
+      "title": "Uncover the Real Concern",
+      "content": "Okay, {{contact_first_name}}. I'm not going to push you on it. What's the part giving you pause?\n\n(Let them answer. Then tap what you hear.)",
+      "sort_order": 12
     },
     {
       "step_key": "touchup_close",
@@ -103,33 +103,51 @@
       "sort_order": 13
     },
     {
-      "step_key": "obj_time",
-      "title": "Objection: “I don’t have time”",
-      "content": "I'm glad you told me, {{contact_first_name}}. A touch-up visit is quick to begin with. If time is tight, we'll have everything ready the moment you walk in, so you're in and out.\n\nWould that work?\n\n(Wait for the yes.)",
-      "sort_order": 15
-    },
-    {
       "step_key": "obj_last_longer",
       "title": "Objection: “I thought it would last longer”",
-      "content": "That's a fair thing to bring up. The effect wears off over a few months as the movement comes back. That's normal, and it's why most patients come in on a regular schedule. We can map that out with you in person.\n\nDoes that make sense?\n\n(Wait for the yes.)",
+      "content": "That's fair, {{contact_first_name}}. Most people hope it holds longer than it does.\n\nCan I ask, how long did it hold before you saw the movement come back?\n\n(Let them answer.)\n\nThree to four months is typical, and it's the muscle waking back up, not the product failing. Some people run shorter, especially with strong muscles or a lot of exercise. That's useful to know, because timing and dose are the two things that change how long {{main_concern}} stays settled.\n\n{{provider_name}} already has your notes, so this visit adjusts instead of guessing.\n\nWould it help to know what would make it hold longer for you?",
       "sort_order": 100
     },
     {
       "step_key": "obj_other_treatment",
       "title": "Objection: “I’m thinking about fillers or something else”",
-      "content": "That's fair. That's something we can talk through at the visit, so you can see what fits best.\n\nCan we at least get you in to talk it through?",
+      "content": "That's fair, {{contact_first_name}}. It might be the right call.\n\nCan I ask what's caught your eye, and what you're hoping it does?\n\n(Let them answer. Do not knock the other treatment.)\n\nThey often work together. Botox handles the lines that come from movement. Filler and other treatments handle volume and texture. Which one fits {{main_concern}} depends on what's driving it, and that's a five-minute look, not a phone call. {{provider_name}} will tell you straight if the other treatment is the better fit.\n\nWould it help to have that sorted out before you spend money on either?",
       "sort_order": 101
+    },
+    {
+      "step_key": "obj_other_option",
+      "title": "Objection: “I’m considering another option”",
+      "content": "That's fair. Can I ask what you're looking at, like a different injector, a deal somewhere else, or just waiting?\n\n(Let them answer. Do not knock the other option.)\n\nThose can all make sense, and some people do well combining them. The part that's hard to compare from home is what would move {{main_concern}} for you. {{provider_name}} already knows how your face responds and what dose held, so you're not starting over here.\n\nCome in, get a straight answer on where things stand, and then compare. If the other option turns out to be the better fit, you'll be choosing it for a reason.\n\nIs that a fair way to decide?",
+      "sort_order": 120
+    },
+    {
+      "step_key": "obj_cost",
+      "title": "Objection: Cost",
+      "content": "I understand, {{contact_first_name}}. Is it the cost of the visit itself, or the thought of the full amount again?\n\n(Let them answer. Do not quote prices, packages, or discounts. The office handles that.)\n\nA lot of people don't realize this. Keeping up a result usually takes fewer units than starting over, and fewer units means less cost. When you come in, we go over how many units you'd need and what that costs, before anything is done. Nothing happens until you're happy with the numbers.\n\nThe other side of it is what {{main_concern}} is already costing you, the things you mentioned a minute ago. That's the part I'd hate to see keep adding up.\n\nCan we at least get the look on the calendar?",
+      "sort_order": 121
+    },
+    {
+      "step_key": "obj_time",
+      "title": "Objection: “I don’t have time”",
+      "content": "I hear you, {{contact_first_name}}. Is it finding time for a visit, or the worry about coming in every few months?\n\n(Let them answer.)\n\nRight now we're only talking about one visit. A touch-up is quick to begin with, and we'll have everything ready when you walk in. {{provider_name}} looks at {{main_concern}} and tells you what spacing makes sense from there. Nobody is putting you on a schedule from the phone.\n\nWe'll fit that first visit around your day, not the other way around.\n\nCould you find a short window for that?",
+      "sort_order": 122
+    },
+    {
+      "step_key": "obj_spouse",
+      "title": "Objection: “I need to talk to my spouse”",
+      "content": "Of course. Is it more about the money side, or do you two just make these decisions together?\n\n(Let them answer. If it's money, use the cost answer.)\n\nThat's fair, and I'm not asking you to commit to anything they'd need to weigh in on. Right now, all you can tell them is that {{main_concern}} is on your mind. After the visit, you can tell them what's going on and what it would take. That's an easier conversation to have. And if they'd like to come along, they're welcome.\n\nCan we pencil it in, and you can move it after you two talk?",
+      "sort_order": 123
     },
     {
       "step_key": "obj_think",
       "title": "Objection: “I need to think about it”",
-      "content": "That's fair, {{contact_first_name}}. Can I ask what part you'd want to think over? Sometimes it's the cost, sometimes the timing, and sometimes people just want to be sure it's right for them.\n\n(Listen. Their answer usually points to one of the other objections. If it stays general, keep going.)\n\nComing in is really just information. You'd see what's possible and what it would involve, and then you decide with real answers. No pressure either way.\n\nDoes that help?",
+      "content": "That's fair, {{contact_first_name}}. Usually when someone says that, there's one specific thing on their mind. What's the part you'd want to think over?\n\n(Let them answer. If they name cost, time, or another reason, tap that button.)\n\nOkay. I'm not trying to rush you. The one thing I'd say is that {{main_concern}} is on your mind. It's been that way for a while, and it hasn't sorted itself out on its own. The visit is how you get the information you'd be thinking with. You can think it over just as easily after you know what's going on.\n\nWould it be easier to think it over once you have the answers?",
       "sort_order": 130
     },
     {
       "step_key": "obj_send_info",
       "title": "Objection: “Just send me some info”",
-      "content": "I'd be glad to send you some information, {{contact_first_name}}. The one thing I'd say is that a flyer can only tell you so much. It can't show you what's possible for you specifically. That's what a quick visit is for. So let me get you on the schedule first, and then I'll send the information along.\n\nIs that okay?",
+      "content": "I can do that, {{contact_first_name}}. What would you want it to cover, so I send the right thing?\n\n(Let them answer. If they name cost, time, or another reason, tap that button.)\n\nI'll be straight with you, though. Anything I send is going to be general. It can't tell you what's realistic for {{main_concern}} specifically. That takes {{provider_name}} looking at your face, and that's one short visit.\n\nLet's do both. I'll send the information, and we'll put a time on the calendar. If what I send answers your question, you can call and cancel, no problem.\n\nDoes doing both work for you?",
       "sort_order": 131
     }
   ],
@@ -198,6 +216,20 @@
       "sort_order": 0
     },
     {
+      "from_step_key": "obj_cost",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_cost",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
       "from_step_key": "obj_last_longer",
       "label": "Resolved: back to scheduling",
       "to_step_key": "scheduling",
@@ -212,6 +244,20 @@
       "sort_order": 2
     },
     {
+      "from_step_key": "obj_other_option",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_other_option",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
       "from_step_key": "obj_other_treatment",
       "label": "Resolved: back to scheduling",
       "to_step_key": "scheduling",
@@ -240,6 +286,20 @@
       "sort_order": 1
     },
     {
+      "from_step_key": "obj_spouse",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_spouse",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
       "from_step_key": "obj_think",
       "label": "Resolved: back to scheduling",
       "to_step_key": "scheduling",
@@ -248,6 +308,20 @@
     },
     {
       "from_step_key": "obj_think",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_time",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_time",
       "label": "Another concern came up",
       "to_step_key": "uncover",
       "variant": "objection",

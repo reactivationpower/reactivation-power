@@ -33,7 +33,8 @@ const generalWith = (...steps: FlowStep[]): FlowFile => ({
 })
 
 const legacyNiche = (...steps: FlowStep[]): FlowFile => ({
-  niche: { name: 'Botox', sector: 'aesthetics', is_active: true, sort_order: 0 },
+  // Not on OBJECTION_SHAPE_NICHES: stands in for a future niche that has not been rewritten yet.
+  niche: { name: 'Legacy Test Niche', sector: 'aesthetics', is_active: true, sort_order: 0 },
   steps,
   choices: [],
 })

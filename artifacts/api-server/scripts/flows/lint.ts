@@ -273,6 +273,32 @@ export const OBJECTION_SHAPE_NICHES: ReadonlySet<string> = new Set([
   'ChiroThin',
   'Gut Health',
   'Red Light / Body Contouring',
+  'Acne / Acne Scarring',
+  'Acoustic Wave Therapy',
+  'Acupuncture',
+  'Body Waxing',
+  'Botox',
+  'Cellulite Reduction',
+  'Chemical Peels',
+  'Clear Aligners',
+  'Dental Implants',
+  'Facials / HydraFacial',
+  'Fillers',
+  'GLP Patients',
+  'HVAC',
+  'IPL / Photofacial',
+  'Laser Hair Removal',
+  'Laser Resurfacing',
+  'Massage Therapy',
+  'Medical-Grade Skincare',
+  'Microneedling / RF Microneedling',
+  'Orthodontics / Braces',
+  'Pigmentation / Sun Damage',
+  'Plumbing',
+  'Rosacea / Redness',
+  'Skin Tightening',
+  'Teeth Whitening',
+  'Weight Loss (Not ChiroThin)',
 ])
 
 /** Coaching note that separates the isolating question from the reason (R9 beat 3). */
@@ -807,8 +833,6 @@ function main() {
   process.exit(totalErrors > 0 ? 1 : 0)
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) main()
-
 /** Lower-case with straight quotes, a plain ellipsis and single spaces so phrase lists match either typography. */
 function normalisePhraseText(text: string): string {
   return text
@@ -897,3 +921,8 @@ export function lintParentChips(slug: string, file: FlowFile): Problem[] {
 
 /** Second-person words that misaddress a parent when spoken about the patient (R15). */
 export const SECOND_PERSON = /\b(you|your|yours|yourself)\b/i
+
+// CLI entrypoint. Keep this last: main() reads top-level constants declared
+// below the functions that use them, and a call above them throws a TDZ
+// ReferenceError at runtime that import-only unit tests never see.
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) main()

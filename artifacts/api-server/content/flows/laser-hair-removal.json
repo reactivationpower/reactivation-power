@@ -91,6 +91,12 @@
       "sort_order": 12
     },
     {
+      "step_key": "uncover",
+      "title": "Uncover the Real Concern",
+      "content": "Okay, {{contact_first_name}}. I'm not going to push you on it. What's the part giving you pause?\n\n(Let them answer. Then tap what you hear.)",
+      "sort_order": 12
+    },
+    {
       "step_key": "comeback_close",
       "title": "Regrowth Is the Whole Story: The Close",
       "content": "{{contact_first_name}}, thank you for that. Your file is up to date.\n\nThe good news is this is what touch-up sessions are for. We don't start from zero. It's a fraction of what you did the first time, and every session puts you further ahead. Does that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you in for one quick touch-up session now, while those new hairs are active. Then you're right back to smooth. Does that sound reasonable?\n\n(Wait for the yes.)\n\nOkay, let's get you back on the books. I have (day) at (time) or (day) at (time). Which is better for you?",
@@ -99,31 +105,55 @@
     {
       "step_key": "obj_permanent",
       "title": "Objection: “I thought it was supposed to be permanent”",
-      "content": "That's a fair question. Laser removal reduces hair for good, but some regrowth can happen over time. Hormones can play a part, and so can an unfinished series. That's why coming in makes sense, so we can look at the whole picture and make a plan.\n\nDoes that make sense?\n\n(Wait for the yes.)",
+      "content": "That's a fair question, {{contact_first_name}}, and the answer is mostly yes.\n\nCan I ask, is it fine, light regrowth, or does it look like it did before?\n\n(Let them answer. Do not promise permanence on the call.)\n\nLaser takes out the hair that's in its growth phase on the day. That's why it's a series. Hair that was resting, hormone changes, or a series that stopped early all leave some behind. Fine, light regrowth is the treatment having worked. Thick regrowth usually means an unfinished series.\n\n{{provider_name}} can look at {{main_concern}} and tell you which one it is, and what it would take.\n\nWould it help to know which one you're dealing with?",
       "sort_order": 100
     },
     {
       "step_key": "obj_frustrated",
       "title": "Objection: “I’m frustrated it came back”",
-      "content": "I understand, and please don't be hard on yourself. Some regrowth is common, and that's the reason we call. We'd just like to help you get back to where you were.\n\nWould you be open to that?\n\n(Wait for the yes.)",
+      "content": "I understand, {{contact_first_name}}, and please don't be hard on yourself.\n\nCan I ask, is it the regrowth itself, or feeling like the time was wasted?\n\n(Let them answer. Stay warm.)\n\nNeither one is on you. Some regrowth after a gap is common, especially if the series stopped before it was done. The sessions you had still count. Hair that's gone is gone, and what's left is finer and fewer. The only thing frustration does is keep people away until it's a bigger job than it needs to be.\n\n{{provider_name}} would rather see you now than after a summer of shaving. We'd take a look at {{main_concern}} and figure out the shortest path back.\n\nWould it feel better to just get that first step done?",
       "sort_order": 101
     },
     {
       "step_key": "obj_did_it_work",
       "title": "Objection: “Did it even work last time?”",
-      "content": "That's a fair question, and it's the kind of thing we'd want to talk through in person. That way we can look at the whole picture and see what would help it hold.\n\n(Do not promise results or permanence on the call.)\n\nIs there anything else on your mind?",
+      "content": "That's a fair question, {{contact_first_name}}, and I'd rather you ask it than wonder.\n\nCan I ask what you noticed at the time, like less shaving or fewer ingrowns?\n\n(Let them answer. Do not promise results on the call.)\n\nYour notes say you were seeing progress when you finished. Hair removal fades in a way you don't notice, one shave at a time. Eventually it feels like it was never there. That's different from it not working.\n\nThe visit is how you get a real answer instead of a guess. {{provider_name}} can compare where {{main_concern}} is now to where you were. Then you'll hear what a touch-up would realistically do.\n\nWouldn’t you rather know than guess?",
       "sort_order": 102
+    },
+    {
+      "step_key": "obj_other_option",
+      "title": "Objection: “I’m considering another option”",
+      "content": "That's fair. Can I ask what you're looking at, like a home device, waxing, or another office?\n\n(Let them answer. Do not knock the other option.)\n\nThose can all make sense, and some people do well combining them. The part that's hard to compare from home is what would move {{main_concern}} for you. {{provider_name}} already knows how your skin responded last time, so you're not starting over here.\n\nCome in, get a straight answer on where things stand, and then compare. If the other option turns out to be the better fit, you'll be choosing it for a reason.\n\nIs that a fair way to decide?",
+      "sort_order": 120
+    },
+    {
+      "step_key": "obj_cost",
+      "title": "Objection: Cost",
+      "content": "I understand, {{contact_first_name}}. Is it the cost of the visit itself, or the thought of paying for a full series again?\n\n(Let them answer. Do not quote prices, packages, or discounts. The office handles that.)\n\nThis first visit is one appointment, not a series. You'll hear what anything past that costs before you decide on it. And since you've been here before, we're not starting from scratch, and starting from scratch is the expensive part.\n\nThe other side of it is what {{main_concern}} is already costing you, the things you mentioned a minute ago. That's the part I'd hate to see keep adding up.\n\nCan we at least get the look on the calendar?",
+      "sort_order": 121
+    },
+    {
+      "step_key": "obj_time",
+      "title": "Objection: “I don’t have time”",
+      "content": "I hear you, {{contact_first_name}}. Is it finding time for the first visit, or the worry about a run of sessions like before?\n\n(Let them answer.)\n\nRight now we're only talking about one visit. {{provider_name}} looks at {{main_concern}} and tells you what it would take from there. Sometimes that’s one or two touch-up sessions. Sometimes it’s more, and you’ll hear that up front so you can decide. Nobody is booking you into a series on the phone.\n\nWe'll fit that first visit around your schedule, not the other way around.\n\nCould you find a short window for that?",
+      "sort_order": 122
+    },
+    {
+      "step_key": "obj_spouse",
+      "title": "Objection: “I need to talk to my spouse”",
+      "content": "Of course. Is it more about the money side, or do you two just make these decisions together?\n\n(Let them answer. If it's money, use the cost answer.)\n\nThat's fair, and I'm not asking you to commit to anything they'd need to weigh in on. Right now, all you can tell them is that {{main_concern}} is on your mind. After the visit, you can tell them what's going on and what it would take. That's an easier conversation to have. And if they'd like to come along, they're welcome.\n\nCan we pencil it in, and you can move it after you two talk?",
+      "sort_order": 123
     },
     {
       "step_key": "obj_think",
       "title": "Objection: “I need to think about it”",
-      "content": "That's fair, {{contact_first_name}}. Can I ask what part you'd want to think over? Sometimes it's the cost, sometimes the timing, and sometimes people just want to be sure it's right for them.\n\n(Listen. Their answer usually points to one of the other objections. If it stays general, keep going.)\n\nComing in is really just information. You'd see what's possible and what it would involve, and then you decide with real answers. No pressure either way.\n\nDoes that help?",
+      "content": "That's fair, {{contact_first_name}}. Usually when someone says that, there's one specific thing on their mind. What's the part you'd want to think over?\n\n(Let them answer. If they name cost, time, or another reason, tap that button.)\n\nOkay. I'm not trying to rush you. The one thing I'd say is that {{main_concern}} is on your mind. It's been that way for a while, and it hasn't sorted itself out on its own. The visit is how you get the information you'd be thinking with. You can think it over just as easily after you know what's going on.\n\nWould it be easier to think it over once you have the answers?",
       "sort_order": 130
     },
     {
       "step_key": "obj_send_info",
       "title": "Objection: “Just send me some info”",
-      "content": "I'd be glad to send you some information, {{contact_first_name}}. The one thing I'd say is that a flyer can only tell you so much. It can't show you what's possible for you specifically. That's what a quick visit is for. So let me get you on the schedule first, and then I'll send the information along.\n\nIs that okay?",
+      "content": "I can do that, {{contact_first_name}}. What would you want it to cover, so I send the right thing?\n\n(Let them answer. If they name cost, time, or another reason, tap that button.)\n\nI'll be straight with you, though. Anything I send is going to be general. It can't tell you what's realistic for {{main_concern}} specifically. That takes {{provider_name}} looking at the area, and that's one short visit.\n\nLet's do both. I'll send the information, and we'll put a time on the calendar. If what I send answers your question, you can call and cancel, no problem.\n\nDoes doing both work for you?",
       "sort_order": 131
     }
   ],
@@ -206,6 +236,20 @@
       "sort_order": 0
     },
     {
+      "from_step_key": "obj_cost",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_cost",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
       "from_step_key": "obj_did_it_work",
       "label": "Resolved: back to scheduling",
       "to_step_key": "scheduling",
@@ -228,6 +272,20 @@
     },
     {
       "from_step_key": "obj_frustrated",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_other_option",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_other_option",
       "label": "Another concern came up",
       "to_step_key": "uncover",
       "variant": "objection",
@@ -262,6 +320,20 @@
       "sort_order": 1
     },
     {
+      "from_step_key": "obj_spouse",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_spouse",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
       "from_step_key": "obj_think",
       "label": "Resolved: back to scheduling",
       "to_step_key": "scheduling",
@@ -270,6 +342,20 @@
     },
     {
       "from_step_key": "obj_think",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_time",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_time",
       "label": "Another concern came up",
       "to_step_key": "uncover",
       "variant": "objection",

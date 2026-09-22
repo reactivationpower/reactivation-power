@@ -91,6 +91,12 @@
       "sort_order": 12
     },
     {
+      "step_key": "uncover",
+      "title": "Uncover the Real Concern",
+      "content": "Okay, {{contact_first_name}}. I'm not going to push you on it. What's the part giving you pause?\n\n(Let them answer. Then tap what you hear.)",
+      "sort_order": 12
+    },
+    {
       "step_key": "comeback_close",
       "title": "Brightness Is the Whole Story: The Close",
       "content": "{{contact_first_name}}, the nice thing is the whitening you did before is still working underneath. What's settled in since is newer surface stain, and newer stain lifts much easier than years of buildup. So getting the brightness back is a smaller job than the first time. Does that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you in for that touch-up now. Getting back to that bright smile is one visit away. Does that sound reasonable?\n\n(Wait for the yes.)\n\nOkay, let's get you back on the books. I have (day) at (time) or (day) at (time). Which is better for you?",
@@ -99,31 +105,55 @@
     {
       "step_key": "obj_last_longer",
       "title": "Objection: “I thought it would last longer”",
-      "content": "That's a fair thing to bring up. Whitening looks great, but teeth pick up stain again over time from coffee, wine, and everyday foods. That's why coming in makes sense. {{provider_name}} can talk through how to get it bright again and help it last.\n\nDoes that make sense?\n\n(Wait for the yes.)",
+      "content": "That's fair, {{contact_first_name}}. Most people hope it holds longer than it does.\n\nCan I ask, how long did it stay bright before you noticed it slipping?\n\n(Let them answer.)\n\nTeeth pick up stain again from coffee, tea, wine, and everyday foods. That's not the whitening failing, it's what teeth do. The first round does the heavy lifting. Keeping it bright after that is usually a quick touch-up, not the whole thing again.\n\n{{provider_name}} can look at {{main_concern}} and tell you what a touch-up would take and how to make it last longer.\n\nWould it help to know what it would take to keep it?",
       "sort_order": 100
     },
     {
       "step_key": "obj_embarrassed",
       "title": "Objection: “I’m embarrassed it stained back up”",
-      "content": "Please don't be. Staining builds up for everyone, one coffee at a time. That's the reason we call, and there's no judgment at all. We'd just like to help you get your smile back to where it was.\n\nWould you be open to that?\n\n(Wait for the yes.)",
+      "content": "Please don't be, {{contact_first_name}}. Staining builds up for everyone, one coffee at a time.\n\nCan I ask, is it the color itself, or catching yourself hiding your smile?\n\n(Let them answer. Stay warm.)\n\nNeither one is something you did wrong. That's how teeth behave once the routine stops. The only thing embarrassment does is keep people away until it's a bigger job than it needs to be.\n\n{{provider_name}} would rather see you now than a year from now. We'd take a look at {{main_concern}} and figure out the shortest path back to a smile you don't think about.\n\nWould it feel better to just get that first step done?",
       "sort_order": 101
     },
     {
       "step_key": "obj_sensitivity",
       "title": "Objection: Sensitivity or a bad experience before",
-      "content": "I'm glad you told me. That's the kind of thing {{provider_name}} will want to talk through in person. That way we can look at the whole picture and keep it comfortable.\n\n(Do not give dental advice on the call.)\n\nIs there anything else on your mind?",
+      "content": "I'm glad you told me, {{contact_first_name}}. That's important, and it changes how we'd approach it.\n\nCan I ask, was it during the whitening, or in the days after?\n\n(Let them answer. Do not give dental advice on the call.)\n\nThose point to different fixes. Strength, timing, and what goes on the teeth before and after can all be adjusted. There are also gentler options now that didn't exist a few years ago. None of that gets decided on the phone. {{provider_name}} would hear exactly what happened and what would need to change before you'd do it again for {{main_concern}}.\n\nWould it feel better to have that conversation before you decide?",
       "sort_order": 102
+    },
+    {
+      "step_key": "obj_other_option",
+      "title": "Objection: “I’m considering another option”",
+      "content": "That's fair. Can I ask what you're looking at, like strips from the store, a kit online, or another office?\n\n(Let them answer. Do not knock the other option.)\n\nThose can all make sense, and some people do well combining them. The part that's hard to compare from home is what would move {{main_concern}} for you. {{provider_name}} already knows how your teeth responded and what strength was used, so you're not starting over here.\n\nCome in, get a straight answer on where things stand, and then compare. If the other option turns out to be the better fit, you'll be choosing it for a reason.\n\nIs that a fair way to decide?",
+      "sort_order": 120
+    },
+    {
+      "step_key": "obj_cost",
+      "title": "Objection: Cost",
+      "content": "I understand, {{contact_first_name}}. Is it the cost of the visit itself, or the thought of paying for the full treatment again?\n\n(Let them answer. Do not quote prices, packages, or discounts. The office handles that.)\n\nThis first visit is one appointment, not the full treatment. You'll hear what anything past that costs before you decide on it. And since you've been here before, we're not starting from scratch, and starting from scratch is the expensive part.\n\nThe other side of it is what {{main_concern}} is already costing you, the things you mentioned a minute ago. That's the part I'd hate to see keep adding up.\n\nCan we at least get the look on the calendar?",
+      "sort_order": 121
+    },
+    {
+      "step_key": "obj_time",
+      "title": "Objection: “I don’t have time”",
+      "content": "I hear you, {{contact_first_name}}. Is it finding time for the first visit, or the worry about coming back every few months?\n\n(Let them answer.)\n\nRight now we're only talking about one visit. {{provider_name}} looks at {{main_concern}} and tells you what it would take from there. Sometimes that’s a quick touch-up. Sometimes it’s a fresh round, and you’ll hear that up front so you can decide. Nobody is booking you into a schedule on the phone.\n\nWe'll fit that first visit around your schedule, not the other way around.\n\nCould you find a short window for that?",
+      "sort_order": 122
+    },
+    {
+      "step_key": "obj_spouse",
+      "title": "Objection: “I need to talk to my spouse”",
+      "content": "Of course. Is it more about the money side, or do you two just make these decisions together?\n\n(Let them answer. If it's money, use the cost answer.)\n\nThat's fair, and I'm not asking you to commit to anything they'd need to weigh in on. Right now, all you can tell them is that {{main_concern}} is on your mind. After the visit, you can tell them what's going on and what it would take. That's an easier conversation to have. And if they'd like to come along, they're welcome.\n\nCan we pencil it in, and you can move it after you two talk?",
+      "sort_order": 123
     },
     {
       "step_key": "obj_think",
       "title": "Objection: “I need to think about it”",
-      "content": "That's fair, {{contact_first_name}}. Can I ask what part you'd want to think over? Sometimes it's the cost, sometimes the timing, and sometimes people just want to be sure it's right for them.\n\n(Listen. Their answer usually points to one of the other objections. If it stays general, keep going.)\n\nComing in is really just information. You'd see what's possible and what it would involve, and then you decide with real answers. No pressure either way.\n\nDoes that help?",
+      "content": "That's fair, {{contact_first_name}}. Usually when someone says that, there's one specific thing on their mind. What's the part you'd want to think over?\n\n(Let them answer. If they name cost, time, or another reason, tap that button.)\n\nOkay. I'm not trying to rush you. The one thing I'd say is that {{main_concern}} is on your mind. It's been that way for a while, and it hasn't sorted itself out on its own. The visit is how you get the information you'd be thinking with. You can think it over just as easily after you know what's going on.\n\nWould it be easier to think it over once you have the answers?",
       "sort_order": 130
     },
     {
       "step_key": "obj_send_info",
       "title": "Objection: “Just send me some info”",
-      "content": "I'd be glad to send you some information, {{contact_first_name}}. The one thing I'd say is that a flyer can only tell you so much. It can't show you what's possible for you specifically. That's what a quick visit is for. So let me get you on the schedule first, and then I'll send the information along.\n\nIs that okay?",
+      "content": "I can do that, {{contact_first_name}}. What would you want it to cover, so I send the right thing?\n\n(Let them answer. If they name cost, time, or another reason, tap that button.)\n\nI'll be straight with you, though. Anything I send is going to be general. It can't tell you what's realistic for {{main_concern}} specifically. That takes {{provider_name}} looking at your teeth, and that's one short visit.\n\nLet's do both. I'll send the information, and we'll put a time on the calendar. If what I send answers your question, you can call and cancel, no problem.\n\nDoes doing both work for you?",
       "sort_order": 131
     }
   ],
@@ -206,6 +236,20 @@
       "sort_order": 0
     },
     {
+      "from_step_key": "obj_cost",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_cost",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
       "from_step_key": "obj_embarrassed",
       "label": "Resolved: back to scheduling",
       "to_step_key": "scheduling",
@@ -234,6 +278,20 @@
       "sort_order": 2
     },
     {
+      "from_step_key": "obj_other_option",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_other_option",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
       "from_step_key": "obj_send_info",
       "label": "Resolved: back to scheduling",
       "to_step_key": "scheduling",
@@ -262,6 +320,20 @@
       "sort_order": 1
     },
     {
+      "from_step_key": "obj_spouse",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_spouse",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
       "from_step_key": "obj_think",
       "label": "Resolved: back to scheduling",
       "to_step_key": "scheduling",
@@ -270,6 +342,20 @@
     },
     {
       "from_step_key": "obj_think",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_time",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_time",
       "label": "Another concern came up",
       "to_step_key": "uncover",
       "variant": "objection",

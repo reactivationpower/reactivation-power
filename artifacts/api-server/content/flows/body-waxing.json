@@ -91,6 +91,12 @@
       "sort_order": 12
     },
     {
+      "step_key": "uncover",
+      "title": "Uncover the Real Concern",
+      "content": "Okay, {{contact_first_name}}. I'm not going to push you on it. What's the part giving you pause?\n\n(Let them answer. Then tap what you hear.)",
+      "sort_order": 12
+    },
+    {
       "step_key": "comeback_close",
       "title": "Getting Back on Schedule Is the Whole Story: The Close",
       "content": "{{contact_first_name}}, thank you for that. Your file is up to date.\n\nThe nice thing is getting back is easy. We're not starting over, just picking up where you left off. And the growth you have right now is probably about the perfect length for a wax. Any longer and it gets less comfortable, so this is a good window. Does that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you in while you're in that window. One visit and you're back to weeks of smooth instead of hours. Does that sound reasonable?\n\n(Wait for the yes.)\n\nOkay, let's get you back on the books. I have (day) at (time) or (day) at (time). Which is better for you?",
@@ -99,37 +105,55 @@
     {
       "step_key": "obj_fell_out",
       "title": "Objection: “I fell out of the habit”",
-      "content": "I understand, and that happens. Life gets busy, and it's easy to fall out of the routine. That's the reason we call. We'll get you right back on track, and the more regular you are, the finer it comes in.\n\nDoes that make sense?\n\n(Wait for the yes.)",
+      "content": "That happens, {{contact_first_name}}. Life gets busy and the routine goes first.\n\nCan I ask, was it one thing that got in the way, or did it just drift?\n\n(Let them answer.)\n\nEither way, that's how it goes for most people. With waxing, regular is what makes it easy. Every visit on schedule, the hair comes in finer and the visit gets quicker. A long gap resets that a little, but not all the way.\n\n{{provider_name}} would rather get you back on track now than after another few months. The first step is one visit, with {{main_concern}} as the focus.\n\nWould it feel good to just get that first one done?",
       "sort_order": 100
     },
     {
       "step_key": "obj_hurt_more",
       "title": "Objection: “Doesn’t it hurt more after a break?”",
-      "content": "That's a fair question. That first visit back is something our team is careful to make as comfortable as possible. The more regular you stay after that, the easier it gets. They'll walk you through it when you're in.\n\nWould you be open to that?\n\n(Wait for the yes.)",
+      "content": "That's a fair question, {{contact_first_name}}, and I'd rather you ask it.\n\nCan I ask, is that from a rough first visit before, or something you've heard?\n\n(Let them answer. Do not promise it won't hurt.)\n\nThe first one back is the one that takes the most, because the hair is thicker after a gap. Our team knows that and works around it, with the right wax and the right pace. After that it gets easier every time, and that's the part you already know from before. Waiting longer only makes the first one back harder, not easier.\n\n{{provider_name}} will walk through {{main_concern}} with you before anything starts.\n\nWould it help to get that first one behind you?",
       "sort_order": 101
     },
     {
       "step_key": "obj_shaving_easier",
       "title": "Objection: “I’ve just been shaving, it’s easier”",
-      "content": "I understand. Shaving is quick, but the stubble and the ingrowns tend to get old fast. That's usually why people switch to waxing in the first place. Coming back in is the easiest way out of that daily grind.\n\nIs there anything else on your mind?",
+      "content": "I understand, {{contact_first_name}}. Quick is hard to argue with.\n\nCan I ask, is it working for you, or is it the stubble and ingrowns again?\n\n(Let them answer. Do not knock shaving.)\n\nShaving is quick, and that's its whole advantage. What it can't do is last. The stubble, the bumps, and the ingrowns are usually what brought people to waxing in the first place. One wax buys weeks of smooth. One shave buys a day.\n\n{{provider_name}} can take a look at {{main_concern}} and get you back to the easy version.\n\nWould it be worth trading the daily shave for one visit a month?",
       "sort_order": 102
+    },
+    {
+      "step_key": "obj_other_option",
+      "title": "Objection: “I’m considering another option”",
+      "content": "That's fair. Can I ask what you're looking at, like shaving, a home kit, or another salon?\n\n(Let them answer. Do not knock the other option.)\n\nThose can all make sense, and some people do well combining them. The part that's hard to compare from home is what would move {{main_concern}} for you. {{provider_name}} already knows your skin and what wax it handles best, so you're not starting over here.\n\nCome in, get a straight answer on where things stand, and then compare. If the other option turns out to be the better fit, you'll be choosing it for a reason.\n\nIs that a fair way to decide?",
+      "sort_order": 120
     },
     {
       "step_key": "obj_cost",
       "title": "Objection: Cost",
-      "content": "I understand, {{contact_first_name}}. One wax buys you weeks of smooth, while shaving is back by dinnertime. Once you add up razors, creams, and the time in the shower, the gap is smaller than it feels. And the longer you keep it up, the finer the hair comes in, so visits get quicker.\n\n(Do not quote prices, packages, or discounts on the call. The office handles that.)\n\nDoes that seem fair?",
-      "sort_order": 103
+      "content": "I understand, {{contact_first_name}}. Is it the cost of the visit itself, or the thought of keeping it up month after month?\n\n(Let them answer. Do not quote prices, packages, or discounts. The office handles that.)\n\nThis first visit is one appointment. One wax buys weeks of smooth, while shaving is back by dinnertime. Add up razors, creams, and the shower time, and the gap is smaller than it feels. The longer you keep it up, the finer the hair comes in and the quicker visits get.\n\nThe other side of it is what {{main_concern}} is already costing you, the things you mentioned a minute ago. That's the part I'd hate to see keep adding up.\n\nCan we at least get the first one on the calendar?",
+      "sort_order": 121
+    },
+    {
+      "step_key": "obj_time",
+      "title": "Objection: “I don’t have time”",
+      "content": "I hear you, {{contact_first_name}}. Is it finding time for the first visit, or the worry about keeping up a regular schedule?\n\n(Let them answer.)\n\nRight now we're only talking about one visit. {{provider_name}} looks at {{main_concern}} and tells you what it would take from there. Sometimes that’s every four weeks. Sometimes it’s less often, and you’ll hear that up front so you can decide. Nobody is booking you into a standing appointment on the phone.\n\nWe'll fit that first visit around your schedule, not the other way around.\n\nCould you find a short window for that?",
+      "sort_order": 122
+    },
+    {
+      "step_key": "obj_spouse",
+      "title": "Objection: “I need to talk to my spouse”",
+      "content": "Of course. Is it more about the money side, or do you two just make these decisions together?\n\n(Let them answer. If it's money, use the cost answer.)\n\nThat's fair, and I'm not asking you to commit to anything they'd need to weigh in on. Right now, all you can tell them is that {{main_concern}} is on your mind. After the visit, you can tell them what's going on and what it would take. That's an easier conversation to have. And if they'd like to come along, they're welcome.\n\nCan we pencil it in, and you can move it after you two talk?",
+      "sort_order": 123
     },
     {
       "step_key": "obj_think",
       "title": "Objection: “I need to think about it”",
-      "content": "That's fair, {{contact_first_name}}. Can I ask what part you'd want to think over? Sometimes it's the cost, sometimes the timing, and sometimes people just want to be sure it's right for them.\n\n(Listen. Their answer usually points to one of the other objections. If it stays general, keep going.)\n\nComing in is really just information. You'd see what's possible and what it would involve, and then you decide with real answers. No pressure either way.\n\nDoes that help?",
+      "content": "That's fair, {{contact_first_name}}. Usually when someone says that, there's one specific thing on their mind. What's the part you'd want to think over?\n\n(Let them answer. If they name cost, time, or another reason, tap that button.)\n\nOkay. I'm not trying to rush you. The one thing I'd say is that {{main_concern}} is on your mind. It's been that way for a while, and it hasn't sorted itself out on its own. The visit is how you get the information you'd be thinking with. You can think it over just as easily after you know what's going on.\n\nWould it be easier to think it over once you have the answers?",
       "sort_order": 130
     },
     {
       "step_key": "obj_send_info",
       "title": "Objection: “Just send me some info”",
-      "content": "I'd be glad to send you some information, {{contact_first_name}}. The one thing I'd say is that a flyer can only tell you so much. It can't show you what's possible for you specifically. That's what a quick visit is for. So let me get you on the schedule first, and then I'll send the information along.\n\nIs that okay?",
+      "content": "I can do that, {{contact_first_name}}. What would you want it to cover, so I send the right thing?\n\n(Let them answer. If they name cost, time, or another reason, tap that button.)\n\nI'll be straight with you, though. Anything I send is going to be general. It can't tell you what's realistic for {{main_concern}} specifically. That takes {{provider_name}} seeing the area, and that's one short visit.\n\nLet's do both. I'll send the information, and we'll put a time on the calendar. If what I send answers your question, you can call and cancel, no problem.\n\nDoes doing both work for you?",
       "sort_order": 131
     }
   ],
@@ -212,6 +236,20 @@
       "sort_order": 0
     },
     {
+      "from_step_key": "obj_cost",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_cost",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
       "from_step_key": "obj_fell_out",
       "label": "Resolved: back to scheduling",
       "to_step_key": "scheduling",
@@ -234,6 +272,20 @@
     },
     {
       "from_step_key": "obj_hurt_more",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_other_option",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_other_option",
       "label": "Another concern came up",
       "to_step_key": "uncover",
       "variant": "objection",
@@ -268,6 +320,20 @@
       "sort_order": 2
     },
     {
+      "from_step_key": "obj_spouse",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_spouse",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
       "from_step_key": "obj_think",
       "label": "Resolved: back to scheduling",
       "to_step_key": "scheduling",
@@ -276,6 +342,20 @@
     },
     {
       "from_step_key": "obj_think",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_time",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_time",
       "label": "Another concern came up",
       "to_step_key": "uncover",
       "variant": "objection",
