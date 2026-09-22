@@ -63,13 +63,13 @@
     {
       "step_key": "review",
       "title": "The Review",
-      "content": "{{contact_first_name}}, let me make sure I have this right.\n\n(Recap how long, how often, and how it affects them.)\n\nDid I get that right?\n\nIt sounds like you'd like to feel comfortable with your skin again. Is that fair to say?\n\n(Tap what you hear.)",
+      "content": "{{contact_first_name}}, let me make sure I have this right.\n\n(Read back their three answers: how long, how often, what it gets in the way of.)\n\nSo it's been on your mind a while, and you notice it most times you look in the mirror. At its worst it gets in the way of what you mentioned. Did I get that right?\n\n(Say what they named: photos, going out, or feeling put together. Let them answer. If they correct you, take the correction and move on.)\n\nIt sounds like you'd like to feel comfortable with your skin again. Is that fair to say?\n\n(Tap what you hear.)",
       "sort_order": 9
     },
     {
       "step_key": "recommendation",
       "title": "The Recommendation",
-      "content": "{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you in so {{provider_name}} can look at {{main_concern}}. If we can help, we'll tell you. If it's not the right fit, we'll tell you that too. Does that sound reasonable?\n\n(Tap what you hear.)",
+      "content": "{{contact_first_name}}, that's worth getting looked at instead of just dealing with it. Can I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you in so {{provider_name}} can take a look at {{main_concern}}. If we can help, we'll walk you through the options. If it's not the right fit, we'll say so. Either way you'll know where you stand. Does that sound reasonable?\n\n(Tap what you hear.)",
       "sort_order": 10
     },
     {

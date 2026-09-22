@@ -63,13 +63,13 @@
     {
       "step_key": "review",
       "title": "The Review",
-      "content": "{{contact_first_name}}, let me make sure I have this right.\n\n(Recap what they told you: how long, how often, how it affects them.)\n\nDid I get that right?\n\nAnd it sounds like you'd love to see {{pt_them}} showing off that smile again without a second thought. Is that fair to say?\n\n(Most people say yes. Tap what you hear.)",
+      "content": "{{contact_first_name}}, let me make sure I have this right.\n\n(Read back their three answers: how long, how often, what it gets in the way of.)\n\nSo it's been on {{pt_your}} mind a while, and it comes up most times there's a photo. At its worst it gets in the way of what you mentioned. Did I get that right?\n\n(Say what they named: photos, smiling around people, or {{pt_your}} confidence. Let them answer. If they correct you, take the correction and move on.)\n\nAnd it sounds like you'd love to see {{pt_them}} showing off that smile again without a second thought. Is that fair to say?\n\n(Most people say yes. Tap what you hear.)",
       "sort_order": 9
     },
     {
       "step_key": "recommendation",
       "title": "The Recommendation",
-      "content": "{{contact_first_name}}, a quick scan shows us where the teeth stand compared to where {{pt_you}} finished. If it's minor, a refreshed retainer or a short refinement is often all it takes. If everything is holding better than you think, we'll tell you that too. Does that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nMy recommendation is that we {{pt_get_you_in}} for that quick scan. Does that sound reasonable?\n\n(Say \"does that sound reasonable\", not \"does that sound good\". Tap what you hear.)",
+      "content": "{{contact_first_name}}, that's worth getting looked at instead of just dealing with it. A quick scan shows us where the teeth stand compared to where {{pt_you}} finished. If it's minor, a refreshed retainer or a short refinement is often all it takes. If everything is holding better than you think, we'll tell you that too. Does that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nLet's {{pt_get_you_in}} for that quick scan. Does that sound reasonable?\n\n(Say \"does that sound reasonable\", not \"does that sound good\". Tap what you hear.)",
       "sort_order": 10
     },
     {

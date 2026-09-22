@@ -45,7 +45,7 @@
     {
       "step_key": "review",
       "title": "The Review",
-      "content": "{{contact_first_name}}, let me make sure I have this right.\n\n(Recap what they told you: how long, how often, how it affects them.)\n\nDid I get that right?\n\nAnd it sounds like you'd like to get back to how you felt when things were going well. Is that fair to say?\n\n(Most people say yes. Tap what you hear.)",
+      "content": "{{contact_first_name}}, let me make sure I have this right.\n\n(Read back their three answers: how long, how often, what it gets in the way of.)\n\nSo it's been going on a while now, and it comes up more often than not. At its worst it gets in the way of what you mentioned. Did I get that right?\n\n(Say what they named: work, home, or your own time. Let them answer. If they correct you, take the correction and move on.)\n\nAnd it sounds like you'd like to get back to how you felt when things were going well. Is that fair to say?\n\n(Most people say yes. Tap what you hear.)",
       "sort_order": 9
     },
     {
@@ -81,13 +81,13 @@
     {
       "step_key": "recommendation",
       "title": "The Recommendation",
-      "content": "{{contact_first_name}}, it sounds like {{main_concern}} isn't just affecting you. It may be getting in the way at home or at work too. Do you see how that could be the case?\n\n(Wait for the answer. If they hesitate, say \"That's fair. It's still been bothering you, and that's reason enough.\" Then continue.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nMy recommendation is that we get you in so {{provider_name}} can take a look at {{main_concern}}. If we can help, we'll tell you. If it's not the right fit, we'll tell you that too. Does that sound reasonable?\n\n(Tap what you hear.)",
+      "content": "{{contact_first_name}}, that's worth getting looked at instead of just dealing with it. Can I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you in so {{provider_name}} can take a look at {{main_concern}}. If we can help, we'll walk you through the options. If it's not the right fit, we'll say so. Either way you'll know where you stand. Does that sound reasonable?\n\n(Tap what you hear.)",
       "sort_order": 23
     },
     {
       "step_key": "recommendation_weight_focus",
       "title": "The Recommendation: Weight Focus",
-      "content": "{{contact_first_name}}, can I say something? You've already done the hardest part. You proved you can lose the weight, because you did it. What's happening now is drift, and drift is easier to fix than starting over. Does that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nMy recommendation is that we get you in so {{provider_name}} can see where things are. Then we help you get back to where you were. If we can help, we'll tell you. If it's not the right fit, we'll tell you that too. Does that sound reasonable?\n\n(Tap what you hear.)",
+      "content": "{{contact_first_name}}, can I say something? You've already done the hardest part. You proved you can lose the weight, because you did it. What's happening now is drift, and drift is easier to fix than starting over. Does that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you in so {{provider_name}} can see where things are. Then we help you get back to where you were. If we can help, we'll tell you. If it's not the right fit, we'll tell you that too. Does that sound reasonable?\n\n(Tap what you hear.)",
       "sort_order": 23
     },
     {

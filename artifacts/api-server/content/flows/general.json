@@ -58,13 +58,13 @@
     {
       "step_key": "review",
       "title": "The Review",
-      "content": "{{contact_first_name}}, let me make sure I have this right.\n\n(Recap what they told you: how long, how often, how it affects them.)\n\nDid I get that right?\n\nAnd it sounds like you'd really like to get back to feeling the way you did when you finished. Is that fair to say?\n\n(Most people say yes. Tap what you hear.)",
+      "content": "{{contact_first_name}}, let me make sure I have this right.\n\n(Read back their three answers: how long, how often, what it gets in the way of.)\n\nSo it's been going on a while, and it comes up more than once in a while. At its worst it gets in the way of what you mentioned. Did I get that right?\n\n(Say what they named: work, home, or your own time. Let them answer. If they correct you, take the correction and move on.)\n\nAnd it sounds like you'd really like to get back to feeling the way you did when you finished. Is that fair to say?\n\n(Most people say yes. Tap what you hear.)",
       "sort_order": 9
     },
     {
       "step_key": "recommendation",
       "title": "The Recommendation",
-      "content": "{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nMy recommendation is that we get you in so {{provider_name}} can take a look. If we can help you get back to how you felt, we'll tell you. If it's not the right time, we'll tell you that too. Does that sound reasonable?\n\n(Say \"does that sound reasonable\", not \"does that sound good\". Tap what you hear.)",
+      "content": "{{contact_first_name}}, either way, it's worth a proper look instead of leaving it to chance. Can I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you in so {{provider_name}} can take a look. If we can help, we'll walk you through the options. If it's not the right fit, we'll say so. Either way you'll know where you stand. Does that sound reasonable?\n\n(Tap what you hear.)",
       "sort_order": 10
     },
     {

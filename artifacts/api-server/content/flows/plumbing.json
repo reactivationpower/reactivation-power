@@ -123,13 +123,13 @@
     {
       "step_key": "review",
       "title": "Review and bridge",
-      "content": "{{contact_first_name}}, let me make sure I've got this right.\n\n(Recap what they told you: how long, how often, and how it affects them.)\n\nDid I get that right?\n\n(Wait for the yes.)\n\nIt sounds like you'd really like the plumbing to be something you never have to think about. Is that fair to say?\n\n(Wait for the yes.)",
+      "content": "{{contact_first_name}}, let me make sure I have this right.\n\n(Read back their three answers: how long, how often, what it gets in the way of.)\n\nSo it started a while back, and it happens more than once in a while. At its worst it gets in the way of what you mentioned. Did I get that right?\n\n(Say what they named: comfort at home, having people over, or the water bill. Let them answer. If they correct you, take the correction and move on.)\n\nIt sounds like you'd really like the plumbing to be something you never have to think about. Is that fair to say?\n\n(Wait for the yes.)",
       "sort_order": 19
     },
     {
       "step_key": "recommendation",
       "title": "Recommendation",
-      "content": "{{contact_first_name}}, here's how this works. One of our plumbers comes out and takes a look at {{main_concern}}. While they're there, they give the home's plumbing a once-over. If anything else is going on, you'll know before it becomes a problem. If it all checks out, we'll tell you that too. Does that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nMy recommendation is that we get a plumber out to take that look. Does that sound reasonable?\n\n(Say \"reasonable\", not \"good\". Click what you hear.)",
+      "content": "{{contact_first_name}}, that's worth getting looked at instead of just living with it. Here's how this works. One of our plumbers comes out and takes a look at {{main_concern}}. While they're there, they give the home's plumbing a once-over. If anything else is going on, you'll know before it becomes a problem. If it all checks out, we'll tell you that too. Does that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get a plumber out to take that look. Does that sound reasonable?\n\n(Say \"reasonable\", not \"good\". Click what you hear.)",
       "sort_order": 20
     },
     {

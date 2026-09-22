@@ -384,19 +384,66 @@ Change only the low anchors and the impact buckets per niche: weeks for pain
 and body, months for wellness and weight, "every time you look in the mirror"
 for aesthetics, "since last season" and "the bill" for home services.
 
-**6. The recommendation (R2, R4, R8)**
+**6. The review and the recommendation (R2, R4, R7, R8)**
 
-> Before: *My recommendation is that we get you set up with an appointment so
-> {{rec_pronoun}} can take a look and see if there's something {{rec_pronoun}}
-> can do to help you with {{main_concern}}. If {{rec_pronoun}} can help you,
-> {{rec_pronoun}}'ll let you know, and {{rec_pronoun}}'d be honored if you let
-> {{rec_obj}}. And if {{rec_pronoun}} don't think it's the right fit,
-> {{rec_pronoun}}'ll let you know that as well, because {{rec_pronoun}}'re not
-> here to waste anybody's time or money. Does that sound reasonable?*
+The read-back lives on the Review screen; the Recommendation screen opens
+with the bridge and asks permission. Together they are one move: read back,
+get "yes, that's right", bridge, ask, recommend.
+
+> Before (review): *{{contact_first_name}}, let me make sure I have this
+> right.*
 >
-> After: *My recommendation is that we get you in so {{provider_name}} can
-> take a look at {{main_concern}}. If we can help, we'll tell you. If it's not
-> the right fit, we'll tell you that too. Does that sound reasonable?*
+> *(Recap what they told you: how long, how often, how it affects them.)*
+>
+> *Did I get that right?*
+>
+> Before (recommendation): *My recommendation is that we get you set up with
+> an appointment so {{rec_pronoun}} can take a look and see if there's
+> something {{rec_pronoun}} can do to help you with {{main_concern}}. If
+> {{rec_pronoun}} can help you, {{rec_pronoun}}'ll let you know, and
+> {{rec_pronoun}}'d be honored if you let {{rec_obj}}. And if {{rec_pronoun}}
+> don't think it's the right fit, {{rec_pronoun}}'ll let you know that as
+> well, because {{rec_pronoun}}'re not here to waste anybody's time or money.
+> Does that sound reasonable?*
+>
+> After (review): *{{contact_first_name}}, let me make sure I have this
+> right.*
+>
+> *(Read back their three answers: how long, how often, what it gets in the
+> way of.)*
+>
+> *So it's been going on a while, and it comes up more than once in a while.
+> At its worst it gets in the way of what you mentioned. Did I get that
+> right?*
+>
+> *(Say what they named: work, home, or your own time. Let them answer. If
+> they correct you, take the correction and move on.)*
+>
+> *And it sounds like you'd really like to get back to feeling the way you
+> did when you finished. Is that fair to say?*
+>
+> After (recommendation): *{{contact_first_name}}, that's worth getting looked
+> at instead of just dealing with it. Can I make a recommendation?*
+>
+> *(Wait for the yes.)*
+>
+> *Let's get you in so {{provider_name}} can take a look at {{main_concern}}.
+> If chiropractic care can help, we'll walk you through the options. If it's
+> not the right fit, we'll say so. Either way you'll know where you stand.
+> Does that sound reasonable?*
+
+The read-back names what the patient actually said on Making It Real (the
+duration anchor, the frequency anchor, the impact bucket they picked), never
+a guess about them. The two anchors follow the niche's Making It Real
+questions ("a while" for pain and aesthetics, "a while now / more often than
+not" for weight, "most times you look in the mirror" for skin, "since last
+season / started a while back" for home services), and the coaching note
+lists that niche's three impact buckets so the caller says the one that was
+named. Parent-mode flows use the short pronoun tokens ("on {{pt_your}}
+mind"). Swap "chiropractic care" for the niche's own service, or "If we can
+help" where the screen names none. Explainer screens (dental checks, home
+service visits) keep their explainer after the bridge and close with "Let's
+get you in for…" rather than "My recommendation is that…".
 
 **7. Objection: embarrassed (R4, R8, R9)**
 

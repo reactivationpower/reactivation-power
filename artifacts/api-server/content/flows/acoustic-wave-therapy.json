@@ -45,7 +45,7 @@
     {
       "step_key": "recommendation",
       "title": "The Recommendation",
-      "content": "{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you in so {{provider_name}} can look at {{main_concern}}. We can see whether acoustic wave therapy may help. Does that sound reasonable?\n\n(Tap what you hear.)",
+      "content": "{{contact_first_name}}, that's worth getting looked at instead of just dealing with it. Can I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you in so {{provider_name}} can take a look at {{main_concern}}. If acoustic wave therapy can help, we'll walk you through the options. If it's not the right fit, we'll say so. Either way you'll know where you stand. Does that sound reasonable?\n\n(Tap what you hear.)",
       "sort_order": 10
     },
     {
