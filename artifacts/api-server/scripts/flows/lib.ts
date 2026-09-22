@@ -283,22 +283,7 @@ export function isTerminalStep(stepKey: string): boolean {
  * them as warnings instead of errors. Remove an entry once the screen gets
  * its buttons; lint warns when an entry is stale.
  */
-export const KNOWN_DEAD_ENDS: Record<string, string[]> = {
-  'acoustic-wave-therapy': ['obj_think', 'obj_send_info'],
-  acupuncture: ['obj_think', 'obj_send_info'],
-  'body-waxing': ['obj_think', 'obj_send_info'],
-  botox: ['obj_think', 'obj_send_info'],
-  'cellulite-reduction': ['obj_think', 'obj_send_info'],
-  'clear-aligners': ['obj_think', 'obj_send_info'],
-  'dental-implants': ['obj_think', 'obj_send_info'],
-  'glp-patients': ['obj_think', 'obj_send_info'],
-  'laser-hair-removal': ['obj_think', 'obj_send_info'],
-  'massage-therapy': ['obj_think', 'obj_send_info'],
-  'orthodontics-braces': ['obj_think', 'obj_send_info'],
-  'skin-tightening': ['obj_think', 'obj_send_info'],
-  'teeth-whitening': ['obj_think', 'obj_send_info'],
-  'weight-loss-not-chirothin': ['obj_think', 'obj_send_info'],
-}
+export const KNOWN_DEAD_ENDS: Record<string, string[]> = {}
 
 /**
  * R12: every non-terminal step must have at least one outgoing choice, in
