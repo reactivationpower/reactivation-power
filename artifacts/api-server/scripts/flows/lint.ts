@@ -1023,7 +1023,6 @@ export function impactBuckets(content: string): string[] | null {
     .filter(Boolean)
   return buckets.length > 0 ? buckets : null
 }
-
 // CLI entrypoint. Keep this last: main() reads top-level constants declared
 // below the functions that use them, and a call above them throws a TDZ
 // ReferenceError at runtime that import-only unit tests never see.

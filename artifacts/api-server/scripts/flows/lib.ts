@@ -1,5 +1,6 @@
 // Shared helpers for the script-flow content tooling (export / apply / lint).
 // Run with plain Node (type stripping): `node scripts/flows/<cmd>.ts`.
+import { execFileSync } from 'node:child_process'
 import { readdirSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -88,6 +89,41 @@ export function normalizeFlowFile(file: FlowFile): FlowFile {
 export function writeFlowFile(slug: string, file: FlowFile): void {
   mkdirSync(CONTENT_DIR, { recursive: true })
   writeFileSync(fileFor(slug), JSON.stringify(normalizeFlowFile(file), null, 2) + '\n')
+}
+
+/**
+ * The committed (git HEAD) version of a flow file, or null when the file is
+ * not tracked yet (a brand-new niche) or the checkout has no git history.
+ * `flows:apply` uses it to tell "this branch changed the step" apart from
+ * "someone else changed the step in the database since this branch was cut".
+ */
+export function readHeadFlowFile(slug: string): FlowFile | null {
+  const abs = fileFor(slug)
+  let root: string
+  try {
+    root = execFileSync('git', ['rev-parse', '--show-toplevel'], {
+      cwd: path.dirname(abs),
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim()
+  } catch {
+    return null
+  }
+  const rel = path.relative(root, abs).split(path.sep).join('/')
+  let raw: string
+  try {
+    raw = execFileSync('git', ['show', `HEAD:${rel}`], {
+      cwd: root,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+      maxBuffer: 64 * 1024 * 1024,
+    })
+  } catch {
+    return null
+  }
+  const parsed = JSON.parse(raw) as FlowFile
+  if (!Array.isArray(parsed.steps) || !Array.isArray(parsed.choices)) return null
+  return parsed
 }
 
 /**
