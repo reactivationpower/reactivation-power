@@ -174,6 +174,18 @@ Two objection screens in the same flow should not share the same closing line.
 And no objection screen ends with "Does that sound reasonable?"; that line
 belongs to the recommendation screen, and the caller just said it.
 
+Lint checks every `obj_*` screen the caller can reach in a flow (the niche's
+own `obj_*` screens plus any general one it does not override but still
+routes to) for: exactly one spoken question before the first `(Let them
+answer…)` note (a `{{pt_*_ask}}` / `{{pt_*_q}}` token counts), a closing
+line no other reachable objection screen uses, and no "Does that sound
+reasonable?" tail. Inherited general screens are reported as
+`<niche>:<key> (inherited from general)` at the niche's severity, so deleting
+an override cannot quietly put general's old handle back in front of the
+caller. These are errors for niches listed in `OBJECTION_SHAPE_NICHES` in
+`scripts/flows/lint.ts` and warnings elsewhere; add a niche to that list
+once its objection screens have been rewritten.
+
 #### Objection handle shape (five beats)
 An objection handle is not a three-sentence brush-off ("That's fair. A visit
 lets us see what changed. Would you be open to that?"). Every `obj_*` screen

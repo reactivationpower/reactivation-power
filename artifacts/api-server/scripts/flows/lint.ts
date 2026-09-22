@@ -15,6 +15,10 @@
 //   R7  coaching notes wrapped in parentheses, one line each, never mixed
 //       into a spoken paragraph
 //   R8  no {{rec_pronoun}} / {{rec_obj}} / {{rec_poss}} / {{rec_pronoun_cap}}
+//   R9  objection handles: an isolating question before "(Let them answer",
+//       a closing line no other obj_* screen in the flow shares, and never
+//       "Does that sound reasonable?" (error for niches on the shape, warn
+//       for niches still on the old three-sentence handles)
 //   R10 question screens map one-to-one to the concern chips
 //   R11 the read-back lives on review only; recommendation opens with the
 //       bridge and asks "Can I make a recommendation?"
@@ -34,6 +38,7 @@ import {
   tokensIn,
   validateStructure,
   type FlowFile,
+  type FlowStep,
   type Problem,
 } from './lib.ts'
 import { CONCERN_OPTIONS } from '@workspace/niche-catalog'
@@ -244,6 +249,25 @@ export const RECOMMENDING_PHRASES: string[] = [
 const REVIEW_KEY = 'review'
 const RECOMMENDATION_KEY = 'recommendation'
 
+const OBJECTION_PREFIX = 'obj_'
+/**
+ * Niches whose objection handles follow the five-beat shape (R9). R9 problems
+ * are errors here and warnings everywhere else, so the rollout can go niche
+ * by niche. Add a niche once its obj_* screens have been rewritten.
+ */
+export const OBJECTION_SHAPE_NICHES: ReadonlySet<string> = new Set([
+  'Chiropractic',
+  'Decompression',
+  'Joint Pain',
+  'Neuropathy',
+  'ChiroThin',
+  'Gut Health',
+  'Red Light / Body Contouring',
+])
+
+/** Coaching note that separates the isolating question from the reason (R9 beat 3). */
+export const LET_THEM_ANSWER = '(let them answer'
+
 /**
  * Ways a caller asks permission before asking questions or recommending
  * (R13). Matched against lower-cased spoken text; each one must be a
@@ -432,8 +456,75 @@ export function lintFile(slug: string, file: FlowFile, general: FlowFile): Probl
 
   problems.push(...lintReadBack(slug, file))
   problems.push(...lintPermission(slug, file))
+  problems.push(...lintObjections(slug, file, general))
 
   return problems
+}
+
+/**
+ * R9: every obj_* screen asks one isolating question before "(Let them
+ * answer.)", ends on a tail no other objection screen in the same flow uses,
+ * and never ends on the recommendation screen's "Does that sound reasonable?".
+ *
+ * The rule runs over the objection screens the caller can actually reach in
+ * this flow: the niche's own obj_* steps plus every general obj_* step the
+ * niche did not override but still routes to (a niche with no choices of its
+ * own for a step falls through to general's, so deleting an override quietly
+ * puts general's screen back in front of the caller). Inherited screens are
+ * linted at the niche's severity. Niches on OBJECTION_SHAPE_NICHES get
+ * errors; the rest get warnings until they are rewritten.
+ */
+export function lintObjections(slug: string, file: FlowFile, general: FlowFile): Problem[] {
+  const problems: Problem[] = []
+  const adopted = file.niche !== null && OBJECTION_SHAPE_NICHES.has(file.niche.name)
+  const level: Problem['level'] = adopted ? 'error' : 'warn'
+  const push = (where: string, message: string) => problems.push({ level, where, message })
+
+  const effective = effectiveObjectionSteps(slug, file, general)
+  const tails = new Map<string, string>()
+
+  for (const { step, where } of effective) {
+    const lines = step.content
+      .split('\n')
+      .map((l) => l.trim())
+      .filter(Boolean)
+
+    // (1) one isolating question, then "(Let them answer.)"
+    const noteIdx = lines.findIndex((l) => isCoachingNote(l) && normalizeQuotes(l).toLowerCase().startsWith(LET_THEM_ANSWER))
+    if (noteIdx === -1) {
+      push(where, `R9 no "(Let them answer.)" note; ask one isolating question, then let them answer before the reason`)
+    } else {
+      const asked = lines
+        .slice(0, noteIdx)
+        .filter((l) => !isCoachingNote(l))
+        .reduce((n, l) => n + questionsIn(l), 0)
+      if (asked === 0) push(where, `R9 nothing is asked before "(Let them answer.)"; open with one isolating question`)
+      if (asked > 1) push(where, `R9 ${asked} questions before "(Let them answer.)"; ask one isolating question and let them answer it`)
+    }
+
+    // (2) and (3) the closing line
+    const tail = closingLine(step.content)
+    if (!tail) {
+      push(where, `R9 objection screen has no spoken closing line`)
+      continue
+    }
+    if (tail === RECOMMENDATION_CLOSE || tail.endsWith(` ${RECOMMENDATION_CLOSE}`)) {
+      push(where, `R9 ends with "Does that sound reasonable?"; that line belongs to the recommendation screen and the caller just said it`)
+    }
+    const seenAt = tails.get(tail)
+    if (seenAt) {
+      push(where, `R9 closing line "${tail}" is also the tail of ${seenAt}; give each objection its own check`)
+    } else {
+      tails.set(tail, where)
+    }
+  }
+  return problems
+}
+
+interface EffectiveStep {
+  step: FlowStep
+  /** Problem location; inherited screens are labelled so the fix lands in the right file. */
+  where: string
 }
 
 /**
@@ -619,4 +710,43 @@ function normalisePhraseText(text: string): string {
     .replace(/[\u201c\u201d]/g, '"')
     .replace(/\u2026/g, '...')
     .replace(/\s+/g, ' ')
+}
+
+/** The last spoken line of a step, lowercased with quotes normalized. Empty when the step has no speech. */
+export function closingLine(content: string): string {
+  const spoken = spokenParagraphs(content)
+  if (spoken.length === 0) return ''
+  const last = spoken[spoken.length - 1].split('\n')
+  return normalizeQuotes(last[last.length - 1]).toLowerCase().replace(/\s+/g, ' ').trim()
+}
+
+/**
+ * The obj_* screens a caller can reach in this flow, in the order the player
+ * would resolve them: the file's own steps, then general's obj_* steps that
+ * are not overridden but are the target of an effective choice. A step's
+ * effective choices are the niche's own when it has any, else general's.
+ */
+function effectiveObjectionSteps(slug: string, file: FlowFile, general: FlowFile): EffectiveStep[] {
+  const own = file.steps
+    .filter((s) => s.step_key.startsWith(OBJECTION_PREFIX))
+    .map((step) => ({ step, where: `${slug}:${step.step_key}` }))
+  if (file === general || slug === GENERAL_SLUG) return own
+
+  const ownKeys = new Set(file.steps.map((s) => s.step_key))
+  const ownChoiceFrom = new Set(file.choices.map((c) => c.from_step_key))
+  const routedTo = new Set<string>()
+  for (const c of file.choices) routedTo.add(c.to_step_key)
+  for (const c of general.choices) if (!ownChoiceFrom.has(c.from_step_key)) routedTo.add(c.to_step_key)
+
+  const inherited = general.steps
+    .filter((s) => s.step_key.startsWith(OBJECTION_PREFIX) && !ownKeys.has(s.step_key) && routedTo.has(s.step_key))
+    .map((step) => ({ step, where: `${slug}:${step.step_key} (inherited from ${GENERAL_SLUG})` }))
+  return [...own, ...inherited]
+}
+
+/** Questions in a spoken line: each "?" plus each parent-mode question token ({{pt_cost_ask}}, {{pt_floss_q}}). */
+function questionsIn(line: string): number {
+  const marks = (line.match(/\?/g) ?? []).length
+  const tokens = tokensIn(line).filter((t) => /^pt_.*(_ask|_q\d*)$/.test(t)).length
+  return marks + tokens
 }
