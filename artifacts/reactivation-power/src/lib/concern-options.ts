@@ -196,6 +196,57 @@ export const CONCERN_OPTIONS: Record<string, ConcernOption[]> = {
       spoken: 'that treatment you\u2019ve been curious about',
     },
   ],
+  // Dental niches: one chip per question on the digging_in screens, in
+  // question order. Spoken phrases read after "take a look at ...".
+  'Teeth Whitening': [
+    { label: 'Staining / dulling', spoken: 'the staining' },
+    { label: 'Coffee / tea / wine', spoken: 'the staining from coffee and wine' },
+    { label: 'Sensitivity', spoken: 'the sensitivity' },
+    {
+      label: 'Something else about the smile',
+      spoken: 'what you\u2019d like changed about your smile',
+    },
+    { label: 'An upcoming event', spoken: 'your smile before that event' },
+  ],
+  // Clear Aligners and Orthodontics carry parent mode, so spoken phrases stay
+  // pronoun-free: "the shifting" reads the same whether the caller is
+  // speaking with the patient or a parent.
+  'Clear Aligners': [
+    { label: 'Shifting / crowding', spoken: 'the shifting' },
+    { label: 'Retainer routine', spoken: 'the retainers' },
+    { label: 'Bite changes', spoken: 'the bite' },
+    { label: 'Flossing tight spots', spoken: 'those tight spots when flossing' },
+    { label: 'Jaw soreness / headaches', spoken: 'the jaw soreness and headaches' },
+    { label: 'Smile in photos', spoken: 'how the smile looks in photos' },
+    { label: 'Something the dentist flagged', spoken: 'what the dentist flagged' },
+  ],
+  'Orthodontics / Braces': [
+    { label: 'Shifting / crowding', spoken: 'the shifting' },
+    { label: 'Retainer routine', spoken: 'the retainers' },
+    { label: 'Bite changes', spoken: 'the bite' },
+    { label: 'Flossing tight spots', spoken: 'those tight spots when flossing' },
+    { label: 'Jaw soreness / headaches', spoken: 'the jaw soreness and headaches' },
+    { label: 'Smile in photos', spoken: 'how the smile looks in photos' },
+    { label: 'Something the dentist flagged', spoken: 'what the dentist flagged' },
+  ],
+  'Dental Implants': [
+    {
+      label: 'Tenderness / swelling',
+      spoken: 'the tenderness around the implant',
+    },
+    { label: 'Food catching', spoken: 'the food catching around it' },
+    { label: 'Bite / chewing', spoken: 'how it feels when you chew' },
+    {
+      label: 'Other teeth / gums',
+      spoken: 'the sensitivity and gum bleeding',
+    },
+    { label: 'Overdue cleaning', spoken: 'how things look since your last cleaning' },
+    { label: 'Smile in photos', spoken: 'your smile' },
+    {
+      label: 'Health / medication changes',
+      spoken: 'the implant alongside those health changes',
+    },
+  ],
   'Cellulite Reduction': [
     { label: 'Backs of thighs', spoken: 'the backs of your thighs' },
     { label: 'Buttocks', spoken: 'the buttocks area' },

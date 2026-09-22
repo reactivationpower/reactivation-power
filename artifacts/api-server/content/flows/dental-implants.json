@@ -69,7 +69,7 @@
     {
       "step_key": "recommendation",
       "title": "The Recommendation",
-      "content": "{{contact_first_name}}, that's worth getting looked at instead of just dealing with it. A quick implant health check does one thing. {{provider_name}} looks at the implant and the gum and bone holding it. That catches anything small before it becomes something big. If everything is as solid as it feels, we'll tell you that too. Does that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you in for that quick implant health check. Does that sound reasonable?\n\n(Say \"does that sound reasonable\", not \"does that sound good\". Tap what you hear.)",
+      "content": "{{contact_first_name}}, that's worth getting looked at instead of just dealing with it. A quick implant health check does one thing. {{provider_name}} looks at the implant and the gum and bone holding it. That catches anything small before it becomes something big. If everything is as solid as it feels, we'll tell you that too. Does that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you in for that quick implant health check, so we can take a look at {{main_concern}}. Does that sound reasonable?\n\n(Say \"does that sound reasonable\", not \"does that sound good\". Tap what you hear.)",
       "sort_order": 10
     },
     {
