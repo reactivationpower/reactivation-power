@@ -10,3 +10,6 @@ description: How the reactivation-power web app runs vitest (jsdom + Testing Lib
 **How to apply:** Add `*.test.ts(x)` beside the source; `pnpm --filter @workspace/reactivation-power test`.
 
 - api-server vitest also picks up `scripts/**/*.test.ts`; flow-tooling scripts must guard their `main()` behind an entry-script check so tests can import their rules.
+
+- If a web-app test fails with "Failed to resolve import @workspace/<lib>", the workspace symlink under the artifact's node_modules/@workspace is missing (type-only imports in source hide it). Run `pnpm install --offline` at the root to restore it; no package.json change needed.
+- "Other…" concern type-in is guarded by a render test (type → change event, then tap a routing button); the CONCERN_FALLBACK and per-sector complaint fallbacks are asserted after clearing the box.
