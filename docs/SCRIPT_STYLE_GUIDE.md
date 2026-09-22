@@ -315,6 +315,27 @@ or `recommendation` (which asks). If a niche reroutes it straight to
 
 The same unit-test file covers R13 and runs every checked-in flow through it.
 
+
+### R14. Making It Real keeps the three-question shape
+Every `making_it_real*` screen asks exactly three spoken questions, in this
+order, each on its own paragraph ending in "?" and each followed by a
+coaching note (`(Let them answer.)`):
+1. duration: a low anchor then "or longer than that?" (aesthetics: "or more
+   like months?"; home services: "or since last season?");
+2. frequency: a low number then "or is it more often than that?" (home
+   services: "or is it most days?"; aesthetics: "or every time you look in
+   the mirror?");
+3. impact: opens with "When it's at its worst" and names three buckets.
+
+Lint errors on any other count of questions, a question missing its scale,
+a third question that does not open with "When it's at its worst", a
+question that keeps talking after the "?", or a question with no coaching
+note after it. Questions inside coaching notes do not count. The bare
+pre-rewrite questions ("How long has that been bothering you?") fail here,
+as does the old "repeat it back, that's a long time" move. See example 5.
+
+The same unit-test file covers R14 and runs every checked-in flow through it.
+
 ---
 
 ## 3. The standard step skeleton
@@ -494,7 +515,7 @@ Before a screen is done, read it aloud once and tick every line:
 
 One chip, one question. The caller can tap what they hear.
 
-**5. Making it real (R1, R2, R4, R7)**
+**5. Making it real (R1, R2, R4, R7, R14)**
 
 > Before: *How long has that been bothering you?*
 >
@@ -527,7 +548,9 @@ when the patient says it out loud: duration is a low anchor then "or longer
 than that?", frequency is a low number then "or more often than that?", and
 impact is "when it's at its worst" followed by three buckets. Keep each
 question one sentence under 20 words; the old "repeat it back, that's a long
-time" move is gone.
+time" move is gone. Lint R14 enforces this shape on every `making_it_real*`
+screen, so a rewrite that slips back to the bare questions fails before
+apply.
 
 Coloring rule: color the question with what is true for anyone who has this
 problem (work, home, unwinding, sleep, the mirror, photos, the bill), never a

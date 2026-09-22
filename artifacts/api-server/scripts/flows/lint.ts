@@ -27,6 +27,9 @@
 //   R13 permission screens (transition, permission_questions, anything that
 //       routes to digging_in) ask permission; "Does that sound reasonable?"
 //       only closes a screen that asked permission earlier on
+//   R14 making_it_real* screens keep the shared three-question shape: a
+//       scaled duration question, a scaled frequency question, then "When
+//       it's at its worst…", each followed by a coaching note
 // Plus the structural checks apply runs (routing targets, tokens).
 import { pathToFileURL } from 'node:url'
 import {
@@ -291,6 +294,26 @@ export const PERMISSION_OPENERS: string[] = [
 /** Step-key families that exist to ask permission for the questions (R13). */
 const PERMISSION_KEY_PREFIXES = ['transition', 'permission_questions']
 const QUESTIONS_KEY = 'digging_in'
+
+/**
+ * The shared Making It Real shape (R14, guide example 5). Every script asks
+ * exactly three questions in this order, each carrying its own scale so the
+ * honest answer sounds significant. Matched against lower-cased spoken text
+ * with straight quotes.
+ */
+const MAKING_IT_REAL_KEY = 'making_it_real'
+export const MAKING_IT_REAL_DURATION_SCALES: string[] = [
+  'longer than that',
+  'more like months',
+  'since last season',
+]
+export const MAKING_IT_REAL_FREQUENCY_SCALES: string[] = [
+  'more often than that',
+  'most days',
+  'every time',
+]
+export const MAKING_IT_REAL_IMPACT_OPENER = "when it's at its worst"
+
 interface Sentence {
   text: string
   words: number
@@ -457,7 +480,68 @@ export function lintFile(slug: string, file: FlowFile, general: FlowFile): Probl
   problems.push(...lintReadBack(slug, file))
   problems.push(...lintPermission(slug, file))
   problems.push(...lintObjections(slug, file, general))
+  problems.push(...lintMakingItReal(slug, file))
 
+  return problems
+}
+
+/**
+ * R14: every Making It Real screen keeps the shared three-question shape.
+ * Exactly three spoken questions, each a paragraph ending in "?": duration
+ * with a low anchor and "or longer than that?" (or the niche variants),
+ * frequency with a low number and "or more often than that?" (or variants),
+ * then "When it's at its worst, does it ever interfere with…". Each question
+ * is followed by a coaching note so the caller pauses for the answer. Bare
+ * questions ("How long has that been bothering you?") fail here.
+ */
+export function lintMakingItReal(slug: string, file: FlowFile): Problem[] {
+  const problems: Problem[] = []
+  const push = (level: Problem['level'], where: string, message: string) =>
+    problems.push({ level, where, message })
+
+  for (const step of file.steps) {
+    if (!isKeyIn(step.step_key, MAKING_IT_REAL_KEY)) continue
+    const where = `${slug}:${step.step_key}`
+    const paragraphs = step.content
+      .split(/\n\s*\n/)
+      .map((p) => p.trim())
+      .filter(Boolean)
+
+    const questionIdx = paragraphs
+      .map((p, i) => (!isCoachingNote(p) && p.includes('?') ? i : -1))
+      .filter((i) => i !== -1)
+
+    if (questionIdx.length !== 3) {
+      push('error', where, `R14 has ${questionIdx.length} spoken question(s); Making It Real asks exactly three (how long, how often, when it's at its worst)`)
+      continue
+    }
+
+    const [duration, frequency, impact] = questionIdx.map((i) => normalizeQuotes(paragraphs[i]))
+    const preview = (q: string) => `"${q.slice(0, 50)}\u2026"`
+
+    for (const q of [duration, frequency, impact]) {
+      if (!q.endsWith('?')) push('error', where, `R14 question does not end in "?"; ask it and stop: ${preview(q)}`)
+    }
+
+    const lowerDuration = duration.toLowerCase()
+    if (!MAKING_IT_REAL_DURATION_SCALES.some((s) => lowerDuration.includes(s))) {
+      push('error', where, `R14 first question needs a low anchor then "or ${MAKING_IT_REAL_DURATION_SCALES.join('" / "or ')}?"; a bare "how long" invites "a while": ${preview(duration)}`)
+    }
+    const lowerFrequency = frequency.toLowerCase()
+    if (!MAKING_IT_REAL_FREQUENCY_SCALES.some((s) => lowerFrequency.includes(s))) {
+      push('error', where, `R14 second question needs a low number then "or ${MAKING_IT_REAL_FREQUENCY_SCALES.join('" / "or ')}?"; a bare "how often" invites "sometimes": ${preview(frequency)}`)
+    }
+    if (!impact.toLowerCase().startsWith(MAKING_IT_REAL_IMPACT_OPENER)) {
+      push('error', where, `R14 third question must start with "When it's at its worst" and name three buckets: ${preview(impact)}`)
+    }
+
+    questionIdx.forEach((i, n) => {
+      const next = paragraphs[i + 1]
+      if (next === undefined || !isCoachingNote(next)) {
+        push('error', where, `R14 question ${n + 1} is not followed by a coaching note ("(Let them answer.)"): ${preview(normalizeQuotes(paragraphs[i]))}`)
+      }
+    })
+  }
   return problems
 }
 

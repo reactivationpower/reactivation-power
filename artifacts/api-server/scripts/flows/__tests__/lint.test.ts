@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { lintPermission, lintReadBack } from '../lint.ts'
+import { lintMakingItReal, lintPermission, lintReadBack } from '../lint.ts'
 import { GENERAL_SLUG, listSlugs, readFlowFile, type FlowFile, type FlowStep } from '../lib.ts'
 
 const step = (step_key: string, content: string, sort_order = 0): FlowStep => ({
@@ -266,6 +266,113 @@ Let's get you back in. Does that sound reasonable?`
   it('passes every checked-in flow', () => {
     for (const slug of [GENERAL_SLUG, ...listSlugs()]) {
       expect(permErrors(readFlowFile(slug)), slug).toEqual([])
+    }
+  })
+})
+
+const mirErrors = (file: FlowFile) =>
+  lintMakingItReal('t', file).filter((p) => p.level === 'error').map((p) => p.message)
+
+const MAKING_IT_REAL = `{{contact_first_name}}, I'd like to ask a few quick questions about {{main_concern}} so your file is up to date.
+
+(Ask these three questions in order. Pause after each.)
+
+How long has it been bothering you, like a week or two, or longer than that?
+
+(Let them answer.)
+
+Is it something you experience like 1 to 2 times a month, or is it more often than that?
+
+(Let them answer.)
+
+When it's at its worst, does it ever interfere with work, at home, or relaxing and doing your own thing?
+
+(Let them answer. Repeat back whatever they name.)
+
+Thank you for sharing that.`
+
+const PRE_REWRITE = `{{contact_first_name}}, I'd like to ask about {{main_concern}}.
+
+How long has that been bothering you?
+
+(Let them answer.)
+
+How often do you notice it?
+
+(Let them answer.)
+
+When it bothers you, how does it affect your day or the things you enjoy?
+
+(Let them answer. Repeat it back: "That's a long time.")`
+
+describe('R14 Making It Real keeps the three-question shape', () => {
+  it('accepts the shared shape', () => {
+    expect(mirErrors(flow(step('making_it_real', MAKING_IT_REAL)))).toEqual([])
+  })
+
+  it('accepts the niche variants of each scale and a parent-mode token', () => {
+    const aesthetics = MAKING_IT_REAL.replace('like a week or two, or longer than that?', 'like a few weeks, or more like months?')
+      .replace('like 1 to 2 times a month, or is it more often than that?', 'now and then, or every time you look in the mirror?')
+    expect(mirErrors(flow(step('making_it_real', aesthetics)))).toEqual([])
+    const home = MAKING_IT_REAL.replace('How long has it been bothering you, like a week or two, or longer than that?', 'How long has that been going on, like a couple weeks, or since last season?')
+      .replace('Is it something you experience like 1 to 2 times a month, or is it more often than that?', 'Is it something you notice like a few days a month, or is it most days?')
+    expect(mirErrors(flow(step('making_it_real', home)))).toEqual([])
+    const parent = MAKING_IT_REAL.replace('How long has it been bothering you', 'How long has it been on {{pt_your}} mind')
+    expect(mirErrors(flow(step('making_it_real_nw', parent)))).toEqual([])
+  })
+
+  it('ignores steps outside the making_it_real family', () => {
+    expect(mirErrors(flow(step('digging_in', PRE_REWRITE), step('review', 'How long has that been bothering you?')))).toEqual([])
+  })
+
+  it('fails the pre-rewrite bare questions', () => {
+    const msgs = mirErrors(flow(step('making_it_real', PRE_REWRITE)))
+    expect(msgs).toHaveLength(3)
+    expect(msgs[0]).toMatch(/first question needs a low anchor/)
+    expect(msgs[1]).toMatch(/second question needs a low number/)
+    expect(msgs[2]).toMatch(/third question must start with "When it's at its worst"/)
+  })
+
+  it('flags the wrong number of questions', () => {
+    const two = MAKING_IT_REAL.replace(/Is it something you experience[^\n]*\n\n\(Let them answer\.\)\n\n/, '')
+    expect(mirErrors(flow(step('making_it_real', two)))).toEqual([expect.stringMatching(/has 2 spoken question\(s\); Making It Real asks exactly three/)])
+    const four = MAKING_IT_REAL.replace('Thank you for sharing that.', 'Anything else you noticed?')
+    expect(mirErrors(flow(step('making_it_real', four)))).toEqual([expect.stringMatching(/has 4 spoken question/)])
+  })
+
+  it('flags the questions arriving out of order', () => {
+    const swapped = MAKING_IT_REAL.replace('How long has it been bothering you, like a week or two, or longer than that?', 'WORST')
+      .replace("When it's at its worst, does it ever interfere with work, at home, or relaxing and doing your own thing?", 'How long has it been bothering you, like a week or two, or longer than that?')
+      .replace('WORST', "When it's at its worst, does it ever interfere with work, at home, or relaxing and doing your own thing?")
+    const msgs = mirErrors(flow(step('making_it_real', swapped)))
+    expect(msgs).toEqual([expect.stringMatching(/first question needs a low anchor/), expect.stringMatching(/third question must start with/)])
+  })
+
+  it('flags a question that keeps talking after the "?"', () => {
+    const tail = MAKING_IT_REAL.replace('or longer than that?', 'or longer than that? That is a long time.')
+    expect(mirErrors(flow(step('making_it_real', tail)))).toEqual([expect.stringMatching(/does not end in "\?"/)])
+  })
+
+  it('flags a question with no coaching note after it', () => {
+    const noNote = MAKING_IT_REAL.replace('or is it more often than that?\n\n(Let them answer.)', 'or is it more often than that?')
+    expect(mirErrors(flow(step('making_it_real', noNote)))).toEqual([expect.stringMatching(/question 2 is not followed by a coaching note/)])
+    const noLast = MAKING_IT_REAL.replace('\n\n(Let them answer. Repeat back whatever they name.)\n\nThank you for sharing that.', '')
+    expect(mirErrors(flow(step('making_it_real', noLast)))).toEqual([expect.stringMatching(/question 3 is not followed by a coaching note/)])
+  })
+
+  it('does not count a question inside a coaching note', () => {
+    const noted = MAKING_IT_REAL.replace('(Let them answer.)', '(Let them answer. If they hedge, ask "would you say longer?")')
+    expect(mirErrors(flow(step('making_it_real', noted)))).toEqual([])
+  })
+
+  it('treats curly apostrophes the same as straight ones', () => {
+    const curly = MAKING_IT_REAL.replace("When it's at its worst", 'When it\u2019s at its worst')
+    expect(mirErrors(flow(step('making_it_real', curly)))).toEqual([])
+  })
+
+  it('passes every checked-in flow', () => {
+    for (const slug of [GENERAL_SLUG, ...listSlugs()]) {
+      expect(mirErrors(readFlowFile(slug)), slug).toEqual([])
     }
   })
 })
