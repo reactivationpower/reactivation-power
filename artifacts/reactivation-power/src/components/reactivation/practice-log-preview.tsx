@@ -8,6 +8,11 @@ import {
 } from 'lucide-react'
 import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
+import {
+  DISPOSITION_BUTTON_BASE,
+  dispositionButtonClasses,
+  type DispositionTone,
+} from '@/components/reactivation/disposition-button-styles'
 
 /**
  * Disabled preview of the call-logging controls that sit under the script on
@@ -19,7 +24,7 @@ import { cn } from '@/lib/utils'
 const PREVIEW_BUTTONS: {
   label: string
   icon: typeof PhoneMissed
-  tone?: 'primary' | 'danger'
+  tone?: DispositionTone
 }[] = [
   { label: 'No Answer', icon: PhoneMissed },
   { label: 'Spoke, Didn\u2019t Schedule', icon: Calendar },
@@ -62,11 +67,11 @@ export function PracticeLogPreview() {
               aria-disabled="true"
               title={PRACTICE_LOG_HINT}
               className={cn(
-                // Same idle look as the live call screen's buttons, dimmed.
-                'inline-flex h-10 cursor-not-allowed items-center gap-2 rounded-md border px-3.5 text-sm font-medium opacity-60',
-                tone === 'danger'
-                  ? 'border-transparent bg-transparent text-destructive'
-                  : 'border-input bg-background text-foreground',
+                // Same idle look as the live call screen's buttons, dimmed,
+                // so the "green Scheduled button" is green here too.
+                DISPOSITION_BUTTON_BASE,
+                'cursor-not-allowed opacity-60',
+                dispositionButtonClasses(tone, false),
               )}
             >
               <Icon className="size-4" />

@@ -43,6 +43,11 @@ import {
 import { CONCERN_OPTIONS } from '@workspace/niche-catalog'
 import { ScriptFlowPlayer } from '@/components/reactivation/script-flow-player'
 import { DateTimePicker } from '@/components/reactivation/date-time-picker'
+import {
+  DISPOSITION_BUTTON_BASE,
+  dispositionButtonClasses,
+  type DispositionTone,
+} from '@/components/reactivation/disposition-button-styles'
 import { cn } from '@/lib/utils'
 import { useRouter } from '@/hooks/use-router'
 import type {
@@ -266,7 +271,7 @@ export function CallScreen({
     d: CallDisposition
     label: string
     icon: typeof Phone
-    tone?: 'primary' | 'danger'
+    tone?: DispositionTone
   }[] = [
     { d: 'no_answer', label: 'No Answer', icon: PhoneMissed },
     {
@@ -439,19 +444,9 @@ export function CallScreen({
                 aria-pressed={active}
                 disabled={saving}
                 className={cn(
-                  'inline-flex h-10 items-center gap-2 rounded-md border px-3.5 text-sm font-medium transition-colors disabled:opacity-60',
-                  !active &&
-                    tone !== 'danger' &&
-                    'border-input bg-background text-foreground hover:bg-muted',
-                  !active &&
-                    tone === 'danger' &&
-                    'border-transparent bg-transparent text-destructive hover:bg-destructive/10',
-                  active &&
-                    tone !== 'danger' &&
-                    'border-accent bg-accent text-accent-foreground shadow-sm',
-                  active &&
-                    tone === 'danger' &&
-                    'border-destructive bg-destructive text-destructive-foreground',
+                  DISPOSITION_BUTTON_BASE,
+                  'transition-colors disabled:opacity-60',
+                  dispositionButtonClasses(tone, active),
                 )}
               >
                 <Icon className="size-4" />

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { PracticeLogPreview } from './practice-log-preview'
+import { dispositionButtonClasses } from './disposition-button-styles'
 import { ScriptFlowPlayer } from './script-flow-player'
 import type { ScriptFlowStep } from '@/lib/types'
 
@@ -42,6 +43,24 @@ describe('PracticeLogPreview', () => {
     })
     expect((notes as HTMLTextAreaElement).disabled).toBe(true)
     expect(screen.getByText(/practice mode: nothing is saved here/i)).toBeTruthy()
+  })
+
+  it('renders the idle Scheduled button green, matching the scripts', () => {
+    render(<PracticeLogPreview />)
+    const scheduled = screen.getByRole('button', { name: 'Scheduled' })
+    expect(scheduled.className).toContain('border-success')
+    expect(scheduled.className).toContain('text-success')
+    // The neutral buttons stay grey so only Scheduled reads as "the green one".
+    const noAnswer = screen.getByRole('button', { name: 'No Answer' })
+    expect(noAnswer.className).not.toContain('success')
+  })
+})
+
+describe('dispositionButtonClasses', () => {
+  it('keeps Scheduled green both idle and active', () => {
+    expect(dispositionButtonClasses('primary', false)).toContain('border-success')
+    expect(dispositionButtonClasses('primary', true)).toContain('bg-success')
+    expect(dispositionButtonClasses(undefined, false)).not.toContain('success')
   })
 })
 
