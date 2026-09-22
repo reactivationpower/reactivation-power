@@ -18,10 +18,14 @@
 //
 // Refuses to write anything when any file has a structural error: a choice
 // that routes to a step_key that does not exist (in the niche or in general),
-// or a {{token}} the player cannot fill.
+// a {{token}} the player cannot fill, or a non-terminal step with no outgoing
+// choice (R12 dead end) that is not allow-listed in KNOWN_DEAD_ENDS.
+// Allow-listed dead ends are printed as warnings and still applied.
+import { pathToFileURL } from 'node:url'
 import {
   GENERAL_SLUG,
   fetchAll,
+  findDeadEnds,
   getSupabase,
   listSlugs,
   printProblems,
@@ -30,6 +34,7 @@ import {
   type FlowChoice,
   type FlowFile,
   type FlowStep,
+  type Problem,
 } from './lib.ts'
 
 interface StepRow extends FlowStep {
@@ -45,11 +50,16 @@ interface NicheRow {
   name: string
 }
 
-const args = process.argv.slice(2)
-const dryRun = args.includes('--dry-run')
-const all = args.includes('--all')
-const createNiches = args.includes('--create-niches')
-const requested = args.filter((a) => !a.startsWith('--'))
+/**
+ * Step 1 of apply: everything that must hold before a file is allowed to
+ * touch the database. Structural errors (missing routes, unknown tokens) and
+ * un-allow-listed dead ends come back as `error`; allow-listed dead ends and
+ * stale allow-list entries come back as `warn`.
+ */
+export function validateForApply(slug: string, file: FlowFile, general: FlowFile): Problem[] {
+  const generalKeys = new Set(general.steps.map((s) => s.step_key))
+  return [...validateStructure(slug, file, generalKeys), ...findDeadEnds(slug, file, general)]
+}
 
 function choiceKey(c: FlowChoice): string {
   return `${c.from_step_key}\u0000${c.to_step_key ?? ''}`
@@ -61,6 +71,12 @@ function short(s: string, n = 70): string {
 }
 
 async function main() {
+  const args = process.argv.slice(2)
+  const dryRun = args.includes('--dry-run')
+  const all = args.includes('--all')
+  const createNiches = args.includes('--create-niches')
+  const requested = args.filter((a) => !a.startsWith('--'))
+
   const slugs = all ? listSlugs() : requested
   if (slugs.length === 0) {
     console.error('usage: node scripts/flows/apply.ts [--dry-run] [--create-niches] (--all | <slug> ...)')
@@ -69,15 +85,19 @@ async function main() {
 
   // 1. Read + validate every requested file before touching the database.
   const general = readFlowFile(GENERAL_SLUG)
-  const generalKeys = new Set(general.steps.map((s) => s.step_key))
   const files = new Map<string, FlowFile>()
-  const problems = []
+  const problems: Problem[] = []
   for (const slug of slugs) {
     const file = readFlowFile(slug)
     files.set(slug, file)
-    problems.push(...validateStructure(slug, file, generalKeys))
+    problems.push(...validateForApply(slug, file, general))
   }
   const errors = problems.filter((p) => p.level === 'error')
+  const warnings = problems.filter((p) => p.level === 'warn')
+  if (warnings.length > 0) {
+    printProblems(warnings)
+    console.log('')
+  }
   if (errors.length > 0) {
     printProblems(errors)
     console.error(`\nRefusing to apply: ${errors.length} structural error(s).`)
@@ -305,7 +325,9 @@ async function main() {
   )
 }
 
-main().catch((err) => {
-  console.error(err)
-  process.exit(1)
-})
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main().catch((err) => {
+    console.error(err)
+    process.exit(1)
+  })
+}
