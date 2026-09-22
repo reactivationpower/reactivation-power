@@ -8,6 +8,7 @@ import {
   DEMO_COURSE_ID,
   DEMO_NICHES,
   DEMO_SHOWCASE_NICHES,
+  DEMO_CALL_BATCH_SIZE,
   DEMO_OWNER,
   DEMO_OWNER_TRAINING_COMPLETED,
   DEMO_VIDEO_IDS,
@@ -167,6 +168,10 @@ const COMPLAINTS: Record<string, string[]> = {
   Acupuncture: ['Chronic neck and shoulder pain', 'Migraines', 'Stress and poor sleep', 'Low energy'],
   'Massage Therapy': ['Neck and shoulder tension', 'Low back tightness', 'Tension headaches'],
   'Acoustic Wave Therapy': ['Plantar fasciitis', 'Achilles tendonitis', 'Chronic shoulder pain', 'Old knee injury'],
+  // Weight and body niches: name the program, never a number or body area.
+  'Weight Loss (Not ChiroThin)': ['Weight loss program', 'Medical weight loss'],
+  'GLP Patients': ['GLP-1 weight loss program', 'Semaglutide program'],
+  'Cellulite Reduction': ['Cellulite reduction series', 'Cellulite treatment package'],
 }
 
 const SERVICE_LABELS: Record<string, string[]> = {
@@ -180,6 +185,9 @@ const SERVICE_LABELS: Record<string, string[]> = {
   Acupuncture: ['Acupuncture Session', 'Acupuncture Series'],
   'Massage Therapy': ['Therapeutic Massage', 'Deep Tissue Massage'],
   'Acoustic Wave Therapy': ['Acoustic Wave Therapy', 'Shockwave Session'],
+  'Weight Loss (Not ChiroThin)': ['Weight Loss Program', 'Medical Weight Loss'],
+  'GLP Patients': ['GLP-1 Program', 'Semaglutide Weight Loss'],
+  'Cellulite Reduction': ['Cellulite Reduction Series', 'Cellulite Treatment'],
 }
 
 // Notes are written the way a real caller would type them, so they read
@@ -501,7 +509,7 @@ async function ensureDemoParticipants() {
     practice_name: DEMO_OWNER.practice,
     office_phone: DEMO_OWNER.officePhone,
     default_niche_id: DEMO_NICHES[0].id,
-    call_batch_size: 7,
+    call_batch_size: DEMO_CALL_BATCH_SIZE,
     is_business_owner: true,
   }
   const owner = must(
@@ -631,7 +639,9 @@ export async function seedDemoData(): Promise<SeedSummary> {
     const showcase = DEMO_SHOWCASE_NICHES[i] as (typeof DEMO_SHOWCASE_NICHES)[number] | undefined
     const niche = showcase ?? DEMO_NICHES[nicheCycle[(i + 3) % nicheCycle.length]]
     // Always draw the minute so the PRNG stream, and the rest of the story, is unchanged.
-    const importMinute = between(5, 40)
+    // The range starts after the last showcase minute so no ordinary import
+    // can tie with or precede a showcase patient in the oldest-first release.
+    const importMinute = between(DEMO_SHOWCASE_NICHES.length + 1, 40)
     contacts.push({
       id: randomUUID(),
       name: `${first} ${last}`,

@@ -115,23 +115,29 @@ export const DEMO_NICHES = [
   { id: 'f68876f9-e021-41d0-bcd9-fb34a6a45051', name: 'Acupuncture' },
   { id: 'b5a41f4d-fdf1-4e6c-92a9-c9bc792fc3d6', name: 'Massage Therapy' },
   { id: '6b0c9c42-51cd-42b8-8f72-c2a6f4eae35d', name: 'Acoustic Wave Therapy' },
+  { id: '1be15e72-fa8a-429d-8965-ff6c8e2d4881', name: 'Weight Loss (Not ChiroThin)' },
+  { id: '1405eac9-3924-4b21-8f2a-7270afff4ee9', name: 'GLP Patients' },
+  { id: '8daa2ca5-1fe6-45ce-af4d-55bb0d1c9bbc', name: 'Cellulite Reduction' },
 ] as const
 
 /**
  * Showcase niches: exactly ONE patient each, kept out of the niche cycle.
  * Index N here is assigned to the Nth name of the new (never-called) cohort
- * and stamped created_at 08:0N ET, a few minutes before the rest of that
- * cohort, so the oldest-first batch release always puts these patients in
- * today's first "Calls Due Now" batch and a presenter can open each script
- * straight from the dashboard.
+ * and stamped created_at 08:0N ET, ahead of the rest of that cohort (which
+ * the seeder stamps from 08:(N+1) onward), so the oldest-first batch release
+ * always puts these patients in today's first "Calls Due Now" batch and a
+ * presenter can open each script straight from the dashboard.
  *   0 Brenda Fairbanks  -> Gut Health
  *   1 Nicholas Sung     -> Neuropathy
  *   2 Pamela Redfield   -> Red Light / Body Contouring
  *   3 Eric Albrecht     -> Acupuncture
  *   4 Emma Castillo     -> Massage Therapy
  *   5 Jonathan Prescott -> Acoustic Wave Therapy
- * The rest of that cohort is stamped 08:05–08:40, so keep this list at six
- * or fewer entries to stay at or ahead of every non-showcase timestamp.
+ *   6 Nicole Haddad     -> Weight Loss (Not ChiroThin)
+ *   7 Stephen Vasquez   -> GLP Patients
+ *   8 Helen Marchetti   -> Cellulite Reduction
+ * Keep this list no longer than DEMO_CALL_BATCH_SIZE, or the tail of it
+ * falls into the second batch and is no longer one click from the dashboard.
  */
 export const DEMO_SHOWCASE_NICHES = [
   DEMO_NICHES[4],
@@ -140,7 +146,23 @@ export const DEMO_SHOWCASE_NICHES = [
   DEMO_NICHES[7],
   DEMO_NICHES[8],
   DEMO_NICHES[9],
+  DEMO_NICHES[10],
+  DEMO_NICHES[11],
+  DEMO_NICHES[12],
 ] as const
+
+/**
+ * The demo owner's cold-call batch size. The largest allowed setting, so
+ * every showcase patient lands in the first "Calls Due Now" batch.
+ */
+export const DEMO_CALL_BATCH_SIZE = 10
+
+if (DEMO_SHOWCASE_NICHES.length > DEMO_CALL_BATCH_SIZE) {
+  throw new Error(
+    `DEMO_SHOWCASE_NICHES has ${DEMO_SHOWCASE_NICHES.length} entries but the demo batch size is ${DEMO_CALL_BATCH_SIZE}; ` +
+      'not every showcase patient would land in the first Calls Due Now batch',
+  )
+}
 
 /** Default (owner_id null) pipeline stages */
 export const DEMO_STAGE_IDS = {
