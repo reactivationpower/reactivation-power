@@ -13,3 +13,5 @@ Rule: anything both the web app and the api-server need (niche chips, matchers, 
 
 - The patient/parent `{{pt_*}}` wording tables live in `@workspace/script-tokens` (not in the player). The api-server tooling derives its allowed pt_ list from them, and tests fail when the two tables' key sets differ or a flow file references an undefined pt_ token. Add a new pt_ slot in both tables there; never re-declare it in lint's KNOWN_TOKENS.
 - api-server `scripts/flows/*.ts` entry guards (`if (import.meta.url === ...) main()`) must be the LAST statement in the file: under plain node, `const` helpers declared after the guard are in the TDZ when main() runs and crash with 'Cannot access X before initialization'.
+
+- Artifact `typecheck` scripts must run `tsc --build <root tsconfig>` before `tsc -p --noEmit`: project references resolve `@workspace/*` through gitignored `lib/*/dist/*.d.ts`, so a bare `tsc -p` on a fresh checkout (or after a lib schema change) reports phantom "has no exported member" errors. Concurrent tasks can also leave dist stale, so never trust a red per-artifact typecheck until libs are rebuilt.
