@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { ScriptFlowPlayer } from '@/components/reactivation/script-flow-player'
+import { PracticeLogPreview } from '@/components/reactivation/practice-log-preview'
 import { CONCERN_OPTIONS } from '@/lib/concern-options'
 import type { Niche, ScriptFlowChoice, ScriptFlowStep } from '@/lib/types'
 
@@ -150,7 +151,10 @@ export function ScriptViewer({
             niches.find((n) => n.id === nicheId)?.name ?? ''
           ] ?? undefined
         }
+        practice
       />
+
+      <PracticeLogPreview />
     </div>
   )
 }

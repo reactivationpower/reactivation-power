@@ -49,7 +49,11 @@ interface Props {
   showLeaveVm?: boolean
   /** Opens the voicemail script dialog (owned by the call screen). */
   onLeaveVoicemail?: () => void
-  }
+  /** Practice player (no contact loaded): the notes box and disposition
+   * buttons the scripts refer to are rendered as a disabled preview by the
+   * practice screen, so end-of-script copy must not promise a real log. */
+  practice?: boolean
+}
 
 // Relationship tokens: scripts can use {{pt_*}} slots that resolve
 // differently when the caller is speaking with a parent/guardian instead of
@@ -160,6 +164,7 @@ export function ScriptFlowPlayer({
   concernOptions,
   showLeaveVm = false,
   onLeaveVoicemail,
+  practice = false,
 }: Props) {
   // Resolve niche overrides: a niche row with the same step_key replaces the
   // general row; a niche's choice set for a step replaces the general set.
@@ -590,7 +595,9 @@ export function ScriptFlowPlayer({
         ) : (
           <div className="flex flex-col gap-3">
             <p className="text-sm text-muted-foreground">
-              End of script. Add your notes and log the call outcome below.
+              {practice
+                ? 'End of script. On a live call you would add your notes and log the outcome below; in practice mode those controls are shown but switched off.'
+                : 'End of script. Add your notes and log the call outcome below.'}
             </p>
             {canLeaveVm && (
               <div>
