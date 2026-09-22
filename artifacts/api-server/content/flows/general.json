@@ -100,7 +100,7 @@
     {
       "step_key": "obj_spouse",
       "title": "Objection: “I need to talk to my spouse”",
-      "content": "That makes sense. Most people find it helps to come in for the look first. Then you both have real information to decide with, instead of guessing.\n\nDoes that sound reasonable?\n\n(Wait for the yes.)",
+      "content": "That makes sense. Can I share a thought?\n\n(Wait for the yes.)\n\nMost people find it helps to come in for the look first. Then you both have real information to decide with, instead of guessing. Does that sound reasonable?\n\n(Wait for the yes.)",
       "sort_order": 16
     },
     {

@@ -20,6 +20,9 @@
 //       bridge and asks "Can I make a recommendation?"
 //   R12 every non-terminal step has an outgoing choice (no mid-call
 //       "End of script"); known dead ends are allow-listed in lib.ts
+//   R13 permission screens (transition, permission_questions, anything that
+//       routes to digging_in) ask permission; "Does that sound reasonable?"
+//       only closes a screen that asked permission earlier on
 // Plus the structural checks apply runs (routing targets, tokens).
 import { pathToFileURL } from 'node:url'
 import {
@@ -241,6 +244,29 @@ export const RECOMMENDING_PHRASES: string[] = [
 const REVIEW_KEY = 'review'
 const RECOMMENDATION_KEY = 'recommendation'
 
+/**
+ * Ways a caller asks permission before asking questions or recommending
+ * (R13). Matched against lower-cased spoken text; each one must be a
+ * question, so "can i ask" only counts when a "?" follows in that sentence.
+ */
+export const PERMISSION_OPENERS: string[] = [
+  'can i ask',
+  'could i ask',
+  'may i ask',
+  'can i make a recommendation',
+  'can i make a suggestion',
+  'can i share',
+  'can i tell you',
+  'mind if i',
+  'would it be okay if',
+  'would it be all right if',
+  'okay if i',
+  'is that okay',
+  'is that all right',
+]
+/** Step-key families that exist to ask permission for the questions (R13). */
+const PERMISSION_KEY_PREFIXES = ['transition', 'permission_questions']
+const QUESTIONS_KEY = 'digging_in'
 interface Sentence {
   text: string
   words: number
@@ -405,10 +431,51 @@ export function lintFile(slug: string, file: FlowFile, general: FlowFile): Probl
   }
 
   problems.push(...lintReadBack(slug, file))
+  problems.push(...lintPermission(slug, file))
 
   return problems
 }
 
+/**
+ * R13: ask before you ask. A permission screen (transition, permission
+ * questions, or any step that routes straight into the question screen) must
+ * contain a permission question. And "Does that sound reasonable?" is the
+ * close of a recommendation the patient agreed to hear, so any screen that
+ * says it must have asked permission earlier on the same screen.
+ */
+export function lintPermission(slug: string, file: FlowFile): Problem[] {
+  const problems: Problem[] = []
+  const push = (level: Problem['level'], where: string, message: string) =>
+    problems.push({ level, where, message })
+
+  const routesToQuestions = new Set(
+    file.choices.filter((c) => isKeyIn(c.to_step_key, QUESTIONS_KEY)).map((c) => c.from_step_key),
+  )
+
+  for (const step of file.steps) {
+    const where = `${slug}:${step.step_key}`
+    const spoken = spokenParagraphs(step.content).map((p) => normalizeQuotes(p).toLowerCase())
+    const all = spoken.join('\n')
+    const ask = firstPermissionAsk(all)
+
+    const byKey = PERMISSION_KEY_PREFIXES.some((k) => isKeyIn(step.step_key, k))
+    if (byKey || routesToQuestions.has(step.step_key)) {
+      if (ask === null) {
+        const why = byKey ? 'is a permission screen' : `routes to ${QUESTIONS_KEY}`
+        push('error', where, `R13 ${why} but never asks permission ("Can I ask you a few quick questions?" / "Is that okay?") before the questions`)
+      }
+    }
+
+    const closeIdx = all.indexOf(RECOMMENDATION_CLOSE)
+    if (closeIdx === -1) continue
+    if (ask === null) {
+      push('error', where, `R13 asks "Does that sound reasonable?" without ever asking permission first; ask ("Can I make a recommendation?") before you recommend`)
+    } else if (ask.index > closeIdx) {
+      push('error', where, `R13 asks "Does that sound reasonable?" before asking permission ("${ask.opener}"); the ask comes first`)
+    }
+  }
+  return problems
+}
 /**
  * R11: the read-back happens once, on the review screen. Every other screen
  * must not recap; the recommendation screen asks permission before it
@@ -469,7 +536,7 @@ export function lintReadBack(slug: string, file: FlowFile): Problem[] {
 }
 
 function isRecommendationKey(key: string): boolean {
-  return key === RECOMMENDATION_KEY || key.startsWith(`${RECOMMENDATION_KEY}_`)
+  return isKeyIn(key, RECOMMENDATION_KEY)
 }
 
 /** Spoken paragraphs of a step, with coaching notes and note-only lines removed. */
@@ -488,6 +555,31 @@ function spokenParagraphs(content: string): string[] {
 
 function normalizeQuotes(s: string): string {
   return s.replace(/[\u2018\u2019]/g, "'").replace(/[\u201c\u201d]/g, '"')
+}
+
+/** Earliest permission opener that is part of a question. */
+function firstPermissionAsk(lowerSpoken: string): { opener: string; index: number } | null {
+  let best: { opener: string; index: number } | null = null
+  for (const opener of PERMISSION_OPENERS) {
+    let from = 0
+    while (true) {
+      const idx = lowerSpoken.indexOf(opener, from)
+      if (idx === -1) break
+      // The opener has to be inside a question: a "?" before the next sentence end.
+      const rest = lowerSpoken.slice(idx + opener.length)
+      const stop = rest.search(/[.!?\n]/)
+      if (stop !== -1 && rest[stop] === '?') {
+        if (best === null || idx < best.index) best = { opener, index: idx }
+        break
+      }
+      from = idx + opener.length
+    }
+  }
+  return best
+}
+
+function isKeyIn(key: string | null, family: string): boolean {
+  return key !== null && (key === family || key.startsWith(`${family}_`))
 }
 
 function main() {

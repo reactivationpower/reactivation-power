@@ -276,6 +276,33 @@ wrap-up, bonus, voicemail, wrong number, do-not-call) or is listed in
 `KNOWN_DEAD_ENDS` in `scripts/flows/lib.ts`, where it lints as a warning
 until its routing is decided. See section 5 for the details.
 
+### R13. Ask before you ask
+The script asks permission twice: once before the questions ("Can I ask you
+a few quick questions?" / "Let me ask you a few quick questions. Is that
+okay?") and once before the recommendation ("Can I make a recommendation?").
+"Does that sound reasonable?" is the close of a recommendation the patient
+agreed to hear. Without the ask it lands as a pitch.
+
+A **permission screen** is any `transition*` or `permission_questions*` step,
+plus any step with a button that routes straight to a `digging_in*` screen
+(so a `doing_well_variant` that skips the transition counts too). Lint errors
+when:
+- a permission screen has no permission question in its spoken text. The
+  opener has to be a question: "can I ask", "could I ask", "may I ask",
+  "mind if I", "would it be okay if", "okay if I", "is that okay?", "can I
+  share", "can I tell you", "can I make a recommendation / suggestion";
+- any screen (objection, lapsed, cadence, recommendation, anything) says
+  "Does that sound reasonable?" and never asked one of those permission
+  questions earlier on the same screen, or asked it only after the close.
+
+An opener inside a coaching note does not count; the caller has to say it.
+The `general.json` `doing_well_variant` is not a permission screen on its
+own: it asks about early signs, then hands off to `transition` (which asks)
+or `recommendation` (which asks). If a niche reroutes it straight to
+`digging_in`, the ask has to move onto that screen.
+
+The same unit-test file covers R13 and runs every checked-in flow through it.
+
 ---
 
 ## 3. The standard step skeleton
@@ -382,7 +409,8 @@ Before a screen is done, read it aloud once and tick every line:
 9. If it is an objection: does its closing line differ from the other objections?
 10. If it is a question screen: one question per chip, in chip order, then the pick?
 11. Every button still routes to the same `to_step_key`?
-12. Title is short and tells the caller where they are ("Objection: cost").
+12. If it is a transition or routes to the questions: does it ask permission? If it ends on "Does that sound reasonable?": did it ask first?
+13. Title is short and tells the caller where they are ("Objection: cost").
 
 ---
 

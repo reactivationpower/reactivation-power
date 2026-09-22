@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { lintReadBack } from '../lint.ts'
+import { lintPermission, lintReadBack } from '../lint.ts'
 import { GENERAL_SLUG, listSlugs, readFlowFile, type FlowFile, type FlowStep } from '../lib.ts'
 
 const step = (step_key: string, content: string, sort_order = 0): FlowStep => ({
@@ -168,5 +168,104 @@ Let's get you in. Does that sound reasonable?`
 
   it('accepts the name before the ask in the explainer shape', () => {
     expect(errors(flow(step('recommendation', EXPLAINER_REC)))).toEqual([])
+  })
+})
+
+const permErrors = (file: FlowFile) =>
+  lintPermission('t', file).filter((p) => p.level === 'error').map((p) => p.message)
+
+const route = (from_step_key: string, to_step_key: string | null) => ({
+  from_step_key,
+  label: `${from_step_key} → ${to_step_key}`,
+  to_step_key,
+  variant: 'default',
+  sort_order: 0,
+})
+
+describe('R13 permission screens ask permission', () => {
+  it('accepts the usual transition and permission_questions openers', () => {
+    const file: FlowFile = {
+      niche: null,
+      choices: [],
+      steps: [
+        step('transition', `That's why I'm glad we connected. Let me ask you a few quick questions. Is that okay?\n\n(Wait for the yes.)`),
+        step('transition_still', `First, can I ask a few quick questions so your file is up to date?`),
+        step('permission_questions', `While I have you, {{contact_first_name}}, can I ask you a few quick questions about anything else you've noticed?`),
+      ],
+    }
+    expect(permErrors(file)).toEqual([])
+  })
+
+  it('flags a transition that goes straight into the questions', () => {
+    const msgs = permErrors(flow(step('transition', `Great. Let's run through a few things so I can update your file.`)))
+    expect(msgs).toEqual([expect.stringMatching(/is a permission screen but never asks permission/)])
+  })
+
+  it('flags a permission_questions variant with a statement instead of a question', () => {
+    const msgs = permErrors(flow(step('permission_questions_back', `I'm going to ask you a few quick questions now.`)))
+    expect(msgs).toEqual([expect.stringMatching(/never asks permission/)])
+  })
+
+  it('flags any step that routes to digging_in without asking first', () => {
+    const file: FlowFile = {
+      niche: null,
+      steps: [step('doing_well_variant', `Glad you're doing well. Let's go through a few things.`), step('digging_in', `How long has it been? ...`)],
+      choices: [route('doing_well_variant', 'digging_in')],
+    }
+    expect(permErrors(file)).toEqual([expect.stringMatching(/routes to digging_in but never asks permission/)])
+  })
+
+  it('does not count an opener that is not a question', () => {
+    const msgs = permErrors(flow(step('transition', `Can I ask you a few quick questions. Great, first one.`)))
+    expect(msgs).toEqual([expect.stringMatching(/never asks permission/)])
+  })
+
+  it('ignores an ask that only lives in a coaching note', () => {
+    const msgs = permErrors(flow(step('transition', `Let's go through a few things.\n\n(Ask "can I ask you a few questions?" first.)`)))
+    expect(msgs).toEqual([expect.stringMatching(/never asks permission/)])
+  })
+
+  it('treats curly apostrophes the same as straight ones', () => {
+    expect(permErrors(flow(step('transition', `While I have you, can I ask about a few things you\u2019ve noticed?`)))).toEqual([])
+  })
+})
+
+describe('R13 "Does that sound reasonable?" only after a permission ask', () => {
+  it('accepts an objection screen that asks before it recommends', () => {
+    const obj = `That makes sense. Can I share a thought?
+
+(Wait for the yes.)
+
+Most people come in for the look first. Does that sound reasonable?`
+    expect(permErrors(flow(step('obj_spouse', obj)))).toEqual([])
+  })
+
+  it('accepts the lapsed screens that ask "Can I make a recommendation?" mid-screen', () => {
+    const lapsed = `Can I ask what changed that led you to stop coming in?
+
+(Let them answer.)
+
+{{contact_first_name}}, can I make a recommendation?
+
+(Wait for the yes.)
+
+Let's get you back in. Does that sound reasonable?`
+    expect(permErrors(flow(step('lapsed_busy', lapsed)))).toEqual([])
+  })
+
+  it('flags a screen that closes with "Does that sound reasonable?" and never asked', () => {
+    const obj = `That makes sense. Most people come in for the look first.\n\nDoes that sound reasonable?\n\n(Wait for the yes.)`
+    expect(permErrors(flow(step('obj_spouse', obj)))).toEqual([expect.stringMatching(/without ever asking permission first/)])
+  })
+
+  it('flags the ask landing after "Does that sound reasonable?"', () => {
+    const obj = `Come in for the look first. Does that sound reasonable?\n\nCan I share why I ask?`
+    expect(permErrors(flow(step('obj_spouse', obj)))).toEqual([expect.stringMatching(/before asking permission/)])
+  })
+
+  it('passes every checked-in flow', () => {
+    for (const slug of [GENERAL_SLUG, ...listSlugs()]) {
+      expect(permErrors(readFlowFile(slug)), slug).toEqual([])
+    }
   })
 })
