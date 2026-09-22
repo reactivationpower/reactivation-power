@@ -30,11 +30,15 @@
 //   R14 making_it_real* screens keep the shared three-question shape: a
 //       scaled duration question, a scaled frequency question, then "When
 //       it's at its worst…", each followed by a coaching note
+//   R15 every non-entry step is the target of some choice (no screen that
+//       no button leads to); entry screens are listed in lib.ts next to
+//       TERMINAL_STEP_PATTERNS
 // Plus the structural checks apply runs (routing targets, tokens).
 import { pathToFileURL } from 'node:url'
 import {
   GENERAL_SLUG,
   findDeadEnds,
+  findUnreachableSteps,
   listSlugs,
   printProblems,
   readFlowFile,
@@ -351,11 +355,18 @@ function hasMixedNote(p: string): boolean {
   return false
 }
 
-export function lintFile(slug: string, file: FlowFile, general: FlowFile): Problem[] {
+export function lintFile(
+  slug: string,
+  file: FlowFile,
+  general: FlowFile,
+  /** Niche files whose buttons may reach into general.json (only used when linting general). */
+  referrers: FlowFile[] = [],
+): Problem[] {
   const generalKeys = new Set(general.steps.map((s) => s.step_key))
   const problems: Problem[] = [
     ...validateStructure(slug, file, generalKeys),
     ...findDeadEnds(slug, file, general),
+    ...findUnreachableSteps(slug, file, general, slug === GENERAL_SLUG ? referrers : []),
   ]
   const push = (level: Problem['level'], where: string, message: string) =>
     problems.push({ level, where, message })
@@ -763,12 +774,15 @@ function main() {
   const requested = args.filter((a) => !a.startsWith('--'))
   const slugs = requested.length > 0 ? requested : listSlugs()
   const general = readFlowFile(GENERAL_SLUG)
+  const nicheFiles = listSlugs()
+    .filter((s) => s !== GENERAL_SLUG)
+    .map((s) => readFlowFile(s))
 
   let totalErrors = 0
   let totalWarnings = 0
   for (const slug of slugs) {
     const file = readFlowFile(slug)
-    const problems = lintFile(slug, file, general)
+    const problems = lintFile(slug, file, general, nicheFiles)
     const errors = problems.filter((p) => p.level === 'error').length
     const warnings = problems.length - errors
     totalErrors += errors

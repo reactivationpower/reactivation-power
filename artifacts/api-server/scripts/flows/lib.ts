@@ -278,6 +278,71 @@ export function isTerminalStep(stepKey: string): boolean {
 }
 
 /**
+ * Screens the caller lands on without pressing a button: the player starts
+ * on `open` (lowest sort_order) and the call screen's outcome buttons jump
+ * straight to voicemail / wrong number / do-not-call. Everything else must
+ * be the target of some choice (R15).
+ */
+export const ENTRY_STEP_PATTERNS: RegExp[] = [
+  /^open$/,
+  /^(voicemail|wrong_number|dnc)$/,
+]
+
+/**
+ * Screens the player swaps in by step_key instead of by a choice. Keep in
+ * sync with script-flow-player.tsx.
+ */
+export const PLAYER_ROUTED_STEP_PATTERNS: RegExp[] = [
+  /^making_it_real_nw$/, // shown in place of making_it_real for a non-weight concern
+]
+
+export function isEntryStep(stepKey: string): boolean {
+  return ENTRY_STEP_PATTERNS.some((re) => re.test(stepKey))
+}
+
+function isPlayerRoutedStep(stepKey: string): boolean {
+  return PLAYER_ROUTED_STEP_PATTERNS.some((re) => re.test(stepKey))
+}
+
+/**
+ * R15: every step that is not an entry screen must be the target of at
+ * least one choice, in its own file or in general.json (a niche step with
+ * the same key as a general step is reached through general's buttons).
+ * Otherwise it is a typo in a to_step_key or dead content nobody will ever
+ * see. Reported as a warning.
+ *
+ * For general.json the check also counts choices from every niche file
+ * passed in `referrers`, since a shared step may only be reached from a
+ * niche's own buttons.
+ */
+export function findUnreachableSteps(
+  slug: string,
+  file: FlowFile,
+  general: FlowFile,
+  referrers: FlowFile[] = [],
+): Problem[] {
+  const targets = new Set<string>()
+  const addTargets = (f: FlowFile) => {
+    for (const c of f.choices) if (c.to_step_key) targets.add(c.to_step_key)
+  }
+  addTargets(file)
+  if (slug !== GENERAL_SLUG) addTargets(general)
+  for (const f of referrers) addTargets(f)
+
+  const problems: Problem[] = []
+  for (const s of file.steps) {
+    if (targets.has(s.step_key) || isEntryStep(s.step_key) || isPlayerRoutedStep(s.step_key)) continue
+    problems.push({
+      level: 'warn',
+      where: `${slug}:${s.step_key}`,
+      message:
+        'R15 unreachable: no choice in this file or general.json routes here and it is not an entry screen (fix the to_step_key typo, or delete the step)',
+    })
+  }
+  return problems
+}
+
+/**
  * Screens that are known to strand the caller (no outgoing choice) and are
  * deliberately left that way until a routing decision is made. Lint reports
  * them as warnings instead of errors. Remove an entry once the screen gets

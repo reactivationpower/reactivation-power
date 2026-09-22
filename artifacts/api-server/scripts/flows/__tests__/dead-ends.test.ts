@@ -4,6 +4,8 @@ import {
   GENERAL_SLUG,
   KNOWN_DEAD_ENDS,
   findDeadEnds,
+  findUnreachableSteps,
+  isEntryStep,
   isTerminalStep,
   listSlugs,
   readFlowFile,
@@ -123,7 +125,91 @@ describe('findDeadEnds', () => {
   })
 })
 
+describe('isEntryStep', () => {
+  it('treats open and the outcome-button screens as entry screens', () => {
+    for (const k of ['open', 'voicemail', 'wrong_number', 'dnc']) {
+      expect(isEntryStep(k), k).toBe(true)
+    }
+  })
+
+  it('does not treat mid-call screens as entry screens', () => {
+    for (const k of ['recommendation', 'obj_cost', 'scheduling', 'open_variant', 'reopen']) {
+      expect(isEntryStep(k), k).toBe(false)
+    }
+  })
+})
+
+describe('findUnreachableSteps (R15)', () => {
+  it('passes a step that a choice in the same file routes to', () => {
+    const file = niche(
+      [step('resp_fine'), step('obj_think')],
+      [choice('resp_fine', 'obj_think'), choice('obj_think', 'scheduling')],
+    )
+    const problems = findUnreachableSteps('test', file, {
+      ...general,
+      choices: [...general.choices, choice('open', 'resp_fine')],
+    })
+    expect(problems).toEqual([])
+  })
+
+  it('passes a niche override that only general.json routes to', () => {
+    const file = niche([step('recommendation')], [choice('recommendation', 'scheduling')])
+    expect(findUnreachableSteps('test', file, general)).toEqual([])
+  })
+
+  it('warns about a step no choice routes to', () => {
+    const file = niche(
+      [step('obj_think'), step('obj_thnik_reassure')],
+      [choice('obj_think', 'scheduling'), choice('obj_thnik_reassure', 'scheduling')],
+    )
+    const problems = findUnreachableSteps('test', file, {
+      ...general,
+      choices: [...general.choices, choice('recommendation', 'obj_think')],
+    })
+    expect(problems).toHaveLength(1)
+    expect(problems[0]).toMatchObject({ level: 'warn', where: 'test:obj_thnik_reassure' })
+    expect(problems[0].message).toMatch(/R15 unreachable/)
+  })
+
+  it('never flags entry screens', () => {
+    const file = niche(
+      [step('open'), step('voicemail'), step('wrong_number'), step('dnc')],
+      [choice('open', 'recommendation')],
+    )
+    expect(findUnreachableSteps('test', file, general)).toEqual([])
+  })
+
+  it('never flags the player-swapped making_it_real_nw screen', () => {
+    const file = niche([step('making_it_real_nw')], [choice('making_it_real_nw', 'scheduling')])
+    expect(findUnreachableSteps('test', file, general)).toEqual([])
+  })
+
+  it('checks general.json against its own choices plus the niche files given', () => {
+    const shared: FlowFile = {
+      ...general,
+      steps: [...general.steps, step('obj_cost_weight')],
+      choices: [...general.choices, choice('recommendation', 'obj_cost')],
+    }
+    expect(findUnreachableSteps(GENERAL_SLUG, shared, shared).map((p) => p.where)).toEqual([
+      'general:obj_cost_weight',
+    ])
+    const referrer = niche([], [choice('uncover', 'obj_cost_weight')])
+    expect(findUnreachableSteps(GENERAL_SLUG, shared, shared, [referrer])).toEqual([])
+  })
+})
+
 describe('content/flows', () => {
+  it('has no unreachable steps', () => {
+    const gen = readFlowFile(GENERAL_SLUG)
+    const niches = listSlugs().filter((s) => s !== GENERAL_SLUG)
+    const nicheFiles = niches.map((s) => readFlowFile(s))
+    const problems = [
+      ...findUnreachableSteps(GENERAL_SLUG, gen, gen, nicheFiles),
+      ...niches.flatMap((slug) => findUnreachableSteps(slug, readFlowFile(slug), gen)),
+    ]
+    expect(problems.map((p) => `${p.where}: ${p.message}`)).toEqual([])
+  })
+
   it('has no un-listed dead ends and no stale allow-list entries', () => {
     const gen = readFlowFile(GENERAL_SLUG)
     const errors = listSlugs().flatMap((slug) =>

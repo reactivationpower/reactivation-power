@@ -336,6 +336,18 @@ as does the old "repeat it back, that's a long time" move. See example 5.
 
 The same unit-test file covers R14 and runs every checked-in flow through it.
 
+### R15. Every screen has a way in
+R12 catches screens with no way out; R15 catches screens with no way in. A
+step that no choice routes to (in its own file or in `general.json`) and
+that is not an entry screen is either a typo in a `to_step_key` or dead
+content that will drift out of date and confuse the next rewrite. Lint
+reports it as a warning. Entry screens are `open` (the player starts on the
+lowest `sort_order`) and the outcome-button screens `voicemail`,
+`wrong_number`, `dnc`; they are listed in `ENTRY_STEP_PATTERNS` next to
+`TERMINAL_STEP_PATTERNS` in `scripts/flows/lib.ts`. Screens the player swaps
+in by key rather than by button (`making_it_real_nw`) are listed in
+`PLAYER_ROUTED_STEP_PATTERNS` in the same place. See section 5.
+
 ---
 
 ## 3. The standard step skeleton
@@ -422,6 +434,13 @@ Keep them exactly like that so they stand out on the screen.
   must be listed in `KNOWN_DEAD_ENDS` in the same file, where it lints as a
   warning; lint also warns once a listed step has grown buttons so the entry
   gets removed.
+- **Every screen needs a way in.** A step that no `to_step_key` points at
+  (in its niche file or in `general.json`; for `general.json` the niche
+  files' buttons count too) is unreachable. Lint R15 warns unless the step
+  is an entry screen (`open`, `voicemail`, `wrong_number`, `dnc`; see
+  `ENTRY_STEP_PATTERNS` in `scripts/flows/lib.ts`) or one the player swaps
+  in by key (`PLAYER_ROUTED_STEP_PATTERNS`). Fix the typo or delete the
+  step; do not leave content nobody can reach.
 - Choice `variant` colours the button: `positive` (they agreed), `caution`
   (hesitant), `negative` (bad news), `objection`, `default` (continue).
 
