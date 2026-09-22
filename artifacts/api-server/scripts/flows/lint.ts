@@ -34,12 +34,12 @@
 //       no button leads to); entry screens are listed in lib.ts next to
 //       TERMINAL_STEP_PATTERNS
 // Plus the structural checks apply runs (routing targets, tokens).
-//   R15 concern chips for a parent-mode niche (any flow with a mode_parent*
-//       step) keep their spoken phrase pronoun-free and token-free, so
-//       {{main_concern}} reads the same to the patient or a parent
 //   R16 the review screen the caller reaches (the file's own or general's)
 //       names every impact bucket the effective making_it_real* screens
 //       offered, so the read-back never names buckets the patient never heard
+//   R17 concern chips for a parent-mode niche (any flow with a mode_parent*
+//       step) keep their spoken phrase pronoun-free and token-free, so
+//       {{main_concern}} reads the same to the patient or a parent
 import { pathToFileURL } from 'node:url'
 import {
   GENERAL_SLUG,
@@ -934,7 +934,7 @@ function questionsIn(line: string): number {
 }
 
 /**
- * R15: on a parent-mode niche the caller may be speaking with a parent, so
+ * R17: on a parent-mode niche the caller may be speaking with a parent, so
  * a chip's spoken phrase is injected into sentences ("take a look at
  * {{main_concern}}") that must read the same to either listener. The phrase
  * therefore carries no second-person word and no {{token}}: mergeScript is
@@ -956,14 +956,14 @@ export function lintParentChips(slug: string, file: FlowFile): Problem[] {
       problems.push({
         level: 'error',
         where,
-        message: `R15 spoken phrase "${chip.spoken}" says "${pronoun[1]}"; this niche runs in parent mode, so write it pronoun-free ("the shifting", "how the smile looks in photos")`,
+        message: `R17 spoken phrase "${chip.spoken}" says "${pronoun[1]}"; this niche runs in parent mode, so write it pronoun-free ("the shifting", "how the smile looks in photos")`,
       })
     }
     if (chip.spoken.includes('{{')) {
       problems.push({
         level: 'error',
         where,
-        message: `R15 spoken phrase "${chip.spoken}" contains a {{token}}; tokens inside a chip are never expanded, so the caller would read it raw`,
+        message: `R17 spoken phrase "${chip.spoken}" contains a {{token}}; tokens inside a chip are never expanded, so the caller would read it raw`,
       })
     }
   }
@@ -983,7 +983,7 @@ function reviewNamesBucket(reviewText: string, bucket: string): boolean {
   if (words.length === 0) return false
   return words.every((w) => new RegExp(`\\b${w.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&')}\\b`).test(reviewText))
 }
-/** Second-person words that misaddress a parent when spoken about the patient (R15). */
+/** Second-person words that misaddress a parent when spoken about the patient (R17). */
 export const SECOND_PERSON = /\b(you|your|yours|yourself)\b/i
 
 

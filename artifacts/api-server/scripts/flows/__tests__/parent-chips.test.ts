@@ -38,7 +38,7 @@ describe('hasParentMode', () => {
   })
 })
 
-describe('R15 parent-mode concern chips', () => {
+describe('R17 parent-mode concern chips', () => {
   const parentFlow = nicheFile(PARENT_NICHE, step('open'), step('mode_parent'))
 
   it('passes a pronoun-free, token-free chip list', () => {
@@ -62,7 +62,7 @@ describe('R15 parent-mode concern chips', () => {
       expect(problems).toHaveLength(1)
       expect(problems[0]!.level).toBe('error')
       expect(problems[0]!.where).toBe('clear-aligners:chip "Smile"')
-      expect(problems[0]!.message).toMatch(/^R15 /)
+      expect(problems[0]!.message).toMatch(/^R17 /)
     },
   )
 
