@@ -549,6 +549,13 @@ Known findings for the batch tasks, from the baseline lint:
   the database (they existed that way before the rewrite), so the player
   shows "End of script" after them. Adding choices is a routing change and
   is deliberately not part of a text rewrite; it needs its own decision.
+  When that decision is made, the niche-objection pattern is two buttons:
+  a `positive` label quoting the patient's yes to the screen's closing
+  question -> `scheduling`, and `Another concern came up` (`objection`) ->
+  `uncover`. Add both choice objects to the JSON (sort_order 0 and 1) and
+  `flows:apply` inserts them; re-export to confirm the round-trip. This is
+  how chiropractic and decompression `obj_came_back_stopped` /
+  `obj_managing_own` and every Acoustic Wave niche objection were wired.
 - Every niche shares the general objections (`obj_cost`, `obj_time`,
   `obj_spouse`, `obj_other_option`, `obj_taken_care_of`) unless it overrides
   them. Those are already rewritten; do not copy the old versions back in.

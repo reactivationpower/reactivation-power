@@ -341,6 +341,20 @@
       "sort_order": 1
     },
     {
+      "from_step_key": "obj_came_back_stopped",
+      "label": "“Yes, get me in”",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_came_back_stopped",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
       "from_step_key": "obj_fixed_for_good",
       "label": "“Yes, let’s schedule”",
       "to_step_key": "scheduling",
@@ -363,6 +377,20 @@
     },
     {
       "from_step_key": "obj_injections_surgery",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_managing_own",
+      "label": "“Yes, I’m open to one visit”",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_managing_own",
       "label": "Another concern came up",
       "to_step_key": "uncover",
       "variant": "objection",
