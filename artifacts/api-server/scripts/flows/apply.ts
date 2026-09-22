@@ -260,7 +260,7 @@ async function main() {
   }
   if (errors.length > 0) {
     printProblems(errors)
-    console.error(`\nRefusing to apply: ${errors.length} structural error(s).`)
+    console.error(`\nRefusing to apply: ${errors.length} structural / dead-end error(s). Nothing written.`)
     process.exit(1)
   }
 
