@@ -45,13 +45,13 @@
     {
       "step_key": "digging_in",
       "title": "Joint Questions",
-      "content": "(Write down every concern they name.)\n\nIs either knee bothering you?\n\nHow about either hip?\n\nIs either shoulder bothering you?\n\nAny trouble with your hands or grip?\n\nAny neck or back pain?\n\nAny morning stiffness?\n\nAny swelling after activity?\n\nAre you taking any medications for joint pain?\n\nOf those, which one bothers you the most?\n\n(Tap their answer below.)",
+      "content": "(Write down every concern they name.)\n\n{{contact_first_name}}, I'm going to run through a few things people often notice. Just say yes if you get them at all, even if they're mild or come and go.\n\nIs either knee bothering you?\n\nHow about either hip?\n\nIs either shoulder bothering you?\n\nAny trouble with your hands or grip?\n\nAny neck or back pain?\n\nAny morning stiffness?\n\nAny swelling after activity?\n\nAre you taking any medications for joint pain?\n\nOf those, which one bothers you the most?\n\n(Tap their answer below.)",
       "sort_order": 7
     },
     {
       "step_key": "digging_in_returning",
       "title": "Joint Questions",
-      "content": "(Write down every concern they name.)\n\nIs either knee bothering you?\n\nHow about either hip?\n\nIs either shoulder bothering you?\n\nAny trouble with your hands or grip?\n\nAny neck or back pain?\n\nAny morning stiffness?\n\nAny swelling after activity?\n\nAre you taking any medications for joint pain?\n\nBetween these and what returned, which one bothers you the most?\n\n(Tap their answer below.)",
+      "content": "(Write down every concern they name.)\n\n{{contact_first_name}}, I'm going to run through a few things people often notice. Just say yes if you get them at all, even if they're mild or come and go.\n\nIs either knee bothering you?\n\nHow about either hip?\n\nIs either shoulder bothering you?\n\nAny trouble with your hands or grip?\n\nAny neck or back pain?\n\nAny morning stiffness?\n\nAny swelling after activity?\n\nAre you taking any medications for joint pain?\n\nBetween these and what returned, which one bothers you the most?\n\n(Tap their answer below.)",
       "sort_order": 7
     },
     {
@@ -135,7 +135,7 @@
     {
       "step_key": "digging_in_fully_back",
       "title": "Joint Questions",
-      "content": "(Write down every concern they name.)\n\nIs either knee bothering you?\n\nHow about either hip?\n\nIs either shoulder bothering you?\n\nAny trouble with your hands or grip?\n\nAny neck or back pain?\n\nAny morning stiffness?\n\nAny swelling after activity?\n\nAre you taking any medications for joint pain?\n\nBetween these and the pain that's back, which one bothers you the most?\n\n(Tap their answer below.)",
+      "content": "(Write down every concern they name.)\n\n{{contact_first_name}}, I'm going to run through a few things people often notice. Just say yes if you get them at all, even if they're mild or come and go.\n\nIs either knee bothering you?\n\nHow about either hip?\n\nIs either shoulder bothering you?\n\nAny trouble with your hands or grip?\n\nAny neck or back pain?\n\nAny morning stiffness?\n\nAny swelling after activity?\n\nAre you taking any medications for joint pain?\n\nBetween these and the pain that's back, which one bothers you the most?\n\n(Tap their answer below.)",
       "sort_order": 110
     },
     {

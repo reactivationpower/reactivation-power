@@ -51,13 +51,13 @@
     {
       "step_key": "digging_in",
       "title": "Questions: Update the File",
-      "content": "(Write down every concern they name.)\n\nAre you having any pain or stiffness?\n\nAny headaches or migraines?\n\nHow have stress or anxiety been lately?\n\nAre you having any sleep issues?\n\nAny fatigue or low energy?\n\nAre you having any digestive issues?\n\nAny allergies or sinus problems?\n\nAny numbness or tingling?\n\nAny women's health concerns?\n\nOf those, which one bothers you the most?\n\n(Tap their answer below.)",
+      "content": "(Write down every concern they name.)\n\n{{contact_first_name}}, I'm going to run through a few things people often notice. Just say yes if you get them at all, even if they're mild or come and go.\n\nAre you having any pain or stiffness?\n\nAny headaches or migraines?\n\nHow have stress or anxiety been lately?\n\nAre you having any sleep issues?\n\nAny fatigue or low energy?\n\nAre you having any digestive issues?\n\nAny allergies or sinus stuff?\n\nAny numbness or tingling?\n\nAny women's health concerns?\n\nOf those, which one bothers you the most?\n\n(Tap their answer below.)",
       "sort_order": 7
     },
     {
       "step_key": "digging_in_returning",
       "title": "Questions: Symptoms Returning",
-      "content": "(Write down every concern they name.)\n\nAre you having any pain or stiffness?\n\nAny headaches or migraines?\n\nHow have stress or anxiety been lately?\n\nAre you having any sleep issues?\n\nAny fatigue or low energy?\n\nAre you having any digestive issues?\n\nAny allergies or sinus problems?\n\nAny numbness or tingling?\n\nAny women's health concerns?\n\nIncluding what returned, which one bothers you the most?\n\n(Tap their answer below.)",
+      "content": "(Write down every concern they name.)\n\n{{contact_first_name}}, I'm going to run through a few things people often notice. Just say yes if you get them at all, even if they're mild or come and go.\n\nAre you having any pain or stiffness?\n\nAny headaches or migraines?\n\nHow have stress or anxiety been lately?\n\nAre you having any sleep issues?\n\nAny fatigue or low energy?\n\nAre you having any digestive issues?\n\nAny allergies or sinus stuff?\n\nAny numbness or tingling?\n\nAny women's health concerns?\n\nIncluding what returned, which one bothers you the most?\n\n(Tap their answer below.)",
       "sort_order": 7
     },
     {
@@ -135,7 +135,7 @@
     {
       "step_key": "digging_in_fully_back",
       "title": "Questions: Symptoms Fully Back",
-      "content": "(Write down every concern they name.)\n\nAre you having any pain or stiffness?\n\nAny headaches or migraines?\n\nHow have stress or anxiety been lately?\n\nAre you having any sleep issues?\n\nAny fatigue or low energy?\n\nAre you having any digestive issues?\n\nAny allergies or sinus problems?\n\nAny numbness or tingling?\n\nAny women's health concerns?\n\nIncluding what came back, which one bothers you the most?\n\n(Tap their answer below.)",
+      "content": "(Write down every concern they name.)\n\n{{contact_first_name}}, I'm going to run through a few things people often notice. Just say yes if you get them at all, even if they're mild or come and go.\n\nAre you having any pain or stiffness?\n\nAny headaches or migraines?\n\nHow have stress or anxiety been lately?\n\nAre you having any sleep issues?\n\nAny fatigue or low energy?\n\nAre you having any digestive issues?\n\nAny allergies or sinus stuff?\n\nAny numbness or tingling?\n\nAny women's health concerns?\n\nIncluding what came back, which one bothers you the most?\n\n(Tap their answer below.)",
       "sort_order": 109
     },
     {

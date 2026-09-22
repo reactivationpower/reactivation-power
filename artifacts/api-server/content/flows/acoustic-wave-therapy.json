@@ -27,13 +27,13 @@
     {
       "step_key": "digging_in",
       "title": "Questions: Update the File",
-      "content": "(Write down every area they name.)\n\nDo you have any nagging joint pain?\n\nAny heel or foot pain?\n\nAny tendon trouble?\n\nIs an old injury bothering you?\n\nDo you have any muscle knots?\n\nAny neck or back soreness?\n\nHave you cut back on any activities?\n\nOf those, which one bothers you the most?\n\n(Tap their answer below.)",
+      "content": "(Write down every area they name.)\n\n{{contact_first_name}}, I'm going to run through a few things people often notice. Just say yes if you get them at all, even if they're mild or come and go.\n\nDo you have any nagging joint pain?\n\nAny heel or foot pain?\n\nAny tendon trouble?\n\nIs an old injury bothering you?\n\nDo you have any muscle knots?\n\nAny neck or back soreness?\n\nHave you cut back on any activities?\n\nOf those, which one bothers you the most?\n\n(Tap their answer below.)",
       "sort_order": 7
     },
     {
       "step_key": "digging_in_returning",
       "title": "Returning: Check Other Areas",
-      "content": "(Write down every area they name.)\n\nDo you have any nagging joint pain?\n\nAny heel or foot pain?\n\nAny tendon trouble?\n\nIs an old injury bothering you?\n\nDo you have any muscle knots?\n\nAny neck or back soreness?\n\nHave you cut back on any activities?\n\nBetween those and the area returning, which one bothers you the most?\n\n(Tap their answer below.)",
+      "content": "(Write down every area they name.)\n\n{{contact_first_name}}, I'm going to run through a few things people often notice. Just say yes if you get them at all, even if they're mild or come and go.\n\nDo you have any nagging joint pain?\n\nAny heel or foot pain?\n\nAny tendon trouble?\n\nIs an old injury bothering you?\n\nDo you have any muscle knots?\n\nAny neck or back soreness?\n\nHave you cut back on any activities?\n\nBetween those and the area returning, which one bothers you the most?\n\n(Tap their answer below.)",
       "sort_order": 7
     },
     {
@@ -99,7 +99,7 @@
     {
       "step_key": "digging_in_fully_back",
       "title": "Fully Back: Check Other Areas",
-      "content": "(Write down every area they name.)\n\nDo you have any nagging joint pain?\n\nAny heel or foot pain?\n\nAny tendon trouble?\n\nIs an old injury bothering you?\n\nDo you have any muscle knots?\n\nAny neck or back soreness?\n\nHave you cut back on any activities?\n\nBetween those and the area fully back, which one bothers you the most?\n\n(Tap their answer below.)",
+      "content": "(Write down every area they name.)\n\n{{contact_first_name}}, I'm going to run through a few things people often notice. Just say yes if you get them at all, even if they're mild or come and go.\n\nDo you have any nagging joint pain?\n\nAny heel or foot pain?\n\nAny tendon trouble?\n\nIs an old injury bothering you?\n\nDo you have any muscle knots?\n\nAny neck or back soreness?\n\nHave you cut back on any activities?\n\nBetween those and the area fully back, which one bothers you the most?\n\n(Tap their answer below.)",
       "sort_order": 24
     },
     {

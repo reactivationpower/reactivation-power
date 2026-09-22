@@ -45,13 +45,13 @@
     {
       "step_key": "digging_in",
       "title": "Questions: Update the File",
-      "content": "(Write down every issue they name.)\n\nHave you had any neck pain?\n\nHave you had any back pain?\n\nAre you having trouble sitting?\n\nDoes any pain travel down a leg or arm?\n\nDo you have morning stiffness?\n\nAre you having trouble bending or lifting?\n\nHave you had any flare-ups?\n\nAre there activities you've given up because of it?\n\nOf those, which one bothers you the most?\n\n(Tap their answer below.)",
+      "content": "(Write down every issue they name.)\n\n{{contact_first_name}}, I'm going to run through a few things people often notice. Just say yes if you get them at all, even if they're mild or come and go.\n\nHave you had any neck pain?\n\nHave you had any back pain?\n\nAre you having trouble sitting?\n\nDoes any pain travel down a leg or arm?\n\nDo you have morning stiffness?\n\nAre you having trouble bending or lifting?\n\nHave you had any flare-ups?\n\nAre there activities you've given up because of it?\n\nOf those, which one bothers you the most?\n\n(Tap their answer below.)",
       "sort_order": 7
     },
     {
       "step_key": "digging_in_returning",
       "title": "Questions: Symptoms Returning",
-      "content": "(Include what they mentioned earlier as you write down each issue.)\n\nHave you had any neck pain?\n\nHave you had any back pain?\n\nAre you having trouble sitting?\n\nDoes any pain travel down a leg or arm?\n\nDo you have morning stiffness?\n\nAre you having trouble bending or lifting?\n\nHave you had any flare-ups?\n\nAre there activities you've given up because of it?\n\nBetween these and what returned, which one bothers you the most?\n\n(Tap their answer below.)",
+      "content": "(Include what they mentioned earlier as you write down each issue.)\n\n{{contact_first_name}}, I'm going to run through a few things people often notice. Just say yes if you get them at all, even if they're mild or come and go.\n\nHave you had any neck pain?\n\nHave you had any back pain?\n\nAre you having trouble sitting?\n\nDoes any pain travel down a leg or arm?\n\nDo you have morning stiffness?\n\nAre you having trouble bending or lifting?\n\nHave you had any flare-ups?\n\nAre there activities you've given up because of it?\n\nBetween these and what returned, which one bothers you the most?\n\n(Tap their answer below.)",
       "sort_order": 7
     },
     {
@@ -141,7 +141,7 @@
     {
       "step_key": "digging_in_fully_back",
       "title": "Questions: Symptoms Fully Back",
-      "content": "(Include the symptoms already back as you write down each issue.)\n\nHave you had any neck pain?\n\nHave you had any back pain?\n\nAre you having trouble sitting?\n\nDoes any pain travel down a leg or arm?\n\nDo you have morning stiffness?\n\nAre you having trouble bending or lifting?\n\nHave you had any flare-ups?\n\nAre there activities you've given up because of it?\n\nIncluding what came back, which one bothers you the most?\n\n(Tap their answer below.)",
+      "content": "(Include the symptoms already back as you write down each issue.)\n\n{{contact_first_name}}, I'm going to run through a few things people often notice. Just say yes if you get them at all, even if they're mild or come and go.\n\nHave you had any neck pain?\n\nHave you had any back pain?\n\nAre you having trouble sitting?\n\nDoes any pain travel down a leg or arm?\n\nDo you have morning stiffness?\n\nAre you having trouble bending or lifting?\n\nHave you had any flare-ups?\n\nAre there activities you've given up because of it?\n\nIncluding what came back, which one bothers you the most?\n\n(Tap their answer below.)",
       "sort_order": 109
     },
     {

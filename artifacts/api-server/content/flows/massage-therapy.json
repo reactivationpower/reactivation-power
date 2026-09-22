@@ -51,13 +51,13 @@
     {
       "step_key": "digging_in_still",
       "title": "Questions: Still Feeling Good",
-      "content": "(Ask in order. Write down even small concerns.)\n\nAny neck or shoulder tension?\n\nAny low back tension?\n\nHave you had any headaches?\n\nHow has your sleep been?\n\nHow has your stress been?\n\nOf those, which one bothers you the most?\n\n(Tap their answer below.)",
+      "content": "(Ask in order. Write down even small concerns.)\n\n{{contact_first_name}}, I'm going to run through a few things people often notice. Just say yes if you get them at all, even if they're mild or come and go.\n\nAny neck or shoulder tension?\n\nAny low back tension?\n\nHave you had any headaches?\n\nHow has your sleep been?\n\nHow has your stress been?\n\nOf those, which one bothers you the most?\n\n(Tap their answer below.)",
       "sort_order": 8
     },
     {
       "step_key": "digging_in",
       "title": "Questions: Tension Is Back",
-      "content": "(Ask in order. Write down every concern.)\n\nAny neck or shoulder tension?\n\nAny low back tension?\n\nHave you had any headaches?\n\nHow has your sleep been?\n\nHow has your stress been?\n\nBetween {{complaint_reference}} and these concerns, which one bothers you the most?\n\n(Tap their answer below.)",
+      "content": "(Ask in order. Write down every concern.)\n\n{{contact_first_name}}, I'm going to run through a few things people often notice. Just say yes if you get them at all, even if they're mild or come and go.\n\nAny neck or shoulder tension?\n\nAny low back tension?\n\nHave you had any headaches?\n\nHow has your sleep been?\n\nHow has your stress been?\n\nBetween {{complaint_reference}} and these concerns, which one bothers you the most?\n\n(Tap their answer below.)",
       "sort_order": 9
     },
     {

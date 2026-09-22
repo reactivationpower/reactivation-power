@@ -45,13 +45,13 @@
     {
       "step_key": "digging_in",
       "title": "Questions: Update the File",
-      "content": "(Write down every concern they name.)\n\nHave you been getting headaches?\n\nHave you noticed fatigue or low energy?\n\nAre you having any sleep problems?\n\nAre allergies or sinus problems bothering you?\n\nHave you noticed more stress or irritability?\n\nAre you having any tension, pain, or soreness?\n\nAre you taking any medications for these concerns?\n\nOf those, which one bothers you the most?\n\n(Tap their answer below.)",
+      "content": "(Write down every concern they name.)\n\n{{contact_first_name}}, I'm going to run through a few things people often notice. Just say yes if you get them at all, even if they're mild or come and go.\n\nHave you been getting headaches?\n\nHave you noticed fatigue or low energy?\n\nHow's your sleep been?\n\nAny allergies or sinus stuff?\n\nHave you noticed more stress or irritability?\n\nAre you having any tension, pain, or soreness?\n\nAre you taking any medications for these concerns?\n\nOf those, which one bothers you the most?\n\n(Tap their answer below.)",
       "sort_order": 7
     },
     {
       "step_key": "digging_in_returning",
       "title": "Questions: Flare-Up",
-      "content": "(Write down every concern they name.)\n\nHave you been getting headaches?\n\nHave you noticed fatigue or low energy?\n\nAre you having any sleep problems?\n\nAre allergies or sinus problems bothering you?\n\nHave you noticed more stress or irritability?\n\nAre you having any tension, pain, or soreness?\n\nAre you taking any medications for these concerns?\n\nBetween the flare-up and these concerns, which one bothers you the most?\n\n(Tap their answer below.)",
+      "content": "(Write down every concern they name.)\n\n{{contact_first_name}}, I'm going to run through a few things people often notice. Just say yes if you get them at all, even if they're mild or come and go.\n\nHave you been getting headaches?\n\nHave you noticed fatigue or low energy?\n\nHow's your sleep been?\n\nAny allergies or sinus stuff?\n\nHave you noticed more stress or irritability?\n\nAre you having any tension, pain, or soreness?\n\nAre you taking any medications for these concerns?\n\nBetween the flare-up and these concerns, which one bothers you the most?\n\n(Tap their answer below.)",
       "sort_order": 7
     },
     {
@@ -141,7 +141,7 @@
     {
       "step_key": "digging_in_fully_back",
       "title": "Questions: Fully Back",
-      "content": "(Write down every concern they name.)\n\nHave you been getting headaches?\n\nHave you noticed fatigue or low energy?\n\nAre you having any sleep problems?\n\nAre allergies or sinus problems bothering you?\n\nHave you noticed more stress or irritability?\n\nAre you having any tension, pain, or soreness?\n\nAre you taking any medications for these concerns?\n\nBetween the original problem and these concerns, which one bothers you the most?\n\n(Tap their answer below.)",
+      "content": "(Write down every concern they name.)\n\n{{contact_first_name}}, I'm going to run through a few things people often notice. Just say yes if you get them at all, even if they're mild or come and go.\n\nHave you been getting headaches?\n\nHave you noticed fatigue or low energy?\n\nHow's your sleep been?\n\nAny allergies or sinus stuff?\n\nHave you noticed more stress or irritability?\n\nAre you having any tension, pain, or soreness?\n\nAre you taking any medications for these concerns?\n\nBetween the original problem and these concerns, which one bothers you the most?\n\n(Tap their answer below.)",
       "sort_order": 104
     },
     {
