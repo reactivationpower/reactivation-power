@@ -164,6 +164,9 @@ const COMPLAINTS: Record<string, string[]> = {
   // Aesthetic niche: name the service, never the body area, so the contact
   // record can't read as a judgment (the script never speaks this field).
   'Red Light / Body Contouring': ['Red light body contouring', 'Body contouring series'],
+  Acupuncture: ['Chronic neck and shoulder pain', 'Migraines', 'Stress and poor sleep', 'Low energy'],
+  'Massage Therapy': ['Neck and shoulder tension', 'Low back tightness', 'Tension headaches'],
+  'Acoustic Wave Therapy': ['Plantar fasciitis', 'Achilles tendonitis', 'Chronic shoulder pain', 'Old knee injury'],
 }
 
 const SERVICE_LABELS: Record<string, string[]> = {
@@ -174,6 +177,9 @@ const SERVICE_LABELS: Record<string, string[]> = {
   'Gut Health': ['Gut Health Program', 'Digestive Health Consult'],
   Neuropathy: ['Neuropathy Program', 'Neuropathy Treatment'],
   'Red Light / Body Contouring': ['Red Light Body Contouring', 'Red Light Sessions'],
+  Acupuncture: ['Acupuncture Session', 'Acupuncture Series'],
+  'Massage Therapy': ['Therapeutic Massage', 'Deep Tissue Massage'],
+  'Acoustic Wave Therapy': ['Acoustic Wave Therapy', 'Shockwave Session'],
 }
 
 // Notes are written the way a real caller would type them, so they read
@@ -621,7 +627,7 @@ export async function seedDemoData(): Promise<SeedSummary> {
   for (let i = 0; i < 40; i++) {
     const [first, last] = nameQueue.shift()!
     // The first few names carry the one-patient showcase niches (see config)
-    // and are stamped 08:00, 08:01, 08:02 so they lead today's cold-call batch.
+    // and are stamped 08:00, 08:01, … so they lead today's cold-call batch.
     const showcase = DEMO_SHOWCASE_NICHES[i] as (typeof DEMO_SHOWCASE_NICHES)[number] | undefined
     const niche = showcase ?? DEMO_NICHES[nicheCycle[(i + 3) % nicheCycle.length]]
     // Always draw the minute so the PRNG stream, and the rest of the story, is unchanged.

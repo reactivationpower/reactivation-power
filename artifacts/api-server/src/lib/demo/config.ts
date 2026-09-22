@@ -112,6 +112,9 @@ export const DEMO_NICHES = [
   { id: '9e6f86fb-f3a9-4cf7-802e-15826e292d66', name: 'Gut Health' },
   { id: '3f538f36-4aff-43a5-b135-5fdb1edbe6e5', name: 'Neuropathy' },
   { id: '645460da-9941-4eff-b209-ec11471ca8e8', name: 'Red Light / Body Contouring' },
+  { id: 'f68876f9-e021-41d0-bcd9-fb34a6a45051', name: 'Acupuncture' },
+  { id: 'b5a41f4d-fdf1-4e6c-92a9-c9bc792fc3d6', name: 'Massage Therapy' },
+  { id: '6b0c9c42-51cd-42b8-8f72-c2a6f4eae35d', name: 'Acoustic Wave Therapy' },
 ] as const
 
 /**
@@ -124,8 +127,20 @@ export const DEMO_NICHES = [
  *   0 Brenda Fairbanks  -> Gut Health
  *   1 Nicholas Sung     -> Neuropathy
  *   2 Pamela Redfield   -> Red Light / Body Contouring
+ *   3 Eric Albrecht     -> Acupuncture
+ *   4 Emma Castillo     -> Massage Therapy
+ *   5 Jonathan Prescott -> Acoustic Wave Therapy
+ * The rest of that cohort is stamped 08:05–08:40, so keep this list at six
+ * or fewer entries to stay at or ahead of every non-showcase timestamp.
  */
-export const DEMO_SHOWCASE_NICHES = [DEMO_NICHES[4], DEMO_NICHES[5], DEMO_NICHES[6]] as const
+export const DEMO_SHOWCASE_NICHES = [
+  DEMO_NICHES[4],
+  DEMO_NICHES[5],
+  DEMO_NICHES[6],
+  DEMO_NICHES[7],
+  DEMO_NICHES[8],
+  DEMO_NICHES[9],
+] as const
 
 /** Default (owner_id null) pipeline stages */
 export const DEMO_STAGE_IDS = {
