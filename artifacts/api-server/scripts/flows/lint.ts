@@ -9,7 +9,7 @@
 //   R1  one question per sentence (two "?" in one breath)
 //   R2  spoken sentences under 20 words, average around 10 per step
 //   R3  everyday vocabulary (swap-table words)
-//   R4  banned sales stock phrases
+//   R4  banned sales stock phrases, plus the retired closes (RETIRED_PHRASES)
 //   R5  never claim what the patient said or felt in the past
 //   R6  {{provider_name}} at most once per screen, then "we"
 //   R7  coaching notes wrapped in parentheses, one line each, never mixed
@@ -89,6 +89,17 @@ export const BANNED_PHRASES: string[] = [
   "that's real, and i'm glad you told me",
 ]
 
+/**
+ * Closing lines the owner retired from every script. Unlike BANNED_PHRASES
+ * these were once the house close, so a batch rewrite or a hand edit in the
+ * DB is likely to bring them back. Matched case-insensitively against the
+ * whole step (spoken text and coaching notes), with curly apostrophes and
+ * ellipses normalised first.
+ */
+export const RETIRED_PHRASES: string[] = [
+  'my recommendation is that',
+  'do you see how that could be the case',
+]
 /** Clinical or copy words -> plain words. Left side is matched whole-word, case-insensitive. */
 export const WORD_SWAPS: Array<[string, string]> = [
   ['laxity', 'loosening'],
@@ -286,6 +297,13 @@ export function lintFile(slug: string, file: FlowFile, general: FlowFile): Probl
     // R8 legacy pronoun tokens
     for (const t of tokensIn(step.content)) {
       if (REC_TOKENS.includes(t)) push('error', where, `R8 uses {{${t}}}; write {{provider_name}} once, then "we"`)
+    }
+
+    // R4 retired closes: checked over the whole step, notes included, so a
+    // retired line cannot hide inside a coaching note either.
+    const normalisedStep = normalisePhraseText(step.content)
+    for (const phrase of RETIRED_PHRASES) {
+      if (normalisedStep.includes(phrase)) push('error', where, `R4 retired close "${phrase}"; the script no longer uses this line`)
     }
 
     // R6 provider named once
@@ -500,3 +518,13 @@ function main() {
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) main()
+
+/** Lower-case with straight quotes, a plain ellipsis and single spaces so phrase lists match either typography. */
+function normalisePhraseText(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/[\u201c\u201d]/g, '"')
+    .replace(/\u2026/g, '...')
+    .replace(/\s+/g, ' ')
+}

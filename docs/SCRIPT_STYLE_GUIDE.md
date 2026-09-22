@@ -98,6 +98,19 @@ Plain replacements: "I understand." "That happens." "That's fair." "Okay."
 
 Lint flags every one of these.
 
+**Retired closes.** Two lines used to be the house close and were retired from
+every script so callers hear one closing voice (the R11 bridge plus "Can I make
+a recommendation?"). They are the most likely phrases for a batch rewrite or a
+hand edit in the DB to bring back, so lint treats them as an error, not a
+warning, and checks the whole step including coaching notes:
+
+- "My recommendation is that…"
+- "Do you see how that could be the case?"
+
+The list lives in `RETIRED_PHRASES` in `artifacts/api-server/scripts/flows/lint.ts`,
+next to the R4 stock-phrase list. Add to it there when another line is retired;
+do not reintroduce a retired line under a different rule.
+
 ### R5. Never claim what the patient said or felt
 The caller was not in the room. "I remember how happy you were" is a lie the
 patient can hear. "You told us it was about looking as good as you feel" is a
