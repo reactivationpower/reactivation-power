@@ -40,6 +40,12 @@
 //   R17 concern chips for a parent-mode niche (any flow with a mode_parent*
 //       step) keep their spoken phrase pronoun-free and token-free, so
 //       {{main_concern}} reads the same to the patient or a parent
+//   R18 every niche flow file has a CONCERN_OPTIONS entry under its niche
+//       name (error: the question screen would fall back to the generic
+//       phrase), and every CONCERN_OPTIONS key names a flow file (warn: the
+//       chips are dead data). Niche name is the join key because the player
+//       looks chips up by the niche row's name, which apply copies from the
+//       file's niche block.
 import { pathToFileURL } from 'node:url'
 import {
   GENERAL_SLUG,
@@ -481,6 +487,10 @@ export function lintFile(
     }
   }
 
+  // R18 a niche flow with no concern chips sends callers to the generic
+  // question screen
+  problems.push(...lintChipPresence(slug, file))
+
   // R10 chips <-> questions, for niches with concern chips
   const chips = file.niche ? CONCERN_OPTIONS[file.niche.name] : undefined
   if (chips && chips.length > 0) {
@@ -531,6 +541,13 @@ export function lintFile(
   return problems
 }
 
+/**
+ * Niche names that deliberately ship a call script without concern chips.
+ * Empty on purpose: every niche so far has chips. Add a name here (with a
+ * comment saying why the generic "what's been bothering you the most"
+ * question is acceptable for it) rather than skipping R18.
+ */
+export const CHIPLESS_NICHES: ReadonlySet<string> = new Set<string>([])
 /**
  * R16: the review screen reads back the buckets the patient actually heard.
  * The third Making It Real question offers three impact buckets ("photos,
@@ -880,6 +897,19 @@ function main() {
       console.log('')
     }
   }
+  // R18 cross-file: chip sets with no script. Reported once, on every run
+  // that covers all files (a single-slug run has nothing to compare against).
+  if (requested.length === 0) {
+    const coverage = lintChipCoverage(nicheFiles)
+    if (coverage.length > 0) {
+      totalWarnings += coverage.length
+      console.log(`WARN  ${'concern-options'.padEnd(28)} 0 error(s), ${coverage.length} warning(s)`)
+      if (!quiet) {
+        printProblems(coverage)
+        console.log('')
+      }
+    }
+  }
   console.log(`\n${slugs.length} file(s): ${totalErrors} error(s), ${totalWarnings} warning(s)`)
   process.exit(totalErrors > 0 ? 1 : 0)
 }
@@ -1023,6 +1053,43 @@ export function impactBuckets(content: string): string[] | null {
     .filter(Boolean)
   return buckets.length > 0 ? buckets : null
 }
+/**
+ * R18 (across files): every CONCERN_OPTIONS key should be the niche name of
+ * some flow file; otherwise the chips can never be shown. Warn rather than
+ * fail because a chip set may land a task ahead of its script.
+ */
+export function lintChipCoverage(nicheFiles: FlowFile[]): Problem[] {
+  const names = new Set(nicheFiles.map((f) => f.niche?.name).filter((n): n is string => Boolean(n)))
+  return Object.keys(CONCERN_OPTIONS)
+    .filter((key) => !names.has(key))
+    .map((key) => ({
+      level: 'warn' as const,
+      where: 'concern-options',
+      message: `R18 CONCERN_OPTIONS["${key}"] matches no flow file's niche name (chips are never shown; rename the key to the niche's exact name or add the flow)`,
+    }))
+}
+
+/**
+ * R18 (per file): a niche flow file must have a CONCERN_OPTIONS entry under
+ * the niche name in its niche block. The player picks chips with
+ * CONCERN_OPTIONS[niche.name], so a missing entry means the question screen
+ * shows no chips and {{main_concern}} renders as the generic fallback.
+ */
+export function lintChipPresence(slug: string, file: FlowFile): Problem[] {
+  if (!file.niche || slug === GENERAL_SLUG) return []
+  const name = file.niche.name
+  if (CHIPLESS_NICHES.has(name)) return []
+  const chips = CONCERN_OPTIONS[name]
+  if (chips && chips.length > 0) return []
+  return [{
+    level: 'error',
+    where: slug,
+    message: chips
+      ? `R18 CONCERN_OPTIONS["${name}"] is empty; callers get the generic question screen (add chips in lib/niche-catalog or allow-list the niche in CHIPLESS_NICHES)`
+      : `R18 no CONCERN_OPTIONS entry for niche "${name}" (lib/niche-catalog/src/concern-options.ts); callers get the generic question screen (add chips under that exact name or allow-list the niche in CHIPLESS_NICHES)`,
+  }]
+}
+
 // CLI entrypoint. Keep this last: main() reads top-level constants declared
 // below the functions that use them, and a call above them throws a TDZ
 // ReferenceError at runtime that import-only unit tests never see.
