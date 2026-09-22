@@ -33,7 +33,7 @@
     {
       "step_key": "permission_questions",
       "title": "Ask Permission for the Questions",
-      "content": "{{contact_first_name}}, I'm updating your file anyway. Can I ask you a few quick questions so it's up to date?\n\n(Wait for the yes. Most people stop thinking about an implant once it feels solid. The questions find what they'd never think to mention.)",
+      "content": "While I have you, {{contact_first_name}}, can I ask you a few quick questions about anything else you've noticed?\n\n(Wait for the yes. Most people stop thinking about an implant once it feels solid. The questions find what they'd never think to mention.)",
       "sort_order": 6
     },
     {

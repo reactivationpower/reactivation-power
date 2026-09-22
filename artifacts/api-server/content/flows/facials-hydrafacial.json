@@ -15,7 +15,7 @@
     {
       "step_key": "resp_doing_great",
       "title": "Skin Still Feels Great",
-      "content": "That's great to hear, {{contact_first_name}}. Your notes say you were happy with how your skin looked. Is it nice that it still feels good?\n\n(Let them answer.)",
+      "content": "That's great to hear, {{contact_first_name}}. That's exactly what we hope for when someone finishes treatment with us. {{provider_name}} will be glad to know you're still happy with the results.\n\n(Let them respond, then continue.)",
       "sort_order": 2
     },
     {
@@ -33,7 +33,7 @@
     {
       "step_key": "permission_questions",
       "title": "Ask Permission for the Questions",
-      "content": "{{contact_first_name}}, I'm updating your file anyway. Can I ask a few questions about anything else you've noticed?\n\n(Wait for the yes.)",
+      "content": "While I have you, {{contact_first_name}}, can I ask you a few quick questions about anything else you've noticed?\n\n(Wait for the yes.)",
       "sort_order": 6
     },
     {

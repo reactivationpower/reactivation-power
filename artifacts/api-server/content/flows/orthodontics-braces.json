@@ -33,7 +33,7 @@
     {
       "step_key": "permission_questions",
       "title": "Ask Permission for the Questions",
-      "content": "{{contact_first_name}}, I'm updating {{pt_your_file}} anyway. Can I ask a few quick questions about how the smile and the bite are holding up? Teeth move so slowly that nobody catches it happening.\n\n(Wait for the yes.)",
+      "content": "While I have you, {{contact_first_name}}, can I ask a few quick questions about how the smile is holding up? Teeth move so slowly that nobody catches it happening.\n\n(Wait for the yes.)",
       "sort_order": 6
     },
     {
@@ -57,7 +57,7 @@
     {
       "step_key": "making_it_real",
       "title": "Making It Real",
-      "content": "(Ask these three questions in order. Pause after each and let them answer.)\n\nHow long has it been on {{pt_your}} mind, like a few weeks, or longer than that?\n\n(Let them answer.)\n\nIs it something that comes up now and then, or every time {{pt_your}} smile is in a photo?\n\n(Let them answer.)\n\nWhen it's at its worst, does it ever interfere with photos, smiling around people, or feeling confident?\n\n(Let them answer. Repeat back whatever they name.)\n\nThank you for sharing that. It makes sense, and it's something we help people with all the time.",
+      "content": "(Ask these three questions in order. Pause after each and let them answer.)\n\nHow long has it been on {{pt_your}} mind, like a few weeks, or longer than that?\n\n(Let them answer.)\n\nIs it something that comes up now and then, or every time {{pt_your}} smile is in a photo?\n\n(Let them answer.)\n\nWhen it's at its worst, does it ever interfere with photos, smiling around people, or {{pt_your}} confidence?\n\n(Let them answer. Repeat back whatever they name.)\n\nThank you for sharing that. It makes sense, and it's something we help people with all the time.",
       "sort_order": 8
     },
     {

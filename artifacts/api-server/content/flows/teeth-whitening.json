@@ -15,7 +15,7 @@
     {
       "step_key": "resp_doing_great",
       "title": "Still Bright",
-      "content": "That's great to hear, {{contact_first_name}}. Your notes say the color was really bothering you before we treated it. Is it nice to catch your smile in a photo and like it?\n\n(Let them answer. This is their win.)\n\n(Do not offer anything yet. Update the file first.)",
+      "content": "That's great to hear, {{contact_first_name}}. That's exactly what we hope for when someone finishes treatment with us. {{provider_name}} will be glad to know you're still happy with the results.\n\n(Let them respond, then continue.)\n\n(Do not offer anything yet. Update the file first.)",
       "sort_order": 2
     },
     {

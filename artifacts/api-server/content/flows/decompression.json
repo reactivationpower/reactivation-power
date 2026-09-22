@@ -15,7 +15,7 @@
     {
       "step_key": "resp_doing_great",
       "title": "Still Doing Great",
-      "content": "That's great to hear, {{contact_first_name}}. Your notes say you had good relief after decompression care.\n\nAre you still moving and doing the things you want to do?\n\n(Let them answer.)",
+      "content": "That's great to hear, {{contact_first_name}}. That's exactly what we hope for when someone finishes care with us. {{provider_name}} will be glad to know you're still doing well.\n\n(Let them respond, then continue.)",
       "sort_order": 2
     },
     {
@@ -33,7 +33,7 @@
     {
       "step_key": "permission_questions",
       "title": "Ask Permission",
-      "content": "{{contact_first_name}}, I'm updating your file anyway. Can I ask a few questions about anything else you've noticed?\n\n(Wait for the yes.)",
+      "content": "While I have you, {{contact_first_name}}, can I ask you a few quick questions about anything else you've noticed?\n\n(Wait for the yes.)",
       "sort_order": 6
     },
     {

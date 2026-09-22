@@ -15,7 +15,7 @@
     {
       "step_key": "resp_doing_great",
       "title": "Kept It Off",
-      "content": "That's great to hear, {{contact_first_name}}. Losing the weight was the program. Keeping it off is you. Your notes say you were really happy when you finished. Is it still feeling that way?\n\n(Let them answer. Let them enjoy it.)",
+      "content": "That's great to hear, {{contact_first_name}}. That's exactly what we hope for when someone finishes a program with us. {{provider_name}} will be glad to know you're still doing well.\n\n(Let them respond, then continue.)",
       "sort_order": 2
     },
     {

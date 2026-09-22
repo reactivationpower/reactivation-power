@@ -15,7 +15,7 @@
     {
       "step_key": "resp_doing_great",
       "title": "Doing Well: Kept It Off",
-      "content": "That's great to hear, {{contact_first_name}}. You should be proud of that. Your notes say you were feeling really good when you finished. Is that still the case?\n\n(Let them answer. Let them enjoy it.)\n\n(Do not pitch anything yet. The file questions come next.)",
+      "content": "That's great to hear, {{contact_first_name}}. That's exactly what we hope for when someone finishes a program with us. {{provider_name}} will be glad to know you're still doing well.\n\n(Let them respond, then continue.)\n\n(Do not pitch anything yet. The file questions come next.)",
       "sort_order": 2
     },
     {
