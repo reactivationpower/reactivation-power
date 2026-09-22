@@ -7,6 +7,7 @@ import { listAdminUsers } from "../lib/data/admin-users";
 import { SESSION_COOKIE_NAME, decodeSession } from "../lib/auth/token";
 import { clearSessionCookie, getSession } from "../lib/auth/session";
 import { billingBlockForOwner } from "../lib/billing/dunning";
+import { UPCOMING_WINDOW_DAYS, getBillingDashboard, parseDateRange } from "../lib/billing/dashboard";
 import {
   accessOwnerId, getAliases, getCurrentParticipant, getParticipantById,
   getSessions, getStaffMembers,
@@ -505,6 +506,12 @@ add("/admin/commissions", "admin", async (req) => {
     saleType: queryString(req, "type") as never,
   });
   return { report };
+});
+
+add("/admin/billing", "super_admin", async (req) => {
+  const range = parseDateRange({ from: queryString(req, "from"), to: queryString(req, "to") });
+  const dashboard = await getBillingDashboard(range);
+  return { ...dashboard, range: { from: range.fromDay, to: range.toDay }, upcomingDays: UPCOMING_WINDOW_DAYS, stripeMode: getStripeMode() };
 });
 
 add("/admin/analytics", "super_admin", async (req) => {

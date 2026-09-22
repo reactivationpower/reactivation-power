@@ -6,6 +6,7 @@ import { useLocation, useParams } from "wouter";
 import {
   BadgeDollarSign,
   BarChart3,
+  Banknote,
   ClipboardList,
   CreditCard,
   FilePenLine,
@@ -45,7 +46,10 @@ const NAV: { group: string; items: { href: string; label: string; icon: any; rol
   },
   {
     group: 'Insights',
-    items: [{ href: '/admin/analytics', label: 'Analytics', icon: BarChart3, roles: ['super_admin'] }],
+    items: [
+      { href: '/admin/analytics', label: 'Analytics', icon: BarChart3, roles: ['super_admin'] },
+      { href: '/admin/billing', label: 'Billing', icon: Banknote, roles: ['super_admin'] },
+    ],
   },
   {
     group: 'Settings',

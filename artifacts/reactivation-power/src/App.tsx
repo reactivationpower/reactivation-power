@@ -52,6 +52,7 @@ import Page_schedule_a_call from '@/pages/schedule-a-call';
 import Page_training_demo from '@/pages/training-demo';
 import Page_training_demo_video_2 from '@/pages/training-demo_video-2';
 import Page_admin_commissions from '@/pages/admin_commissions';
+import Page_admin_billing from '@/pages/admin_billing';
 
 const queryClient = new QueryClient();
 
@@ -83,6 +84,13 @@ function Router() {
         <RoutedErrorBoundary>
           <AdminLayout>
             <Page_admin_analytics />
+          </AdminLayout>
+        </RoutedErrorBoundary>
+      </Route>
+      <Route path="/admin/billing">
+        <RoutedErrorBoundary>
+          <AdminLayout>
+            <Page_admin_billing />
           </AdminLayout>
         </RoutedErrorBoundary>
       </Route>

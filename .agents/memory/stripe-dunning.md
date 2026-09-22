@@ -11,3 +11,5 @@ description: Non-obvious rules behind the failed-payment flow (one attempt per c
 **Why:** business rule is card 1 → immediately card 2 → shut off; a code review caught the alternating-retry loop, the stale-event re-lock, and the media bypass.
 
 **Verifying without the Stripe CLI (not installed):** a throwaway vitest file under the api-server `src` tree (path aliases only resolve there) can drive the sandbox with `pm_card_chargeCustomerFail` / `pm_card_visa`, create an invoice item + finalized invoice, trigger the decline with `invoices.pay`, then call the handlers directly. Temporary admin logins come from `supabase.auth.admin.createUser` with the admin app_metadata; clean up Stripe customer, Postgres rows, Supabase participants/links and the auth user afterwards.
+
+**Sandbox seeding pitfalls:** decline-token cards like `pm_card_visa_chargeDeclinedInsufficientFunds` are rejected at attach time — only `pm_card_chargeCustomerFail` attaches and then declines. After a task merge the dev Postgres can lag the drizzle schema; run the db push before assuming a query bug.
