@@ -10,3 +10,6 @@ Rule: anything both the web app and the api-server need (niche chips, matchers, 
 - New lib = package.json with `exports` pointing at `./src/*.ts`, tsconfig with `composite`/`emitDeclarationOnly`, add to root tsconfig `references`, add `workspace:*` dep to each consumer, `pnpm install --offline`.
 - api-server `scripts/flows/*.ts` run under plain `node` (type-stripping), so a lib's barrel must use explicit `.ts` import specifiers and the lib tsconfig needs `allowImportingTsExtensions: true` (fine with `emitDeclarationOnly`).
 - Keep libs free of artifact-local types (`@/lib/types`): make functions generic over the minimal structural shape instead.
+
+- The patient/parent `{{pt_*}}` wording tables live in `@workspace/script-tokens` (not in the player). The api-server tooling derives its allowed pt_ list from them, and tests fail when the two tables' key sets differ or a flow file references an undefined pt_ token. Add a new pt_ slot in both tables there; never re-declare it in lint's KNOWN_TOKENS.
+- api-server `scripts/flows/*.ts` entry guards (`if (import.meta.url === ...) main()`) must be the LAST statement in the file: under plain node, `const` helpers declared after the guard are in the TDZ when main() runs and crash with 'Cannot access X before initialization'.

@@ -189,6 +189,9 @@ importers:
       '@workspace/niche-catalog':
         specifier: workspace:*
         version: link:../../lib/niche-catalog
+      '@workspace/script-tokens':
+        specifier: workspace:*
+        version: link:../../lib/script-tokens
       busboy:
         specifier: ^1.6.0
         version: 1.6.0
@@ -605,6 +608,9 @@ importers:
       '@workspace/niche-catalog':
         specifier: workspace:*
         version: link:../../lib/niche-catalog
+      '@workspace/script-tokens':
+        specifier: workspace:*
+        version: link:../../lib/script-tokens
       class-variance-authority:
         specifier: 'catalog:'
         version: 0.7.1
@@ -728,6 +734,8 @@ importers:
         version: 0.31.10
 
   lib/niche-catalog: {}
+
+  lib/script-tokens: {}
 
   scripts:
     devDependencies:

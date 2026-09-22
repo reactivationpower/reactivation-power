@@ -5,6 +5,7 @@ import { readdirSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
+import { PT_TOKEN_KEYS } from '@workspace/script-tokens'
 
 export const CONTENT_DIR = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -333,7 +334,7 @@ export async function fetchAll<T>(
 /**
  * Tokens the script player can fill. Anything else renders as a raw
  * [BRACKETED PLACEHOLDER] on the call screen, so apply refuses it.
- * Keep in sync with script-viewer.tsx / call-screen.tsx / script-flow-player.tsx.
+ * Keep the non-pt_ entries in sync with script-viewer.tsx / call-screen.tsx / script-flow-player.tsx.
  */
 export const KNOWN_TOKENS = new Set([
   'contact_first_name',
@@ -351,34 +352,10 @@ export const KNOWN_TOKENS = new Set([
   'rec_pronoun_cap',
   'rec_obj',
   'rec_poss',
-  // Patient / parent-mode tokens (dental & ortho flows)
-  'pt_you',
-  'pt_you_cap',
-  'pt_your',
-  'pt_them',
-  'pt_they_are',
-  'pt_get_you_in',
-  'pt_no_fault',
-  'pt_proud',
-  'pt_bite_q',
-  'pt_jaw_q',
-  'pt_photos_q',
-  'pt_obj_braces_q',
-  'pt_obj_startover_q',
-  'pt_obj_embarrassed_q',
-  'pt_al_photos_q',
-  'pt_moved_back_q',
-  'pt_your_file',
-  'pt_smile_bite',
-  'pt_floss_q',
-  'pt_clean_q',
-  'pt_invested',
-  'pt_mir_q1',
-  'pt_mir_q2',
-  'pt_mir_q3',
-  'pt_uncover_action',
-  'pt_cost_ask',
-  'pt_bridge_q',
+  // Patient / parent-mode tokens (dental & ortho flows) come from the
+  // shared tables the player substitutes, so a slot neither table defines
+  // can never be applied.
+  ...PT_TOKEN_KEYS,
 ])
 
 export function tokensIn(text: string): string[] {

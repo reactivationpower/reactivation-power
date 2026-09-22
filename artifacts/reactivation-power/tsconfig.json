@@ -20,6 +20,7 @@
     },
     {
       "path": "../../lib/niche-catalog"
-    }
+    },
+      { "path": "../../lib/script-tokens" }
   ]
 }
