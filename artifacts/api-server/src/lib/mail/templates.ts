@@ -85,6 +85,18 @@ export interface AgreementSentData {
   resend?: boolean
 }
 
+export interface BillingLinkData {
+  name: string
+  /** Why the link was sent: an admin asked for a new card, or the customer requested access to their billing page. */
+  purpose: 'update_card' | 'billing'
+  billingUrl: string
+  expiresAt: string
+  /** Set when portal access is currently paused for non-payment. */
+  accessPaused: boolean
+  outstandingCents?: number | null
+  sentByName?: string | null
+}
+
 export interface AgreementSignedData {
   /** Recipient's first name (customer) or "Team" for admin copies. */
   name: string
@@ -108,6 +120,9 @@ export interface TemplateDataMap {
   subscription_cancelled: SubscriptionCancelledData
   agreement_sent: AgreementSentData
   agreement_signed: AgreementSignedData
+  billing_link: BillingLinkData
+  cancellation_requested: CancellationRequestedData
+  cancellation_scheduled: CancellationScheduledData
 }
 
 export type TemplateId = keyof TemplateDataMap
@@ -400,6 +415,58 @@ const agreementSent: TemplateDefinition<'agreement_sent'> = {
   },
 }
 
+const billingLink: TemplateDefinition<'billing_link'> = {
+  id: 'billing_link',
+  name: 'Billing page link / update your card',
+  description:
+    'A secure, expiring link to the customer billing page. Sent by an admin asking for a new card, or when the customer requests it from the login notice while access is paused.',
+  sample: {
+    name: 'Dr. Michael Chen',
+    purpose: 'update_card',
+    billingUrl: `${BRAND.siteUrl}/billing/sample-token`,
+    expiresAt: new Date(Date.now() + 14 * 86400000).toISOString(),
+    accessPaused: true,
+    outstandingCents: 49700,
+    sentByName: 'Sarah from Reactivation Power',
+  },
+  render: (d) => {
+    const updateCard = d.purpose === 'update_card'
+    const subject = d.accessPaused
+      ? 'Update your card to restore your Reactivation Power access'
+      : updateCard
+        ? 'Please add a new card for your Reactivation Power subscription'
+        : 'Your Reactivation Power billing page'
+    const intro = updateCard
+      ? `${d.sentByName ? `${esc(d.sentByName)} has` : 'We have'} sent you a secure link to add a new card to your account. The card you enter becomes your primary card; your current cards stay on file.`
+      : `Here is the secure link to your billing page you asked for. From there you can see your balance, pay it, and add or update a card.`
+    return {
+      subject,
+      previewText: d.accessPaused ? 'Pay your balance or add a new card to restore access.' : 'Manage your cards and balance securely.',
+      html: layout(
+        [
+          h1(d.accessPaused ? 'Restore your access' : updateCard ? 'Add a new card' : 'Your billing page'),
+          p(`Hi ${esc(d.name.split(' ')[0])},`),
+          p(intro),
+          ...(d.accessPaused
+            ? [
+                panel([
+                  `<strong>Your team's portal access is paused</strong> because a payment did not go through.${
+                    d.outstandingCents ? ` The outstanding balance is <strong>${money(d.outstandingCents)}</strong>.` : ''
+                  } Pay it or add a card that works and access comes back right away.`,
+                ]),
+              ]
+            : []),
+          button(d.accessPaused ? 'Pay now or update my card' : updateCard ? 'Add my new card' : 'Open my billing page', d.billingUrl),
+          fallbackLink(d.billingUrl),
+          small(`This link is personal to you and expires on ${longDate(d.expiresAt)}. If you did not expect it, you can ignore this email — nothing changes until a card is entered.`),
+          signoff(),
+        ],
+        { previewText: d.accessPaused ? 'Pay your balance or add a new card to restore access.' : 'Manage your cards and balance securely.', footerNote: SUPPORT_NOTE },
+      ),
+    }
+  },
+}
+
 const agreementSigned: TemplateDefinition<'agreement_signed'> = {
   id: 'agreement_signed',
   name: 'Agreement signed (signed copy)',
@@ -454,6 +521,110 @@ const agreementSigned: TemplateDefinition<'agreement_signed'> = {
   },
 }
 
+
+export interface CancellationScheduledData {
+  name: string
+  /** ISO date the subscription (and portal access) ends. */
+  cancelAt: string
+  remainingPayments: number
+  remainingCents: number
+  monthlyCents: number
+  /** ISO date of the next scheduled charge, if any. */
+  nextPaymentAt: string | null
+  billingUrl: string
+}
+
+export interface CancellationRequestedData {
+  customerName: string
+  businessName: string
+  customerEmail: string
+  /** ISO date the subscription ends. */
+  cancelAt: string
+  remainingPayments: number
+  remainingCents: number
+  monthlyCents: number
+  adminUrl: string
+}
+
+const cancellationRequested: TemplateDefinition<'cancellation_requested'> = {
+  id: 'cancellation_requested',
+  name: 'Customer requested cancellation (admin notice)',
+  description: 'Sent to the admin team when a customer schedules their cancellation from the portal billing page.',
+  sample: {
+    customerName: 'Dr. Michael Chen',
+    businessName: 'Chen Family Dental',
+    customerEmail: 'mchen@example.com',
+    cancelAt: new Date(Date.now() + 120 * 86400000).toISOString(),
+    remainingPayments: 4,
+    remainingCents: 4 * 49700,
+    monthlyCents: 49700,
+    adminUrl: `${BRAND.siteUrl}/admin/payments/123`,
+  },
+  render: (d) => ({
+    subject: `Cancellation scheduled: ${d.businessName || d.customerName}`,
+    previewText: `${d.customerName} scheduled cancellation for ${longDate(d.cancelAt)}.`,
+    html: layout(
+      [
+        h1('A customer scheduled their cancellation'),
+        p(
+          `<strong>${esc(d.customerName)}</strong>${d.businessName ? ` (${esc(d.businessName)})` : ''} — ${esc(d.customerEmail)} — used the billing page to cancel at the end of their agreement.`,
+        ),
+        details([
+          ['Subscription ends', longDate(d.cancelAt)],
+          ['Remaining payments', `${d.remainingPayments} × ${money(d.monthlyCents)}`],
+          ['Still owed under the agreement', money(d.remainingCents)],
+        ]),
+        p(`They acknowledged the remaining obligation before confirming. Billing continues as scheduled until the end date; the subscription cancels automatically after the last charge.`),
+        button('Open the customer record', d.adminUrl),
+        small(`You can remove the scheduled cancellation from the customer record if they change their mind.`),
+      ],
+      { previewText: `${d.customerName} scheduled cancellation for ${longDate(d.cancelAt)}.` },
+    ),
+  }),
+}
+
+const cancellationScheduled: TemplateDefinition<'cancellation_scheduled'> = {
+  id: 'cancellation_scheduled',
+  name: 'Cancellation scheduled (customer confirmation)',
+  description: 'Sent to the customer right after they schedule cancellation at the end of their agreement. States the end date and every remaining charge.',
+  sample: {
+    name: 'Dr. Michael Chen',
+    cancelAt: new Date(Date.now() + 120 * 86400000).toISOString(),
+    remainingPayments: 4,
+    remainingCents: 4 * 49700,
+    monthlyCents: 49700,
+    nextPaymentAt: new Date(Date.now() + 12 * 86400000).toISOString(),
+    billingUrl: `${BRAND.siteUrl}/portal/billing`,
+  },
+  render: (d) => ({
+    subject: `Your cancellation is scheduled for ${longDate(d.cancelAt)}`,
+    previewText: `Your subscription ends ${longDate(d.cancelAt)}. ${d.remainingPayments} payment${d.remainingPayments === 1 ? '' : 's'} remain before then.`,
+    html: layout(
+      [
+        h1('Your cancellation is scheduled'),
+        p(`Hi ${esc(d.name)},`),
+        p(
+          `As you requested, your Reactivation Power subscription will end on <strong>${longDate(d.cancelAt)}</strong>, the last day of your agreement. Until then, you keep full access for you and your team.`,
+        ),
+        details([
+          ['Subscription ends', longDate(d.cancelAt)],
+          ['Remaining payments', d.remainingPayments > 0 ? `${d.remainingPayments} × ${money(d.monthlyCents)}` : 'None'],
+          ['Still owed under your agreement', money(d.remainingCents)],
+          ...(d.nextPaymentAt ? [['Next charge', longDate(d.nextPaymentAt)] as [string, string]] : []),
+        ]),
+        p(
+          d.remainingPayments > 0
+            ? `Your card on file will still be charged ${money(d.monthlyCents)} on each remaining billing date, as you acknowledged when scheduling. After the final payment, nothing further is charged and access ends on the date above.`
+            : `No further charges are scheduled. Access ends on the date above.`,
+        ),
+        button('View your billing page', d.billingUrl),
+        small(`Changed your mind? Reply to this email or contact your account manager before ${longDate(d.cancelAt)} and we will remove the scheduled cancellation.`),
+      ],
+      { previewText: `Your subscription ends ${longDate(d.cancelAt)}.` },
+    ),
+  }),
+}
+
 type AnyTemplate = { [K in TemplateId]: TemplateDefinition<K> }[TemplateId]
 
 export const TEMPLATES: { [K in TemplateId]: TemplateDefinition<K> } = {
@@ -464,6 +635,9 @@ export const TEMPLATES: { [K in TemplateId]: TemplateDefinition<K> } = {
   subscription_cancelled: subscriptionCancelled,
   agreement_sent: agreementSent,
   agreement_signed: agreementSigned,
+  billing_link: billingLink,
+  cancellation_requested: cancellationRequested,
+  cancellation_scheduled: cancellationScheduled,
 }
 
 export const TEMPLATE_IDS = Object.keys(TEMPLATES) as TemplateId[]

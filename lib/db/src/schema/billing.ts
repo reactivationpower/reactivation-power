@@ -114,7 +114,8 @@ export type PaymentHistoryKind =
   | "subscription_updated"
   | "subscription_canceled"
   | "billing_date_changed"
-  | "cancellation_scheduled";
+  | "cancellation_scheduled"
+  | "card_added";
 
 export type PaymentHistoryStatus = "succeeded" | "failed" | "refunded" | "info";
 
@@ -158,11 +159,40 @@ export const paymentHistoryTable = pgTable(
   ],
 );
 
-export type PaymentHistorySource = "webhook" | "dunning" | "cron" | "admin";
+export type PaymentHistorySource = "webhook" | "dunning" | "cron" | "admin" | "customer";
 
+export type BillingLinkPurpose = "update_card" | "billing";
 export type Customer = typeof customersTable.$inferSelect;
 export type StripeEvent = typeof stripeEventsTable.$inferSelect;
 export type PaymentHistory = typeof paymentHistoryTable.$inferSelect;
 export type NewPaymentHistory = typeof paymentHistoryTable.$inferInsert;
 export type PaymentLinkTerms = typeof paymentLinkTermsTable.$inferSelect;
 export type CustomerCard = typeof customerCardsTable.$inferSelect;
+
+/**
+ * Tokenized, expiring links to the public customer billing page
+ * (/billing/:token). Sent by an admin ("update your card") or requested by
+ * the customer from the login notice when access is paused. The customer
+ * never needs a portal session, so a locked-out account can still pay.
+ */
+export const billingLinksTable = pgTable(
+  "billing_links",
+  {
+    id: text("id").primaryKey(),
+    token: text("token").notNull(),
+    customerId: text("customer_id").notNull(),
+    /** The agreement (payment link) the cards are scoped to. */
+    linkId: text("link_id"),
+    purpose: text("purpose").$type<BillingLinkPurpose>().notNull().default("billing"),
+    /** SetupIntent handed to Stripe Elements for the card being added. */
+    setupIntentId: text("setup_intent_id"),
+    createdById: text("created_by_id"),
+    createdByName: text("created_by_name"),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    lastUsedAt: timestamp("last_used_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex("billing_links_token_idx").on(t.token), index("billing_links_customer_idx").on(t.customerId)],
+);
+
+export type BillingLink = typeof billingLinksTable.$inferSelect;

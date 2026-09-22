@@ -53,6 +53,9 @@ import Page_training_demo from '@/pages/training-demo';
 import Page_training_demo_video_2 from '@/pages/training-demo_video-2';
 import Page_admin_commissions from '@/pages/admin_commissions';
 import Page_admin_billing from '@/pages/admin_billing';
+import Page_billing from '@/pages/billing';
+import Page_billing_token from '@/pages/billing_token';
+import Page_portal_billing from '@/pages/portal_billing';
 
 const queryClient = new QueryClient();
 
@@ -248,6 +251,20 @@ function Router() {
           </RootLayout>
         </RoutedErrorBoundary>
       </Route>
+      <Route path="/billing">
+        <RoutedErrorBoundary>
+          <RootLayout>
+            <Page_billing />
+          </RootLayout>
+        </RoutedErrorBoundary>
+      </Route>
+      <Route path="/billing/:token">
+        <RoutedErrorBoundary>
+          <RootLayout>
+            <Page_billing_token />
+          </RootLayout>
+        </RoutedErrorBoundary>
+      </Route>
       <Route path="/pay/:token">
         <RoutedErrorBoundary>
           <RootLayout>
@@ -336,6 +353,13 @@ function Router() {
         <RoutedErrorBoundary>
           <PortalLayout>
             <Page_portal_reactivation_rest />
+          </PortalLayout>
+        </RoutedErrorBoundary>
+      </Route>
+      <Route path="/portal/billing">
+        <RoutedErrorBoundary>
+          <PortalLayout>
+            <Page_portal_billing />
           </PortalLayout>
         </RoutedErrorBoundary>
       </Route>

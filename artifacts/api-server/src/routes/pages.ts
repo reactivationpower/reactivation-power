@@ -8,6 +8,7 @@ import { SESSION_COOKIE_NAME, decodeSession } from "../lib/auth/token";
 import { clearSessionCookie, getSession } from "../lib/auth/session";
 import { billingBlockForOwner } from "../lib/billing/dunning";
 import { UPCOMING_WINDOW_DAYS, getBillingDashboard, parseDateRange } from "../lib/billing/dashboard";
+import { getBillingByToken, getMyBilling } from "../actions/customer-billing";
 import {
   accessOwnerId, getAliases, getCurrentParticipant, getParticipantById,
   getSessions, getStaffMembers,
@@ -575,6 +576,22 @@ add("/agreements/:token", undefined, async (req) => {
   if (!agreement) notFound();
   return { token, agreement };
 });
+// Customer billing. /billing (request a link by email) and /billing/:token
+// are public so an account paused for non-payment can still pay or add a
+// card; /portal/billing is the signed-in owner's page with the cancel flow.
+add("/billing", undefined, async (req) => ({ email: queryString(req, "email") ?? null }));
+add("/billing/:token", undefined, async (req) => {
+  const token = String(req.params.token);
+  const state = await getBillingByToken(token);
+  if (!state) notFound();
+  return { token, ...state, stripeMode: getStripeMode() };
+});
+add("/portal/billing", "portal", async () => {
+  const participant = await getCurrentParticipant();
+  if (!participant) redirect("/login");
+  return { ...(await getMyBilling()), stripeMode: getStripeMode() };
+});
+
 add("/pay/:token/thank-you", undefined, async (req) => {
   const token = String(req.params.token);
   const link = await getPaymentLinkPublic(token);

@@ -20,6 +20,7 @@ import { getAdminSessionFromRequest, satisfies } from "../lib/auth/admin-session
 import { SESSION_COOKIE_NAME, decodeSession } from "../lib/auth/token";
 import * as agreements from "../actions/agreements";
 import * as commissions from "../actions/commissions";
+import * as customerBilling from "../actions/customer-billing";
 
 /**
  * RPC bridge for the former Next.js server actions.
@@ -53,6 +54,7 @@ const MODULES: Record<string, ActionModule> = {
   billing,
   booking,
   commissions,
+  "customer-billing": customerBilling,
   demo,
   leads,
   mail,
@@ -83,6 +85,16 @@ const ACTIONS: Record<string, Record<string, Auth>> = {
     changeBillingDate: "admin", retryCustomerPayment: "admin",
   },
   booking: { getAvailability: "public", bookStrategyCall: "public" },
+  "customer-billing": {
+    // Public, emailed-token billing page (works while access is paused).
+    requestBillingLink: "public", getBillingByToken: "public",
+    startCardUpdateByToken: "public", recordCardByToken: "public", payBalanceByToken: "public",
+    // Signed-in owner on /portal/billing.
+    getMyBilling: "portal", startMyCardUpdate: "portal", recordMyCard: "portal",
+    payMyBalance: "portal", cancelMyAgreement: "portal",
+    // Admin: email the customer an "add a new card" link.
+    sendCardUpdateLink: "admin",
+  },
   commissions: {
     // Reps are scoped to their own entries inside listCommissions.
     listCommissions: "admin",

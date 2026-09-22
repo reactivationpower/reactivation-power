@@ -20,6 +20,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { usePageData } from '@/hooks/use-page-data'
 import { PageError, PageLoading } from '@/components/page-status'
 import NotFound from '@/pages/not-found'
+import { SendCardLinkButton } from '@/components/admin/send-card-link-button'
 
 
 function formatUsd(cents: number): string {
@@ -379,6 +380,14 @@ export default function PaymentDetailPage() {
                     ))}
                   </ul>
                 )}
+                {customer ? (
+                  <div className="mt-4 border-t border-border pt-4">
+                    <p className="mb-2 text-xs text-muted-foreground">
+                      Emails the customer a secure link to add a new card. It becomes their primary card; earlier cards stay on file.
+                    </p>
+                    <SendCardLinkButton linkId={link.id} />
+                  </div>
+                ) : null}
               </CardContent>
             </Card>
           ) : null}

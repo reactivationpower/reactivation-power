@@ -181,3 +181,61 @@ export function validateRefundAmount(amountCents: number | null | undefined, ref
   if (amountCents > refundableCents) return `You can refund at most ${(refundableCents / 100).toFixed(2)} on this payment.`
   return null
 }
+
+export interface ObligationInput {
+  /** Next scheduled charge (Stripe current_period_end / trial_end). */
+  nextPaymentAt: Date | null
+  /** End of the 12-month agreement. */
+  agreementEnd: Date | null
+  monthlyCents: number
+  now?: Date
+}
+
+export interface RemainingObligation {
+  /** Monthly charges still due before the agreement ends. */
+  payments: number
+  totalCents: number
+  /** The dates of those charges, in order. */
+  dates: Date[]
+  agreementEnd: Date | null
+}
+
+/**
+ * What a customer still owes under the agreement if they cancel today: every
+ * monthly charge from the next payment date up to (not including) the
+ * agreement end. A 12-month agreement started on its first charge bills on
+ * months 0–11, so a charge that would fall on the end date itself is not
+ * counted. Nothing is owed once the term has run out or the subscription
+ * never scheduled another charge.
+ */
+/** Safety bound only — well above the 60-month maximum term. */
+const MAX_OBLIGATION_PAYMENTS = 120
+
+/** Add calendar months in UTC, clamping to the last day of the target month. */
+export function addUtcMonthsClamped(from: Date, months: number): Date {
+  const day = from.getUTCDate()
+  const d = new Date(Date.UTC(from.getUTCFullYear(), from.getUTCMonth() + months, 1, from.getUTCHours(), from.getUTCMinutes(), from.getUTCSeconds(), from.getUTCMilliseconds()))
+  const lastDay = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 0)).getUTCDate()
+  d.setUTCDate(Math.min(day, lastDay))
+  return d
+}
+
+export function remainingObligation(input: ObligationInput): RemainingObligation {
+  const now = input.now ?? new Date()
+  const empty: RemainingObligation = { payments: 0, totalCents: 0, dates: [], agreementEnd: input.agreementEnd }
+  if (!input.nextPaymentAt || !input.agreementEnd || input.monthlyCents <= 0) return empty
+  if (input.agreementEnd.getTime() <= now.getTime()) return empty
+  // Walk the billing anchor forward one calendar month at a time until the
+  // agreement ends. No fixed cap: agreements run anywhere from 1 to 60 months.
+  // Anchored on the original day-of-month so a Jan 31 anchor bills Feb 28 and
+  // then Mar 31 (Stripe's behaviour), never drifting to the 28th for good.
+  const dates: Date[] = []
+  const anchor = new Date(input.nextPaymentAt)
+  const endMs = input.agreementEnd.getTime()
+  for (let k = 0; k <= MAX_OBLIGATION_PAYMENTS; k++) {
+    const d = addUtcMonthsClamped(anchor, k)
+    if (d.getTime() >= endMs) break
+    dates.push(d)
+  }
+  return { payments: dates.length, totalCents: dates.length * input.monthlyCents, dates, agreementEnd: input.agreementEnd }
+}

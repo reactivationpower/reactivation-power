@@ -4,6 +4,7 @@ import { Link } from "wouter";
 import { useLocation, useParams } from "wouter";
 import {
   BarChart3,
+  CreditCard,
   GraduationCap,
   PhoneCall,
   Settings,
@@ -66,6 +67,27 @@ export function SettingsNavLink() {
       )}
     >
       <Settings className="size-4" />
+    </Link>
+  )
+}
+
+export function BillingNavLink() {
+  const [pathname] = useLocation();
+  const active = pathname.startsWith('/portal/billing')
+  return (
+    <Link
+      href="/portal/billing"
+      aria-label="Billing"
+      aria-current={active ? 'page' : undefined}
+      data-testid="nav-billing"
+      className={cn(
+        'flex size-10 items-center justify-center rounded-md border border-input transition-colors',
+        active
+          ? 'bg-primary text-primary-foreground'
+          : 'bg-card text-foreground hover:bg-muted',
+      )}
+    >
+      <CreditCard className="size-4" />
     </Link>
   )
 }

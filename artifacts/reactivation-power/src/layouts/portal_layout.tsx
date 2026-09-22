@@ -4,7 +4,7 @@ import { Suspense } from 'react'
 import { Link } from "wouter";
 import { LogOut } from 'lucide-react'
 import { logout } from '@/app/actions/auth'
-import { PortalNav, SettingsNavLink } from '@/components/portal/portal-nav'
+import { BillingNavLink, PortalNav, SettingsNavLink } from '@/components/portal/portal-nav'
 import { PORTAL_WIDTH } from '@/lib/portal-layout'
 import { DemoBarServer } from '@/components/demo/demo-bar-server'
 import { ViewAsBanner } from '@/components/portal/view-as-banner'
@@ -33,6 +33,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
           </Link>
           <PortalNav />
           <div className="flex items-center gap-2">
+            <BillingNavLink />
             <SettingsNavLink />
             <form onSubmit={async (e) => {
               e.preventDefault();

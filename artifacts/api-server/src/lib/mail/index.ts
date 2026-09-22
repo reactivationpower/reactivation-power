@@ -3,6 +3,9 @@ import { sendEmail, type SendOptions, type SendResult } from './send'
 import type {
   AgreementSentData,
   AgreementSignedData,
+  BillingLinkData,
+  CancellationRequestedData,
+  CancellationScheduledData,
   PaymentFailedData,
   PaymentReceivedData,
   SubscriptionCancelledData,
@@ -87,10 +90,30 @@ export function sendAgreementSentEmail(
   return sendEmail('agreement_sent', to, data, options)
 }
 
+export function sendBillingLinkEmail(to: string, data: BillingLinkData, options?: SendOptions): Promise<SendResult> {
+  return sendEmail('billing_link', to, data, options)
+}
+
 export function sendAgreementSignedEmail(
   to: string,
   data: AgreementSignedData,
   options?: SendOptions,
 ): Promise<SendResult> {
   return sendEmail('agreement_signed', to, data, options)
+}
+
+export function sendCancellationScheduledEmail(
+  to: string,
+  data: CancellationScheduledData,
+  options?: SendOptions,
+): Promise<SendResult> {
+  return sendEmail('cancellation_scheduled', to, data, options)
+}
+
+export function sendCancellationRequestedEmail(
+  to: string,
+  data: CancellationRequestedData,
+  options?: SendOptions,
+): Promise<SendResult> {
+  return sendEmail('cancellation_requested', to, data, options)
 }
