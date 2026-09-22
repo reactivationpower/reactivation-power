@@ -29,7 +29,7 @@ they told the office two years ago, and they can tell when they are being
 
 ---
 
-## 2. The ten rules
+## 2. The rules
 
 ### R1. One question per sentence
 Never stack questions. "How long has it been, a few weeks, a month?" is two
@@ -172,6 +172,36 @@ questions, then the pick.
 
 Lint checks each chip has a question mentioning it, and warns on extra
 questions or a count mismatch.
+
+### R11. The read-back happens once, on the Review screen
+Every flow runs Making It Real → `review` → `recommendation`. The recap
+("let me make sure I have this right… Did I get that right?") belongs on
+`review` and nowhere else. `recommendation` opens with the bridge and asks
+permission ("Can I make a recommendation?") before it recommends anything.
+If the recap shows up on both screens the caller reads the patient's answers
+back twice in a row, which sounds like a script.
+
+Lint errors when:
+- a `review` step has no read-back opener or never asks "Did I get that
+  right?";
+- any other step (recommendation, objections, making it real, anything)
+  contains a read-back opener or "Did I get that right?";
+- a `recommendation` step (or `recommendation_*` variant) never asks "Can I
+  make a recommendation?", asks it anywhere but the first spoken paragraph,
+  keeps talking in the same paragraph after asking (the ask ends its
+  paragraph; the caller waits for the yes), or starts recommending ("let's
+  get you in", "I recommend", "Does that sound reasonable?") before it has
+  asked.
+
+The one allowed exception to "first paragraph" is the explainer shape used by
+the dental checks, HVAC/Plumbing and the weight-focus variants: paragraph one
+explains the visit and ends with "Does that make sense?", paragraph two is
+the ask on its own, and the recommendation follows. Anything else that delays
+the ask is an error.
+
+Unit tests for the rule live in
+`artifacts/api-server/scripts/flows/__tests__/lint.test.ts` and also run
+every checked-in flow through it.
 
 ---
 

@@ -8,3 +8,5 @@ description: How the reactivation-power web app runs vitest (jsdom + Testing Lib
 
 **Why:** Sector-specific wording ("came out for" vs "came in for") was previously unguarded; a render test through ScriptFlowPlayer catches a dropped `sector` prop or changed fallback logic.
 **How to apply:** Add `*.test.ts(x)` beside the source; `pnpm --filter @workspace/reactivation-power test`.
+
+- api-server vitest also picks up `scripts/**/*.test.ts`; flow-tooling scripts must guard their `main()` behind an entry-script check so tests can import their rules.

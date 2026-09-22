@@ -16,7 +16,10 @@
 //       into a spoken paragraph
 //   R8  no {{rec_pronoun}} / {{rec_obj}} / {{rec_poss}} / {{rec_pronoun_cap}}
 //   R10 question screens map one-to-one to the concern chips
+//   R11 the read-back lives on review only; recommendation opens with the
+//       bridge and asks "Can I make a recommendation?"
 // Plus the structural checks apply runs (routing targets, tokens).
+import { pathToFileURL } from 'node:url'
 import {
   GENERAL_SLUG,
   listSlugs,
@@ -187,6 +190,43 @@ const CHIP_HINTS: Record<string, string[]> = {
   'Irregularity': ['irregular', 'regular'],
 }
 
+/** Read-back openers that belong on the review screen only (R11). */
+export const READBACK_OPENERS: string[] = [
+  'let me make sure i have this right',
+  'let me make sure i have that right',
+  'let me make sure i got this right',
+  'let me make sure i got that right',
+  'let me make sure i heard you right',
+  "let me make sure i've heard you right",
+  "let me make sure i've got this right",
+  "let me make sure i've got that right",
+  'let me make sure i understand',
+  'let me read that back',
+  'let me read this back',
+  'let me play that back',
+  'let me play this back',
+  'so if i heard you right',
+  'so if i have this right',
+  'so if i got this right',
+]
+export const READBACK_CONFIRM = 'did i get that right?'
+export const RECOMMENDATION_ASK = 'can i make a recommendation?'
+export const RECOMMENDATION_CLOSE = 'does that sound reasonable?'
+export const EXPLAINER_CHECK = 'does that make sense?'
+/** Phrases that mean the caller has started recommending (the "let's get you in" move). */
+export const RECOMMENDING_PHRASES: string[] = [
+  "let's get",
+  "let's book",
+  "let's schedule",
+  "let's set you up",
+  'my recommendation is',
+  'i recommend',
+  "i'd recommend",
+  'what i recommend',
+]
+const REVIEW_KEY = 'review'
+const RECOMMENDATION_KEY = 'recommendation'
+
 interface Sentence {
   text: string
   words: number
@@ -339,7 +379,90 @@ export function lintFile(slug: string, file: FlowFile, generalKeys: Set<string>)
     }
   }
 
+  problems.push(...lintReadBack(slug, file))
+
   return problems
+}
+
+/**
+ * R11: the read-back happens once, on the review screen. Every other screen
+ * must not recap; the recommendation screen asks permission before it
+ * recommends anything.
+ */
+export function lintReadBack(slug: string, file: FlowFile): Problem[] {
+  const problems: Problem[] = []
+  const push = (level: Problem['level'], where: string, message: string) =>
+    problems.push({ level, where, message })
+
+  for (const step of file.steps) {
+    const where = `${slug}:${step.step_key}`
+    const spoken = spokenParagraphs(step.content).map((p) => normalizeQuotes(p).toLowerCase())
+    const all = spoken.join('\n')
+    const opener = READBACK_OPENERS.find((o) => all.includes(o))
+    const confirms = all.includes(READBACK_CONFIRM)
+
+    if (step.step_key === REVIEW_KEY) {
+      if (!opener) push('error', where, `R11 review screen has no read-back opener ("let me make sure I have this right")`)
+      if (!confirms) push('error', where, `R11 review screen never asks "Did I get that right?"`)
+      continue
+    }
+
+    // Every other screen: no recap. The caller already read the answers back.
+    if (opener) push('error', where, `R11 read-back opener "${opener}" outside the review screen; the recap happens once, on review`)
+    if (confirms) push('error', where, `R11 asks "Did I get that right?" outside the review screen; that question belongs on review`)
+
+    if (!isRecommendationKey(step.step_key)) continue
+
+    const askIdx = spoken.findIndex((p) => p.includes(RECOMMENDATION_ASK))
+    if (askIdx === -1) {
+      push('error', where, `R11 recommendation never asks "Can I make a recommendation?"; open with the bridge and ask permission before recommending`)
+      continue
+    }
+    // The ask belongs in the first spoken paragraph. The one allowed exception
+    // is the explainer shape: paragraph 1 explains the visit and ends with
+    // "Does that make sense?", paragraph 2 is the ask on its own.
+    const askParagraph = spoken[askIdx]
+    const explainer = askIdx === 1 && spoken[0].endsWith(EXPLAINER_CHECK)
+    if (askIdx > 0 && !explainer) {
+      push('error', where, `R11 "Can I make a recommendation?" is in paragraph ${askIdx + 1}; ask it in the first paragraph (or explain the visit, end on "Does that make sense?", then ask)`)
+    }
+    // The ask closes its paragraph: nothing is recommended until the patient
+    // has said yes. Only the bridge (or the name) may come before it.
+    if (!askParagraph.endsWith(RECOMMENDATION_ASK)) {
+      push('error', where, `R11 keeps talking after "Can I make a recommendation?" in the same paragraph; stop there and wait for the yes`)
+    }
+    const beforeAsk = askParagraph.slice(0, askParagraph.indexOf(RECOMMENDATION_ASK))
+    if (explainer && !/^(\{\{\s*contact_first_name\s*\}\},?\s*)?$/.test(beforeAsk)) {
+      push('error', where, `R11 explainer shape needs the ask on its own in paragraph two; move "${beforeAsk.trim().slice(0, 40)}…" into the explainer`)
+    }
+    const spokenBeforeAsk = [...spoken.slice(0, askIdx), beforeAsk].join('\n')
+    if (RECOMMENDING_PHRASES.some((ph) => spokenBeforeAsk.includes(ph)) || spokenBeforeAsk.includes(RECOMMENDATION_CLOSE)) {
+      push('error', where, `R11 recommends before asking "Can I make a recommendation?"; ask permission first`)
+    }
+  }
+  return problems
+}
+
+function isRecommendationKey(key: string): boolean {
+  return key === RECOMMENDATION_KEY || key.startsWith(`${RECOMMENDATION_KEY}_`)
+}
+
+/** Spoken paragraphs of a step, with coaching notes and note-only lines removed. */
+function spokenParagraphs(content: string): string[] {
+  return content
+    .split(/\n\s*\n/)
+    .map((p) =>
+      p
+        .split('\n')
+        .map((l) => l.trim())
+        .filter((l) => l && !isCoachingNote(l))
+        .join('\n'),
+    )
+    .filter(Boolean)
+}
+
+function normalizeQuotes(s: string): string {
+  return s.replace(/[\u2018\u2019]/g, "'").replace(/[\u201c\u201d]/g, '"')
 }
 
 function main() {
@@ -370,4 +493,4 @@ function main() {
   process.exit(totalErrors > 0 ? 1 : 0)
 }
 
-main()
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) main()
