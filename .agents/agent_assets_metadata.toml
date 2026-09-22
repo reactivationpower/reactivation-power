@@ -1,0 +1,16 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "O5gjU6L4x5fCnhiadR-B0"
+uri = "file://exports/Reactivation-Power-Service-Agreement.pdf"
+type = "pdf"
+title = "Reactivation Power 12-Month Service Agreement (reference copy)"
+description = "Unsigned copy of the standard agreement a new client signs, with the default $475 setup fee and $475/month terms. Client details are blank."
+logical_id = "406937ad-a923-4d75-ba97-d94e614f5fb8"
+content_hash = "sha256:06a5d70370039e498a58267b0dcf85044eeef0591a557c184f1cedfe3cad3013"
+size = 6166
+mtime_ms = 1790085160453
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/406937ad-a923-4d75-ba97-d94e614f5fb8/64984a94-1d7f-49fe-86b8-ad92b17a7ba6"
+storage_version_token = "1790085167767420"
+content_type = "application/pdf"
