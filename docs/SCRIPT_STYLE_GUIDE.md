@@ -29,6 +29,9 @@ they told the office two years ago, and they can tell when they are being
 
 ---
 
+
+## 2. The rules
+
 ## 2. The rules
 
 ### R1. One question per sentence
@@ -218,6 +221,9 @@ questions, then the pick.
 Lint checks each chip has a question mentioning it, and warns on extra
 questions or a count mismatch.
 
+
+---
+
 ### R11. The read-back happens once, on the Review screen
 Every flow runs Making It Real → `review` → `recommendation`. The recap
 ("let me make sure I have this right… Did I get that right?") belongs on
@@ -247,6 +253,15 @@ the ask is an error.
 Unit tests for the rule live in
 `artifacts/api-server/scripts/flows/__tests__/lint.test.ts` and also run
 every checked-in flow through it.
+
+
+### R12. Every non-terminal screen has a way out
+A step with no outgoing choice, in its own file or in `general.json`, leaves
+the caller on "End of script" with a patient still on the line. Lint reports
+it as an error unless the step is a terminal screen (scheduling, close,
+wrap-up, bonus, voicemail, wrong number, do-not-call) or is listed in
+`KNOWN_DEAD_ENDS` in `scripts/flows/lib.ts`, where it lints as a warning
+until its routing is decided. See section 5 for the details.
 
 ---
 
@@ -325,6 +340,15 @@ Keep them exactly like that so they stand out on the screen.
   `flows:apply` refuses otherwise.
 - Never delete rows. Rows in the database that are not in the file are left
   alone and listed by `flows:apply` so the author can decide.
+- **Every screen needs a way out.** A step with no outgoing choice (in its
+  niche file or in `general.json`) shows "End of script" mid-call. Lint R12
+  reports this as an error unless the step is a terminal screen
+  (`scheduling`, `close_*`, `booked_wrap`, `*_bonus`, `voicemail`,
+  `wrong_number`, `dnc`, `end*` / `wrap_up*`; see `TERMINAL_STEP_PATTERNS`
+  in `scripts/flows/lib.ts`). A dead end that is intentionally still open
+  must be listed in `KNOWN_DEAD_ENDS` in the same file, where it lints as a
+  warning; lint also warns once a listed step has grown buttons so the entry
+  gets removed.
 - Choice `variant` colours the button: `positive` (they agreed), `caution`
   (hesitant), `negative` (bad news), `objection`, `default` (continue).
 
@@ -667,9 +691,11 @@ Known findings for the batch tasks, from the baseline lint:
   files until then.
 - Several niches have a question with no chip ("anything coming up on the
   calendar?") and chips with no question. R10 decides: the chips win.
-- Skin Tightening `obj_think` and `obj_send_info` have no outgoing choices in
-  the database (they existed that way before the rewrite), so the player
-  shows "End of script" after them. Adding choices is a routing change and
+- `obj_think` and `obj_send_info` in the older niches have no outgoing
+  choices in the database (they existed that way before the rewrite), so the
+  player shows "End of script" after them. They are allow-listed in
+  `KNOWN_DEAD_ENDS` (lint R12 warning, not error); remove a niche's entry when
+  its buttons are added. Adding choices is a routing change and
   is deliberately not part of a text rewrite; it needs its own decision.
   When that decision is made, the niche-objection pattern is two buttons:
   a `positive` label quoting the patient's yes to the screen's closing

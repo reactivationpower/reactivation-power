@@ -18,10 +18,13 @@
 //   R10 question screens map one-to-one to the concern chips
 //   R11 the read-back lives on review only; recommendation opens with the
 //       bridge and asks "Can I make a recommendation?"
+//   R12 every non-terminal step has an outgoing choice (no mid-call
+//       "End of script"); known dead ends are allow-listed in lib.ts
 // Plus the structural checks apply runs (routing targets, tokens).
 import { pathToFileURL } from 'node:url'
 import {
   GENERAL_SLUG,
+  findDeadEnds,
   listSlugs,
   printProblems,
   readFlowFile,
@@ -264,8 +267,12 @@ function hasMixedNote(p: string): boolean {
   return false
 }
 
-export function lintFile(slug: string, file: FlowFile, generalKeys: Set<string>): Problem[] {
-  const problems: Problem[] = [...validateStructure(slug, file, generalKeys)]
+export function lintFile(slug: string, file: FlowFile, general: FlowFile): Problem[] {
+  const generalKeys = new Set(general.steps.map((s) => s.step_key))
+  const problems: Problem[] = [
+    ...validateStructure(slug, file, generalKeys),
+    ...findDeadEnds(slug, file, general),
+  ]
   const push = (level: Problem['level'], where: string, message: string) =>
     problems.push({ level, where, message })
 
@@ -471,13 +478,12 @@ function main() {
   const requested = args.filter((a) => !a.startsWith('--'))
   const slugs = requested.length > 0 ? requested : listSlugs()
   const general = readFlowFile(GENERAL_SLUG)
-  const generalKeys = new Set(general.steps.map((s) => s.step_key))
 
   let totalErrors = 0
   let totalWarnings = 0
   for (const slug of slugs) {
     const file = readFlowFile(slug)
-    const problems = lintFile(slug, file, generalKeys)
+    const problems = lintFile(slug, file, general)
     const errors = problems.filter((p) => p.level === 'error').length
     const warnings = problems.length - errors
     totalErrors += errors

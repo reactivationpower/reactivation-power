@@ -259,6 +259,103 @@ export function validateStructure(
   return problems
 }
 
+/**
+ * Step keys that are meant to end the script. The player shows "End of
+ * script" under them and the caller logs the call with the buttons below the
+ * script, so no outgoing choice is expected.
+ */
+export const TERMINAL_STEP_PATTERNS: RegExp[] = [
+  /^scheduling$/, // booked; notes + "Scheduled" button live below the script
+  /^close_/, // home services: close_appt / close_callback / close_no
+  /^booked_wrap$/, // weight-loss niches: confirm and hang up
+  /_bonus$/, // "one more thing" add-on question after booking
+  /^(voicemail|wrong_number|dnc)$/,
+  /^(end|wrap_up|wrapup)(_|$)/,
+]
+
+export function isTerminalStep(stepKey: string): boolean {
+  return TERMINAL_STEP_PATTERNS.some((re) => re.test(stepKey))
+}
+
+/**
+ * Screens that are known to strand the caller (no outgoing choice) and are
+ * deliberately left that way until a routing decision is made. Lint reports
+ * them as warnings instead of errors. Remove an entry once the screen gets
+ * its buttons; lint warns when an entry is stale.
+ */
+export const KNOWN_DEAD_ENDS: Record<string, string[]> = {
+  'acoustic-wave-therapy': ['obj_think', 'obj_send_info'],
+  acupuncture: ['obj_think', 'obj_send_info'],
+  'body-waxing': ['obj_think', 'obj_send_info'],
+  botox: ['obj_think', 'obj_send_info'],
+  'cellulite-reduction': ['obj_think', 'obj_send_info'],
+  'clear-aligners': ['obj_think', 'obj_send_info'],
+  'dental-implants': ['obj_think', 'obj_send_info'],
+  'glp-patients': ['obj_think', 'obj_send_info'],
+  'laser-hair-removal': ['obj_think', 'obj_send_info'],
+  'massage-therapy': ['obj_think', 'obj_send_info'],
+  'orthodontics-braces': ['obj_think', 'obj_send_info'],
+  'skin-tightening': ['obj_think', 'obj_send_info'],
+  'teeth-whitening': ['obj_think', 'obj_send_info'],
+  'weight-loss-not-chirothin': ['obj_think', 'obj_send_info'],
+}
+
+/**
+ * R12: every non-terminal step must have at least one outgoing choice, in
+ * its own file or in general.json (a niche with no choices for a step falls
+ * through to general's set). Otherwise the player shows "End of script"
+ * mid-call. Known, tracked dead ends downgrade to warnings.
+ */
+export function findDeadEnds(
+  slug: string,
+  file: FlowFile,
+  general: FlowFile,
+  allowList: Record<string, string[]> = KNOWN_DEAD_ENDS,
+): Problem[] {
+  const problems: Problem[] = []
+  const hasChoices = new Set<string>()
+  for (const c of file.choices) hasChoices.add(c.from_step_key)
+  if (slug !== GENERAL_SLUG) {
+    for (const c of general.choices) hasChoices.add(c.from_step_key)
+  }
+  const allowed = new Set(allowList[slug] ?? [])
+  const stepKeys = new Set(file.steps.map((s) => s.step_key))
+
+  for (const s of file.steps) {
+    if (hasChoices.has(s.step_key) || isTerminalStep(s.step_key)) continue
+    const where = `${slug}:${s.step_key}`
+    if (allowed.has(s.step_key)) {
+      problems.push({
+        level: 'warn',
+        where,
+        message: 'R12 known dead end: no outgoing choice, player shows "End of script" (allow-listed in KNOWN_DEAD_ENDS)',
+      })
+    } else {
+      problems.push({
+        level: 'error',
+        where,
+        message: 'R12 dead end: no outgoing choice in this file or general.json, player shows "End of script" mid-call (add choices, or list it in KNOWN_DEAD_ENDS if intentional)',
+      })
+    }
+  }
+  for (const key of allowed) {
+    if (!stepKeys.has(key)) {
+      problems.push({
+        level: 'warn',
+        where: `${slug}:${key}`,
+        message: 'R12 stale KNOWN_DEAD_ENDS entry: step does not exist in this file',
+      })
+    } else if (hasChoices.has(key)) {
+      problems.push({
+        level: 'warn',
+        where: `${slug}:${key}`,
+        message: 'R12 stale KNOWN_DEAD_ENDS entry: step now has outgoing choices, remove it from the list',
+      })
+    }
+  }
+  return problems
+}
+
 export function printProblems(problems: Problem[]): void {
   for (const p of problems) {
     console.log(`${p.level === 'error' ? 'ERROR' : 'warn '}  ${p.where}: ${p.message}`)
