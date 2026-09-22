@@ -6,3 +6,4 @@
 - [Stripe dunning & webhook verification](stripe-dunning.md) — access keyed on customers.billing_status; Stripe retries are a Dashboard setting; sandbox test recipe without Stripe CLI.
 - [Agreement e-sign flow constraints](agreements-esign.md) — edit/sign linearized in DB, one agreement per link, signed copy sent on completion, Stripe readiness keyed by client secret.
 - [One-off api-server scripts & test admins](api-server-scripts.md) — esbuild-bundle with pino externalized; create disposable admins via Supabase createUser, never ask for the owner's password.
+- [Web app unit tests](web-app-tests.md) — reactivation-power vitest uses its own config (vite.config throws without PORT); root `pnpm test` + validation `test`/`typecheck` registered.
