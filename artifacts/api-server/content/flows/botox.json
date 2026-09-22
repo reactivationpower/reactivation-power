@@ -87,7 +87,7 @@
     {
       "step_key": "cadence_close",
       "title": "Nothing Found: Protect the Results",
-      "content": "{{contact_first_name}}, I'm glad everything is still looking the way you want it.\n\nOne thing before I let you go. It's been at least three months since your last visit. That's right about when things usually start to soften. The movement comes back slowly before the lines do, so you're usually the last one to notice. Does that make sense?\n\n(Wait for the yes. If they hesitate, use the second button.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nMy recommendation is that we get your touch-up on the books now, just ahead of that. That way the results stay even and nobody sees the in-between stage. Does that sound reasonable?\n\n(Wait for the yes.)\n\nOkay, let's find you a time. I have (day) at (time) or (day) at (time). Which is better for you?",
+      "content": "{{contact_first_name}}, I'm glad everything is still looking the way you want it.\n\nOne thing before I let you go. It's been at least three months since your last visit. That's right about when things usually start to soften. The movement comes back slowly before the lines do, so you're usually the last one to notice. Does that make sense?\n\n(Wait for the yes. If they hesitate, use the second button.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get your touch-up on the books now, just ahead of that. That way the results stay even and nobody sees the in-between stage. Does that sound reasonable?\n\n(Wait for the yes.)\n\nOkay, let's find you a time. I have (day) at (time) or (day) at (time). Which is better for you?",
       "sort_order": 12
     },
     {

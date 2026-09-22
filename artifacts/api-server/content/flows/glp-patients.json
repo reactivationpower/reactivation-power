@@ -93,7 +93,7 @@
     {
       "step_key": "comeback_close",
       "title": "Getting Back On Track: The Close",
-      "content": "{{contact_first_name}}, thank you for that. Your file is up to date.\n\nThe good news is nothing about where you are today keeps you from getting back on track. With the right supervision, the restart is straightforward. Does that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nMy recommendation is that we get you back on the program now, picking up where you left off. That's the fastest way to feel in control again. Does that sound reasonable?\n\n(Wait for the yes.)\n\nLet's get you back on the schedule. We have (day) at (time) or (day) at (time). Which is better for you?",
+      "content": "{{contact_first_name}}, thank you for that. Your file is up to date.\n\nThe good news is nothing about where you are today keeps you from getting back on track. With the right supervision, the restart is straightforward. Does that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you back on the program now, picking up where you left off. That's the fastest way to feel in control again. Does that sound reasonable?\n\n(Wait for the yes.)\n\nLet's get you back on the schedule. We have (day) at (time) or (day) at (time). Which is better for you?",
       "sort_order": 13
     },
     {

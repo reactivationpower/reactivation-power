@@ -87,13 +87,13 @@
     {
       "step_key": "cadence_close",
       "title": "Nothing Found: Stay Ahead of It",
-      "content": "{{contact_first_name}}, I'm glad your smile is still looking bright.\n\nOne thing before I let you go. Staining comes back so slowly that you never see it happening. Coffee, tea, and wine dull things a shade at a time. Because you see your own smile every day, you're usually the last one to notice. Does that make sense?\n\n(Wait for the yes. If they hesitate, use the second button.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nMy recommendation is that we get you in for a quick touch-up. That way you stay ahead of the staining instead of chasing it. Does that sound reasonable?\n\n(Wait for the yes.)\n\nOkay, let's find you a time. I have (day) at (time) or (day) at (time). Which is better for you?",
+      "content": "{{contact_first_name}}, I'm glad your smile is still looking bright.\n\nOne thing before I let you go. Staining comes back so slowly that you never see it happening. Coffee, tea, and wine dull things a shade at a time. Because you see your own smile every day, you're usually the last one to notice. Does that make sense?\n\n(Wait for the yes. If they hesitate, use the second button.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you in for a quick touch-up. That way you stay ahead of the staining instead of chasing it. Does that sound reasonable?\n\n(Wait for the yes.)\n\nOkay, let's find you a time. I have (day) at (time) or (day) at (time). Which is better for you?",
       "sort_order": 12
     },
     {
       "step_key": "comeback_close",
       "title": "Brightness Is the Whole Story: The Close",
-      "content": "{{contact_first_name}}, the nice thing is the whitening you did before is still working underneath. What's settled in since is newer surface stain, and newer stain lifts much easier than years of buildup. So getting the brightness back is a smaller job than the first time. Does that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nMy recommendation is that we get you in for that touch-up now. Getting back to that bright smile is one visit away. Does that sound reasonable?\n\n(Wait for the yes.)\n\nOkay, let's get you back on the books. I have (day) at (time) or (day) at (time). Which is better for you?",
+      "content": "{{contact_first_name}}, the nice thing is the whitening you did before is still working underneath. What's settled in since is newer surface stain, and newer stain lifts much easier than years of buildup. So getting the brightness back is a smaller job than the first time. Does that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you in for that touch-up now. Getting back to that bright smile is one visit away. Does that sound reasonable?\n\n(Wait for the yes.)\n\nOkay, let's get you back on the books. I have (day) at (time) or (day) at (time). Which is better for you?",
       "sort_order": 13
     },
     {

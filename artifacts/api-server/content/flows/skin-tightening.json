@@ -105,31 +105,31 @@
     {
       "step_key": "lapsed_felt_fine",
       "title": "If They Say: “I was happy with my results”",
-      "content": "That makes sense, {{contact_first_name}}, and that's the best reason there is. When you like what you see in the mirror, coming back stops feeling urgent. Looking that good is the result of the work we did together. The firmness you built does fade without a check-in now and then.\n\nDoes that make sense?\n\n(Let them answer.)\n\nWas there anything else holding you back, or was that pretty much it?\n\n(If they raise another reason, go back and tap the button for it. If that was it, continue.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nMy recommendation is that we get you back on the schedule so you keep looking this good. Does that sound reasonable?",
+      "content": "That makes sense, {{contact_first_name}}, and that's the best reason there is. When you like what you see in the mirror, coming back stops feeling urgent. Looking that good is the result of the work we did together. The firmness you built does fade without a check-in now and then.\n\nDoes that make sense?\n\n(Let them answer.)\n\nWas there anything else holding you back, or was that pretty much it?\n\n(If they raise another reason, go back and tap the button for it. If that was it, continue.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you back on the schedule so you keep looking this good. Does that sound reasonable?",
       "sort_order": 103
     },
     {
       "step_key": "lapsed_cost",
       "title": "If They Say: Cost or Budget",
-      "content": "I understand, {{contact_first_name}}, and I'm glad you told me. Check-in visits are spaced out and cost a fraction of what it took to build the results. And you're not committing to anything. It's one visit so we can make sure everything is holding.\n\nDoes that seem fair?\n\n(Let them answer.)\n\n(Do not quote prices, packages, or discounts. The office handles that.)\n\nWas there anything else holding you back, or was that pretty much it?\n\n(If they raise another reason, go back and tap the button for it. If that was it, continue.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nMy recommendation is that we get you back on the schedule. Does that sound reasonable?",
+      "content": "I understand, {{contact_first_name}}, and I'm glad you told me. Check-in visits are spaced out and cost a fraction of what it took to build the results. And you're not committing to anything. It's one visit so we can make sure everything is holding.\n\nDoes that seem fair?\n\n(Let them answer.)\n\n(Do not quote prices, packages, or discounts. The office handles that.)\n\nWas there anything else holding you back, or was that pretty much it?\n\n(If they raise another reason, go back and tap the button for it. If that was it, continue.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you back on the schedule. Does that sound reasonable?",
       "sort_order": 104
     },
     {
       "step_key": "lapsed_busy",
       "title": "If They Say: “Life got busy”",
-      "content": "I hear you, {{contact_first_name}}. Life fills up fast, and this kind of thing gets pushed down the list. It happens to everyone. A check-in visit is quick, and we can find a time that works around your schedule.\n\nWould that work?\n\n(Let them answer.)\n\nWas there anything else holding you back, or was that pretty much it?\n\n(If they raise another reason, go back and tap the button for it. If that was it, continue.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nMy recommendation is that we get you back on the schedule at a time that's easy for you. Does that sound reasonable?",
+      "content": "I hear you, {{contact_first_name}}. Life fills up fast, and this kind of thing gets pushed down the list. It happens to everyone. A check-in visit is quick, and we can find a time that works around your schedule.\n\nWould that work?\n\n(Let them answer.)\n\nWas there anything else holding you back, or was that pretty much it?\n\n(If they raise another reason, go back and tap the button for it. If that was it, continue.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you back on the schedule at a time that's easy for you. Does that sound reasonable?",
       "sort_order": 105
     },
     {
       "step_key": "lapsed_wait_pain",
       "title": "If They Say: “I’ll come back if it loosens again”",
-      "content": "That's a fair way to think about it, {{contact_first_name}}. The one thing I'd share is that skin changes slowly. You usually don't notice until it's been sliding for a while. Keeping the results you have takes a lot less than rebuilding them.\n\nDoes that sound right?\n\n(Let them answer.)\n\nWas there anything else holding you back, or was that pretty much it?\n\n(If they raise another reason, go back and tap the button for it. If that was it, continue.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nMy recommendation is that we get you back on the schedule so we stay ahead of it. Does that sound reasonable?",
+      "content": "That's a fair way to think about it, {{contact_first_name}}. The one thing I'd share is that skin changes slowly. You usually don't notice until it's been sliding for a while. Keeping the results you have takes a lot less than rebuilding them.\n\nDoes that sound right?\n\n(Let them answer.)\n\nWas there anything else holding you back, or was that pretty much it?\n\n(If they raise another reason, go back and tap the button for it. If that was it, continue.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you back on the schedule so we stay ahead of it. Does that sound reasonable?",
       "sort_order": 106
     },
     {
       "step_key": "lapsed_moved",
       "title": "If They Say: They Moved or Tried Another Provider",
-      "content": "That's understandable, {{contact_first_name}}. Things change. If you're still in the area, we'd love to see you again. Your whole history is in your file, so we can pick up right where you left off.\n\nWould that be okay?\n\n(Let them answer.)\n\nWas there anything else holding you back, or was that pretty much it?\n\n(If they raise another reason, go back and tap the button for it. If that was it, continue.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nMy recommendation is that we get you back on the schedule. Does that sound reasonable?",
+      "content": "That's understandable, {{contact_first_name}}. Things change. If you're still in the area, we'd love to see you again. Your whole history is in your file, so we can pick up right where you left off.\n\nWould that be okay?\n\n(Let them answer.)\n\nWas there anything else holding you back, or was that pretty much it?\n\n(If they raise another reason, go back and tap the button for it. If that was it, continue.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you back on the schedule. Does that sound reasonable?",
       "sort_order": 107
     },
     {
