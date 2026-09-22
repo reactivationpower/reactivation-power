@@ -36,7 +36,7 @@ import {
   type FlowFile,
   type Problem,
 } from './lib.ts'
-import { CONCERN_OPTIONS } from '../../../reactivation-power/src/lib/concern-options.ts'
+import { CONCERN_OPTIONS } from '@workspace/niche-catalog'
 
 export const MAX_SENTENCE_WORDS = 20
 export const TARGET_AVG_WORDS = 12

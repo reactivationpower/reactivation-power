@@ -36,7 +36,7 @@ import { getStripeMode } from "../lib/stripe";
 import { DEFAULT_CALL_BATCH_SIZE } from "../lib/types";
 import { demoIsStale } from "../lib/demo/seed";
 import { parseInactiveCount, parsePatientValue } from "../lib/opportunity";
-import { publicServiceName } from "../lib/service-catalog";
+import { publicServiceName } from "@workspace/niche-catalog";
 import { DEFAULT_TIMEZONE, isUsTimezone, timezoneLabel } from "../lib/us-timezones";
 import {
   confirmPayment, getPaymentDetail, getPaymentLinkPublic, listPaymentLinks,

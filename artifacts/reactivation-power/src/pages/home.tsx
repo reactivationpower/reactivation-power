@@ -14,7 +14,7 @@ import { OpportunityProvider } from '@/components/landing/opportunity-context'
 import { ServicesWeSupport } from '@/components/site/services-we-support'
 import { SiteFooter } from '@/components/site/site-footer'
 import { SiteHeader } from '@/components/site/site-header'
-import { PRACTICE_TYPES_LINE } from '@/lib/service-catalog'
+import { PRACTICE_TYPES_LINE } from '@workspace/niche-catalog'
 
 
 const STATS = [

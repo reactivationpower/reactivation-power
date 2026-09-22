@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/select'
 import { ScriptFlowPlayer } from '@/components/reactivation/script-flow-player'
 import { PracticeLogPreview } from '@/components/reactivation/practice-log-preview'
-import { CONCERN_OPTIONS } from '@/lib/concern-options'
+import { CONCERN_OPTIONS } from '@workspace/niche-catalog'
 import type { Niche, ScriptFlowChoice, ScriptFlowStep } from '@/lib/types'
 
 const FONT_SIZES = [16, 18, 20, 24, 28, 32, 36, 40]

@@ -34,7 +34,7 @@ import {
   matchNicheByName,
   normalizeServiceLabel,
   suggestNicheForService,
-} from '@/lib/niche-match'
+} from '@workspace/niche-catalog'
 import type { Niche, ServiceNicheMapping } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { useRouter } from '@/hooks/use-router'

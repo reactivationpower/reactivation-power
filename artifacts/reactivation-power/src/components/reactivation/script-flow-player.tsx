@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input'
 import {
   CONCERN_FALLBACK,
   type ConcernOption,
-} from '@/lib/concern-options'
+} from '@workspace/niche-catalog'
 import {
   complaintFallbackFor,
   isComplaintFallback,

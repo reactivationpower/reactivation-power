@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { ScriptFlowPlayer } from './script-flow-player'
 import type { ScriptFlowChoice, ScriptFlowStep, Sector } from '@/lib/types'
-import type { ConcernOption } from '@/lib/concern-options'
+import type { ConcernOption } from '@workspace/niche-catalog'
 
 // Guards the per-sector "Original complaint" wording: home-service calls must
 // say "came out for" (the tech went to the house), healthcare keeps "came in

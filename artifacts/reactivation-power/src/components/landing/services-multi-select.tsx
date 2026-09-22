@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Check } from 'lucide-react'
-import { SERVICE_GROUPS } from '@/lib/service-catalog'
+import { SERVICE_GROUPS } from '@workspace/niche-catalog'
 
 /**
  * Lead-form service picker. Shows the public label from the catalog but

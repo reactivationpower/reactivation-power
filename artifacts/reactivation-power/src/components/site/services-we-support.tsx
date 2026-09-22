@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { Activity, Scale, Smile, Sparkles } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
-import { SERVICE_GROUPS, type ServiceGroupId } from '@/lib/service-catalog'
+import { SERVICE_GROUPS, type ServiceGroupId } from '@workspace/niche-catalog'
 
 const GROUP_ICONS: Record<ServiceGroupId, LucideIcon> = {
   chiropractic: Activity,

@@ -10,7 +10,7 @@ import {
   getOwnerNiches,
   releaseReserveContacts,
 } from '@/lib/data/reactivation'
-import { matchNicheByName } from '@/lib/niche-match'
+import { matchNicheByName } from '@workspace/niche-catalog'
 import { easternWallClockToUtc } from '@/lib/call-time'
 import { sanitizeNotes } from '@/lib/notes-html'
 import type { CallDisposition } from '@/lib/types'

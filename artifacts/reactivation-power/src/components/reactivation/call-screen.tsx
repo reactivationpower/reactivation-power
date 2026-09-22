@@ -40,7 +40,7 @@ import {
   spokenProviderName,
   type ProviderSource,
 } from '@/lib/provider-name'
-import { CONCERN_OPTIONS } from '@/lib/concern-options'
+import { CONCERN_OPTIONS } from '@workspace/niche-catalog'
 import { ScriptFlowPlayer } from '@/components/reactivation/script-flow-player'
 import { DateTimePicker } from '@/components/reactivation/date-time-picker'
 import { cn } from '@/lib/utils'

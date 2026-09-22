@@ -19,6 +19,7 @@
     "@vercel/blob": "^2.8.0",
     "@workspace/api-zod": "workspace:*",
     "@workspace/db": "workspace:*",
+    "@workspace/niche-catalog": "workspace:*",
     "busboy": "^1.6.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",

@@ -1,4 +1,3 @@
-// @ts-nocheck
 // Main-concern capture lists for the clinical niches.
 //
 // On the "Questions — Update the File" screen, the caller taps the concern

@@ -2,7 +2,7 @@ import { Router, type IRouter, type Request, type Response } from "express";
 import { accessOwnerId, getCurrentParticipant } from "@/lib/data/participants";
 import { getOwnerNiches } from "@/lib/data/reactivation";
 import { getOwnerSectors } from "@/lib/data/courses";
-import { suggestNicheForService } from "@/lib/niche-match";
+import { suggestNicheForService } from "@workspace/niche-catalog";
 import { runWithRequestContext } from "@/lib/request-context";
 import { isRedirectSignal } from "@/shims/next-navigation";
 

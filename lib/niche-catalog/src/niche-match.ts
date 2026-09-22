@@ -1,4 +1,11 @@
-import type { Niche } from '@/lib/types'
+/**
+ * The matchers only ever read a niche's name, so they accept any record
+ * shape that carries one (the web app's `Niche`, the api-server's row type,
+ * a bare `{ name }` in tests) and hand the same object back.
+ */
+export interface NicheLike {
+  name: string
+}
 
 /**
  * Keyword -> niche name matcher for service/appointment types found in a
@@ -438,10 +445,10 @@ function nicheKey(raw: string): string {
  * right niche. Returns null when nothing matches, which lets the caller
  * fall back to the service column or the account default.
  */
-export function matchNicheByName(
+export function matchNicheByName<T extends NicheLike>(
   value: string,
-  niches: Niche[],
-): Niche | null {
+  niches: T[],
+): T | null {
   const key = nicheKey(value)
   if (!key) return null
   for (const niche of niches) {
@@ -454,10 +461,10 @@ export function matchNicheByName(
  * Suggest a niche for a raw service/appointment-type string.
  * Returns the matched Niche or null when nothing matches confidently.
  */
-export function suggestNicheForService(
+export function suggestNicheForService<T extends NicheLike>(
   service: string,
-  niches: Niche[],
-): Niche | null {
+  niches: T[],
+): T | null {
   const text = matchKey(service)
   if (!text) return null
 
