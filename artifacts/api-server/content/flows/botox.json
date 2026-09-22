@@ -69,7 +69,7 @@
     {
       "step_key": "making_it_real",
       "title": "Making It Real",
-      "content": "{{contact_first_name}}, I'd like to ask a few quick questions about {{main_concern}} so your file is up to date. It'll only take a minute.\n\n(Ask these three questions in order. Pause after each and let them answer.)\n\nHow long has that been on your mind?\n\n(Let them answer. Repeat it back.)\n\nHow often do you notice it, here and there or pretty much every time you look in the mirror?\n\n(Let them answer.)\n\nWhen you notice it, how does it change how you feel, like getting ready or walking into a room?\n\n(Let them open up. Do not rush.)\n\nThank you for sharing that. It makes sense, and it's something we help people with all the time.",
+      "content": "{{contact_first_name}}, I'd like to ask a few quick questions about {{main_concern}} so your file is up to date. It'll only take a minute.\n\n(Ask these three questions in order. Pause after each and let them answer.)\n\nHow long has it been bothering you, like a few weeks, or more like months?\n\n(Let them answer.)\n\nIs it something you notice now and then, or every time you look in the mirror?\n\n(Let them answer.)\n\nWhen it's at its worst, does it ever interfere with photos, going out, or feeling put together?\n\n(Let them answer. Repeat back whatever they name.)\n\nThank you for sharing that. It makes sense, and it's something we help people with all the time.",
       "sort_order": 10
     },
     {

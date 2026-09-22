@@ -1,106 +1,681 @@
 {
-  "niche": { "name": "Medical-Grade Skincare", "sector": "healthcare", "is_active": true, "sort_order": 33 },
+  "niche": {
+    "name": "Medical-Grade Skincare",
+    "sector": "healthcare",
+    "is_active": true,
+    "sort_order": 33
+  },
   "steps": [
-    { "step_key": "opening_question", "title": "The Opening Question", "content": "So {{contact_first_name}}, how has your skin been since we set up your home routine? I usually hear one of three things. I'm still using it, and my skin looks good. Or I ran out, or the routine slipped. Or I stopped, and my skin is back to how it was. Which one is closest for you?\n\n(Only three answers. Tap the one you hear.)", "sort_order": 1 },
-    { "step_key": "resp_doing_great", "title": "Still Using the Routine", "content": "That's great to hear, {{contact_first_name}}. Your notes say you were happy with how your skin looked. Is the routine still fitting into your day?\n\n(Let them answer.)", "sort_order": 2 },
-    { "step_key": "resp_coming_back", "title": "Ran Out or the Routine Slipped", "content": "That happens, {{contact_first_name}}. Home routines can slip when life gets busy. There's no judgment. What made it harder to keep up?\n\n(Let them answer. Stay warm. Do not book yet.)", "sort_order": 3 },
-    { "step_key": "resp_fully_back", "title": "Stopped and Skin Changed", "content": "I'm sorry, {{contact_first_name}}. Skin keeps changing after a routine stops. It's not anything you did wrong. What changed first?\n\n(Let them answer. Stay warm. Do not book yet.)", "sort_order": 4 },
-    { "step_key": "permission_questions", "title": "Ask Permission for the Questions", "content": "{{contact_first_name}}, I'm updating your file anyway. Can I ask a few questions about anything else you've noticed?\n\n(Wait for the yes.)", "sort_order": 6 },
-    { "step_key": "transition", "title": "The Transition: Ask Permission", "content": "{{contact_first_name}}, we'll come back to the routine. First, can I ask a few quick questions so your file is current?\n\n(Wait for the yes.)", "sort_order": 6 },
-    { "step_key": "digging_in", "title": "The Questions: Update the File", "content": "(Write down every concern they name. You'll recap them in a moment.)\n\nWould you like to get your routine back on track?\n\nAre there products you ran out of?\n\nHave you noticed any dryness or flaking?\n\nAre you having any breakouts?\n\nHas your skin been looking dull?\n\nHave you noticed sun spots or uneven tone?\n\nAre fine lines starting to bother you?\n\nHow about redness or sensitivity?\n\nHave you noticed large pores or rough skin?\n\nWould you like to get your sunscreen habit back?\n\nHave you noticed any loosening or sagging?\n\n(Recap what you wrote down, then ask:)\n\n{{contact_first_name}}, of those, which one bothers you the most?\n\n(Tap their answer below.)", "sort_order": 7 },
-    { "step_key": "digging_in_concern", "title": "The Questions: Update the File", "content": "(Write down every concern they name, including the first one.)\n\nWould you like to get your routine back on track?\n\nAre there products you ran out of?\n\nHave you noticed any dryness or flaking?\n\nAre you having any breakouts?\n\nHas your skin been looking dull?\n\nHave you noticed sun spots or uneven tone?\n\nAre fine lines starting to bother you?\n\nHow about redness or sensitivity?\n\nHave you noticed large pores or rough skin?\n\nWould you like to get your sunscreen habit back?\n\nHave you noticed any loosening or sagging?\n\n(Recap everything, including what they mentioned first, then ask:)\n\n{{contact_first_name}}, between these, which one bothers you the most?\n\n(Tap their answer below.)", "sort_order": 7 },
-    { "step_key": "making_it_real", "title": "Making It Real", "content": "{{contact_first_name}}, I'd like to ask about {{main_concern}} so your file is current.\n\n(Ask these questions in order. Pause after each.)\n\nHow long has that been on your mind?\n\n(Let them answer.)\n\nHow often do you notice it?\n\n(Let them answer.)\n\nWhen it bothers you, how does it affect how you feel about your skin?\n\n(Let them answer. Do not rush.)\n\nThank you for sharing that.", "sort_order": 8 },
-    { "step_key": "review", "title": "The Review", "content": "{{contact_first_name}}, let me make sure I have this right.\n\n(Recap how long, how often, and how it affects them.)\n\nDid I get that right?\n\nIt sounds like you'd like your skin and routine to feel manageable again. Is that fair to say?\n\n(Tap what you hear.)", "sort_order": 9 },
-    { "step_key": "recommendation", "title": "The Recommendation", "content": "{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you in so {{provider_name}} can look at {{main_concern}}. We can check your skin and talk about what fits your life. Does that sound reasonable?\n\n(Tap what you hear.)", "sort_order": 10 },
-    { "step_key": "bridge_no", "title": "They Hesitate: Find Out Why", "content": "{{contact_first_name}}, I don't want to assume anything. Is it the timing, or is something else holding you back?\n\n(Stay easy. Let them answer.)", "sort_order": 11 },
-    { "step_key": "lapsed_commitment", "title": "Nothing Found: Why Did They Stop?", "content": "{{contact_first_name}}, I'm glad your skin is doing well.\n\nCan I ask what changed that led you to stop coming in for skin checks?\n\n(Let them answer. Do not argue with it.)\n\nSkin needs can change, even when a routine works well. A skin check helps keep your file current. Does that make sense?\n\n(Wait for the yes.)\n\nCan I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you in for a skin check. Does that sound reasonable?", "sort_order": 16 },
-    { "step_key": "obj_switched", "title": "Objection: “I’m using drugstore stuff now and it’s fine”", "content": "That's okay, {{contact_first_name}}. There's no judgment about what's on your shelf. The visit is about looking at your skin and hearing what's working.\n\nCan we get you in for a look?", "sort_order": 100 },
-    { "step_key": "obj_no_difference", "title": "Objection: “I didn’t see enough of a difference”", "content": "Thank you for telling me. We'd want to hear what you hoped would change. {{provider_name}} can look at your skin and talk it through.\n\n(Do not promise results.)\n\nIs there anything else on your mind?", "sort_order": 101 },
-    { "step_key": "obj_too_many_steps", "title": "Objection: “The routine was too many steps”", "content": "That's useful to know. Your routine needs to fit your life. It's worth sharing that in person so we understand what felt like too much.\n\nWould you be open to coming back in?", "sort_order": 102 },
-    { "step_key": "obj_worth_it", "title": "Objection: “I’m not sure it’s worth it”", "content": "That's fair. A skin check gives us a chance to see what matters now. Then you can decide what feels useful for you.\n\nWould it help to come in and talk it through first?", "sort_order": 103 },
-    { "step_key": "lapsed_felt_fine", "title": "If They Say: “My skin was doing fine”", "content": "That makes sense, {{contact_first_name}}. When skin looks good, a check can stop feeling important. Skin needs can still change over time.\n\nDoes that make sense?\n\n(Let them answer.)\n\nWas anything else holding you back?\n\n(If they name another reason, go back and tap it.)\n\nCan I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you in for a skin check. Does that sound reasonable?", "sort_order": 104 },
-    { "step_key": "lapsed_cost", "title": "If They Say: Cost or Budget", "content": "I understand, {{contact_first_name}}. A skin check is just a look. You're not committing to anything.\n\nDoes that seem fair?\n\n(Let them answer.)\n\n(Do not quote prices or sell products on the call.)\n\nWas anything else holding you back?\n\n(If they name another reason, go back and tap it.)\n\nCan I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you back on the schedule. Does that sound reasonable?", "sort_order": 105 },
-    { "step_key": "lapsed_busy", "title": "If They Say: “Life got busy”", "content": "I hear you, {{contact_first_name}}. Life fills up, and skin checks get pushed down the list. We can work around your schedule.\n\nWould that work?\n\n(Let them answer.)\n\nWas anything else holding you back?\n\n(If they name another reason, go back and tap it.)\n\nCan I make a recommendation?\n\n(Wait for the yes.)\n\nLet's find a time that's easy for you. Does that sound reasonable?", "sort_order": 106 },
-    { "step_key": "lapsed_wait", "title": "If They Say: “I’ll come back if my skin acts up”", "content": "That's fair, {{contact_first_name}}. Skin needs can change before a bigger issue stands out. A check lets us see how things look now.\n\nDoes that sound right?\n\n(Let them answer.)\n\nWas anything else holding you back?\n\n(If they name another reason, go back and tap it.)\n\nCan I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you in for a skin check. Does that sound reasonable?", "sort_order": 107 },
-    { "step_key": "lapsed_moved", "title": "If They Say: They Moved or Tried Another Provider", "content": "That's understandable, {{contact_first_name}}. Things change. If you're nearby, we'd be glad to see you again. Your skin history is still in your file.\n\nWould that be okay?\n\n(Let them answer.)\n\nWas anything else holding you back?\n\n(If they name another reason, go back and tap it.)\n\nCan I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you back on the schedule. Does that sound reasonable?", "sort_order": 108 },
-    { "step_key": "obj_think", "title": "Objection: “I need to think about it”", "content": "That's fair, {{contact_first_name}}. What part would you like to think over?\n\n(Listen. If they name a concern, tap it below.)\n\nA skin check lets us look and answer your questions. Then you decide what feels right.\n\nDoes that help?", "sort_order": 130 },
-    { "step_key": "obj_send_info", "title": "Objection: “Just send me some info”", "content": "I can send information, {{contact_first_name}}. A general flyer can't show what your skin needs. A visit gives you answers about your own skin.\n\nWould a skin check work for you?", "sort_order": 131 }
+    {
+      "step_key": "opening_question",
+      "title": "The Opening Question",
+      "content": "So {{contact_first_name}}, how has your skin been since we set up your home routine? I usually hear one of three things. I'm still using it, and my skin looks good. Or I ran out, or the routine slipped. Or I stopped, and my skin is back to how it was. Which one is closest for you?\n\n(Only three answers. Tap the one you hear.)",
+      "sort_order": 1
+    },
+    {
+      "step_key": "resp_doing_great",
+      "title": "Still Using the Routine",
+      "content": "That's great to hear, {{contact_first_name}}. Your notes say you were happy with how your skin looked. Is the routine still fitting into your day?\n\n(Let them answer.)",
+      "sort_order": 2
+    },
+    {
+      "step_key": "resp_coming_back",
+      "title": "Ran Out or the Routine Slipped",
+      "content": "That happens, {{contact_first_name}}. Home routines can slip when life gets busy. There's no judgment. What made it harder to keep up?\n\n(Let them answer. Stay warm. Do not book yet.)",
+      "sort_order": 3
+    },
+    {
+      "step_key": "resp_fully_back",
+      "title": "Stopped and Skin Changed",
+      "content": "I'm sorry, {{contact_first_name}}. Skin keeps changing after a routine stops. It's not anything you did wrong. What changed first?\n\n(Let them answer. Stay warm. Do not book yet.)",
+      "sort_order": 4
+    },
+    {
+      "step_key": "permission_questions",
+      "title": "Ask Permission for the Questions",
+      "content": "{{contact_first_name}}, I'm updating your file anyway. Can I ask a few questions about anything else you've noticed?\n\n(Wait for the yes.)",
+      "sort_order": 6
+    },
+    {
+      "step_key": "transition",
+      "title": "The Transition: Ask Permission",
+      "content": "{{contact_first_name}}, we'll come back to the routine. First, can I ask a few quick questions so your file is current?\n\n(Wait for the yes.)",
+      "sort_order": 6
+    },
+    {
+      "step_key": "digging_in",
+      "title": "The Questions: Update the File",
+      "content": "(Write down every concern they name. You'll recap them in a moment.)\n\nWould you like to get your routine back on track?\n\nAre there products you ran out of?\n\nHave you noticed any dryness or flaking?\n\nAre you having any breakouts?\n\nHas your skin been looking dull?\n\nHave you noticed sun spots or uneven tone?\n\nAre fine lines starting to bother you?\n\nHow about redness or sensitivity?\n\nHave you noticed large pores or rough skin?\n\nWould you like to get your sunscreen habit back?\n\nHave you noticed any loosening or sagging?\n\n(Recap what you wrote down, then ask:)\n\n{{contact_first_name}}, of those, which one bothers you the most?\n\n(Tap their answer below.)",
+      "sort_order": 7
+    },
+    {
+      "step_key": "digging_in_concern",
+      "title": "The Questions: Update the File",
+      "content": "(Write down every concern they name, including the first one.)\n\nWould you like to get your routine back on track?\n\nAre there products you ran out of?\n\nHave you noticed any dryness or flaking?\n\nAre you having any breakouts?\n\nHas your skin been looking dull?\n\nHave you noticed sun spots or uneven tone?\n\nAre fine lines starting to bother you?\n\nHow about redness or sensitivity?\n\nHave you noticed large pores or rough skin?\n\nWould you like to get your sunscreen habit back?\n\nHave you noticed any loosening or sagging?\n\n(Recap everything, including what they mentioned first, then ask:)\n\n{{contact_first_name}}, between these, which one bothers you the most?\n\n(Tap their answer below.)",
+      "sort_order": 7
+    },
+    {
+      "step_key": "making_it_real",
+      "title": "Making It Real",
+      "content": "{{contact_first_name}}, I'd like to ask about {{main_concern}} so your file is current.\n\n(Ask these questions in order. Pause after each.)\n\nHow long has it been bothering you, like a few weeks, or more like months?\n\n(Let them answer.)\n\nIs it something you notice now and then, or every time you look in the mirror?\n\n(Let them answer.)\n\nWhen it's at its worst, does it ever interfere with photos, going out, or feeling put together?\n\n(Let them answer. Repeat back whatever they name.)\n\nThank you for sharing that.",
+      "sort_order": 8
+    },
+    {
+      "step_key": "review",
+      "title": "The Review",
+      "content": "{{contact_first_name}}, let me make sure I have this right.\n\n(Recap how long, how often, and how it affects them.)\n\nDid I get that right?\n\nIt sounds like you'd like your skin and routine to feel manageable again. Is that fair to say?\n\n(Tap what you hear.)",
+      "sort_order": 9
+    },
+    {
+      "step_key": "recommendation",
+      "title": "The Recommendation",
+      "content": "{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you in so {{provider_name}} can look at {{main_concern}}. We can check your skin and talk about what fits your life. Does that sound reasonable?\n\n(Tap what you hear.)",
+      "sort_order": 10
+    },
+    {
+      "step_key": "bridge_no",
+      "title": "They Hesitate: Find Out Why",
+      "content": "{{contact_first_name}}, I don't want to assume anything. Is it the timing, or is something else holding you back?\n\n(Stay easy. Let them answer.)",
+      "sort_order": 11
+    },
+    {
+      "step_key": "lapsed_commitment",
+      "title": "Nothing Found: Why Did They Stop?",
+      "content": "{{contact_first_name}}, I'm glad your skin is doing well.\n\nCan I ask what changed that led you to stop coming in for skin checks?\n\n(Let them answer. Do not argue with it.)\n\nSkin needs can change, even when a routine works well. A skin check helps keep your file current. Does that make sense?\n\n(Wait for the yes.)\n\nCan I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you in for a skin check. Does that sound reasonable?",
+      "sort_order": 16
+    },
+    {
+      "step_key": "obj_switched",
+      "title": "Objection: “I’m using drugstore stuff now and it’s fine”",
+      "content": "That's okay, {{contact_first_name}}. There's no judgment about what's on your shelf. The visit is about looking at your skin and hearing what's working.\n\nCan we get you in for a look?",
+      "sort_order": 100
+    },
+    {
+      "step_key": "obj_no_difference",
+      "title": "Objection: “I didn’t see enough of a difference”",
+      "content": "Thank you for telling me. We'd want to hear what you hoped would change. {{provider_name}} can look at your skin and talk it through.\n\n(Do not promise results.)\n\nIs there anything else on your mind?",
+      "sort_order": 101
+    },
+    {
+      "step_key": "obj_too_many_steps",
+      "title": "Objection: “The routine was too many steps”",
+      "content": "That's useful to know. Your routine needs to fit your life. It's worth sharing that in person so we understand what felt like too much.\n\nWould you be open to coming back in?",
+      "sort_order": 102
+    },
+    {
+      "step_key": "obj_worth_it",
+      "title": "Objection: “I’m not sure it’s worth it”",
+      "content": "That's fair. A skin check gives us a chance to see what matters now. Then you can decide what feels useful for you.\n\nWould it help to come in and talk it through first?",
+      "sort_order": 103
+    },
+    {
+      "step_key": "lapsed_felt_fine",
+      "title": "If They Say: “My skin was doing fine”",
+      "content": "That makes sense, {{contact_first_name}}. When skin looks good, a check can stop feeling important. Skin needs can still change over time.\n\nDoes that make sense?\n\n(Let them answer.)\n\nWas anything else holding you back?\n\n(If they name another reason, go back and tap it.)\n\nCan I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you in for a skin check. Does that sound reasonable?",
+      "sort_order": 104
+    },
+    {
+      "step_key": "lapsed_cost",
+      "title": "If They Say: Cost or Budget",
+      "content": "I understand, {{contact_first_name}}. A skin check is just a look. You're not committing to anything.\n\nDoes that seem fair?\n\n(Let them answer.)\n\n(Do not quote prices or sell products on the call.)\n\nWas anything else holding you back?\n\n(If they name another reason, go back and tap it.)\n\nCan I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you back on the schedule. Does that sound reasonable?",
+      "sort_order": 105
+    },
+    {
+      "step_key": "lapsed_busy",
+      "title": "If They Say: “Life got busy”",
+      "content": "I hear you, {{contact_first_name}}. Life fills up, and skin checks get pushed down the list. We can work around your schedule.\n\nWould that work?\n\n(Let them answer.)\n\nWas anything else holding you back?\n\n(If they name another reason, go back and tap it.)\n\nCan I make a recommendation?\n\n(Wait for the yes.)\n\nLet's find a time that's easy for you. Does that sound reasonable?",
+      "sort_order": 106
+    },
+    {
+      "step_key": "lapsed_wait",
+      "title": "If They Say: “I’ll come back if my skin acts up”",
+      "content": "That's fair, {{contact_first_name}}. Skin needs can change before a bigger issue stands out. A check lets us see how things look now.\n\nDoes that sound right?\n\n(Let them answer.)\n\nWas anything else holding you back?\n\n(If they name another reason, go back and tap it.)\n\nCan I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you in for a skin check. Does that sound reasonable?",
+      "sort_order": 107
+    },
+    {
+      "step_key": "lapsed_moved",
+      "title": "If They Say: They Moved or Tried Another Provider",
+      "content": "That's understandable, {{contact_first_name}}. Things change. If you're nearby, we'd be glad to see you again. Your skin history is still in your file.\n\nWould that be okay?\n\n(Let them answer.)\n\nWas anything else holding you back?\n\n(If they name another reason, go back and tap it.)\n\nCan I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you back on the schedule. Does that sound reasonable?",
+      "sort_order": 108
+    },
+    {
+      "step_key": "obj_think",
+      "title": "Objection: “I need to think about it”",
+      "content": "That's fair, {{contact_first_name}}. What part would you like to think over?\n\n(Listen. If they name a concern, tap it below.)\n\nA skin check lets us look and answer your questions. Then you decide what feels right.\n\nDoes that help?",
+      "sort_order": 130
+    },
+    {
+      "step_key": "obj_send_info",
+      "title": "Objection: “Just send me some info”",
+      "content": "I can send information, {{contact_first_name}}. A general flyer can't show what your skin needs. A visit gives you answers about your own skin.\n\nWould a skin check work for you?",
+      "sort_order": 131
+    }
   ],
   "choices": [
-    { "from_step_key": "opening_question", "label": "“I’m still using it and my skin looks good”", "to_step_key": "resp_doing_great", "variant": "positive", "sort_order": 0 },
-    { "from_step_key": "opening_question", "label": "“I ran out or the routine slipped”", "to_step_key": "resp_coming_back", "variant": "caution", "sort_order": 1 },
-    { "from_step_key": "opening_question", "label": "“I stopped and my skin is back to how it was”", "to_step_key": "resp_fully_back", "variant": "negative", "sort_order": 2 },
-    { "from_step_key": "resp_doing_great", "label": "They agreed: ask permission for a few questions", "to_step_key": "permission_questions", "variant": "default", "sort_order": 0 },
-    { "from_step_key": "resp_coming_back", "label": "Continue to the transition", "to_step_key": "transition", "variant": "default", "sort_order": 0 },
-    { "from_step_key": "resp_fully_back", "label": "Continue to the transition", "to_step_key": "transition", "variant": "default", "sort_order": 0 },
-    { "from_step_key": "permission_questions", "label": "They said okay: ask the questions", "to_step_key": "digging_in", "variant": "default", "sort_order": 0 },
-    { "from_step_key": "transition", "label": "They said okay: dig in", "to_step_key": "digging_in_concern", "variant": "default", "sort_order": 0 },
-    { "from_step_key": "digging_in", "label": "They named something that bothers them", "to_step_key": "making_it_real", "variant": "caution", "sort_order": 0 },
-    { "from_step_key": "digging_in", "label": "Nothing found: happy across the board", "to_step_key": "lapsed_commitment", "variant": "positive", "sort_order": 1 },
-    { "from_step_key": "digging_in_concern", "label": "They named something new or bigger", "to_step_key": "making_it_real", "variant": "default", "sort_order": 0 },
-    { "from_step_key": "digging_in_concern", "label": "Nothing new: it’s what they already mentioned", "to_step_key": "making_it_real", "variant": "default", "sort_order": 1 },
-    { "from_step_key": "making_it_real", "label": "Continue to the review", "to_step_key": "review", "variant": "default", "sort_order": 0 },
-    { "from_step_key": "review", "label": "They said yes: make the recommendation", "to_step_key": "recommendation", "variant": "positive", "sort_order": 0 },
-    { "from_step_key": "review", "label": "Not quite / they hesitate", "to_step_key": "bridge_no", "variant": "negative", "sort_order": 1 },
-    { "from_step_key": "recommendation", "label": "“Yes, that sounds reasonable”", "to_step_key": "scheduling", "variant": "positive", "sort_order": 0 },
-    { "from_step_key": "recommendation", "label": "Hesitant or soft no", "to_step_key": "uncover", "variant": "caution", "sort_order": 1 },
-    { "from_step_key": "recommendation", "label": "“I’m using drugstore stuff now and it’s fine”", "to_step_key": "obj_switched", "variant": "objection", "sort_order": 2 },
-    { "from_step_key": "recommendation", "label": "“I didn’t see enough of a difference”", "to_step_key": "obj_no_difference", "variant": "objection", "sort_order": 3 },
-    { "from_step_key": "recommendation", "label": "“The routine was too many steps”", "to_step_key": "obj_too_many_steps", "variant": "objection", "sort_order": 4 },
-    { "from_step_key": "recommendation", "label": "“I’m not sure it’s worth it”", "to_step_key": "obj_worth_it", "variant": "objection", "sort_order": 5 },
-    { "from_step_key": "recommendation", "label": "Cost or insurance", "to_step_key": "obj_cost", "variant": "objection", "sort_order": 6 },
-    { "from_step_key": "recommendation", "label": "“I don’t have time”", "to_step_key": "obj_time", "variant": "objection", "sort_order": 7 },
-    { "from_step_key": "recommendation", "label": "“I need to talk to my spouse”", "to_step_key": "obj_spouse", "variant": "objection", "sort_order": 8 },
-    { "from_step_key": "recommendation", "label": "“I’m considering another option”", "to_step_key": "obj_other_option", "variant": "objection", "sort_order": 9 },
-    { "from_step_key": "recommendation", "label": "“I need to think about it”", "to_step_key": "obj_think", "variant": "objection", "sort_order": 10 },
-    { "from_step_key": "recommendation", "label": "“Just send me some info”", "to_step_key": "obj_send_info", "variant": "objection", "sort_order": 11 },
-    { "from_step_key": "uncover", "label": "They’re ready: schedule", "to_step_key": "scheduling", "variant": "positive", "sort_order": 0 },
-    { "from_step_key": "uncover", "label": "“I’m using drugstore stuff now and it’s fine”", "to_step_key": "obj_switched", "variant": "objection", "sort_order": 1 },
-    { "from_step_key": "uncover", "label": "“I didn’t see enough of a difference”", "to_step_key": "obj_no_difference", "variant": "objection", "sort_order": 2 },
-    { "from_step_key": "uncover", "label": "“The routine was too many steps”", "to_step_key": "obj_too_many_steps", "variant": "objection", "sort_order": 3 },
-    { "from_step_key": "uncover", "label": "“I’m not sure it’s worth it”", "to_step_key": "obj_worth_it", "variant": "objection", "sort_order": 4 },
-    { "from_step_key": "uncover", "label": "Cost or insurance", "to_step_key": "obj_cost", "variant": "objection", "sort_order": 5 },
-    { "from_step_key": "uncover", "label": "“I don’t have time”", "to_step_key": "obj_time", "variant": "objection", "sort_order": 6 },
-    { "from_step_key": "uncover", "label": "“I need to talk to my spouse”", "to_step_key": "obj_spouse", "variant": "objection", "sort_order": 7 },
-    { "from_step_key": "uncover", "label": "“I’m considering another option”", "to_step_key": "obj_other_option", "variant": "objection", "sort_order": 8 },
-    { "from_step_key": "uncover", "label": "“I need to think about it”", "to_step_key": "obj_think", "variant": "objection", "sort_order": 9 },
-    { "from_step_key": "uncover", "label": "“Just send me some info”", "to_step_key": "obj_send_info", "variant": "objection", "sort_order": 10 },
-    { "from_step_key": "bridge_no", "label": "They’re okay to move forward", "to_step_key": "recommendation", "variant": "positive", "sort_order": 0 },
-    { "from_step_key": "bridge_no", "label": "“I’m using drugstore stuff now and it’s fine”", "to_step_key": "obj_switched", "variant": "objection", "sort_order": 1 },
-    { "from_step_key": "bridge_no", "label": "“I didn’t see enough of a difference”", "to_step_key": "obj_no_difference", "variant": "objection", "sort_order": 2 },
-    { "from_step_key": "bridge_no", "label": "“The routine was too many steps”", "to_step_key": "obj_too_many_steps", "variant": "objection", "sort_order": 3 },
-    { "from_step_key": "bridge_no", "label": "“I’m not sure it’s worth it”", "to_step_key": "obj_worth_it", "variant": "objection", "sort_order": 4 },
-    { "from_step_key": "bridge_no", "label": "Cost or insurance", "to_step_key": "obj_cost", "variant": "objection", "sort_order": 5 },
-    { "from_step_key": "bridge_no", "label": "“I don’t have time”", "to_step_key": "obj_time", "variant": "objection", "sort_order": 6 },
-    { "from_step_key": "bridge_no", "label": "“I need to talk to my spouse”", "to_step_key": "obj_spouse", "variant": "objection", "sort_order": 7 },
-    { "from_step_key": "bridge_no", "label": "Another reason: dig deeper", "to_step_key": "uncover", "variant": "caution", "sort_order": 8 },
-    { "from_step_key": "obj_switched", "label": "Resolved: back to scheduling", "to_step_key": "scheduling", "variant": "positive", "sort_order": 0 },
-    { "from_step_key": "obj_switched", "label": "Another concern came up", "to_step_key": "uncover", "variant": "objection", "sort_order": 1 },
-    { "from_step_key": "obj_no_difference", "label": "Resolved: back to scheduling", "to_step_key": "scheduling", "variant": "positive", "sort_order": 0 },
-    { "from_step_key": "obj_no_difference", "label": "Another concern came up", "to_step_key": "uncover", "variant": "objection", "sort_order": 1 },
-    { "from_step_key": "obj_too_many_steps", "label": "Resolved: back to scheduling", "to_step_key": "scheduling", "variant": "positive", "sort_order": 0 },
-    { "from_step_key": "obj_too_many_steps", "label": "Another concern came up", "to_step_key": "uncover", "variant": "objection", "sort_order": 1 },
-    { "from_step_key": "obj_worth_it", "label": "Resolved: back to scheduling", "to_step_key": "scheduling", "variant": "positive", "sort_order": 0 },
-    { "from_step_key": "obj_worth_it", "label": "Another concern came up", "to_step_key": "uncover", "variant": "objection", "sort_order": 1 },
-    { "from_step_key": "obj_think", "label": "Resolved: back to scheduling", "to_step_key": "scheduling", "variant": "positive", "sort_order": 0 },
-    { "from_step_key": "obj_think", "label": "Another concern came up", "to_step_key": "uncover", "variant": "objection", "sort_order": 1 },
-    { "from_step_key": "obj_send_info", "label": "Resolved: back to scheduling", "to_step_key": "scheduling", "variant": "positive", "sort_order": 0 },
-    { "from_step_key": "obj_send_info", "label": "Another concern came up", "to_step_key": "uncover", "variant": "objection", "sort_order": 1 },
-    { "from_step_key": "lapsed_commitment", "label": "They shared a reason: back to scheduling", "to_step_key": "scheduling", "variant": "positive", "sort_order": 0 },
-    { "from_step_key": "lapsed_commitment", "label": "“My skin was doing fine”", "to_step_key": "lapsed_felt_fine", "variant": "default", "sort_order": 1 },
-    { "from_step_key": "lapsed_commitment", "label": "Cost or budget", "to_step_key": "lapsed_cost", "variant": "default", "sort_order": 2 },
-    { "from_step_key": "lapsed_commitment", "label": "“Life got busy”", "to_step_key": "lapsed_busy", "variant": "default", "sort_order": 3 },
-    { "from_step_key": "lapsed_commitment", "label": "“I’ll come back if my skin acts up”", "to_step_key": "lapsed_wait", "variant": "default", "sort_order": 4 },
-    { "from_step_key": "lapsed_commitment", "label": "Moved or tried another provider", "to_step_key": "lapsed_moved", "variant": "default", "sort_order": 5 },
-    { "from_step_key": "lapsed_felt_fine", "label": "Sounds reasonable: back to scheduling", "to_step_key": "scheduling", "variant": "default", "sort_order": 0 },
-    { "from_step_key": "lapsed_felt_fine", "label": "Another reason came up: go back and pick it", "to_step_key": "lapsed_commitment", "variant": "default", "sort_order": 1 },
-    { "from_step_key": "lapsed_cost", "label": "Sounds reasonable: back to scheduling", "to_step_key": "scheduling", "variant": "default", "sort_order": 0 },
-    { "from_step_key": "lapsed_cost", "label": "Another reason came up: go back and pick it", "to_step_key": "lapsed_commitment", "variant": "default", "sort_order": 1 },
-    { "from_step_key": "lapsed_busy", "label": "Sounds reasonable: back to scheduling", "to_step_key": "scheduling", "variant": "default", "sort_order": 0 },
-    { "from_step_key": "lapsed_busy", "label": "Another reason came up: go back and pick it", "to_step_key": "lapsed_commitment", "variant": "default", "sort_order": 1 },
-    { "from_step_key": "lapsed_wait", "label": "Sounds reasonable: back to scheduling", "to_step_key": "scheduling", "variant": "default", "sort_order": 0 },
-    { "from_step_key": "lapsed_wait", "label": "Another reason came up: go back and pick it", "to_step_key": "lapsed_commitment", "variant": "default", "sort_order": 1 },
-    { "from_step_key": "lapsed_moved", "label": "Sounds reasonable: back to scheduling", "to_step_key": "scheduling", "variant": "default", "sort_order": 0 },
-    { "from_step_key": "lapsed_moved", "label": "Another reason came up: go back and pick it", "to_step_key": "lapsed_commitment", "variant": "default", "sort_order": 1 }
+    {
+      "from_step_key": "bridge_no",
+      "label": "They’re okay to move forward",
+      "to_step_key": "recommendation",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "bridge_no",
+      "label": "“I’m using drugstore stuff now and it’s fine”",
+      "to_step_key": "obj_switched",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "bridge_no",
+      "label": "“I didn’t see enough of a difference”",
+      "to_step_key": "obj_no_difference",
+      "variant": "objection",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "bridge_no",
+      "label": "“The routine was too many steps”",
+      "to_step_key": "obj_too_many_steps",
+      "variant": "objection",
+      "sort_order": 3
+    },
+    {
+      "from_step_key": "bridge_no",
+      "label": "“I’m not sure it’s worth it”",
+      "to_step_key": "obj_worth_it",
+      "variant": "objection",
+      "sort_order": 4
+    },
+    {
+      "from_step_key": "bridge_no",
+      "label": "Cost or insurance",
+      "to_step_key": "obj_cost",
+      "variant": "objection",
+      "sort_order": 5
+    },
+    {
+      "from_step_key": "bridge_no",
+      "label": "“I don’t have time”",
+      "to_step_key": "obj_time",
+      "variant": "objection",
+      "sort_order": 6
+    },
+    {
+      "from_step_key": "bridge_no",
+      "label": "“I need to talk to my spouse”",
+      "to_step_key": "obj_spouse",
+      "variant": "objection",
+      "sort_order": 7
+    },
+    {
+      "from_step_key": "bridge_no",
+      "label": "Another reason: dig deeper",
+      "to_step_key": "uncover",
+      "variant": "caution",
+      "sort_order": 8
+    },
+    {
+      "from_step_key": "digging_in",
+      "label": "They named something that bothers them",
+      "to_step_key": "making_it_real",
+      "variant": "caution",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "digging_in",
+      "label": "Nothing found: happy across the board",
+      "to_step_key": "lapsed_commitment",
+      "variant": "positive",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "digging_in_concern",
+      "label": "They named something new or bigger",
+      "to_step_key": "making_it_real",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "digging_in_concern",
+      "label": "Nothing new: it’s what they already mentioned",
+      "to_step_key": "making_it_real",
+      "variant": "default",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "lapsed_busy",
+      "label": "Sounds reasonable: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "lapsed_busy",
+      "label": "Another reason came up: go back and pick it",
+      "to_step_key": "lapsed_commitment",
+      "variant": "default",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "lapsed_commitment",
+      "label": "They shared a reason: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "lapsed_commitment",
+      "label": "“My skin was doing fine”",
+      "to_step_key": "lapsed_felt_fine",
+      "variant": "default",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "lapsed_commitment",
+      "label": "Cost or budget",
+      "to_step_key": "lapsed_cost",
+      "variant": "default",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "lapsed_commitment",
+      "label": "“Life got busy”",
+      "to_step_key": "lapsed_busy",
+      "variant": "default",
+      "sort_order": 3
+    },
+    {
+      "from_step_key": "lapsed_commitment",
+      "label": "“I’ll come back if my skin acts up”",
+      "to_step_key": "lapsed_wait",
+      "variant": "default",
+      "sort_order": 4
+    },
+    {
+      "from_step_key": "lapsed_commitment",
+      "label": "Moved or tried another provider",
+      "to_step_key": "lapsed_moved",
+      "variant": "default",
+      "sort_order": 5
+    },
+    {
+      "from_step_key": "lapsed_cost",
+      "label": "Sounds reasonable: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "lapsed_cost",
+      "label": "Another reason came up: go back and pick it",
+      "to_step_key": "lapsed_commitment",
+      "variant": "default",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "lapsed_felt_fine",
+      "label": "Sounds reasonable: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "lapsed_felt_fine",
+      "label": "Another reason came up: go back and pick it",
+      "to_step_key": "lapsed_commitment",
+      "variant": "default",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "lapsed_moved",
+      "label": "Sounds reasonable: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "lapsed_moved",
+      "label": "Another reason came up: go back and pick it",
+      "to_step_key": "lapsed_commitment",
+      "variant": "default",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "lapsed_wait",
+      "label": "Sounds reasonable: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "lapsed_wait",
+      "label": "Another reason came up: go back and pick it",
+      "to_step_key": "lapsed_commitment",
+      "variant": "default",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "making_it_real",
+      "label": "Continue to the review",
+      "to_step_key": "review",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_no_difference",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_no_difference",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_send_info",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_send_info",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_switched",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_switched",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_think",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_think",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_too_many_steps",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_too_many_steps",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_worth_it",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_worth_it",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "opening_question",
+      "label": "“I’m still using it and my skin looks good”",
+      "to_step_key": "resp_doing_great",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "opening_question",
+      "label": "“I ran out or the routine slipped”",
+      "to_step_key": "resp_coming_back",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "opening_question",
+      "label": "“I stopped and my skin is back to how it was”",
+      "to_step_key": "resp_fully_back",
+      "variant": "negative",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "permission_questions",
+      "label": "They said okay: ask the questions",
+      "to_step_key": "digging_in",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“Yes, that sounds reasonable”",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "Hesitant or soft no",
+      "to_step_key": "uncover",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“I’m using drugstore stuff now and it’s fine”",
+      "to_step_key": "obj_switched",
+      "variant": "objection",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“I didn’t see enough of a difference”",
+      "to_step_key": "obj_no_difference",
+      "variant": "objection",
+      "sort_order": 3
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“The routine was too many steps”",
+      "to_step_key": "obj_too_many_steps",
+      "variant": "objection",
+      "sort_order": 4
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“I’m not sure it’s worth it”",
+      "to_step_key": "obj_worth_it",
+      "variant": "objection",
+      "sort_order": 5
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "Cost or insurance",
+      "to_step_key": "obj_cost",
+      "variant": "objection",
+      "sort_order": 6
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“I don’t have time”",
+      "to_step_key": "obj_time",
+      "variant": "objection",
+      "sort_order": 7
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“I need to talk to my spouse”",
+      "to_step_key": "obj_spouse",
+      "variant": "objection",
+      "sort_order": 8
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“I’m considering another option”",
+      "to_step_key": "obj_other_option",
+      "variant": "objection",
+      "sort_order": 9
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“I need to think about it”",
+      "to_step_key": "obj_think",
+      "variant": "objection",
+      "sort_order": 10
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“Just send me some info”",
+      "to_step_key": "obj_send_info",
+      "variant": "objection",
+      "sort_order": 11
+    },
+    {
+      "from_step_key": "resp_coming_back",
+      "label": "Continue to the transition",
+      "to_step_key": "transition",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "resp_doing_great",
+      "label": "They agreed: ask permission for a few questions",
+      "to_step_key": "permission_questions",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "resp_fully_back",
+      "label": "Continue to the transition",
+      "to_step_key": "transition",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "review",
+      "label": "They said yes: make the recommendation",
+      "to_step_key": "recommendation",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "review",
+      "label": "Not quite / they hesitate",
+      "to_step_key": "bridge_no",
+      "variant": "negative",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "transition",
+      "label": "They said okay: dig in",
+      "to_step_key": "digging_in_concern",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "They’re ready: schedule",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I’m using drugstore stuff now and it’s fine”",
+      "to_step_key": "obj_switched",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I didn’t see enough of a difference”",
+      "to_step_key": "obj_no_difference",
+      "variant": "objection",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“The routine was too many steps”",
+      "to_step_key": "obj_too_many_steps",
+      "variant": "objection",
+      "sort_order": 3
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I’m not sure it’s worth it”",
+      "to_step_key": "obj_worth_it",
+      "variant": "objection",
+      "sort_order": 4
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "Cost or insurance",
+      "to_step_key": "obj_cost",
+      "variant": "objection",
+      "sort_order": 5
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I don’t have time”",
+      "to_step_key": "obj_time",
+      "variant": "objection",
+      "sort_order": 6
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I need to talk to my spouse”",
+      "to_step_key": "obj_spouse",
+      "variant": "objection",
+      "sort_order": 7
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I’m considering another option”",
+      "to_step_key": "obj_other_option",
+      "variant": "objection",
+      "sort_order": 8
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I need to think about it”",
+      "to_step_key": "obj_think",
+      "variant": "objection",
+      "sort_order": 9
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“Just send me some info”",
+      "to_step_key": "obj_send_info",
+      "variant": "objection",
+      "sort_order": 10
+    }
   ]
 }

@@ -342,17 +342,47 @@ Before a screen is done, read it aloud once and tick every line:
 
 One chip, one question. The caller can tap what they hear.
 
-**5. Making it real (R1, R4, R7)**
+**5. Making it real (R1, R2, R4, R7)**
 
-> Before: *(Let them answer, then:) "[Repeat their answer back]? That's a long
-> time to have something quietly chipping away at how you feel about
-> yourself. Would you agree that's not really OK?"*
+> Before: *How long has that been bothering you?*
 >
-> After: *How long has that been on your mind?*
+> *(Let them answer.)*
 >
-> *(Let them answer. Repeat it back.)*
+> *How often do you notice it?*
 >
-> *That's a long time to have something bothering you.*
+> *(Let them answer.)*
+>
+> *When it bothers you, how does it affect your day or the things you enjoy?*
+>
+> After: *How long has it been bothering you, like a week or two, or longer
+> than that?*
+>
+> *(Let them answer.)*
+>
+> *Is it something you experience like 1 to 2 times a month, or is it more
+> often than that?*
+>
+> *(Let them answer.)*
+>
+> *When it's at its worst, does it ever interfere with work, at home, or
+> relaxing and doing your own thing?*
+>
+> *(Let them answer. Repeat back whatever they name.)*
+
+Bare questions invite small answers ("a while", "sometimes", "not really").
+Each question carries its own scale so the honest answer sounds significant
+when the patient says it out loud: duration is a low anchor then "or longer
+than that?", frequency is a low number then "or more often than that?", and
+impact is "when it's at its worst" followed by three buckets. Keep each
+question one sentence under 20 words; the old "repeat it back, that's a long
+time" move is gone.
+
+Coloring rule: color the question with what is true for anyone who has this
+problem (work, home, unwinding, sleep, the mirror, photos, the bill), never a
+guess about this person (kids, a yard, a spouse, a hobby, something they own).
+Change only the low anchors and the impact buckets per niche: weeks for pain
+and body, months for wellness and weight, "every time you look in the mirror"
+for aesthetics, "since last season" and "the bill" for home services.
 
 **6. The recommendation (R2, R4, R8)**
 
