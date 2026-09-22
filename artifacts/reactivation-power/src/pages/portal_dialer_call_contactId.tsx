@@ -83,7 +83,10 @@ export default function CallPage() {
           practiceName={owner?.practice_name ?? null}
           officePhone={owner?.office_phone ?? null}
           providerName={
-            owner ? `Dr. ${owner.first_name} ${owner.last_name}`.trim() : null
+            // Spoken form: "Dr. Whitaker", never "Dr. Daniel Whitaker".
+            owner
+              ? `Dr. ${(owner.last_name || owner.first_name || '').trim()}`.trim()
+              : null
           }
           isProvider={participant.role === 'owner'}
           callHistory={callHistory}
