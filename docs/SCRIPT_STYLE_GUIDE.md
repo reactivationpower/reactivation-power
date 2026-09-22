@@ -336,6 +336,24 @@ as does the old "repeat it back, that's a long time" move. See example 5.
 
 The same unit-test file covers R14 and runs every checked-in flow through it.
 
+
+### R15. Parent-mode chips speak about the patient, not to them
+Clear Aligners and Orthodontics carry a `mode_parent` step: the caller may be
+speaking with a parent. A concern chip's spoken phrase is injected wherever
+`{{main_concern}}` appears ("take a look at {{main_concern}}"), so on those
+niches it has to read the same to either listener. Write it pronoun-free:
+"the shifting", "how the smile looks in photos", never "your smile".
+
+Lint errors when a chip's spoken phrase for a parent-mode niche contains
+"you", "your", "yours" or "yourself", or any `{{token}}`. Tokens inside a
+chip are never expanded (the merge is single-pass), so `{{pt_your}}` would
+reach the caller raw. Parent mode is read from the flow file (any
+`mode_parent*` step), not from a list of niche names; a niche that gains a
+parent screen later picks up the rule automatically. Unit tests cover the
+rule and run every checked-in parent-mode flow through it.
+
+---
+
 ### R15. Every screen has a way in
 R12 catches screens with no way out; R15 catches screens with no way in. A
 step that no choice routes to (in its own file or in `general.json`) and

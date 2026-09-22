@@ -34,6 +34,9 @@
 //       no button leads to); entry screens are listed in lib.ts next to
 //       TERMINAL_STEP_PATTERNS
 // Plus the structural checks apply runs (routing targets, tokens).
+//   R15 concern chips for a parent-mode niche (any flow with a mode_parent*
+//       step) keep their spoken phrase pronoun-free and token-free, so
+//       {{main_concern}} reads the same to the patient or a parent
 import { pathToFileURL } from 'node:url'
 import {
   GENERAL_SLUG,
@@ -492,6 +495,7 @@ export function lintFile(
   problems.push(...lintPermission(slug, file))
   problems.push(...lintObjections(slug, file, general))
   problems.push(...lintMakingItReal(slug, file))
+  problems.push(...lintParentChips(slug, file))
 
   return problems
 }
@@ -661,6 +665,11 @@ export function lintPermission(slug: string, file: FlowFile): Problem[] {
     }
   }
   return problems
+}
+
+/** A flow runs in parent mode when it carries a mode_parent* step. */
+export function hasParentMode(file: FlowFile): boolean {
+  return file.steps.some((s) => s.step_key.startsWith('mode_parent'))
 }
 /**
  * R11: the read-back happens once, on the review screen. Every other screen
@@ -848,3 +857,43 @@ function questionsIn(line: string): number {
   const tokens = tokensIn(line).filter((t) => /^pt_.*(_ask|_q\d*)$/.test(t)).length
   return marks + tokens
 }
+
+/**
+ * R15: on a parent-mode niche the caller may be speaking with a parent, so
+ * a chip's spoken phrase is injected into sentences ("take a look at
+ * {{main_concern}}") that must read the same to either listener. The phrase
+ * therefore carries no second-person word and no {{token}}: mergeScript is
+ * single-pass and never re-expands tokens inside substituted values, so a
+ * {{pt_your}} in a chip would reach the caller raw.
+ *
+ * Parent mode is derived from the flow file (any mode_parent* step), not
+ * from a list of niche names, so a niche that gains a parent screen later
+ * picks up the rule on its own.
+ */
+export function lintParentChips(slug: string, file: FlowFile): Problem[] {
+  const problems: Problem[] = []
+  if (!file.niche || !hasParentMode(file)) return problems
+  const chips = CONCERN_OPTIONS[file.niche.name] ?? []
+  for (const chip of chips) {
+    const where = `${slug}:chip "${chip.label}"`
+    const pronoun = SECOND_PERSON.exec(chip.spoken)
+    if (pronoun) {
+      problems.push({
+        level: 'error',
+        where,
+        message: `R15 spoken phrase "${chip.spoken}" says "${pronoun[1]}"; this niche runs in parent mode, so write it pronoun-free ("the shifting", "how the smile looks in photos")`,
+      })
+    }
+    if (chip.spoken.includes('{{')) {
+      problems.push({
+        level: 'error',
+        where,
+        message: `R15 spoken phrase "${chip.spoken}" contains a {{token}}; tokens inside a chip are never expanded, so the caller would read it raw`,
+      })
+    }
+  }
+  return problems
+}
+
+/** Second-person words that misaddress a parent when spoken about the patient (R15). */
+export const SECOND_PERSON = /\b(you|your|yours|yourself)\b/i
