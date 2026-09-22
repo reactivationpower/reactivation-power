@@ -337,6 +337,8 @@ as does the old "repeat it back, that's a long time" move. See example 5.
 The same unit-test file covers R14 and runs every checked-in flow through it.
 
 
+---
+
 ### R15. Parent-mode chips speak about the patient, not to them
 Clear Aligners and Orthodontics carry a `mode_parent` step: the caller may be
 speaking with a parent. A concern chip's spoken phrase is injected wherever
@@ -365,6 +367,29 @@ lowest `sort_order`) and the outcome-button screens `voicemail`,
 `TERMINAL_STEP_PATTERNS` in `scripts/flows/lib.ts`. Screens the player swaps
 in by key rather than by button (`making_it_real_nw`) are listed in
 `PLAYER_ROUTED_STEP_PATTERNS` in the same place. See section 5.
+
+
+### R16. The review reads back the buckets the patient heard
+The third Making It Real question offers three impact buckets ("photos,
+going out, or feeling put together"). The review screen the caller reaches
+next has to name each of them, either in its spoken line or in the "(Say
+what they named: …)" coaching note. A niche that writes its own
+`making_it_real` but inherits general's `review` would otherwise read back
+"work, home, or your own time" to a patient who was asked about photos.
+
+Lint takes the buckets from the effective `making_it_real*` screens (the
+file's own, else general's) and checks them against the effective `review*`
+screens (the file's own, else general's, reported as "inherited from
+general" so the fix lands in the niche file). A bucket counts as named when
+the review contains it verbatim, one of the short forms declared in
+`IMPACT_BUCKET_EQUIVALENTS` in `scripts/flows/lint.ts` ("relaxing and doing
+your own thing" → "your own time"; "at home" → "home"), or all of its
+content words. Anything missing is an error. Changing the buckets on a niche
+means giving that niche its own review (or updating the one it has); adding
+a new short form means declaring it in the equivalents table, not loosening
+the rule. See example 6.
+
+The same unit-test file covers R16 and runs every checked-in flow through it.
 
 ---
 
@@ -480,7 +505,8 @@ Before a screen is done, read it aloud once and tick every line:
 10. If it is a question screen: one question per chip, in chip order, then the pick?
 11. Every button still routes to the same `to_step_key`?
 12. If it is a transition or routes to the questions: does it ask permission? If it ends on "Does that sound reasonable?": did it ask first?
-13. Title is short and tells the caller where they are ("Objection: cost").
+13. If it is the review: does it name the same three impact buckets the Making It Real screen offered?
+14. Title is short and tells the caller where they are ("Objection: cost").
 
 ---
 
@@ -596,7 +622,7 @@ Change only the low anchors and the impact buckets per niche: weeks for pain
 and body, months for wellness and weight, "every time you look in the mirror"
 for aesthetics, "since last season" and "the bill" for home services.
 
-**6. The review and the recommendation (R2, R4, R7, R8)**
+**6. The review and the recommendation (R2, R4, R7, R8, R11, R16)**
 
 The read-back lives on the Review screen; the Recommendation screen opens
 with the bridge and asks permission. Together they are one move: read back,
@@ -630,6 +656,11 @@ get "yes, that's right", bridge, ask, recommend.
 >
 > *(Say what they named: work, home, or your own time. Let them answer. If
 > they correct you, take the correction and move on.)*
+>
+> (Those are general's buckets. A niche whose third question asks about
+> "photos, going out, or feeling put together" names those three here
+> instead; lint R16 fails a review that reads back buckets its Making It
+> Real screen never offered.)
 >
 > *And it sounds like you'd really like to get back to feeling the way you
 > did when you finished. Is that fair to say?*

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { lintMakingItReal, lintPermission, lintReadBack } from '../lint.ts'
+import { impactBuckets, lintMakingItReal, lintPermission, lintReadBack, lintReviewBuckets } from '../lint.ts'
 import { GENERAL_SLUG, listSlugs, readFlowFile, type FlowFile, type FlowStep } from '../lib.ts'
 
 const step = (step_key: string, content: string, sort_order = 0): FlowStep => ({
@@ -373,6 +373,94 @@ describe('R14 Making It Real keeps the three-question shape', () => {
   it('passes every checked-in flow', () => {
     for (const slug of [GENERAL_SLUG, ...listSlugs()]) {
       expect(mirErrors(readFlowFile(slug)), slug).toEqual([])
+    }
+  })
+})
+
+describe('R16 review reads back the Making It Real buckets', () => {
+  const AESTHETICS_MIR = MAKING_IT_REAL.replace(
+    'interfere with work, at home, or relaxing and doing your own thing?',
+    'interfere with photos, going out, or feeling put together?',
+  )
+  const GENERAL_REVIEW = `{{contact_first_name}}, let me make sure I have this right.
+
+(Read back their three answers: how long, how often, what it gets in the way of.)
+
+So it's been going on a while. At its worst it gets in the way of what you mentioned. Did I get that right?
+
+(Say what they named: work, home, or your own time. Let them answer.)
+
+Is that fair to say?`
+  const AESTHETICS_REVIEW = GENERAL_REVIEW.replace('work, home, or your own time', 'photos, going out, or feeling put together')
+  const general: FlowFile = flow(step('making_it_real', MAKING_IT_REAL), step('review', GENERAL_REVIEW))
+  const niche = (...steps: FlowStep[]): FlowFile => ({ niche: { name: 'Botox' } as FlowFile['niche'], steps, choices: [] })
+  const bucketErrors = (file: FlowFile, gen: FlowFile = general) =>
+    lintReviewBuckets('t', file, gen).filter((p) => p.level === 'error').map((p) => p.message)
+
+  it('reads the buckets off the third question', () => {
+    expect(impactBuckets(MAKING_IT_REAL)).toEqual(['work', 'at home', 'relaxing and doing your own thing'])
+    expect(impactBuckets(AESTHETICS_MIR)).toEqual(['photos', 'going out', 'feeling put together'])
+    expect(impactBuckets(PRE_REWRITE)).toBeNull()
+  })
+
+  it("accepts general's review against general's own short forms", () => {
+    expect(lintReviewBuckets(GENERAL_SLUG, general, general)).toEqual([])
+  })
+
+  it('accepts a niche whose review names its own buckets', () => {
+    expect(bucketErrors(niche(step('making_it_real', AESTHETICS_MIR), step('review', AESTHETICS_REVIEW)))).toEqual([])
+  })
+
+  it('fails a review that reads back "work or home" for an aesthetics niche', () => {
+    const drifted = GENERAL_REVIEW.replace('work, home, or your own time', 'work or home')
+    const msgs = bucketErrors(niche(step('making_it_real', AESTHETICS_MIR), step('review', drifted)))
+    expect(msgs).toEqual([
+      expect.stringMatching(/R16 review never names "photos"/),
+      expect.stringMatching(/R16 review never names "going out"/),
+      expect.stringMatching(/R16 review never names "feeling put together"/),
+    ])
+  })
+
+  it("fails an aesthetics niche that inherits general's review", () => {
+    const problems = lintReviewBuckets('botox', niche(step('making_it_real', AESTHETICS_MIR)), general)
+    expect(problems).toHaveLength(3)
+    expect(problems[0].where).toBe('botox:review (inherited from general)')
+    expect(problems[0].message).toMatch(/never names "photos" from botox:making_it_real's third question/)
+  })
+
+  it("checks a niche review against general's Making It Real when the niche has none", () => {
+    expect(bucketErrors(niche(step('review', GENERAL_REVIEW)))).toEqual([])
+    const msgs = bucketErrors(niche(step('review', AESTHETICS_REVIEW)))
+    expect(msgs).toEqual([
+      expect.stringMatching(/never names "work" from t:making_it_real \(inherited from general\)/),
+      expect.stringMatching(/never names "at home"/),
+      expect.stringMatching(/never names "relaxing and doing your own thing"/),
+    ])
+  })
+
+  it('checks every making_it_real variant against the review', () => {
+    const msgs = bucketErrors(niche(step('making_it_real', MAKING_IT_REAL), step('making_it_real_nw', AESTHETICS_MIR), step('review', GENERAL_REVIEW)))
+    expect(msgs).toHaveLength(3)
+    expect(msgs[0]).toMatch(/from t:making_it_real_nw's third question/)
+  })
+
+  it('accepts a parent-mode bucket read back with the same token', () => {
+    const parent = MAKING_IT_REAL.replace(
+      'interfere with work, at home, or relaxing and doing your own thing?',
+      'interfere with photos, smiling around people, or {{pt_your}} confidence?',
+    )
+    const review = GENERAL_REVIEW.replace('work, home, or your own time', 'photos, smiling around people, or {{pt_your}} confidence')
+    expect(bucketErrors(niche(step('making_it_real', parent), step('review', review)))).toEqual([])
+  })
+
+  it('leaves the shape of the third question to R14', () => {
+    expect(bucketErrors(niche(step('making_it_real', PRE_REWRITE), step('review', GENERAL_REVIEW)))).toEqual([])
+  })
+
+  it('passes every checked-in flow', () => {
+    const gen = readFlowFile(GENERAL_SLUG)
+    for (const slug of [GENERAL_SLUG, ...listSlugs()]) {
+      expect(bucketErrors(readFlowFile(slug), gen), slug).toEqual([])
     }
   })
 })

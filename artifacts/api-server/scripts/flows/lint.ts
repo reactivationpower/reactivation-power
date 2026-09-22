@@ -37,6 +37,9 @@
 //   R15 concern chips for a parent-mode niche (any flow with a mode_parent*
 //       step) keep their spoken phrase pronoun-free and token-free, so
 //       {{main_concern}} reads the same to the patient or a parent
+//   R16 the review screen the caller reaches (the file's own or general's)
+//       names every impact bucket the effective making_it_real* screens
+//       offered, so the read-back never names buckets the patient never heard
 import { pathToFileURL } from 'node:url'
 import {
   GENERAL_SLUG,
@@ -327,7 +330,6 @@ export const PERMISSION_OPENERS: string[] = [
 /** Step-key families that exist to ask permission for the questions (R13). */
 const PERMISSION_KEY_PREFIXES = ['transition', 'permission_questions']
 const QUESTIONS_KEY = 'digging_in'
-
 /**
  * The shared Making It Real shape (R14, guide example 5). Every script asks
  * exactly three questions in this order, each carrying its own scale so the
@@ -347,6 +349,8 @@ export const MAKING_IT_REAL_FREQUENCY_SCALES: string[] = [
 ]
 export const MAKING_IT_REAL_IMPACT_OPENER = "when it's at its worst"
 
+/** The words in the third question that introduce the buckets ("…interfere with work, at home, or…"). */
+export const MAKING_IT_REAL_BUCKET_LEAD = /\b(?:interfere with|gets? in the way of)\s+/i
 interface Sentence {
   text: string
   words: number
@@ -522,10 +526,57 @@ export function lintFile(
   problems.push(...lintObjections(slug, file, general))
   problems.push(...lintMakingItReal(slug, file))
   problems.push(...lintParentChips(slug, file))
+  problems.push(...lintReviewBuckets(slug, file, general))
 
   return problems
 }
 
+/**
+ * R16: the review screen reads back the buckets the patient actually heard.
+ * The third Making It Real question offers three impact buckets ("photos,
+ * going out, or feeling put together"); the review screen the caller reaches
+ * next (the file's own `review*` steps, else general's) has to name each of
+ * them, in its spoken text or in the "(Say what they named: …)" note. A
+ * niche that writes its own making_it_real but inherits general's review
+ * would otherwise read back "work, home, or your own time" to a patient who
+ * was asked about photos. Short forms of a bucket are declared in
+ * IMPACT_BUCKET_EQUIVALENTS; any other bucket must appear with all of its
+ * content words.
+ */
+export function lintReviewBuckets(slug: string, file: FlowFile, general: FlowFile): Problem[] {
+  const problems: Problem[] = []
+  const isGeneral = file === general || slug === GENERAL_SLUG
+
+  const effective = (family: string): EffectiveStep[] => {
+    const own = file.steps
+      .filter((s) => isKeyIn(s.step_key, family))
+      .map((step) => ({ step, where: `${slug}:${step.step_key}` }))
+    if (own.length > 0 || isGeneral) return own
+    return general.steps
+      .filter((s) => isKeyIn(s.step_key, family))
+      .map((step) => ({ step, where: `${slug}:${step.step_key} (inherited from ${GENERAL_SLUG})` }))
+  }
+  const makingItReal = effective(MAKING_IT_REAL_KEY)
+  const reviews = effective(REVIEW_KEY)
+  if (makingItReal.length === 0 || reviews.length === 0) return problems
+
+  for (const review of reviews) {
+    const reviewText = normalisePhraseText(review.step.content)
+    for (const mir of makingItReal) {
+      const buckets = impactBuckets(mir.step.content)
+      if (buckets === null) continue // R14 reports the missing third question
+      for (const bucket of buckets) {
+        if (reviewNamesBucket(reviewText, bucket)) continue
+        problems.push({
+          level: 'error',
+          where: review.where,
+          message: `R16 review never names "${bucket}" from ${mir.where}'s third question ("${buckets.join(', ')}"); the read-back must use the buckets the patient heard`,
+        })
+      }
+    }
+  }
+  return problems
+}
 /**
  * R14: every Making It Real screen keeps the shared three-question shape.
  * Exactly three spoken questions, each a paragraph ending in "?": duration
@@ -919,8 +970,59 @@ export function lintParentChips(slug: string, file: FlowFile): Problem[] {
   return problems
 }
 
+/** Whether the (normalised) review text reads a bucket back, verbatim, by a declared short form, or by all of its content words. */
+function reviewNamesBucket(reviewText: string, bucket: string): boolean {
+  if (reviewText.includes(bucket)) return true
+  const equivalents = IMPACT_BUCKET_EQUIVALENTS[bucket] ?? []
+  if (equivalents.some((e) => reviewText.includes(e))) return true
+  const words = bucket
+    .replace(/\{\{\s*[a-zA-Z0-9_]+\s*\}\}/g, ' ')
+    .split(/\s+/)
+    .map((w) => w.replace(/[^a-z0-9'-]/g, ''))
+    .filter((w) => w && !BUCKET_STOPWORDS.has(w))
+  if (words.length === 0) return false
+  return words.every((w) => new RegExp(`\\b${w.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&')}\\b`).test(reviewText))
+}
 /** Second-person words that misaddress a parent when spoken about the patient (R15). */
 export const SECOND_PERSON = /\b(you|your|yours|yourself)\b/i
+
+
+/**
+ * Shorter ways the review screen may read a bucket back (R16). Keys are the
+ * bucket exactly as the third question phrases it (lower-cased, straight
+ * quotes, tokens kept); values are the accepted read-back phrases. A bucket
+ * not listed here must appear on review with all of its content words.
+ */
+export const IMPACT_BUCKET_EQUIVALENTS: Record<string, string[]> = {
+  'relaxing and doing your own thing': ['your own time', 'own time', 'relaxing', 'time to yourself'],
+  'at home': ['home'],
+}
+
+/** Small words that carry no meaning when matching a bucket against the review screen. */
+const BUCKET_STOPWORDS = new Set(['the', 'a', 'an', 'at', 'in', 'on', 'or', 'and', 'your', 'their', 'with', 'of', 'to'])
+
+/**
+ * The impact buckets a making_it_real* screen offers: the text of the third
+ * spoken question after "interfere with", split on commas and "or". Null
+ * when the screen has no third question in the R14 shape (it must open with
+ * "When it's at its worst") or it names no buckets.
+ */
+export function impactBuckets(content: string): string[] | null {
+  const questions = content
+    .split(/\n\s*\n/)
+    .map((p) => p.trim())
+    .filter((p) => p && !isCoachingNote(p) && p.includes('?'))
+  const impact = questions[2]
+  if (impact === undefined || !normalizeQuotes(impact).toLowerCase().startsWith(MAKING_IT_REAL_IMPACT_OPENER)) return null
+  const lead = MAKING_IT_REAL_BUCKET_LEAD.exec(impact)
+  if (lead === null) return null
+  const tail = normalisePhraseText(impact.slice(lead.index + lead[0].length)).replace(/\?.*$/, '')
+  const buckets = tail
+    .split(/,\s*(?:or\s+)?|\s+or\s+/)
+    .map((b) => b.trim())
+    .filter(Boolean)
+  return buckets.length > 0 ? buckets : null
+}
 
 // CLI entrypoint. Keep this last: main() reads top-level constants declared
 // below the functions that use them, and a call above them throws a TDZ
