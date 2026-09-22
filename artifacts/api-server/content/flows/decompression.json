@@ -73,6 +73,12 @@
       "sort_order": 11
     },
     {
+      "step_key": "uncover",
+      "title": "Uncover the Real Concern",
+      "content": "Okay, {{contact_first_name}}. I'm not going to push you on it. What's the part giving you pause?\n\n(Let them answer. Then tap what you hear.)",
+      "sort_order": 12
+    },
+    {
       "step_key": "lapsed_commitment",
       "title": "Nothing Found: Why They Stopped",
       "content": "{{contact_first_name}}, I'm glad you're still doing well.\n\nCan I ask what changed that led you to stop coming in for check-ins?\n\n(Let them answer. Do not argue with it.)\n\nDecompression can ease pressure, but everyday strain can build again. Regular checks help us catch changes early.\n\n(Tap the reason they shared.)",
@@ -81,19 +87,19 @@
     {
       "step_key": "obj_came_back_stopped",
       "title": "Objection: “It came back after I stopped”",
-      "content": "That can happen when pressure builds again after care stops. A visit lets us see what has changed.\n\nCan we get you in for that look?",
+      "content": "I'm glad you told me, {{contact_first_name}}. That's one of the most common reasons people call us back.\n\nHow long after your last session did you notice it?\n\n(Let them answer.)\n\nWhen it comes back that soon, it usually means the pressure was down but the area hadn't fully settled. Care stopped a little early, or life loaded it up faster than expected. Either way, you're not back at square one. You already did the hard part once.\n\nWe'd rather have {{provider_name}} check it now than let it build back up. You'll hear where things stand and what it would take.\n\nCan we get you in for a look?",
       "sort_order": 100
     },
     {
       "step_key": "obj_fixed_for_good",
       "title": "Objection: “I thought it was fixed for good”",
-      "content": "That's fair. Decompression can ease pressure, but daily strain can build again over time.\n\nA check-in lets us see what's happening before it gets worse.\n\nDoes that make sense?\n\n(Wait for the yes.)",
+      "content": "That's fair, {{contact_first_name}}. Most people finish decompression expecting the relief to hold.\n\nCan I ask what's changed since you finished, like more sitting, driving, or lifting?\n\n(Let them answer.)\n\nYour notes say you were moving better when you finished. So the care did its job. What didn't change is the load on that spot. Long days sitting or lifting put the pressure right back. That's why it crept back, and it doesn't mean the care failed.\n\nLet's have {{provider_name}} check what changed. If it's a short tune-up, you'll know. If it's something new, you'll know that too.\n\nWould you be open to that?",
       "sort_order": 100
     },
     {
       "step_key": "obj_injections_surgery",
       "title": "Objection: Injections or Surgery",
-      "content": "That's an important decision. We can look at what's happening and discuss your options before you decide.\n\nWould that help?",
+      "content": "Okay. That tells me it's gotten bad enough that you want it handled.\n\nHas a doctor recommended that, or is it something you're looking into yourself?\n\n(Let them answer. Do not talk down injections or surgery.)\n\nBoth of those are real options, and sometimes they're the right call. They're also hard to undo once you've done them. Decompression is one of the things people try before going that route. A visit with {{provider_name}} doesn't rule anything out. It gives you a second look at {{main_concern}} before you commit to something permanent.\n\nIf decompression isn't the answer here, we'll say so. Either way you'll walk into that decision knowing more than you do today.\n\nDoes it make sense to get that second look first?",
       "sort_order": 101
     },
     {
@@ -105,7 +111,7 @@
     {
       "step_key": "obj_managing_own",
       "title": "Objection: “I’m managing on my own”",
-      "content": "I understand. Home care may help, but it can't show us whether the pressure has changed.\n\nWould you be open to one visit?",
+      "content": "Good for you, {{contact_first_name}}. That takes some discipline.\n\nWhat have you been doing for it?\n\n(Let them answer. Give them credit for it.)\n\nStretching and home care can keep you moving, and that matters. What they can't do is take the pressure off the way decompression does. Managing something and fixing it are two different things.\n\nA check with {{provider_name}} tells you which one you're dealing with. If what you're doing is enough, we'll tell you to keep going. If it isn't, you'll find out now instead of a year from now.\n\nWould it help to know for sure?",
       "sort_order": 102
     },
     {
@@ -145,15 +151,39 @@
       "sort_order": 109
     },
     {
+      "step_key": "obj_other_option",
+      "title": "Objection: “I’m considering another option”",
+      "content": "That's fair. Can I ask what you're looking at, like physical therapy, massage, or another office?\n\n(Let them answer. Do not knock the other option.)\n\nThose can all help, and some people do well combining them. The part that's hard to compare from home is what's going on with {{main_concern}} right now. {{provider_name}} already has your history and knows how you responded last time, so you're not starting over here.\n\nCome in, get a straight answer on where things stand, and then compare. If the other option turns out to be the better fit, you'll be choosing it for a reason.\n\nIs that a fair way to decide?",
+      "sort_order": 120
+    },
+    {
+      "step_key": "obj_cost",
+      "title": "Objection: Cost or Insurance",
+      "content": "I understand, {{contact_first_name}}. Is it more the cost of the visit itself, or not knowing what insurance will cover?\n\n(Let them answer. Do not quote prices, packages, or discounts. The office handles that.)\n\nInsurance changes every year, so a lot of people aren't sure what they have now. Our front desk can check your coverage before you come in, so there are no surprises. And this first visit is one appointment, not another round of sessions. You'll hear what anything past that costs before you decide.\n\nThe other side of it is what {{main_concern}} is already costing you, the things you mentioned a minute ago. That's the part I'd hate to see keep adding up.\n\nCan we at least get the look on the calendar?",
+      "sort_order": 121
+    },
+    {
+      "step_key": "obj_time",
+      "title": "Objection: “It’s the time or number of visits”",
+      "content": "I hear you, {{contact_first_name}}. Is it finding time for the first visit, or the worry about coming in several times a week like before?\n\n(Let them answer.)\n\nRight now we're only talking about one visit. {{provider_name}} looks at {{main_concern}} and tells you what it would take from there. Sometimes that's a handful of visits to settle it down. Sometimes it's more, and you'll hear that up front so you can decide. Nobody is signing you up for a full series on the phone.\n\nWe have early and late openings. Since you've been here before, the first visit is usually under 30 minutes.\n\nCould you find half an hour for that?",
+      "sort_order": 122
+    },
+    {
+      "step_key": "obj_spouse",
+      "title": "Objection: “I need to talk to my spouse”",
+      "content": "Of course. Is it more about the money side, or do you two just make these decisions together?\n\n(Let them answer. If it's money, use the cost answer.)\n\nThat's fair, and I'm not asking you to commit to anything they'd need to weigh in on. Right now, all you can tell them is that the pressure is back and you don't know why. After the visit, you can tell them what's going on and what it would take. That's an easier conversation to have. And if they'd like to come along, they're welcome.\n\nCan we pencil it in, and you can move it after you two talk?",
+      "sort_order": 123
+    },
+    {
       "step_key": "obj_think",
       "title": "Objection: “I need to think”",
-      "content": "That's fair, {{contact_first_name}}. What part would you like to think over?\n\n(Listen. Tap the matching concern if they name one.)\n\nThe visit gives you information about {{main_concern}} before you decide on any care.\n\nDoes that help?",
+      "content": "That's fair, {{contact_first_name}}. Usually when someone says that, there's one specific thing on their mind. What's the part you'd want to think over?\n\n(Let them answer. If they name cost, time, or another reason, tap that button.)\n\nOkay. I'm not trying to rush you. The one thing I'd say is that {{main_concern}} has been building for a while now. It's had time to sort itself out on its own, and it hasn't. The visit is how you get the information you'd be thinking with. You can think it over just as easily after you know what's going on.\n\nWould it be easier to think it over once you have the answers?",
       "sort_order": 130
     },
     {
       "step_key": "obj_send_info",
       "title": "Objection: “Just send information”",
-      "content": "I'd be glad to send information, {{contact_first_name}}. General information can't show what is causing {{main_concern}}.\n\nA visit lets us look at your situation before discussing more decompression care.\n\nWould that work for you?",
+      "content": "I can do that, {{contact_first_name}}. What would you want it to cover, so I send the right thing?\n\n(Let them answer. If they name cost, time, or another reason, tap that button.)\n\nI'll be straight with you, though. Anything I send is going to be general. It can't tell you whether {{main_concern}} is the same spot acting up or something new. That takes {{provider_name}} looking at you, and that's one short visit.\n\nLet's do both. I'll send the information, and we'll put a time on the calendar. If what I send answers your question, you can call and cancel, no problem.\n\nDoes doing both work for you?",
       "sort_order": 131
     }
   ],
@@ -355,6 +385,20 @@
       "sort_order": 1
     },
     {
+      "from_step_key": "obj_cost",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_cost",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
       "from_step_key": "obj_fixed_for_good",
       "label": "“Yes, let’s schedule”",
       "to_step_key": "scheduling",
@@ -391,6 +435,76 @@
     },
     {
       "from_step_key": "obj_managing_own",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_other_option",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_other_option",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_send_info",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_send_info",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_spouse",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_spouse",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_think",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_think",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_time",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_time",
       "label": "Another concern came up",
       "to_step_key": "uncover",
       "variant": "objection",

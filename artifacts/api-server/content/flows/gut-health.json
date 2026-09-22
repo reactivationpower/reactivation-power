@@ -73,6 +73,12 @@
       "sort_order": 11
     },
     {
+      "step_key": "uncover",
+      "title": "Uncover the Real Concern",
+      "content": "Okay, {{contact_first_name}}. I'm not going to push you on it. What's the part giving you pause?\n\n(Let them answer. Then tap what you hear.)",
+      "sort_order": 12
+    },
+    {
       "step_key": "lapsed_commitment",
       "title": "Nothing Found: Why Did They Stop?",
       "content": "{{contact_first_name}}, I'm glad you're doing so well.\n\nCan I ask what changed that led you to stop coming in for your check-ins?\n\n(Let them answer. Listen all the way through. Do not argue with it.)\n\n(Tap the button below that is closest to their reason.)",
@@ -81,19 +87,19 @@
     {
       "step_key": "obj_came_back_eating",
       "title": "Objection: “It came back when I went back to my old eating”",
-      "content": "I understand. The gut can be stubborn, and once you're off the program it can slip back into old patterns. That's why coming in makes sense. We look at the whole picture and make a plan to keep it settled.\n\nCan we get you in so we can take a look?",
+      "content": "I appreciate you saying that, {{contact_first_name}}. Most people do, and it's not a character flaw.\n\nWas it one thing that pulled you off, like travel or a stressful stretch, or did it just drift?\n\n(Let them answer. Do not lecture about food.)\n\nThe program worked while you were on it, so your gut can settle. What didn't hold was the routine, and the gut goes back to old patterns fast when the routine goes. That's why {{main_concern}} came back. It's not a sign it can't be fixed.\n\nA visit with {{provider_name}} isn't starting the whole program over. It's a look at where things stand. Then we work out the smallest set of changes that keeps it settled this time.\n\nWould a shorter version of it be easier to hold onto?",
       "sort_order": 100
     },
     {
       "step_key": "obj_embarrassed",
       "title": "Objection: “I’m embarrassed I let it slip back”",
-      "content": "Please don't be. This happens to almost everyone who stops. That's the reason we call. We'd just like to help you get back to where you were.\n\nWould you be open to that?\n\n(Wait for the yes.)",
+      "content": "Please don't be, {{contact_first_name}}. Nobody here is keeping score.\n\nCan I ask, is it that it slipped, or that it slipped after you'd done so well?\n\n(Let them answer. Stay warm.)\n\nEither way, that's how it goes for most people once the program ends. The gut is quick to slide back into old patterns, and life makes that easy. The part that worked hasn't changed. The only thing embarrassment does is keep people away until {{main_concern}} is a bigger job than it needs to be.\n\n{{provider_name}} would rather see you now than a year from now. We'd look at where things stand and find the shortest path back.\n\nWould it feel better to just get that first step done?",
       "sort_order": 101
     },
     {
       "step_key": "obj_bad_experience",
       "title": "Objection: Bad experience or it didn’t fully work",
-      "content": "(Never give medical advice on the call.)\n\nI understand, {{contact_first_name}}, and I'm glad you told me. That's the kind of thing {{provider_name}} would want to talk through with you in person.\n\nIs there anything else on your mind?",
+      "content": "I'm glad you told me, {{contact_first_name}}, and I'm sorry it went that way.\n\nCan I ask what part didn't work for you, so I can pass it along?\n\n(Let them answer. Do not argue or explain it away. Do not give medical advice.)\n\nThank you. {{provider_name}} will want to hear that directly, and that's a fair reason to come in on its own. Gut issues have more than one cause, and the first round doesn't always land on the right one. That doesn't mean {{main_concern}} can't be helped. It means the next look should start from what we learned.\n\nIf you'd rather not continue after that conversation, we'll respect it. You'd still leave knowing more than you do now.\n\nWould you be comfortable coming in just to talk it through?",
       "sort_order": 102
     },
     {
@@ -139,15 +145,39 @@
       "sort_order": 110
     },
     {
+      "step_key": "obj_other_option",
+      "title": "Objection: “I’m considering another option”",
+      "content": "That's fair. Can I ask what you're looking at, like a dietitian, a different program, or another office?\n\n(Let them answer. Do not knock the other option.)\n\nThose can all help, and some people do well combining them. The part that's hard to compare from home is what's behind {{main_concern}} right now. {{provider_name}} already knows your history and what you've tried, so you're not starting over here.\n\nCome in, get a straight answer on where things stand, and then compare. If the other option turns out to be the better fit, you'll be choosing it for a reason.\n\nIs that a fair way to decide?",
+      "sort_order": 120
+    },
+    {
+      "step_key": "obj_cost",
+      "title": "Objection: Cost or Insurance",
+      "content": "I understand, {{contact_first_name}}. Is it more the cost of the visit itself, or the worry about paying for a whole program again?\n\n(Let them answer. Do not quote prices, packages, or discounts. The office handles that.)\n\nThis first visit is one appointment, not a program. You'll hear what anything past that costs before you decide. If insurance is part of it, our front desk can check your coverage before you come in.\n\nThe other side of it is what {{main_concern}} is already costing you, the things you mentioned a minute ago. That's the part I'd hate to see keep adding up.\n\nCan we at least get the look on the calendar?",
+      "sort_order": 121
+    },
+    {
+      "step_key": "obj_time",
+      "title": "Objection: “I don’t have time”",
+      "content": "I hear you, {{contact_first_name}}. Is it finding time for the first visit, or the worry about coming in regularly like before?\n\n(Let them answer.)\n\nRight now we're only talking about one visit. {{provider_name}} looks at {{main_concern}} and tells you what it would take from there. Sometimes that's a handful of visits to settle it down. Sometimes it's more, and you'll hear that up front so you can decide. Nobody is signing you up for a whole program on the phone.\n\nWe have early and late openings. Since you've been here before, the first visit is usually under 30 minutes.\n\nCould you find half an hour for that?",
+      "sort_order": 122
+    },
+    {
+      "step_key": "obj_spouse",
+      "title": "Objection: “I need to talk to my spouse”",
+      "content": "Of course. Is it more about the money side, or do you two just make these decisions together?\n\n(Let them answer. If it's money, use the cost answer.)\n\nThat's fair, and I'm not asking you to commit to anything they'd need to weigh in on. Right now, all you can tell them is that {{main_concern}} is still bothering you. After the visit, you can tell them what's going on and what it would take. That's an easier conversation to have. And if they'd like to come along, they're welcome.\n\nCan we pencil it in, and you can move it after you two talk?",
+      "sort_order": 123
+    },
+    {
       "step_key": "obj_think",
       "title": "Objection: “I need to think about it”",
-      "content": "That's fair, {{contact_first_name}}. Can I ask what part you'd want to think over? Sometimes it's the cost, sometimes the timing, and sometimes people want to be sure it's worth coming in.\n\n(Listen. Their answer usually points to one of the buttons below. If it stays general, keep going.)\n\nComing in is really just information. We take a look at {{main_concern}}, and you decide with real answers. If we can't help, we'll tell you that too.\n\nDoes that help?",
+      "content": "That's fair, {{contact_first_name}}. Usually when someone says that, there's one specific thing on their mind. What's the part you'd want to think over?\n\n(Let them answer. If they name cost, time, or another reason, tap that button.)\n\nOkay. I'm not trying to rush you. The one thing I'd say is that {{main_concern}} has been going on for a while now. It's had time to sort itself out on its own, and it hasn't. The visit is how you get the information you'd be thinking with. You can think it over just as easily after you know what's going on.\n\nWould it be easier to think it over once you have the answers?",
       "sort_order": 130
     },
     {
       "step_key": "obj_send_info",
       "title": "Objection: “Just send me some info”",
-      "content": "I'd be glad to send you some information, {{contact_first_name}}. The one thing I'd say is that a flyer can only tell you so much. It can't look at what's going on with {{main_concern}} for you. That's what the visit is for. So let me get you on the schedule first, and then I'll send the information along.\n\nDoes that work for you?",
+      "content": "I can do that, {{contact_first_name}}. What would you want it to cover, so I send the right thing?\n\n(Let them answer. If they name cost, time, or another reason, tap that button.)\n\nI'll be straight with you, though. Anything I send is going to be general. It can't tell you what's behind {{main_concern}} for you. That takes {{provider_name}} looking at you, and that's one short visit.\n\nLet's do both. I'll send the information, and we'll put a time on the calendar. If what I send answers your question, you can call and cancel, no problem.\n\nDoes doing both work for you?",
       "sort_order": 131
     }
   ],
@@ -370,6 +400,20 @@
       "sort_order": 1
     },
     {
+      "from_step_key": "obj_cost",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_cost",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
       "from_step_key": "obj_embarrassed",
       "label": "Resolved: schedule",
       "to_step_key": "scheduling",
@@ -378,6 +422,76 @@
     },
     {
       "from_step_key": "obj_embarrassed",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_other_option",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_other_option",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_send_info",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_send_info",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_spouse",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_spouse",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_think",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_think",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_time",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_time",
       "label": "Another concern came up",
       "to_step_key": "uncover",
       "variant": "objection",

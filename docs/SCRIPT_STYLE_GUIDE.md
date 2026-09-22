@@ -155,6 +155,51 @@ objection ends with its own short check, for example:
 - "Is there anything else on your mind?"
 
 Two objection screens in the same flow should not share the same closing line.
+And no objection screen ends with "Does that sound reasonable?"; that line
+belongs to the recommendation screen, and the caller just said it.
+
+#### Objection handle shape (five beats)
+An objection handle is not a three-sentence brush-off ("That's fair. A visit
+lets us see what changed. Would you be open to that?"). Every `obj_*` screen
+follows the same five beats, top to bottom, with the niche's own reason in the
+middle:
+
+1. **Acknowledge** in one short line, by name where it fits.
+2. **One isolating question** that finds out which version of the objection
+   this is ("Is it the cost of the visit itself, or not knowing what insurance
+   will cover?"). One `?`, under 20 words.
+3. `(Let them answer.)` on its own line, with any do-not instruction folded in
+   ("Do not quote prices…", "Do not knock the other option.").
+4. **The niche-specific reason**, tied to `{{main_concern}}`, that makes the
+   visit the sensible next step. This is the paragraph that changes from
+   niche to niche; it should not be pasteable into another niche's file.
+   `{{provider_name}}` appears here once, then "we".
+5. **A low-stakes ask** with a tail unique to that screen ("Can we pencil it
+   in, and you can move it after you two talk?").
+
+Reference: Chiropractic `obj_managing_own`:
+
+> Good for you, {{contact_first_name}}. That takes some discipline.
+>
+> What have you been doing for it?
+>
+> (Let them answer. Give them credit for it.)
+>
+> That's getting you through the day, and that matters. What it can't do is
+> tell you why {{main_concern}} keeps coming back. Managing something and
+> fixing it are two different things.
+>
+> A check with {{provider_name}} tells you which one you're dealing with. If
+> what you're doing is enough, we'll tell you to keep going. If it isn't,
+> you'll find out now instead of a year from now.
+>
+> Would it help to know for sure?
+
+The shared `general` objections (`obj_cost`, `obj_time`, `obj_spouse`,
+`obj_other_option`) and `uncover` are deliberately generic. When a niche gets
+this treatment, add same-key overrides to the niche file rather than editing
+`general.json`, and give each override the standard two buttons ("Resolved:
+back to scheduling" → `scheduling`, "Another concern came up" → `uncover`).
 
 ### R10. Question screens map one-to-one to the concern chips
 On the `digging_in*` screens, niches with concern chips
