@@ -47,6 +47,7 @@ export default function PracticeScriptPage() {
           initialNicheId={participant.selected_niche_id ?? null}
           callerName={participant.first_name}
           practiceName={owner?.practice_name ?? null}
+          owner={owner ?? null}
           isProvider={participant.role === 'owner'}
           initialStepKey={screen ?? null}
         />

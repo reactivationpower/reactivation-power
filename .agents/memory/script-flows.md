@@ -20,7 +20,7 @@ description: Constraints and quirks when rewriting or applying reactivation call
 - Making It Real screens share one scaled three-question shape (see style guide example 5). The owner's reference impact line ("...interfere with things like work, at home, or relaxing...") is 22 words and fails lint R2; the applied version drops "things like" (20 words). Keep every question ≤20 words with a single "?" — lint splits R1 units only on `.!`, so a question cannot be split in two.
 - The facial-aesthetics JSONs were hand-written with compact one-line choices; any export (or JSON.stringify re-save) expands them, so a small text edit shows a ~800-line diff. Verify text-only changes by parsing HEAD vs working tree (choices/step meta identical), not by diff size.
 - Task agents share the same Supabase flow tables, so an unmerged task's `flows:apply` can leave the DB ahead of main's JSON. Before `flows:apply --all`, read the dry-run and, for any step you did not touch that shows as an update, export that slug and adopt the DB text into the file rather than reverting it.
-- `{{provider_name}}` resolves to the provider's name in the dialer, falling back to the practice name; safe to use in any niche.
+- Owner-approved rule: `{{provider_name}}` is always spoken as "Dr. <last name>" (never first name, never the business name — that sounds like a call centre); when no doctor applies it becomes "the whole office", so write the token mid-sentence in a shape that reads with either value.
 - The API Server workflow is often stopped between sessions; a demo sign-in "Request failed (502)" in the player means restart it, not an app bug.
 
 **Why:** Text rewrites must never alter routing (no DDL, routing owned by the product); the tooling only updates text in place.

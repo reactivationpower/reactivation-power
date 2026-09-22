@@ -4,6 +4,11 @@ import { useMemo, useState } from 'react'
 import { AArrowDown, AArrowUp } from 'lucide-react'
 import { setSelectedNiche } from '@/app/actions/reactivation'
 import {
+  providerTokens,
+  spokenProviderName,
+  type ProviderSource,
+} from '@/lib/provider-name'
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -23,6 +28,8 @@ interface Props {
   initialNicheId: string | null
   callerName?: string
   practiceName?: string | null
+  /** Account owner; the provider's spoken name is derived from it. */
+  owner?: ProviderSource | null
   isProvider?: boolean
   /** Optional deep link: open the player at this step (review/debug use). */
   initialStepKey?: string | null
@@ -35,6 +42,7 @@ export function ScriptViewer({
   initialNicheId,
   callerName,
   practiceName,
+  owner = null,
   isProvider = false,
   initialStepKey = null,
 }: Props) {
@@ -58,23 +66,18 @@ export function ScriptViewer({
       e.caller_name = callerName
       e.your_name = callerName
     }
-    if (practiceName) {
-      e.practice_name = practiceName
-      e.provider_name = practiceName
-    }
+    if (practiceName) e.practice_name = practiceName
     // Role-aware pronouns: the provider says "I / me", everyone else
     // speaks for the practice with "we / us".
     e.rec_pronoun = isProvider ? 'I' : 'we'
     e.rec_pronoun_cap = isProvider ? 'I' : 'We'
     e.rec_obj = isProvider ? 'me' : 'us'
     e.rec_poss = isProvider ? 'my' : 'our'
-    // Credibility line in the Professional Open: staff callers borrow the
-    // provider's authority; the provider speaks for themselves.
-    e.asked_by_provider = isProvider
-      ? 'I wanted to reach out to you personally.'
-      : `${e.provider_name ?? '[PROVIDER NAME]'} asked me to reach out to you personally.`
+    // Same provider fill-in as the live call screen ("Dr. Whitaker", or
+    // "the whole office" when there is no doctor on file).
+    Object.assign(e, providerTokens(spokenProviderName(owner, sector), isProvider))
     return e
-  }, [callerName, practiceName, niches, nicheId, isProvider])
+  }, [callerName, practiceName, owner, niches, nicheId, isProvider])
 
   function handleNicheChange(id: string | null) {
     if (!id) return

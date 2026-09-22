@@ -35,6 +35,11 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { mergeScript, spokenComplaint } from '@/lib/script-merge'
+import {
+  providerTokens,
+  spokenProviderName,
+  type ProviderSource,
+} from '@/lib/provider-name'
 import { CONCERN_OPTIONS } from '@/lib/concern-options'
 import { ScriptFlowPlayer } from '@/components/reactivation/script-flow-player'
 import { DateTimePicker } from '@/components/reactivation/date-time-picker'
@@ -71,7 +76,8 @@ interface Props {
   callerName: string
   practiceName: string | null
   officePhone: string | null
-  providerName: string | null
+  /** Account owner; the provider's spoken name is derived from it. */
+  owner: ProviderSource | null
   isProvider?: boolean
   callHistory: CallWithCaller[]
   flowSteps: ScriptFlowStep[]
@@ -98,7 +104,7 @@ export function CallScreen({
   callerName,
   practiceName,
   officePhone,
-  providerName,
+  owner,
   isProvider = false,
   callHistory,
   flowSteps,
@@ -141,26 +147,33 @@ export function CallScreen({
     const complaint = spokenComplaint(contact.original_complaint ?? '')
     if (complaint) e.complaint_reference = complaint
     if (practiceName) e.practice_name = practiceName
-    if (providerName) e.provider_name = providerName
-    else if (practiceName) e.provider_name = practiceName
     // Role-aware pronouns: the provider says "I / me", everyone else
     // speaks for the practice with "we / us".
     e.rec_pronoun = isProvider ? 'I' : 'we'
     e.rec_pronoun_cap = isProvider ? 'I' : 'We'
     e.rec_obj = isProvider ? 'me' : 'us'
     e.rec_poss = isProvider ? 'my' : 'our'
-    // Credibility line in the Professional Open: staff callers borrow the
-    // provider's authority; the provider speaks for themselves.
-    e.asked_by_provider = isProvider
-      ? 'I wanted to reach out to you personally.'
-      : `${e.provider_name ?? '[PROVIDER NAME]'} asked me to reach out to you personally.`
+    // {{provider_name}} ("Dr. Whitaker" / "the whole office") and the Open's
+    // credibility line, resolved per the selected niche's sector.
+    Object.assign(
+      e,
+      providerTokens(
+        spokenProviderName(
+          owner,
+          niches.find((n) => n.id === nicheId)?.sector ?? null,
+        ),
+        isProvider,
+      ),
+    )
     return e
   }, [
     contact.name,
     contact.original_complaint,
     callerName,
     practiceName,
-    providerName,
+    owner,
+    niches,
+    nicheId,
     isProvider,
   ])
 

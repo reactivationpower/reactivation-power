@@ -82,12 +82,7 @@ export default function CallPage() {
           callerName={participant.first_name}
           practiceName={owner?.practice_name ?? null}
           officePhone={owner?.office_phone ?? null}
-          providerName={
-            // Spoken form: "Dr. Whitaker", never "Dr. Daniel Whitaker".
-            owner
-              ? `Dr. ${(owner.last_name || owner.first_name || '').trim()}`.trim()
-              : null
-          }
+          owner={owner ?? null}
           isProvider={participant.role === 'owner'}
           callHistory={callHistory}
           flowSteps={flow.steps}

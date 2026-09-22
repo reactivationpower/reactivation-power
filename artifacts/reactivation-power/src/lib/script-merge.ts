@@ -70,11 +70,33 @@ export function mergeScript(
   extras: Record<string, string> = {},
 ): string {
   const bySlot = new Map(sections.map((s) => [s.slot_name, s.content]))
-  return body.replace(/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g, (_match, slot) => {
-    if (extras[slot] !== undefined) return extras[slot]
-    const content = bySlot.get(slot)
-    return content !== undefined && content !== ''
-      ? content
-      : `[${slot.replace(/_/g, ' ').toUpperCase()}]`
-  })
+  return body.replace(
+    /\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g,
+    (_match, slot, offset: number) => {
+      let value: string
+      if (extras[slot] !== undefined) value = extras[slot]
+      else {
+        const content = bySlot.get(slot)
+        value =
+          content !== undefined && content !== ''
+            ? content
+            : `[${slot.replace(/_/g, ' ').toUpperCase()}]`
+      }
+      // The provider fallback ("the whole office") is lower-case; give it a
+      // capital when the token opens a sentence or a paragraph. Every other
+      // value (names, brands, practice names) is inserted verbatim.
+      return slot === 'provider_name' && startsSentence(body, offset)
+        ? capitalize(value)
+        : value
+    },
+  )
+}
+
+function startsSentence(body: string, offset: number): boolean {
+  const before = body.slice(0, offset).replace(/[\s("\u201c]+$/, '')
+  return before === '' || /[.!?]["\u201d)]?$/.test(before)
+}
+
+function capitalize(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1)
 }
