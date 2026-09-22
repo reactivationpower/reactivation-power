@@ -793,6 +793,7 @@ Commands (run from the repo root; they need `SUPABASE_URL` and
 | `pnpm --filter @workspace/api-server run flows:export [slug…]` | Regenerate the JSON files from the live database. Overwrites local edits, so commit first. |
 | `pnpm --filter @workspace/api-server run flows:lint [slug…]` | Report rule violations per file. Exit 1 on errors. `--quiet` for counts only. |
 | `pnpm --filter @workspace/api-server run flows:apply [--dry-run] (--all \| slug…)` | Upsert the files back. Steps match on niche + `step_key`; choices on niche + `from_step_key` + `to_step_key`. Text is updated in place, nothing is duplicated, nothing is deleted. Refuses to write when a choice routes to a missing step or a token is unknown. Prints a diff summary. |
+| `pnpm --filter @workspace/api-server run flows:check [--quiet] [slug…]` | Compare the live database with the files in both directions (same matching as apply). Exit 1 when any step or choice differs or a slug exists on only one side, so a flow edited in the admin UI or by SQL — or a linted file nobody applied — is caught. Run by hand; it is not a validation step because it needs the database and every task branch shares one. |
 
 Slugs are the niche name lowercased with dashes (`skin-tightening`,
 `weight-loss-not-chirothin`) and `general`.
@@ -803,8 +804,9 @@ Slugs are the niche name lowercased with dashes (`skin-tightening`,
 
 One loop per niche. Do not skip steps.
 
-1. **Export** — `flows:export` so the files match the database. Commit the
-   baseline before editing anything.
+1. **Export** — `flows:check <slug>` first to see whether the file and the
+   database already disagree, then `flows:export` so the files match the
+   database. Commit the baseline before editing anything.
 2. **Audit** — `flows:lint <slug>` and read the output top to bottom. Read the
    niche's screens in the player (`/portal/script`, pick the niche) to see
    which steps the niche overrides and which fall through to general. Note
@@ -818,7 +820,8 @@ One loop per niche. Do not skip steps.
 4. **Lint** — `flows:lint <slug>` until it passes with zero errors. Read the
    warnings; most are worth fixing.
 5. **Apply your own niches only** — `flows:apply --dry-run <slug>` first, read
-   the diff, then `flows:apply <slug>`. Never `--all` from a batch task: another
+   the diff, then `flows:apply <slug>`, then `flows:check <slug>` to confirm
+   the phones and the file now agree. Never `--all` from a batch task: another
    batch may be mid-rewrite on a different niche.
 6. **Click through** — open the niche in the player and walk every branch:
    all three opening answers, the question screen with a chip tapped and with

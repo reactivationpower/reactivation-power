@@ -11,7 +11,8 @@
     "test": "vitest run",
     "flows:export": "node scripts/flows/export.ts",
     "flows:apply": "node scripts/flows/apply.ts",
-    "flows:lint": "node scripts/flows/lint.ts"
+    "flows:lint": "node scripts/flows/lint.ts",
+    "flows:check": "node scripts/flows/check.ts"
   },
   "dependencies": {
     "@replit/connectors-sdk": "^0.4.3",

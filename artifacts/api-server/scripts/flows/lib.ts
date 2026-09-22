@@ -69,9 +69,9 @@ export function readFlowFile(slug: string): FlowFile {
   return parsed
 }
 
-export function writeFlowFile(slug: string, file: FlowFile): void {
-  mkdirSync(CONTENT_DIR, { recursive: true })
-  const sorted: FlowFile = {
+/** The canonical row order a flow file is written in (export) and compared in (check). */
+export function normalizeFlowFile(file: FlowFile): FlowFile {
+  return {
     niche: file.niche,
     steps: [...file.steps].sort(
       (a, b) => a.sort_order - b.sort_order || a.step_key.localeCompare(b.step_key),
@@ -83,7 +83,183 @@ export function writeFlowFile(slug: string, file: FlowFile): void {
         a.label.localeCompare(b.label),
     ),
   }
-  writeFileSync(fileFor(slug), JSON.stringify(sorted, null, 2) + '\n')
+}
+
+export function writeFlowFile(slug: string, file: FlowFile): void {
+  mkdirSync(CONTENT_DIR, { recursive: true })
+  writeFileSync(fileFor(slug), JSON.stringify(normalizeFlowFile(file), null, 2) + '\n')
+}
+
+/**
+ * Every flow the database currently holds, keyed by file slug, in the exact
+ * shape `flows:export` writes. Niches with no rows of their own are omitted
+ * (the player falls through to general for them), matching export's skip.
+ */
+export async function loadLiveFlows(supabase: SupabaseClient): Promise<Map<string, FlowFile>> {
+  interface NicheRow {
+    id: string
+    name: string
+    sector: FlowNicheMeta['sector']
+    is_active: boolean
+    sort_order: number
+  }
+  type StepRow = FlowStep & { niche_id: string | null }
+  type ChoiceRow = FlowChoice & { niche_id: string | null }
+
+  const [niches, steps, choices] = await Promise.all([
+    fetchAll<NicheRow>(supabase, 'niches', 'id,name,sector,is_active,sort_order'),
+    fetchAll<StepRow>(supabase, 'script_flow_steps', 'niche_id,step_key,title,content,sort_order'),
+    fetchAll<ChoiceRow>(
+      supabase,
+      'script_flow_choices',
+      'niche_id,from_step_key,label,to_step_key,variant,sort_order',
+    ),
+  ])
+
+  const strip = <T extends { niche_id: string | null }>(r: T) => {
+    const { niche_id: _omit, ...rest } = r
+    return rest
+  }
+
+  const targets: Array<{ slug: string; nicheId: string | null; meta: FlowFile['niche'] }> = [
+    { slug: GENERAL_SLUG, nicheId: null, meta: null },
+    ...niches.map((n) => ({
+      slug: slugify(n.name),
+      nicheId: n.id,
+      meta: { name: n.name, sector: n.sector, is_active: n.is_active, sort_order: n.sort_order },
+    })),
+  ]
+
+  const out = new Map<string, FlowFile>()
+  for (const t of targets) {
+    const file: FlowFile = {
+      niche: t.meta,
+      steps: steps.filter((s) => s.niche_id === t.nicheId).map(strip),
+      choices: choices.filter((c) => c.niche_id === t.nicheId).map(strip),
+    }
+    if (t.nicheId && file.steps.length === 0 && file.choices.length === 0) continue
+    out.set(t.slug, normalizeFlowFile(file))
+  }
+  return out
+}
+
+/** One way the live database and a checked-in flow file disagree. */
+export interface FlowDrift {
+  slug: string
+  /** `text` fails the check; `meta` is a niche-row attribute (is_active, sector, sort_order) that only export would rewrite */
+  kind: 'text' | 'meta'
+  message: string
+}
+
+function shortText(s: string, n = 60): string {
+  const one = s.replace(/\s+/g, ' ').trim()
+  return one.length > n ? one.slice(0, n - 1) + '\u2026' : one
+}
+
+/**
+ * Compare a checked-in flow file with what the database holds for the same
+ * slug, using apply's matching rules (steps by step_key; choices by
+ * from+to, paired in sort_order). Either side may be missing: a file with
+ * no live rows, or live rows with no file. Returns an empty list when the
+ * two are identical, i.e. when `flows:export` would be a no-op and
+ * `flows:apply` would find nothing to write.
+ */
+export function diffFlowFile(
+  slug: string,
+  inRepo: FlowFile | null,
+  inDatabase: FlowFile | null,
+): FlowDrift[] {
+  const out: FlowDrift[] = []
+  const text = (message: string) => out.push({ slug, kind: 'text', message })
+  const meta = (message: string) => out.push({ slug, kind: 'meta', message })
+
+  if (!inRepo && !inDatabase) return out
+  if (!inRepo) {
+    text(
+      `database has ${inDatabase!.steps.length} step(s) and ${inDatabase!.choices.length} choice(s) but content/flows/${slug}.json does not exist (run flows:export ${slug})`,
+    )
+    return out
+  }
+  if (!inDatabase) {
+    text(
+      `content/flows/${slug}.json exists but the database has no rows for it (run flows:apply ${slug}, or delete the file)`,
+    )
+    return out
+  }
+
+  if (inRepo.niche && inDatabase.niche) {
+    for (const k of ['sector', 'is_active', 'sort_order'] as const) {
+      if (inRepo.niche[k] !== inDatabase.niche[k]) {
+        meta(`niche ${k}: file ${String(inRepo.niche[k])}, database ${String(inDatabase.niche[k])}`)
+      }
+    }
+  }
+
+  const dbSteps = new Map(inDatabase.steps.map((s) => [s.step_key, s]))
+  const fileSteps = new Map(inRepo.steps.map((s) => [s.step_key, s]))
+  for (const [key, f] of fileSteps) {
+    const d = dbSteps.get(key)
+    if (!d) {
+      text(`step ${key}: in file, not in database`)
+      continue
+    }
+    if (d.title !== f.title) {
+      text(`step ${key}: title differs (file "${shortText(f.title, 40)}", database "${shortText(d.title, 40)}")`)
+    }
+    if (d.content !== f.content) {
+      text(`step ${key}: content differs (file ${f.content.length} chars, database ${d.content.length} chars)`)
+    }
+    if (d.sort_order !== f.sort_order) {
+      text(`step ${key}: sort_order differs (file ${f.sort_order}, database ${d.sort_order})`)
+    }
+  }
+  for (const key of dbSteps.keys()) {
+    if (!fileSteps.has(key)) text(`step ${key}: in database, not in file`)
+  }
+
+  const choiceKey = (c: FlowChoice) => `${c.from_step_key}\u0000${c.to_step_key ?? ''}`
+  const group = (list: FlowChoice[]) => {
+    const groups = new Map<string, FlowChoice[]>()
+    for (const c of list) {
+      const g = groups.get(choiceKey(c)) ?? []
+      g.push(c)
+      groups.set(choiceKey(c), g)
+    }
+    for (const g of groups.values()) g.sort((a, b) => a.sort_order - b.sort_order)
+    return groups
+  }
+  const dbChoices = group(inDatabase.choices)
+  const fileChoices = group(inRepo.choices)
+  const route = (c: FlowChoice) => `choice ${c.from_step_key} -> ${c.to_step_key ?? '(none)'}`
+  for (const [key, fList] of fileChoices) {
+    const dList = dbChoices.get(key) ?? []
+    fList.forEach((f, i) => {
+      const d = dList[i]
+      if (!d) {
+        text(`${route(f)} "${shortText(f.label, 40)}": in file, not in database`)
+        return
+      }
+      if (d.label !== f.label) {
+        text(`${route(f)}: label differs (file "${shortText(f.label, 40)}", database "${shortText(d.label, 40)}")`)
+      }
+      if (d.variant !== f.variant) {
+        text(`${route(f)}: variant differs (file ${f.variant}, database ${d.variant})`)
+      }
+      if (d.sort_order !== f.sort_order) {
+        text(`${route(f)}: sort_order differs (file ${f.sort_order}, database ${d.sort_order})`)
+      }
+    })
+    for (const extra of dList.slice(fList.length)) {
+      text(`${route(extra)} "${shortText(extra.label, 40)}": in database, not in file`)
+    }
+  }
+  for (const [key, dList] of dbChoices) {
+    if (fileChoices.has(key)) continue
+    for (const extra of dList) {
+      text(`${route(extra)} "${shortText(extra.label, 40)}": in database, not in file`)
+    }
+  }
+  return out
 }
 
 export function getSupabase(): SupabaseClient {
