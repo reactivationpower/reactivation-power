@@ -5,7 +5,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
  * Customer emails in the dunning flow go through the billing_notifications
  * outbox: one row per (type, invoice) claimed atomically, the template data
  * stored on the row, and failed sends retried by the cron. The database is
- * an in-memory table that honours the unique index the way Postgres does;
+ * an in-memory table that honours the unique (slot, invoice) index — and the
+ * generated `slot` column behind it — the way Postgres does;
  * the mail transport is a stub whose outcome the test controls.
  */
 
@@ -36,6 +37,7 @@ const col = (name: string) => {
 const table = {
   id: col('id'),
   type: col('type'),
+  slot: col('slot'),
   stripeInvoiceId: col('stripeInvoiceId'),
   customerId: col('customerId'),
   recipient: col('recipient'),
@@ -56,6 +58,8 @@ const matches = (row: Row, c: Cond | undefined): boolean => {
   return (v as number | Date) < (c.value as number | Date)
 }
 const INCREMENT = Symbol('increment')
+// Mirrors the generated `slot` column: the two emails about one successful payment share a slot.
+const slotOf = (type: string) => (type === 'access_restored' || type === 'payment_received' ? 'paid' : type)
 vi.mock('drizzle-orm', () => ({
   and: (...parts: Cond[]) => ({ and: parts.filter(Boolean) }),
   or: (...parts: Cond[]) => ({ or: parts.filter(Boolean) }),
@@ -75,7 +79,8 @@ vi.mock('@workspace/db', () => ({
       values: (v: Omit<Row, 'updatedAt' | 'lastError' | 'emailLogId' | 'sentAt'>) => ({
         onConflictDoNothing: () => ({
           returning: async () => {
-            if (rows.some((r) => r.type === v.type && r.stripeInvoiceId === v.stripeInvoiceId)) return []
+            const slot = slotOf(v.type)
+            if (rows.some((r) => slotOf(r.type) === slot && r.stripeInvoiceId === v.stripeInvoiceId)) return []
             const row: Row = { ...v, lastError: null, emailLogId: null, sentAt: null, updatedAt: new Date() }
             rows.push(row)
             return [row]
@@ -130,7 +135,7 @@ vi.mock('@/lib/stripe', () => ({
 vi.mock('@/lib/app-origin', () => ({ appOrigin: () => 'https://app.test' }))
 vi.mock('@/lib/logger', () => ({ logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() } }))
 
-const { notifyAccessPaused, notifyAccessRestored, notifyBackupCardUsed, notifySubscriptionCancelled, retryFailedNotifications } = await import(
+const { notifyAccessPaused, notifyAccessRestored, notifyBackupCardUsed, notifyPaymentReceived, notifySubscriptionCancelled, retryFailedNotifications } = await import(
   '@/lib/billing/notifications'
 )
 
@@ -222,6 +227,77 @@ describe('one email per kind per invoice', () => {
     release()
     await first
     expect(sent).toHaveLength(1)
+  })
+})
+
+describe('monthly receipt', () => {
+  it('is sent once per invoice with the hosted invoice link and the card that paid', async () => {
+    const inv = invoice('in_r1', { hosted_invoice_url: 'https://invoice.stripe.com/i/in_r1' } as Partial<Stripe.Invoice>)
+    const args = { customer, invoice: inv, charged: { brand: 'visa', last4: '4242' }, receiptUrl: 'https://pay.stripe.com/receipts/x' }
+    expect(await notifyPaymentReceived(args)).toBe('sent')
+    expect(await notifyPaymentReceived(args)).toBe('duplicate') // invoice.paid + invoice.payment_succeeded
+    expect(sent).toHaveLength(1)
+    expect(sent[0]).toMatchObject({
+      type: 'payment_received',
+      to: 'owner@example.com',
+      data: {
+        name: 'Dr. Michael Chen',
+        amountCents: 47500,
+        description: 'Monthly access',
+        paidAt: new Date(1_790_000_000 * 1000).toISOString(),
+        receiptUrl: 'https://invoice.stripe.com/i/in_r1',
+        cardBrand: 'visa',
+        cardLast4: '4242',
+        portalUrl: 'https://app.test/portal',
+      },
+    })
+    expect(rows[0]).toMatchObject({ type: 'payment_received', stripeInvoiceId: 'in_r1', status: 'sent' })
+  })
+
+  it('falls back to the card receipt when Stripe has no hosted invoice page', async () => {
+    await notifyPaymentReceived({ customer, invoice: invoice('in_r2'), charged: null, receiptUrl: 'https://pay.stripe.com/receipts/x' })
+    expect(sent[0].data).toMatchObject({ receiptUrl: 'https://pay.stripe.com/receipts/x', cardBrand: null, cardLast4: null })
+  })
+
+  it('is not sent when the same payment already produced an access-restored email', async () => {
+    await notifyAccessRestored({ customer, invoice: invoice('in_r3'), charged: { brand: 'visa', last4: '4242' } })
+    expect(await notifyPaymentReceived({ customer, invoice: invoice('in_r3'), charged: { brand: 'visa', last4: '4242' } })).toBe('duplicate')
+    expect(sent).toHaveLength(1)
+    expect(sent[0].type).toBe('access_restored')
+    expect(rows).toHaveLength(1)
+  })
+
+  it('a receipt claimed first keeps a later access-restored notice for the same invoice from going out', async () => {
+    await notifyPaymentReceived({ customer, invoice: invoice('in_r3b'), charged: null })
+    await notifyAccessRestored({ customer, invoice: invoice('in_r3b'), charged: null })
+    expect(sent.map((s) => s.type)).toEqual(['payment_received'])
+  })
+
+  it('invoice.paid and subscription.updated racing on one payment send exactly one email between them', async () => {
+    let release!: () => void
+    sendGate = new Promise<void>((r) => (release = r))
+    const receipt = notifyPaymentReceived({ customer, invoice: invoice('in_r6'), charged: null })
+    const restored = notifyAccessRestored({ customer, invoice: invoice('in_r6'), charged: null })
+    await new Promise((r) => setTimeout(r, 5)) // both have tried to claim; the winner is blocked in send
+    release()
+    const [a] = await Promise.all([receipt, restored])
+    expect(a).toBe('sent') // the receipt claimed first here; the restore notice found the slot taken
+    expect(sent).toHaveLength(1)
+    expect(rows).toHaveLength(1)
+    expect(rows[0].status).toBe('sent')
+  })
+
+  it('a $0 invoice (trial start) gets no receipt', async () => {
+    const trial = invoice('in_r7', { amount_due: 0, amount_paid: 0 })
+    expect(await notifyPaymentReceived({ customer, invoice: trial, charged: null })).toBe('skipped')
+    expect(sent).toHaveLength(0)
+    expect(rows).toHaveLength(0)
+  })
+
+  it('is its own kind: a receipt for one invoice does not block the next month', async () => {
+    await notifyPaymentReceived({ customer, invoice: invoice('in_r4'), charged: null })
+    await notifyPaymentReceived({ customer, invoice: invoice('in_r5'), charged: null })
+    expect(sent.map((s) => s.type)).toEqual(['payment_received', 'payment_received'])
   })
 })
 

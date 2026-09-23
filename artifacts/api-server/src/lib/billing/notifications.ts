@@ -21,12 +21,14 @@ import { invoiceDescription, latestInvoiceAttempt, type CardUsed } from './dunni
  * Customer-facing emails for the failed-payment flow and for cancellations,
  * delivered through a small outbox (`billing_notifications`):
  *
- *   - One row per (type, Stripe object) — the invoice for payment notices,
+ *   - One row per (slot, Stripe object) — the invoice for payment notices,
  *     the subscription for the cancellation notice. The unique index makes
  *     the "once" rule hold even when two Stripe events, an admin action and
  *     a webhook, or a webhook and the daily cron race each other: exactly
  *     one caller wins the insert and sends; the others see the existing row
- *     and stop.
+ *     and stop. The slot is the type, except that `access_restored` and the
+ *     `payment_received` receipt share one slot: they describe the same
+ *     successful payment, so whichever claims first is the one email sent.
  *   - The rendered template data is stored on the row, so a send that the
  *     mail provider rejected is retried by `retryFailedNotifications()`
  *     (run from the daily billing cron) without touching Stripe again.
@@ -43,9 +45,10 @@ const newId = () => randomBytes(16).toString('hex')
 type Payload<K extends DunningEmailType> = TemplateDataMap[K]
 
 /**
- * Claim the (type, Stripe object) slot. Returns the row when this caller
- * should send, null when another caller already owns it (sent, or in flight).
- * A previous attempt that failed can be re-claimed until MAX_ATTEMPTS.
+ * Claim the invoice's slot for this type. Returns the row when this caller
+ * should send, null when another caller already owns it (sent, or in
+ * flight — possibly with the other email of the same slot). A previous
+ * attempt of the same type that failed can be re-claimed until MAX_ATTEMPTS.
  */
 async function claim<K extends DunningEmailType>(
   type: K,
@@ -65,7 +68,7 @@ async function claim<K extends DunningEmailType>(
       status: 'pending',
       attempts: 0,
     })
-    .onConflictDoNothing({ target: [billingNotificationsTable.type, billingNotificationsTable.stripeInvoiceId] })
+    .onConflictDoNothing({ target: [billingNotificationsTable.slot, billingNotificationsTable.stripeInvoiceId] })
     .returning()
   if (inserted) return inserted
   // Someone else holds it. Only a failed earlier attempt may be taken over.
@@ -215,7 +218,6 @@ export async function notifyAccessPaused(input: {
     updatePaymentUrl: billingPageUrl(customer.email),
   })
 }
-
 /**
  * A payment went through for a customer whose access was paused. Pass the
  * paid invoice when the caller has it; otherwise the subscription's most
@@ -287,4 +289,40 @@ export async function notifySubscriptionCancelled(input: {
     accessEndsAt: input.accessEndsAt.toISOString(),
     reactivateUrl: billingPageUrl(customer.email),
   })
+}
+
+/**
+ * Receipt for an ordinary paid subscription invoice (Stripe's own receipts
+ * are off). It shares its outbox slot with `access_restored`, so a payment
+ * that also brought a paused customer back produces exactly one email —
+ * whichever handler claims the invoice first — even when `invoice.paid` and
+ * `customer.subscription.updated` are processed at the same time. Links
+ * Stripe's hosted invoice when it has one, else the card receipt.
+ *
+ * Only real charges get a receipt: the invoice Stripe creates when a trial
+ * subscription starts is "paid" for $0 and must not be announced as one.
+ */
+export async function notifyPaymentReceived(input: {
+  customer: Customer
+  invoice: Stripe.Invoice
+  charged: CardSummary | null
+  receiptUrl?: string | null
+}): Promise<'sent' | 'failed' | 'duplicate' | 'skipped'> {
+  const { customer, invoice } = input
+  if (!isReceiptWorthy(invoice)) return 'skipped'
+  return enqueueAndSend('payment_received', invoice.id, customer, {
+    name: recipientName(customer),
+    amountCents: invoice.amount_paid,
+    description: invoiceDescription(invoice),
+    paidAt: new Date((invoice.status_transitions?.paid_at ?? Math.floor(Date.now() / 1000)) * 1000).toISOString(),
+    receiptUrl: invoice.hosted_invoice_url ?? input.receiptUrl ?? null,
+    cardBrand: input.charged?.brand ?? null,
+    cardLast4: input.charged?.last4 ?? null,
+    portalUrl: `${appOrigin()}/portal`,
+  })
+}
+
+/** A paid invoice that actually charged the customer something. */
+export function isReceiptWorthy(invoice: Pick<Stripe.Invoice, 'amount_paid'>): boolean {
+  return (invoice.amount_paid ?? 0) > 0
 }

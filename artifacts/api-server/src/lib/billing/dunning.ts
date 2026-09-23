@@ -18,7 +18,7 @@ import { logger } from '@/lib/logger'
 import { getAdminClient } from '@/lib/supabase/admin'
 import { billingStatusAfterPayment, cardToRetry, isAccessBlocked, reconcileAccess, subscriptionNextPaymentAt } from './rules'
 import { generateCommissionForHistory, isCommissionable } from './commissions'
-import { cardSummary, notifyAccessPaused, notifyAccessRestored, notifyBackupCardUsed, notifySubscriptionCancelled } from './notifications'
+import { cardSummary, notifyAccessPaused, notifyAccessRestored, notifyBackupCardUsed, notifyPaymentReceived, notifySubscriptionCancelled } from './notifications'
 
 /**
  * Failed-payment policy ("dunning") and the billing ledger.
@@ -100,6 +100,8 @@ export interface CardUsed {
   chargeId: string | null
   paymentIntentId: string | null
   failureMessage: string | null
+  /** Stripe's card receipt for a successful charge. */
+  receiptUrl: string | null
 }
 
 /** The PaymentIntent behind an invoice's most recent payment attempt. */
@@ -111,6 +113,7 @@ export async function latestInvoiceAttempt(invoice: Stripe.Invoice): Promise<Car
     chargeId: null,
     paymentIntentId: null,
     failureMessage: null,
+    receiptUrl: null,
   }
   let paymentIntentId: string | null = null
   const payments = invoice.payments?.data ?? []
@@ -144,6 +147,7 @@ export function cardFromIntent(pi: Stripe.PaymentIntent): CardUsed {
     chargeId: charge?.id ?? (typeof pi.latest_charge === 'string' ? pi.latest_charge : null),
     paymentIntentId: pi.id,
     failureMessage: pi.last_payment_error?.message ?? charge?.failure_message ?? null,
+    receiptUrl: charge?.receipt_url ?? null,
   }
 }
 
@@ -225,7 +229,7 @@ export interface HandleResult {
   note?: string
 }
 
-/** invoice.paid / invoice.payment_succeeded: ledger + restore access. */
+/** invoice.paid / invoice.payment_succeeded: ledger + restore access + receipt. */
 export async function handleInvoicePaid(invoice: Stripe.Invoice, eventId: string | null, source: NewPaymentHistory['source'] = 'webhook'): Promise<HandleResult> {
   const subscriptionId = invoiceSubscriptionId(invoice)
   if (!subscriptionId) return { handled: false, note: 'not a subscription invoice' }
@@ -235,8 +239,8 @@ export async function handleInvoicePaid(invoice: Stripe.Invoice, eventId: string
   const already = await hasHistory(
     and(eq(paymentHistoryTable.stripeInvoiceId, invoice.id), eq(paymentHistoryTable.kind, 'invoice_paid')),
   )
+  const used = await latestInvoiceAttempt(invoice)
   if (!already) {
-    const used = await latestInvoiceAttempt(invoice)
     await recordHistory({
       customerId: ctx.customer.id,
       linkId: ctx.terms.linkId,
@@ -267,8 +271,19 @@ export async function handleInvoicePaid(invoice: Stripe.Invoice, eventId: string
     await restoreAccess(ctx.customer.id, subStatus)
     logger.info({ customerId: ctx.customer.id }, 'billing: portal access restored')
     await notifyAccessRestored({ customer: ctx.customer, invoice })
-  } else if (!['active', 'trialing'].includes(ctx.customer.billingStatus)) {
-    await restoreAccess(ctx.customer.id, subStatus)
+  } else {
+    if (!['active', 'trialing'].includes(ctx.customer.billingStatus)) await restoreAccess(ctx.customer.id, subStatus)
+    // An ordinary renewal: the customer's only record of the charge, since
+    // Stripe's own receipts are off. A recovering customer got the
+    // access-restored email above instead; the two share an outbox slot, so
+    // subscription.updated restoring access at the same moment cannot
+    // produce both. $0 invoices (trial start) get no receipt.
+    await notifyPaymentReceived({
+      customer: ctx.customer,
+      invoice,
+      charged: cardSummary(used) ?? cardSummary(rankOf(ctx.cards, used.paymentMethodId)),
+      receiptUrl: used.receiptUrl,
+    })
   }
   return { handled: true }
 }

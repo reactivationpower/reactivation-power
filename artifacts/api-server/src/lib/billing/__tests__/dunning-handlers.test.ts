@@ -143,14 +143,19 @@ vi.mock('@/lib/supabase/admin', () => ({ getAdminClient: () => ({}) }))
 
 // Customer emails go through the outbox, which has its own suite; here only
 // the decision to notify is observed.
+type ReceiptArgs = { customer: { id: string }; invoice: { id: string }; charged: unknown; receiptUrl?: string | null }
 const notifications = {
-  cardSummary: (card: { brand?: string | null; last4?: string | null } | null) => (card ? { brand: card.brand ?? null, last4: card.last4 ?? null } : null),
-  notifyAccessPaused: vi.fn(async () => undefined),
-  notifyAccessRestored: vi.fn(async () => undefined),
-  notifyBackupCardUsed: vi.fn(async () => undefined),
+  notifyAccessPaused: vi.fn(async (_args: unknown) => undefined),
+  notifyAccessRestored: vi.fn(async (_args: unknown) => undefined),
+  notifyBackupCardUsed: vi.fn(async (_args: unknown) => undefined),
+  notifyPaymentReceived: vi.fn(async (_args: ReceiptArgs) => 'sent' as const),
   notifySubscriptionCancelled: vi.fn<(input: { customer: Row; subscriptionId: string; monthlyCents: number | null; accessEndsAt: Date }) => Promise<'sent'>>(async () => 'sent'),
 }
-vi.mock('@/lib/billing/notifications', () => notifications)
+vi.mock('@/lib/billing/notifications', () => ({
+  ...notifications,
+  cardSummary: (card: { brand?: string | null; last4?: string | null } | null | undefined) =>
+    card ? { brand: card.brand ?? null, last4: card.last4 ?? null } : null,
+}))
 
 const {
   handleChargeRefunded,
@@ -300,7 +305,7 @@ const terms = () => tables.payment_link_terms[0]
 beforeEach(() => {
   for (const group of Object.values(stripeMock)) for (const fn of Object.values(group)) fn.mockReset()
   commissions.generateCommissionForHistory.mockClear()
-  for (const fn of Object.values(notifications)) if ('mockClear' in fn) fn.mockClear()
+  for (const fn of Object.values(notifications)) fn.mockClear()
 })
 
 // ── invoice.payment_failed ─────────────────────────────────────────────────
@@ -466,6 +471,45 @@ describe('handleInvoicePaid', () => {
     const { register } = stubStripe()
     await handleInvoicePaid(invoice({ status: 'paid', paymentIntentId: register(PM_PRIMARY, 'succeeded') }), 'evt_paid_5')
     expect(customer().billingStatus).toBe('active')
+  })
+
+  it('an ordinary renewal emails a receipt with the card that paid and the Stripe receipt link', async () => {
+    seed({ billingStatus: 'active' })
+    const { register, intents } = stubStripe()
+    const piId = register(PM_PRIMARY, 'succeeded')
+    const pi = intents.get(piId) as unknown as { latest_charge: Record<string, unknown> }
+    pi.latest_charge = { ...pi.latest_charge, receipt_url: 'https://pay.stripe.com/receipts/r_1' }
+    const paid = { ...invoice({ status: 'paid', paymentIntentId: piId }), hosted_invoice_url: 'https://invoice.stripe.com/i/in_1' }
+
+    await handleInvoicePaid(paid, 'evt_paid_6')
+
+    expect(notifications.notifyAccessRestored).not.toHaveBeenCalled()
+    expect(notifications.notifyPaymentReceived).toHaveBeenCalledTimes(1)
+    expect(notifications.notifyPaymentReceived.mock.calls[0][0]).toMatchObject({
+      customer: { id: CUSTOMER },
+      invoice: { id: 'in_1' },
+      charged: { brand: 'visa', last4: '4242' },
+      receiptUrl: 'https://pay.stripe.com/receipts/r_1',
+    })
+  })
+
+  it('a payment that restores access sends the restored notice, not a receipt as well', async () => {
+    seed({ billingStatus: 'past_due', billingBlockedAt: new Date() })
+    const { register } = stubStripe()
+    await handleInvoicePaid(invoice({ status: 'paid', paymentIntentId: register(PM_PRIMARY, 'succeeded') }), 'evt_paid_7')
+    expect(notifications.notifyAccessRestored).toHaveBeenCalledTimes(1)
+    expect(notifications.notifyPaymentReceived).not.toHaveBeenCalled()
+  })
+
+  it('a redelivered invoice.paid asks for the receipt again and leaves de-duplication to the outbox', async () => {
+    seed({ billingStatus: 'active' })
+    const { register } = stubStripe()
+    const paid = invoice({ status: 'paid', paymentIntentId: register(PM_PRIMARY, 'succeeded') })
+    await handleInvoicePaid(paid, 'evt_paid_8')
+    await handleInvoicePaid(paid, 'evt_paid_8')
+    expect(ledger('invoice_paid')).toHaveLength(1)
+    expect(notifications.notifyPaymentReceived).toHaveBeenCalledTimes(2)
+    expect(notifications.notifyPaymentReceived.mock.calls.every((c) => c[0].invoice.id === 'in_1')).toBe(true)
   })
 })
 
