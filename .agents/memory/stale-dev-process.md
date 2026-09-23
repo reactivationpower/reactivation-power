@@ -1,0 +1,8 @@
+---
+name: Stale dev process after a failed workflow restart
+description: Why a preview can run old code while dist/ and the source are new, how to spot it in seconds, and what guards it now.
+---
+- **Rule:** when a workflow log shows `EADDRINUSE` / "address already in use", an *older* process is still serving on that port. Before debugging code or data, compare the listener's start time (`lsof -nP -iTCP:<port> -sTCP:LISTEN` then `ps -o lstart -p <pid>`) with the bundle's mtime (`ls -l --time-style=full-iso artifacts/api-server/dist/index.mjs`). If the process predates the bundle, the symptom is stale code, not a bug.
+  **Why:** after the two-practice demo split merged, the api-server restart failed to bind 8080 and the pre-split process kept answering, so the aesthetics choice on /demo "signed into" the chiro practice although code, seed and DB were all correct. Vite's HMR masked the same situation on the web port.
+  **How to apply:** both dev scripts now run `scripts/free-port.mjs` before listening (kills the stale listener, /proc based, no-op in production). If a symptom looks like "the code on disk clearly does X but the app does Y", check for a stale listener first — and remember the published deployment runs whatever was last published, so production shows the old behaviour until republished.
+- Isolated task environments boot fresh, so the stale process cannot be reproduced there; simulate it with a throwaway `node -e "require('http').createServer().listen(PORT)"` started as a *background* shell task (a foreground shell's children are reaped when the command ends) and then restart the workflow.

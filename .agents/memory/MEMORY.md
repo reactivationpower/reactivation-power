@@ -11,3 +11,4 @@
 - [Shared workspace libs](shared-libs.md) — lib/shared + lib/niche-catalog are the only copies; `tsc --build` libs before artifact typecheck (stale dist = phantom missing exports); no DOM types in libs.
 - [Scheduled jobs on autoscale](scheduled-jobs.md) — day slot claimed in cron_runs by both in-process ticker and external cron route; external trigger still needed for on-time runs; off in dev.
 - [Two sales-demo practices](demo-practices.md) — chiro + med spa families isolated by owner e-mail; niches by exact name; showcase ≤ batch per practice; how to verify a seed.
+- [Stale dev process after failed restart](stale-dev-process.md) — EADDRINUSE in a workflow log = old build still serving; check listener start time vs dist mtime before debugging code.
