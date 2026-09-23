@@ -28,13 +28,7 @@ import { cn } from '@/lib/utils'
 import { bulkAssignNiche, bulkDeleteContacts } from '@/app/actions/reactivation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { NicheSelect, nicheDisplayLabel } from '@/components/reactivation/niche-select'
 import { DeleteContactButton } from '@/components/reactivation/delete-contact-button'
 import { useRouter } from '@/hooks/use-router'
 type ContactWithMeta = any
@@ -272,22 +266,13 @@ export function ContactsTable({
             </button>
           )}
         </div>
-        <Select
+        <NicheSelect
           value={nicheFilter}
           onValueChange={(v) => v && setNicheFilter(v)}
           items={nicheFilterItems}
-        >
-          <SelectTrigger className="h-10 w-56" aria-label="Filter by niche">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {nicheFilterItems.map((item) => (
-              <SelectItem key={item.value} value={item.value}>
-                {item.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          className="min-h-10 w-56"
+          aria-label="Filter by niche"
+        />
         <p className="text-sm text-muted-foreground tabular-nums">
           {showingAll
             ? `${contacts.length} contact${contacts.length === 1 ? '' : 's'}`
@@ -355,25 +340,14 @@ export function ContactsTable({
             {selected.size} selected
           </span>
           <div className="flex items-center gap-2">
-            <Select
+            <NicheSelect
               value={bulkNiche}
               onValueChange={(v) => v && setBulkNiche(v)}
               items={bulkNicheItems}
-            >
-              <SelectTrigger
-                className="h-9 w-56 bg-card"
-                aria-label="Niche to assign"
-              >
-                <SelectValue placeholder="Assign niche…" />
-              </SelectTrigger>
-              <SelectContent>
-                {bulkNicheItems.map((item) => (
-                  <SelectItem key={item.value} value={item.value}>
-                    {item.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              className="min-h-9 w-56 bg-card"
+              aria-label="Niche to assign"
+              placeholder="Assign niche…"
+            />
             <Button
               size="sm"
               className="gap-1.5"
@@ -514,10 +488,12 @@ export function ContactsTable({
                             title="This niche isn't active on your account — contact the Reactivation Power team to turn it on."
                           >
                             <Lock className="size-3" />
-                            {c.niche.name} — not active
+                            {nicheDisplayLabel(c.niche.name)} — not active
                           </span>
                         ) : (
-                          <span className="text-foreground">{c.niche.name}</span>
+                          <span className="text-foreground">
+                            {nicheDisplayLabel(c.niche.name)}
+                          </span>
                         )
                       ) : (
                         <span className="text-muted-foreground">—</span>

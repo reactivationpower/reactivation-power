@@ -14,13 +14,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { PhoneInput } from '@/components/reactivation/phone-input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { NicheSelect } from '@/components/reactivation/niche-select'
 import { Textarea } from '@/components/ui/textarea'
 import type { Niche } from '@workspace/shared/types'
 import { useRouter } from '@/hooks/use-router'
@@ -91,22 +85,12 @@ export function AddContactDialog({ niches }: { niches: Niche[] }) {
             </div>
             <div className="flex flex-col gap-2">
               <Label>Niche (optional)</Label>
-              <Select
+              <NicheSelect
                 value={nicheId}
                 onValueChange={(v) => v && setNicheId(v)}
                 items={nicheItems}
-              >
-                <SelectTrigger aria-label="Niche">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {nicheItems.map((item) => (
-                    <SelectItem key={item.value} value={item.value}>
-                      {item.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                aria-label="Niche"
+              />
             </div>
             <div className="flex flex-col gap-2">
               <Label htmlFor="contact-complaint">

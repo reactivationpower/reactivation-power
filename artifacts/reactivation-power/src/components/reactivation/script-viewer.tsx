@@ -8,13 +8,7 @@ import {
   spokenProviderName,
   type ProviderSource,
 } from '@/lib/provider-name'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { NicheSelect } from '@/components/reactivation/niche-select'
 import { ScriptFlowPlayer } from '@/components/reactivation/script-flow-player'
 import { PracticeLogPreview } from '@/components/reactivation/practice-log-preview'
 import { CONCERN_OPTIONS } from '@workspace/niche-catalog'
@@ -89,22 +83,13 @@ export function ScriptViewer({
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <Select
+        <NicheSelect
           value={nicheId}
           onValueChange={handleNicheChange}
           items={niches.map((n) => ({ value: n.id, label: n.name }))}
-        >
-          <SelectTrigger className="w-80 max-w-full" aria-label="Select niche">
-            <SelectValue placeholder="Select niche" />
-          </SelectTrigger>
-          <SelectContent>
-            {niches.map((n) => (
-              <SelectItem key={n.id} value={n.id}>
-                {n.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          className="w-80"
+          aria-label="Select niche"
+        />
 
         <div
           className="flex items-center rounded-md border border-input"

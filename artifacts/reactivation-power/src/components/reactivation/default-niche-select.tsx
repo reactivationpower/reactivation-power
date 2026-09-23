@@ -3,13 +3,7 @@
 import { useState, useTransition } from 'react'
 import { Loader2, Target } from 'lucide-react'
 import { setDefaultNiche } from '@/app/actions/reactivation'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { NicheSelect } from '@/components/reactivation/niche-select'
 import type { Niche } from '@workspace/shared/types'
 import { useRouter } from '@/hooks/use-router'
 
@@ -53,21 +47,14 @@ export function DefaultNicheSelect({ niches, initialNicheId }: Props) {
         <span className="text-xs font-medium text-muted-foreground">
           Default niche
         </span>
-        <Select value={value} onValueChange={handleChange} items={items}>
-          <SelectTrigger
-            className="w-80 max-w-full border-0 bg-transparent px-2 shadow-none"
-            aria-label="Account default niche"
-          >
-            <SelectValue placeholder="No default niche" />
-          </SelectTrigger>
-          <SelectContent>
-            {items.map((item) => (
-              <SelectItem key={item.value} value={item.value}>
-                {item.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <NicheSelect
+          value={value}
+          onValueChange={handleChange}
+          items={items}
+          className="w-80 border-0 bg-transparent px-2 shadow-none"
+          aria-label="Account default niche"
+          placeholder="No default niche"
+        />
         {saving && (
           <Loader2 className="size-3.5 animate-spin text-muted-foreground" />
         )}

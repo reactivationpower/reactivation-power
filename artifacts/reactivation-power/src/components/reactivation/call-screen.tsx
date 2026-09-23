@@ -27,13 +27,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { NicheSelect } from '@/components/reactivation/niche-select'
 import { mergeScript, spokenComplaint } from '@workspace/shared/script-merge'
 import {
   providerTokens,
@@ -310,22 +304,13 @@ export function CallScreen({
         </div>
 
         <div className="flex max-w-full flex-wrap items-center gap-2">
-          <Select
+          <NicheSelect
             value={nicheId}
             onValueChange={handleNicheChange}
             items={niches.map((n) => ({ value: n.id, label: n.name }))}
-          >
-            <SelectTrigger className="w-80 max-w-full" aria-label="Select niche">
-              <SelectValue placeholder="Select niche" />
-            </SelectTrigger>
-            <SelectContent>
-              {niches.map((n) => (
-                <SelectItem key={n.id} value={n.id}>
-                  {n.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            className="w-80"
+            aria-label="Select niche"
+          />
           <div
             className="flex items-center rounded-md border border-input"
             role="group"

@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { NicheSelect } from '@/components/reactivation/niche-select'
 import { cn } from '@/lib/utils'
 import { useRouter } from '@/hooks/use-router'
 
@@ -126,16 +127,16 @@ export function CampaignForm({
       <section className="flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="campaign-niche">Service type</Label>
-          <Select value={values.nicheId || null} onValueChange={(v) => v && set('nicheId', v)} items={nicheItems}>
-            <SelectTrigger id="campaign-niche" aria-label="Service type" data-testid="select-niche" className="w-full sm:max-w-sm">
-              <SelectValue placeholder="Pick the service this ad was for" />
-            </SelectTrigger>
-            <SelectContent>
-              {nicheItems.map((item) => (
-                <SelectItem key={item.value} value={item.value}>{item.label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <NicheSelect
+            id="campaign-niche"
+            value={values.nicheId || null}
+            onValueChange={(v) => v && set('nicheId', v)}
+            items={nicheItems}
+            aria-label="Service type"
+            data-testid="select-niche"
+            className="w-full sm:max-w-sm"
+            placeholder="Pick the service this ad was for"
+          />
           <p className="text-xs text-muted-foreground">Decides which lead script the caller sees.</p>
           <FieldError message={errors.nicheId} />
           {niches.length === 0 ? (

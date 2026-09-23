@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { NicheSelect } from '@/components/reactivation/niche-select'
 import { Switch } from '@/components/ui/switch'
 import { PhoneInput } from '@/components/reactivation/phone-input'
 import { RichTextEditor } from '@/components/reactivation/rich-text-editor'
@@ -140,22 +141,12 @@ export function ContactEditor({
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="flex flex-col gap-2">
             <Label>Niche</Label>
-            <Select
+            <NicheSelect
               value={nicheId}
               onValueChange={(v) => v && setNicheId(v)}
               items={nicheItems}
-            >
-              <SelectTrigger aria-label="Niche" className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {nicheItems.map((item) => (
-                  <SelectItem key={item.value} value={item.value}>
-                    {item.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              aria-label="Niche"
+            />
           </div>
           <div className="flex flex-col gap-2">
             <Label>Pipeline Stage</Label>

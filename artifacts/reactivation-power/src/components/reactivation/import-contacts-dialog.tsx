@@ -29,6 +29,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import {
+  NicheSelect,
+  nicheDisplayLabel,
+} from '@/components/reactivation/niche-select'
 import { Textarea } from '@/components/ui/textarea'
 import {
   matchNicheByName,
@@ -509,7 +513,7 @@ export function ImportContactsDialog({
     {
       value: DEFAULT,
       label: defaultNicheName
-        ? `Account default (${defaultNicheName})`
+        ? `Account default (${nicheDisplayLabel(defaultNicheName)})`
         : 'Account default (none set)',
     },
     ...niches.map((n) => ({ value: n.id, label: n.name })),
@@ -654,7 +658,7 @@ export function ImportContactsDialog({
                           key={n.id}
                           className="rounded-full border border-border bg-background px-2 py-0.5 text-xs text-foreground"
                         >
-                          {n.name}
+                          {nicheDisplayLabel(n.name)}
                         </span>
                       ))}
                     </div>
@@ -709,28 +713,20 @@ export function ImportContactsDialog({
                   <Label htmlFor="file-niche" className="text-xs">
                     Niche for this file
                   </Label>
-                  <Select
+                  <NicheSelect
                     value={fileNiche}
                     onValueChange={(v) => {
                       if (v) setFileNiche(v)
                     }}
                     items={fileNicheItems}
-                  >
-                    <SelectTrigger id="file-niche" className="h-9" aria-label="Niche for this file">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {fileNicheItems.map((item) => (
-                        <SelectItem key={item.value} value={item.value}>
-                          {item.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    id="file-niche"
+                    className="min-h-9"
+                    aria-label="Niche for this file"
+                  />
                   <p className="text-xs leading-relaxed text-muted-foreground">
                     {fileNiche === AUTO
                       ? 'Each contact is tagged from their own Niche column when your file has one, then the service column, then your account default. Or pick a niche to tag every contact in this file with it.'
-                      : `Every contact in this file will be tagged ${nicheById.get(fileNiche)?.name ?? 'the selected niche'} and get that script when called — this overrides any Niche column on the file.`}
+                      : `Every contact in this file will be tagged ${nicheDisplayLabel(nicheById.get(fileNiche)?.name ?? 'the selected niche')} and get that script when called — this overrides any Niche column on the file.`}
                   </p>
                 </div>
                 <label className="flex items-center gap-2 text-sm text-foreground">
@@ -902,7 +898,9 @@ export function ImportContactsDialog({
                         {
                           '. Check the spelling against your niche list, or those contacts will fall back to your account default'
                         }
-                        {defaultNicheName ? ` (${defaultNicheName})` : ''}.
+                        {defaultNicheName
+                          ? ` (${nicheDisplayLabel(defaultNicheName)})`
+                          : ''}.
                       </p>
                     )}
                     {nichePreview.blank > 0 && (
@@ -910,7 +908,9 @@ export function ImportContactsDialog({
                         {nichePreview.blank} row
                         {nichePreview.blank === 1 ? ' has' : 's have'} no niche
                         listed and will use your account default
-                        {defaultNicheName ? ` (${defaultNicheName})` : ''}.
+                        {defaultNicheName
+                          ? ` (${nicheDisplayLabel(defaultNicheName)})`
+                          : ''}.
                       </p>
                     )}
                   </div>
@@ -921,7 +921,9 @@ export function ImportContactsDialog({
                     <p className="rounded-md bg-muted px-3 py-2 text-xs leading-relaxed text-muted-foreground">
                       No niche or service column selected — every imported
                       contact will use your account default niche
-                      {defaultNicheName ? ` (${defaultNicheName})` : ''}. Adding
+                      {defaultNicheName
+                        ? ` (${nicheDisplayLabel(defaultNicheName)})`
+                        : ''}. Adding
                       a Niche column to your export is the cleanest way to let
                       each contact get the right script. Or pick a niche for
                       this file above.
@@ -1013,28 +1015,16 @@ export function ImportContactsDialog({
                             : `${s.count} contact${s.count === 1 ? '' : 's'}`}
                         </p>
                       </div>
-                      <Select
+                      <NicheSelect
                         value={serviceMap[s.key] ?? DEFAULT}
                         onValueChange={(v) => {
                           if (!v) return
                           setServiceMap((prev) => ({ ...prev, [s.key]: v }))
                         }}
                         items={nicheItems}
-                      >
-                        <SelectTrigger
-                          className="h-9 w-56"
-                          aria-label={`Niche for ${s.label}`}
-                        >
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {nicheItems.map((item) => (
-                            <SelectItem key={item.value} value={item.value}>
-                              {item.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                        className="min-h-9 w-56"
+                        aria-label={`Niche for ${s.label}`}
+                      />
                     </li>
                     )
                   })}
