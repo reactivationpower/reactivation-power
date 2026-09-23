@@ -5,3 +5,4 @@ export * from "./agreements";
 export * from "./commissions";
 export * from "./cron-runs";
 export * from "./billing-notifications";
+export * from "./lead-followup";

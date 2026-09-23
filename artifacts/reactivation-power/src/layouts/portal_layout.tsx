@@ -1,10 +1,9 @@
 import type React from 'react'
 import { Suspense } from 'react'
 
-import { Link } from "wouter";
 import { LogOut } from 'lucide-react'
 import { logout } from '@/app/actions/auth'
-import { BillingNavLink, PortalNav, SettingsNavLink } from '@/components/portal/portal-nav'
+import { BillingNavLink, PortalHomeLink, PortalNav, SettingsNavLink } from '@/components/portal/portal-nav'
 import { PORTAL_WIDTH } from '@/lib/portal-layout'
 import { DemoBarServer } from '@/components/demo/demo-bar-server'
 import { ViewAsBanner } from '@/components/portal/view-as-banner'
@@ -21,7 +20,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
         <div
           className={`${PORTAL_WIDTH} flex h-16 items-center justify-between gap-4`}
         >
-          <Link href="/portal" className="flex min-w-0 items-center">
+          <PortalHomeLink>
             <img
               src="/images/logo.png"
               alt="Reactivation Power"
@@ -30,7 +29,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
               className="h-12 w-auto"
             />
             <span className="sr-only">Reactivation Power Portal</span>
-          </Link>
+          </PortalHomeLink>
           <PortalNav />
           <div className="flex items-center gap-2">
             <BillingNavLink />

@@ -17,6 +17,9 @@ import {
   type DemoPracticeKey,
 } from './config'
 import { DEMO_PRACTICE_COPY, type DemoPracticeCopy } from './practice-copy'
+import { DEMO_LEAD_CAMPAIGNS } from './lead-campaign'
+import { setLeadFollowUpAccess } from '@/lib/lead-followup/access'
+import * as leadStore from '@/lib/lead-followup/store'
 
 /**
  * Demo account seeder.
@@ -443,6 +446,9 @@ export async function wipeDemoPractice(practice: DemoPractice) {
     supabase.from('service_niche_mappings').delete().in('owner_id', ids),
   ])
   results.forEach((r, i) => must(r, `wipe ${tables[i]}`))
+  // Lead Follow-Up campaigns (leads cascade) live in the drizzle-managed
+  // tables; the product grant itself is kept, like course access.
+  await leadStore.wipeLeadFollowUpForOwners(ids, { keepProductAccess: true })
 }
 
 // ---------- ensure identities ----------
@@ -752,6 +758,8 @@ export async function seedDemoData(practice: DemoPractice): Promise<SeedSummary>
   await seedTraining(ownerId, callers)
 
   // ----- stamp the owner -----
+  await seedLeadFollowUp(practice, ownerId, niches)
+
   must(
     await supabase
       .from('participants')
@@ -776,6 +784,63 @@ export async function seedDemoData(practice: DemoPractice): Promise<SeedSummary>
     dueToday,
     reserve: 40,
   }
+}
+
+// ---------- Lead Follow-Up ----------
+
+/**
+ * Grant the product and build the practice's one demo campaign with a
+ * handful of leads aged relative to now. Practices without a campaign in
+ * DEMO_LEAD_CAMPAIGNS stay reactivation-only and never get the grant.
+ */
+async function seedLeadFollowUp(
+  practice: DemoPractice,
+  ownerId: string,
+  niches: Map<string, DemoNiche>,
+) {
+  const config = DEMO_LEAD_CAMPAIGNS[practice.key]
+  if (!config) {
+    await setLeadFollowUpAccess(ownerId, false)
+    return
+  }
+  const niche = niches.get(config.niche)
+  if (!niche) throw new Error(`demo ${practice.key}: lead campaign niche not enabled: ${config.niche}`)
+
+  await setLeadFollowUpAccess(ownerId, true)
+  const campaign = await leadStore.createCampaign(ownerId, ownerId, {
+    nicheId: niche.id,
+    name: config.name,
+    offerItems: config.offerItems,
+    regularPriceCents: config.regularPriceCents,
+    offerPriceCents: config.offerPriceCents,
+    priceLineStyle: config.priceLineStyle,
+    urgencyNote: config.urgencyNote,
+  })
+  const now = Date.now()
+  const result = await leadStore.importLeads({
+    campaign,
+    createdBy: ownerId,
+    source: 'webhook',
+    rows: config.leads.map(({ minutesAgo, status: _s, attemptedMinutesAgo: _a, ...lead }) => ({
+      ...lead,
+      submittedAt: new Date(now - minutesAgo * 60_000).toISOString(),
+    })),
+  })
+  if (result.imported !== config.leads.length) {
+    throw new Error(`demo ${practice.key}: expected ${config.leads.length} leads, inserted ${result.imported}`)
+  }
+  await Promise.all(
+    config.leads.map((lead, i) =>
+      lead.status && lead.status !== 'new'
+        ? leadStore.setLeadStatus(
+            ownerId,
+            result.insertedIds[i],
+            lead.status,
+            lead.attemptedMinutesAgo ? new Date(now - lead.attemptedMinutesAgo * 60_000) : null,
+          )
+        : Promise.resolve(),
+    ),
+  )
 }
 
 // ---------- training audit data ----------

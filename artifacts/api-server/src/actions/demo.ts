@@ -5,6 +5,8 @@ import { revalidatePath } from 'next/cache'
 import { getAdminClient } from '@/lib/supabase/admin'
 import { setSessionCookie, getClientIp } from '@/lib/auth/session'
 import { getCurrentParticipant } from '@/lib/data/participants'
+import { landingPathFor } from '@workspace/shared/lead-followup'
+import { hasLeadFollowUp } from '@/lib/lead-followup/access'
 import {
   demoPracticeOfParticipant,
   ensureDemoSeeded,
@@ -49,7 +51,8 @@ export async function enterDemo(formData: FormData) {
     console.error(`[demo] enter ${practice.key}: sign-in failed:`, err)
     return { error: DB_UNAVAILABLE }
   }
-  redirect('/portal')
+  // The chiro demo also carries Lead Follow-Up, so it opens on the two-door chooser.
+  redirect(landingPathFor({ reactivation: true, leadFollowUp: await hasLeadFollowUp(ownerId) }))
 }
 
 async function startSessionAs(participantId: string) {

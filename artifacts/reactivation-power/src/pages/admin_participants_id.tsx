@@ -16,6 +16,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { CourseAccessToggle } from '@/components/admin/course-access-toggle'
+import { ProductAccessToggle } from '@/components/admin/product-access-toggle'
 import { NicheAccessToggle } from '@/components/admin/niche-access-toggle'
 import { AddStaffForm } from '@/components/admin/add-staff-form'
 import { ParticipantActiveToggle } from '@/components/admin/participant-active-toggle'
@@ -56,7 +57,7 @@ export default function ParticipantDetailPage() {
     participant, ownerId, isOwner, staff, aliases, sessions, courses,
     accessIds, accessibleCourses, courseTrees, events, progress, niches,
     nicheAccessSet, nichesBySector, progressByVideo, accessSet, videoTitle,
-    parent, reactivationStats,
+    parent, reactivationStats, leadFollowUp,
   } = data
 
   return (
@@ -115,6 +116,41 @@ export default function ParticipantDetailPage() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
+        {/* Products */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Products</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-3">
+            <div className="flex items-center justify-between gap-4 rounded-md border border-border px-4 py-3">
+              <div className="min-w-0">
+                <p className="text-sm font-medium">Reactivation</p>
+                <p className="text-xs text-muted-foreground">Included with every account.</p>
+              </div>
+              <Badge>On</Badge>
+            </div>
+            <div className="flex items-center justify-between gap-4 rounded-md border border-border px-4 py-3">
+              <div className="min-w-0">
+                <p className="text-sm font-medium">Lead Follow-Up</p>
+                <p className="text-xs text-muted-foreground">
+                  Campaigns and ad-lead calling. Staff inherit the owner&rsquo;s access.
+                </p>
+              </div>
+              {isOwner ? (
+                <ProductAccessToggle
+                  participantId={participant.id}
+                  product="lead_followup"
+                  initialGranted={Boolean(leadFollowUp)}
+                />
+              ) : (
+                <Badge variant={leadFollowUp ? 'default' : 'outline'}>
+                  {leadFollowUp ? 'Inherited' : 'No access'}
+                </Badge>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Course access */}
         <Card>
           <CardHeader>

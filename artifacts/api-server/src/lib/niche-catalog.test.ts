@@ -36,6 +36,7 @@ const SHARED_MODULES = [
   'email-templates',
   'format',
   'lazy-time',
+  'lead-followup',
   'lead-validation',
   'notes-text',
   'opportunity',

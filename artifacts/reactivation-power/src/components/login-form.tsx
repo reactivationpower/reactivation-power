@@ -14,7 +14,7 @@ export function LoginForm({ next, email }: { next?: string; email?: string }) {
 
   return (
     <form action={formAction} className="flex flex-col gap-5">
-      <input type="hidden" name="next" value={next ?? '/portal'} />
+      <input type="hidden" name="next" value={next ?? ''} />
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-col gap-2">
           <Label htmlFor="firstName">First name</Label>

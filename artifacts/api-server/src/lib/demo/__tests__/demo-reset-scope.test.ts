@@ -52,6 +52,14 @@ const supabase = {
 }
 
 vi.mock('@/lib/supabase/admin', () => ({ getAdminClient: () => supabase }))
+// Lead Follow-Up rows live in drizzle-managed tables; record the wipe's scope
+// the same way instead of opening a Postgres pool.
+vi.mock('@/lib/lead-followup/store', () => ({
+  wipeLeadFollowUpForOwners: async (ids: string[]) => {
+    deletes.push({ table: 'lead_campaigns', column: 'owner_id', ids })
+  },
+}))
+vi.mock('@/lib/lead-followup/access', () => ({ setLeadFollowUpAccess: async () => {} }))
 
 const { wipeDemoPractice } = await import('../seed')
 const { CHIRO_DEMO, AESTHETICS_DEMO, demoEmail } = await import('../config')
@@ -75,7 +83,7 @@ describe('wipeDemoPractice', () => {
   it('resetting the chiro demo deletes only the chiro family\u2019s rows', async () => {
     await wipeDemoPractice(CHIRO_DEMO)
     expect(deletes.map((d) => d.table).sort()).toEqual(
-      ['activity_events', 'contacts', 'service_niche_mappings', 'sessions', 'video_progress'],
+      ['activity_events', 'contacts', 'lead_campaigns', 'service_niche_mappings', 'sessions', 'video_progress'],
     )
     for (const d of deletes) {
       expect([...d.ids].sort()).toEqual(['chiro-owner', 'chiro-sarah', 'chiro-tyler'])

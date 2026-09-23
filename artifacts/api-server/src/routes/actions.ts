@@ -12,6 +12,7 @@ import * as billing from "../actions/billing";
 import * as booking from "../actions/booking";
 import * as demo from "../actions/demo";
 import * as leads from "../actions/leads";
+import * as leadFollowUp from "../actions/lead-followup";
 import * as mail from "../actions/mail";
 import * as payments from "../actions/payments";
 import * as reactivation from "../actions/reactivation";
@@ -59,6 +60,7 @@ const MODULES: Record<string, ActionModule> = {
   "customer-billing": customerBilling,
   demo,
   leads,
+  "lead-followup": leadFollowUp,
   mail,
   payments,
   reactivation,
@@ -104,6 +106,10 @@ const ACTIONS: Record<string, Record<string, Auth>> = {
     overrideCommission: "super_admin", setCommissionsPaid: "super_admin", generateMissingCommissions: "super_admin",
   },
   leads: { lookupZip: "public", submitHealthcareLead: "public" },
+  "lead-followup": {
+    // Each action also checks the account holds the Lead Follow-Up product.
+    createCampaign: "portal", updateCampaign: "portal", setCampaignStatus: "portal", importLeads: "portal",
+  },
   demo: {
     enterDemo: "public",
     resetDemo: "portal",
@@ -154,7 +160,7 @@ const ACTIONS: Record<string, Record<string, Auth>> = {
     createVideo: "super_admin", updateVideo: "super_admin", deleteVideo: "super_admin", moveVideo: "super_admin",
     addAttachment: "super_admin", deleteAttachment: "super_admin",
     createParticipant: "super_admin", updateParticipant: "super_admin", deleteParticipant: "super_admin",
-    setCourseAccess: "super_admin", setNicheAccess: "super_admin",
+    setCourseAccess: "super_admin", setNicheAccess: "super_admin", setProductAccess: "super_admin",
   },
   reactivation: {
     // Global niche / script management (admin area).

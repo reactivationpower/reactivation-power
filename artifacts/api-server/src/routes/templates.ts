@@ -116,4 +116,44 @@ router.get("/templates/contacts", async (req: Request, res: Response) => {
   });
 });
 
+/**
+ * Sample lead list for the campaign Leads tab. Leads are people who
+ * answered an ad, so the columns are what an ad form collects: name, phone,
+ * e-mail, an optional requested day/time and whatever they wrote.
+ */
+const LEAD_SAMPLES: ReadonlyArray<readonly [string, string]> = [
+  ["Tuesday after 3pm", "Lower back has been bad for two weeks, saw your $49 exam ad"],
+  ["", "Is this good for sciatica?"],
+  ["Any morning this week", ""],
+  ["Saturday", "Do you take Aetna?"],
+  ["", ""],
+  ["Thursday 10am", "Neck pain from desk work"],
+];
+
+router.get("/templates/leads", async (req: Request, res: Response) => {
+  await runWithRequestContext(req, res, async () => {
+    const participant = await getCurrentParticipant().catch((err) => {
+      if (isRedirectSignal(err)) return null;
+      throw err;
+    });
+    if (!participant) {
+      res.status(401).send("Not signed in");
+      return;
+    }
+    const headers = ["First Name", "Last Name", "Phone", "Email", "Requested Time", "Message"];
+    const lines = [csvRow(headers)];
+    LEAD_SAMPLES.forEach(([requested, message], i) => {
+      const person = PEOPLE[(i + 3) % PEOPLE.length];
+      lines.push(csvRow([
+        person[0], person[1], samplePhone(i + 20), sampleEmail(person[0], person[1]), requested, message,
+      ]));
+    });
+    res.set({
+      "Content-Type": "text/csv; charset=utf-8",
+      "Content-Disposition": 'attachment; filename="lead-follow-up-sample-leads.csv"',
+      "Cache-Control": "no-store",
+    }).send(`${lines.join("\r\n")}\r\n`);
+  });
+});
+
 export default router;

@@ -3,6 +3,8 @@ import { revalidatePath } from 'next/cache'
 import { getAdminClient } from '@/lib/supabase/admin'
 import { MAX_STAFF } from '@workspace/shared/types'
 import { sendPortalWelcomeEmail } from '@/lib/mail'
+import { accessOwnerId, getParticipantById } from '@/lib/data/participants'
+import { LEAD_FOLLOWUP_PRODUCT, setLeadFollowUpAccess } from '@/lib/lead-followup/access'
 
 function slugify(title: string): string {
   return title
@@ -406,6 +408,28 @@ export async function setCourseAccess(
   }
   revalidatePath(`/admin/participants/${participantId}`)
   revalidatePath('/admin/participants')
+}
+
+// ---------- Product access ----------
+
+/**
+ * Turn Lead Follow-Up on or off for an OWNER account. Staff inherit through
+ * their access owner, so a grant on a staff id would never be read; the
+ * action resolves whichever id it is given to the owner.
+ */
+export async function setProductAccess(
+  participantId: string,
+  product: string,
+  granted: boolean,
+) {
+  if (product !== LEAD_FOLLOWUP_PRODUCT) return { error: 'Unknown product' }
+  const target = await getParticipantById(participantId)
+  if (!target) return { error: 'Participant not found' }
+  const ownerId = accessOwnerId(target)
+  await setLeadFollowUpAccess(ownerId, Boolean(granted))
+  revalidatePath(`/admin/participants/${participantId}`)
+  revalidatePath('/admin/participants')
+  return { ok: true }
 }
 
 // ---------- Niche access ----------

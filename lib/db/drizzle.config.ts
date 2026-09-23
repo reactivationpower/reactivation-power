@@ -47,5 +47,8 @@ export default defineConfig({
     "commission_entries",
     "cron_runs",
     "billing_notifications",
+    "product_access",
+    "lead_campaigns",
+    "campaign_leads",
   ],
 });

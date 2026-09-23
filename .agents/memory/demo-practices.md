@@ -9,3 +9,5 @@ description: How the chiro and aesthetics demo accounts are isolated, seeded and
 - Verifying a seed: bundle a throwaway script with esbuild (see api-server-scripts.md), call `ensureDemoSeeded(key, { force: true })`, then `getCallQueueState(ownerId, batchSize)` and check every showcase niche appears in `followUps + newCalls`. Contacts use `name` (single column) and `original_complaint`, not first/last/chief_complaint.
 - Sample CSV per practice deliberately includes two rows whose niche the account lacks (entitlement warning the user wants) and two rows whose phone matches a seeded patient (dedupe demo); the seeded phones are deterministic per rngSeed, so changing a seed or the RNG call order requires re-picking those two phones.
 - Aesthetic complaints are the concern-option chip labels for that niche (except Cellulite Reduction and Red Light / Body Contouring which name the service); a unit test enforces it along with the banned-phrase lint on practice-copy.ts.
+
+**Shell check:** the RPC accepts FormData as `{"__formData":[[k,v],...]}`, so `demo/enterDemo` + `demo/resetDemo` with a cookie jar reseeds without a browser.

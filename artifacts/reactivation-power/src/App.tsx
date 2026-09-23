@@ -38,6 +38,12 @@ import Page_pay_token from '@/pages/pay_token';
 import Page_pay_token_thank_you from '@/pages/pay_token_thank-you';
 import Page_portal from '@/pages/portal';
 import Page_portal_analytics from '@/pages/portal_analytics';
+import Page_portal_start from '@/pages/portal_start';
+import Page_portal_campaigns from '@/pages/portal_campaigns';
+import Page_portal_campaigns_new from '@/pages/portal_campaigns_new';
+import Page_portal_campaigns_id from '@/pages/portal_campaigns_id';
+import Page_portal_campaigns_id_edit from '@/pages/portal_campaigns_id_edit';
+import Page_portal_campaigns_id_leads_leadId from '@/pages/portal_campaigns_id_leads_leadId';
 import Page_portal_analytics_callerId from '@/pages/portal_analytics_callerId';
 import Page_portal_contacts from '@/pages/portal_contacts';
 import Page_portal_contacts_id from '@/pages/portal_contacts_id';
@@ -283,6 +289,48 @@ function Router() {
         <RoutedErrorBoundary>
           <PortalLayout>
             <Page_portal />
+          </PortalLayout>
+        </RoutedErrorBoundary>
+      </Route>
+      <Route path="/portal/start">
+        <RoutedErrorBoundary>
+          <PortalLayout>
+            <Page_portal_start />
+          </PortalLayout>
+        </RoutedErrorBoundary>
+      </Route>
+      <Route path="/portal/campaigns">
+        <RoutedErrorBoundary>
+          <PortalLayout>
+            <Page_portal_campaigns />
+          </PortalLayout>
+        </RoutedErrorBoundary>
+      </Route>
+      <Route path="/portal/campaigns/new">
+        <RoutedErrorBoundary>
+          <PortalLayout>
+            <Page_portal_campaigns_new />
+          </PortalLayout>
+        </RoutedErrorBoundary>
+      </Route>
+      <Route path="/portal/campaigns/:id">
+        <RoutedErrorBoundary>
+          <PortalLayout>
+            <Page_portal_campaigns_id />
+          </PortalLayout>
+        </RoutedErrorBoundary>
+      </Route>
+      <Route path="/portal/campaigns/:id/edit">
+        <RoutedErrorBoundary>
+          <PortalLayout>
+            <Page_portal_campaigns_id_edit />
+          </PortalLayout>
+        </RoutedErrorBoundary>
+      </Route>
+      <Route path="/portal/campaigns/:id/leads/:leadId">
+        <RoutedErrorBoundary>
+          <PortalLayout>
+            <Page_portal_campaigns_id_leads_leadId />
           </PortalLayout>
         </RoutedErrorBoundary>
       </Route>

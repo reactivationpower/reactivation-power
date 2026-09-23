@@ -37,6 +37,8 @@ import { getCronJobStatuses } from "../lib/cron/jobs";
 import { DEFAULT_CALL_BATCH_SIZE } from '@workspace/shared/types';
 import { demoIsStale } from "../lib/demo/seed";
 import { demoPracticeByOwnerEmail } from "../lib/demo/config";
+import { hasLeadFollowUp, productAccessFor, requireLeadFollowUp } from "../lib/lead-followup/access";
+import * as leadStore from "../lib/lead-followup/store";
 import { parseInactiveCount, parsePatientValue } from '@workspace/shared/opportunity';
 import { publicServiceName } from "@workspace/niche-catalog";
 import { DEFAULT_TIMEZONE, isUsTimezone, timezoneLabel } from '@workspace/shared/us-timezones';
@@ -108,7 +110,8 @@ add("/portal/_layout", "portal", async () => {
   const participant = await getCurrentParticipant();
   if (!participant) redirect("/login");
   const viewingAs = (await getSession())?.impersonatedBy ?? null;
-  if (!participant.is_demo) return { participant, demo: null, viewingAs };
+  const products = await productAccessFor(participant);
+  if (!participant.is_demo) return { participant, products, demo: null, viewingAs };
   const ownerId = accessOwnerId(participant);
   const supabase = getAdminClient();
   const [ownerRes, peopleRes] = await Promise.all([
@@ -127,7 +130,7 @@ add("/portal/_layout", "portal", async () => {
       timeZone: "America/New_York", month: "short", day: "numeric", hour: "numeric", minute: "2-digit",
     })} ET`
     : "";
-  return { participant, viewingAs, demo: {
+  return { participant, products, viewingAs, demo: {
     currentId: participant.id, identities, seededLabel, stale: !ownerRes.error && demoIsStale(seededAt),
     practiceName: ownerRes.data?.practice_name ?? null,
   } };
@@ -186,6 +189,71 @@ add("/portal", "portal", async () => {
     return { course, completed: state.completedVideos, total: state.totalVideos, percent: state.percentComplete };
   }));
   return { participant, ownerId, isOwner, courses, staff, sectors, entityLabel, activeStaff, withProgress };
+});
+
+// ---------- Lead Follow-Up ----------
+
+/** Two-door chooser. Only meaningful when the account holds both products. */
+add("/portal/start", "portal", async () => {
+  const participant = await getCurrentParticipant();
+  if (!participant) redirect("/login");
+  const products = await productAccessFor(participant);
+  if (!products.leadFollowUp) redirect("/portal");
+  const ownerId = accessOwnerId(participant);
+  const owner = participant.role === "owner" ? participant : await getParticipantById(ownerId);
+  const campaigns = await leadStore.listCampaigns(ownerId);
+  const activeCampaigns = campaigns.filter((c) => c.status === "active").length;
+  const newLeads = campaigns.reduce((n, c) => n + c.newLeadCount, 0);
+  return { participant, products, practiceName: owner?.practice_name ?? null, activeCampaigns, newLeads };
+});
+
+/** Niche options for a campaign form: the owner's enabled HEALTHCARE niches. */
+async function campaignNicheOptions(ownerId: string) {
+  const niches = await getOwnerNiches(ownerId, ["healthcare"]);
+  return niches.map((n) => ({ id: n.id, name: n.name }));
+}
+
+add("/portal/campaigns", "portal", async () => {
+  const { participant, ownerId, isOwner } = await requireLeadFollowUp("/portal/campaigns");
+  const [campaigns, niches] = await Promise.all([leadStore.listCampaigns(ownerId), campaignNicheOptions(ownerId)]);
+  const nicheName = Object.fromEntries(niches.map((n) => [n.id, n.name]));
+  return { participant, ownerId, isOwner, campaigns, niches, nicheName };
+});
+
+add("/portal/campaigns/new", "portal", async () => {
+  const { participant, ownerId, isOwner } = await requireLeadFollowUp("/portal/campaigns/new");
+  const niches = await campaignNicheOptions(ownerId);
+  return { participant, ownerId, isOwner, niches };
+});
+
+add("/portal/campaigns/:id", "portal", async (req) => {
+  const id = String(req.params.id);
+  const { participant, ownerId, isOwner } = await requireLeadFollowUp(`/portal/campaigns/${id}`);
+  const campaign = await leadStore.getCampaign(ownerId, id);
+  if (!campaign) notFound();
+  const [leads, niches] = await Promise.all([leadStore.listLeads(campaign.id), campaignNicheOptions(ownerId)]);
+  const niche = niches.find((n) => n.id === campaign.nicheId) ?? null;
+  return { id, participant, ownerId, isOwner, campaign, leads, niche, now: new Date().toISOString() };
+});
+
+add("/portal/campaigns/:id/edit", "portal", async (req) => {
+  const id = String(req.params.id);
+  const { participant, ownerId, isOwner } = await requireLeadFollowUp(`/portal/campaigns/${id}/edit`);
+  const campaign = await leadStore.getCampaign(ownerId, id);
+  if (!campaign) notFound();
+  const niches = await campaignNicheOptions(ownerId);
+  return { id, participant, ownerId, isOwner, campaign, niches };
+});
+
+add("/portal/campaigns/:id/leads/:leadId", "portal", async (req) => {
+  const id = String(req.params.id);
+  const leadId = String(req.params.leadId);
+  const { participant, ownerId, isOwner } = await requireLeadFollowUp(`/portal/campaigns/${id}/leads/${leadId}`);
+  const [campaign, lead] = await Promise.all([leadStore.getCampaign(ownerId, id), leadStore.getLead(ownerId, leadId)]);
+  if (!campaign || !lead || lead.campaignId !== campaign.id) notFound();
+  const niches = await campaignNicheOptions(ownerId);
+  const niche = niches.find((n) => n.id === campaign.nicheId) ?? null;
+  return { id, leadId, participant, ownerId, isOwner, campaign, lead, niche, now: new Date().toISOString() };
 });
 
 add("/portal/course/:slug", "portal", async (req) => {
@@ -453,6 +521,7 @@ add("/admin/participants/:id", "super_admin", async (req) => {
     supabase.from("video_progress").select("*").eq("participant_id", id),
     getNiches(true), getAccessibleNicheIds(ownerId),
   ]);
+  const leadFollowUp = await hasLeadFollowUp(ownerId);
   const nichesBySector: Record<string, typeof niches> = {};
   for (const niche of niches) (nichesBySector[niche.sector] ??= []).push(niche);
   const progress = progressRes.data ?? [];
@@ -472,7 +541,7 @@ add("/admin/participants/:id", "super_admin", async (req) => {
   return { id, participant, ownerId, isOwner, staff, aliases, sessions, courses, accessIds, events,
     progress, niches, nicheAccessIds, nicheAccessSet, nichesBySector, progressByVideo,
     accessSet: accessSetObject, accessibleCourses, courseTrees,
-    videoIds, eventVideos: eventVideos ?? [], videoTitle, parent, reactivationStats };
+    videoIds, eventVideos: eventVideos ?? [], videoTitle, parent, reactivationStats, leadFollowUp };
 });
 
 add("/admin/reactivation", "super_admin", async () => {
