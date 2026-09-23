@@ -2,6 +2,7 @@ import app from "./app";
 import { logger } from "./lib/logger";
 import { seedSuperAdmin } from "./lib/data/admin-users";
 import { initStripe } from "./lib/stripe";
+import { startCronScheduler } from "./lib/cron/scheduler";
 
 const rawPort = process.env["PORT"];
 
@@ -28,6 +29,7 @@ initStripe()
 
       logger.info({ port }, "Server listening");
       seedSuperAdmin(logger).catch((err) => logger.error({ err }, "super admin seed failed"));
+      startCronScheduler();
     });
   })
   .catch((err) => {

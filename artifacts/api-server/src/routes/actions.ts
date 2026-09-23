@@ -21,6 +21,7 @@ import { SESSION_COOKIE_NAME, decodeSession } from "../lib/auth/token";
 import * as agreements from "../actions/agreements";
 import * as commissions from "../actions/commissions";
 import * as customerBilling from "../actions/customer-billing";
+import * as cron from "../actions/cron";
 
 /**
  * RPC bridge for the former Next.js server actions.
@@ -54,6 +55,7 @@ const MODULES: Record<string, ActionModule> = {
   billing,
   booking,
   commissions,
+  cron,
   "customer-billing": customerBilling,
   demo,
   leads,
@@ -78,6 +80,7 @@ const ACTIONS: Record<string, Record<string, Auth>> = {
   },
   mail: { listTransactionalTemplates: "super_admin", sendTestEmail: "super_admin", listEmailLog: "super_admin" },
   "admin-view-as": { viewAsParticipant: "super_admin" },
+  cron: { listCronJobs: "super_admin", runCronJobNow: "super_admin" },
   auth: { login: "public", logout: "public" },
   billing: {
     // Admin billing actions on a customer record (each stamps the acting admin).

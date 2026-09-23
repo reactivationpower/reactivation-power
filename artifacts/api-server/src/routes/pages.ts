@@ -33,6 +33,7 @@ import {
 } from "../lib/data/reactivation";
 import { getAdminClient } from "../lib/supabase/admin";
 import { getStripeMode } from "../lib/stripe";
+import { getCronJobStatuses } from "../lib/cron/jobs";
 import { DEFAULT_CALL_BATCH_SIZE } from '@workspace/shared/types';
 import { demoIsStale } from "../lib/demo/seed";
 import { parseInactiveCount, parsePatientValue } from '@workspace/shared/opportunity';
@@ -474,7 +475,13 @@ add("/admin/reactivation", "super_admin", async () => {
   return { niches, script, sections, slots };
 });
 
-add("/admin/payments", "admin", async () => ({ links: await listPaymentLinks(), stripeMode: getStripeMode() }));
+add("/admin/payments", "admin", async (req) => {
+  // The Scheduled jobs card (global card-charging controls) is super-admin only.
+  const session = await getAdminSessionFromRequest(req);
+  const superAdmin = session?.role === "super_admin";
+  const [links, cronJobs] = await Promise.all([listPaymentLinks(), superAdmin ? getCronJobStatuses(5) : Promise.resolve(null)]);
+  return { links, stripeMode: getStripeMode(), cronJobs };
+});
 add("/admin/payments/:id", "admin", async (req) => {
   const id = String(req.params.id);
   const detail = await getPaymentDetail(id);

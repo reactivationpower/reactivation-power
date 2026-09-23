@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { PaymentsManager } from '@/components/admin/payments-manager'
+import { CronJobsCard } from '@/components/admin/cron-jobs-card'
 import { usePageData } from '@/hooks/use-page-data'
 import { PageError, PageLoading } from '@/components/page-status'
 
@@ -8,7 +9,7 @@ export default function AdminPaymentsPage() {
   const { data, loading, error } = usePageData<any>('/admin/payments')
   if (loading) return <PageLoading />
   if (error) return <PageError error={error} />
-  const { links, stripeMode } = data
+  const { links, stripeMode, cronJobs } = data
 
   return (
     <div className="flex h-full flex-col gap-6">
@@ -30,6 +31,7 @@ export default function AdminPaymentsPage() {
           for quick actions.
         </p>
       </header>
+      {cronJobs ? <CronJobsCard initialJobs={cronJobs} /> : null}
       <div className="min-h-0 flex-1">
         <PaymentsManager initialLinks={links} />
       </div>

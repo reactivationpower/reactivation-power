@@ -305,6 +305,8 @@ Query: none. Auth: admin.
 
 Data:
 - `links` — up to 200 payment-link records, newest first.
+- `stripeMode` — `live` | `test`.
+- `cronJobs` — scheduled-job statuses (`name`, `label`, `hourEt`, `lastRun`, `lastSuccess`, `recent[]` from `cron_runs`) for the Scheduled jobs card; `null` for sales reps (super admins only).
 
 ### `GET /api/pages/admin/payments/:id`
 

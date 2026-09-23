@@ -112,8 +112,20 @@ export interface AgreementSignedData {
   adminCopy: boolean
 }
 
+export interface CronFailedData {
+  /** Human label of the job, e.g. "Daily billing retry". */
+  jobLabel: string
+  /** Job id as stored in cron_runs, e.g. "billing-retry". */
+  job: string
+  trigger: 'scheduler' | 'http' | 'admin'
+  startedAt: string
+  error: string
+  /** Admin page where the run log and "Run now" button live. */
+  dashboardUrl: string
+}
 export interface TemplateDataMap {
   portal_welcome: PortalWelcomeData
+  cron_failed: CronFailedData
   admin_invite: AdminInviteData
   payment_received: PaymentReceivedData
   payment_failed: PaymentFailedData
@@ -521,6 +533,55 @@ const agreementSigned: TemplateDefinition<'agreement_signed'> = {
   },
 }
 
+const cronFailed: TemplateDefinition<'cron_failed'> = {
+  id: 'cron_failed',
+  name: 'Scheduled job failed (admin alert)',
+  description:
+    'Sent to the super admin when a scheduled job (daily billing retry, nightly demo reset) throws. Card declines are not failures — only the job itself breaking triggers this.',
+  sample: {
+    jobLabel: 'Daily billing retry',
+    job: 'billing-retry',
+    trigger: 'scheduler',
+    startedAt: new Date().toISOString(),
+    error: 'StripeConnectionError: An error occurred with our connection to Stripe.',
+    dashboardUrl: `${BRAND.siteUrl}/admin/payments`,
+  },
+  render: (d) => {
+    const when = new Date(d.startedAt).toLocaleString('en-US', {
+      timeZone: 'America/New_York',
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      timeZoneName: 'short',
+    })
+    const preview = `${d.jobLabel} did not finish: ${d.error}`
+    return {
+      subject: `[Action needed] ${d.jobLabel} failed`,
+      previewText: preview,
+      html: layout(
+        [
+          h1(`${esc(d.jobLabel)} failed`),
+          p(
+            `The <strong>${esc(d.jobLabel)}</strong> job (<code>${esc(d.job)}</code>) started at ${esc(when)} and stopped with an error. Nothing was retried past the point of failure; the next scheduled run will try again.`,
+          ),
+          panel([`<strong>Error:</strong> ${esc(d.error)}`], '#ef4444'),
+          details([
+            ['Job', d.job],
+            ['Triggered by', d.trigger],
+            ['Started', when],
+          ]),
+          button('Open the run log', d.dashboardUrl),
+          fallbackLink(d.dashboardUrl),
+          small('You can run the job again right away from the Scheduled jobs card on that page.'),
+          signoff(),
+        ],
+        { previewText: preview },
+      ),
+    }
+  },
+}
+
 
 export interface CancellationScheduledData {
   name: string
@@ -638,6 +699,7 @@ export const TEMPLATES: { [K in TemplateId]: TemplateDefinition<K> } = {
   billing_link: billingLink,
   cancellation_requested: cancellationRequested,
   cancellation_scheduled: cancellationScheduled,
+  cron_failed: cronFailed,
 }
 
 export const TEMPLATE_IDS = Object.keys(TEMPLATES) as TemplateId[]
