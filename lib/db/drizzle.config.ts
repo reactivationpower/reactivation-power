@@ -50,5 +50,6 @@ export default defineConfig({
     "product_access",
     "lead_campaigns",
     "campaign_leads",
+    "campaign_webhook_events",
   ],
 });

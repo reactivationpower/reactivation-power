@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import { index, integer, jsonb, pgTable, primaryKey, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
 
 /**
@@ -43,10 +44,28 @@ export const leadCampaignsTable = pgTable(
     /** "Offer ends Friday" / "only 10 spots" — read aloud when set. */
     urgencyNote: text("urgency_note"),
     status: text("status").notNull().default("active"), // active | paused | archived
+    /**
+     * Secret path segment of this campaign's intake URL. Regenerating it is
+     * the only way to revoke a URL that leaked. The SQL default only
+     * back-fills rows that existed before the column; the app generates
+     * tokens itself with node's CSPRNG.
+     */
+    webhookToken: text("webhook_token")
+      .notNull()
+      .default(sql`replace(gen_random_uuid()::text, '-', '')`),
+    /**
+     * Owner overrides for the webhook field mapping: target field -> incoming
+     * key (dotted path allowed). Anything not listed falls back to the
+     * automatic mapping.
+     */
+    fieldMapping: jsonb("field_mapping").$type<Record<string, string>>().notNull().default({}),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [index("lead_campaigns_owner_idx").on(t.ownerId, t.status)],
+  (t) => [
+    index("lead_campaigns_owner_idx").on(t.ownerId, t.status),
+    uniqueIndex("lead_campaigns_webhook_token_idx").on(t.webhookToken),
+  ],
 ).enableRLS();
 
 export type LeadCampaignRow = typeof leadCampaignsTable.$inferSelect;
@@ -72,7 +91,7 @@ export const campaignLeadsTable = pgTable(
     /** Digits-only phone used for dedupe within a campaign. */
     phoneKey: text("phone_key").notNull(),
     email: text("email"),
-    source: text("source").notNull(), // upload | webhook | manual
+    source: text("source").notNull(), // upload | webhook | gohighlevel | manual
     /** When the lead responded to the ad (list uploads default to the upload time). */
     submittedAt: timestamp("submitted_at", { withTimezone: true }).notNull().defaultNow(),
     /** Free text the lead gave for when they'd like to come in; acted on by a later task. */
@@ -94,3 +113,34 @@ export const campaignLeadsTable = pgTable(
 
 export type CampaignLeadRow = typeof campaignLeadsTable.$inferSelect;
 export type NewCampaignLeadRow = typeof campaignLeadsTable.$inferInsert;
+
+/**
+ * Every POST a campaign's intake URL received, raw, whether or not it became
+ * a lead. The Lead sources tab shows the latest 20 so the owner can see what
+ * their form tool actually sends and why a payload was rejected.
+ */
+export const campaignWebhookEventsTable = pgTable(
+  "campaign_webhook_events",
+  {
+    id: text("id").primaryKey(),
+    campaignId: text("campaign_id")
+      .notNull()
+      .references(() => leadCampaignsTable.id, { onDelete: "cascade" }),
+    ownerId: text("owner_id").notNull(),
+    receivedAt: timestamp("received_at", { withTimezone: true }).notNull().defaultNow(),
+    /** webhook | gohighlevel | test */
+    source: text("source").notNull(),
+    contentType: text("content_type"),
+    /** The body exactly as parsed (JSON object or form fields). */
+    payload: jsonb("payload").$type<Record<string, unknown>>().notNull(),
+    /** created | updated | rejected */
+    outcome: text("outcome").notNull(),
+    /** Why a payload was rejected, in the owner's words. */
+    error: text("error"),
+    leadId: text("lead_id"),
+  },
+  (t) => [index("campaign_webhook_events_campaign_idx").on(t.campaignId, t.receivedAt)],
+).enableRLS();
+
+export type CampaignWebhookEventRow = typeof campaignWebhookEventsTable.$inferSelect;
+export type NewCampaignWebhookEventRow = typeof campaignWebhookEventsTable.$inferInsert;

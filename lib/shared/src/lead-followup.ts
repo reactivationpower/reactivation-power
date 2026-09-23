@@ -268,12 +268,13 @@ export const LEAD_STATUS_LABELS: Record<LeadStatus, string> = {
   closed: 'Closed',
 }
 
-export const LEAD_SOURCES = ['upload', 'webhook', 'manual'] as const
+export const LEAD_SOURCES = ['upload', 'webhook', 'gohighlevel', 'manual'] as const
 export type LeadSource = (typeof LEAD_SOURCES)[number]
 
 export const LEAD_SOURCE_LABELS: Record<LeadSource, string> = {
   upload: 'List upload',
   webhook: 'Ad form',
+  gohighlevel: 'GoHighLevel',
   manual: 'Added by hand',
 }
 

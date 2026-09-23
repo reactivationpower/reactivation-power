@@ -109,6 +109,7 @@ const ACTIONS: Record<string, Record<string, Auth>> = {
   "lead-followup": {
     // Each action also checks the account holds the Lead Follow-Up product.
     createCampaign: "portal", updateCampaign: "portal", setCampaignStatus: "portal", importLeads: "portal",
+    regenerateWebhookUrl: "portal", saveWebhookFieldMapping: "portal", sendTestWebhook: "portal",
   },
   demo: {
     enterDemo: "public",

@@ -7,7 +7,14 @@ import {
   type CampaignStatus,
   type LeadImportRow,
 } from '@workspace/shared/lead-followup'
+import {
+  buildTestPayload,
+  sanitizeFieldMapping,
+  type WebhookFieldMapping,
+} from '@workspace/shared/lead-webhooks'
 import { getOwnerNiches } from '@/lib/data/reactivation'
+import { leadWebhookUrl } from '@/lib/lead-followup/webhook-url'
+import { TEST_HEADER } from '@/routes/webhooks-leads'
 import { leadFollowUpContextOrError } from '@/lib/lead-followup/access'
 import * as store from '@/lib/lead-followup/store'
 
@@ -102,4 +109,60 @@ export async function importLeads(input: { campaignId: string; rows: LeadImportR
   })
   revalidatePath(`/portal/campaigns/${campaign.id}`)
   return result
+}
+
+// ---------- lead sources (webhook intake) ----------
+
+/** New secret URL for a campaign; the previous one stops working at once. */
+export async function regenerateWebhookUrl(campaignId: string) {
+  const guard = await leadFollowUpContextOrError()
+  if (!guard.ok) return { error: guard.error }
+  const { ownerId } = guard.ctx
+  const campaign = await store.regenerateWebhookToken(ownerId, String(campaignId ?? ''))
+  if (!campaign) return { error: 'Campaign not found.' }
+  revalidatePath(`/portal/campaigns/${campaign.id}`)
+  return { webhookUrl: leadWebhookUrl(campaign.webhookToken) }
+}
+
+/** Owner overrides for which incoming field lands where. Blank = automatic. */
+export async function saveWebhookFieldMapping(campaignId: string, mapping: unknown) {
+  const guard = await leadFollowUpContextOrError()
+  if (!guard.ok) return { error: guard.error }
+  const { ownerId } = guard.ctx
+  const clean = sanitizeFieldMapping(mapping)
+  const campaign = await store.updateFieldMapping(ownerId, String(campaignId ?? ''), clean)
+  if (!campaign) return { error: 'Campaign not found.' }
+  revalidatePath(`/portal/campaigns/${campaign.id}`)
+  return { fieldMapping: clean }
+}
+
+/**
+ * Post a sample payload to the campaign's own public URL, exactly the way a
+ * form tool would, so the owner sees a real entry in "Last 20 received"
+ * before wiring anything up.
+ */
+export async function sendTestWebhook(campaignId: string) {
+  const guard = await leadFollowUpContextOrError()
+  if (!guard.ok) return { error: guard.error }
+  const { ownerId } = guard.ctx
+  const campaign = await store.getCampaign(ownerId, String(campaignId ?? ''))
+  if (!campaign) return { error: 'Campaign not found.' }
+
+  const url = leadWebhookUrl(campaign.webhookToken)
+  const payload = buildTestPayload((campaign.fieldMapping ?? {}) as WebhookFieldMapping)
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', [TEST_HEADER]: '1' },
+      body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(10_000),
+    })
+    const body = (await res.json().catch(() => ({}))) as { error?: string; outcome?: string }
+    if (!res.ok) {
+      return { error: `The URL answered ${res.status}: ${body.error ?? 'no details'}`, status: res.status }
+    }
+    return { ok: true, status: res.status, outcome: body.outcome ?? null }
+  } catch (err) {
+    return { error: `Could not reach ${url}: ${err instanceof Error ? err.message : String(err)}` }
+  }
 }

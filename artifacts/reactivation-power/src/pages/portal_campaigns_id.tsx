@@ -13,11 +13,14 @@ import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { CampaignStatusBadge, LeadStatusBadge, OfferSummary } from '@/components/lead-followup/lead-bits'
 import { ImportLeadsDialog } from '@/components/lead-followup/import-leads-dialog'
+import { LeadSourcesTab } from '@/components/lead-followup/lead-sources-tab'
 import { PORTAL_WIDTH } from '@/lib/portal-layout'
 import { cn } from '@/lib/utils'
 import NotFound from '@/pages/not-found'
 
-type Tab = 'leads' | 'offer'
+type Tab = 'leads' | 'sources' | 'offer'
+
+const TAB_LABELS: Record<Tab, string> = { leads: 'Leads', sources: 'Lead sources', offer: 'Offer' }
 
 export default function CampaignDetailPage() {
   const { id } = useParams()
@@ -29,7 +32,7 @@ export default function CampaignDetailPage() {
   if (loading) return <PageLoading />
   if (notFound) return <NotFound />
   if (error) return <PageError error={error} />
-  const { campaign, leads, niche, now } = data
+  const { campaign, leads, niche, now, webhookUrl, webhookEvents } = data
   const nowMs = new Date(now).getTime()
   const newCount = leads.filter((l) => l.status === 'new').length
 
@@ -106,7 +109,7 @@ export default function CampaignDetailPage() {
 
       <div className="mt-8 flex items-center justify-between gap-4 border-b border-border">
         <div className="flex gap-1" role="tablist">
-          {(['leads', 'offer'] as Tab[]).map((t) => (
+          {(['leads', 'sources', 'offer'] as Tab[]).map((t) => (
             <button
               key={t}
               type="button"
@@ -119,7 +122,7 @@ export default function CampaignDetailPage() {
                 tab === t ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground',
               )}
             >
-              {t === 'leads' ? `Leads (${leads.length})` : 'Offer'}
+              {t === 'leads' ? `Leads (${leads.length})` : TAB_LABELS[t]}
             </button>
           ))}
         </div>
@@ -134,12 +137,22 @@ export default function CampaignDetailPage() {
         <div className="mt-6 max-w-xl rounded-lg border border-border bg-card p-6">
           <OfferSummary campaign={campaign} />
         </div>
+      ) : tab === 'sources' ? (
+        <LeadSourcesTab
+          campaignId={campaign.id}
+          campaignName={campaign.name}
+          webhookUrl={webhookUrl}
+          fieldMapping={campaign.fieldMapping ?? {}}
+          events={webhookEvents ?? []}
+          archived={campaign.status === 'archived'}
+          now={nowMs}
+        />
       ) : leads.length === 0 ? (
         <div className="mt-8 rounded-lg border border-dashed border-border bg-card p-10 text-center">
           <Users className="mx-auto size-8 text-muted-foreground" />
           <p className="mt-3 font-medium text-foreground">No leads in this campaign yet</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Upload the list from your ad platform and they&rsquo;ll appear here, newest first.
+            Upload the list from your ad platform, or connect the ad form on the Lead sources tab and they&rsquo;ll appear here the moment they come in, newest first.
           </p>
         </div>
       ) : (

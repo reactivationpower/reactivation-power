@@ -39,6 +39,7 @@ import { demoIsStale } from "../lib/demo/seed";
 import { demoPracticeByOwnerEmail } from "../lib/demo/config";
 import { hasLeadFollowUp, productAccessFor, requireLeadFollowUp } from "../lib/lead-followup/access";
 import * as leadStore from "../lib/lead-followup/store";
+import { leadWebhookUrl } from "../lib/lead-followup/webhook-url";
 import { parseInactiveCount, parsePatientValue } from '@workspace/shared/opportunity';
 import { publicServiceName } from "@workspace/niche-catalog";
 import { DEFAULT_TIMEZONE, isUsTimezone, timezoneLabel } from '@workspace/shared/us-timezones';
@@ -231,9 +232,17 @@ add("/portal/campaigns/:id", "portal", async (req) => {
   const { participant, ownerId, isOwner } = await requireLeadFollowUp(`/portal/campaigns/${id}`);
   const campaign = await leadStore.getCampaign(ownerId, id);
   if (!campaign) notFound();
-  const [leads, niches] = await Promise.all([leadStore.listLeads(campaign.id), campaignNicheOptions(ownerId)]);
+  const [leads, niches, webhookEvents] = await Promise.all([
+    leadStore.listLeads(campaign.id),
+    campaignNicheOptions(ownerId),
+    leadStore.listWebhookEvents(campaign.id),
+  ]);
   const niche = niches.find((n) => n.id === campaign.nicheId) ?? null;
-  return { id, participant, ownerId, isOwner, campaign, leads, niche, now: new Date().toISOString() };
+  return {
+    id, participant, ownerId, isOwner, campaign, leads, niche, now: new Date().toISOString(),
+    webhookUrl: leadWebhookUrl(campaign.webhookToken),
+    webhookEvents,
+  };
 });
 
 add("/portal/campaigns/:id/edit", "portal", async (req) => {
