@@ -94,7 +94,7 @@ export function ScriptViewer({
           onValueChange={handleNicheChange}
           items={niches.map((n) => ({ value: n.id, label: n.name }))}
         >
-          <SelectTrigger className="w-44" aria-label="Select niche">
+          <SelectTrigger className="w-80 max-w-full" aria-label="Select niche">
             <SelectValue placeholder="Select niche" />
           </SelectTrigger>
           <SelectContent>

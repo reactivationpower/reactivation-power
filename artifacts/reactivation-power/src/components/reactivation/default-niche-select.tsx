@@ -48,14 +48,14 @@ export function DefaultNicheSelect({ niches, initialNicheId }: Props) {
 
   return (
     <div className="flex flex-col gap-1">
-      <div className="flex items-center gap-2 rounded-md border border-border bg-card px-3 py-1.5">
+      <div className="flex flex-wrap items-center gap-2 rounded-md border border-border bg-card px-3 py-1.5">
         <Target className="size-4 shrink-0 text-muted-foreground" />
         <span className="text-xs font-medium text-muted-foreground">
           Default niche
         </span>
         <Select value={value} onValueChange={handleChange} items={items}>
           <SelectTrigger
-            className="h-8 w-48 border-0 bg-transparent px-2 shadow-none"
+            className="w-80 max-w-full border-0 bg-transparent px-2 shadow-none"
             aria-label="Account default niche"
           >
             <SelectValue placeholder="No default niche" />

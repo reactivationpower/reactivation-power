@@ -309,13 +309,13 @@ export function CallScreen({
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex max-w-full flex-wrap items-center gap-2">
           <Select
             value={nicheId}
             onValueChange={handleNicheChange}
             items={niches.map((n) => ({ value: n.id, label: n.name }))}
           >
-            <SelectTrigger className="w-64" aria-label="Select niche">
+            <SelectTrigger className="w-80 max-w-full" aria-label="Select niche">
               <SelectValue placeholder="Select niche" />
             </SelectTrigger>
             <SelectContent>
