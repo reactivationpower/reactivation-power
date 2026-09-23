@@ -1,7 +1,6 @@
 // @ts-nocheck
 
 import { DemoEntryForm } from '@/components/demo/demo-entry-form'
-import { DEMO_OWNER } from '@/lib/demo/config'
 
 
 
@@ -19,7 +18,7 @@ export default function DemoPage() {
             className="h-auto w-full max-w-xs sm:max-w-sm"
           />
           <p className="mt-2 text-sm text-muted-foreground text-pretty">
-            Sales demo &middot; {DEMO_OWNER.practice}
+            Sales demo &middot; two sample practices
           </p>
         </div>
         <div className="rounded-xl border bg-card p-6 shadow-sm">

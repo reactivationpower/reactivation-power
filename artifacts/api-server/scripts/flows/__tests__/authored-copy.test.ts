@@ -22,6 +22,7 @@ export const AUTHORED_COPY_SOURCES: string[] = [
   // demo account: seeded contacts, complaints, call notes and outcome notes
   'artifacts/api-server/src/lib/demo/seed.ts',
   'artifacts/api-server/src/lib/demo/config.ts',
+  'artifacts/api-server/src/lib/demo/practice-copy.ts',
   'artifacts/api-server/src/lib/demo/sample-csv.ts',
   'artifacts/reactivation-power/src/lib/demo/config.ts',
   'artifacts/reactivation-power/src/lib/demo/sample-csv.ts',

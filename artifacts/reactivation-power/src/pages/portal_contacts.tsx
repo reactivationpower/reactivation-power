@@ -3,7 +3,7 @@ import { PORTAL_WIDTH } from '@/lib/portal-layout'
 import { ContactsTable } from '@/components/reactivation/contacts-table'
 import { AddContactDialog } from '@/components/reactivation/add-contact-dialog'
 import { ImportContactsDialog } from '@/components/reactivation/import-contacts-dialog'
-import { DEMO_SAMPLE_CSV } from '@/lib/demo/sample-csv'
+import { DEMO_SAMPLE_CSVS } from '@/lib/demo/sample-csv'
 import { usePageData } from '@/hooks/use-page-data'
 import { PageError, PageLoading } from '@/components/page-status'
 import NotFound from '@/pages/not-found'
@@ -15,7 +15,7 @@ export default function ContactsPage() {
   if (error) return <PageError error={error} />
   const {
     participant, isOwner, contacts, stages, niches, allSectorNiches,
-    serviceMappings, defaultNiche, healthcare,
+    serviceMappings, defaultNiche, healthcare, demoPracticeKey,
   } = data
 
   return (
@@ -37,7 +37,7 @@ export default function ContactsPage() {
             allNiches={allSectorNiches}
             savedMappings={serviceMappings}
             defaultNicheName={defaultNiche?.name ?? null}
-            demoSampleCsv={participant.is_demo ? DEMO_SAMPLE_CSV : null}
+            demoSampleCsv={demoPracticeKey ? DEMO_SAMPLE_CSVS[demoPracticeKey] : null}
           />
           <AddContactDialog niches={niches} />
         </div>

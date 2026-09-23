@@ -3,7 +3,7 @@ import { and, desc, eq, inArray, sql } from 'drizzle-orm'
 import { cronRunsTable, db, type CronRun } from '@workspace/db'
 
 import { retryPastDueInvoices } from '@/lib/billing/dunning'
-import { ensureDemoSeeded } from '@/lib/demo/seed'
+import { ensureAllDemosSeeded } from '@/lib/demo/seed'
 import { appOrigin } from '@/lib/app-origin'
 import { logger } from '@/lib/logger'
 import { sendEmail } from '@/lib/mail'
@@ -46,12 +46,21 @@ export const CRON_JOBS: Record<CronJobName, CronJobDefinition> = {
   'demo-reset': {
     name: 'demo-reset',
     label: 'Nightly demo reset',
-    description: 'Rebuilds the demo account so every presenter starts the day with a fresh call list.',
+    description: 'Rebuilds both demo accounts so every presenter starts the day with a fresh call list.',
     hourEt: 3,
     run: async () => {
-      const result = await ensureDemoSeeded({ force: true })
-      if (result.status === 'error') throw new Error(result.message)
-      return result.status === 'seeded' ? { status: 'seeded', ...result.summary } : { status: result.status }
+      const results = await ensureAllDemosSeeded({ force: true })
+      const failed = Object.entries(results).filter(([, r]) => r.status === 'error')
+      if (failed.length > 0) {
+        throw new Error(
+          failed.map(([key, r]) => `${key}: ${r.status === 'error' ? r.message : ''}`).join('; '),
+        )
+      }
+      const summary: Record<string, unknown> = {}
+      for (const [key, r] of Object.entries(results)) {
+        summary[key] = r.status === 'seeded' ? { status: 'seeded', ...r.summary } : { status: r.status }
+      }
+      return summary
     },
   },
 }

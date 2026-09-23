@@ -36,6 +36,7 @@ import { getStripeMode } from "../lib/stripe";
 import { getCronJobStatuses } from "../lib/cron/jobs";
 import { DEFAULT_CALL_BATCH_SIZE } from '@workspace/shared/types';
 import { demoIsStale } from "../lib/demo/seed";
+import { demoPracticeByOwnerEmail } from "../lib/demo/config";
 import { parseInactiveCount, parsePatientValue } from '@workspace/shared/opportunity';
 import { publicServiceName } from "@workspace/niche-catalog";
 import { DEFAULT_TIMEZONE, isUsTimezone, timezoneLabel } from '@workspace/shared/us-timezones';
@@ -111,7 +112,7 @@ add("/portal/_layout", "portal", async () => {
   const ownerId = accessOwnerId(participant);
   const supabase = getAdminClient();
   const [ownerRes, peopleRes] = await Promise.all([
-    supabase.from("participants").select("id, demo_seeded_at").eq("id", ownerId).maybeSingle(),
+    supabase.from("participants").select("id, demo_seeded_at, practice_name").eq("id", ownerId).maybeSingle(),
     supabase.from("participants").select("id, first_name, last_name, role")
       .eq("is_demo", true).eq("is_active", true)
       .or(`id.eq.${ownerId},parent_id.eq.${ownerId}`)
@@ -126,7 +127,10 @@ add("/portal/_layout", "portal", async () => {
       timeZone: "America/New_York", month: "short", day: "numeric", hour: "numeric", minute: "2-digit",
     })} ET`
     : "";
-  return { participant, viewingAs, demo: { currentId: participant.id, identities, seededLabel, stale: !ownerRes.error && demoIsStale(seededAt) } };
+  return { participant, viewingAs, demo: {
+    currentId: participant.id, identities, seededLabel, stale: !ownerRes.error && demoIsStale(seededAt),
+    practiceName: ownerRes.data?.practice_name ?? null,
+  } };
 });
 
 add("/admin/_layout", "admin", async (req) => {
@@ -244,7 +248,9 @@ add("/portal/contacts", "portal", async () => {
   ]);
   const defaultNiche = niches.find((n) => n.id === owner.default_niche_id) ?? null;
   const healthcare = sectors.includes("healthcare");
-  return { participant, ownerId, isOwner, owner, sectors, contacts, stages, niches, allSectorNiches, serviceMappings, defaultNiche, healthcare };
+  // Which demo practice this is (null for real accounts) picks the sample CSV in the Upload dialog.
+  const demoPracticeKey = participant.is_demo ? (demoPracticeByOwnerEmail(owner.email)?.key ?? null) : null;
+  return { participant, ownerId, isOwner, owner, sectors, contacts, stages, niches, allSectorNiches, serviceMappings, defaultNiche, healthcare, demoPracticeKey };
 });
 
 add("/portal/contacts/:id", "portal", async (req) => {

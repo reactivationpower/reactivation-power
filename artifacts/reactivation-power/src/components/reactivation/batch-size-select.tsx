@@ -28,7 +28,13 @@ export function BatchSizeSelect({ initialSize }: Props) {
   const [saving, startSaving] = useTransition()
   const [error, setError] = useState<string | null>(null)
 
-  const items = CALL_BATCH_SIZES.map((n) => ({
+  // The demo med spa runs a larger batch than the offered sizes so every
+  // showcase patient fits in today's first batch; show whatever the account
+  // is actually set to rather than a blank control.
+  const sizes = CALL_BATCH_SIZES.includes(initialSize)
+    ? CALL_BATCH_SIZES
+    : [...CALL_BATCH_SIZES, initialSize].sort((a, b) => a - b)
+  const items = sizes.map((n) => ({
     value: String(n),
     label: `${n} at a time`,
   }))

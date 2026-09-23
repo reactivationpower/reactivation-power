@@ -20,6 +20,12 @@ Training portal + patient-reactivation dialer for healthcare/service businesses:
 - `artifacts/api-server/src/routes/{media,upload,progress,templates,admin-emails,cron,config}.ts` — ported Next API routes.
 - `artifacts/reactivation-power/src/lib/api.ts` (RPC client), `src/hooks/use-page-data.ts` (page loader hook), `src/hooks/use-router.ts` (next/navigation `useRouter` drop-in; `router.refresh()` re-fetches loaders), `src/app/actions/*` (thin client stubs mirroring server actions).
 
+
+## Sales demo (two practices)
+- `/demo` takes the shared `DEMO_PASSWORD` and a practice picker: **Chiropractic** (Ridgeline Chiropractic & Wellness, owner Dr. Daniel Whitaker, callers Sarah Mitchell / Marcus Reyes / Priya Nair / Tyler Brooks, 11 chiro-family niches, batch 10) and **Aesthetics / Med Spa** (Solstice Aesthetics & Med Spa, owner Dr. Elena Marsh, callers Jasmine Okoro / Carlos Medina / Olivia Bennett / Brooke Lawson, all 16 aesthetic niches, batch 16). Config: `artifacts/api-server/src/lib/demo/config.ts` (`DEMO_PRACTICES`; an identical copy lives at `artifacts/reactivation-power/src/lib/demo/config.ts` — a unit test diffs them), per-practice complaints/notes in `practice-copy.ts`, per-practice sample CSV in `sample-csv.ts`, seeder in `seed.ts`.
+- Each practice is its own participant family under `demo.reactivationpower.com`, keyed by the owner e-mail. Reset, the stale-day refresh and "Viewing as" act only on the practice the presenter is inside; the nightly `demo-reset` job rebuilds both in turn and fails if either fails. Every showcase patient must fit the owner's `call_batch_size` (guarded at import time per practice); niche ids are looked up by exact name at seed time, so renaming a niche makes the seed throw rather than drop a showcase patient.
+- Tests: `artifacts/api-server/src/lib/demo/__tests__/` (config guard, med-spa copy rules, reset scoping).
+
 ## Admin accounts (Supabase Auth)
 
 - Admins sign in at `/admin-login` with email + password via Supabase Auth (`actions/admin-auth.ts`). The old shared `ADMIN_PASSWORD` is no longer read.

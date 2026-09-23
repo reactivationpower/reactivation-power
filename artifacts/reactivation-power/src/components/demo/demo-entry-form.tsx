@@ -6,6 +6,8 @@ import { enterDemo } from '@/app/actions/demo'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { DEMO_PRACTICES, type DemoPracticeKey } from '@/lib/demo/config'
+import { cn } from '@/lib/utils'
 
 type State = { error?: string }
 const initialState: State = {}
@@ -15,9 +17,15 @@ async function submit(_prev: State, formData: FormData): Promise<State> {
   return res ?? {}
 }
 
+/**
+ * Shared password, then a choice of which demo practice to walk into. The
+ * choice travels with the form as `practice`; the server signs the presenter
+ * in as that practice's owner.
+ */
 export function DemoEntryForm() {
   const [state, formAction, pending] = useActionState(submit, initialState)
   const [show, setShow] = useState(false)
+  const [practice, setPractice] = useState<DemoPracticeKey>(DEMO_PRACTICES[0].key)
 
   return (
     <form action={formAction} className="flex flex-col gap-5">
@@ -43,6 +51,40 @@ export function DemoEntryForm() {
           </button>
         </div>
       </div>
+
+      <fieldset className="flex flex-col gap-2">
+        <legend className="text-sm font-medium leading-none">Which practice?</legend>
+        <div className="mt-2 grid gap-2" role="radiogroup" aria-label="Demo practice">
+          {DEMO_PRACTICES.map((p) => {
+            const selected = practice === p.key
+            return (
+              <label
+                key={p.key}
+                className={cn(
+                  'flex cursor-pointer items-start gap-3 rounded-lg border p-3 text-left transition-colors',
+                  selected
+                    ? 'border-accent bg-accent/10'
+                    : 'border-border hover:bg-muted/40',
+                )}
+              >
+                <input
+                  type="radio"
+                  name="practice"
+                  value={p.key}
+                  checked={selected}
+                  onChange={() => setPractice(p.key)}
+                  className="mt-1 size-4 shrink-0 accent-accent"
+                />
+                <span className="flex flex-col gap-0.5">
+                  <span className="text-sm font-medium text-foreground">{p.label}</span>
+                  <span className="text-xs text-muted-foreground text-pretty">{p.description}</span>
+                </span>
+              </label>
+            )
+          })}
+        </div>
+      </fieldset>
+
       {state.error ? (
         <p role="alert" className="text-sm text-destructive">
           {state.error}
@@ -59,8 +101,8 @@ export function DemoEntryForm() {
         )}
       </Button>
       <p className="text-center text-xs text-muted-foreground text-pretty">
-        The first open of the day rebuilds the sample data so every date is
-        current. That can take a few seconds.
+        The first open of the day rebuilds that practice&rsquo;s sample data so
+        every date is current. That can take a few seconds.
       </p>
     </form>
   )

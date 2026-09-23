@@ -60,11 +60,14 @@ export function DemoBar({
   identities,
   seededLabel,
   stale = false,
+  practiceName = null,
 }: {
   currentId: string
   identities: DemoIdentity[]
   seededLabel: string
   stale?: boolean
+  /** Which demo practice the presenter is inside (there are two). */
+  practiceName?: string | null
 }) {
   const [, setLocation] = useLocation();
   const [pathname] = useLocation();
@@ -128,7 +131,7 @@ export function DemoBar({
       <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center gap-3 px-4 py-2 text-sm">
         <span className="flex items-center gap-2 font-medium text-foreground">
           <Sparkles className="size-4 text-accent" aria-hidden="true" />
-          Demo account
+          Demo account{practiceName ? ` \u00b7 ${practiceName}` : ''}
         </span>
         <span className="hidden text-muted-foreground sm:inline">
           {seededLabel}

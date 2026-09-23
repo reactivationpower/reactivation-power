@@ -4,33 +4,39 @@ import { getAdminClient } from '@/lib/supabase/admin'
 import { easternWallClockToUtc } from '@workspace/shared/call-time'
 import type { CallDisposition } from '@workspace/shared/types'
 import {
-  DEMO_CALLERS,
   DEMO_COURSE_ID,
-  DEMO_NICHES,
-  DEMO_SHOWCASE_NICHES,
-  DEMO_CALL_BATCH_SIZE,
-  DEMO_OWNER,
   DEMO_OWNER_TRAINING_COMPLETED,
+  DEMO_PRACTICES,
   DEMO_VIDEO_IDS,
   DEMO_STAGE_IDS,
-  PATIENT_NAMES,
   demoEmail,
+  demoPracticeByOwnerEmail,
+  getDemoPractice,
   type DemoCallerProfile,
+  type DemoPractice,
+  type DemoPracticeKey,
 } from './config'
+import { DEMO_PRACTICE_COPY, type DemoPracticeCopy } from './practice-copy'
 
 /**
  * Demo account seeder.
  *
- * Everything here is computed RELATIVE TO NOW (Eastern time) so a presenter
- * who opens the demo two months from now sees a campaign that looks like it
- * started ten weeks ago and made its last call yesterday afternoon. Same 100
- * patients, same four callers, same story every time — only the dates slide.
+ * There are two demo practices (see config.ts). Each is built independently:
+ * its own owner and staff, niche grants, 100 patients, calls, follow-ups and
+ * training progress. Everything here is computed RELATIVE TO NOW (Eastern
+ * time) so a presenter who opens the demo two months from now sees a
+ * campaign that looks like it started ten weeks ago and made its last call
+ * yesterday afternoon. Same 100 patients, same four callers, same story
+ * every time — only the dates slide.
  *
- * The generator is deterministic: a seeded PRNG keyed off a fixed string, so
- * "Sarah is the closer, Tyler is behind" is stable across resets.
+ * The generator is deterministic: a seeded PRNG keyed off a per-practice
+ * string, so "the closer is ahead, the laggard is behind" is stable across
+ * resets.
  *
- * SAFETY: every delete in wipeDemoData() is scoped to participant rows where
- * is_demo = true. Live accounts are never touched.
+ * SAFETY: every delete in wipeDemoPractice() is scoped to the participant
+ * family (owner + staff) of ONE demo practice, all flagged is_demo = true.
+ * Live accounts are never touched, and resetting one demo never touches the
+ * other.
  */
 
 // ---------- deterministic PRNG ----------
@@ -55,17 +61,16 @@ function hashSeed(s: string) {
   return h >>> 0
 }
 
-const RNG_SEED = 'ridgeline-chiro-demo-v1'
-let rand = mulberry32(hashSeed(RNG_SEED))
+let rand = mulberry32(hashSeed('unseeded'))
 const pick = <T,>(arr: readonly T[]): T => arr[Math.floor(rand() * arr.length)]
 const chance = (p: number) => rand() < p
 const between = (lo: number, hi: number) =>
   lo + Math.floor(rand() * (hi - lo + 1))
 
-/** Restart the stream so every rebuild tells the identical story, even when
- *  several rebuilds run inside one long-lived server process. */
-function resetRng() {
-  rand = mulberry32(hashSeed(RNG_SEED))
+/** Restart the stream so every rebuild of a practice tells the identical
+ *  story, even when several rebuilds run inside one long-lived server process. */
+function resetRng(seed: string) {
+  rand = mulberry32(hashSeed(seed))
 }
 
 // ---------- query guard ----------
@@ -137,10 +142,9 @@ function businessInstant(offsetDays: number) {
 
 // ---------- fake-data pools ----------
 
-const AREA_CODES = ['303', '720', '970', '719'] // Colorado, matches the clinic
-function fakePhone() {
+function fakePhone(areaCodes: readonly string[]) {
   // 555-01xx is the reserved fictional exchange range; keep the area code real-looking.
-  return `(${pick(AREA_CODES)}) 555-${String(between(100, 199)).padStart(3, '0')}${between(0, 9)}`
+  return `(${pick(areaCodes)}) 555-${String(between(100, 199)).padStart(3, '0')}${between(0, 9)}`
 }
 
 const EMAIL_DOMAINS = ['gmail.com', 'yahoo.com', 'outlook.com', 'icloud.com', 'comcast.net']
@@ -154,69 +158,6 @@ function fakeEmail(first: string, last: string) {
   ]
   return `${pick(styles).toLowerCase()}@${pick(EMAIL_DOMAINS)}`
 }
-
-const COMPLAINTS: Record<string, string[]> = {
-  Chiropractic: ['Lower back pain', 'Neck pain', 'Headaches', 'Sciatica', 'Mid-back tightness', 'Shoulder pain'],
-  Decompression: ['Herniated disc L4-L5', 'Sciatica', 'Degenerative disc disease', 'Lower back pain', 'Spinal stenosis'],
-  'Joint Pain': ['Knee pain', 'Shoulder pain', 'Hip pain', 'Elbow tendonitis', 'Ankle pain'],
-  ChiroThin: ['Weight loss', 'Weight management'],
-  'Gut Health': ['Bloating', 'Acid reflux', 'IBS symptoms', 'Constipation', 'Food sensitivities'],
-  Neuropathy: ['Peripheral neuropathy', 'Numbness in both feet', 'Burning feet', 'Tingling in hands and feet'],
-  // Aesthetic niche: name the service, never the body area, so the contact
-  // record can't read as a judgment (the script never speaks this field).
-  'Red Light / Body Contouring': ['Red light body contouring', 'Body contouring series'],
-  Acupuncture: ['Chronic neck and shoulder pain', 'Migraines', 'Stress and poor sleep', 'Low energy'],
-  'Massage Therapy': ['Neck and shoulder tension', 'Low back tightness', 'Tension headaches'],
-  'Acoustic Wave Therapy': ['Plantar fasciitis', 'Achilles tendonitis', 'Chronic shoulder pain', 'Old knee injury'],
-  // Weight and body niches: name the program, never a number or body area.
-  'Weight Loss (Not ChiroThin)': ['Weight loss program', 'Medical weight loss'],
-  'GLP Patients': ['GLP-1 weight loss program', 'Semaglutide program'],
-  'Cellulite Reduction': ['Cellulite reduction series', 'Cellulite treatment package'],
-}
-
-const SERVICE_LABELS: Record<string, string[]> = {
-  Chiropractic: ['Chiropractic Adjustment', 'Adjustment', 'Chiro Wellness Visit'],
-  Decompression: ['Spinal Decompression', 'DTS Therapy'],
-  'Joint Pain': ['Joint Pain Program', 'Knee Program'],
-  ChiroThin: ['ChiroThin Weight Loss', 'ChiroThin'],
-  'Gut Health': ['Gut Health Program', 'Digestive Health Consult'],
-  Neuropathy: ['Neuropathy Program', 'Neuropathy Treatment'],
-  'Red Light / Body Contouring': ['Red Light Body Contouring', 'Red Light Sessions'],
-  Acupuncture: ['Acupuncture Session', 'Acupuncture Series'],
-  'Massage Therapy': ['Therapeutic Massage', 'Deep Tissue Massage'],
-  'Acoustic Wave Therapy': ['Acoustic Wave Therapy', 'Shockwave Session'],
-  'Weight Loss (Not ChiroThin)': ['Weight Loss Program', 'Medical Weight Loss'],
-  'GLP Patients': ['GLP-1 Program', 'Semaglutide Weight Loss'],
-  'Cellulite Reduction': ['Cellulite Reduction Series', 'Cellulite Treatment'],
-}
-
-// Notes are written the way a real caller would type them, so they read
-// naturally in the contact drawer and the call history.
-const NOTES_RECEPTIVE = [
-  '<p>Very friendly. Said the back has been acting up again since starting a new desk job. Open to coming back in.</p>',
-  '<p>Remembered Dr. Whitaker by name. Asked whether we still do Saturday hours.</p>',
-  '<p>Receptive — knee has been bothering her on stairs. Wants to talk to her husband first.</p>',
-  '<p>Warm call. He said the last round of care "worked great" and he just got busy.</p>',
-  '<p>Interested, but recovering from a cold this week. Wants a callback next week.</p>',
-  '<p>Said she\u2019s been thinking about coming back. Best time to reach is early morning.</p>',
-]
-const NOTES_NEUTRAL = [
-  '<p>Polite but short. Said things are "fine for now." Left the door open.</p>',
-  '<p>Asked about insurance changes — told him we\u2019d have the front desk confirm.</p>',
-  '<p>Busy at work, asked us to try again in the afternoon.</p>',
-  '<p>Moved across town but still within driving distance. Not a hard no.</p>',
-]
-const NOTES_COLD = [
-  '<p>Not interested right now. Said to check back in a few months.</p>',
-  '<p>Seeing a PT through work insurance. Wished us well.</p>',
-  '<p>Asked not to be called again. Marked DNC.</p>',
-]
-const NOTES_NEVER_REACHED = [
-  '<p>Straight to voicemail both times. Number appears active.</p>',
-  '<p>No answer. Mobile number from the 2024 intake form.</p>',
-  '',
-  '',
-]
 
 // ---------- types ----------
 
@@ -282,6 +223,7 @@ function buildHistory(
   contactId: string,
   importDayOffset: number,
   callerFor: () => DemoCallerProfile,
+  copy: DemoPracticeCopy,
   todayOffset = 0,
 ) {
   const calls: SeedCall[] = []
@@ -346,7 +288,7 @@ function buildHistory(
     if (chance(prof.dnc)) {
       dnc = true
       outcome = 'dnc'
-      notes = pick(NOTES_COLD)
+      notes = pick(copy.notesCold)
       calls.push({
         contact_id: contactId,
         caller_id: caller.id,
@@ -366,18 +308,13 @@ function buildHistory(
       const appt = at(apptDay, pick([9, 10, 11, 13, 14, 15, 16]), pick([0, 30]))
       outcome = 'scheduled'
       stage = 'scheduled'
-      notes = pick(NOTES_RECEPTIVE)
+      notes = pick(copy.notesReceptive)
       calls.push({
         contact_id: contactId,
         caller_id: caller.id,
         disposition: 'scheduled',
         voicemail_left: false,
-        notes: pick([
-          'Booked. Wants to see Dr. Whitaker specifically.',
-          'Scheduled — reminded her to bring the updated insurance card.',
-          'Booked for a re-eval. Very glad we called.',
-          'Scheduled. Said the timing was perfect.',
-        ]),
+        notes: pick(copy.bookedNotes),
         created_at: createdIso,
         appointment_at: appt.toISOString(),
       })
@@ -401,17 +338,13 @@ function buildHistory(
       const cb = at(cbDay, pick([9, 10, 11, 13, 14, 15, 16, 17]), pick([0, 30]))
       stage = 'spoke_to'
       outcome = 'callback'
-      notes = pick(NOTES_RECEPTIVE.concat(NOTES_NEUTRAL))
+      notes = pick(copy.notesReceptive.concat(copy.notesNeutral))
       calls.push({
         contact_id: contactId,
         caller_id: caller.id,
         disposition: 'spoke_call_back_later',
         voicemail_left: false,
-        notes: pick([
-          'Asked us to call back — better time is after 3pm.',
-          'In the middle of something, asked for a callback next week.',
-          'Wants to check her schedule first. Call back Thursday.',
-        ]),
+        notes: pick(copy.callbackNotes),
         created_at: createdIso,
         appointment_at: null,
       })
@@ -431,17 +364,13 @@ function buildHistory(
     // Spoke, didn't schedule → 3 months out
     stage = 'spoke_to'
     outcome = 'no_sched'
-    notes = pick(NOTES_NEUTRAL.concat(NOTES_COLD.slice(0, 2)))
+    notes = pick(copy.notesNeutral.concat(copy.notesCold.slice(0, -1)))
     calls.push({
       contact_id: contactId,
       caller_id: caller.id,
       disposition: 'spoke_did_not_schedule',
       voicemail_left: false,
-      notes: pick([
-        'Not right now — doing okay. Said to check back in a few months.',
-        'Feeling fine lately. Keep him on the list.',
-        'Interested but money is tight this quarter.',
-      ]),
+      notes: pick(copy.noScheduleNotes),
       created_at: createdIso,
       appointment_at: null,
     })
@@ -455,20 +384,46 @@ function buildHistory(
     break
   }
 
-  if (outcome === 'unreached' && attempts > 0) notes = pick(NOTES_NEVER_REACHED) || null
+  if (outcome === 'unreached' && attempts > 0) notes = pick(copy.notesNeverReached) || null
 
   return { calls, followUps, firstCallAt, stage, dnc, outcome, notes, attempts }
 }
 
 // ---------- wipe ----------
 
-export async function wipeDemoData() {
+/**
+ * The participant ids (owner + staff) that belong to one demo practice, by
+ * the owner's e-mail. Only rows flagged is_demo are ever returned, so a
+ * live account that somehow shared the id space could never be swept up.
+ */
+async function demoFamilyIds(practice: DemoPractice): Promise<string[]> {
   const supabase = getAdminClient()
-  const demoParticipants = must(
-    await supabase.from('participants').select('id').eq('is_demo', true),
-    'participants lookup',
+  const owner = must(
+    await supabase
+      .from('participants')
+      .select('id')
+      .eq('email', demoEmail(practice.owner.email))
+      .eq('is_demo', true)
+      .maybeSingle(),
+    'demo owner lookup',
   )
-  const ids = (demoParticipants ?? []).map((p) => p.id as string)
+  if (!owner) return []
+  const ownerId = owner.id as string
+  const staff = must(
+    await supabase
+      .from('participants')
+      .select('id')
+      .eq('parent_id', ownerId)
+      .eq('is_demo', true),
+    'demo staff lookup',
+  )
+  return [ownerId, ...(staff ?? []).map((p) => p.id as string)]
+}
+
+/** Remove every row that belongs to ONE demo practice; the other is untouched. */
+export async function wipeDemoPractice(practice: DemoPractice) {
+  const supabase = getAdminClient()
+  const ids = await demoFamilyIds(practice)
   if (ids.length === 0) return
 
   // Contacts cascade to follow_ups + reactivation_calls (FK ON DELETE CASCADE).
@@ -492,24 +447,54 @@ export async function wipeDemoData() {
 
 // ---------- ensure identities ----------
 
-async function ensureDemoParticipants() {
+interface DemoNiche {
+  id: string
+  name: string
+}
+
+/**
+ * Resolve the practice's niche names to ids from the niches table. A name
+ * that is missing (renamed, deactivated) stops the build with a clear error
+ * rather than seeding contacts into the wrong niche.
+ */
+async function resolveDemoNiches(practice: DemoPractice): Promise<Map<string, DemoNiche>> {
   const supabase = getAdminClient()
+  const rows = must(
+    await supabase
+      .from('niches')
+      .select('id, name')
+      .in('name', [...practice.niches])
+      .eq('is_active', true),
+    'niche lookup',
+  )
+  const byName = new Map<string, DemoNiche>()
+  for (const r of rows ?? []) byName.set(r.name as string, { id: r.id as string, name: r.name as string })
+  const missing = practice.niches.filter((n) => !byName.has(n))
+  if (missing.length > 0) {
+    throw new Error(`demo ${practice.key}: niches not found or inactive: ${missing.join(', ')}`)
+  }
+  return byName
+}
+
+async function ensureDemoParticipants(practice: DemoPractice, niches: Map<string, DemoNiche>) {
+  const supabase = getAdminClient()
+  const { owner: profile } = practice
 
   // Owner: one upsert keyed on the unique email creates the row on a brand-new
   // database and refreshes it on every rebuild after that.
   const ownerRow = {
-    first_name: DEMO_OWNER.first,
-    last_name: DEMO_OWNER.last,
-    email: demoEmail(DEMO_OWNER.email),
-    phone: DEMO_OWNER.phone,
+    first_name: profile.first,
+    last_name: profile.last,
+    email: demoEmail(profile.email),
+    phone: profile.phone,
     parent_id: null,
     role: 'owner',
     is_active: true,
     is_demo: true,
-    practice_name: DEMO_OWNER.practice,
-    office_phone: DEMO_OWNER.officePhone,
-    default_niche_id: DEMO_NICHES[0].id,
-    call_batch_size: DEMO_CALL_BATCH_SIZE,
+    practice_name: profile.practice,
+    office_phone: profile.officePhone,
+    default_niche_id: niches.get(practice.defaultNiche)!.id,
+    call_batch_size: practice.callBatchSize,
     is_business_owner: true,
   }
   const owner = must(
@@ -524,7 +509,7 @@ async function ensureDemoParticipants() {
   const ownerId = owner.id as string
 
   // Callers and access grants only depend on the owner id, so they run together.
-  const callerRows = DEMO_CALLERS.map((c) => ({
+  const callerRows = practice.callers.map((c) => ({
     first_name: c.first,
     last_name: c.last,
     email: demoEmail(c.email),
@@ -534,15 +519,25 @@ async function ensureDemoParticipants() {
     is_active: true,
     is_demo: true,
   }))
+  const nicheIds = [...niches.values()].map((n) => n.id)
   const [callersRes, nicheRes, courseRes] = await Promise.all([
     supabase
       .from('participants')
       .upsert(callerRows, { onConflict: 'email' })
       .select('id, email'),
-    supabase.from('niche_access').upsert(
-      DEMO_NICHES.map((n) => ({ participant_id: ownerId, niche_id: n.id })),
-      { onConflict: 'participant_id,niche_id', ignoreDuplicates: true },
-    ),
+    // Grants that are no longer in the config (a niche moved to the other
+    // demo) are dropped, so the account shows exactly the configured list.
+    supabase
+      .from('niche_access')
+      .delete()
+      .eq('participant_id', ownerId)
+      .not('niche_id', 'in', `(${nicheIds.join(',')})`)
+      .then(() =>
+        supabase.from('niche_access').upsert(
+          nicheIds.map((id) => ({ participant_id: ownerId, niche_id: id })),
+          { onConflict: 'participant_id,niche_id', ignoreDuplicates: true },
+        ),
+      ),
     supabase
       .from('course_access')
       .upsert(
@@ -558,7 +553,7 @@ async function ensureDemoParticipants() {
     savedCallers.map((r) => [r.email as string, r.id as string]),
   )
   const callerIds = new Map<string, string>()
-  for (const c of DEMO_CALLERS) {
+  for (const c of practice.callers) {
     const id = idByEmail.get(demoEmail(c.email))
     if (!id) throw new Error(`demo callers upsert: ${c.email} missing from response`)
     callerIds.set(c.key, id)
@@ -579,14 +574,17 @@ export interface SeedSummary {
   reserve: number
 }
 
-export async function seedDemoData(): Promise<SeedSummary> {
+export async function seedDemoData(practice: DemoPractice): Promise<SeedSummary> {
   const startedAt = Date.now()
-  resetRng()
+  resetRng(practice.rngSeed)
   const supabase = getAdminClient()
-  await wipeDemoData()
-  const { ownerId, callerIds } = await ensureDemoParticipants()
+  const copy = DEMO_PRACTICE_COPY[practice.key]
+  const niches = await resolveDemoNiches(practice)
+  const nicheByName = (name: string) => niches.get(name)!
+  await wipeDemoPractice(practice)
+  const { ownerId, callerIds } = await ensureDemoParticipants(practice, niches)
 
-  const callers: DemoCallerProfile[] = DEMO_CALLERS.map((c) => ({
+  const callers: DemoCallerProfile[] = practice.callers.map((c) => ({
     ...c,
     id: callerIds.get(c.key)!,
   }))
@@ -597,8 +595,8 @@ export async function seedDemoData(): Promise<SeedSummary> {
 
   // ----- 100 contacts -----
   const contacts: SeedContact[] = []
-  const nameQueue = [...PATIENT_NAMES]
-  const nicheCycle = [0, 0, 0, 0, 1, 1, 2, 2, 3, 0] // Chiro-heavy mix
+  const nameQueue = [...practice.patientNames]
+  const { nicheCycle, showcaseNiches } = practice
 
   // 60 "worked" patients, uploaded in four waves over the past 10 weeks —
   // the way a real office feeds the list. The most recent wave is still
@@ -612,12 +610,12 @@ export async function seedDemoData(): Promise<SeedSummary> {
   }
   for (let i = 0; i < 60; i++) {
     const [first, last] = nameQueue.shift()!
-    const niche = DEMO_NICHES[nicheCycle[i % nicheCycle.length]]
+    const niche = nicheByName(nicheCycle[i % nicheCycle.length])
     const importDay = waveOf(i)
     contacts.push({
       id: randomUUID(),
       name: `${first} ${last}`,
-      phone: fakePhone(),
+      phone: fakePhone(practice.areaCodes),
       email: chance(0.85) ? fakeEmail(first, last) : null,
       niche_id: niche.id,
       stage_id: DEMO_STAGE_IDS.new,
@@ -625,8 +623,8 @@ export async function seedDemoData(): Promise<SeedSummary> {
       notes: null,
       first_call_at: null,
       created_at: at(importDay, 8, between(0, 59)).toISOString(),
-      service_label: pick(SERVICE_LABELS[niche.name]),
-      original_complaint: pick(COMPLAINTS[niche.name]),
+      service_label: pick(copy.serviceLabels[niche.name]),
+      original_complaint: pick(copy.complaints[niche.name]),
       owner_id: ownerId,
       created_by: ownerId,
     })
@@ -636,16 +634,16 @@ export async function seedDemoData(): Promise<SeedSummary> {
     const [first, last] = nameQueue.shift()!
     // The first few names carry the one-patient showcase niches (see config)
     // and are stamped 08:00, 08:01, … so they lead today's cold-call batch.
-    const showcase = DEMO_SHOWCASE_NICHES[i] as (typeof DEMO_SHOWCASE_NICHES)[number] | undefined
-    const niche = showcase ?? DEMO_NICHES[nicheCycle[(i + 3) % nicheCycle.length]]
+    const showcase = showcaseNiches[i] as string | undefined
+    const niche = nicheByName(showcase ?? nicheCycle[(i + 3) % nicheCycle.length])
     // Always draw the minute so the PRNG stream, and the rest of the story, is unchanged.
     // The range starts after the last showcase minute so no ordinary import
     // can tie with or precede a showcase patient in the oldest-first release.
-    const importMinute = between(DEMO_SHOWCASE_NICHES.length + 1, 40)
+    const importMinute = between(showcaseNiches.length + 1, 40)
     contacts.push({
       id: randomUUID(),
       name: `${first} ${last}`,
-      phone: fakePhone(),
+      phone: fakePhone(practice.areaCodes),
       email: chance(0.85) ? fakeEmail(first, last) : null,
       niche_id: niche.id,
       stage_id: DEMO_STAGE_IDS.new,
@@ -653,8 +651,8 @@ export async function seedDemoData(): Promise<SeedSummary> {
       notes: null,
       first_call_at: null,
       created_at: at(0, 8, showcase ? i : importMinute).toISOString(),
-      service_label: pick(SERVICE_LABELS[niche.name]),
-      original_complaint: pick(COMPLAINTS[niche.name]),
+      service_label: pick(copy.serviceLabels[niche.name]),
+      original_complaint: pick(copy.complaints[niche.name]),
       owner_id: ownerId,
       created_by: ownerId,
     })
@@ -674,7 +672,7 @@ export async function seedDemoData(): Promise<SeedSummary> {
     const importDay = Math.round(
       (new Date(c.created_at).getTime() - Date.now()) / 86_400_000,
     )
-    const h = buildHistory(c.id!, importDay, callerFor)
+    const h = buildHistory(c.id!, importDay, callerFor, copy)
     allCalls.push(...h.calls)
     allFollowUps.push(...h.followUps)
     if (h.outcome === 'scheduled') scheduled += 1
@@ -940,6 +938,7 @@ export interface DemoOwnerState {
  * so no caller can mistake a database outage for "first run, needs seeding".
  */
 export async function getDemoOwnerState(
+  practice: DemoPractice,
   attempts = 3,
 ): Promise<DemoOwnerState | null> {
   const supabase = getAdminClient()
@@ -948,7 +947,7 @@ export async function getDemoOwnerState(
     const { data, error } = await supabase
       .from('participants')
       .select('id, demo_seeded_at, demo_seed_started_at')
-      .eq('email', demoEmail(DEMO_OWNER.email))
+      .eq('email', demoEmail(practice.owner.email))
       .maybeSingle()
     if (!error) return (data as DemoOwnerState | null) ?? null
     lastError = error.message
@@ -996,13 +995,13 @@ async function releaseSeedLock(ownerId: string) {
 }
 
 /** Wait for a rebuild someone else started to finish. */
-async function waitForSeed(): Promise<'fresh' | 'failed' | 'timeout'> {
+async function waitForSeed(practice: DemoPractice): Promise<'fresh' | 'failed' | 'timeout'> {
   const deadline = Date.now() + SEED_WAIT_MS
   while (Date.now() < deadline) {
     await sleep(SEED_POLL_MS)
     let owner: DemoOwnerState | null
     try {
-      owner = await getDemoOwnerState(1)
+      owner = await getDemoOwnerState(practice, 1)
     } catch {
       continue // transport blip while waiting: keep polling
     }
@@ -1023,17 +1022,21 @@ export type EnsureSeedResult =
 const errorMessage = (e: unknown) => (e instanceof Error ? e.message : String(e))
 
 /**
- * The ONLY place a rebuild may start from. Rebuilds when the demo has never
- * been seeded, was seeded on a previous Eastern day, or `force` is set. If a
- * rebuild is already running (a double click, a second presenter, the nightly
- * cron) this waits for it instead of starting another one on top.
+ * The ONLY place a rebuild may start from. Rebuilds one practice when it has
+ * never been seeded, was seeded on a previous Eastern day, or `force` is set.
+ * If a rebuild of that practice is already running (a double click, a second
+ * presenter, the nightly cron) this waits for it instead of starting another
+ * one on top. Each practice has its own lock (its owner row), so the two
+ * demos never block or wipe each other.
  */
 export async function ensureDemoSeeded(
+  practiceKey: DemoPracticeKey,
   opts: { force?: boolean } = {},
 ): Promise<EnsureSeedResult> {
+  const practice = getDemoPractice(practiceKey)
   let owner: DemoOwnerState | null
   try {
-    owner = await getDemoOwnerState()
+    owner = await getDemoOwnerState(practice)
   } catch (e) {
     return { status: 'error', message: errorMessage(e) }
   }
@@ -1042,7 +1045,7 @@ export async function ensureDemoSeeded(
   // read), so there is nothing to lock on. Seed directly.
   if (!owner) {
     try {
-      return { status: 'seeded', summary: await seedDemoData() }
+      return { status: 'seeded', summary: await seedDemoData(practice) }
     } catch (e) {
       return { status: 'error', message: errorMessage(e) }
     }
@@ -1061,7 +1064,7 @@ export async function ensureDemoSeeded(
   }
 
   if (!claimed) {
-    const outcome = await waitForSeed()
+    const outcome = await waitForSeed(practice)
     if (outcome === 'fresh') return { status: 'waited' }
     return {
       status: 'error',
@@ -1076,14 +1079,44 @@ export async function ensureDemoSeeded(
     // Re-check under the lock: whoever held it before us may have just
     // finished the very rebuild we were about to start.
     if (!opts.force) {
-      const latest = await getDemoOwnerState()
+      const latest = await getDemoOwnerState(practice)
       if (latest && !demoIsStale(latest.demo_seeded_at)) return { status: 'fresh' }
     }
-    const summary = await seedDemoData()
+    const summary = await seedDemoData(practice)
     return { status: 'seeded', summary }
   } catch (e) {
     return { status: 'error', message: errorMessage(e) }
   } finally {
     await releaseSeedLock(owner.id)
   }
+}
+
+/** Rebuild every demo practice in turn (the nightly reset). */
+export async function ensureAllDemosSeeded(
+  opts: { force?: boolean } = {},
+): Promise<Record<DemoPracticeKey, EnsureSeedResult>> {
+  const out = {} as Record<DemoPracticeKey, EnsureSeedResult>
+  for (const p of DEMO_PRACTICES) out[p.key] = await ensureDemoSeeded(p.key, opts)
+  return out
+}
+
+/**
+ * Which demo practice a demo participant belongs to, by the e-mail of the
+ * owner of their participant family. Null for anything that is not a demo
+ * identity, so reset / refresh / "view as" can refuse to act.
+ */
+export async function demoPracticeOfParticipant(p: {
+  id: string
+  parent_id: string | null
+  email?: string | null
+}): Promise<DemoPractice | null> {
+  if (!p.parent_id && p.email) return demoPracticeByOwnerEmail(p.email)
+  const supabase = getAdminClient()
+  const { data } = await supabase
+    .from('participants')
+    .select('email, is_demo')
+    .eq('id', p.parent_id ?? p.id)
+    .maybeSingle()
+  if (!data || !data.is_demo) return null
+  return demoPracticeByOwnerEmail(data.email as string)
 }

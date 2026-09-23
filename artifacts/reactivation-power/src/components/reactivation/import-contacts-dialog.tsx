@@ -288,7 +288,7 @@ interface Props {
    * so no file is needed on their laptop. The server never writes demo
    * imports, so the whole flow is safe to run live in front of a prospect.
    */
-  demoSampleCsv?: string | null
+  demoSampleCsv?: { filename: string; csv: string } | null
 }
 
 export function ImportContactsDialog({
@@ -674,7 +674,7 @@ export function ImportContactsDialog({
                       type="button"
                       className="shrink-0 gap-2"
                       onClick={() =>
-                        loadText(demoSampleCsv, 'ridgeline-patient-export.csv')
+                        loadText(demoSampleCsv.csv, demoSampleCsv.filename)
                       }
                     >
                       <FileSpreadsheet className="size-4" />

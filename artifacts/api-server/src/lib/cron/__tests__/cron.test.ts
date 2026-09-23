@@ -74,8 +74,11 @@ vi.mock('@workspace/db', () => {
 
 const retry = vi.fn(async () => ({ customers: 1, invoices: 2, paid: 1, failed: 1, details: [] }))
 vi.mock('@/lib/billing/dunning', () => ({ retryPastDueInvoices: retry }))
-const seed = vi.fn(async () => ({ status: 'seeded', summary: { patients: 12 } }))
-vi.mock('@/lib/demo/seed', () => ({ ensureDemoSeeded: seed }))
+const seed = vi.fn(async () => ({
+  chiro: { status: 'seeded', summary: { patients: 12 } },
+  aesthetics: { status: 'seeded', summary: { patients: 12 } },
+}))
+vi.mock('@/lib/demo/seed', () => ({ ensureAllDemosSeeded: seed }))
 const sendEmail = vi.fn(async (..._args: unknown[]) => ({ ok: true, logId: 'log' }))
 vi.mock('@/lib/mail', () => ({ sendEmail }))
 
@@ -188,8 +191,12 @@ describe('runCronJob / tick', () => {
   })
 
   it('a demo reset error result is a failure, not a success with an error inside', async () => {
-    seed.mockResolvedValueOnce({ status: 'error', message: 'lock held' } as never)
+    // One practice failing fails the run, even though the other rebuilt fine.
+    seed.mockResolvedValueOnce({
+      chiro: { status: 'seeded', summary: { patients: 12 } },
+      aesthetics: { status: 'error', message: 'lock held' },
+    } as never)
     const outcome = await runCronJob('demo-reset', { trigger: 'http' })
-    expect(outcome).toMatchObject({ ok: false, error: 'lock held' })
+    expect(outcome).toMatchObject({ ok: false, error: 'aesthetics: lock held' })
   })
 })

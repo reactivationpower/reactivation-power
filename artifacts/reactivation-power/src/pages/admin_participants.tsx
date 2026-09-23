@@ -132,6 +132,15 @@ export default function ViewersPage() {
                     >
                       {viewer.first_name} {viewer.last_name}
                     </Link>
+                    {viewer.is_demo && (
+                      <Badge
+                        variant="outline"
+                        className="ml-2 border-accent/40 text-accent"
+                        title={viewer.practice_name ?? undefined}
+                      >
+                        Demo
+                      </Badge>
+                    )}
                     {!viewer.is_active && (
                       <Badge
                         variant="outline"
