@@ -38,6 +38,7 @@ const SHARED_MODULES = [
   'format',
   'lazy-time',
   'lead-followup',
+  'lead-requested-time',
   'lead-webhooks',
   'lead-validation',
   'notes-text',

@@ -1,9 +1,11 @@
-import { useMemo, useState, useTransition } from 'react'
+import { useCallback, useMemo, useState, useTransition } from 'react'
 import {
   AArrowDown,
   AArrowUp,
   Calendar,
+  CalendarCheck,
   CalendarClock,
+  CalendarSync,
   CheckCircle2,
   History,
   Loader2,
@@ -29,9 +31,12 @@ import {
 import { formatPhone } from '@workspace/shared/phone'
 import {
   LEAD_DISPOSITION_LABELS,
+  isAppointmentDisposition,
+  leadEntryStepKey,
   timeAgo,
   type LeadDisposition,
 } from '@workspace/shared/lead-followup'
+import { formatRequestedAt, requestedAtLocalDate } from '@workspace/shared/lead-requested-time'
 import { CONCERN_OPTIONS } from '@workspace/niche-catalog'
 import type { ScriptFlowChoice, ScriptFlowStep } from '@workspace/shared/types'
 import { logLeadCall } from '@/app/actions/lead-followup'
@@ -77,6 +82,7 @@ interface Props {
     email: string | null
     submittedAt: string
     requestedTime: string | null
+    requestedAt?: string | null
     message: string | null
     status: string
   }
@@ -107,6 +113,25 @@ function fmtWhen(d: Date | string) {
 const TIMED: Partial<Record<LeadDisposition, 'callBack' | 'booked'>> = {
   callback_later: 'callBack',
   booked: 'booked',
+  confirmed: 'booked',
+  rescheduled: 'booked',
+}
+
+/**
+ * Screens in the confirmation branch that pre-select the outcome, so the
+ * caller reading "press the Confirmed button below" finds it already
+ * chosen with the time filled in (or the picker open for a new time).
+ */
+const STEP_PRESELECTS: Record<string, LeadDisposition> = {
+  close_confirmed: 'confirmed',
+  close_rescheduled: 'rescheduled',
+}
+
+/** What the sticky bar and history call the time a disposition carries. */
+function appointmentWord(d: LeadDisposition | string): string {
+  if (d === 'confirmed') return 'confirmed for'
+  if (d === 'rescheduled') return 'moved to'
+  return 'booked for'
 }
 
 /**
@@ -143,6 +168,11 @@ export function LeadCallScreen({
   const [saved, setSaved] = useState<LeadDisposition | null>(null)
 
   const nowMs = new Date(now).getTime()
+  // A lead who picked a day and time on the form starts on the confirm
+  // screen; that slot, read in the browser's zone, is the default
+  // appointment time for "confirmed".
+  const entryStepKey = leadEntryStepKey(lead)
+  const requestedLocal = useMemo(() => requestedAtLocalDate(lead.requestedAt), [lead.requestedAt])
   const extras = useMemo(
     () =>
       leadScriptExtras({
@@ -171,7 +201,7 @@ export function LeadCallScreen({
         disposition: d,
         notes,
         callBackAt: d === 'callback_later' && callBackAt ? callBackAt.toISOString() : null,
-        bookedAt: d === 'booked' && bookedAt ? bookedAt.toISOString() : null,
+        bookedAt: isAppointmentDisposition(d) && bookedAt ? bookedAt.toISOString() : null,
       })
       if (result?.error) {
         setError(result.error)
@@ -194,6 +224,24 @@ export function LeadCallScreen({
     }
   }
 
+  const onStepChange = useCallback(
+    (stepKey: string) => {
+      const preselect = STEP_PRESELECTS[stepKey]
+      if (!preselect) return
+      setError(null)
+      setDisposition(preselect)
+      if (preselect === 'confirmed' && requestedLocal) {
+        // The time they asked for, already filled in; the pencil re-opens the picker.
+        setBookedAt(requestedLocal)
+        return
+      }
+      // Rescheduled (or a confirm with no parsable slot): ask for the time now.
+      setPickerValue(null)
+      setPickerFor('booked')
+    },
+    [requestedLocal],
+  )
+
   function confirmPicker() {
     if (!pickerFor || !pickerValue) return
     if (pickerFor === 'callBack') setCallBackAt(pickerValue)
@@ -202,7 +250,8 @@ export function LeadCallScreen({
   }
 
   const needsTime =
-    (disposition === 'callback_later' && !callBackAt) || (disposition === 'booked' && !bookedAt)
+    (disposition === 'callback_later' && !callBackAt) ||
+    (disposition !== null && isAppointmentDisposition(disposition) && !bookedAt)
   const canLog = disposition !== null && !needsTime && !saving
 
   const buttons: { d: LeadDisposition; icon: typeof Phone; tone?: DispositionTone }[] = [
@@ -211,6 +260,13 @@ export function LeadCallScreen({
     { d: 'spoke_did_not_book', icon: Calendar },
     { d: 'callback_later', icon: CalendarClock },
     { d: 'booked', icon: CheckCircle2, tone: 'primary' },
+    // Confirmation-call outcomes only make sense for a lead who asked for a time.
+    ...(lead.requestedAt
+      ? ([
+          { d: 'confirmed', icon: CalendarCheck, tone: 'primary' },
+          { d: 'rescheduled', icon: CalendarSync, tone: 'primary' },
+        ] as const)
+      : []),
     { d: 'booked_elsewhere', icon: MapPinOff },
     { d: 'do_not_call', icon: PhoneOff, tone: 'danger' },
   ]
@@ -235,7 +291,18 @@ export function LeadCallScreen({
               </a>
               {' \u00b7 '}
               responded {timeAgo(lead.submittedAt, nowMs)}
-              {lead.requestedTime ? ` \u00b7 asked for ${lead.requestedTime}` : ''}
+              {lead.requestedAt ? (
+                <>
+                  {' \u00b7 '}
+                  <span className="font-medium text-foreground" data-testid="text-lead-requested-at">
+                    Requested: {formatRequestedAt(lead.requestedAt)}
+                  </span>
+                </>
+              ) : lead.requestedTime ? (
+                ` \u00b7 asked for ${lead.requestedTime}`
+              ) : (
+                ''
+              )}
             </p>
             <p className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
               <Megaphone className="size-3.5" />
@@ -290,6 +357,8 @@ export function LeadCallScreen({
           fontSize={LEAD_FONT_SIZES[sizeIndex]}
           concernOptions={CONCERN_OPTIONS[niche?.name ?? ''] ?? undefined}
           flowKind="lead"
+          initialStepKey={entryStepKey}
+          onStepChange={onStepChange}
           showLeaveVm
           onLeaveVoicemail={() => setVmOpen(true)}
         />
@@ -310,7 +379,7 @@ export function LeadCallScreen({
         <div className="flex flex-wrap items-center gap-2 p-4">
           {buttons.map(({ d, icon: Icon, tone }) => {
             const active = disposition === d
-            const when = d === 'callback_later' ? callBackAt : d === 'booked' ? bookedAt : null
+            const when = d === 'callback_later' ? callBackAt : isAppointmentDisposition(d) ? bookedAt : null
             return (
               <button
                 key={d}
@@ -358,7 +427,7 @@ export function LeadCallScreen({
                 <span aria-hidden="true">{'\u00b7'}</span>
                 <time dateTime={call.createdAt}>{fmtWhen(call.createdAt)}</time>
                 {call.callBackAt ? <span>{'\u00b7'} call back {fmtWhen(call.callBackAt)}</span> : null}
-                {call.bookedAt ? <span>{'\u00b7'} booked for {fmtWhen(call.bookedAt)}</span> : null}
+                {call.bookedAt ? <span>{'\u00b7'} {appointmentWord(call.disposition)} {fmtWhen(call.bookedAt)}</span> : null}
               </li>
             ))}
           </ul>
@@ -416,7 +485,7 @@ export function LeadCallScreen({
                 Logging as{' '}
                 <span className="font-semibold text-foreground">{LEAD_DISPOSITION_LABELS[disposition]}</span>
                 {disposition === 'callback_later' && callBackAt && <> {'\u00b7'} call back {fmtWhen(callBackAt)}</>}
-                {disposition === 'booked' && bookedAt && <> {'\u00b7'} appointment {fmtWhen(bookedAt)}</>}
+                {isAppointmentDisposition(disposition) && bookedAt && <> {'\u00b7'} appointment {fmtWhen(bookedAt)}</>}
                 {needsTime && (
                   <span className="text-destructive"> {'\u00b7'} pick a date and time first</span>
                 )}
@@ -523,10 +592,18 @@ export function LeadCallScreen({
       >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{pickerFor === 'booked' ? 'When is the appointment?' : 'When should we call back?'}</DialogTitle>
+            <DialogTitle>
+              {pickerFor !== 'booked'
+                ? 'When should we call back?'
+                : disposition === 'rescheduled'
+                  ? 'What is the new time?'
+                  : 'When is the appointment?'}
+            </DialogTitle>
             <DialogDescription>
               {pickerFor === 'booked'
-                ? `Pick the day ${lead.firstName} booked, then type the time ("9a", "1030", and "2:15 pm" all work).`
+                ? disposition === 'rescheduled'
+                  ? `Pick the day ${lead.firstName} moved to, then type the time ("9a", "1030", and "2:15 pm" all work).`
+                  : `Pick the day ${lead.firstName} booked, then type the time ("9a", "1030", and "2:15 pm" all work).`
                 : `${lead.firstName} asked for a callback. Pick the day, then type the time ("9a", "1030", and "2:15 pm" all work).`}
             </DialogDescription>
           </DialogHeader>

@@ -3,6 +3,7 @@ import { Link } from 'wouter'
 import { ArrowRight, Megaphone, PhoneCall } from 'lucide-react'
 import { formatPhone } from '@workspace/shared/phone'
 import { timeAgo } from '@workspace/shared/lead-followup'
+import { formatRequestedAt } from '@workspace/shared/lead-requested-time'
 import { usePageData } from '@/hooks/use-page-data'
 import { PageError, PageLoading } from '@/components/page-status'
 import { PORTAL_NARROW } from '@/lib/portal-layout'
@@ -72,7 +73,7 @@ export default function PortalStartPage() {
           <div>
             <h2 id="call-next-heading" className="text-xl font-semibold text-foreground">Call next</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Newest leads nobody has called yet, then callbacks and retries that are due.
+              Leads who asked for a time in the next two days, then the newest leads nobody has called yet, then callbacks and retries that are due.
             </p>
           </div>
           <Link href="/portal/campaigns" className="text-sm font-medium text-accent hover:underline">
@@ -95,7 +96,9 @@ export default function PortalStartPage() {
                   <p className="text-xs text-muted-foreground">
                     {campaign.name}
                     {' \u00b7 '}
-                    {reason === 'new'
+                    {reason === 'requested'
+                      ? `asked for ${formatRequestedAt(lead.requestedAt)} · confirm it`
+                      : reason === 'new'
                       ? `responded ${timeAgo(lead.submittedAt, nowMs)}`
                       : lead.lastDisposition === 'callback_later'
                         ? `callback due ${timeAgo(lead.nextDueAt, nowMs)}`

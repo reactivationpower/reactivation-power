@@ -2,6 +2,7 @@ import { revalidatePath } from 'next/cache'
 import {
   CAMPAIGN_STATUSES,
   MAX_LEAD_IMPORT_ROWS,
+  isAppointmentDisposition,
   isLeadDisposition,
   leadCallBlockReason,
   leadDispositionFieldError,
@@ -162,7 +163,7 @@ export async function logLeadCall(input: {
   const booked = parseWhen(input.bookedAt, 'appointment time')
   if (!booked.ok) return { error: booked.error }
   const callBackAt = input.disposition === 'callback_later' ? callBack.value : null
-  const bookedAt = input.disposition === 'booked' ? booked.value : null
+  const bookedAt = isAppointmentDisposition(input.disposition) ? booked.value : null
   const fieldError = leadDispositionFieldError({ disposition: input.disposition, callBackAt, bookedAt })
   if (fieldError) return { error: fieldError }
   const campaign = await store.getCampaign(ownerId, lead.campaignId)

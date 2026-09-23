@@ -48,7 +48,7 @@ const CHIRO_LEAD_CAMPAIGN: DemoLeadCampaign = {
   leads: [
     {
       firstName: 'Melissa', lastName: 'Tran', phone: '(720) 555-0186', email: 'melissa.tran@example.com',
-      requestedTime: 'Tuesday after 3pm',
+      requestedTime: 'Tomorrow at 3pm',
       message: 'Lower back has been bad for two weeks, saw your $49 ad on Facebook',
       minutesAgo: 12,
     },

@@ -1,6 +1,6 @@
 // @ts-nocheck
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   ArrowLeft,
   Crosshair,
@@ -40,8 +40,10 @@ interface Props {
   sector?: Sector | null
   extras: Record<string, string>
   fontSize: number
-  /** Optional deep link: start the player at this step instead of the first screen. */
+  /** Optional entry point: start (and restart) the player at this step instead of the first screen. */
   initialStepKey?: string | null
+  /** Fires with the step_key every time the screen changes, including the first render. */
+  onStepChange?: (stepKey: string) => void
   /** Main-concern capture chips for this niche (clinical niches only).
    * Shown on the questions screen; the tapped concern fills the
    * {{main_concern}} token on every later screen. */
@@ -86,6 +88,7 @@ export function ScriptFlowPlayer({
   extras,
   fontSize,
   initialStepKey,
+  onStepChange,
   concernOptions,
   flowKind = 'reactivation',
   showLeaveVm = false,
@@ -129,10 +132,14 @@ export function ScriptFlowPlayer({
     return { stepMap, choiceMap, startKey: ordered[0]?.step_key ?? null }
   }, [steps, choices, nicheId])
 
-  const [currentKey, setCurrentKey] = useState<string | null>(
-    initialStepKey && stepMap.has(initialStepKey) ? initialStepKey : startKey,
-  )
+  const entryKey = initialStepKey && stepMap.has(initialStepKey) ? initialStepKey : startKey
+  const [currentKey, setCurrentKey] = useState<string | null>(entryKey)
   const [trail, setTrail] = useState<string[]>([])
+  useEffect(() => {
+    if (currentKey) onStepChange?.(currentKey)
+    // Only the screen change matters; a new callback identity should not re-fire.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentKey])
 
   // Main-concern capture: the caller taps the patient's answer to the magic
   // question on the questions screen. Last tap wins. "Other" opens a small
@@ -264,7 +271,7 @@ export function ScriptFlowPlayer({
 
   function restart() {
     setTrail([])
-    setCurrentKey(startKey)
+    setCurrentKey(entryKey)
     setConcern(null)
     setOtherOpen(false)
     setOtherText('')
@@ -304,7 +311,7 @@ export function ScriptFlowPlayer({
   const isObjection = step.step_key.startsWith('obj_')
   // The opener is the entry step. If nobody picks up here, this is where the
   // caller leaves a voicemail — so the "Leave VM" chip lives on this screen.
-  const isStartStep = step.step_key === startKey
+  const isStartStep = step.step_key === entryKey
   const canLeaveVm = isStartStep && showLeaveVm && Boolean(onLeaveVoicemail)
 
   return (

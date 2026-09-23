@@ -6,6 +6,8 @@
  * api-server (server-side validation, import dedupe).
  */
 
+import { officeClock, parseRequestedTime } from './lead-requested-time.ts'
+
 // ---------- products ----------
 
 /**
@@ -327,6 +329,8 @@ export interface PlannedLead {
   phoneKey: string
   email: string | null
   requestedTime: string | null
+  /** `requestedTime` resolved to a wall-clock slot (YYYY-MM-DDTHH:mm) when it named a day and a time. */
+  requestedAt: string | null
   message: string | null
   submittedAt: Date | null
 }
@@ -363,6 +367,7 @@ function parseSubmittedAt(raw: string | undefined): Date | null {
 export function planLeadImport(
   rows: LeadImportRow[],
   existingPhoneKeys: Iterable<string>,
+  now: Date = new Date(),
 ): LeadImportPlan {
   const seen = new Set(existingPhoneKeys)
   const toInsert: PlannedLead[] = []
@@ -386,15 +391,20 @@ export function planLeadImport(
       continue
     }
     seen.add(key)
+    const submittedAt = parseSubmittedAt(row.submittedAt)
+    const requestedTime = (row.requestedTime ?? '').trim().slice(0, 200) || null
     toInsert.push({
       firstName: firstName.slice(0, 80),
       lastName: lastName.slice(0, 80),
       phone,
       phoneKey: key,
       email: (row.email ?? '').trim().slice(0, 200) || null,
-      requestedTime: (row.requestedTime ?? '').trim().slice(0, 200) || null,
+      requestedTime,
+      // "Tuesday" means the Tuesday after they filled the form in (on the
+      // office's calendar), not after the upload.
+      requestedAt: parseRequestedTime(requestedTime, officeClock(submittedAt ?? now)),
       message: (row.message ?? '').trim().slice(0, 2000) || null,
-      submittedAt: parseSubmittedAt(row.submittedAt),
+      submittedAt,
     })
   }
 
@@ -412,6 +422,8 @@ export const LEAD_DISPOSITIONS = [
   'spoke_did_not_book',
   'callback_later',
   'booked',
+  'confirmed',
+  'rescheduled',
   'booked_elsewhere',
   'do_not_call',
 ] as const
@@ -453,6 +465,9 @@ export function formatRate(rate: number): string {
  * - callback_later: reached (a booked lead stays booked), due at the
  *   requested callback time.
  * - booked: status booked with the appointment time; off the list.
+ * - confirmed / rescheduled: the lead had asked for a time on the ad form;
+ *   the caller locked it in (or moved it). Status confirmed with the
+ *   appointment time; off the list. Counted as booked everywhere.
  * - booked_elsewhere / do_not_call: closed; last_disposition says why.
  */
 export function applyLeadDisposition(
@@ -490,9 +505,9 @@ export function applyLeadDisposition(
       bookedAt: keptBooking,
     }
   }
-  if (disposition === 'booked') {
+  if (disposition === 'booked' || disposition === 'confirmed' || disposition === 'rescheduled') {
     return {
-      status: 'booked',
+      status: disposition === 'booked' ? 'booked' : 'confirmed',
       unansweredAttempts: 0,
       nextDueAt: null,
       lastDisposition: disposition,
@@ -515,10 +530,14 @@ export const REACHED_DISPOSITIONS: readonly LeadDisposition[] = [
   'spoke_did_not_book',
   'callback_later',
   'booked',
+  'confirmed',
+  'rescheduled',
   'booked_elsewhere',
   'do_not_call',
 ]
 
+/** Dispositions that record an appointment time (`bookedAt` required). */
+export const APPOINTMENT_DISPOSITIONS: readonly LeadDisposition[] = ['booked', 'confirmed', 'rescheduled']
 export type LeadDisposition = (typeof LEAD_DISPOSITIONS)[number]
 
 const HOUR = 60 * 60 * 1000
@@ -551,6 +570,8 @@ export const LEAD_DISPOSITION_LABELS: Record<LeadDisposition, string> = {
   spoke_did_not_book: 'Spoke, didn\u2019t book',
   callback_later: 'Spoke, call back later',
   booked: 'Booked',
+  confirmed: 'Confirmed requested time',
+  rescheduled: 'Rescheduled',
   booked_elsewhere: 'Booked elsewhere',
   do_not_call: 'Do not call',
 }
@@ -646,5 +667,29 @@ export function leadDispositionFieldError(input: {
 }): string | null {
   if (input.disposition === 'callback_later' && !input.callBackAt) return 'Pick when they asked to be called back.'
   if (input.disposition === 'booked' && !input.bookedAt) return 'Pick the appointment date and time.'
+  if (input.disposition === 'confirmed' && !input.bookedAt) return 'Pick the time you confirmed with them.'
+  if (input.disposition === 'rescheduled' && !input.bookedAt) return 'Pick the new appointment date and time.'
   return null
+}
+
+/**
+ * Which screen the lead script opens on. A lead who picked a day and time on
+ * the ad form believes they already booked, so the call starts on the
+ * confirmation screen instead of the "why didn't you book" open — until
+ * the appointment is locked in (booked/confirmed) or the lead is closed.
+ * Null means the flow's normal first step.
+ */
+export const LEAD_CONFIRM_STEP_KEY = 'confirm_requested'
+
+export function leadEntryStepKey(lead: {
+  status: LeadStatus | string
+  requestedAt?: string | null
+}): string | null {
+  if (!lead.requestedAt) return null
+  if (lead.status === 'booked' || lead.status === 'confirmed' || lead.status === 'closed') return null
+  return LEAD_CONFIRM_STEP_KEY
+}
+
+export function isAppointmentDisposition(d: LeadDisposition | string): boolean {
+  return (APPOINTMENT_DISPOSITIONS as readonly string[]).includes(d)
 }

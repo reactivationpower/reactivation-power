@@ -94,8 +94,15 @@ export const campaignLeadsTable = pgTable(
     source: text("source").notNull(), // upload | webhook | gohighlevel | manual
     /** When the lead responded to the ad (list uploads default to the upload time). */
     submittedAt: timestamp("submitted_at", { withTimezone: true }).notNull().defaultNow(),
-    /** Free text the lead gave for when they'd like to come in; acted on by a later task. */
+    /** Free text the lead gave for when they'd like to come in, exactly as written. */
     requestedTime: text("requested_time"),
+    /**
+     * `requested_time` resolved to a wall-clock slot when it named a day and a
+     * time (see @workspace/shared/lead-requested-time). Zone-less on purpose:
+     * the office's clock, read back by the browser in local time. Drives the
+     * confirmation-call entry point and the call-next ordering.
+     */
+    requestedAt: timestamp("requested_at", { mode: "string" }),
     /** What they wrote on the form. */
     message: text("message"),
     status: text("status").notNull().default("new"), // new | attempted | reached | booked | confirmed | closed
@@ -117,6 +124,7 @@ export const campaignLeadsTable = pgTable(
     index("campaign_leads_campaign_submitted_idx").on(t.campaignId, t.submittedAt),
     index("campaign_leads_owner_idx").on(t.ownerId),
     index("campaign_leads_owner_due_idx").on(t.ownerId, t.nextDueAt),
+    index("campaign_leads_owner_requested_idx").on(t.ownerId, t.requestedAt),
   ],
 ).enableRLS();
 
@@ -144,7 +152,7 @@ export const leadCallsTable = pgTable(
     notes: text("notes"),
     /** Requested callback time for `callback_later`. */
     callBackAt: timestamp("call_back_at", { withTimezone: true }),
-    /** Appointment time for `booked`. */
+    /** Appointment time for `booked`, `confirmed` and `rescheduled`. */
     bookedAt: timestamp("booked_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },

@@ -1,5 +1,5 @@
 import { randomBytes, randomUUID } from "node:crypto";
-import { and, asc, desc, eq, inArray, isNotNull, lt, lte, ne, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gte, inArray, isNotNull, lt, lte, ne, notInArray, sql } from "drizzle-orm";
 import {
   campaignLeadsTable,
   campaignWebhookEventsTable,
@@ -13,6 +13,13 @@ import {
   type LeadCampaignRow,
 } from "@workspace/db";
 import type { MappedLead, WebhookFieldMapping } from "@workspace/shared/lead-webhooks";
+import {
+  REQUESTED_GRACE_MS,
+  REQUESTED_SOON_MS,
+  officeClock,
+  officeWallClockOf,
+  parseRequestedTime,
+} from "@workspace/shared/lead-requested-time";
 import {
   applyLeadDisposition,
   reopenParkedLead,
@@ -268,8 +275,8 @@ export async function importLeads(opts: {
   submittedAt?: Date;
 }): Promise<ImportLeadsResult> {
   const existing = await campaignPhoneKeys(opts.campaign.id);
-  const plan = planLeadImport(opts.rows, existing);
   const submittedAt = opts.submittedAt ?? new Date();
+  const plan = planLeadImport(opts.rows, existing, submittedAt);
 
   let imported = 0;
   const insertedIds: string[] = [];
@@ -291,6 +298,7 @@ export async function importLeads(opts: {
           source: opts.source,
           submittedAt: lead.submittedAt ?? submittedAt,
           requestedTime: lead.requestedTime,
+          requestedAt: lead.requestedAt,
           message: lead.message,
           status: "new" as const,
           createdBy: opts.createdBy,
@@ -343,6 +351,7 @@ export async function upsertWebhookLead(opts: {
     source: opts.source,
     submittedAt,
     requestedTime: opts.lead.requestedTime || null,
+    requestedAt: parseRequestedTime(opts.lead.requestedTime, officeClock(submittedAt)),
     message: opts.lead.message || null,
     status: 'new' as const,
     createdBy: null,
@@ -357,6 +366,8 @@ export async function upsertWebhookLead(opts: {
         updatedAt: submittedAt,
         email: sql`coalesce(excluded.email, ${campaignLeadsTable.email})`,
         requestedTime: sql`coalesce(excluded.requested_time, ${campaignLeadsTable.requestedTime})`,
+        // A re-submission with a new time replaces the old slot; a blank one keeps it.
+        requestedAt: sql`case when excluded.requested_time is null then ${campaignLeadsTable.requestedAt} else excluded.requested_at end`,
         message: sql`coalesce(excluded.message, ${campaignLeadsTable.message})`,
       },
     })
@@ -572,14 +583,20 @@ export interface CallNextItem {
   lead: CampaignLeadRow;
   campaign: Pick<LeadCampaignRow, "id" | "name" | "nicheId">;
   /** Why it is on the list. */
-  reason: "new" | "due";
+  reason: "requested" | "new" | "due";
 }
 
 /**
- * The "call next" list across the owner's ACTIVE campaigns: every untouched
- * lead newest first, then callbacks and retries that have come due, soonest
- * first (a booked lead's requested callback included). Parked leads (next_due_at null after the cadence ran out) and
- * paused/archived campaigns stay off the list.
+ * The "call next" list across the owner's ACTIVE campaigns: first the leads
+ * who asked for an appointment time on the ad form that falls within the
+ * next two days (or was missed less than a day ago) and are not yet locked
+ * in, soonest slot first; then every untouched lead newest first; then
+ * callbacks and retries that have come due, soonest first (a booked lead's
+ * requested callback included). Parked leads (next_due_at null after the
+ * cadence ran out) and paused/archived campaigns stay off the list.
+ *
+ * requested_at is a zone-less wall clock (the office's, Eastern), so `now`
+ * is converted to the office clock before the comparison.
  */
 export async function callNext(
   ownerId: string,
@@ -595,7 +612,26 @@ export async function callNext(
     eq(campaignLeadsTable.ownerId, ownerId),
     eq(leadCampaignsTable.status, "active"),
   );
-  const [fresh, due] = await Promise.all([
+  const [requested, fresh, due] = await Promise.all([
+    db
+      .select({ lead: campaignLeadsTable, campaign: campaignCols })
+      .from(campaignLeadsTable)
+      .innerJoin(
+        leadCampaignsTable,
+        eq(leadCampaignsTable.id, campaignLeadsTable.campaignId),
+      )
+      .where(
+        and(
+          base,
+          // Mirrors leadEntryStepKey: anyone whose slot is not locked in yet.
+          notInArray(campaignLeadsTable.status, ["booked", "confirmed", "closed"]),
+          isNotNull(campaignLeadsTable.requestedAt),
+          gte(campaignLeadsTable.requestedAt, officeWallClockOf(new Date(now.getTime() - REQUESTED_GRACE_MS))),
+          lte(campaignLeadsTable.requestedAt, officeWallClockOf(new Date(now.getTime() + REQUESTED_SOON_MS))),
+        ),
+      )
+      .orderBy(asc(campaignLeadsTable.requestedAt))
+      .limit(limit),
     db
       .select({ lead: campaignLeadsTable, campaign: campaignCols })
       .from(campaignLeadsTable)
@@ -629,9 +665,11 @@ export async function callNext(
       .orderBy(asc(campaignLeadsTable.nextDueAt))
       .limit(limit),
   ]);
+  const seen = new Set(requested.map((r) => r.lead.id));
   return [
-    ...fresh.map((r) => ({ ...r, reason: "new" as const })),
-    ...due.map((r) => ({ ...r, reason: "due" as const })),
+    ...requested.map((r) => ({ ...r, reason: "requested" as const })),
+    ...fresh.filter((r) => !seen.has(r.lead.id)).map((r) => ({ ...r, reason: "new" as const })),
+    ...due.filter((r) => !seen.has(r.lead.id)).map((r) => ({ ...r, reason: "due" as const })),
   ].slice(0, limit);
 }
 

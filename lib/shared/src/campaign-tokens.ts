@@ -1,4 +1,5 @@
 import { formatDollars, type PriceLineStyle } from './lead-followup.ts'
+import { spokenRequestedTime } from './lead-requested-time.ts'
 
 /**
  * Merge tokens a LEAD script reads from the campaign the lead answered.
@@ -20,6 +21,7 @@ export const CAMPAIGN_TOKEN_KEYS = [
   'urgency_note',
   'submitted_date',
   'submitted_ago',
+  'requested_time',
 ] as const
 export type CampaignTokenKey = (typeof CAMPAIGN_TOKEN_KEYS)[number]
 export type CampaignTokens = Record<CampaignTokenKey, string>
@@ -35,7 +37,12 @@ export interface CampaignTokenSource {
 
 export interface LeadTokenSource {
   submittedAt: string | Date | null
+  /** Wall-clock slot from the ad form (see lead-requested-time); null when the lead gave none. */
+  requestedAt?: string | null
 }
+
+/** What the confirmation screen says on the practice page, where there is no lead. */
+export const REQUESTED_TIME_PLACEHOLDER = 'the time you asked for'
 
 /** Bullet marker the player recognises as a list paragraph. */
 export const OFFER_ITEM_BULLET = '\u2022'
@@ -116,5 +123,8 @@ export function campaignTokens(
     urgency_note: (campaign.urgencyNote ?? '').trim(),
     submitted_date: formatSubmittedDate(lead?.submittedAt ?? null, now),
     submitted_ago: spokenAgo(lead?.submittedAt ?? null, now),
+    // "Tuesday at 2": only the confirmation screens read it, and they are
+    // only shown to a lead who has a slot, so the fallback is for practice.
+    requested_time: spokenRequestedTime(lead?.requestedAt ?? null, now) || REQUESTED_TIME_PLACEHOLDER,
   }
 }

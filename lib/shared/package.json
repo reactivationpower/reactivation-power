@@ -12,6 +12,7 @@
     "./format": "./src/format.ts",
     "./lazy-time": "./src/lazy-time.ts",
     "./lead-followup": "./src/lead-followup.ts",
+    "./lead-requested-time": "./src/lead-requested-time.ts",
     "./lead-validation": "./src/lead-validation.ts",
     "./lead-webhooks": "./src/lead-webhooks.ts",
     "./notes-text": "./src/notes-text.ts",

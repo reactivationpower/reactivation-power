@@ -8,6 +8,8 @@ import {
   type CampaignStatus,
   type LeadStatus,
 } from '@workspace/shared/lead-followup'
+import { formatRequestedAt } from '@workspace/shared/lead-requested-time'
+import { CalendarClock } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 
@@ -31,6 +33,34 @@ export function LeadStatusBadge({ status }: { status: LeadStatus }) {
       {LEAD_STATUS_LABELS[status] ?? status}
     </span>
   )
+}
+
+/**
+ * "Requested: Tue Oct 6, 2:00 PM" for a lead whose form answer resolved to a
+ * day and time; falls back to the free text they typed, or nothing.
+ */
+export function RequestedTimeBadge({
+  requestedAt,
+  requestedTime,
+  className,
+}: {
+  requestedAt?: string | null
+  requestedTime?: string | null
+  className?: string
+}) {
+  if (requestedAt) {
+    return (
+      <span
+        className={cn('inline-flex items-center gap-1 rounded-md border border-teal-200 bg-teal-50 px-2 py-0.5 text-xs font-medium text-teal-900', className)}
+        data-testid="badge-lead-requested"
+      >
+        <CalendarClock className="size-3.5" aria-hidden="true" />
+        Requested: {formatRequestedAt(requestedAt)}
+      </span>
+    )
+  }
+  if (requestedTime) return <span className={cn('text-sm text-muted-foreground', className)}>{requestedTime}</span>
+  return null
 }
 
 export function CampaignStatusBadge({ status }: { status: CampaignStatus }) {

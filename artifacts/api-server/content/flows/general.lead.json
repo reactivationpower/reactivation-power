@@ -138,6 +138,36 @@
       "title": "Scheduling",
       "content": "Great, {{contact_first_name}}. We have time this week on (day) and (day). Do mornings or afternoons work better for you?\n\n(Let them answer.)\n\nPerfect. I have (time) and (time). Which is better?\n\n(Let them answer.)\n\nGreat, I've got you down for (day) at (time). You'll get everything in the {{offer_name}} at that visit.\n\n(Have two days and two times ready before the call, both within 48 hours.)\n\n(Once booked, add your notes and press the green \"Booked\" button below to log the call.)",
       "sort_order": 200
+    },
+    {
+      "step_key": "confirm_requested",
+      "title": "Confirm Their Requested Time",
+      "content": "Hi, this is {{caller_name}} with {{provider_name}}'s office. Is {{contact_first_name}} available, please?\n\nHi {{contact_first_name}}. You reached out {{submitted_ago}} about our {{offer_name}}, and you asked for {{requested_time}}. I'm calling to lock that in. Does that time still work for you?\n\n(Let them answer. Tap what you hear.)",
+      "sort_order": 300
+    },
+    {
+      "step_key": "close_confirmed",
+      "title": "Locked In",
+      "content": "Perfect. You're all set for {{requested_time}} with {{provider_name}}. You'll get everything in the {{offer_name}} at that visit. Anything I can answer before then?\n\n(Let them answer.)\n\nGreat. We'll see you then, {{contact_first_name}}.\n\n(Add your notes and press the green \"Confirmed requested time\" button below to log the call. The time is already filled in.)",
+      "sort_order": 301
+    },
+    {
+      "step_key": "reschedule",
+      "title": "Move the Time",
+      "content": "No problem at all, {{contact_first_name}}. Let's find one that works. Do mornings or afternoons work better for you?\n\n(Let them answer.)\n\nI have (time) and (time). Which is better?\n\n(Let them answer. Have two days and two times ready before the call, both within 48 hours.)\n\nGreat, let's move you to (day) at (time). Does that work?\n\n(Wait for the yes. Then tap the button below and pick the new time.)",
+      "sort_order": 302
+    },
+    {
+      "step_key": "close_rescheduled",
+      "title": "New Time Locked In",
+      "content": "Perfect. You're all set for (day) at (time) with {{provider_name}}. You'll get everything in the {{offer_name}} at that visit. Anything I can answer before then?\n\n(Let them answer.)\n\nGreat. We'll see you then, {{contact_first_name}}.\n\n(Pick the new time in the \"Rescheduled\" button below, add your notes, and log the call.)",
+      "sort_order": 303
+    },
+    {
+      "step_key": "confirm_unsure",
+      "title": "They're Not Sure They Want to Come In",
+      "content": "That's okay, {{contact_first_name}}. Nothing is locked in until you're ready. Just so we're on the same page, here's what the {{offer_name}} includes:\n\n{{offer_items}}\n\n{{price_line}}\n\n{{urgency_note}}\n\nCan I ask what's giving you pause?\n\n(Let them answer. Tap what you hear.)",
+      "sort_order": 304
     }
   ],
   "choices": [
@@ -546,6 +576,76 @@
       "to_step_key": "uncover",
       "variant": "objection",
       "sort_order": 1
+    },
+    {
+      "from_step_key": "confirm_requested",
+      "label": "Confirmed: that time works",
+      "to_step_key": "close_confirmed",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "confirm_requested",
+      "label": "Needs a different time",
+      "to_step_key": "reschedule",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "confirm_requested",
+      "label": "Not sure they want to come in",
+      "to_step_key": "confirm_unsure",
+      "variant": "objection",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "reschedule",
+      "label": "New time agreed: lock it in",
+      "to_step_key": "close_rescheduled",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "reschedule",
+      "label": "Not sure they want to come in",
+      "to_step_key": "confirm_unsure",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "confirm_unsure",
+      "label": "“I got busy”",
+      "to_step_key": "reason_busy",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "confirm_unsure",
+      "label": "“It was the cost”",
+      "to_step_key": "reason_cost",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "confirm_unsure",
+      "label": "“I’m still deciding”",
+      "to_step_key": "reason_deciding",
+      "variant": "caution",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "confirm_unsure",
+      "label": "“I booked somewhere else”",
+      "to_step_key": "close_booked_elsewhere",
+      "variant": "negative",
+      "sort_order": 3
+    },
+    {
+      "from_step_key": "confirm_unsure",
+      "label": "Ready after all: lock the time in",
+      "to_step_key": "close_confirmed",
+      "variant": "positive",
+      "sort_order": 4
     }
   ]
 }

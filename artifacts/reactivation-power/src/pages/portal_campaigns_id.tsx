@@ -9,7 +9,6 @@ import { useRouter } from '@/hooks/use-router'
 import { PageError, PageLoading } from '@/components/page-status'
 import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { CampaignStatusBadge, LeadStatusBadge, OfferSummary } from '@/components/lead-followup/lead-bits'
 import { ImportLeadsDialog } from '@/components/lead-followup/import-leads-dialog'
 import { LeadSourcesTab } from '@/components/lead-followup/lead-sources-tab'
 import { PORTAL_WIDTH } from '@/lib/portal-layout'
@@ -17,6 +16,7 @@ import { cn } from '@/lib/utils'
 import NotFound from '@/pages/not-found'
 import { ArrowLeft, Archive, ArchiveRestore, BookOpen, Pause, Pencil, PhoneCall, Play, Users } from 'lucide-react'
 import { LEAD_SOURCE_LABELS, campaignConversion, formatRate, isLeadDue, isParkedLead, leadCallBlockReason, timeAgo } from '@workspace/shared/lead-followup'
+import { CampaignStatusBadge, LeadStatusBadge, OfferSummary, RequestedTimeBadge } from '@/components/lead-followup/lead-bits'
 
 type Tab = 'leads' | 'sources' | 'offer'
 
@@ -217,7 +217,9 @@ export default function CampaignDetailPage() {
                     </span>
                     <p className="text-xs text-muted-foreground">{LEAD_SOURCE_LABELS[lead.source] ?? lead.source}</p>
                   </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{lead.requestedTime ?? '—'}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    <RequestedTimeBadge requestedAt={lead.requestedAt} requestedTime={lead.requestedTime} /> {!lead.requestedAt && !lead.requestedTime ? '—' : null}
+                  </TableCell>
                   <TableCell><LeadStatusBadge status={lead.status} />{isParkedLead(lead) ? <p className="mt-1 text-xs text-muted-foreground">Parked</p> : null}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">
                     {lead.lastAttemptAt ? timeAgo(lead.lastAttemptAt, nowMs) : '—'}

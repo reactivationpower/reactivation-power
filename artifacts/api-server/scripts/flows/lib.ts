@@ -525,6 +525,10 @@ export function isTerminalStep(stepKey: string): boolean {
 export const ENTRY_STEP_PATTERNS: RegExp[] = [
   /^open$/,
   /^(voicemail|wrong_number|dnc)$/,
+  // Lead flows: the call screen starts here (instead of `open`) for a lead
+  // who picked a day and time on the ad form. Keep in sync with
+  // LEAD_CONFIRM_STEP_KEY in lib/shared/src/lead-followup.ts.
+  /^confirm_requested$/,
 ]
 
 /**

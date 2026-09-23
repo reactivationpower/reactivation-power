@@ -10,9 +10,9 @@ import { useRouter } from '@/hooks/use-router'
 import { usePageData } from '@/hooks/use-page-data'
 import { PageError, PageLoading } from '@/components/page-status'
 import { Button } from '@/components/ui/button'
-import { CampaignStatusBadge, LeadStatusBadge, OfferSummary } from '@/components/lead-followup/lead-bits'
 import { PORTAL_NARROW } from '@/lib/portal-layout'
 import NotFound from '@/pages/not-found'
+import { CampaignStatusBadge, LeadStatusBadge, OfferSummary, RequestedTimeBadge } from '@/components/lead-followup/lead-bits'
 
 export default function LeadDetailPage() {
   const { id, leadId } = useParams()
@@ -109,7 +109,12 @@ export default function LeadDetailPage() {
             </dd>
             <dt className="text-muted-foreground">Requested time</dt>
             <dd className="text-foreground" data-testid="text-lead-requested">
-              {lead.requestedTime ? (
+              {lead.requestedAt ? (
+                <span className="inline-flex flex-wrap items-center gap-2">
+                  <RequestedTimeBadge requestedAt={lead.requestedAt} />
+                  {lead.requestedTime ? <span className="text-xs text-muted-foreground">they wrote &ldquo;{lead.requestedTime}&rdquo;</span> : null}
+                </span>
+              ) : lead.requestedTime ? (
                 <span className="inline-flex items-center gap-1.5"><Clock className="size-4 text-muted-foreground" />{lead.requestedTime}</span>
               ) : (
                 <span className="text-muted-foreground">Not given</span>
@@ -157,7 +162,11 @@ export default function LeadDetailPage() {
                   <span className="font-medium text-foreground">{LEAD_DISPOSITION_LABELS[call.disposition] ?? call.disposition}</span>
                   <span className="text-muted-foreground"> · {formatDateTime(call.createdAt)}</span>
                   {call.callBackAt ? <span className="text-muted-foreground"> · call back {formatDateTime(call.callBackAt)}</span> : null}
-                  {call.bookedAt ? <span className="text-muted-foreground"> · booked for {formatDateTime(call.bookedAt)}</span> : null}
+                  {call.bookedAt ? (
+                    <span className="text-muted-foreground">
+                      {' '}· {call.disposition === 'confirmed' ? 'confirmed for' : call.disposition === 'rescheduled' ? 'moved to' : 'booked for'} {formatDateTime(call.bookedAt)}
+                    </span>
+                  ) : null}
                 </p>
                 {call.notes ? <p className="mt-1 text-sm text-foreground">{call.notes}</p> : null}
               </li>
