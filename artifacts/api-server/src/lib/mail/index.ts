@@ -1,11 +1,14 @@
 import { appOrigin } from '@/lib/app-origin'
 import { sendEmail, type SendOptions, type SendResult } from './send'
 import type {
+  AccessPausedData,
+  AccessRestoredData,
   AgreementSentData,
   AgreementSignedData,
   BillingLinkData,
   CancellationRequestedData,
   CancellationScheduledData,
+  PaymentFailedBackupUsedData,
   PaymentFailedData,
   PaymentReceivedData,
   SubscriptionCancelledData,
@@ -48,6 +51,14 @@ export function sendPortalWelcomeEmail(input: {
   )
 }
 
+/**
+ * Customer billing page (card updates, paying an open invoice). Same link
+ * the login-page billing notice uses; the email is prefilled.
+ */
+export function billingPageUrl(email?: string | null): string {
+  const base = `${appOrigin()}/billing`
+  return email ? `${base}?email=${encodeURIComponent(email.trim().toLowerCase())}` : base
+}
 export function sendPaymentReceivedEmail(
   to: string,
   data: Omit<PaymentReceivedData, 'portalUrl'> & { portalUrl?: string },
@@ -64,7 +75,7 @@ export function sendPaymentFailedEmail(
   return sendEmail(
     'payment_failed',
     to,
-    { ...data, updatePaymentUrl: data.updatePaymentUrl ?? `${appOrigin()}/portal/billing` },
+    { ...data, updatePaymentUrl: data.updatePaymentUrl ?? billingPageUrl(to) },
     options,
   )
 }
@@ -77,7 +88,7 @@ export function sendSubscriptionCancelledEmail(
   return sendEmail(
     'subscription_cancelled',
     to,
-    { ...data, reactivateUrl: data.reactivateUrl ?? `${appOrigin()}/portal/billing` },
+    { ...data, reactivateUrl: data.reactivateUrl ?? billingPageUrl(to) },
     options,
   )
 }
@@ -116,4 +127,38 @@ export function sendCancellationRequestedEmail(
   options?: SendOptions,
 ): Promise<SendResult> {
   return sendEmail('cancellation_requested', to, data, options)
+}
+
+export function sendAccessRestoredEmail(
+  to: string,
+  data: Omit<AccessRestoredData, 'portalUrl' | 'billingUrl'> & { portalUrl?: string; billingUrl?: string },
+  options?: SendOptions,
+): Promise<SendResult> {
+  return sendEmail(
+    'access_restored',
+    to,
+    { ...data, portalUrl: data.portalUrl ?? `${appOrigin()}/portal`, billingUrl: data.billingUrl ?? billingPageUrl(to) },
+    options,
+  )
+}
+
+export function sendAccessPausedEmail(
+  to: string,
+  data: Omit<AccessPausedData, 'updatePaymentUrl'> & { updatePaymentUrl?: string },
+  options?: SendOptions,
+): Promise<SendResult> {
+  return sendEmail('access_paused', to, { ...data, updatePaymentUrl: data.updatePaymentUrl ?? billingPageUrl(to) }, options)
+}
+
+export function sendPaymentFailedBackupUsedEmail(
+  to: string,
+  data: Omit<PaymentFailedBackupUsedData, 'updatePaymentUrl'> & { updatePaymentUrl?: string },
+  options?: SendOptions,
+): Promise<SendResult> {
+  return sendEmail(
+    'payment_failed_backup_used',
+    to,
+    { ...data, updatePaymentUrl: data.updatePaymentUrl ?? billingPageUrl(to) },
+    options,
+  )
 }

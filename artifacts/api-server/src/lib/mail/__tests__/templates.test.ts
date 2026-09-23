@@ -26,11 +26,72 @@ describe('transactional templates', () => {
     expect(r.html).toContain('https://app.test/login?email=a%40b.co')
   })
 
+  it('dunning emails name the cards and point at the billing page', () => {
+    const backup = renderTemplate('payment_failed_backup_used', {
+      name: 'Dr. Chen',
+      amountCents: 47500,
+      description: 'Monthly access',
+      reason: 'Your card was declined.',
+      declinedCard: { brand: 'visa', last4: '0341' },
+      chargedCard: { brand: 'mastercard', last4: '4444' },
+      updatePaymentUrl: 'https://x/billing?email=a%40b.co',
+    })
+    expect(backup.subject).toContain('backup card')
+    expect(backup.html).toContain('Visa ending in 0341')
+    expect(backup.html).toContain('Mastercard ending in 4444')
+    expect(backup.html).toContain('access is not affected')
+    expect(backup.html).toContain('https://x/billing?email=a%40b.co')
+
+    const both = renderTemplate('access_paused', {
+      name: 'Dr. Chen',
+      amountCents: 47500,
+      description: 'Monthly access',
+      reason: null,
+      cardsTried: [{ brand: 'visa', last4: '0341' }, { brand: 'mastercard', last4: '4444' }],
+      hadBackupCard: true,
+      updatePaymentUrl: 'https://x/billing',
+    })
+    expect(both.subject).toContain('paused')
+    expect(both.html).toContain('backup card (Mastercard ending in 4444)')
+    const single = renderTemplate('access_paused', {
+      name: 'Dr. Chen',
+      amountCents: 47500,
+      description: 'Monthly access',
+      cardsTried: [{ brand: 'visa', last4: '0341' }],
+      hadBackupCard: false,
+      updatePaymentUrl: 'https://x/billing',
+    })
+    expect(single.html).toContain('no backup card')
+
+    const restored = renderTemplate('access_restored', {
+      name: 'Dr. Chen',
+      amountCents: 47500,
+      description: 'Monthly access',
+      paidAt: '2026-10-02T12:00:00Z',
+      chargedCard: { brand: 'visa', last4: '4242' },
+      portalUrl: 'https://x/portal',
+      billingUrl: 'https://x/billing',
+    })
+    expect(restored.subject).toContain('restored')
+    expect(restored.html).toContain('October 2, 2026')
+    expect(restored.html).toContain('https://x/portal')
+  })
+
   it('payment failed changes tone when access is suspended', () => {
     const base = { name: 'Dr. Chen', amountCents: 49700, description: 'Monthly', updatePaymentUrl: 'https://x/billing' }
     expect(renderTemplate('payment_failed', { ...base, accessSuspended: true }).subject).toContain('paused')
     const retry = renderTemplate('payment_failed', { ...base, accessSuspended: false, nextRetryAt: '2026-10-01T12:00:00Z' })
     expect(retry.subject).toContain('payment failed')
     expect(retry.html).toContain('October 1, 2026')
+  })
+})
+
+describe('greetingName', () => {
+  it('skips honorifics and falls back gracefully', async () => {
+    const { greetingName } = await import('@/lib/mail/templates')
+    expect(greetingName('Dr. Michael Chen')).toBe('Michael')
+    expect(greetingName('Sarah Lee')).toBe('Sarah')
+    expect(greetingName('Dr.')).toBe('there')
+    expect(greetingName(null)).toBe('there')
   })
 })

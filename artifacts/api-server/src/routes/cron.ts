@@ -1,6 +1,7 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { runWithRequestContext } from "@/lib/request-context";
 import { currentDueKey, runCronJob, type CronJobName } from "@/lib/cron/jobs";
+import { retryFailedNotifications } from "@/lib/billing/notifications";
 
 const router: IRouter = Router();
 
@@ -40,3 +41,5 @@ router.get("/cron/demo-reset", cronRoute("demo-reset"));
 router.get("/cron/billing-retry", cronRoute("billing-retry"));
 
 export default router;
+
+      const notifications = await retryFailedNotifications();

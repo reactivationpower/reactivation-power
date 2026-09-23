@@ -1,6 +1,6 @@
 - [Next.js port architecture](next-port-architecture.md) — actions via allow-listed RPC + per-page loaders; CRLF sources, headless H.264 limits, placeholder-grep first.
 - [Supabase admin accounts](supabase-admin-accounts.md) — no DDL access to Supabase; admin roles live in auth app_metadata; invite needs manual-link fallback; Base UI menu API.
-- [Transactional email via Resend](transactional-email.md) — send-only connector key, unverified links. subdomain + RESEND_FROM override, email_log in Replit Postgres, Tabs needs explicit flex-col.
+- [Transactional email via Resend](transactional-email.md) — send-only connector key, RESEND_FROM override, email_log in Replit Postgres, once-per-event mail needs an outbox not a log lookup.
 - [Script flow content-as-code](script-flows.md) — player italics need whole-paragraph parens; apply pairs duplicate from+to by sort_order; demo owner lacks most niches; known dead ends.
 - [Stripe modes & billing tables](stripe-modes-and-billing.md) — env keys are LIVE; workspace uses sandbox via Stripe integration, STRIPE_MODE overrides; billing tables in Replit Postgres.
 - [Stripe dunning & webhook verification](stripe-dunning.md) — access keyed on customers.billing_status; Stripe retries are a Dashboard setting; sandbox test recipe without Stripe CLI.

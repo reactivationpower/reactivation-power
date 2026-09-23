@@ -18,6 +18,7 @@ import { logger } from '@/lib/logger'
 import { getAdminClient } from '@/lib/supabase/admin'
 import { billingStatusAfterPayment, cardToRetry, isAccessBlocked, reconcileAccess, subscriptionNextPaymentAt } from './rules'
 import { generateCommissionForHistory, isCommissionable } from './commissions'
+import { cardSummary, notifyAccessPaused, notifyAccessRestored, notifyBackupCardUsed } from './notifications'
 
 /**
  * Failed-payment policy ("dunning") and the billing ledger.
@@ -30,6 +31,9 @@ import { generateCommissionForHistory, isCommissionable } from './commissions'
  *   3. A daily cron re-attempts every open invoice on both cards; any
  *      successful payment (ours or a card update paid through Stripe)
  *      restores access.
+ *
+ * The customer is emailed at each step (backup card used / access paused /
+ * access restored), once per invoice — see ./notifications.
  *
  * Stripe's own retry schedule must be turned off in the Dashboard (Billing →
  * Subscriptions and emails → Manage failed payments → "Do not retry") so the
@@ -261,6 +265,7 @@ export async function handleInvoicePaid(invoice: Stripe.Invoice, eventId: string
   if (isAccessBlocked(ctx.customer.billingStatus) || ctx.customer.billingBlockedAt) {
     await restoreAccess(ctx.customer.id, subStatus)
     logger.info({ customerId: ctx.customer.id }, 'billing: portal access restored')
+    await notifyAccessRestored({ customer: ctx.customer, invoice })
   } else if (!['active', 'trialing'].includes(ctx.customer.billingStatus)) {
     await restoreAccess(ctx.customer.id, subStatus)
   }
@@ -318,9 +323,25 @@ export async function handleInvoicePaymentFailed(invoice: Stripe.Invoice, eventI
   const failedCards = await failedCardsForInvoice(fresh.id)
   failedCards.add(used.paymentMethodId ?? '')
   const retryCard = cardToRetry(ctx.cards, failedCards)
+  const wasBlocked = isAccessBlocked(ctx.customer.billingStatus) || Boolean(ctx.customer.billingBlockedAt)
+  let retryFailure: string | null = null
   if (retryCard) {
     const outcome = await payInvoiceWith(fresh, retryCard, ctx, 'dunning')
-    if (outcome.ok) return { handled: true, note: `paid with ${retryCard.rank} card` }
+    if (outcome.ok) {
+      // payInvoiceWith already told a paused customer their access is back;
+      // an active customer only needs to know the backup card was used.
+      if (!wasBlocked) {
+        await notifyBackupCardUsed({
+          customer: ctx.customer,
+          invoice: fresh,
+          declined: cardSummary(used) ?? cardSummary(rankOf(ctx.cards, used.paymentMethodId)),
+          charged: cardSummary(retryCard),
+          reason: used.failureMessage,
+        })
+      }
+      return { handled: true, note: `paid with ${retryCard.rank} card` }
+    }
+    retryFailure = outcome.message
   }
   await blockAccess(ctx.customer, used.failureMessage)
   await db
@@ -332,7 +353,21 @@ export async function handleInvoicePaymentFailed(invoice: Stripe.Invoice, eventI
     : ctx.cards.length > 1
       ? 'both cards already declined on this invoice; access blocked'
       : 'no backup card; access blocked'
+  await notifyAccessPaused({
+    customer: ctx.customer,
+    invoice: fresh,
+    cardsTried: cardsTriedOnInvoice(ctx.cards, failedCards, used),
+    hadBackupCard: ctx.cards.length > 1,
+    reason: retryFailure ?? used.failureMessage,
+  })
   return { handled: true, note }
+}
+
+/** Cards that declined on this invoice, primary first, for the paused notice. */
+function cardsTriedOnInvoice(cards: CustomerCard[], failed: Set<string>, used: CardUsed) {
+  const known = cards.filter((c) => failed.has(c.stripePaymentMethodId)).map((c) => cardSummary(c)!)
+  if (known.length === 0 && used.last4) return [cardSummary(used)!]
+  return known
 }
 
 export interface PayOutcome {
@@ -391,6 +426,9 @@ export async function payInvoiceWith(
     }
     await restoreAccess(ctx.customer.id, subStatus)
     logger.info({ customerId: ctx.customer.id, invoiceId: invoice.id, card: card.rank }, 'billing: invoice paid on retry')
+    if (isAccessBlocked(ctx.customer.billingStatus) || ctx.customer.billingBlockedAt) {
+      await notifyAccessRestored({ customer: ctx.customer, invoice: paid, charged: cardSummary(card) })
+    }
     return { ok: true, message: null }
   }
 
@@ -463,8 +501,32 @@ export async function handleSubscriptionUpdated(sub: Stripe.Subscription, eventI
     stripe.invoices.list({ subscription: sub.id, status: 'open', limit: 1 }),
   ])
   const decision = reconcileAccess({ subscriptionStatus: live.status, openInvoices: open.data.length, billingStatus: ctx.customer.billingStatus })
-  if (decision === 'restore') await restoreAccess(ctx.customer.id, live.status)
-  else if (decision === 'block') await blockAccess(ctx.customer, 'Your subscription payment is overdue.')
+  if (decision === 'restore') {
+    await restoreAccess(ctx.customer.id, live.status)
+    if (isAccessBlocked(ctx.customer.billingStatus) || ctx.customer.billingBlockedAt) {
+      await notifyAccessRestored({ customer: ctx.customer, subscriptionId: sub.id })
+    }
+  } else if (decision === 'block') {
+    await blockAccess(ctx.customer, 'Your subscription payment is overdue.')
+    // Tell the customer only once the ledger shows every card on file has
+    // declined on the open invoice. Events are unordered: this can run before
+    // invoice.payment_failed has tried the backup card, and that path sends
+    // the notice itself once it has.
+    const invoice = open.data[0]
+    if (invoice && ctx.cards.length > 0) {
+      const failed = await failedCardsForInvoice(invoice.id)
+      const allDeclined = ctx.cards.every((c) => failed.has(c.stripePaymentMethodId))
+      if (allDeclined) {
+        await notifyAccessPaused({
+          customer: ctx.customer,
+          invoice,
+          cardsTried: ctx.cards.map((c) => cardSummary(c)!),
+          hadBackupCard: ctx.cards.length > 1,
+          reason: null,
+        })
+      }
+    }
+  }
   if (sub.cancel_at || sub.cancel_at_period_end) {
     const when = sub.cancel_at ?? sub.items.data[0]?.current_period_end
     const exists = await hasHistory(
@@ -617,6 +679,7 @@ export async function retryPastDueInvoices(
           const sub = await stripe.subscriptions.retrieve(terms.stripeSubscriptionId)
           if (sub.status === 'active' || sub.status === 'trialing') {
             await restoreAccess(customer.id, sub.status)
+            await notifyAccessRestored({ customer, subscriptionId: terms.stripeSubscriptionId })
             summary.details.push({ customerId: customer.id, invoiceId: '-', result: 'skipped', message: 'no open invoices; access restored' })
           }
         } catch (err) {
@@ -641,6 +704,15 @@ export async function retryPastDueInvoices(
         if (!paid) {
           summary.failed += 1
           summary.details.push({ customerId: customer.id, invoiceId: invoice.id, result: 'failed', message: lastMessage })
+          // Normally already sent by the webhook path; a no-op for that invoice
+          // thanks to the outbox, but covers invoices that never reached it.
+          await notifyAccessPaused({
+            customer,
+            invoice,
+            cardsTried: ctx.cards.map((c) => cardSummary(c)!),
+            hadBackupCard: ctx.cards.length > 1,
+            reason: lastMessage,
+          })
         }
       }
     }

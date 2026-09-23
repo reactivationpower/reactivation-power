@@ -112,6 +112,11 @@ export interface AgreementSignedData {
   adminCopy: boolean
 }
 
+export interface CardSummary {
+  brand?: string | null
+  last4?: string | null
+}
+
 export interface CronFailedData {
   /** Human label of the job, e.g. "Daily billing retry". */
   jobLabel: string
@@ -129,6 +134,9 @@ export interface TemplateDataMap {
   admin_invite: AdminInviteData
   payment_received: PaymentReceivedData
   payment_failed: PaymentFailedData
+  payment_failed_backup_used: PaymentFailedBackupUsedData
+  access_paused: AccessPausedData
+  access_restored: AccessRestoredData
   subscription_cancelled: SubscriptionCancelledData
   agreement_sent: AgreementSentData
   agreement_signed: AgreementSignedData
@@ -166,6 +174,7 @@ const ROLE_LABEL: Record<AdminInviteData['role'], string> = {
 
 const SUPPORT_NOTE = `Questions? Reply to this email and we'll help.`
 
+const HONORIFICS = new Set(['dr', 'dr.', 'mr', 'mr.', 'mrs', 'mrs.', 'ms', 'ms.', 'miss', 'prof', 'prof.'])
 const portalWelcome: TemplateDefinition<'portal_welcome'> = {
   id: 'portal_welcome',
   name: 'Portal account created',
@@ -227,7 +236,7 @@ const adminInvite: TemplateDefinition<'admin_invite'> = {
     html: layout(
       [
         h1(`You're invited to the ${BRAND.name} admin`),
-        p(`Hi ${esc(d.name?.split(' ')[0] || 'there')},`),
+        p(`Hi ${esc(greetingName(d.name))},`),
         p(
           `${d.invitedByName ? esc(d.invitedByName) : 'A super admin'} has invited you to join the ${BRAND.name} admin as a <strong>${ROLE_LABEL[d.role]}</strong>. Set a password and you're in.`,
         ),
@@ -274,7 +283,7 @@ const paymentReceived: TemplateDefinition<'payment_received'> = {
       html: layout(
         [
           h1('Thank you — your payment went through'),
-          p(`Hi ${esc(d.name.split(' ')[0])},`),
+          p(`Hi ${esc(greetingName(d.name))},`),
           p(`This is your receipt for the payment below. Keep it for your records.`),
           details(rows),
           button('Open the portal', d.portalUrl),
@@ -301,7 +310,7 @@ const paymentFailed: TemplateDefinition<'payment_failed'> = {
     reason: 'Your card was declined.',
     accessSuspended: true,
     nextRetryAt: null,
-    updatePaymentUrl: `${BRAND.siteUrl}/portal/billing`,
+    updatePaymentUrl: `${BRAND.siteUrl}/billing`,
   },
   render: (d) => {
     const headline = d.accessSuspended
@@ -320,7 +329,7 @@ const paymentFailed: TemplateDefinition<'payment_failed'> = {
       html: layout(
         [
           h1(headline),
-          p(`Hi ${esc(d.name.split(' ')[0])},`),
+          p(`Hi ${esc(greetingName(d.name))},`),
           p(
             `We tried to charge <strong>${money(d.amountCents)}</strong> for <strong>${esc(d.description)}</strong> and the payment didn't go through${d.reason ? ` (${esc(d.reason.replace(/\.$/, ''))})` : ''}.`,
           ),
@@ -338,6 +347,11 @@ const paymentFailed: TemplateDefinition<'payment_failed'> = {
   },
 }
 
+const cardLabel = (card: CardSummary | null | undefined, fallback = 'your card') => {
+  if (!card?.last4) return fallback
+  const brand = card.brand ? card.brand.charAt(0).toUpperCase() + card.brand.slice(1) : 'Card'
+  return `${esc(brand)} ending in ${esc(card.last4)}`
+}
 const subscriptionCancelled: TemplateDefinition<'subscription_cancelled'> = {
   id: 'subscription_cancelled',
   name: 'Subscription cancelled',
@@ -346,7 +360,7 @@ const subscriptionCancelled: TemplateDefinition<'subscription_cancelled'> = {
     name: 'Dr. Michael Chen',
     description: 'Reactivation Power — monthly',
     accessEndsAt: new Date(Date.now() + 21 * 86400000).toISOString(),
-    reactivateUrl: `${BRAND.siteUrl}/portal/billing`,
+    reactivateUrl: `${BRAND.siteUrl}/billing`,
   },
   render: (d) => {
     const ended = new Date(d.accessEndsAt).getTime() <= Date.now()
@@ -358,7 +372,7 @@ const subscriptionCancelled: TemplateDefinition<'subscription_cancelled'> = {
       html: layout(
         [
           h1('Your subscription has been cancelled'),
-          p(`Hi ${esc(d.name.split(' ')[0])},`),
+          p(`Hi ${esc(greetingName(d.name))},`),
           p(`We've cancelled <strong>${esc(d.description)}</strong> as requested. You won't be charged again.`),
           panel([
             ended
@@ -406,7 +420,7 @@ const agreementSent: TemplateDefinition<'agreement_sent'> = {
       html: layout(
         [
           h1(d.resend ? 'Your service agreement is still waiting for your signature' : 'Your service agreement is ready to sign'),
-          p(`Hi ${esc(d.name.split(' ')[0])},`),
+          p(`Hi ${esc(greetingName(d.name))},`),
           p(
             `Your <strong>${esc(d.agreementTitle)}</strong> is ready on the link below. It covers the ${d.termMonths}-month term, what's included, billing, and how either side can end the agreement. Please read it through, initial each highlighted section and sign electronically — it takes about two minutes. You can do it on your phone or computer.`,
           ),
@@ -515,7 +529,7 @@ const agreementSigned: TemplateDefinition<'agreement_signed'> = {
       html: layout(
         [
           h1(d.adminCopy ? `${esc(d.businessName)} signed their agreement` : 'Your agreement is signed'),
-          p(`Hi ${esc(d.name.split(' ')[0])},`),
+          p(`Hi ${esc(greetingName(d.name))},`),
           p(
             d.adminCopy
               ? `<strong>${esc(d.signerName)}</strong> has signed the <strong>${esc(d.agreementTitle)}</strong> for ${esc(d.businessName)}. The signed agreement and its certificate of completion are attached and available at the link below.`
@@ -687,12 +701,14 @@ const cancellationScheduled: TemplateDefinition<'cancellation_scheduled'> = {
 }
 
 type AnyTemplate = { [K in TemplateId]: TemplateDefinition<K> }[TemplateId]
-
 export const TEMPLATES: { [K in TemplateId]: TemplateDefinition<K> } = {
   portal_welcome: portalWelcome,
   admin_invite: adminInvite,
   payment_received: paymentReceived,
   payment_failed: paymentFailed,
+  payment_failed_backup_used: paymentFailedBackupUsed,
+  access_paused: accessPaused,
+  access_restored: accessRestored,
   subscription_cancelled: subscriptionCancelled,
   agreement_sent: agreementSent,
   agreement_signed: agreementSigned,
@@ -703,7 +719,6 @@ export const TEMPLATES: { [K in TemplateId]: TemplateDefinition<K> } = {
 }
 
 export const TEMPLATE_IDS = Object.keys(TEMPLATES) as TemplateId[]
-
 export function isTemplateId(value: unknown): value is TemplateId {
   return typeof value === 'string' && value in TEMPLATES
 }
@@ -714,4 +729,199 @@ export function listTemplates(): AnyTemplate[] {
 
 export function renderTemplate<K extends TemplateId>(id: K, data: TemplateDataMap[K]): RenderedEmail {
   return TEMPLATES[id].render(data)
+}
+
+/** Card 1 declined, card 2 paid the invoice — access was never interrupted. */
+export interface PaymentFailedBackupUsedData {
+  name: string
+  amountCents: number
+  description: string
+  /** Decline message from the processor, if any. */
+  reason?: string | null
+  declinedCard?: CardSummary | null
+  chargedCard?: CardSummary | null
+  updatePaymentUrl: string
+}
+
+const accessRestored: TemplateDefinition<'access_restored'> = {
+  id: 'access_restored',
+  name: 'Access restored — payment received',
+  description:
+    'Sent when a payment goes through after access was paused: our daily retry, an admin retry, or the customer paying after updating a card. Confirms the portal is open again.',
+  sample: {
+    name: 'Dr. Michael Chen',
+    amountCents: 47500,
+    description: 'Monthly access · Oct 1, 2026 – Nov 1, 2026',
+    paidAt: new Date().toISOString(),
+    chargedCard: { brand: 'visa', last4: '4242' },
+    portalUrl: `${BRAND.siteUrl}/portal`,
+    billingUrl: `${BRAND.siteUrl}/billing`,
+  },
+  render: (d) => {
+    const preview = `Your payment of ${money(d.amountCents)} went through and your portal access is back on.`
+    const rows: Array<[string, string]> = [
+      ['Description', esc(d.description)],
+      ['Amount paid', money(d.amountCents)],
+      ['Date', longDate(d.paidAt)],
+    ]
+    if (d.chargedCard?.last4) rows.push(['Payment method', cardLabel(d.chargedCard)])
+    return {
+      subject: `You're back in: ${BRAND.name} access restored`,
+      previewText: preview,
+      html: layout(
+        [
+          h1('Payment received — your access is restored'),
+          p(`Hi ${esc(greetingName(d.name))},`),
+          p(`Thank you — the payment below went through and your team's portal access is back on. Nothing else is needed.`),
+          details(rows),
+          panel(
+            [
+              `<strong>Everything is where you left it.</strong> Contacts, call history, scripts and progress were kept while access was paused.`,
+            ],
+            '#16a34a',
+          ),
+          button('Open the portal', d.portalUrl),
+          small(
+            `Want to avoid this next time? Make sure the cards on your <a href="${esc(d.billingUrl)}" style="color:${BRAND.teal};">billing page</a> are current.`,
+          ),
+          signoff('Glad to have you back,'),
+        ],
+        { previewText: preview, footerNote: SUPPORT_NOTE },
+      ),
+    }
+  },
+}
+
+/** Every card on file declined; portal access is paused until an invoice is paid. */
+export interface AccessPausedData {
+  name: string
+  amountCents: number
+  description: string
+  reason?: string | null
+  /** Cards that were tried (in order). Empty when we have no card details. */
+  cardsTried: CardSummary[]
+  /** False when the account has no backup card, so only one attempt was possible. */
+  hadBackupCard: boolean
+  updatePaymentUrl: string
+}
+
+/** First name for the greeting: skips a leading "Dr." so it never reads "Hi Dr.,". */
+export function greetingName(fullName: string | null | undefined, fallback = 'there'): string {
+  const parts = (fullName ?? '').trim().split(/\s+/).filter(Boolean)
+  const first = parts.find((w) => !HONORIFICS.has(w.toLowerCase()))
+  return first ?? fallback
+}
+
+const accessPaused: TemplateDefinition<'access_paused'> = {
+  id: 'access_paused',
+  name: 'Access paused — every card declined',
+  description:
+    'Sent when the primary and backup cards both decline (or the only card on file declines) and portal access is shut off. Links to the billing page to update a card and pay.',
+  sample: {
+    name: 'Dr. Michael Chen',
+    amountCents: 47500,
+    description: 'Monthly access · Oct 1, 2026 – Nov 1, 2026',
+    reason: 'Your card has insufficient funds.',
+    cardsTried: [
+      { brand: 'visa', last4: '0341' },
+      { brand: 'mastercard', last4: '4444' },
+    ],
+    hadBackupCard: true,
+    updatePaymentUrl: `${BRAND.siteUrl}/billing`,
+  },
+  render: (d) => {
+    const tried = d.cardsTried.filter((c) => c.last4)
+    const cardsSentence = d.hadBackupCard
+      ? tried.length >= 2
+        ? `We tried your primary card (${cardLabel(tried[0])}) and then your backup card (${cardLabel(tried[1])}); both were declined${declineNote(d.reason)}.`
+        : `We tried both cards on file and both were declined${declineNote(d.reason)}.`
+      : `We tried the card on file (${cardLabel(tried[0])}) and it was declined${declineNote(d.reason)}, and there is no backup card to fall back on.`
+    const preview = `We couldn't collect ${money(d.amountCents)} for ${d.description}, so portal access is paused until it's settled.`
+    return {
+      subject: `Action needed: your ${BRAND.name} access is paused`,
+      previewText: preview,
+      html: layout(
+        [
+          h1('Your access has been paused — update your card to restore it'),
+          p(`Hi ${esc(greetingName(d.name))},`),
+          p(`We couldn't collect <strong>${money(d.amountCents)}</strong> for <strong>${esc(d.description)}</strong>. ${cardsSentence}`),
+          panel(
+            [
+              `<strong>Your team's portal access is paused</strong> until this payment goes through. Everything is saved — your contacts, call history and progress will be right where you left them.`,
+            ],
+            '#dc2626',
+          ),
+          p(
+            `To get back in, open your billing page, add or update a card, and pay the open invoice. Access comes back automatically the moment the payment succeeds — we'll email you to confirm. We'll also retry the cards on file once a day.`,
+          ),
+          button('Update card and restore access', d.updatePaymentUrl),
+          fallbackLink(d.updatePaymentUrl),
+          small(
+            'Common causes: an expired card, a new card number after a replacement, or a bank limit on the charge. Updating the card usually fixes it in under a minute.',
+          ),
+          signoff(),
+        ],
+        { previewText: preview, footerNote: SUPPORT_NOTE },
+      ),
+    }
+  },
+}
+
+const paymentFailedBackupUsed: TemplateDefinition<'payment_failed_backup_used'> = {
+  id: 'payment_failed_backup_used',
+  name: 'Primary card declined — backup card charged',
+  description:
+    'Sent when the primary card declines a subscription charge and the backup card pays the same invoice. Access was never interrupted; asks the customer to check the primary card.',
+  sample: {
+    name: 'Dr. Michael Chen',
+    amountCents: 47500,
+    description: 'Monthly access · Oct 1, 2026 – Nov 1, 2026',
+    reason: 'Your card was declined.',
+    declinedCard: { brand: 'visa', last4: '0341' },
+    chargedCard: { brand: 'mastercard', last4: '4444' },
+    updatePaymentUrl: `${BRAND.siteUrl}/billing`,
+  },
+  render: (d) => {
+    const preview = `Your primary card was declined, so we charged your backup card instead. Nothing to do unless the primary card needs updating.`
+    return {
+      subject: `Heads up: we charged your backup card for ${BRAND.name}`,
+      previewText: preview,
+      html: layout(
+        [
+          h1('Your backup card covered this payment'),
+          p(`Hi ${esc(greetingName(d.name))},`),
+          p(
+            `We tried to charge <strong>${money(d.amountCents)}</strong> for <strong>${esc(d.description)}</strong> to your primary card (${cardLabel(d.declinedCard)}) and it was declined${declineNote(d.reason)}. As a courtesy we charged your backup card (${cardLabel(d.chargedCard)}) instead, and that payment went through.`,
+          ),
+          panel([
+            `<strong>Your access is not affected.</strong> Your team can keep using the portal and the dialer as usual.`,
+          ]),
+          p(
+            `Next month we'll try your primary card first again. If it has expired or been replaced, update it now so you don't get this notice every month.`,
+          ),
+          button('Review your cards', d.updatePaymentUrl),
+          fallbackLink(d.updatePaymentUrl),
+          small(
+            'Common causes: an expired card, a new card number after a replacement, or a bank limit on the charge. If the primary card is fine, you can ignore this email.',
+          ),
+          signoff(),
+        ],
+        { previewText: preview, footerNote: SUPPORT_NOTE },
+      ),
+    }
+  },
+}
+
+const declineNote = (reason: string | null | undefined) =>
+  reason ? ` (${esc(reason.replace(/\.$/, ''))})` : ''
+
+/** A payment went through after access had been paused. */
+export interface AccessRestoredData {
+  name: string
+  amountCents: number
+  description: string
+  paidAt: string
+  chargedCard?: CardSummary | null
+  portalUrl: string
+  billingUrl: string
 }
