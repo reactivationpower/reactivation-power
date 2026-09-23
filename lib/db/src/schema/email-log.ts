@@ -26,7 +26,7 @@ export const emailLogTable = pgTable(
     lastEventAt: timestamp("last_event_at", { withTimezone: true }),
   },
   (t) => [index("email_log_provider_id_idx").on(t.providerId), index("email_log_created_at_idx").on(t.createdAt)],
-);
+).enableRLS();
 
 export const insertEmailLogSchema = createInsertSchema(emailLogTable).omit({ createdAt: true });
 export type InsertEmailLog = z.infer<typeof insertEmailLogSchema>;

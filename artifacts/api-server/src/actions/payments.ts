@@ -42,7 +42,7 @@ export interface PaymentLink {
   created_at: string
   participant_id: string | null
   provisioned_at: string | null
-  // ── Billing terms (Replit Postgres, null for legacy links) ──
+  // ── Billing terms (drizzle tables, null for legacy links) ──
   type: 'one_time' | 'subscription'
   customer_id: string | null
   rep_id: string | null

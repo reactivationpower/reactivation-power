@@ -700,49 +700,6 @@ const cancellationScheduled: TemplateDefinition<'cancellation_scheduled'> = {
   }),
 }
 
-type AnyTemplate = { [K in TemplateId]: TemplateDefinition<K> }[TemplateId]
-export const TEMPLATES: { [K in TemplateId]: TemplateDefinition<K> } = {
-  portal_welcome: portalWelcome,
-  admin_invite: adminInvite,
-  payment_received: paymentReceived,
-  payment_failed: paymentFailed,
-  payment_failed_backup_used: paymentFailedBackupUsed,
-  access_paused: accessPaused,
-  access_restored: accessRestored,
-  subscription_cancelled: subscriptionCancelled,
-  agreement_sent: agreementSent,
-  agreement_signed: agreementSigned,
-  billing_link: billingLink,
-  cancellation_requested: cancellationRequested,
-  cancellation_scheduled: cancellationScheduled,
-  cron_failed: cronFailed,
-}
-
-export const TEMPLATE_IDS = Object.keys(TEMPLATES) as TemplateId[]
-export function isTemplateId(value: unknown): value is TemplateId {
-  return typeof value === 'string' && value in TEMPLATES
-}
-
-export function listTemplates(): AnyTemplate[] {
-  return TEMPLATE_IDS.map((id) => TEMPLATES[id] as AnyTemplate)
-}
-
-export function renderTemplate<K extends TemplateId>(id: K, data: TemplateDataMap[K]): RenderedEmail {
-  return TEMPLATES[id].render(data)
-}
-
-/** Card 1 declined, card 2 paid the invoice — access was never interrupted. */
-export interface PaymentFailedBackupUsedData {
-  name: string
-  amountCents: number
-  description: string
-  /** Decline message from the processor, if any. */
-  reason?: string | null
-  declinedCard?: CardSummary | null
-  chargedCard?: CardSummary | null
-  updatePaymentUrl: string
-}
-
 const accessRestored: TemplateDefinition<'access_restored'> = {
   id: 'access_restored',
   name: 'Access restored — payment received',
@@ -924,4 +881,47 @@ export interface AccessRestoredData {
   chargedCard?: CardSummary | null
   portalUrl: string
   billingUrl: string
+}
+
+type AnyTemplate = { [K in TemplateId]: TemplateDefinition<K> }[TemplateId]
+export const TEMPLATES: { [K in TemplateId]: TemplateDefinition<K> } = {
+  portal_welcome: portalWelcome,
+  admin_invite: adminInvite,
+  payment_received: paymentReceived,
+  payment_failed: paymentFailed,
+  payment_failed_backup_used: paymentFailedBackupUsed,
+  access_paused: accessPaused,
+  access_restored: accessRestored,
+  subscription_cancelled: subscriptionCancelled,
+  agreement_sent: agreementSent,
+  agreement_signed: agreementSigned,
+  billing_link: billingLink,
+  cancellation_requested: cancellationRequested,
+  cancellation_scheduled: cancellationScheduled,
+  cron_failed: cronFailed,
+}
+
+export const TEMPLATE_IDS = Object.keys(TEMPLATES) as TemplateId[]
+export function isTemplateId(value: unknown): value is TemplateId {
+  return typeof value === 'string' && value in TEMPLATES
+}
+
+export function listTemplates(): AnyTemplate[] {
+  return TEMPLATE_IDS.map((id) => TEMPLATES[id] as AnyTemplate)
+}
+
+export function renderTemplate<K extends TemplateId>(id: K, data: TemplateDataMap[K]): RenderedEmail {
+  return TEMPLATES[id].render(data)
+}
+
+/** Card 1 declined, card 2 paid the invoice — access was never interrupted. */
+export interface PaymentFailedBackupUsedData {
+  name: string
+  amountCents: number
+  description: string
+  /** Decline message from the processor, if any. */
+  reason?: string | null
+  declinedCard?: CardSummary | null
+  chargedCard?: CardSummary | null
+  updatePaymentUrl: string
 }

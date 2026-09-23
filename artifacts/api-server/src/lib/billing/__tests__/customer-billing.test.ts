@@ -2,7 +2,7 @@
  * Customer billing service tests.
  *
  * The throttle tests are pure. The remaining suites drive the real Stripe
- * sandbox (the workspace Stripe integration) plus the Replit Postgres tables,
+ * sandbox (the workspace Stripe integration) plus the Supabase drizzle tables,
  * so they self-skip when Stripe cannot be initialised. They create disposable
  * customers and subscriptions and remove them in afterAll.
  */
@@ -10,6 +10,8 @@ import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 import { eq } from 'drizzle-orm'
 import {
   billingLinksTable,
+  billingNotificationsTable,
+  commissionEntriesTable,
   customerCardsTable,
   customersTable,
   db,
@@ -34,6 +36,10 @@ vi.mock('@/lib/mail', () => ({
     return { ok: true }
   }),
   sendSubscriptionCancelledEmail: vi.fn(async () => ({ ok: true })),
+  // The billing_notifications outbox calls sendEmail directly; without a
+  // mock it would throw inside enqueueAndSend and leave the row pending.
+  sendEmail: vi.fn(async () => ({ ok: true, id: 'mock-email' })),
+  billingPageUrl: (email?: string | null) => `https://example.test/billing?email=${encodeURIComponent(email ?? '')}`,
 }))
 
 let currentParticipant: Record<string, unknown> | null = null
@@ -162,11 +168,18 @@ async function seed(id: string, opts: { startDaysAgo: number; termMonths: number
   return { customer, terms, stripeCustomerId: cus.id, subscriptionId: sub.id }
 }
 
+/**
+ * Remove every row this customer produced. The tests run against the shared
+ * Supabase database, so anything left behind is visible in the admin UI and
+ * (for the notifications outbox) picked up by the daily cron.
+ */
 async function cleanup(id: string) {
   const [t] = await db.select().from(paymentLinkTermsTable).where(eq(paymentLinkTermsTable.customerId, id))
   const [c] = await db.select().from(customersTable).where(eq(customersTable.id, id))
   if (t?.stripeSubscriptionId) await stripe.subscriptions.cancel(t.stripeSubscriptionId).catch(() => undefined)
   if (c?.stripeCustomerId) await stripe.customers.del(c.stripeCustomerId).catch(() => undefined)
+  await db.delete(commissionEntriesTable).where(eq(commissionEntriesTable.customerId, id))
+  await db.delete(billingNotificationsTable).where(eq(billingNotificationsTable.customerId, id))
   await db.delete(billingLinksTable).where(eq(billingLinksTable.customerId, id))
   await db.delete(paymentHistoryTable).where(eq(paymentHistoryTable.customerId, id))
   await db.delete(customerCardsTable).where(eq(customerCardsTable.customerId, id))

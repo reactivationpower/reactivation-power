@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { ScriptFlowPlayer } from './script-flow-player'
-import type { ScriptFlowChoice, ScriptFlowStep } from '@/lib/types'
+import type { ScriptFlowChoice, ScriptFlowStep } from '@workspace/shared/types'
 import type { ConcernOption } from '@workspace/niche-catalog'
 
 // Guards the ChiroThin concern-aware swap: a chip flagged weightRelated:false

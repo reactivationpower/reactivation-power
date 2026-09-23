@@ -27,7 +27,7 @@ export const AUTHORED_COPY_SOURCES: string[] = [
   'artifacts/reactivation-power/src/lib/demo/sample-csv.ts',
   // tokens and fallbacks the player merges into every script
   'artifacts/reactivation-power/src/lib/provider-name.ts',
-  'artifacts/reactivation-power/src/lib/script-merge.ts',
+  'lib/shared/src/script-merge.ts',
   // step fixtures the web player and practice mode render in tests
   'artifacts/reactivation-power/src/lib/script-merge.test.ts',
   'artifacts/reactivation-power/src/components/reactivation/practice-log-preview.test.tsx',

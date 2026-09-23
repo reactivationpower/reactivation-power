@@ -1,7 +1,7 @@
 /**
- * Agreement lifecycle guarantees against the real Replit Postgres schema:
+ * Agreement lifecycle guarantees against the real Supabase Postgres schema:
  * one agreement per link, edit vs sign linearized, and the payment gate.
- * Skipped when DATABASE_URL is not available (e.g. a bare CI runner).
+ * Skipped when SUPABASE_DB_URL is not available (e.g. a bare CI runner).
  */
 import { randomUUID } from 'node:crypto'
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
@@ -23,7 +23,7 @@ vi.mock('@/lib/mail', () => ({
 vi.mock('@/lib/data/admin-users', () => ({ listAdminUsers: async () => [] }))
 vi.mock('@vercel/blob', () => ({ put: vi.fn(), get: vi.fn() }))
 
-const hasDb = Boolean(process.env.DATABASE_URL)
+const hasDb = Boolean(process.env.SUPABASE_DB_URL)
 const d = describe.skipIf(!hasDb)
 
 d('agreement lifecycle', () => {

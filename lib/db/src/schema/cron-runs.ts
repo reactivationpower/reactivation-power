@@ -25,7 +25,7 @@ export const cronRunsTable = pgTable(
     uniqueIndex("cron_runs_job_due_key_idx").on(t.job, t.dueKey),
     index("cron_runs_job_started_idx").on(t.job, t.startedAt),
   ],
-);
+).enableRLS();
 
 export type CronRun = typeof cronRunsTable.$inferSelect;
 export type NewCronRun = typeof cronRunsTable.$inferInsert;

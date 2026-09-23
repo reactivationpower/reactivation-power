@@ -1,7 +1,7 @@
 import { boolean, index, integer, pgTable, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
 
 /**
- * Billing records live in the Replit Postgres. The Supabase `payment_links`
+ * Billing records live in Supabase next to `payment_links`. The `payment_links`
  * row stays the identity of a link (token, buyer name/email, paid flag,
  * provisioned participant); the tables below extend it with the customer
  * record, offer terms, subscription state and cards on file.
@@ -36,7 +36,7 @@ export const customersTable = pgTable(
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index("customers_email_idx").on(t.email), index("customers_participant_idx").on(t.participantId)],
-);
+).enableRLS();
 
 /** One row per payment link (keyed by the Supabase payment_links.id). */
 export const paymentLinkTermsTable = pgTable(
@@ -70,7 +70,7 @@ export const paymentLinkTermsTable = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index("payment_link_terms_customer_idx").on(t.customerId), index("payment_link_terms_token_idx").on(t.token)],
-);
+).enableRLS();
 
 export const customerCardsTable = pgTable(
   "customer_cards",
@@ -89,7 +89,7 @@ export const customerCardsTable = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index("customer_cards_customer_idx").on(t.customerId)],
-);
+).enableRLS();
 
 /**
  * Every Stripe webhook event we have seen, keyed by Stripe's event id, so a
@@ -103,7 +103,7 @@ export const stripeEventsTable = pgTable("stripe_events", {
   error: text("error"),
   receivedAt: timestamp("received_at", { withTimezone: true }).notNull().defaultNow(),
   processedAt: timestamp("processed_at", { withTimezone: true }),
-});
+}).enableRLS();
 
 export type StripeEventStatus = "processing" | "processed" | "ignored" | "failed";
 
@@ -157,7 +157,7 @@ export const paymentHistoryTable = pgTable(
     index("payment_history_invoice_idx").on(t.stripeInvoiceId),
     uniqueIndex("payment_history_refund_idx").on(t.stripeRefundId),
   ],
-);
+).enableRLS();
 
 export type PaymentHistorySource = "webhook" | "dunning" | "cron" | "admin" | "customer";
 
@@ -193,6 +193,6 @@ export const billingLinksTable = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [uniqueIndex("billing_links_token_idx").on(t.token), index("billing_links_customer_idx").on(t.customerId)],
-);
+).enableRLS();
 
 export type BillingLink = typeof billingLinksTable.$inferSelect;

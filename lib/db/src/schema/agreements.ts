@@ -88,7 +88,7 @@ export const agreementsTable = pgTable(
     uniqueIndex("agreements_link_idx").on(t.linkId),
     index("agreements_status_idx").on(t.status),
   ],
-);
+).enableRLS();
 
 export const agreementVersionsTable = pgTable(
   "agreement_versions",
@@ -110,7 +110,7 @@ export const agreementVersionsTable = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [uniqueIndex("agreement_versions_unique_idx").on(t.agreementId, t.version)],
-);
+).enableRLS();
 
 export const agreementInitialsTable = pgTable(
   "agreement_initials",
@@ -127,7 +127,7 @@ export const agreementInitialsTable = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [uniqueIndex("agreement_initials_section_idx").on(t.agreementId, t.sectionId)],
-);
+).enableRLS();
 
 export type AgreementEventType =
   | "created"
@@ -161,7 +161,7 @@ export const agreementEventsTable = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index("agreement_events_agreement_idx").on(t.agreementId, t.createdAt)],
-);
+).enableRLS();
 
 export type Agreement = typeof agreementsTable.$inferSelect;
 export type AgreementVersion = typeof agreementVersionsTable.$inferSelect;

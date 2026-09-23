@@ -55,7 +55,7 @@ export const commissionEntriesTable = pgTable(
     index("commission_entries_rep_idx").on(t.repId, t.occurredAt),
     index("commission_entries_customer_idx").on(t.customerId),
   ],
-);
+).enableRLS();
 
 export type CommissionEntry = typeof commissionEntriesTable.$inferSelect;
 export type NewCommissionEntry = typeof commissionEntriesTable.$inferInsert;

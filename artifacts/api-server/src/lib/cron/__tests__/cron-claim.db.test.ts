@@ -5,12 +5,12 @@ import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
  * The slot claim against a real Postgres: concurrent scheduler + external
  * triggers for the same ET day must produce exactly one run, and a crashed
  * run must be re-claimable while a live one is not. Uses the workspace
- * database (DATABASE_URL) with a far-future due key and cleans up after
+ * database (SUPABASE_DB_URL) with a far-future due key and cleans up after
  * itself; skipped when no database is configured.
  */
 
 const DUE_KEY = '2999-01-01'
-const hasDb = Boolean(process.env.DATABASE_URL)
+const hasDb = Boolean(process.env.SUPABASE_DB_URL)
 
 let started = 0
 const retry = vi.fn(async () => {

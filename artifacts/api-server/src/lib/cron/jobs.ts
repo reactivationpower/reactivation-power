@@ -114,11 +114,16 @@ async function runInProgress(job: CronJobName, conn: Tx | typeof db = db): Promi
  * Claim a run row. All trigger modes go through one per-job transaction
  * lock (pg_advisory_xact_lock), so the "is anything running?" check and the
  * insert are atomic across instances: a scheduled run never starts on top of
- * a manual one and two manual clicks cannot both start. Returns null when
- * the job is in progress, or when the slot already has a run that is not a
- * stale crash (another instance or trigger owns it).
+ * a manual one and two manual clicks cannot both start. The reason for a
+ * refused claim is decided inside the same transaction: checking it
+ * afterwards would race the winner finishing (on a remote database the
+ * winner can be done before the loser's second query lands).
  */
-async function claimRun(job: CronJobName, opts: RunOptions): Promise<CronRun | null> {
+type ClaimResult =
+  | { claimed: CronRun }
+  | { claimed: null; inProgress: CronRun | null }
+
+async function claimRun(job: CronJobName, opts: RunOptions): Promise<ClaimResult> {
   const id = randomUUID()
   const base = {
     id,
@@ -134,10 +139,11 @@ async function claimRun(job: CronJobName, opts: RunOptions): Promise<CronRun | n
     // Never two passes of the same job at once, whatever started them: the
     // billing pass must not retry a card while another pass is mid-way
     // through the same invoices.
-    if (await runInProgress(job, tx)) return null
+    const inProgress = await runInProgress(job, tx)
+    if (inProgress) return { claimed: null, inProgress }
     if (!opts.dueKey) {
       const [row] = await tx.insert(cronRunsTable).values(base).returning()
-      return row ?? null
+      return row ? { claimed: row } : { claimed: null, inProgress: null }
     }
     const staleBefore = new Date(Date.now() - CRON_RUN_STALE_MS)
     const [row] = await tx
@@ -160,20 +166,20 @@ async function claimRun(job: CronJobName, opts: RunOptions): Promise<CronRun | n
         setWhere: and(eq(cronRunsTable.status, 'running'), sql`${cronRunsTable.startedAt} < ${staleBefore.toISOString()}`),
       })
       .returning()
-    return row && row.id === id ? row : null
+    return row && row.id === id ? { claimed: row } : { claimed: null, inProgress: null }
   })
 }
 
 /** Run a job now, recording the attempt. Skips (without running) if the slot is already taken. */
 export async function runCronJob(job: CronJobName, opts: RunOptions): Promise<RunOutcome> {
   const def = CRON_JOBS[job]
-  const run = await claimRun(job, opts)
-  if (!run) {
-    const inProgress = await runInProgress(job)
-    if (inProgress) return { ok: true, skipped: true, existing: inProgress, reason: 'a run is already in progress' }
+  const claim = await claimRun(job, opts)
+  if (!claim.claimed) {
+    if (claim.inProgress) return { ok: true, skipped: true, existing: claim.inProgress, reason: 'a run is already in progress' }
     const existing = opts.dueKey ? await runForSlot(job, opts.dueKey) : null
     return { ok: true, skipped: true, existing, reason: opts.dueKey ? `already ran for ${opts.dueKey}` : 'a run is already in progress' }
   }
+  const run = claim.claimed
   const log = logger.child({ cron: { job, runId: run.id, trigger: opts.trigger, dueKey: opts.dueKey ?? null } })
   log.info('cron job started')
   try {

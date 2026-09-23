@@ -31,7 +31,7 @@ export const billingNotificationsTable = pgTable(
     uniqueIndex("billing_notifications_type_invoice_idx").on(t.type, t.stripeInvoiceId),
     index("billing_notifications_status_idx").on(t.status),
   ],
-);
+).enableRLS();
 
 export type BillingNotification = typeof billingNotificationsTable.$inferSelect;
 export type NewBillingNotification = typeof billingNotificationsTable.$inferInsert;
