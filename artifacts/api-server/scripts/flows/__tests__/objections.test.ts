@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { OBJECTION_SHAPE_NICHES, closingLine, lintObjections } from '../lint.ts'
-import { GENERAL_SLUG, listSlugs, readFlowFile, type FlowChoice, type FlowFile, type FlowStep } from '../lib.ts'
+import { GENERAL_SLUG, generalSlugFor, listSlugs, readFlowFile, type FlowChoice, type FlowFile, type FlowStep } from '../lib.ts'
 
 const step = (step_key: string, content: string, sort_order = 0): FlowStep => ({
   step_key,
@@ -228,7 +228,7 @@ describe('R9 against the checked-in flows', () => {
     for (const slug of listSlugs()) {
       const file = readFlowFile(slug)
       if (!file.niche || !OBJECTION_SHAPE_NICHES.has(file.niche.name)) continue
-      expect(lintObjections(slug, file, general).filter((p) => p.level === 'error'), slug).toEqual([])
+      expect(lintObjections(slug, file, readFlowFile(generalSlugFor(slug))).filter((p) => p.level === 'error'), slug).toEqual([])
     }
   })
 
@@ -236,7 +236,7 @@ describe('R9 against the checked-in flows', () => {
     for (const slug of [GENERAL_SLUG, ...listSlugs()]) {
       const file = readFlowFile(slug)
       if (file.niche && OBJECTION_SHAPE_NICHES.has(file.niche.name)) continue
-      expect(lintObjections(slug, file, general).filter((p) => p.level === 'error'), slug).toEqual([])
+      expect(lintObjections(slug, file, readFlowFile(generalSlugFor(slug))).filter((p) => p.level === 'error'), slug).toEqual([])
     }
   })
 })

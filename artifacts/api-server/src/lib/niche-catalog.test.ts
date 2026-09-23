@@ -33,6 +33,7 @@ const NICHE_CATALOG_MODULES = [
 const SHARED_MODULES = [
   'analytics-types',
   'call-time',
+  'campaign-tokens',
   'email-templates',
   'format',
   'lazy-time',

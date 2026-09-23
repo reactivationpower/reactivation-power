@@ -6,12 +6,48 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { PT_TOKEN_KEYS } from '@workspace/script-tokens'
+import { CAMPAIGN_TOKEN_KEYS } from '@workspace/shared/campaign-tokens'
 
 export const CONTENT_DIR = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   '../../content/flows',
 )
 export const GENERAL_SLUG = 'general'
+
+/**
+ * Script families. Every niche may carry one flow per family; the two are
+ * kept apart in the database by the `flow_kind` column, and in this folder
+ * by the file suffix: `chiropractic.json` is the reactivation flow,
+ * `chiropractic.lead.json` the lead flow. Each family has its own general
+ * file (`general.json` / `general.lead.json`) that niche files inherit from.
+ */
+export const FLOW_KINDS = ['reactivation', 'lead'] as const
+export type FlowKind = (typeof FLOW_KINDS)[number]
+export const DEFAULT_FLOW_KIND: FlowKind = 'reactivation'
+const LEAD_SUFFIX = '.lead'
+
+/** `chiropractic.lead` -> lead; `chiropractic` -> reactivation. */
+export function flowKindOf(slug: string): FlowKind {
+  return slug.endsWith(LEAD_SUFFIX) ? 'lead' : 'reactivation'
+}
+
+/** `chiropractic.lead` -> `chiropractic` (the niche part of a slug). */
+export function baseSlugOf(slug: string): string {
+  return slug.endsWith(LEAD_SUFFIX) ? slug.slice(0, -LEAD_SUFFIX.length) : slug
+}
+
+export function slugFor(baseSlug: string, kind: FlowKind): string {
+  return kind === 'lead' ? `${baseSlug}${LEAD_SUFFIX}` : baseSlug
+}
+
+/** The general file a slug inherits from: `general` or `general.lead`. */
+export function generalSlugFor(slug: string): string {
+  return slugFor(GENERAL_SLUG, flowKindOf(slug))
+}
+
+export function isGeneralSlug(slug: string): boolean {
+  return baseSlugOf(slug) === GENERAL_SLUG
+}
 
 export interface FlowStep {
   step_key: string
@@ -140,25 +176,29 @@ export async function loadLiveFlows(supabase: SupabaseClient): Promise<Map<strin
     is_active: boolean
     sort_order: number
   }
-  type StepRow = FlowStep & { niche_id: string | null }
-  type ChoiceRow = FlowChoice & { niche_id: string | null }
+  type StepRow = FlowStep & { niche_id: string | null; flow_kind: FlowKind }
+  type ChoiceRow = FlowChoice & { niche_id: string | null; flow_kind: FlowKind }
 
   const [niches, steps, choices] = await Promise.all([
     fetchAll<NicheRow>(supabase, 'niches', 'id,name,sector,is_active,sort_order'),
-    fetchAll<StepRow>(supabase, 'script_flow_steps', 'niche_id,step_key,title,content,sort_order'),
+    fetchAll<StepRow>(
+      supabase,
+      'script_flow_steps',
+      'niche_id,flow_kind,step_key,title,content,sort_order',
+    ),
     fetchAll<ChoiceRow>(
       supabase,
       'script_flow_choices',
-      'niche_id,from_step_key,label,to_step_key,variant,sort_order',
+      'niche_id,flow_kind,from_step_key,label,to_step_key,variant,sort_order',
     ),
   ])
 
-  const strip = <T extends { niche_id: string | null }>(r: T) => {
-    const { niche_id: _omit, ...rest } = r
+  const strip = <T extends { niche_id: string | null; flow_kind: FlowKind }>(r: T) => {
+    const { niche_id: _omit, flow_kind: _kind, ...rest } = r
     return rest
   }
 
-  const targets: Array<{ slug: string; nicheId: string | null; meta: FlowFile['niche'] }> = [
+  const bases: Array<{ slug: string; nicheId: string | null; meta: FlowFile['niche'] }> = [
     { slug: GENERAL_SLUG, nicheId: null, meta: null },
     ...niches.map((n) => ({
       slug: slugify(n.name),
@@ -168,14 +208,21 @@ export async function loadLiveFlows(supabase: SupabaseClient): Promise<Map<strin
   ]
 
   const out = new Map<string, FlowFile>()
-  for (const t of targets) {
-    const file: FlowFile = {
-      niche: t.meta,
-      steps: steps.filter((s) => s.niche_id === t.nicheId).map(strip),
-      choices: choices.filter((c) => c.niche_id === t.nicheId).map(strip),
+  for (const kind of FLOW_KINDS) {
+    for (const t of bases) {
+      const file: FlowFile = {
+        niche: t.meta,
+        steps: steps.filter((s) => s.niche_id === t.nicheId && s.flow_kind === kind).map(strip),
+        choices: choices
+          .filter((c) => c.niche_id === t.nicheId && c.flow_kind === kind)
+          .map(strip),
+      }
+      // Reactivation general always exists; every other (niche, kind) pair
+      // only when it has rows, so an empty lead family never exports files.
+      const isReactivationGeneral = kind === DEFAULT_FLOW_KIND && t.nicheId === null
+      if (!isReactivationGeneral && file.steps.length === 0 && file.choices.length === 0) continue
+      out.set(slugFor(t.slug, kind), normalizeFlowFile(file))
     }
-    if (t.nicheId && file.steps.length === 0 && file.choices.length === 0) continue
-    out.set(t.slug, normalizeFlowFile(file))
   }
   return out
 }
@@ -356,6 +403,9 @@ export const KNOWN_TOKENS = new Set([
   // shared tables the player substitutes, so a slot neither table defines
   // can never be applied.
   ...PT_TOKEN_KEYS,
+  // Campaign tokens (lead flows): filled from the campaign the lead answered.
+  // Keep in sync with lib/shared/src/campaign-tokens.ts (CAMPAIGN_TOKEN_KEYS).
+  ...CAMPAIGN_TOKEN_KEYS,
 ])
 
 export function tokensIn(text: string): string[] {
@@ -515,7 +565,7 @@ export function findUnreachableSteps(
     for (const c of f.choices) if (c.to_step_key) targets.add(c.to_step_key)
   }
   addTargets(file)
-  if (slug !== GENERAL_SLUG) addTargets(general)
+  if (!isGeneralSlug(slug)) addTargets(general)
   for (const f of referrers) addTargets(f)
 
   const problems: Problem[] = []
@@ -554,7 +604,7 @@ export function findDeadEnds(
   const problems: Problem[] = []
   const hasChoices = new Set<string>()
   for (const c of file.choices) hasChoices.add(c.from_step_key)
-  if (slug !== GENERAL_SLUG) {
+  if (!isGeneralSlug(slug)) {
     for (const c of general.choices) hasChoices.add(c.from_step_key)
   }
   const allowed = new Set(allowList[slug] ?? [])
@@ -645,7 +695,7 @@ export function findObjectionExitDrift(slug: string, file: FlowFile, general: Fl
     own.get(c.from_step_key)!.push(c)
   }
   const inherited = new Map<string, FlowChoice[]>()
-  if (slug !== GENERAL_SLUG) {
+  if (!isGeneralSlug(slug)) {
     for (const c of general.choices) {
       if (!inherited.has(c.from_step_key)) inherited.set(c.from_step_key, [])
       inherited.get(c.from_step_key)!.push(c)

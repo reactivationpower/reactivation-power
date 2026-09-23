@@ -70,6 +70,7 @@ const MODULES: Record<string, ActionModule> = {
 
 type Auth = "public" | "portal" | "admin" | "super_admin";
 
+// hint: Logic changed on both sides. Requires understanding intent of each change.
 /** Allow-list: module -> action -> required auth. Anything else is 404. */
 const ACTIONS: Record<string, Record<string, Auth>> = {
   "admin-auth": {
@@ -110,6 +111,7 @@ const ACTIONS: Record<string, Record<string, Auth>> = {
     // Each action also checks the account holds the Lead Follow-Up product.
     createCampaign: "portal", updateCampaign: "portal", setCampaignStatus: "portal", importLeads: "portal",
     regenerateWebhookUrl: "portal", saveWebhookFieldMapping: "portal", sendTestWebhook: "portal",
+    logLeadCall: "portal",
   },
   demo: {
     enterDemo: "public",

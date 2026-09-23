@@ -40,7 +40,10 @@
 // Allow-listed dead ends are printed as warnings and still applied.
 import { pathToFileURL } from 'node:url'
 import {
-  GENERAL_SLUG,
+  flowKindOf,
+  generalSlugFor,
+  isGeneralSlug,
+  type FlowKind,
   fetchAll,
   findDeadEnds,
   getSupabase,
@@ -58,10 +61,12 @@ import {
 interface StepRow extends FlowStep {
   id: string
   niche_id: string | null
+  flow_kind: FlowKind
 }
 interface ChoiceRow extends FlowChoice {
   id: string
   niche_id: string | null
+  flow_kind: FlowKind
 }
 interface NicheRow {
   id: string
@@ -200,6 +205,7 @@ export function findConflicts(
 interface FilePlan {
   slug: string
   nicheId: string | null
+  flowKind: FlowKind
   stepUpdates: Array<{ id: string; patch: Partial<FlowStep>; why: string[] }>
   stepInserts: FlowStep[]
   choiceUpdates: Array<{ id: string; patch: Partial<FlowChoice>; why: string }>
@@ -244,12 +250,17 @@ async function main() {
   // 1. Read + validate every requested file before touching the database.
   //    Validation always runs on the whole file: a --steps subset on its own
   //    would look like a dead end / missing route even when the file is fine.
-  const general = readFlowFile(GENERAL_SLUG)
+  const generals = new Map<string, FlowFile>()
   const fullFiles = new Map<string, FlowFile>()
   const problems: Problem[] = []
   for (const slug of slugs) {
     const file = readFlowFile(slug)
     fullFiles.set(slug, file)
+    // Each family validates against its own general file (general.json /
+    // general.lead.json); a lead file never routes into reactivation steps.
+    const gs = generalSlugFor(slug)
+    const general = generals.get(gs) ?? readFlowFile(gs)
+    generals.set(gs, general)
     problems.push(...validateForApply(slug, file, general))
   }
   const errors = problems.filter((p) => p.level === 'error')
@@ -295,12 +306,12 @@ async function main() {
     fetchAll<StepRow>(
       supabase,
       'script_flow_steps',
-      'id,niche_id,step_key,title,content,sort_order',
+      'id,niche_id,flow_kind,step_key,title,content,sort_order',
     ),
     fetchAll<ChoiceRow>(
       supabase,
       'script_flow_choices',
-      'id,niche_id,from_step_key,label,to_step_key,variant,sort_order',
+      'id,niche_id,flow_kind,from_step_key,label,to_step_key,variant,sort_order',
     ),
   ])
   const nicheByName = new Map(niches.map((n) => [n.name.toLowerCase(), n.id]))
@@ -312,7 +323,8 @@ async function main() {
   //    git HEAD). Nothing is written until every plan is clean or --force.
   for (const [slug, file] of files) {
     let nicheId: string | null = null
-    if (slug !== GENERAL_SLUG) {
+    const flowKind = flowKindOf(slug)
+    if (!isGeneralSlug(slug)) {
       if (!file.niche) throw new Error(`${slug}.json has no niche block`)
       let id = nicheByName.get(file.niche.name.toLowerCase())
       if (!id && createNiches) {
@@ -349,7 +361,7 @@ async function main() {
       nicheId = id
     }
 
-    console.log(`\n== ${slug} (${nicheId ? `niche ${nicheId}` : 'general'})`)
+    console.log(`\n== ${slug} (${nicheId ? `niche ${nicheId}` : 'general'}, ${flowKind} flow)`)
     const sk = skipped.get(slug)
     if (sk && (sk.steps.length > 0 || sk.choices > 0)) {
       console.log(
@@ -359,7 +371,9 @@ async function main() {
 
     // ---- steps
     const dbSteps = new Map(
-      liveSteps.filter((s) => s.niche_id === nicheId).map((s) => [s.step_key, s]),
+      liveSteps
+        .filter((s) => s.niche_id === nicheId && s.flow_kind === flowKind)
+        .map((s) => [s.step_key, s]),
     )
     const stepUpdates: FilePlan['stepUpdates'] = []
     const stepInserts: FlowStep[] = []
@@ -399,7 +413,9 @@ async function main() {
     for (const k of orphanSteps) console.log(`  keep   step   ${k} (in database, not in file)`)
 
     // ---- choices (paired by from+to, in sort_order, so duplicates line up)
-    const nicheChoices = liveChoices.filter((c) => c.niche_id === nicheId)
+    const nicheChoices = liveChoices.filter(
+      (c) => c.niche_id === nicheId && c.flow_kind === flowKind,
+    )
     const dbChoiceGroups = groupChoices(nicheChoices)
     const fileChoiceGroups = groupChoices(file.choices)
 
@@ -474,7 +490,7 @@ async function main() {
       continue
     }
     if (dryRun) console.log(`  (dry run) ${changes} change(s) not written`)
-    plans.push({ slug, nicheId, stepUpdates, stepInserts, choiceUpdates, choiceInserts, conflicts })
+    plans.push({ slug, nicheId, flowKind, stepUpdates, stepInserts, choiceUpdates, choiceInserts, conflicts })
   }
 
   const conflicted = plans.filter((p) => p.conflicts.length > 0)
@@ -519,7 +535,9 @@ async function main() {
     if (p.stepInserts.length > 0) {
       const { error } = await supabase
         .from('script_flow_steps')
-        .insert(p.stepInserts.map((s) => ({ ...s, niche_id: p.nicheId, updated_at: now })))
+        .insert(
+          p.stepInserts.map((s) => ({ ...s, niche_id: p.nicheId, flow_kind: p.flowKind, updated_at: now })),
+        )
       if (error) throw new Error(`insert steps: ${error.message}`)
       totalInserted += p.stepInserts.length
     }
@@ -534,7 +552,7 @@ async function main() {
     if (p.choiceInserts.length > 0) {
       const { error } = await supabase
         .from('script_flow_choices')
-        .insert(p.choiceInserts.map((c) => ({ ...c, niche_id: p.nicheId })))
+        .insert(p.choiceInserts.map((c) => ({ ...c, niche_id: p.nicheId, flow_kind: p.flowKind })))
       if (error) throw new Error(`insert choices: ${error.message}`)
       totalInserted += p.choiceInserts.length
     }

@@ -44,6 +44,8 @@ import Page_portal_campaigns_new from '@/pages/portal_campaigns_new';
 import Page_portal_campaigns_id from '@/pages/portal_campaigns_id';
 import Page_portal_campaigns_id_edit from '@/pages/portal_campaigns_id_edit';
 import Page_portal_campaigns_id_leads_leadId from '@/pages/portal_campaigns_id_leads_leadId';
+import Page_portal_campaigns_id_leads_leadId_call from '@/pages/portal_campaigns_id_leads_leadId_call';
+import Page_portal_campaigns_id_practice from '@/pages/portal_campaigns_id_practice';
 import Page_portal_analytics_callerId from '@/pages/portal_analytics_callerId';
 import Page_portal_contacts from '@/pages/portal_contacts';
 import Page_portal_contacts_id from '@/pages/portal_contacts_id';
@@ -331,6 +333,20 @@ function Router() {
         <RoutedErrorBoundary>
           <PortalLayout>
             <Page_portal_campaigns_id_leads_leadId />
+          </PortalLayout>
+        </RoutedErrorBoundary>
+      </Route>
+      <Route path="/portal/campaigns/:id/leads/:leadId/call">
+        <RoutedErrorBoundary>
+          <PortalLayout>
+            <Page_portal_campaigns_id_leads_leadId_call />
+          </PortalLayout>
+        </RoutedErrorBoundary>
+      </Route>
+      <Route path="/portal/campaigns/:id/practice">
+        <RoutedErrorBoundary>
+          <PortalLayout>
+            <Page_portal_campaigns_id_practice />
           </PortalLayout>
         </RoutedErrorBoundary>
       </Route>

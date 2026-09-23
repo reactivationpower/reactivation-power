@@ -15,7 +15,10 @@ const hasDb = Boolean(process.env.SUPABASE_DB_URL)
 let started = 0
 const retry = vi.fn(async () => {
   started += 1
-  await new Promise((r) => setTimeout(r, 150)) // hold the slot long enough for the others to collide
+  // Hold the slot long enough for the other claimants to collide. The claim
+  // transactions serialise on an advisory lock, so this must outlast several
+  // round trips to the remote pooler (~100ms+ each), not just a local one.
+  await new Promise((r) => setTimeout(r, 1500))
   return { customers: 0, invoices: 0, paid: 0, failed: 0, details: [] }
 })
 vi.mock('@/lib/billing/dunning', () => ({ retryPastDueInvoices: retry }))

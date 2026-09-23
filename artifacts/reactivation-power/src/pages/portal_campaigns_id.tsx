@@ -1,10 +1,8 @@
 // @ts-nocheck
 import { useState, useTransition } from 'react'
 import { Link, useParams } from 'wouter'
-import { ArrowLeft, Archive, ArchiveRestore, Pause, Pencil, Play, Users } from 'lucide-react'
 import { formatDateTime } from '@workspace/shared/format'
 import { formatPhone } from '@workspace/shared/phone'
-import { LEAD_SOURCE_LABELS, timeAgo } from '@workspace/shared/lead-followup'
 import { setCampaignStatus } from '@/app/actions/lead-followup'
 import { usePageData } from '@/hooks/use-page-data'
 import { useRouter } from '@/hooks/use-router'
@@ -17,6 +15,8 @@ import { LeadSourcesTab } from '@/components/lead-followup/lead-sources-tab'
 import { PORTAL_WIDTH } from '@/lib/portal-layout'
 import { cn } from '@/lib/utils'
 import NotFound from '@/pages/not-found'
+import { ArrowLeft, Archive, ArchiveRestore, BookOpen, Pause, Pencil, PhoneCall, Play, Users } from 'lucide-react'
+import { LEAD_SOURCE_LABELS, campaignConversion, formatRate, isLeadDue, leadCallBlockReason, timeAgo } from '@workspace/shared/lead-followup'
 
 type Tab = 'leads' | 'sources' | 'offer'
 
@@ -35,6 +35,7 @@ export default function CampaignDetailPage() {
   const { campaign, leads, niche, now, webhookUrl, webhookEvents } = data
   const nowMs = new Date(now).getTime()
   const newCount = leads.filter((l) => l.status === 'new').length
+  const conversion = campaignConversion(leads)
 
   function changeStatus(status: 'active' | 'paused' | 'archived') {
     setActionError(null)
@@ -66,6 +67,10 @@ export default function CampaignDetailPage() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          <Button render={<Link href={`/portal/campaigns/${campaign.id}/practice`} />} nativeButton={false} variant="outline" className="gap-2" data-testid="button-practice-script">
+            <BookOpen className="size-4" />
+            Practice script
+          </Button>
           <Button render={<Link href={`/portal/campaigns/${campaign.id}/edit`} />} nativeButton={false} variant="outline" className="gap-2" data-testid="button-edit-campaign">
             <Pencil className="size-4" />
             Edit
@@ -106,6 +111,20 @@ export default function CampaignDetailPage() {
           Archived. Restore it to add leads or call from it again.
         </p>
       ) : null}
+
+      <dl className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4" data-testid="campaign-stats">
+        {[
+          ['Leads received', String(conversion.received), 'stat-received'],
+          ['Reached', String(conversion.reached), 'stat-reached'],
+          ['Booked', String(conversion.booked), 'stat-booked'],
+          ['Booked rate', formatRate(conversion.bookedRate), 'stat-booked-rate'],
+        ].map(([label, value, testId]) => (
+          <div key={label} className="rounded-lg border border-border bg-card px-4 py-3">
+            <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</dt>
+            <dd className="mt-1 text-2xl font-bold tabular-nums text-foreground" data-testid={testId}>{value}</dd>
+          </div>
+        ))}
+      </dl>
 
       <div className="mt-8 flex items-center justify-between gap-4 border-b border-border">
         <div className="flex gap-1" role="tablist">
@@ -165,10 +184,16 @@ export default function CampaignDetailPage() {
                 <TableHead>Requested time</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Last attempt</TableHead>
+                <TableHead className="text-right">
+                  <span className="sr-only">Call</span>
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {leads.map((lead) => (
+              {leads.map((lead) => {
+                const blocked = leadCallBlockReason(campaign, lead)
+                const canCall = !blocked
+                return (
                 <TableRow key={lead.id} data-testid={`row-lead-${lead.id}`}>
                   <TableCell>
                     <Link href={`/portal/campaigns/${campaign.id}/leads/${lead.id}`} className="font-medium text-foreground hover:underline" data-testid={`link-lead-${lead.id}`}>
@@ -186,9 +211,28 @@ export default function CampaignDetailPage() {
                   <TableCell><LeadStatusBadge status={lead.status} /></TableCell>
                   <TableCell className="text-sm text-muted-foreground">
                     {lead.lastAttemptAt ? timeAgo(lead.lastAttemptAt, nowMs) : '—'}
+                    {isLeadDue(lead, nowMs) ? (
+                      <p className="text-xs font-medium text-amber-700">Due now</p>
+                    ) : null}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button
+                      render={<Link href={`/portal/campaigns/${campaign.id}/leads/${lead.id}/call`} />}
+                      nativeButton={false}
+                      size="sm"
+                      variant={lead.status === 'new' ? 'default' : 'outline'}
+                      className={cn('gap-1.5', !canCall && 'pointer-events-none opacity-50')}
+                      aria-disabled={!canCall}
+                      title={blocked ?? undefined}
+                      data-testid={`button-call-lead-${lead.id}`}
+                    >
+                      <PhoneCall className="size-3.5" />
+                      Call
+                    </Button>
                   </TableCell>
                 </TableRow>
-              ))}
+                )
+              })}
             </TableBody>
           </Table>
         </div>

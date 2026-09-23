@@ -14,6 +14,7 @@ if (!raw) {
   throw new Error("SUPABASE_DB_URL must be set to the Supabase Postgres connection string (Session pooler URI).");
 }
 const url = new URL(raw);
+// hint: Logic changed on both sides. Requires understanding intent of each change.
 
 export default defineConfig({
   // Relative to this package; run the scripts through `pnpm --filter @workspace/db`.
@@ -51,5 +52,6 @@ export default defineConfig({
     "lead_campaigns",
     "campaign_leads",
     "campaign_webhook_events",
+    "lead_calls",
   ],
 });

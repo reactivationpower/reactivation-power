@@ -1,25 +1,31 @@
-import { randomBytes, randomUUID } from 'node:crypto'
-import { and, desc, eq, inArray, lt, sql } from 'drizzle-orm'
+import { randomBytes, randomUUID } from "node:crypto";
+import { and, asc, desc, eq, inArray, isNotNull, lt, lte, ne, sql } from "drizzle-orm";
 import {
   campaignLeadsTable,
   campaignWebhookEventsTable,
   db,
+  leadCallsTable,
   leadCampaignsTable,
   productAccessTable,
   type CampaignLeadRow,
   type CampaignWebhookEventRow,
+  type LeadCallRow,
   type LeadCampaignRow,
-} from '@workspace/db'
-import type { MappedLead, WebhookFieldMapping } from '@workspace/shared/lead-webhooks'
+} from "@workspace/db";
+import type { MappedLead, WebhookFieldMapping } from "@workspace/shared/lead-webhooks";
 import {
+  applyLeadDisposition,
+  leadCallBlockReason,
+  leadDispositionFieldError,
   planLeadImport,
   type CampaignInput,
   type CampaignStatus,
+  type LeadDisposition,
   type LeadImportPlan,
   type LeadImportRow,
   type LeadSource,
   type LeadStatus,
-} from '@workspace/shared/lead-followup'
+} from "@workspace/shared/lead-followup";
 
 /**
  * Data access for campaigns and their leads. Every query is scoped by
@@ -29,46 +35,72 @@ import {
 // ---------- campaigns ----------
 
 /** 192 random bits, URL-safe: the secret segment of a campaign's intake URL. */
-export const newWebhookToken = () => randomBytes(24).toString('base64url')
+export const newWebhookToken = () => randomBytes(24).toString("base64url");
 
 export interface CampaignWithCounts extends LeadCampaignRow {
-  leadCount: number
-  newLeadCount: number
+  leadCount: number;
+  newLeadCount: number;
+  /** Leads someone has spoken with at least once (see campaignConversion). */
+  reachedCount: number;
+  bookedCount: number;
 }
 
-export async function listCampaigns(ownerId: string): Promise<CampaignWithCounts[]> {
+/** SQL form of the "reached" rule in campaignConversion; keep the two in step. */
+const REACHED_SQL = sql`(${campaignLeadsTable.status} in ('reached', 'booked', 'confirmed') or (${campaignLeadsTable.status} = 'closed' and ${campaignLeadsTable.lastDisposition} in ('booked_elsewhere', 'do_not_call')))`;
+const BOOKED_SQL = sql`${campaignLeadsTable.status} in ('booked', 'confirmed')`;
+
+export async function listCampaigns(
+  ownerId: string,
+): Promise<CampaignWithCounts[]> {
   const campaigns = await db
     .select()
     .from(leadCampaignsTable)
     .where(eq(leadCampaignsTable.ownerId, ownerId))
-    .orderBy(desc(leadCampaignsTable.createdAt))
-  if (campaigns.length === 0) return []
+    .orderBy(desc(leadCampaignsTable.createdAt));
+  if (campaigns.length === 0) return [];
 
   const counts = await db
     .select({
       campaignId: campaignLeadsTable.campaignId,
       total: sql<number>`count(*)::int`,
       fresh: sql<number>`count(*) filter (where ${campaignLeadsTable.status} = 'new')::int`,
+      reached: sql<number>`count(*) filter (where ${REACHED_SQL})::int`,
+      booked: sql<number>`count(*) filter (where ${BOOKED_SQL})::int`,
     })
     .from(campaignLeadsTable)
-    .where(inArray(campaignLeadsTable.campaignId, campaigns.map((c) => c.id)))
-    .groupBy(campaignLeadsTable.campaignId)
-  const byId = new Map(counts.map((c) => [c.campaignId, c]))
+    .where(
+      inArray(
+        campaignLeadsTable.campaignId,
+        campaigns.map((c) => c.id),
+      ),
+    )
+    .groupBy(campaignLeadsTable.campaignId);
+  const byId = new Map(counts.map((c) => [c.campaignId, c]));
 
   return campaigns.map((c) => ({
     ...c,
     leadCount: byId.get(c.id)?.total ?? 0,
     newLeadCount: byId.get(c.id)?.fresh ?? 0,
-  }))
+    reachedCount: byId.get(c.id)?.reached ?? 0,
+    bookedCount: byId.get(c.id)?.booked ?? 0,
+  }));
 }
 
-export async function getCampaign(ownerId: string, id: string): Promise<LeadCampaignRow | null> {
+export async function getCampaign(
+  ownerId: string,
+  id: string,
+): Promise<LeadCampaignRow | null> {
   const rows = await db
     .select()
     .from(leadCampaignsTable)
-    .where(and(eq(leadCampaignsTable.id, id), eq(leadCampaignsTable.ownerId, ownerId)))
-    .limit(1)
-  return rows[0] ?? null
+    .where(
+      and(
+        eq(leadCampaignsTable.id, id),
+        eq(leadCampaignsTable.ownerId, ownerId),
+      ),
+    )
+    .limit(1);
+  return rows[0] ?? null;
 }
 
 export async function createCampaign(
@@ -89,11 +121,11 @@ export async function createCampaign(
       offerPriceCents: input.offerPriceCents,
       priceLineStyle: input.priceLineStyle,
       urgencyNote: input.urgencyNote,
-      status: 'active',
+      status: "active",
       webhookToken: newWebhookToken(),
     })
-    .returning()
-  return row
+    .returning();
+  return row;
 }
 
 /** The campaign behind an intake URL, whatever account it belongs to. */
@@ -143,9 +175,14 @@ export async function updateCampaign(
       urgencyNote: input.urgencyNote,
       updatedAt: new Date(),
     })
-    .where(and(eq(leadCampaignsTable.id, id), eq(leadCampaignsTable.ownerId, ownerId)))
-    .returning()
-  return row ?? null
+    .where(
+      and(
+        eq(leadCampaignsTable.id, id),
+        eq(leadCampaignsTable.ownerId, ownerId),
+      ),
+    )
+    .returning();
+  return row ?? null;
 }
 
 export async function setCampaignStatus(
@@ -156,44 +193,64 @@ export async function setCampaignStatus(
   const [row] = await db
     .update(leadCampaignsTable)
     .set({ status, updatedAt: new Date() })
-    .where(and(eq(leadCampaignsTable.id, id), eq(leadCampaignsTable.ownerId, ownerId)))
-    .returning()
-  return row ?? null
+    .where(
+      and(
+        eq(leadCampaignsTable.id, id),
+        eq(leadCampaignsTable.ownerId, ownerId),
+      ),
+    )
+    .returning();
+  return row ?? null;
 }
 
 // ---------- leads ----------
 
 /** Newest first: leads decay by the hour, so the freshest response is always on top. */
-export async function listLeads(campaignId: string): Promise<CampaignLeadRow[]> {
+export async function listLeads(
+  campaignId: string,
+): Promise<CampaignLeadRow[]> {
   return db
     .select()
     .from(campaignLeadsTable)
     .where(eq(campaignLeadsTable.campaignId, campaignId))
-    .orderBy(desc(campaignLeadsTable.submittedAt), desc(campaignLeadsTable.createdAt))
+    .orderBy(
+      desc(campaignLeadsTable.submittedAt),
+      desc(campaignLeadsTable.createdAt),
+    );
 }
 
-export async function getLead(ownerId: string, leadId: string): Promise<CampaignLeadRow | null> {
+export async function getLead(
+  ownerId: string,
+  leadId: string,
+): Promise<CampaignLeadRow | null> {
   const rows = await db
     .select()
     .from(campaignLeadsTable)
-    .where(and(eq(campaignLeadsTable.id, leadId), eq(campaignLeadsTable.ownerId, ownerId)))
-    .limit(1)
-  return rows[0] ?? null
+    .where(
+      and(
+        eq(campaignLeadsTable.id, leadId),
+        eq(campaignLeadsTable.ownerId, ownerId),
+      ),
+    )
+    .limit(1);
+  return rows[0] ?? null;
 }
 
 /** Phone keys already present in ONE campaign — the per-campaign dedupe set. */
-export async function campaignPhoneKeys(campaignId: string): Promise<Set<string>> {
+export async function campaignPhoneKeys(
+  campaignId: string,
+): Promise<Set<string>> {
   const rows = await db
     .select({ phoneKey: campaignLeadsTable.phoneKey })
     .from(campaignLeadsTable)
-    .where(eq(campaignLeadsTable.campaignId, campaignId))
-  return new Set(rows.map((r) => r.phoneKey))
+    .where(eq(campaignLeadsTable.campaignId, campaignId));
+  return new Set(rows.map((r) => r.phoneKey));
 }
 
-export interface ImportLeadsResult extends Omit<LeadImportPlan, 'toInsert'> {
-  imported: number
+export interface ImportLeadsResult extends Omit<LeadImportPlan, "toInsert"> {
+  imported: number;
   /** Ids of the rows that landed, in file order (seeds use these). */
-  insertedIds: string[]
+  insertedIds: string[];
 }
 
 /**
@@ -202,22 +259,22 @@ export interface ImportLeadsResult extends Omit<LeadImportPlan, 'toInsert'> {
  * backstop for two uploads racing each other.
  */
 export async function importLeads(opts: {
-  campaign: Pick<LeadCampaignRow, 'id' | 'ownerId'>
-  rows: LeadImportRow[]
-  source: LeadSource
-  createdBy: string
+  campaign: Pick<LeadCampaignRow, "id" | "ownerId">;
+  rows: LeadImportRow[];
+  source: LeadSource;
+  createdBy: string;
   /** Leads without their own submitted time get this one (defaults to now). */
-  submittedAt?: Date
+  submittedAt?: Date;
 }): Promise<ImportLeadsResult> {
-  const existing = await campaignPhoneKeys(opts.campaign.id)
-  const plan = planLeadImport(opts.rows, existing)
-  const submittedAt = opts.submittedAt ?? new Date()
+  const existing = await campaignPhoneKeys(opts.campaign.id);
+  const plan = planLeadImport(opts.rows, existing);
+  const submittedAt = opts.submittedAt ?? new Date();
 
-  let imported = 0
-  const insertedIds: string[] = []
-  const CHUNK = 250
+  let imported = 0;
+  const insertedIds: string[] = [];
+  const CHUNK = 250;
   for (let i = 0; i < plan.toInsert.length; i += CHUNK) {
-    const chunk = plan.toInsert.slice(i, i + CHUNK)
+    const chunk = plan.toInsert.slice(i, i + CHUNK);
     const inserted = await db
       .insert(campaignLeadsTable)
       .values(
@@ -234,14 +291,16 @@ export async function importLeads(opts: {
           submittedAt: lead.submittedAt ?? submittedAt,
           requestedTime: lead.requestedTime,
           message: lead.message,
-          status: 'new' as const,
+          status: "new" as const,
           createdBy: opts.createdBy,
         })),
       )
-      .onConflictDoNothing({ target: [campaignLeadsTable.campaignId, campaignLeadsTable.phoneKey] })
-      .returning({ id: campaignLeadsTable.id })
-    imported += inserted.length
-    insertedIds.push(...inserted.map((r) => r.id))
+      .onConflictDoNothing({
+        target: [campaignLeadsTable.campaignId, campaignLeadsTable.phoneKey],
+      })
+      .returning({ id: campaignLeadsTable.id });
+    imported += inserted.length;
+    insertedIds.push(...inserted.map((r) => r.id));
   }
 
   return {
@@ -250,9 +309,10 @@ export async function importLeads(opts: {
     // Anything the plan meant to insert but the index rejected raced another upload.
     skippedDuplicate: plan.skippedDuplicate + (plan.toInsert.length - imported),
     skippedInvalid: plan.skippedInvalid,
-  }
+  };
 }
 
+/** Used by the demo seed to show a lead that has already been tried once. */
 export type WebhookLeadOutcome = { outcome: 'created' | 'updated'; leadId: string }
 
 /**
@@ -359,7 +419,6 @@ export async function listWebhookEvents(campaignId: string, limit = WEBHOOK_EVEN
     .limit(limit)
 }
 
-/** Used by the demo seed to show a lead that has already been tried once. */
 export async function setLeadStatus(
   ownerId: string,
   leadId: string,
@@ -369,7 +428,185 @@ export async function setLeadStatus(
   await db
     .update(campaignLeadsTable)
     .set({ status, lastAttemptAt, updatedAt: new Date() })
-    .where(and(eq(campaignLeadsTable.id, leadId), eq(campaignLeadsTable.ownerId, ownerId)))
+    .where(
+      and(
+        eq(campaignLeadsTable.id, leadId),
+        eq(campaignLeadsTable.ownerId, ownerId),
+      ),
+    );
+}
+
+// ---------- lead calls ----------
+
+export interface LogLeadCallInput {
+  lead: Pick<CampaignLeadRow, "id">;
+  callerId: string | null;
+  disposition: LeadDisposition;
+  notes: string | null;
+  callBackAt: Date | null;
+  bookedAt: Date | null;
+  now?: Date;
+}
+
+/** Thrown when the lead may not be called (archived campaign, closed lead); `message` is caller-facing. */
+export class LeadCallBlockedError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "LeadCallBlockedError";
+  }
+}
+
+/**
+ * Record one call attempt and move the lead along the cadence. The lead row
+ * carries the derived state (status, next_due_at, unanswered_attempts) so
+ * the call-next list is a single indexed query, not a walk of lead_calls.
+ *
+ * The lead row is locked (SELECT ... FOR UPDATE) for the whole transaction
+ * and the next state is computed from the locked row, so two staff logging
+ * the same lead at once serialise: both attempts are counted and a stale
+ * "no answer" can never overwrite a booking that landed a moment earlier.
+ * Eligibility (archived campaign, do-not-call lead) is re-checked under the
+ * same lock.
+ */
+export async function logLeadCall(
+  input: LogLeadCallInput,
+): Promise<{ call: LeadCallRow; lead: CampaignLeadRow }> {
+  const now = input.now ?? new Date();
+  const fieldError = leadDispositionFieldError(input);
+  if (fieldError) throw new LeadCallBlockedError(fieldError);
+  return db.transaction(async (tx) => {
+    const [current] = await tx
+      .select()
+      .from(campaignLeadsTable)
+      .where(eq(campaignLeadsTable.id, input.lead.id))
+      .for("update");
+    if (!current) throw new LeadCallBlockedError("Lead not found.");
+    const [campaign] = await tx
+      .select({ status: leadCampaignsTable.status })
+      .from(leadCampaignsTable)
+      .where(eq(leadCampaignsTable.id, current.campaignId));
+    const blocked = leadCallBlockReason(campaign ?? { status: "archived" }, current);
+    if (blocked) throw new LeadCallBlockedError(blocked);
+
+    const next = applyLeadDisposition(
+      {
+        status: current.status as LeadStatus,
+        unansweredAttempts: current.unansweredAttempts,
+        bookedAt: current.bookedAt,
+      },
+      {
+        disposition: input.disposition,
+        now,
+        callBackAt: input.callBackAt,
+        bookedAt: input.bookedAt,
+      },
+    );
+    const [call] = await tx
+      .insert(leadCallsTable)
+      .values({
+        id: randomUUID(),
+        leadId: current.id,
+        campaignId: current.campaignId,
+        ownerId: current.ownerId,
+        callerId: input.callerId,
+        disposition: input.disposition,
+        notes: input.notes,
+        callBackAt: input.callBackAt,
+        bookedAt: input.bookedAt,
+        createdAt: now,
+      })
+      .returning();
+    const [lead] = await tx
+      .update(campaignLeadsTable)
+      .set({
+        status: next.status,
+        unansweredAttempts: next.unansweredAttempts,
+        nextDueAt: next.nextDueAt,
+        lastDisposition: next.lastDisposition,
+        bookedAt: next.bookedAt,
+        lastAttemptAt: now,
+        updatedAt: now,
+      })
+      .where(eq(campaignLeadsTable.id, current.id))
+      .returning();
+    return { call, lead };
+  });
+}
+
+/** Newest first: the lead's call history. */
+export async function listLeadCalls(leadId: string): Promise<LeadCallRow[]> {
+  return db
+    .select()
+    .from(leadCallsTable)
+    .where(eq(leadCallsTable.leadId, leadId))
+    .orderBy(desc(leadCallsTable.createdAt));
+}
+
+export interface CallNextItem {
+  lead: CampaignLeadRow;
+  campaign: Pick<LeadCampaignRow, "id" | "name" | "nicheId">;
+  /** Why it is on the list. */
+  reason: "new" | "due";
+}
+
+/**
+ * The "call next" list across the owner's ACTIVE campaigns: every untouched
+ * lead newest first, then callbacks and retries that have come due, soonest
+ * first (a booked lead's requested callback included). Parked leads (next_due_at null after the cadence ran out) and
+ * paused/archived campaigns stay off the list.
+ */
+export async function callNext(
+  ownerId: string,
+  now: Date = new Date(),
+  limit = 50,
+): Promise<CallNextItem[]> {
+  const campaignCols = {
+    id: leadCampaignsTable.id,
+    name: leadCampaignsTable.name,
+    nicheId: leadCampaignsTable.nicheId,
+  };
+  const base = and(
+    eq(campaignLeadsTable.ownerId, ownerId),
+    eq(leadCampaignsTable.status, "active"),
+  );
+  const [fresh, due] = await Promise.all([
+    db
+      .select({ lead: campaignLeadsTable, campaign: campaignCols })
+      .from(campaignLeadsTable)
+      .innerJoin(
+        leadCampaignsTable,
+        eq(leadCampaignsTable.id, campaignLeadsTable.campaignId),
+      )
+      .where(and(base, eq(campaignLeadsTable.status, "new")))
+      .orderBy(
+        desc(campaignLeadsTable.submittedAt),
+        desc(campaignLeadsTable.createdAt),
+      )
+      .limit(limit),
+    db
+      .select({ lead: campaignLeadsTable, campaign: campaignCols })
+      .from(campaignLeadsTable)
+      .innerJoin(
+        leadCampaignsTable,
+        eq(leadCampaignsTable.id, campaignLeadsTable.campaignId),
+      )
+      .where(
+        and(
+          base,
+          // Mirrors isLeadDue: anything not closed with a due time,
+          // including a booked lead who asked for a callback.
+          ne(campaignLeadsTable.status, "closed"),
+          isNotNull(campaignLeadsTable.nextDueAt),
+          lte(campaignLeadsTable.nextDueAt, now),
+        ),
+      )
+      .orderBy(asc(campaignLeadsTable.nextDueAt))
+      .limit(limit),
+  ]);
+  return [
+    ...fresh.map((r) => ({ ...r, reason: "new" as const })),
+    ...due.map((r) => ({ ...r, reason: "due" as const })),
+  ].slice(0, limit);
 }
 
 // ---------- demo / maintenance ----------
@@ -383,9 +620,13 @@ export async function wipeLeadFollowUpForOwners(
   ownerIds: string[],
   opts: { keepProductAccess?: boolean } = {},
 ): Promise<void> {
-  if (ownerIds.length === 0) return
-  await db.delete(leadCampaignsTable).where(inArray(leadCampaignsTable.ownerId, ownerIds))
+  if (ownerIds.length === 0) return;
+  await db
+    .delete(leadCampaignsTable)
+    .where(inArray(leadCampaignsTable.ownerId, ownerIds));
   if (!opts.keepProductAccess) {
-    await db.delete(productAccessTable).where(inArray(productAccessTable.participantId, ownerIds))
+    await db
+      .delete(productAccessTable)
+      .where(inArray(productAccessTable.participantId, ownerIds));
   }
 }

@@ -21,11 +21,13 @@ import {
  * contact loaded, this shows them exactly where those controls will be so the
  * note never points at nothing. Labels and order mirror the live call screen.
  */
-const PREVIEW_BUTTONS: {
+export interface PreviewButton {
   label: string
   icon: typeof PhoneMissed
   tone?: DispositionTone
-}[] = [
+}
+
+const PREVIEW_BUTTONS: PreviewButton[] = [
   { label: 'No Answer', icon: PhoneMissed },
   { label: 'Spoke, Didn\u2019t Schedule', icon: Calendar },
   { label: 'Spoke, Call Back Later', icon: CalendarClock },
@@ -36,7 +38,12 @@ const PREVIEW_BUTTONS: {
 export const PRACTICE_LOG_HINT =
   'Practice mode: nothing is saved here. These buttons and the notes box go live when you open a contact from the dialer.'
 
-export function PracticeLogPreview() {
+export function PracticeLogPreview({
+  buttons = PREVIEW_BUTTONS,
+}: {
+  /** Lead scripts pass their own outcome set so the note about the green "Booked" button points at a real button. */
+  buttons?: PreviewButton[]
+} = {}) {
   return (
     <div
       className="flex flex-col gap-4"
@@ -59,7 +66,7 @@ export function PracticeLogPreview() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2 p-4">
-          {PREVIEW_BUTTONS.map(({ label, icon: Icon, tone }) => (
+          {buttons.map(({ label, icon: Icon, tone }) => (
             <button
               key={label}
               type="button"

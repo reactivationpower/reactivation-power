@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest'
 import { validateForApply } from '../apply.ts'
 import {
   GENERAL_SLUG,
+  generalSlugFor,
+  isGeneralSlug,
   KNOWN_DEAD_ENDS,
   findDeadEnds,
   findUnreachableSteps,
@@ -200,20 +202,22 @@ describe('findUnreachableSteps (R15)', () => {
 
 describe('content/flows', () => {
   it('has no unreachable steps', () => {
-    const gen = readFlowFile(GENERAL_SLUG)
-    const niches = listSlugs().filter((s) => s !== GENERAL_SLUG)
-    const nicheFiles = niches.map((s) => readFlowFile(s))
-    const problems = [
-      ...findUnreachableSteps(GENERAL_SLUG, gen, gen, nicheFiles),
-      ...niches.flatMap((slug) => findUnreachableSteps(slug, readFlowFile(slug), gen)),
-    ]
+    const generals = listSlugs().filter(isGeneralSlug)
+    const problems = generals.flatMap((generalSlug) => {
+      const gen = readFlowFile(generalSlug)
+      const niches = listSlugs().filter((s) => !isGeneralSlug(s) && generalSlugFor(s) === generalSlug)
+      const nicheFiles = niches.map((s) => readFlowFile(s))
+      return [
+        ...findUnreachableSteps(generalSlug, gen, gen, nicheFiles),
+        ...niches.flatMap((slug) => findUnreachableSteps(slug, readFlowFile(slug), gen)),
+      ]
+    })
     expect(problems.map((p) => `${p.where}: ${p.message}`)).toEqual([])
   })
 
   it('has no un-listed dead ends and no stale allow-list entries', () => {
-    const gen = readFlowFile(GENERAL_SLUG)
     const errors = listSlugs().flatMap((slug) =>
-      findDeadEnds(slug, readFlowFile(slug), gen, KNOWN_DEAD_ENDS).filter(
+      findDeadEnds(slug, readFlowFile(slug), readFlowFile(generalSlugFor(slug)), KNOWN_DEAD_ENDS).filter(
         (p) => p.level === 'error' || /stale/.test(p.message),
       ),
     )
@@ -260,9 +264,9 @@ describe('flows:apply validation (validateForApply)', () => {
   })
 
   it('accepts every committed flow file', () => {
-    const gen = readFlowFile(GENERAL_SLUG)
+    // Each family validates against its own general file.
     const errors = listSlugs().flatMap((slug) =>
-      validateForApply(slug, readFlowFile(slug), gen).filter((p) => p.level === 'error'),
+      validateForApply(slug, readFlowFile(slug), readFlowFile(generalSlugFor(slug))).filter((p) => p.level === 'error'),
     )
     expect(errors.map((p) => `${p.where}: ${p.message}`)).toEqual([])
   })

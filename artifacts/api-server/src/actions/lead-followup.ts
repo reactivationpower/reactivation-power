@@ -2,9 +2,13 @@ import { revalidatePath } from 'next/cache'
 import {
   CAMPAIGN_STATUSES,
   MAX_LEAD_IMPORT_ROWS,
+  isLeadDisposition,
+  leadCallBlockReason,
+  leadDispositionFieldError,
   validateCampaignInput,
   type CampaignDraft,
   type CampaignStatus,
+  type LeadDisposition,
   type LeadImportRow,
 } from '@workspace/shared/lead-followup'
 import {
@@ -109,6 +113,67 @@ export async function importLeads(input: { campaignId: string; rows: LeadImportR
   })
   revalidatePath(`/portal/campaigns/${campaign.id}`)
   return result
+}
+
+/**
+ * Log one call against a lead and move it along the lead cadence. The
+ * caller must belong to the campaign's account; the result carries the
+ * updated lead so the call screen can show where it landed.
+ */
+export async function logLeadCall(input: {
+  leadId: string
+  disposition: LeadDisposition
+  notes?: string | null
+  callBackAt?: string | null
+  bookedAt?: string | null
+}) {
+  const guard = await leadFollowUpContextOrError()
+  if (!guard.ok) return { error: guard.error }
+  const { participant, ownerId } = guard.ctx
+
+  if (!isLeadDisposition(input?.disposition)) return { error: 'Unknown call outcome.' }
+  const lead = await store.getLead(ownerId, String(input.leadId ?? ''))
+  if (!lead) return { error: 'Lead not found.' }
+
+  const parseWhen = (v: string | null | undefined, label: string) => {
+    if (!v) return { ok: true as const, value: null }
+    const d = new Date(v)
+    if (Number.isNaN(d.getTime())) return { ok: false as const, error: `Pick a valid ${label}.` }
+    return { ok: true as const, value: d }
+  }
+  const callBack = parseWhen(input.callBackAt, 'callback time')
+  if (!callBack.ok) return { error: callBack.error }
+  const booked = parseWhen(input.bookedAt, 'appointment time')
+  if (!booked.ok) return { error: booked.error }
+  const callBackAt = input.disposition === 'callback_later' ? callBack.value : null
+  const bookedAt = input.disposition === 'booked' ? booked.value : null
+  const fieldError = leadDispositionFieldError({ disposition: input.disposition, callBackAt, bookedAt })
+  if (fieldError) return { error: fieldError }
+  const campaign = await store.getCampaign(ownerId, lead.campaignId)
+  const blocked = leadCallBlockReason(campaign ?? { status: 'archived' }, lead)
+  if (blocked) return { error: blocked }
+
+  const notes = typeof input.notes === 'string' ? input.notes.trim().slice(0, 4000) || null : null
+  let result: Awaited<ReturnType<typeof store.logLeadCall>>
+  try {
+    result = await store.logLeadCall({
+      lead,
+      callerId: participant.id,
+      disposition: input.disposition,
+      notes,
+      callBackAt,
+      bookedAt,
+    })
+  } catch (err) {
+    // Eligibility is re-checked under the row lock; a race with an archive or
+    // a do-not-call logged a moment earlier surfaces here.
+    if (err instanceof store.LeadCallBlockedError) return { error: err.message }
+    throw err
+  }
+  revalidatePath(`/portal/campaigns/${lead.campaignId}`)
+  revalidatePath(`/portal/campaigns/${lead.campaignId}/leads/${lead.id}`)
+  revalidatePath('/portal/start')
+  return { call: result.call, lead: result.lead }
 }
 
 // ---------- lead sources (webhook intake) ----------

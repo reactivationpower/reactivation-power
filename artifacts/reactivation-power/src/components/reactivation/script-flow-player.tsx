@@ -54,6 +54,17 @@ interface Props {
    * buttons the scripts refer to are rendered as a disabled preview by the
    * practice screen, so end-of-script copy must not promise a real log. */
   practice?: boolean
+  /** Which script family is playing. Lead flows talk to people who have
+   * never visited, so the reactivation-only "Original complaint" chip (and
+   * its "what you originally came in for" wording) is replaced by a chip
+   * anchored on the form they submitted. */
+  flowKind?: 'reactivation' | 'lead'
+}
+
+/** First concern chip on a LEAD questions screen: the thing they filled the form about. */
+export const LEAD_FIRST_CHIP: ConcernOption = {
+  label: 'What they reached out about',
+  spoken: 'what you reached out about',
 }
 
 const CHOICE_STYLES: Record<ScriptFlowVariant, string> = {
@@ -76,6 +87,7 @@ export function ScriptFlowPlayer({
   fontSize,
   initialStepKey,
   concernOptions,
+  flowKind = 'reactivation',
   showLeaveVm = false,
   onLeaveVoicemail,
   practice = false,
@@ -279,6 +291,7 @@ export function ScriptFlowPlayer({
     }
     return { label: 'Original complaint', spoken: complaintFallback }
   }, [extras.complaint_reference, complaintFallback])
+  const firstChip = flowKind === 'lead' ? LEAD_FIRST_CHIP : originalChip
 
   if (!step) {
     return (
@@ -373,7 +386,15 @@ export function ScriptFlowPlayer({
                 {p}
               </p>
             ) : (
-              <p key={i} className="leading-relaxed text-foreground">
+              // A bullet list (campaign offer items) keeps its line breaks;
+              // every other paragraph flows as prose.
+              <p
+                key={i}
+                className={cn(
+                  'leading-relaxed text-foreground',
+                  p.includes('\u2022 ') && 'whitespace-pre-line',
+                )}
+              >
                 {p}
               </p>
             ),
@@ -393,7 +414,7 @@ export function ScriptFlowPlayer({
               Tap their answer: which one do they want gone?
             </p>
             <div className="flex flex-wrap gap-2">
-              {[originalChip, ...concernOptions].map((opt) => (
+              {[firstChip, ...concernOptions].map((opt) => (
                 <button
                   key={opt.label}
                   type="button"

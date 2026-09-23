@@ -96,25 +96,28 @@ export interface ScriptFlow {
  * niche override. The client filters per selected niche: a niche row with the
  * same step_key replaces the general one.
  */
-export async function getScriptFlow(): Promise<ScriptFlow> {
-  const supabase = getAdminClient()
+export type ScriptFlowKind = 'reactivation' | 'lead'
+
+export async function getScriptFlow(kind: ScriptFlowKind = 'reactivation'): Promise<ScriptFlow> {
   const [steps, choices] = await Promise.all([
-    fetchAllRows<ScriptFlowStep>('script_flow_steps'),
-    fetchAllRows<ScriptFlowChoice>('script_flow_choices'),
+    fetchAllRows<ScriptFlowStep>('script_flow_steps', kind),
+    fetchAllRows<ScriptFlowChoice>('script_flow_choices', kind),
   ])
   return { steps, choices }
 }
 
 /**
- * Fetch every row from a script-flow table, paging past PostgREST's per-request
- * row cap (1000). Both tables now exceed 1000 rows across all niches, and the
- * default single request silently truncated to the first 1000 by sort_order —
- * which dropped every choice/step at higher sort orders. We page in 1000-row
- * chunks with a stable (sort_order, id) order so page boundaries never skip or
- * duplicate a row.
+ * Fetch every row of one flow family from a script-flow table, paging past
+ * PostgREST's per-request row cap (1000). Both tables exceed 1000 rows across
+ * all niches, and a single request silently truncated to the first 1000 by
+ * sort_order — which dropped every choice/step at higher sort orders. We page
+ * in 1000-row chunks with a stable (sort_order, id) order so page boundaries
+ * never skip or duplicate a row. `flow_kind` keeps the lead family and the
+ * reactivation family apart even though they share step keys.
  */
 async function fetchAllRows<T>(
   table: 'script_flow_steps' | 'script_flow_choices',
+  kind: ScriptFlowKind,
 ): Promise<T[]> {
   const supabase = getAdminClient()
   const PAGE = 1000
@@ -123,6 +126,7 @@ async function fetchAllRows<T>(
     const { data, error } = await supabase
       .from(table)
       .select('*')
+      .eq('flow_kind', kind)
       .order('sort_order')
       .order('id')
       .range(from, from + PAGE - 1)

@@ -34,6 +34,7 @@ import {
 import { getAdminClient } from "../lib/supabase/admin";
 import { getStripeMode } from "../lib/stripe";
 import { getCronJobStatuses } from "../lib/cron/jobs";
+import { leadCallBlockReason } from '@workspace/shared/lead-followup';
 import { DEFAULT_CALL_BATCH_SIZE } from '@workspace/shared/types';
 import { demoIsStale } from "../lib/demo/seed";
 import { demoPracticeByOwnerEmail } from "../lib/demo/config";
@@ -202,11 +203,22 @@ add("/portal/start", "portal", async () => {
   if (!products.leadFollowUp) redirect("/portal");
   const ownerId = accessOwnerId(participant);
   const owner = participant.role === "owner" ? participant : await getParticipantById(ownerId);
-  const campaigns = await leadStore.listCampaigns(ownerId);
+  const now = new Date();
+  const [campaigns, callNext] = await Promise.all([leadStore.listCampaigns(ownerId), leadStore.callNext(ownerId, now, 25)]);
   const activeCampaigns = campaigns.filter((c) => c.status === "active").length;
   const newLeads = campaigns.reduce((n, c) => n + c.newLeadCount, 0);
-  return { participant, products, practiceName: owner?.practice_name ?? null, activeCampaigns, newLeads };
+  return { participant, products, practiceName: owner?.practice_name ?? null, activeCampaigns, newLeads, callNext, now: now.toISOString() };
 });
+
+/** Everything a lead call or practice screen needs about the account: caller, provider, script. */
+async function leadCallContext(ownerId: string, participant: { role: string } & Record<string, any>) {
+  const [owner, flow, niches] = await Promise.all([
+    participant.role === "owner" ? Promise.resolve(participant) : getParticipantById(ownerId),
+    getScriptFlow("lead"),
+    campaignNicheOptions(ownerId),
+  ]);
+  return { owner, flow, niches };
+}
 
 /** Niche options for a campaign form: the owner's enabled HEALTHCARE niches. */
 async function campaignNicheOptions(ownerId: string) {
@@ -260,9 +272,41 @@ add("/portal/campaigns/:id/leads/:leadId", "portal", async (req) => {
   const { participant, ownerId, isOwner } = await requireLeadFollowUp(`/portal/campaigns/${id}/leads/${leadId}`);
   const [campaign, lead] = await Promise.all([leadStore.getCampaign(ownerId, id), leadStore.getLead(ownerId, leadId)]);
   if (!campaign || !lead || lead.campaignId !== campaign.id) notFound();
-  const niches = await campaignNicheOptions(ownerId);
+  const [niches, calls] = await Promise.all([campaignNicheOptions(ownerId), leadStore.listLeadCalls(lead.id)]);
   const niche = niches.find((n) => n.id === campaign.nicheId) ?? null;
-  return { id, leadId, participant, ownerId, isOwner, campaign, lead, niche, now: new Date().toISOString() };
+  const callBlocked = leadCallBlockReason(campaign, lead);
+  return { id, leadId, participant, ownerId, isOwner, campaign, lead, niche, calls, callBlocked, now: new Date().toISOString() };
+});
+
+add("/portal/campaigns/:id/leads/:leadId/call", "portal", async (req) => {
+  const id = String(req.params.id);
+  const leadId = String(req.params.leadId);
+  const { participant, ownerId, isOwner } = await requireLeadFollowUp(`/portal/campaigns/${id}/leads/${leadId}/call`);
+  const [campaign, lead] = await Promise.all([leadStore.getCampaign(ownerId, id), leadStore.getLead(ownerId, leadId)]);
+  if (!campaign || !lead || lead.campaignId !== campaign.id) notFound();
+  // Archived campaigns and closed (do-not-call) leads have no call screen;
+  // the detail page explains why. The action re-checks under a row lock.
+  if (leadCallBlockReason(campaign, lead)) redirect(`/portal/campaigns/${id}/leads/${leadId}`);
+  const now = new Date();
+  const [{ owner, flow, niches }, calls, queue] = await Promise.all([
+    leadCallContext(ownerId, participant),
+    leadStore.listLeadCalls(lead.id),
+    leadStore.callNext(ownerId, now, 25),
+  ]);
+  const niche = niches.find((n) => n.id === campaign.nicheId) ?? null;
+  const next = queue.find((q) => q.lead.id !== lead.id) ?? null;
+  const nextHref = next ? `/portal/campaigns/${next.campaign.id}/leads/${next.lead.id}/call` : null;
+  return { id, leadId, participant, ownerId, isOwner, campaign, lead, niche, owner, flow, calls, nextHref, now: now.toISOString() };
+});
+
+add("/portal/campaigns/:id/practice", "portal", async (req) => {
+  const id = String(req.params.id);
+  const { participant, ownerId, isOwner } = await requireLeadFollowUp(`/portal/campaigns/${id}/practice`);
+  const campaign = await leadStore.getCampaign(ownerId, id);
+  if (!campaign) notFound();
+  const { owner, flow, niches } = await leadCallContext(ownerId, participant);
+  const niche = niches.find((n) => n.id === campaign.nicheId) ?? null;
+  return { id, participant, ownerId, isOwner, campaign, niche, owner, flow, now: new Date().toISOString() };
 });
 
 add("/portal/course/:slug", "portal", async (req) => {

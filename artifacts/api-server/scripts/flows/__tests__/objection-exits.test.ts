@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   GENERAL_SLUG,
+  generalSlugFor,
   OBJECTION_EXIT_CHOICES,
   findObjectionExitDrift,
   listSlugs,
@@ -140,8 +141,7 @@ describe('R19 shared objection exit pair', () => {
 
 describe('R19 on the real content files', () => {
   it('every objection screen in every flow file carries the shared pair', () => {
-    const generalFile = readFlowFile(GENERAL_SLUG)
-    const problems = listSlugs().flatMap((slug) => findObjectionExitDrift(slug, readFlowFile(slug), generalFile))
+    const problems = listSlugs().flatMap((slug) => findObjectionExitDrift(slug, readFlowFile(slug), readFlowFile(generalSlugFor(slug))))
     expect(problems.map((p) => `${p.where}: ${p.message}`)).toEqual([])
   })
 })

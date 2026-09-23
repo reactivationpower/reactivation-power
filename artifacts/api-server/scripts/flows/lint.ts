@@ -55,6 +55,9 @@
 import { pathToFileURL } from 'node:url'
 import {
   GENERAL_SLUG,
+  flowKindOf,
+  generalSlugFor,
+  isGeneralSlug,
   findDeadEnds,
   findObjectionExitDrift,
   findUnreachableSteps,
@@ -168,6 +171,28 @@ export const CLAIM_PHRASES: string[] = [
   'you were so',
   "i'm sure you remember",
   'i\u2019m sure you remember',
+]
+
+/**
+ * Rule 5 for LEAD flows. A lead has never been a patient, so on top of the
+ * reactivation list the script must not lean on a chart or a past visit:
+ * there are no notes to cite and no care they "finished".
+ */
+export const LEAD_CLAIM_PHRASES: string[] = [
+  'your notes say',
+  'your chart',
+  'your file',
+  'last time you were in',
+  'last time you came in',
+  'when you finished',
+  'since you finished',
+  'since your last visit',
+  'your last visit',
+  'your care with us',
+  "haven't seen you",
+  'haven\u2019t seen you',
+  'you originally came in',
+  'came back in',
 ]
 
 const REC_TOKENS = ['rec_pronoun', 'rec_pronoun_cap', 'rec_obj', 'rec_poss']
@@ -412,11 +437,12 @@ export function lintFile(
   const problems: Problem[] = [
     ...validateStructure(slug, file, generalKeys),
     ...findDeadEnds(slug, file, general),
-    ...findUnreachableSteps(slug, file, general, slug === GENERAL_SLUG ? referrers : []),
+    ...findUnreachableSteps(slug, file, general, isGeneralSlug(slug) ? referrers : []),
     ...findObjectionExitDrift(slug, file, general),
   ]
   const push = (level: Problem['level'], where: string, message: string) =>
     problems.push({ level, where, message })
+  const isLead = flowKindOf(slug) === 'lead'
 
   for (const step of file.steps) {
     const where = `${slug}:${step.step_key}`
@@ -470,7 +496,20 @@ export function lintFile(
           }
         }
         for (const phrase of CLAIM_PHRASES) {
-          if (lower.includes(phrase)) push('error', where, `R5 claims what the patient said or felt ("${phrase}"); use "your notes say"`)
+          if (lower.includes(phrase)) {
+            push(
+              'error',
+              where,
+              isLead
+                ? `R5 claims what the lead said or felt ("${phrase}"); anchor on what they submitted instead`
+                : `R5 claims what the patient said or felt ("${phrase}"); use "your notes say"`,
+            )
+          }
+        }
+        if (isLead) {
+          for (const phrase of LEAD_CLAIM_PHRASES) {
+            if (lower.includes(phrase)) push('error', where, `R5 (lead) cites a chart or past visit a lead never had ("${phrase}"); anchor on the form they submitted`)
+          }
         }
         // R1: two questions in one breath (no period between two "?")
         for (const unit of line.split(/(?<=[.!])\s+/)) {
@@ -570,7 +609,7 @@ export const CHIPLESS_NICHES: ReadonlySet<string> = new Set<string>([])
  */
 export function lintReviewBuckets(slug: string, file: FlowFile, general: FlowFile): Problem[] {
   const problems: Problem[] = []
-  const isGeneral = file === general || slug === GENERAL_SLUG
+  const isGeneral = file === general || isGeneralSlug(slug)
 
   const effective = (family: string): EffectiveStep[] => {
     const own = file.steps
@@ -922,16 +961,32 @@ function main() {
   const quiet = args.includes('--quiet')
   const requested = args.filter((a) => !a.startsWith('--'))
   const slugs = requested.length > 0 ? requested : listSlugs()
-  const general = readFlowFile(GENERAL_SLUG)
-  const nicheFiles = listSlugs()
-    .filter((s) => s !== GENERAL_SLUG)
-    .map((s) => readFlowFile(s))
+  // Each family (reactivation / lead) has its own general file and its own
+  // set of niche files; a lead file never inherits from general.json.
+  const generals = new Map<string, FlowFile>()
+  const nicheFilesByKind = new Map<string, FlowFile[]>()
+  for (const s of listSlugs()) {
+    if (isGeneralSlug(s)) continue
+    const list = nicheFilesByKind.get(flowKindOf(s)) ?? []
+    list.push(readFlowFile(s))
+    nicheFilesByKind.set(flowKindOf(s), list)
+  }
+  const generalFor = (slug: string): FlowFile => {
+    const gs = generalSlugFor(slug)
+    let g = generals.get(gs)
+    if (!g) {
+      g = readFlowFile(gs)
+      generals.set(gs, g)
+    }
+    return g
+  }
+  const nicheFiles = nicheFilesByKind.get('reactivation') ?? []
 
   let totalErrors = 0
   let totalWarnings = 0
   for (const slug of slugs) {
     const file = readFlowFile(slug)
-    const problems = lintFile(slug, file, general, nicheFiles)
+    const problems = lintFile(slug, file, generalFor(slug), nicheFilesByKind.get(flowKindOf(slug)) ?? [])
     const errors = problems.filter((p) => p.level === 'error').length
     const warnings = problems.length - errors
     totalErrors += errors
@@ -988,7 +1043,7 @@ function effectiveObjectionSteps(slug: string, file: FlowFile, general: FlowFile
   const own = file.steps
     .filter((s) => s.step_key.startsWith(OBJECTION_PREFIX))
     .map((step) => ({ step, where: `${slug}:${step.step_key}` }))
-  if (file === general || slug === GENERAL_SLUG) return own
+  if (file === general || isGeneralSlug(slug)) return own
 
   const ownKeys = new Set(file.steps.map((s) => s.step_key))
   const ownChoiceFrom = new Set(file.choices.map((c) => c.from_step_key))
@@ -1122,7 +1177,7 @@ export function lintChipCoverage(nicheFiles: FlowFile[]): Problem[] {
  * shows no chips and {{main_concern}} renders as the generic fallback.
  */
 export function lintChipPresence(slug: string, file: FlowFile): Problem[] {
-  if (!file.niche || slug === GENERAL_SLUG) return []
+  if (!file.niche || isGeneralSlug(slug)) return []
   const name = file.niche.name
   if (CHIPLESS_NICHES.has(name)) return []
   const chips = CONCERN_OPTIONS[name]

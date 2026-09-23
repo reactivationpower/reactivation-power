@@ -400,3 +400,233 @@ export function planLeadImport(
 
   return { toInsert, skippedDuplicate, skippedInvalid }
 }
+
+/**
+ * What happened on a lead call. Deliberately not the reactivation
+ * CallDisposition: a lead "booked elsewhere" is a real outcome an owner
+ * wants counted, and there is no "scheduled" vs "booked" distinction.
+ */
+export const LEAD_DISPOSITIONS = [
+  'no_answer',
+  'voicemail',
+  'spoke_did_not_book',
+  'callback_later',
+  'booked',
+  'booked_elsewhere',
+  'do_not_call',
+] as const
+
+export const LEAD_MAX_UNANSWERED_ATTEMPTS = 3
+
+export function formatRate(rate: number): string {
+  return `${Math.round(rate * 100)}%`
+}
+
+/**
+ * The lead's next state after a call is logged. Pure so the server and the
+ * tests agree; the store copies the result onto the campaign_leads row
+ * while holding a row lock, so two callers logging at once both count.
+ *
+ * - no_answer / voicemail: status "attempted" (never demotes a reached or
+ *   booked lead, and keeps an existing booking), unanswered count +1, next
+ *   due from the cadence. A booked lead is not put back on the retry list.
+ * - spoke_did_not_book: reached, cadence reset, nothing scheduled — the
+ *   caller decides in the notes whether to try again.
+ * - callback_later: reached (a booked lead stays booked), due at the
+ *   requested callback time.
+ * - booked: status booked with the appointment time; off the list.
+ * - booked_elsewhere / do_not_call: closed; last_disposition says why.
+ */
+export function applyLeadDisposition(
+  lead: Pick<LeadCadenceState, 'status' | 'unansweredAttempts'> & { bookedAt?: Date | null },
+  input: LeadDispositionInput,
+): LeadCadenceState {
+  const { disposition, now } = input
+  const holdsBooking = lead.status === 'booked' || lead.status === 'confirmed'
+  const keptBooking = holdsBooking ? (lead.bookedAt ?? null) : null
+  if (disposition === 'no_answer' || disposition === 'voicemail') {
+    const unansweredAttempts = lead.unansweredAttempts + 1
+    return {
+      status: lead.status === 'new' ? 'attempted' : lead.status,
+      unansweredAttempts,
+      nextDueAt: holdsBooking ? null : nextLeadAttemptAt(unansweredAttempts, now),
+      lastDisposition: disposition,
+      bookedAt: keptBooking,
+    }
+  }
+  if (disposition === 'spoke_did_not_book') {
+    return {
+      status: holdsBooking ? lead.status : 'reached',
+      unansweredAttempts: 0,
+      nextDueAt: null,
+      lastDisposition: disposition,
+      bookedAt: keptBooking,
+    }
+  }
+  if (disposition === 'callback_later') {
+    return {
+      status: holdsBooking ? lead.status : 'reached',
+      unansweredAttempts: 0,
+      nextDueAt: input.callBackAt ?? null,
+      lastDisposition: disposition,
+      bookedAt: keptBooking,
+    }
+  }
+  if (disposition === 'booked') {
+    return {
+      status: 'booked',
+      unansweredAttempts: 0,
+      nextDueAt: null,
+      lastDisposition: disposition,
+      bookedAt: input.bookedAt ?? null,
+    }
+  }
+  return { status: 'closed', unansweredAttempts: 0, nextDueAt: null, lastDisposition: disposition, bookedAt: null }
+}
+
+export interface LeadCadenceState {
+  status: LeadStatus
+  unansweredAttempts: number
+  nextDueAt: Date | null
+  lastDisposition: LeadDisposition | null
+  bookedAt: Date | null
+}
+
+/** Dispositions where the caller actually spoke with the lead. */
+export const REACHED_DISPOSITIONS: readonly LeadDisposition[] = [
+  'spoke_did_not_book',
+  'callback_later',
+  'booked',
+  'booked_elsewhere',
+  'do_not_call',
+]
+
+export type LeadDisposition = (typeof LEAD_DISPOSITIONS)[number]
+
+const HOUR = 60 * 60 * 1000
+
+export function isReachedDisposition(d: LeadDisposition): boolean {
+  return REACHED_DISPOSITIONS.includes(d)
+}
+
+/**
+ * Retry cadence for a lead nobody has reached yet. Leads go cold within
+ * days, so the cadence is front-loaded and short — nothing like the
+ * quarterly reactivation cycle:
+ *   1st unanswered attempt -> again later today (4 hours)
+ *   2nd                    -> tomorrow
+ *   3rd                    -> day three
+ *   4th and later          -> parked (null): off the call-next list until
+ *                             the lead calls back or someone reopens them.
+ * `unansweredAttempts` counts consecutive no-answer/voicemail attempts
+ * INCLUDING the one just logged.
+ */
+export function nextLeadAttemptAt(unansweredAttempts: number, now: Date): Date | null {
+  if (unansweredAttempts <= 1) return new Date(now.getTime() + 4 * HOUR)
+  if (unansweredAttempts <= 3) return new Date(now.getTime() + DAY)
+  return null
+}
+
+export const LEAD_DISPOSITION_LABELS: Record<LeadDisposition, string> = {
+  no_answer: 'No answer',
+  voicemail: 'No answer, left VM',
+  spoke_did_not_book: 'Spoke, didn\u2019t book',
+  callback_later: 'Spoke, call back later',
+  booked: 'Booked',
+  booked_elsewhere: 'Booked elsewhere',
+  do_not_call: 'Do not call',
+}
+
+const DAY = 24 * HOUR
+
+/**
+ * The numbers an owner asks for first. "Reached" is any lead the team has
+ * spoken with at least once (status reached, booked, confirmed, or closed
+ * by a conversation); "booked" is status booked or confirmed.
+ */
+export function campaignConversion(
+  leads: Array<{ status: LeadStatus | string; lastDisposition?: string | null }>,
+): CampaignConversion {
+  const received = leads.length
+  let reached = 0
+  let booked = 0
+  for (const l of leads) {
+    const spoke =
+      l.status === 'reached' ||
+      l.status === 'booked' ||
+      l.status === 'confirmed' ||
+      (l.status === 'closed' && (l.lastDisposition === 'booked_elsewhere' || l.lastDisposition === 'do_not_call'))
+    if (spoke) reached++
+    if (l.status === 'booked' || l.status === 'confirmed') booked++
+  }
+  return { received, reached, booked, bookedRate: received === 0 ? 0 : booked / received }
+}
+
+export function isLeadDisposition(value: unknown): value is LeadDisposition {
+  return typeof value === 'string' && (LEAD_DISPOSITIONS as readonly string[]).includes(value)
+}
+
+export interface LeadDispositionInput {
+  disposition: LeadDisposition
+  now: Date
+  callBackAt?: Date | null
+  bookedAt?: Date | null
+}
+
+/**
+ * Why a lead cannot be called right now, or null when it can. Enforced on
+ * the server (loader and action) and mirrored by the UI so nobody dials a
+ * do-not-call lead or works an archived campaign.
+ *  - archived campaign: restore it first; its leads are frozen.
+ *  - closed lead: do-not-call or booked elsewhere is final from the caller's
+ *    seat; reopening is an explicit owner action, not another call.
+ * Booked/confirmed leads stay callable (reminders, reschedules) but a missed
+ * retry never clears the booking — see applyLeadDisposition.
+ */
+export function leadCallBlockReason(
+  campaign: { status: CampaignStatus | string },
+  lead: { status: LeadStatus | string; lastDisposition?: string | null },
+): string | null {
+  if (campaign.status === 'archived') return 'This campaign is archived. Restore it before calling its leads.'
+  if (lead.status === 'closed') {
+    if (lead.lastDisposition === 'do_not_call') return 'This lead asked not to be called.'
+    if (lead.lastDisposition === 'booked_elsewhere') return 'This lead booked elsewhere and is closed.'
+    return 'This lead is closed.'
+  }
+  return null
+}
+
+/**
+ * Whether a lead's scheduled retry or callback has come due. Any lead that
+ * is not closed qualifies — including a booked lead who asked to be called
+ * back — so a promised callback always reaches the call-next list. The
+ * store's SQL mirrors this rule.
+ */
+export function isLeadDue(
+  lead: { status: LeadStatus | string; nextDueAt: Date | string | null },
+  now: Date | number,
+): boolean {
+  if (lead.status === 'closed' || !lead.nextDueAt) return false
+  const due = typeof lead.nextDueAt === 'string' ? new Date(lead.nextDueAt).getTime() : lead.nextDueAt.getTime()
+  const at = typeof now === 'number' ? now : now.getTime()
+  return due <= at
+}
+
+export interface CampaignConversion {
+  received: number
+  reached: number
+  booked: number
+  /** booked / received, 0..1; 0 when nothing has been received. */
+  bookedRate: number
+}
+
+/** The fields a disposition must carry; the server refuses without them. */
+export function leadDispositionFieldError(input: {
+  disposition: LeadDisposition
+  callBackAt: Date | null
+  bookedAt: Date | null
+}): string | null {
+  if (input.disposition === 'callback_later' && !input.callBackAt) return 'Pick when they asked to be called back.'
+  if (input.disposition === 'booked' && !input.bookedAt) return 'Pick the appointment date and time.'
+  return null
+}

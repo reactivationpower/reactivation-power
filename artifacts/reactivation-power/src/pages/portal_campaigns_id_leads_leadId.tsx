@@ -1,9 +1,9 @@
 // @ts-nocheck
 import { Link, useParams } from 'wouter'
-import { ArrowLeft, Clock, Mail, Phone, PhoneCall } from 'lucide-react'
+import { ArrowLeft, Clock, History, Mail, Phone, PhoneCall } from 'lucide-react'
 import { formatDateTime } from '@workspace/shared/format'
 import { formatPhone } from '@workspace/shared/phone'
-import { LEAD_SOURCE_LABELS, timeAgo } from '@workspace/shared/lead-followup'
+import { LEAD_DISPOSITION_LABELS, LEAD_SOURCE_LABELS, timeAgo } from '@workspace/shared/lead-followup'
 import { usePageData } from '@/hooks/use-page-data'
 import { PageError, PageLoading } from '@/components/page-status'
 import { Button } from '@/components/ui/button'
@@ -17,7 +17,7 @@ export default function LeadDetailPage() {
   if (loading) return <PageLoading />
   if (notFound) return <NotFound />
   if (error) return <PageError error={error} />
-  const { campaign, lead, niche, now } = data
+  const { campaign, lead, niche, calls = [], now } = data
   const nowMs = new Date(now).getTime()
 
   return (
@@ -41,11 +41,28 @@ export default function LeadDetailPage() {
           </p>
         </div>
         <div className="flex flex-col items-end gap-1">
-          <Button disabled className="gap-2" title="Calling from a campaign arrives with the lead call screen" data-testid="button-call-lead">
-            <PhoneCall className="size-4" />
-            Call
-          </Button>
-          <p className="text-xs text-muted-foreground">Call screen coming next</p>
+          {data.callBlocked ? (
+            <>
+              <Button disabled className="gap-2" title={data.callBlocked} data-testid="button-call-lead">
+                <PhoneCall className="size-4" />
+                Call
+              </Button>
+              <p className="max-w-56 text-right text-xs text-muted-foreground" data-testid="text-call-blocked">{data.callBlocked}</p>
+            </>
+          ) : (
+            <Button
+              render={<Link href={`/portal/campaigns/${campaign.id}/leads/${lead.id}/call`} />}
+              nativeButton={false}
+              className="gap-2"
+              data-testid="button-call-lead"
+            >
+              <PhoneCall className="size-4" />
+              Call
+            </Button>
+          )}
+          {lead.nextDueAt && !data.callBlocked ? (
+            <p className="text-xs text-muted-foreground">Next try due {formatDateTime(lead.nextDueAt)}</p>
+          ) : null}
         </div>
       </div>
 
@@ -94,6 +111,30 @@ export default function LeadDetailPage() {
           <OfferSummary campaign={campaign} className="mt-4" />
         </section>
       </div>
+
+      <section className="mt-6 rounded-lg border border-border bg-card" aria-label="Call history">
+        <div className="flex items-center gap-2 border-b border-border px-6 py-3">
+          <History className="size-4 text-accent" />
+          <h2 className="text-base font-semibold text-foreground">Call history ({calls.length})</h2>
+        </div>
+        {calls.length === 0 ? (
+          <p className="px-6 py-4 text-sm text-muted-foreground" data-testid="text-no-calls">No calls logged yet.</p>
+        ) : (
+          <ul className="divide-y divide-border">
+            {calls.map((call) => (
+              <li key={call.id} className="px-6 py-3" data-testid={`row-lead-call-${call.id}`}>
+                <p className="text-sm">
+                  <span className="font-medium text-foreground">{LEAD_DISPOSITION_LABELS[call.disposition] ?? call.disposition}</span>
+                  <span className="text-muted-foreground"> · {formatDateTime(call.createdAt)}</span>
+                  {call.callBackAt ? <span className="text-muted-foreground"> · call back {formatDateTime(call.callBackAt)}</span> : null}
+                  {call.bookedAt ? <span className="text-muted-foreground"> · booked for {formatDateTime(call.bookedAt)}</span> : null}
+                </p>
+                {call.notes ? <p className="mt-1 text-sm text-foreground">{call.notes}</p> : null}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
     </div>
   )
 }

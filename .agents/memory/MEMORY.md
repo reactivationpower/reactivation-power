@@ -2,7 +2,7 @@
 - [Supabase Postgres access & migrations](supabase-postgres-access.md) — SUPABASE_DB_URL pooler + relaxed TLS; never drizzle-kit push; MCP tools not mounted; ask for a reset DB password up front.
 - [Supabase admin accounts](supabase-admin-accounts.md) — admin roles live in auth app_metadata (kept after DDL access arrived); invite needs manual-link fallback; Base UI menu API.
 - [Transactional email via Resend](transactional-email.md) — send-only connector key, RESEND_FROM override, email_log in Supabase via drizzle, once-per-event mail needs an outbox not a log lookup.
-- [Script flow content-as-code](script-flows.md) — player italics need whole-paragraph parens; apply pairs duplicate from+to by sort_order; demo owner lacks most niches; known dead ends.
+- [Script flow content-as-code](script-flows.md) — player italics need whole-paragraph parens; apply pairs duplicate from+to by sort_order; lead family (`*.lead.json` + `general.lead.json`) needs per-slug general in tests.
 - [Stripe modes & billing tables](stripe-modes-and-billing.md) — env keys are LIVE; workspace uses sandbox via Stripe integration, STRIPE_MODE overrides; billing tables in Supabase via drizzle.
 - [Stripe dunning & webhook verification](stripe-dunning.md) — access keyed on customers.billing_status; Stripe retries are a Dashboard setting; sandbox test recipe without Stripe CLI.
 - [Agreement e-sign flow constraints](agreements-esign.md) — edit/sign linearized in DB, one agreement per link, signed copy sent on completion, Stripe readiness keyed by client secret.

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { impactBuckets, lintMakingItReal, lintPermission, lintReadBack, lintReviewBuckets } from '../lint.ts'
-import { GENERAL_SLUG, listSlugs, readFlowFile, type FlowFile, type FlowStep } from '../lib.ts'
+import { GENERAL_SLUG, generalSlugFor, listSlugs, readFlowFile, type FlowFile, type FlowStep } from '../lib.ts'
 
 const step = (step_key: string, content: string, sort_order = 0): FlowStep => ({
   step_key,
@@ -502,9 +502,8 @@ Is that fair to say?`
   })
 
   it('passes every checked-in flow', () => {
-    const gen = readFlowFile(GENERAL_SLUG)
-    for (const slug of [GENERAL_SLUG, ...listSlugs()]) {
-      expect(bucketErrors(readFlowFile(slug), gen), slug).toEqual([])
+    for (const slug of listSlugs()) {
+      expect(bucketErrors(readFlowFile(slug), readFlowFile(generalSlugFor(slug))), slug).toEqual([])
     }
   })
 })

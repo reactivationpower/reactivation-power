@@ -100,6 +100,14 @@ export const campaignLeadsTable = pgTable(
     message: text("message"),
     status: text("status").notNull().default("new"), // new | attempted | reached | booked | confirmed | closed
     lastAttemptAt: timestamp("last_attempt_at", { withTimezone: true }),
+    /** Outcome of the most recent call (a LeadDisposition); explains a `closed` status. */
+    lastDisposition: text("last_disposition"),
+    /** When the lead is next due on the "call next" list: a retry from the lead cadence or a requested callback. Null when parked, booked or closed. */
+    nextDueAt: timestamp("next_due_at", { withTimezone: true }),
+    /** Consecutive no-answer / voicemail attempts since the lead was last reached; drives the retry cadence. */
+    unansweredAttempts: integer("unanswered_attempts").notNull().default(0),
+    /** Appointment time captured when the caller logged "booked". */
+    bookedAt: timestamp("booked_at", { withTimezone: true }),
     createdBy: text("created_by"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
@@ -108,11 +116,44 @@ export const campaignLeadsTable = pgTable(
     uniqueIndex("campaign_leads_campaign_phone_idx").on(t.campaignId, t.phoneKey),
     index("campaign_leads_campaign_submitted_idx").on(t.campaignId, t.submittedAt),
     index("campaign_leads_owner_idx").on(t.ownerId),
+    index("campaign_leads_owner_due_idx").on(t.ownerId, t.nextDueAt),
   ],
 ).enableRLS();
 
 export type CampaignLeadRow = typeof campaignLeadsTable.$inferSelect;
 export type NewCampaignLeadRow = typeof campaignLeadsTable.$inferInsert;
+
+/**
+ * One call attempt against a lead. Mirrors `reactivation_calls` for contacts
+ * but keyed on the lead, so the cadence and the per-campaign conversion
+ * numbers never mix with reactivation history.
+ */
+export const leadCallsTable = pgTable(
+  "lead_calls",
+  {
+    id: text("id").primaryKey(),
+    leadId: text("lead_id")
+      .notNull()
+      .references(() => campaignLeadsTable.id, { onDelete: "cascade" }),
+    /** Denormalised from the lead so campaign stats and owner-wide lists never need a join. */
+    campaignId: text("campaign_id").notNull(),
+    ownerId: text("owner_id").notNull(),
+    /** Participant who made the call (Supabase `participants`, no FK). */
+    callerId: text("caller_id"),
+    disposition: text("disposition").notNull(), // LeadDisposition
+    notes: text("notes"),
+    /** Requested callback time for `callback_later`. */
+    callBackAt: timestamp("call_back_at", { withTimezone: true }),
+    /** Appointment time for `booked`. */
+    bookedAt: timestamp("booked_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index("lead_calls_lead_idx").on(t.leadId, t.createdAt),
+    index("lead_calls_campaign_idx").on(t.campaignId),
+    index("lead_calls_owner_idx").on(t.ownerId),
+  ],
+).enableRLS();
 
 /**
  * Every POST a campaign's intake URL received, raw, whether or not it became
@@ -144,3 +185,7 @@ export const campaignWebhookEventsTable = pgTable(
 
 export type CampaignWebhookEventRow = typeof campaignWebhookEventsTable.$inferSelect;
 export type NewCampaignWebhookEventRow = typeof campaignWebhookEventsTable.$inferInsert;
+
+export type NewLeadCallRow = typeof leadCallsTable.$inferInsert;
+
+export type LeadCallRow = typeof leadCallsTable.$inferSelect;
