@@ -130,7 +130,7 @@ vi.mock('@/lib/stripe', () => ({
 vi.mock('@/lib/app-origin', () => ({ appOrigin: () => 'https://app.test' }))
 vi.mock('@/lib/logger', () => ({ logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() } }))
 
-const { notifyAccessPaused, notifyAccessRestored, notifyBackupCardUsed, retryFailedNotifications } = await import(
+const { notifyAccessPaused, notifyAccessRestored, notifyBackupCardUsed, notifySubscriptionCancelled, retryFailedNotifications } = await import(
   '@/lib/billing/notifications'
 )
 
@@ -336,5 +336,48 @@ describe('access restored', () => {
     await notifyAccessRestored({ customer, subscriptionId: 'sub_none' })
     expect(sent).toHaveLength(0)
     expect(rows).toHaveLength(0)
+  })
+})
+
+describe('subscription cancelled', () => {
+  const cancelled = (subscriptionId: string, accessEndsAt = new Date('2026-09-23T15:00:00Z')) =>
+    notifySubscriptionCancelled({ customer, subscriptionId, monthlyCents: 47500, accessEndsAt })
+
+  it('tells the customer once per subscription, keyed on the subscription id', async () => {
+    expect(await cancelled('sub_1')).toBe('sent')
+    expect(sent[0]).toMatchObject({
+      type: 'subscription_cancelled',
+      to: 'owner@example.com',
+      data: {
+        name: 'Dr. Michael Chen',
+        description: 'Reactivation Power — $475.00/month',
+        accessEndsAt: '2026-09-23T15:00:00.000Z',
+        reactivateUrl: 'https://app.test/billing?email=owner%40example.com',
+      },
+    })
+    expect(rows[0]).toMatchObject({ type: 'subscription_cancelled', stripeInvoiceId: 'sub_1', status: 'sent' })
+  })
+
+  it('the admin action and the customer.subscription.deleted webhook produce a single email', async () => {
+    let release!: () => void
+    sendGate = new Promise<void>((r) => (release = r))
+    const admin = cancelled('sub_9')
+    const webhook = cancelled('sub_9')
+    await new Promise((r) => setTimeout(r, 5))
+    release()
+    const outcomes = await Promise.all([admin, webhook])
+    expect(outcomes.sort()).toEqual(['duplicate', 'sent'])
+    expect(sent).toHaveLength(1)
+  })
+
+  it('a second subscription for the same customer gets its own notice', async () => {
+    await cancelled('sub_1')
+    await cancelled('sub_2')
+    expect(sent).toHaveLength(2)
+  })
+
+  it('falls back to a generic description when no monthly amount is on file', async () => {
+    await notifySubscriptionCancelled({ customer, subscriptionId: 'sub_3', monthlyCents: null, accessEndsAt: new Date() })
+    expect(sent[0].data.description).toBe('Reactivation Power — monthly subscription')
   })
 })

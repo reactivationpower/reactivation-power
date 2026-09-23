@@ -13,6 +13,10 @@ import {
   retryPastDueInvoices,
   syncSubscriptionRecord,
 } from '@/lib/billing/dunning'
+import { notifySubscriptionCancelled } from '@/lib/billing/notifications'
+import { obligationFor } from '@/lib/billing/customer-billing'
+import { sendCancellationScheduledEmail } from '@/lib/mail'
+import { appOrigin } from '@/lib/app-origin'
 
 /**
  * Admin billing actions on a customer record. Every action is stamped with
@@ -109,8 +113,15 @@ export async function refundPayment(input: {
 
 /**
  * Cancel a subscription: `term_end` schedules the cancellation for the end
- * of the 12-month agreement (falling back to the current period when no
- * agreement end is recorded); `now` cancels immediately and shuts access off.
+ * of the agreement (falling back to the current period when no agreement
+ * end is recorded); `now` cancels immediately and shuts access off.
+ *
+ * The customer is told either way. An immediate cancellation sends the
+ * "subscription cancelled" notice (access has ended; once per subscription,
+ * shared with the Stripe webhook). A scheduled one sends the dedicated
+ * "cancellation scheduled" confirmation, because the remaining installments
+ * are still collected until the end date — the cancelled notice follows from
+ * the webhook when the subscription actually ends.
  */
 export async function cancelSubscription(input: {
   linkId: string
@@ -164,6 +175,12 @@ export async function cancelSubscription(input: {
       ...actor,
       occurredAt: new Date(),
     })
+    await notifySubscriptionCancelled({
+      customer: ctx.customer,
+      subscriptionId: sub.id,
+      monthlyCents: terms.monthlyCents,
+      accessEndsAt: new Date(),
+    })
   } else {
     const when = sub.cancel_at ?? sub.items.data[0]?.current_period_end ?? null
     // Replace any earlier scheduled-cancellation note for this subscription.
@@ -183,6 +200,29 @@ export async function cancelSubscription(input: {
       ...actor,
       occurredAt: new Date(),
     })
+    // Confirm to the customer, unless this is a repeat of a cancellation that
+    // is already scheduled for the same date (nothing changed for them).
+    const cancelAt = when ? new Date(when * 1000) : null
+    const alreadyScheduledForSameDate =
+      terms.cancelAt != null && cancelAt != null && terms.cancelAt.getTime() === cancelAt.getTime()
+    if (!alreadyScheduledForSameDate) {
+      // `terms` still carries the pre-cancellation next payment date, which
+      // is what the remaining-obligation math needs.
+      const obligation = obligationFor(terms)
+      await sendCancellationScheduledEmail(
+        ctx.customer.email,
+        {
+          name: ctx.customer.fullName,
+          cancelAt: (cancelAt ?? new Date()).toISOString(),
+          remainingPayments: obligation.payments,
+          remainingCents: obligation.totalCents,
+          monthlyCents: terms.monthlyCents,
+          nextPaymentAt: obligation.dates[0]?.toISOString() ?? null,
+          billingUrl: `${appOrigin()}/portal/billing`,
+        },
+        { metadata: { customerId: ctx.customer.id, linkId: terms.linkId, subscriptionId: sub.id, source: 'admin' } },
+      )
+    }
   }
   revalidatePath(`/admin/payments/${terms.linkId}`)
   return {

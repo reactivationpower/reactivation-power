@@ -18,7 +18,7 @@ import { logger } from '@/lib/logger'
 import { getAdminClient } from '@/lib/supabase/admin'
 import { billingStatusAfterPayment, cardToRetry, isAccessBlocked, reconcileAccess, subscriptionNextPaymentAt } from './rules'
 import { generateCommissionForHistory, isCommissionable } from './commissions'
-import { cardSummary, notifyAccessPaused, notifyAccessRestored, notifyBackupCardUsed } from './notifications'
+import { cardSummary, notifyAccessPaused, notifyAccessRestored, notifyBackupCardUsed, notifySubscriptionCancelled } from './notifications'
 
 /**
  * Failed-payment policy ("dunning") and the billing ledger.
@@ -33,7 +33,8 @@ import { cardSummary, notifyAccessPaused, notifyAccessRestored, notifyBackupCard
  *      restores access.
  *
  * The customer is emailed at each step (backup card used / access paused /
- * access restored), once per invoice — see ./notifications.
+ * access restored), once per invoice, and once per subscription when it is
+ * cancelled — see ./notifications.
  *
  * Stripe's own retry schedule must be turned off in the Dashboard (Billing →
  * Subscriptions and emails → Manage failed payments → "Do not retry") so the
@@ -572,6 +573,17 @@ export async function handleSubscriptionDeleted(sub: Stripe.Subscription, eventI
       occurredAt: new Date((sub.canceled_at ?? sub.ended_at ?? Math.floor(Date.now() / 1000)) * 1000),
     })
   }
+  // Tell the customer access has ended. The outbox keeps this to one notice
+  // per subscription, so an immediate admin cancellation (which sends the
+  // same notice itself) does not produce a second email when this event lands.
+  await notifySubscriptionCancelled({
+    customer: ctx.customer,
+    subscriptionId: sub.id,
+    monthlyCents: ctx.terms.monthlyCents,
+    // The subscription is gone, so access has ended; never report a time in
+    // the future here even if Stripe's clock is a little ahead of ours.
+    accessEndsAt: new Date(Math.min(Date.now(), (sub.ended_at ?? sub.canceled_at ?? Math.floor(Date.now() / 1000)) * 1000)),
+  })
   return { handled: true }
 }
 

@@ -13,17 +13,20 @@ import {
 import { logger } from '@/lib/logger'
 import { stripe } from '@/lib/stripe'
 import { billingPageUrl, sendEmail, type CardSummary, type TemplateDataMap } from '@/lib/mail'
+import { BRAND } from '@/lib/mail/layout'
 import { appOrigin } from '@/lib/app-origin'
 import { invoiceDescription, latestInvoiceAttempt, type CardUsed } from './dunning'
 
 /**
- * Customer-facing emails for the failed-payment flow, delivered through a
- * small outbox (`billing_notifications`):
+ * Customer-facing emails for the failed-payment flow and for cancellations,
+ * delivered through a small outbox (`billing_notifications`):
  *
- *   - One row per (type, invoice). The unique index makes the "once per
- *     invoice" rule hold even when two Stripe events, or a webhook and the
- *     daily cron, race each other: exactly one caller wins the insert and
- *     sends; the others see the existing row and stop.
+ *   - One row per (type, Stripe object) — the invoice for payment notices,
+ *     the subscription for the cancellation notice. The unique index makes
+ *     the "once" rule hold even when two Stripe events, an admin action and
+ *     a webhook, or a webhook and the daily cron race each other: exactly
+ *     one caller wins the insert and sends; the others see the existing row
+ *     and stop.
  *   - The rendered template data is stored on the row, so a send that the
  *     mail provider rejected is retried by `retryFailedNotifications()`
  *     (run from the daily billing cron) without touching Stripe again.
@@ -40,8 +43,8 @@ const newId = () => randomBytes(16).toString('hex')
 type Payload<K extends DunningEmailType> = TemplateDataMap[K]
 
 /**
- * Claim the (type, invoice) slot. Returns the row when this caller should
- * send, null when another caller already owns it (sent, or in flight).
+ * Claim the (type, Stripe object) slot. Returns the row when this caller
+ * should send, null when another caller already owns it (sent, or in flight).
  * A previous attempt that failed can be re-claimed until MAX_ATTEMPTS.
  */
 async function claim<K extends DunningEmailType>(
@@ -254,5 +257,34 @@ export async function notifyAccessRestored(input: {
     chargedCard: charged,
     portalUrl: `${appOrigin()}/portal`,
     billingUrl: billingPageUrl(customer.email),
+  })
+}
+
+/**
+ * The subscription is cancelled and no further charges will be made. Sent
+ * once per subscription: an immediate admin cancellation and the
+ * `customer.subscription.deleted` webhook it triggers both call this, and
+ * only the first claim delivers. Not used for a *scheduled* end-of-term
+ * cancellation — installments continue until then, so that path sends the
+ * dedicated `cancellation_scheduled` confirmation instead; this notice goes
+ * out when the subscription actually ends.
+ */
+export async function notifySubscriptionCancelled(input: {
+  customer: Customer
+  subscriptionId: string
+  monthlyCents: number | null
+  /** When portal access ends — now for an immediate cancellation. */
+  accessEndsAt: Date
+}): Promise<'sent' | 'failed' | 'duplicate'> {
+  const { customer } = input
+  const monthly =
+    input.monthlyCents && input.monthlyCents > 0
+      ? ` — ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(input.monthlyCents / 100)}/month`
+      : ' — monthly subscription'
+  return enqueueAndSend('subscription_cancelled', input.subscriptionId, customer, {
+    name: recipientName(customer),
+    description: `${BRAND.name}${monthly}`,
+    accessEndsAt: input.accessEndsAt.toISOString(),
+    reactivateUrl: billingPageUrl(customer.email),
   })
 }

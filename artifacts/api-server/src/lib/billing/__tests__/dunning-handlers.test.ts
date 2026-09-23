@@ -141,10 +141,22 @@ vi.mock('@/lib/billing/commissions', () => ({
 vi.mock('@/lib/logger', () => ({ logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() } }))
 vi.mock('@/lib/supabase/admin', () => ({ getAdminClient: () => ({}) }))
 
+// Customer emails go through the outbox, which has its own suite; here only
+// the decision to notify is observed.
+const notifications = {
+  cardSummary: (card: { brand?: string | null; last4?: string | null } | null) => (card ? { brand: card.brand ?? null, last4: card.last4 ?? null } : null),
+  notifyAccessPaused: vi.fn(async () => undefined),
+  notifyAccessRestored: vi.fn(async () => undefined),
+  notifyBackupCardUsed: vi.fn(async () => undefined),
+  notifySubscriptionCancelled: vi.fn<(input: { customer: Row; subscriptionId: string; monthlyCents: number | null; accessEndsAt: Date }) => Promise<'sent'>>(async () => 'sent'),
+}
+vi.mock('@/lib/billing/notifications', () => notifications)
+
 const {
   handleChargeRefunded,
   handleInvoicePaid,
   handleInvoicePaymentFailed,
+  handleSubscriptionDeleted,
   handleSubscriptionUpdated,
   retryPastDueInvoices,
 } = await import('@/lib/billing/dunning')
@@ -177,6 +189,7 @@ function seed(overrides: { billingStatus?: string; billingBlockedAt?: Date | nul
     stripeCustomerId: STRIPE_CUSTOMER,
     stripeSubscriptionId: SUB,
     subscriptionStatus: overrides.billingStatus === 'past_due' ? 'past_due' : 'active',
+    monthlyCents: 29_700,
     nextPaymentAt: null,
     cancelAt: null,
     canceledAt: null,
@@ -287,6 +300,7 @@ const terms = () => tables.payment_link_terms[0]
 beforeEach(() => {
   for (const group of Object.values(stripeMock)) for (const fn of Object.values(group)) fn.mockReset()
   commissions.generateCommissionForHistory.mockClear()
+  for (const fn of Object.values(notifications)) if ('mockClear' in fn) fn.mockClear()
 })
 
 // ── invoice.payment_failed ─────────────────────────────────────────────────
@@ -486,6 +500,65 @@ describe('handleSubscriptionUpdated', () => {
 
     expect(customer().billingStatus).toBe('past_due')
     expect(customer().billingIssue).toBe('Your subscription payment is overdue.')
+  })
+})
+
+// ── customer.subscription.deleted ──────────────────────────────────────────
+
+describe('handleSubscriptionDeleted', () => {
+  /** A real end time: in the past, as it always is when Stripe delivers the event. */
+  const ENDED = Math.floor(Date.now() / 1000) - 3 * 86_400
+
+  it('marks the customer cancelled and tells them access has ended', async () => {
+    seed({ billingStatus: 'active' })
+    const sub = { ...subscription('canceled'), canceled_at: ENDED, ended_at: ENDED }
+
+    const result = await handleSubscriptionDeleted(sub, 'evt_del_1')
+
+    expect(result).toEqual({ handled: true })
+    expect(customer().billingStatus).toBe('canceled')
+    expect(terms()).toMatchObject({ subscriptionStatus: 'canceled' })
+    expect(ledger('subscription_canceled')).toHaveLength(1)
+    expect(notifications.notifySubscriptionCancelled).toHaveBeenCalledTimes(1)
+    expect(notifications.notifySubscriptionCancelled).toHaveBeenCalledWith({
+      customer: expect.objectContaining({ id: CUSTOMER }),
+      subscriptionId: SUB,
+      monthlyCents: 29_700,
+      accessEndsAt: new Date(ENDED * 1000),
+    })
+  })
+
+  it('never reports an access-end time in the future for a subscription that is already gone', async () => {
+    seed({ billingStatus: 'active' })
+    const ahead = Math.floor(Date.now() / 1000) + 3_600
+    const sub = { ...subscription('canceled'), canceled_at: ahead, ended_at: ahead }
+    const before = Date.now()
+
+    await handleSubscriptionDeleted(sub, 'evt_del_2')
+
+    const { accessEndsAt } = notifications.notifySubscriptionCancelled.mock.calls[0][0]
+    expect(accessEndsAt.getTime()).toBeLessThanOrEqual(Date.now())
+    expect(accessEndsAt.getTime()).toBeGreaterThanOrEqual(before)
+  })
+
+  it('a redelivered event writes no second ledger row and leaves the once-per-subscription rule to the outbox', async () => {
+    seed({ billingStatus: 'active' })
+    const sub = { ...subscription('canceled'), canceled_at: ENDED, ended_at: ENDED }
+
+    await handleSubscriptionDeleted(sub, 'evt_del_3')
+    await handleSubscriptionDeleted(sub, 'evt_del_3')
+
+    expect(ledger('subscription_canceled')).toHaveLength(1)
+    // Both calls ask; the outbox's unique (type, subscription) row is what stops the second send.
+    expect(notifications.notifySubscriptionCancelled).toHaveBeenCalledTimes(2)
+    expect(notifications.notifySubscriptionCancelled.mock.calls.every((c) => c[0].subscriptionId === SUB)).toBe(true)
+  })
+
+  it('ignores subscriptions it does not know', async () => {
+    seed({ billingStatus: 'active' })
+    const result = await handleSubscriptionDeleted({ ...subscription('canceled'), id: 'sub_unknown' }, 'evt_del_4')
+    expect(result).toEqual({ handled: false, note: 'unknown subscription' })
+    expect(notifications.notifySubscriptionCancelled).not.toHaveBeenCalled()
   })
 })
 

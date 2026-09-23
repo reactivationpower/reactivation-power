@@ -1,14 +1,23 @@
 import { pgTable, text, timestamp, jsonb, integer, uniqueIndex, index } from "drizzle-orm/pg-core";
 
-export type BillingNotificationType = "payment_failed_backup_used" | "access_paused" | "access_restored";
+export type BillingNotificationType =
+  | "payment_failed_backup_used"
+  | "access_paused"
+  | "access_restored"
+  | "subscription_cancelled";
 export type BillingNotificationStatus = "pending" | "sent" | "failed";
 
 /**
- * Outbox for the customer emails in the failed-payment flow. One row per
- * (type, invoice): the unique index is what makes "once per invoice" hold
- * when two Stripe events or a webhook and the cron race. The rendered
- * template data is kept so a send that Resend rejected can be retried later
- * without re-deriving anything from Stripe.
+ * Outbox for once-per-event customer billing emails. One row per (type,
+ * Stripe object): the unique index is what makes "once" hold when two Stripe
+ * events, an admin action and a webhook, or a webhook and the cron race. The
+ * rendered template data is kept so a send that Resend rejected can be
+ * retried later without re-deriving anything from Stripe.
+ *
+ * `stripe_invoice_id` holds the invoice for the payment notices and the
+ * subscription id for `subscription_cancelled` (one cancellation notice per
+ * subscription, whichever of the admin action or the Stripe webhook runs
+ * first).
  */
 export const billingNotificationsTable = pgTable(
   "billing_notifications",
