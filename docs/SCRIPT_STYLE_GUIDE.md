@@ -308,6 +308,21 @@ when:
   questions earlier on the same screen, or asked it only after the close.
 
 An opener inside a coaching note does not count; the caller has to say it.
+
+**Then stop.** Every permission question, on every screen (lapsed, objection,
+transition, permission_questions, anything), is the last thing the caller
+says before waiting. Lint errors when:
+- spoken text follows the ask in the same paragraph ("Can I make a
+  recommendation? Let's get you in…"). Move the extra sentence before the
+  ask or into the next spoken paragraph;
+- the next non-empty line after the ask is speech rather than a coaching
+  note. Put "(Wait for the yes.)" / "(Let them answer.)" between them. An
+  ask that is the last line of the screen is fine: the button is the wait.
+
+This is the R11 "keeps talking after" check applied to every ask, not only
+the recommendation screen's own (which R11 still reports, once). A note
+glued onto the ask ("…questions? (Wait for the yes.)") is left to R7.
+
 The `general.json` `doing_well_variant` is not a permission screen on its
 own: it asks about early signs, then hands off to `transition` (which asks)
 or `recommendation` (which asks). If a niche reroutes it straight to
@@ -338,6 +353,7 @@ The same unit-test file covers R14 and runs every checked-in flow through it.
 
 
 ---
+
 
 ### R15. Every screen has a way in
 R12 catches screens with no way out; R15 catches screens with no way in. A

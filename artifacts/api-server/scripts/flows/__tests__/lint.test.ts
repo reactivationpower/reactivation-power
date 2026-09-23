@@ -270,6 +270,50 @@ Let's get you back in. Does that sound reasonable?`
   })
 })
 
+describe('R13 the caller stops after every permission ask', () => {
+  it('accepts an ask that ends its paragraph and is followed by a coaching note', () => {
+    const lapsed = `That happens a lot. Can I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you in for a quick check.`
+    expect(permErrors(flow(step('lapsed_busy', lapsed)))).toEqual([])
+  })
+
+  it('accepts an ask that is the last line on the screen (the button is the wait)', () => {
+    expect(permErrors(flow(step('transition_still', `First, can I ask a few quick questions so your file is up to date?`)))).toEqual([])
+  })
+
+  it('flags a lapsed screen that keeps talking after the ask in the same breath', () => {
+    const msgs = permErrors(flow(step('lapsed_busy', `Can I make a recommendation? Let's get you in for a quick check.\n\n(Wait for the yes.)`)))
+    expect(msgs).toEqual([expect.stringMatching(/keeps talking after "Can I make a recommendation\?"/)])
+  })
+
+  it('flags an objection screen whose ask runs into an explanation', () => {
+    const obj = `I understand. Can I share what I think happened? The medication did the work, so the results left with it.\n\n(Let them answer.)`
+    expect(permErrors(flow(step('obj_glp', obj)))).toEqual([expect.stringMatching(/keeps talking after "Can I share what I think happened\?"/)])
+  })
+
+  it('flags a permission_questions screen that keeps talking after the ask', () => {
+    const msgs = permErrors(flow(step('permission_questions', `While I have you, can I ask a few quick questions? Teeth move slowly.\n\n(Wait for the yes.)`)))
+    expect(msgs).toEqual([expect.stringMatching(/keeps talking after/)])
+  })
+
+  it('flags an ask whose next paragraph is speech instead of a coaching note', () => {
+    const msgs = permErrors(flow(step('transition', `Let me ask you a few quick questions. Is that okay?\n\nFirst, how long has it been?`)))
+    expect(msgs).toEqual([expect.stringMatching(/goes straight from "Is that okay\?" into "First, how long/)])
+  })
+
+  it('does not double-report the recommendation screen ask that R11 already covers', () => {
+    const msgs = permErrors(flow(step('recommendation', `Can I make a recommendation? Let's get you in.\n\n(Wait for the yes.)`)))
+    expect(msgs).toEqual([])
+  })
+
+  it('leaves a note glued onto the ask to R7', () => {
+    expect(permErrors(flow(step('transition', `Can I ask you a few quick questions? (Wait for the yes.)`)))).toEqual([])
+  })
+
+  it('ignores an ask that only lives in a coaching note', () => {
+    expect(permErrors(flow(step('obj_cost', `I hear you.\n\n(If they hesitate, ask "can I share a thought?" and keep going.)\n\nMost people come in for the look first.`)))).toEqual([])
+  })
+})
+
 const mirErrors = (file: FlowFile) =>
   lintMakingItReal('t', file).filter((p) => p.level === 'error').map((p) => p.message)
 

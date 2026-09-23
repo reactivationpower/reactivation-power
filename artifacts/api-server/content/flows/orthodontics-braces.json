@@ -33,7 +33,7 @@
     {
       "step_key": "permission_questions",
       "title": "Ask Permission for the Questions",
-      "content": "While I have you, {{contact_first_name}}, can I ask a few quick questions about how the smile is holding up? Teeth move so slowly that nobody catches it happening.\n\n(Wait for the yes.)",
+      "content": "While I have you, {{contact_first_name}}, teeth move so slowly that nobody catches it happening. Can I ask a few quick questions about how the smile is holding up?\n\n(Wait for the yes.)",
       "sort_order": 6
     },
     {

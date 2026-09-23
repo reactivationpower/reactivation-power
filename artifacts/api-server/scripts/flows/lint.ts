@@ -26,7 +26,8 @@
 //       "End of script"); known dead ends are allow-listed in lib.ts
 //   R13 permission screens (transition, permission_questions, anything that
 //       routes to digging_in) ask permission; "Does that sound reasonable?"
-//       only closes a screen that asked permission earlier on
+//       only closes a screen that asked permission earlier on; every
+//       permission ask ends its paragraph and is followed by a coaching note
 //   R14 making_it_real* screens keep the shared three-question shape: a
 //       scaled duration question, a scaled frequency question, then "When
 //       it's at its worst…", each followed by a coaching note
@@ -757,6 +758,8 @@ export function lintPermission(slug: string, file: FlowFile): Problem[] {
       }
     }
 
+    for (const p of permissionPauseProblems(step)) push('error', where, p)
+
     const closeIdx = all.indexOf(RECOMMENDATION_CLOSE)
     if (closeIdx === -1) continue
     if (ask === null) {
@@ -768,6 +771,42 @@ export function lintPermission(slug: string, file: FlowFile): Problem[] {
   return problems
 }
 
+/**
+ * R13 (wait for the yes): every permission ask, on any screen, is the last
+ * thing the caller says before stopping. The ask ends its line, and whatever
+ * comes next on the screen is a coaching note ("(Wait for the yes.)") rather
+ * than more speech. Mirrors the R11 "keeps talking after" check, which only
+ * covers the recommendation screen's own ask.
+ */
+function permissionPauseProblems(step: FlowStep): string[] {
+  const problems: string[] = []
+  const lines = step.content
+    .split('\n')
+    .map((l) => l.trim())
+    .filter(Boolean)
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i]
+    if (isCoachingNote(line)) continue
+    const lower = normalizeQuotes(line).toLowerCase()
+    const ask = firstPermissionAsk(lower)
+    if (ask === null) continue
+    const quoted = `"${line.slice(ask.index, lower.indexOf('?', ask.index) + 1)}"`
+    const after = line.slice(lower.indexOf('?', ask.index) + 1).trim()
+    if (after) {
+      // A note glued onto the ask is R7's problem, not a second breath.
+      if (isCoachingNote(after)) continue
+      // R11 already reports the recommendation screen's own ask.
+      if (isRecommendationKey(step.step_key) && ask.opener + '?' === RECOMMENDATION_ASK) continue
+      problems.push(`R13 keeps talking after ${quoted} in the same paragraph; end the paragraph there and add "(Wait for the yes.)" before the next line`)
+      continue
+    }
+    const next = lines[i + 1]
+    if (next !== undefined && !isCoachingNote(next)) {
+      problems.push(`R13 goes straight from ${quoted} into "${next.slice(0, 40)}…"; put a coaching note like "(Wait for the yes.)" between the ask and the next spoken line`)
+    }
+  }
+  return problems
+}
 /** A flow runs in parent mode when it carries a mode_parent* step. */
 export function hasParentMode(file: FlowFile): boolean {
   return file.steps.some((s) => s.step_key.startsWith('mode_parent'))
