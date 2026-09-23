@@ -373,14 +373,14 @@
     },
     {
       "from_step_key": "obj_came_back_stopped",
-      "label": "“Yes, we can take a look”",
+      "label": "Resolved: back to scheduling",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0
     },
     {
       "from_step_key": "obj_came_back_stopped",
-      "label": "“I have another concern”",
+      "label": "Another concern came up",
       "to_step_key": "uncover",
       "variant": "objection",
       "sort_order": 1
@@ -401,28 +401,28 @@
     },
     {
       "from_step_key": "obj_getting_older",
-      "label": "“Yes, I’m open to that”",
+      "label": "Resolved: back to scheduling",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0
     },
     {
       "from_step_key": "obj_getting_older",
-      "label": "“I have another concern”",
+      "label": "Another concern came up",
       "to_step_key": "uncover",
       "variant": "objection",
       "sort_order": 1
     },
     {
       "from_step_key": "obj_managing_own",
-      "label": "“Yes, take a look”",
+      "label": "Resolved: back to scheduling",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0
     },
     {
       "from_step_key": "obj_managing_own",
-      "label": "“I have another concern”",
+      "label": "Another concern came up",
       "to_step_key": "uncover",
       "variant": "objection",
       "sort_order": 1

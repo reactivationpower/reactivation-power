@@ -373,7 +373,7 @@
     },
     {
       "from_step_key": "obj_came_back_stopped",
-      "label": "Concern resolved",
+      "label": "Resolved: back to scheduling",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0
@@ -401,7 +401,7 @@
     },
     {
       "from_step_key": "obj_managing_own",
-      "label": "Concern resolved",
+      "label": "Resolved: back to scheduling",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0
@@ -443,7 +443,7 @@
     },
     {
       "from_step_key": "obj_skeptical",
-      "label": "Concern resolved",
+      "label": "Resolved: back to scheduling",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0

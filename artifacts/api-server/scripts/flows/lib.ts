@@ -600,3 +600,99 @@ export function printProblems(problems: Problem[]): void {
     console.log(`${p.level === 'error' ? 'ERROR' : 'warn '}  ${p.where}: ${p.message}`)
   }
 }
+
+/**
+ * The two buttons every objection screen ends on. The first sends the caller
+ * back to scheduling once the concern is handled; the second re-opens the
+ * concern picker. They are copied into every niche file rather than shared,
+ * so R19 pins the label, target, variant and sort_order of both, in every
+ * file, to this one definition. Change the wording here and in the JSON
+ * together; a rename that lands in only one niche fails lint.
+ */
+export const OBJECTION_EXIT_CHOICES: ReadonlyArray<Omit<FlowChoice, 'from_step_key'>> = [
+  { sort_order: 0, label: 'Resolved: back to scheduling', to_step_key: 'scheduling', variant: 'positive' },
+  { sort_order: 1, label: 'Another concern came up', to_step_key: 'uncover', variant: 'objection' },
+]
+
+/**
+ * Where an objection screen may route besides the standard pair: straight
+ * into another objection (hvac/plumbing "I'll think about it" → cost or
+ * spouse) or to a home-services close screen ("Genuinely can't now: set a
+ * callback"). Anything else is a mistyped target or a third scheduling button.
+ */
+export const OBJECTION_EXTRA_ROUTE_PATTERNS: RegExp[] = [/^obj_/, /^close_/]
+
+function describeChoice(c: Omit<FlowChoice, 'from_step_key'>): string {
+  return `[${c.sort_order}] "${c.label}" → ${c.to_step_key} (${c.variant})`
+}
+
+/**
+ * R19: every obj_* step's outgoing buttons start with OBJECTION_EXIT_CHOICES
+ * exactly (same labels, targets, variants, sort_order 0 and 1). Any further
+ * button must sit at sort_order 2+ and route to another objection screen or
+ * a close screen, never to scheduling or uncover again.
+ *
+ * A niche obj_* step with no choices of its own falls through to general's
+ * buttons for that key in the player, so those are the ones checked; a niche
+ * that overrides the buttons of a general obj_* step it does not carry is
+ * checked on that override.
+ */
+export function findObjectionExitDrift(slug: string, file: FlowFile, general: FlowFile): Problem[] {
+  const problems: Problem[] = []
+  const own = new Map<string, FlowChoice[]>()
+  for (const c of file.choices) {
+    if (!own.has(c.from_step_key)) own.set(c.from_step_key, [])
+    own.get(c.from_step_key)!.push(c)
+  }
+  const inherited = new Map<string, FlowChoice[]>()
+  if (slug !== GENERAL_SLUG) {
+    for (const c of general.choices) {
+      if (!inherited.has(c.from_step_key)) inherited.set(c.from_step_key, [])
+      inherited.get(c.from_step_key)!.push(c)
+    }
+  }
+
+  // Every objection screen this file puts in front of the caller: its own
+  // obj_* steps, plus any general obj_* step whose buttons it overrides
+  // without carrying the step itself (validateStructure allows that).
+  const screens = new Set<string>()
+  for (const s of file.steps) if (s.step_key.startsWith('obj_')) screens.add(s.step_key)
+  for (const key of own.keys()) if (key.startsWith('obj_')) screens.add(key)
+
+  for (const key of [...screens].sort()) {
+    const where = `${slug}:${key}`
+    const push = (message: string) => problems.push({ level: 'error', where, message })
+    const choices = [...(own.get(key) ?? inherited.get(key) ?? [])].sort((a, b) => a.sort_order - b.sort_order)
+    if (choices.length === 0) continue // R12 already reports the dead end
+
+    OBJECTION_EXIT_CHOICES.forEach((want, i) => {
+      const got = choices[i]
+      if (!got) {
+        push(`R19 missing objection button ${describeChoice(want)}`)
+        return
+      }
+      const diffs: string[] = []
+      if (got.sort_order !== want.sort_order) diffs.push(`sort_order ${got.sort_order} (want ${want.sort_order})`)
+      if (got.label !== want.label) diffs.push(`label "${got.label}" (want "${want.label}")`)
+      if (got.to_step_key !== want.to_step_key) diffs.push(`target ${got.to_step_key} (want ${want.to_step_key})`)
+      if (got.variant !== want.variant) diffs.push(`variant ${got.variant} (want ${want.variant})`)
+      if (diffs.length > 0) {
+        push(`R19 objection button ${i + 1} differs from the shared pair: ${diffs.join(', ')}; expected ${describeChoice(want)}`)
+      }
+    })
+
+    for (const extra of choices.slice(OBJECTION_EXIT_CHOICES.length)) {
+      const target = extra.to_step_key ?? ''
+      const standardTargets = OBJECTION_EXIT_CHOICES.map((c) => c.to_step_key)
+      if (standardTargets.includes(target)) {
+        push(`R19 duplicate route ${describeChoice(extra)}: the shared pair already covers ${target}`)
+      } else if (!OBJECTION_EXTRA_ROUTE_PATTERNS.some((re) => re.test(target))) {
+        push(`R19 extra objection button ${describeChoice(extra)} routes somewhere other than another obj_* or close_* screen`)
+      }
+      if (extra.sort_order < OBJECTION_EXIT_CHOICES.length) {
+        push(`R19 extra objection button ${describeChoice(extra)} must sort after the shared pair (sort_order 2+)`)
+      }
+    }
+  }
+  return problems
+}

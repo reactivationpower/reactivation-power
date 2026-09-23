@@ -373,7 +373,7 @@
     },
     {
       "from_step_key": "obj_bad_experience",
-      "label": "Resolved: schedule",
+      "label": "Resolved: back to scheduling",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0
@@ -387,7 +387,7 @@
     },
     {
       "from_step_key": "obj_came_back_eating",
-      "label": "Resolved: schedule",
+      "label": "Resolved: back to scheduling",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0
@@ -415,7 +415,7 @@
     },
     {
       "from_step_key": "obj_embarrassed",
-      "label": "Resolved: schedule",
+      "label": "Resolved: back to scheduling",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0

@@ -354,7 +354,7 @@
     },
     {
       "from_step_key": "obj_came_back_stopped",
-      "label": "“Yes, I’m open to that”",
+      "label": "Resolved: back to scheduling",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0
@@ -382,7 +382,7 @@
     },
     {
       "from_step_key": "obj_fixed_for_good",
-      "label": "“Yes, get me in”",
+      "label": "Resolved: back to scheduling",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0
@@ -396,7 +396,7 @@
     },
     {
       "from_step_key": "obj_injections_surgery",
-      "label": "“Yes, that would help”",
+      "label": "Resolved: back to scheduling",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0
@@ -410,7 +410,7 @@
     },
     {
       "from_step_key": "obj_managing_own",
-      "label": "Concern resolved",
+      "label": "Resolved: back to scheduling",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0

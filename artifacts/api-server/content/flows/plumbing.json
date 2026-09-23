@@ -583,7 +583,7 @@
     },
     {
       "from_step_key": "obj_busy",
-      "label": "Resolved: re-ask the scheduling question",
+      "label": "Resolved: back to scheduling",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0
@@ -604,7 +604,7 @@
     },
     {
       "from_step_key": "obj_price",
-      "label": "Resolved: re-ask the scheduling question",
+      "label": "Resolved: back to scheduling",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0
@@ -618,7 +618,7 @@
     },
     {
       "from_step_key": "obj_spouse",
-      "label": "Resolved: re-ask the scheduling question",
+      "label": "Resolved: back to scheduling",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0
@@ -632,7 +632,7 @@
     },
     {
       "from_step_key": "obj_think",
-      "label": "Resolved: re-ask the scheduling question",
+      "label": "Resolved: back to scheduling",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0

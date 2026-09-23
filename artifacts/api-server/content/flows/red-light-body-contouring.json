@@ -241,6 +241,20 @@
       "sort_order": 1
     },
     {
+      "from_step_key": "lapsed_busy",
+      "label": "“Sounds reasonable”: schedule",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "lapsed_busy",
+      "label": "They shared another reason: go back and pick it",
+      "to_step_key": "lapsed_commitment",
+      "variant": "default",
+      "sort_order": 1
+    },
+    {
       "from_step_key": "lapsed_commitment",
       "label": "“I was happy with my results”",
       "to_step_key": "lapsed_felt_fine",
@@ -283,20 +297,6 @@
       "sort_order": 5
     },
     {
-      "from_step_key": "lapsed_felt_fine",
-      "label": "“Sounds reasonable”: schedule",
-      "to_step_key": "scheduling",
-      "variant": "positive",
-      "sort_order": 0
-    },
-    {
-      "from_step_key": "lapsed_felt_fine",
-      "label": "They shared another reason: go back and pick it",
-      "to_step_key": "lapsed_commitment",
-      "variant": "default",
-      "sort_order": 1
-    },
-    {
       "from_step_key": "lapsed_cost",
       "label": "“Sounds reasonable”: schedule",
       "to_step_key": "scheduling",
@@ -311,28 +311,14 @@
       "sort_order": 1
     },
     {
-      "from_step_key": "lapsed_busy",
+      "from_step_key": "lapsed_felt_fine",
       "label": "“Sounds reasonable”: schedule",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0
     },
     {
-      "from_step_key": "lapsed_busy",
-      "label": "They shared another reason: go back and pick it",
-      "to_step_key": "lapsed_commitment",
-      "variant": "default",
-      "sort_order": 1
-    },
-    {
-      "from_step_key": "lapsed_wait_pain",
-      "label": "“Sounds reasonable”: schedule",
-      "to_step_key": "scheduling",
-      "variant": "positive",
-      "sort_order": 0
-    },
-    {
-      "from_step_key": "lapsed_wait_pain",
+      "from_step_key": "lapsed_felt_fine",
       "label": "They shared another reason: go back and pick it",
       "to_step_key": "lapsed_commitment",
       "variant": "default",
@@ -347,6 +333,20 @@
     },
     {
       "from_step_key": "lapsed_moved",
+      "label": "They shared another reason: go back and pick it",
+      "to_step_key": "lapsed_commitment",
+      "variant": "default",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "lapsed_wait_pain",
+      "label": "“Sounds reasonable”: schedule",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "lapsed_wait_pain",
       "label": "They shared another reason: go back and pick it",
       "to_step_key": "lapsed_commitment",
       "variant": "default",
@@ -354,7 +354,7 @@
     },
     {
       "from_step_key": "obj_came_back",
-      "label": "Resolved: schedule",
+      "label": "Resolved: back to scheduling",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0
@@ -382,7 +382,7 @@
     },
     {
       "from_step_key": "obj_did_it_work",
-      "label": "Resolved: schedule",
+      "label": "Resolved: back to scheduling",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0
@@ -396,7 +396,7 @@
     },
     {
       "from_step_key": "obj_embarrassed",
-      "label": "Resolved: schedule",
+      "label": "Resolved: back to scheduling",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0

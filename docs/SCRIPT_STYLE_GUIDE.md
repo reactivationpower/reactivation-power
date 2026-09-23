@@ -391,6 +391,29 @@ reach the caller raw. Parent mode is read from the flow file (any
 parent screen later picks up the rule automatically. Unit tests cover the
 rule and run every checked-in parent-mode flow through it.
 
+### R19. Every objection screen ends on the same two buttons
+Each `obj_*` screen's buttons open with the shared exit pair, in every niche
+and in `general.json`:
+
+| sort_order | label | to_step_key | variant |
+|---|---|---|---|
+| 0 | Resolved: back to scheduling | `scheduling` | `positive` |
+| 1 | Another concern came up | `uncover` | `objection` |
+
+The pair is copied into every file rather than shared, so lint pins all four
+fields of both buttons to `OBJECTION_EXIT_CHOICES` in `scripts/flows/lib.ts`.
+Change the wording there and in every JSON file together; a rename that lands
+in one niche only ("Resolved: schedule", "Concern resolved", a quoted "Yes,
+get me in") is an error, as is a pair that starts at sort_order 1.
+
+A screen may carry more buttons after the pair (sort_order 2+) only when they
+route straight into another `obj_*` screen or a `close_*` screen; that is
+how HVAC and Plumbing send "I'll think about it" on to cost or spouse, and
+"Genuinely can't now" to a callback. A third button to `scheduling` or
+`uncover`, or one that jumps anywhere else, is an error. A niche `obj_*`
+step with no buttons of its own is checked against the general buttons it
+falls through to.
+
 ---
 
 ## 3. The standard step skeleton
@@ -486,6 +509,10 @@ Keep them exactly like that so they stand out on the screen.
   step; do not leave content nobody can reach.
 - Choice `variant` colours the button: `positive` (they agreed), `caution`
   (hesitant), `negative` (bad news), `objection`, `default` (continue).
+- **Objection screens all end on the same pair** ("Resolved: back to
+  scheduling" → `scheduling`, "Another concern came up" → `uncover`, at
+  sort_order 0 and 1). Lint R19 pins the labels, targets and variants to
+  `OBJECTION_EXIT_CHOICES` in `scripts/flows/lib.ts`.
 
 ---
 

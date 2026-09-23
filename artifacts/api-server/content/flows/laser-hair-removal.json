@@ -296,14 +296,14 @@
       "label": "Resolved: back to scheduling",
       "to_step_key": "scheduling",
       "variant": "positive",
-      "sort_order": 1
+      "sort_order": 0
     },
     {
       "from_step_key": "obj_permanent",
       "label": "Another concern came up",
       "to_step_key": "uncover",
       "variant": "objection",
-      "sort_order": 2
+      "sort_order": 1
     },
     {
       "from_step_key": "obj_send_info",

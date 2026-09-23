@@ -117,7 +117,7 @@
     {
       "step_key": "obj_cost_weight",
       "title": "Objection: Cost (weight is the focus)",
-      "content": "I understand, {{contact_first_name}}. Is it the cost of the visit, or the thought of paying for the whole program again?\n\n(Let them answer. Do not quote prices, packages, or discounts. The office handles that.)\n\nThis first visit is one appointment, not a program. And you may not need the full program again. If only some of the weight came back, a shorter course is often enough. That's what the visit figures out, and you'll hear the numbers before you decide anything.\n\nCan I ask how much getting back there matters to you? The way you felt in your clothes, the energy, all of it.\n\n(Let them answer. This is the question that does the work.)\n\nCan we at least get you in so we can see where you're at?",
+      "content": "I understand, {{contact_first_name}}. Is it the cost of the visit, or the thought of paying for the whole program again?\n\n(Let them answer. Do not quote prices, packages, or discounts. The office handles that.)\n\nThis first visit is one appointment, not a program. And you may not need the full program again. If only some of the weight came back, a shorter course is often enough. That's what the visit figures out, and you'll hear the numbers before you decide anything.\n\nThink about the way you felt in your clothes, the energy, all of it. How much does getting back there matter to you?\n\n(Let them answer. This is the question that does the work.)\n\nCan we at least get you in so we can see where you're at?",
       "sort_order": 102
     },
     {
@@ -275,7 +275,7 @@
     },
     {
       "from_step_key": "obj_cost_weight",
-      "label": "Resolved: schedule",
+      "label": "Resolved: back to scheduling",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0
@@ -289,21 +289,21 @@
     },
     {
       "from_step_key": "obj_do_it_myself",
-      "label": "Resolved: schedule",
+      "label": "Resolved: back to scheduling",
       "to_step_key": "scheduling",
       "variant": "positive",
-      "sort_order": 1
+      "sort_order": 0
     },
     {
       "from_step_key": "obj_do_it_myself",
       "label": "Another concern came up",
       "to_step_key": "uncover",
       "variant": "objection",
-      "sort_order": 2
+      "sort_order": 1
     },
     {
       "from_step_key": "obj_embarrassed",
-      "label": "Resolved: schedule",
+      "label": "Resolved: back to scheduling",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0
@@ -317,7 +317,7 @@
     },
     {
       "from_step_key": "obj_nw_chiro_didnt_help",
-      "label": "Resolved: schedule",
+      "label": "Resolved: back to scheduling",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0
@@ -331,7 +331,7 @@
     },
     {
       "from_step_key": "obj_nw_thought_behind_me",
-      "label": "Resolved: schedule",
+      "label": "Resolved: back to scheduling",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0

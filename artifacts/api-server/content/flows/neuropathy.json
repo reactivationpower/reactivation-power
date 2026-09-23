@@ -373,7 +373,7 @@
     },
     {
       "from_step_key": "obj_bad_experience",
-      "label": "“Yes, I can come in to talk”",
+      "label": "Resolved: back to scheduling",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0
@@ -387,7 +387,7 @@
     },
     {
       "from_step_key": "obj_came_back_stopped",
-      "label": "“Yes, I can come in”",
+      "label": "Resolved: back to scheduling",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0
@@ -415,7 +415,7 @@
     },
     {
       "from_step_key": "obj_frustrated",
-      "label": "“Yes, I’m open to that”",
+      "label": "Resolved: back to scheduling",
       "to_step_key": "scheduling",
       "variant": "positive",
       "sort_order": 0

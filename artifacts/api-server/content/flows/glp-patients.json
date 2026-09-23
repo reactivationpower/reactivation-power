@@ -251,31 +251,31 @@
     },
     {
       "from_step_key": "obj_embarrassed",
-      "label": "Resolved: schedule",
+      "label": "Resolved: back to scheduling",
       "to_step_key": "scheduling",
       "variant": "positive",
-      "sort_order": 1
+      "sort_order": 0
     },
     {
       "from_step_key": "obj_embarrassed",
       "label": "Another concern came up",
       "to_step_key": "uncover",
       "variant": "objection",
-      "sort_order": 2
+      "sort_order": 1
     },
     {
       "from_step_key": "obj_gained_back",
-      "label": "Resolved: schedule",
+      "label": "Resolved: back to scheduling",
       "to_step_key": "scheduling",
       "variant": "positive",
-      "sort_order": 1
+      "sort_order": 0
     },
     {
       "from_step_key": "obj_gained_back",
       "label": "Another concern came up",
       "to_step_key": "uncover",
       "variant": "objection",
-      "sort_order": 2
+      "sort_order": 1
     },
     {
       "from_step_key": "obj_other_option",
@@ -307,17 +307,17 @@
     },
     {
       "from_step_key": "obj_side_effects",
-      "label": "Resolved: schedule",
+      "label": "Resolved: back to scheduling",
       "to_step_key": "scheduling",
       "variant": "positive",
-      "sort_order": 1
+      "sort_order": 0
     },
     {
       "from_step_key": "obj_side_effects",
       "label": "Another concern came up",
       "to_step_key": "uncover",
       "variant": "objection",
-      "sort_order": 2
+      "sort_order": 1
     },
     {
       "from_step_key": "obj_spouse",

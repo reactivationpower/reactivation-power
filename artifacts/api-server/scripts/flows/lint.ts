@@ -46,10 +46,16 @@
 //       chips are dead data). Niche name is the join key because the player
 //       looks chips up by the niche row's name, which apply copies from the
 //       file's niche block.
+//   R19 every obj_* screen's buttons open with the shared exit pair from
+//       lib.ts (OBJECTION_EXIT_CHOICES): "Resolved: back to scheduling" →
+//       scheduling at 0, "Another concern came up" → uncover at 1; extra
+//       routes (hvac/plumbing) sit after them and only lead to another
+//       obj_* or a close_* screen
 import { pathToFileURL } from 'node:url'
 import {
   GENERAL_SLUG,
   findDeadEnds,
+  findObjectionExitDrift,
   findUnreachableSteps,
   listSlugs,
   printProblems,
@@ -406,6 +412,7 @@ export function lintFile(
     ...validateStructure(slug, file, generalKeys),
     ...findDeadEnds(slug, file, general),
     ...findUnreachableSteps(slug, file, general, slug === GENERAL_SLUG ? referrers : []),
+    ...findObjectionExitDrift(slug, file, general),
   ]
   const push = (level: Problem['level'], where: string, message: string) =>
     problems.push({ level, where, message })
