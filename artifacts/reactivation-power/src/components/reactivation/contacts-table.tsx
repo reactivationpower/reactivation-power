@@ -20,10 +20,10 @@ import {
   Trash2,
   X,
 } from 'lucide-react'
-import type { Niche, PipelineStage } from '@/lib/types'
-import { DISPOSITION_LABELS } from '@/lib/types'
-import { formatPhone } from '@/lib/phone'
-import { notesToText } from '@/lib/notes-text'
+import type { Niche, PipelineStage } from '@workspace/shared/types'
+import { DISPOSITION_LABELS } from '@workspace/shared/types'
+import { formatPhone } from '@workspace/shared/phone'
+import { notesToText } from '@workspace/shared/notes-text'
 import { cn } from '@/lib/utils'
 import { bulkAssignNiche, bulkDeleteContacts } from '@/app/actions/reactivation'
 import { Button } from '@/components/ui/button'

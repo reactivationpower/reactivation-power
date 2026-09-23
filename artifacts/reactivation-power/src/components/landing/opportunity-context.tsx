@@ -7,7 +7,7 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import { INACTIVE_DEFAULT, VALUE_DEFAULT } from '@/lib/opportunity'
+import { INACTIVE_DEFAULT, VALUE_DEFAULT } from '@workspace/shared/opportunity'
 
 export interface OpportunityState {
   inactiveCount: number

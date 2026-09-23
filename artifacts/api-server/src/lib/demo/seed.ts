@@ -1,8 +1,8 @@
 
 import { randomUUID } from 'node:crypto'
 import { getAdminClient } from '@/lib/supabase/admin'
-import { easternWallClockToUtc } from '@/lib/call-time'
-import type { CallDisposition } from '@/lib/types'
+import { easternWallClockToUtc } from '@workspace/shared/call-time'
+import type { CallDisposition } from '@workspace/shared/types'
 import {
   DEMO_CALLERS,
   DEMO_COURSE_ID,

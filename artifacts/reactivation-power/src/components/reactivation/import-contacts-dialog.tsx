@@ -35,7 +35,7 @@ import {
   normalizeServiceLabel,
   suggestNicheForService,
 } from '@workspace/niche-catalog'
-import type { Niche, ServiceNicheMapping } from '@/lib/types'
+import type { Niche, ServiceNicheMapping } from '@workspace/shared/types'
 import { cn } from '@/lib/utils'
 import { useRouter } from '@/hooks/use-router'
 

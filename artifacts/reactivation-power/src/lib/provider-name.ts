@@ -1,4 +1,4 @@
-import type { Sector } from '@/lib/types'
+import type { Sector } from '@workspace/shared/types'
 
 /**
  * How the scripts refer to the provider. Every `{{provider_name}}` in the

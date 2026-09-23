@@ -11,10 +11,10 @@ import {
   releaseReserveContacts,
 } from '@/lib/data/reactivation'
 import { matchNicheByName } from '@workspace/niche-catalog'
-import { easternWallClockToUtc } from '@/lib/call-time'
+import { easternWallClockToUtc } from '@workspace/shared/call-time'
 import { sanitizeNotes } from '@/lib/notes-html'
-import type { CallDisposition } from '@/lib/types'
-import { CALL_BATCH_SIZES, RETRY_WINDOW_MONTHS, MAX_STAFF } from '@/lib/types'
+import type { CallDisposition } from '@workspace/shared/types'
+import { CALL_BATCH_SIZES, RETRY_WINDOW_MONTHS, MAX_STAFF } from '@workspace/shared/types'
 import { sendPortalWelcomeEmail } from '@/lib/mail'
 
 // ---------- Admin: niches ----------

@@ -8,7 +8,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion'
-import { formatDuration } from '@/lib/format'
+import { formatDuration } from '@workspace/shared/format'
 import { Play } from 'lucide-react'
 
 export interface VideoStat {

@@ -21,6 +21,7 @@
     {
       "path": "../../lib/niche-catalog"
     },
-      { "path": "../../lib/script-tokens" }
+      { "path": "../../lib/script-tokens" },
+    { "path": "../../lib/shared" }
   ]
 }

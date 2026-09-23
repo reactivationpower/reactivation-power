@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/dialog'
 import { Progress } from '@/components/ui/progress'
 import { cn } from '@/lib/utils'
-import { formatFileSize } from '@/lib/format'
+import { formatFileSize } from '@workspace/shared/format'
 
 type UploadPhase = 'idle' | 'uploading' | 'saving' | 'done' | 'error'
 

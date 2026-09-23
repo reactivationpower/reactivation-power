@@ -3,7 +3,7 @@ import { getAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { getSession, type SessionPayload } from '@/lib/auth/session'
 import { billingBlockForOwner } from '@/lib/billing/dunning'
-import type { Participant, ParticipantAlias, Session } from '@/lib/types'
+import type { Participant, ParticipantAlias, Session } from '@workspace/shared/types'
 
 export async function getParticipantById(
   id: string,

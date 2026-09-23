@@ -7,7 +7,7 @@ import {
   VALUE_STEP,
   reactivatedPatients,
   sliderFillPercent,
-} from '@/lib/opportunity'
+} from '@workspace/shared/opportunity'
 
 interface OpportunityCalculatorProps {
   inactiveCount: number

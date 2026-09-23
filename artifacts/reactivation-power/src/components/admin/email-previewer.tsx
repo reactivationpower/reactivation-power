@@ -7,7 +7,7 @@ import {
   EMAIL_AUDIENCES,
   templatesForAudience,
   type EmailAudienceId,
-} from '@/lib/email-templates'
+} from '@workspace/shared/email-templates'
 import { notifyDone, notifyError } from '@/lib/notify'
 import { cn } from '@/lib/utils'
 

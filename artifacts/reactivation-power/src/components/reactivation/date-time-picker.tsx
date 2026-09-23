@@ -9,7 +9,7 @@ import {
   formatLazyTime,
   parseLazyTime,
   type LazyTime,
-} from '@/lib/lazy-time'
+} from '@workspace/shared/lazy-time'
 
 interface Props {
   value: Date | null

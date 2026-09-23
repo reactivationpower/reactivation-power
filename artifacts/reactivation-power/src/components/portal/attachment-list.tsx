@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { Download, FileText } from 'lucide-react'
-import type { Attachment } from '@/lib/types'
+import type { Attachment } from '@workspace/shared/types'
 
 export function AttachmentList({ attachments }: { attachments: Attachment[] }) {
   return (

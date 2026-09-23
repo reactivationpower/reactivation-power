@@ -7,7 +7,7 @@ import {
   templatesForAudience,
   type EmailAudience,
   type EmailTemplate,
-} from "@/lib/email-templates";
+} from '@workspace/shared/email-templates';
 import { runWithRequestContext } from "@/lib/request-context";
 
 interface AudienceSet {

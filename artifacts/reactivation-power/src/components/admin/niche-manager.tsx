@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { SECTOR_LABELS, type Niche, type Sector } from '@/lib/types'
+import { SECTOR_LABELS, type Niche, type Sector } from '@workspace/shared/types'
 
 const SECTOR_ORDER: Sector[] = ['healthcare', 'home_services']
 

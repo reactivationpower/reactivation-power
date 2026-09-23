@@ -5,7 +5,7 @@ import type {
   Participant,
   Video,
   VideoProgress,
-} from '@/lib/types'
+} from '@workspace/shared/types'
 
 export interface DashboardStats {
   totalViewers: number

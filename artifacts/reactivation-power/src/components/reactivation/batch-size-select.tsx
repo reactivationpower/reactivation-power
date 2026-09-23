@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { CALL_BATCH_SIZES } from '@/lib/types'
+import { CALL_BATCH_SIZES } from '@workspace/shared/types'
 import { useRouter } from '@/hooks/use-router'
 
 interface Props {

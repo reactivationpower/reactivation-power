@@ -1,11 +1,10 @@
-// @ts-nocheck
 /**
  * Shared analytics shapes + constants that are safe to import from client
  * components (no server-only imports here). The aggregation itself lives in
  * lib/data/caller-analytics.ts and re-exports everything below.
  */
 
-import type { CallDisposition } from '@/lib/types'
+import type { CallDisposition } from './types.ts'
 
 /** Minimum calls a time bucket needs before we'll call it a trend. */
 export const MIN_BUCKET_SAMPLE = 3

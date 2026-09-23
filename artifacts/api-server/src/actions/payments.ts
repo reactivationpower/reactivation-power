@@ -7,7 +7,7 @@ import { requireAdmin } from '@/lib/auth/admin-session'
 import { getAdminClient } from '@/lib/supabase/admin'
 import { stripe } from '@/lib/stripe'
 import { cardFromIntent, recordHistory } from '@/lib/billing/dunning'
-import { MAX_STAFF } from '@/lib/types'
+import { MAX_STAFF } from '@workspace/shared/types'
 import { sendPaymentReceivedEmail, sendPortalWelcomeEmail } from '@/lib/mail'
 import {
   customerCardsTable,

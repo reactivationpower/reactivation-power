@@ -9,7 +9,7 @@ import {
 import { useOpportunity } from '@/components/landing/opportunity-context'
 import { ServicesMultiSelect } from '@/components/landing/services-multi-select'
 import { Button } from '@/components/ui/button'
-import { readLeadFields, validateLeadFields } from '@/lib/lead-validation'
+import { readLeadFields, validateLeadFields } from '@workspace/shared/lead-validation'
 
 const initialState: LeadState = {}
 

@@ -7,7 +7,7 @@ import {
   type NicheCallerStat,
   type NicheLeaderRow,
   type NicheLeaders,
-} from '@/lib/analytics-types'
+} from '@workspace/shared/analytics-types'
 import { cn } from '@/lib/utils'
 
 export function NicheLeaderBoard({ data }: { data: NicheLeaders }) {

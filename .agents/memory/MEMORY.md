@@ -7,4 +7,4 @@
 - [Agreement e-sign flow constraints](agreements-esign.md) — edit/sign linearized in DB, one agreement per link, signed copy sent on completion, Stripe readiness keyed by client secret.
 - [One-off api-server scripts & test admins](api-server-scripts.md) — esbuild-bundle with pino externalized; create disposable admins via Supabase createUser, never ask for the owner's password.
 - [Web app unit tests](web-app-tests.md) — reactivation-power vitest uses its own config (vite.config throws without PORT); root `pnpm test` + validation `test`/`typecheck` registered.
-- [Shared workspace libs](shared-libs.md) — share pure TS via lib/* packages; artifact typecheck must `tsc --build` libs first (stale dist = phantom missing exports); never re-copy niche lists.
+- [Shared workspace libs](shared-libs.md) — lib/shared + lib/niche-catalog are the only copies; `tsc --build` libs before artifact typecheck (stale dist = phantom missing exports); no DOM types in libs.

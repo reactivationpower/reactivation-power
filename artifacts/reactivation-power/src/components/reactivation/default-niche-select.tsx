@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import type { Niche } from '@/lib/types'
+import type { Niche } from '@workspace/shared/types'
 import { useRouter } from '@/hooks/use-router'
 
 const NONE = '__none__'

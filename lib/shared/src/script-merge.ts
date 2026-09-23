@@ -1,5 +1,4 @@
-// @ts-nocheck
-import type { ScriptSection, Sector } from '@/lib/types'
+import type { ScriptSection, Sector } from './types.ts'
 
 /** Generic lead-in used wherever {{complaint_reference}} appears mid-sentence
  * and no condition is documented, so the script never shows a raw bracket.

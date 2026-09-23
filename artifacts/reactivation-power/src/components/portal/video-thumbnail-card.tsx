@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { CheckCircle2, Lock, Play } from 'lucide-react'
 import { mediaUrl } from '@/lib/media'
-import { formatDuration } from '@/lib/format'
+import { formatDuration } from '@workspace/shared/format'
 
 /**
  * Video card for the participant side: thumbnail frame in the background,

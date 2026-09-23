@@ -2,7 +2,7 @@
 import { Link } from "wouter";
 import { Phone, Clock, Lock } from 'lucide-react'
 type QueueItem = any
-import { suggestedCallTime } from '@/lib/call-time'
+import { suggestedCallTime } from '@workspace/shared/call-time'
 
 /**
  * Calendar-day comparison, not elapsed hours: a call due yesterday at 2 PM is

@@ -34,7 +34,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { mergeScript, spokenComplaint } from '@/lib/script-merge'
+import { mergeScript, spokenComplaint } from '@workspace/shared/script-merge'
 import {
   providerTokens,
   spokenProviderName,
@@ -56,7 +56,7 @@ import type {
   ScriptFlowChoice,
   ScriptFlowStep,
   ScriptSection,
-} from '@/lib/types'
+} from '@workspace/shared/types'
 type CallWithCaller = any
 type ContactWithMeta = any
 

@@ -22,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { SECTOR_LABELS, type Sector } from '@/lib/types'
+import { SECTOR_LABELS, type Sector } from '@workspace/shared/types'
 
 const SECTOR_OPTIONS: Sector[] = ['healthcare', 'home_services']
 

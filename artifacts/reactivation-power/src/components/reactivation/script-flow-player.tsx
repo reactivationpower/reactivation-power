@@ -19,7 +19,7 @@ import {
   isComplaintFallback,
   mergeScript,
   stripComplaintClause,
-} from '@/lib/script-merge'
+} from '@workspace/shared/script-merge'
 import { cn } from '@/lib/utils'
 import { PARENT_TOKENS, PATIENT_TOKENS } from '@workspace/script-tokens'
 import type {
@@ -27,7 +27,7 @@ import type {
   ScriptFlowStep,
   ScriptFlowVariant,
   Sector,
-} from '@/lib/types'
+} from '@workspace/shared/types'
 
 interface Props {
   steps: ScriptFlowStep[]

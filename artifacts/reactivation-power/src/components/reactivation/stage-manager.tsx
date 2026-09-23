@@ -9,7 +9,7 @@ import {
 } from '@/app/actions/reactivation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import type { PipelineStage } from '@/lib/types'
+import type { PipelineStage } from '@workspace/shared/types'
 import { useRouter } from '@/hooks/use-router'
 
 export function StageManager({ stages }: { stages: PipelineStage[] }) {

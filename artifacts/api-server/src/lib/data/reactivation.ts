@@ -1,6 +1,6 @@
 
 import { getAdminClient } from '@/lib/supabase/admin'
-import { dueWithinEasternToday } from '@/lib/call-time'
+import { dueWithinEasternToday } from '@workspace/shared/call-time'
 import type {
   Contact,
   FollowUp,
@@ -14,7 +14,7 @@ import type {
   ScriptSection,
   Sector,
   ServiceNicheMapping,
-} from '@/lib/types'
+} from '@workspace/shared/types'
 
 // ---------- Niches ----------
 
@@ -82,7 +82,7 @@ export async function getScriptSections(
   return (data ?? []) as ScriptSection[]
 }
 
-export { extractSlots, mergeScript } from '@/lib/script-merge'
+export { extractSlots, mergeScript } from '@workspace/shared/script-merge'
 
 // ---------- Interactive script flow ----------
 

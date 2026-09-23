@@ -192,6 +192,9 @@ importers:
       '@workspace/script-tokens':
         specifier: workspace:*
         version: link:../../lib/script-tokens
+      '@workspace/shared':
+        specifier: workspace:*
+        version: link:../../lib/shared
       busboy:
         specifier: ^1.6.0
         version: 1.6.0
@@ -611,6 +614,9 @@ importers:
       '@workspace/script-tokens':
         specifier: workspace:*
         version: link:../../lib/script-tokens
+      '@workspace/shared':
+        specifier: workspace:*
+        version: link:../../lib/shared
       class-variance-authority:
         specifier: 'catalog:'
         version: 0.7.1
@@ -736,6 +742,8 @@ importers:
   lib/niche-catalog: {}
 
   lib/script-tokens: {}
+
+  lib/shared: {}
 
   scripts:
     devDependencies:

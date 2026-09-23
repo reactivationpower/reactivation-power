@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { existsSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import {
@@ -8,6 +8,7 @@ import {
   matchNicheByName,
   suggestNicheForService,
 } from '@workspace/niche-catalog'
+import { extractSlots, formatPhone } from '@workspace/shared'
 
 /**
  * The niche chip / matcher / catalog lists used to be copied by hand into
@@ -19,15 +20,47 @@ const workspaceRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   '../../../..',
 )
-const SHARED_MODULES = ['concern-options', 'niche-match', 'service-catalog']
-const ARTIFACT_LIB_DIRS = [
-  'artifacts/api-server/src/lib',
-  'artifacts/reactivation-power/src/lib',
+const NICHE_CATALOG_MODULES = [
+  'concern-options',
+  'niche-match',
+  'service-catalog',
 ]
+/**
+ * The same happened to a dozen more helpers (script-merge had drifted by ~60
+ * lines); they now live once in `@workspace/shared`. Every export of that
+ * package must be listed here so a re-copied file fails the suite.
+ */
+const SHARED_MODULES = [
+  'analytics-types',
+  'call-time',
+  'email-templates',
+  'format',
+  'lazy-time',
+  'lead-validation',
+  'notes-text',
+  'opportunity',
+  'phone',
+  'script-merge',
+  'types',
+  'us-timezones',
+]
+/**
+ * notes-html depends on sanitize-html and is only used when the server stores
+ * a note, so it deliberately stays in the api-server; the web app must not
+ * grow a copy again (its old one was dead code).
+ */
+const SERVER_ONLY_MODULES = ['notes-html']
+const API_SERVER_LIB = 'artifacts/api-server/src/lib'
+const WEB_LIB = 'artifacts/reactivation-power/src/lib'
+const ARTIFACT_LIB_DIRS = [API_SERVER_LIB, WEB_LIB]
+
+const sharedPackageExports = JSON.parse(
+  readFileSync(path.join(workspaceRoot, 'lib/shared/package.json'), 'utf8'),
+).exports as Record<string, string>
 
 describe('@workspace/niche-catalog is the only copy', () => {
   for (const dir of ARTIFACT_LIB_DIRS) {
-    for (const mod of SHARED_MODULES) {
+    for (const mod of NICHE_CATALOG_MODULES) {
       it(`${dir}/${mod}.ts does not exist`, () => {
         expect(existsSync(path.join(workspaceRoot, dir, `${mod}.ts`))).toBe(
           false,
@@ -49,5 +82,51 @@ describe('@workspace/niche-catalog is the only copy', () => {
     expect(matchNicheByName('clear-aligners', niches)?.id).toBe('b')
     expect(suggestNicheForService('Invisalign consult', niches)?.id).toBe('b')
     expect(suggestNicheForService('zzz unknown', niches)).toBeNull()
+  })
+})
+
+describe('@workspace/shared is the only copy', () => {
+  for (const dir of ARTIFACT_LIB_DIRS) {
+    for (const mod of SHARED_MODULES) {
+      it(`${dir}/${mod}.ts does not exist`, () => {
+        expect(existsSync(path.join(workspaceRoot, dir, `${mod}.ts`))).toBe(
+          false,
+        )
+      })
+    }
+  }
+
+  for (const mod of SERVER_ONLY_MODULES) {
+    it(`${WEB_LIB}/${mod}.ts does not exist (server-only helper)`, () => {
+      expect(existsSync(path.join(workspaceRoot, WEB_LIB, `${mod}.ts`))).toBe(
+        false,
+      )
+    })
+    it(`${API_SERVER_LIB}/${mod}.ts still exists`, () => {
+      expect(
+        existsSync(path.join(workspaceRoot, API_SERVER_LIB, `${mod}.ts`)),
+      ).toBe(true)
+    })
+  }
+
+  it('lists every module the package exports', () => {
+    const exported = Object.keys(sharedPackageExports)
+      .filter((key) => key !== '.')
+      .map((key) => key.replace(/^\.\//, ''))
+      .sort()
+    expect(exported).toEqual([...SHARED_MODULES].sort())
+    for (const mod of SHARED_MODULES) {
+      expect(
+        existsSync(path.join(workspaceRoot, 'lib/shared/src', `${mod}.ts`)),
+      ).toBe(true)
+    }
+  })
+
+  it('exports the shared helpers', () => {
+    expect(formatPhone('5551234567')).toContain('555')
+    expect(extractSlots('Hi {{first_name}}, about {{complaint_reference}}')).toEqual([
+      'first_name',
+      'complaint_reference',
+    ])
   })
 })

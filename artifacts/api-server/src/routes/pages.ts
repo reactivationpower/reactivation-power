@@ -33,11 +33,11 @@ import {
 } from "../lib/data/reactivation";
 import { getAdminClient } from "../lib/supabase/admin";
 import { getStripeMode } from "../lib/stripe";
-import { DEFAULT_CALL_BATCH_SIZE } from "../lib/types";
+import { DEFAULT_CALL_BATCH_SIZE } from '@workspace/shared/types';
 import { demoIsStale } from "../lib/demo/seed";
-import { parseInactiveCount, parsePatientValue } from "../lib/opportunity";
+import { parseInactiveCount, parsePatientValue } from '@workspace/shared/opportunity';
 import { publicServiceName } from "@workspace/niche-catalog";
-import { DEFAULT_TIMEZONE, isUsTimezone, timezoneLabel } from "../lib/us-timezones";
+import { DEFAULT_TIMEZONE, isUsTimezone, timezoneLabel } from '@workspace/shared/us-timezones';
 import {
   confirmPayment, getPaymentDetail, getPaymentLinkPublic, listPaymentLinks,
 } from "../actions/payments";

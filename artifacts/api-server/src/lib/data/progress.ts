@@ -1,6 +1,6 @@
 
 import { getAdminClient } from '@/lib/supabase/admin'
-import type { VideoProgress } from '@/lib/types'
+import type { VideoProgress } from '@workspace/shared/types'
 import type { CourseTree, ModuleWithVideos } from './courses'
 
 export async function getProgressForParticipant(

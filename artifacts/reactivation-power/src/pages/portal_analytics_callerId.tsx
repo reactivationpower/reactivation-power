@@ -2,7 +2,7 @@
 import { useParams } from 'wouter';
 import { Link } from "wouter";
 import { ArrowLeft, CalendarCheck } from 'lucide-react'
-import { MIN_BUCKET_SAMPLE } from '@/lib/analytics-types'
+import { MIN_BUCKET_SAMPLE } from '@workspace/shared/analytics-types'
 import { PORTAL_WIDTH } from '@/lib/portal-layout'
 import {
   ActivityTrendChart,

@@ -7,7 +7,7 @@ import {
   ghlConfigured,
   setGhlContactCustomField,
 } from '@/lib/ghl'
-import { US_TIMEZONES } from '@/lib/us-timezones'
+import { US_TIMEZONES } from '@workspace/shared/us-timezones'
 
 const BOOKING_WINDOW_DAYS = 45
 

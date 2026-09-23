@@ -6,7 +6,7 @@ import {
   isComplaintFallback,
   spokenComplaint,
   stripComplaintClause,
-} from './script-merge'
+} from '@workspace/shared/script-merge'
 
 describe('complaintFallbackFor', () => {
   it('uses the house-call phrasing for home services', () => {

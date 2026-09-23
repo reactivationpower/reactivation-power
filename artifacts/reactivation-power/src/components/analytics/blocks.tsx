@@ -6,7 +6,7 @@ import {
   type CallAnalytics,
   type NicheRow,
   type TimeInsight,
-} from '@/lib/analytics-types'
+} from '@workspace/shared/analytics-types'
 import { cn } from '@/lib/utils'
 
 // ---------- Section card ----------

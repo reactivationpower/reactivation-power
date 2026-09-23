@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Input } from '@/components/ui/input'
-import { maskPhone } from '@/lib/phone'
+import { maskPhone } from '@workspace/shared/phone'
 
 type Props = Omit<
   React.ComponentProps<typeof Input>,

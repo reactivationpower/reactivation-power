@@ -23,7 +23,7 @@ import {
   type Bucket,
   type MonthRow,
   type WeekRow,
-} from '@/lib/analytics-types'
+} from '@workspace/shared/analytics-types'
 
 /**
  * One color language across every chart on the analytics pages:

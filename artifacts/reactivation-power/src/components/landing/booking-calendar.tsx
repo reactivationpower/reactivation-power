@@ -14,7 +14,7 @@ import {
   US_TIMEZONES,
   isUsTimezone,
   timezoneLabel,
-} from '@/lib/us-timezones'
+} from '@workspace/shared/us-timezones'
 import { CalendarClock, ChevronLeft, Globe, Loader2 } from 'lucide-react'
 
 const PAST_DAYS_SHOWN = 3

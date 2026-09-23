@@ -7,7 +7,7 @@ import {
   setTeamMemberActive,
   updateTeamMember,
 } from '@/app/actions/reactivation'
-import { MAX_STAFF, type Participant } from '@/lib/types'
+import { MAX_STAFF, type Participant } from '@workspace/shared/types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'

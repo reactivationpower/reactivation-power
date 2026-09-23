@@ -2,7 +2,7 @@
 import { useParams } from 'wouter';
 import { Link } from "wouter";
 import { ArrowLeft, Phone } from 'lucide-react'
-import { DISPOSITION_LABELS } from '@/lib/types'
+import { DISPOSITION_LABELS } from '@workspace/shared/types'
 import { ContactEditor } from '@/components/reactivation/contact-editor'
 import { DeleteContactButton } from '@/components/reactivation/delete-contact-button'
 import { usePageData } from '@/hooks/use-page-data'

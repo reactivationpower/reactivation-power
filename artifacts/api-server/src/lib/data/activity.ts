@@ -1,6 +1,6 @@
 
 import { getAdminClient } from '@/lib/supabase/admin'
-import type { ActivityEventType } from '@/lib/types'
+import type { ActivityEventType } from '@workspace/shared/types'
 
 export interface LogEventInput {
   participantId: string

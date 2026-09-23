@@ -7,12 +7,12 @@ import {
   ghlConfigured,
   upsertGhlContact,
 } from '@/lib/ghl'
-import { readLeadFields, validateLeadFields } from '@/lib/lead-validation'
+import { readLeadFields, validateLeadFields } from '@workspace/shared/lead-validation'
 import {
   parseInactiveCount,
   parsePatientValue,
   reactivatedPatients,
-} from '@/lib/opportunity'
+} from '@workspace/shared/opportunity'
 
 export interface LeadState {
   error?: string

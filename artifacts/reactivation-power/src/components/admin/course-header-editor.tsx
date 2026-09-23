@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import type { Course } from '@/lib/types'
+import type { Course } from '@workspace/shared/types'
 import { useRouter } from '@/hooks/use-router'
 
 export function CourseHeaderEditor({ course }: { course: Course }) {

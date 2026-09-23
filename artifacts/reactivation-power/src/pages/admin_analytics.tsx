@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { useSearch } from 'wouter'
-import { formatDateTime, formatDuration } from '@/lib/format'
+import { formatDateTime, formatDuration } from '@workspace/shared/format'
 import { Card, CardContent } from '@/components/ui/card'
 import {
   Table,

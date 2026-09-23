@@ -2,8 +2,8 @@
 import { useParams } from 'wouter';
 // import { notFound } from 'next/navigation'
 import { Link } from "wouter";
-import { formatDateTime, formatDuration } from '@/lib/format'
-import { MAX_STAFF, SECTOR_LABELS, type VideoProgress } from '@/lib/types'
+import { formatDateTime, formatDuration } from '@workspace/shared/format'
+import { MAX_STAFF, SECTOR_LABELS, type VideoProgress } from '@workspace/shared/types'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'

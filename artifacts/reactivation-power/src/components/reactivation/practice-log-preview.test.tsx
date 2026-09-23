@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react'
 import { PracticeLogPreview } from './practice-log-preview'
 import { dispositionButtonClasses } from './disposition-button-styles'
 import { ScriptFlowPlayer } from './script-flow-player'
-import type { ScriptFlowStep } from '@/lib/types'
+import type { ScriptFlowStep } from '@workspace/shared/types'
 
 // The scheduling coaching note tells the caller to "add your notes and press
 // the green Scheduled button below". In practice mode (no contact loaded)

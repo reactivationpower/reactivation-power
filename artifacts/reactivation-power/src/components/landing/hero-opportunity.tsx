@@ -11,7 +11,7 @@ import {
   VALUE_STEP,
   reactivatedPatients,
   sliderFillPercent,
-} from '@/lib/opportunity'
+} from '@workspace/shared/opportunity'
 
 function formatMoney(n: number): string {
   return '$' + Math.round(n).toLocaleString('en-US')

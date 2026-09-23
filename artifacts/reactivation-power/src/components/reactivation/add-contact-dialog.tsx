@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import type { Niche } from '@/lib/types'
+import type { Niche } from '@workspace/shared/types'
 import { useRouter } from '@/hooks/use-router'
 
 export function AddContactDialog({ niches }: { niches: Niche[] }) {

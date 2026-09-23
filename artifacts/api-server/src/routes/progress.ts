@@ -3,7 +3,7 @@ import { getAdminClient } from "@/lib/supabase/admin";
 import { getClientIp } from "@/lib/auth/session";
 import { getAllowedSession } from "@/lib/data/participants";
 import { logEvent } from "@/lib/data/activity";
-import { COMPLETION_THRESHOLD } from "@/lib/types";
+import { COMPLETION_THRESHOLD } from '@workspace/shared/types';
 import { logger } from "@/lib/logger";
 import { runWithRequestContext } from "@/lib/request-context";
 

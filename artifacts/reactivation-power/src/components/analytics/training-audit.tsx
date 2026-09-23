@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { GraduationCap, LogIn, PlayCircle, CheckCircle2 } from 'lucide-react'
-import type { TrainingAudit as TrainingAuditData } from '@/lib/analytics-types'
-import { formatDuration } from '@/lib/format'
+import type { TrainingAudit as TrainingAuditData } from '@workspace/shared/analytics-types'
+import { formatDuration } from '@workspace/shared/format'
 import { LoginsByWeekChart } from '@/components/analytics/call-charts'
 import { Section, longDate, relativeDay } from '@/components/analytics/blocks'
 import { cn } from '@/lib/utils'

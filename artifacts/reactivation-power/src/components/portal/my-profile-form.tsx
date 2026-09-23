@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import { Check } from 'lucide-react'
 import { updateMyProfile } from '@/app/actions/reactivation'
-import type { Participant } from '@/lib/types'
+import type { Participant } from '@workspace/shared/types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'

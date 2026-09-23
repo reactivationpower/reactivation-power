@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Validation rules for the /healthcare lead form. Shared by the client (so
  * errors appear the instant someone clicks submit) and the server action (the
@@ -22,8 +21,15 @@ export interface LeadFieldValues {
   services: string[]
 }
 
+/** The slice of FormData this helper reads. Declared structurally so the
+ * package type-checks without the DOM lib (the api-server has none). */
+export interface LeadFormDataLike {
+  get(key: string): unknown
+  getAll(key: string): unknown[]
+}
+
 /** Pull the lead fields out of a FormData identically on both sides. */
-export function readLeadFields(formData: FormData): LeadFieldValues {
+export function readLeadFields(formData: LeadFormDataLike): LeadFieldValues {
   const str = (key: string) => String(formData.get(key) ?? '').trim()
   return {
     firstName: str('firstName'),

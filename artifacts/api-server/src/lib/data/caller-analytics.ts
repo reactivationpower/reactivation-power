@@ -1,7 +1,7 @@
 
 import { getAdminClient } from '@/lib/supabase/admin'
-import { DISPOSITION_LABELS, type CallDisposition } from '@/lib/types'
-import type { Participant } from '@/lib/types'
+import { DISPOSITION_LABELS, type CallDisposition } from '@workspace/shared/types'
+import type { Participant } from '@workspace/shared/types'
 import {
   MIN_BUCKET_SAMPLE,
   MIN_NICHE_CONVERSATIONS,
@@ -15,7 +15,7 @@ import {
   type TimeInsight,
   type TrainingAudit,
   type WeekRow,
-} from '@/lib/analytics-types'
+} from '@workspace/shared/analytics-types'
 
 // Client components import shapes from lib/analytics-types directly; server
 // code can keep importing everything from here.

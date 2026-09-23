@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { ScriptFlowPlayer } from './script-flow-player'
-import type { ScriptFlowChoice, ScriptFlowStep } from '@/lib/types'
+import type { ScriptFlowChoice, ScriptFlowStep } from '@workspace/shared/types'
 
 // Guards parent/guardian wording. A "who's on the phone" screen routes
 // through a hidden mode_parent marker step; from then on every {{pt_*}}

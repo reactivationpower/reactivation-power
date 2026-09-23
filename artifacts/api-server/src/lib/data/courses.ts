@@ -1,6 +1,6 @@
 
 import { getAdminClient } from '@/lib/supabase/admin'
-import type { Attachment, Course, Module, Sector, Video } from '@/lib/types'
+import type { Attachment, Course, Module, Sector, Video } from '@workspace/shared/types'
 
 export interface ModuleWithVideos extends Module {
   videos: Video[]

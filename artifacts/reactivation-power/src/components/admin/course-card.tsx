@@ -8,7 +8,7 @@ import { useRouter } from '@/hooks/use-router'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { notifyDone, notifyError } from '@/lib/notify'
-import { SECTOR_LABELS, type Course } from '@/lib/types'
+import { SECTOR_LABELS, type Course } from '@workspace/shared/types'
 
 export function CourseCard({
   course,

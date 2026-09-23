@@ -1,11 +1,11 @@
 // @ts-nocheck
 import { useSearch } from 'wouter';
 import { Link } from "wouter";
-import { formatDuration } from '@/lib/format'
+import { formatDuration } from '@workspace/shared/format'
 import { Badge } from '@/components/ui/badge'
 import { NewParticipantButton } from '@/components/admin/new-participant-dialog'
 import { ViewerSearch } from '@/components/admin/viewer-search'
-import { formatDateTime } from '@/lib/format'
+import { formatDateTime } from '@workspace/shared/format'
 import { usePageData } from '@/hooks/use-page-data'
 import { PageError, PageLoading } from '@/components/page-status'
 

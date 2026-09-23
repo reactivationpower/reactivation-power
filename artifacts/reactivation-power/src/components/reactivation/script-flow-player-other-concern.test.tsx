@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { ScriptFlowPlayer } from './script-flow-player'
-import type { ScriptFlowChoice, ScriptFlowStep, Sector } from '@/lib/types'
+import type { ScriptFlowChoice, ScriptFlowStep, Sector } from '@workspace/shared/types'
 import { CONCERN_FALLBACK, type ConcernOption } from '@workspace/niche-catalog'
 
 // Guards the "Other…" type-in on the questions screen: whatever the caller

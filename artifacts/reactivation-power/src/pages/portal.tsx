@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { Link } from "wouter";
 import { PlayCircle } from 'lucide-react'
-import { MAX_STAFF } from '@/lib/types'
+import { MAX_STAFF } from '@workspace/shared/types'
 import { AddCallerDialog } from '@/components/reactivation/add-caller-dialog'
 import { usePageData } from '@/hooks/use-page-data'
 import { PageError, PageLoading } from '@/components/page-status'

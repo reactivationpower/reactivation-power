@@ -19,6 +19,7 @@
     { "path": "../../lib/db" },
     { "path": "../../lib/api-zod" },
     { "path": "../../lib/niche-catalog" },
-      { "path": "../../lib/script-tokens" }
+      { "path": "../../lib/script-tokens" },
+    { "path": "../../lib/shared" }
   ]
 }

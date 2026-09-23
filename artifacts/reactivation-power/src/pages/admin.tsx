@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { Link } from "wouter";
 import { PlayCircle } from 'lucide-react'
-import { formatDuration } from '@/lib/format'
+import { formatDuration } from '@workspace/shared/format'
 import { usePageData } from '@/hooks/use-page-data'
 import { PageError, PageLoading } from '@/components/page-status'
 

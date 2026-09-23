@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import type { Niche, ScriptSection } from '@/lib/types'
+import type { Niche, ScriptSection } from '@workspace/shared/types'
 
 export function NicheSectionsEditor({
   niches,

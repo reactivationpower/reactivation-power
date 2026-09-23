@@ -1,7 +1,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { getAdminClient } from '@/lib/supabase/admin'
-import { MAX_STAFF } from '@/lib/types'
+import { MAX_STAFF } from '@workspace/shared/types'
 import { sendPortalWelcomeEmail } from '@/lib/mail'
 
 function slugify(title: string): string {

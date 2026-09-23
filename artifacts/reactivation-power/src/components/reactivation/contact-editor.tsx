@@ -16,7 +16,7 @@ import {
 import { Switch } from '@/components/ui/switch'
 import { PhoneInput } from '@/components/reactivation/phone-input'
 import { RichTextEditor } from '@/components/reactivation/rich-text-editor'
-import type { Niche, PipelineStage } from '@/lib/types'
+import type { Niche, PipelineStage } from '@workspace/shared/types'
 import { useRouter } from '@/hooks/use-router'
 type ContactWithMeta = any
 

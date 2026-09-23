@@ -31,9 +31,9 @@ import {
   uploadFileWithProgress,
 } from '@/lib/upload-client'
 import { startManagedUpload, useUpload } from '@/lib/upload-manager'
-import { formatDuration } from '@/lib/format'
+import { formatDuration } from '@workspace/shared/format'
 import { adminMediaUrl } from '@/lib/media'
-import type { Attachment, Video } from '@/lib/types'
+import type { Attachment, Video } from '@workspace/shared/types'
 import { useRouter } from '@/hooks/use-router'
 
 export function VideoRow({
