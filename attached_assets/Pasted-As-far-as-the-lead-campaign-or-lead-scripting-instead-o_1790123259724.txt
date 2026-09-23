@@ -1,0 +1,24 @@
+As far as the lead campaign or lead scripting, instead of the reactivation, I would want that as a separate portal. It could be the same login and then you would just grant access to them for the lead dialing but they would still log in through their same login.
+Just when they log in maybe you give them two options:
+- They can log into the reactivation system.
+- They could log into this new section, which is the lead follow-up section.
+After that you're going to need to have each person that's logged in be able to have multiple campaigns. In campaigns they should have to configure a campaign. They could hit New Campaign and they type in:
+- what type of service it is
+- the service name
+- what's included in the initial offer, an outline of what they're going to be receiving when they come in, which could be maybe bullet points or several fields, several line items
+For example, new patient, joint pain package. They would put the name of it as well and the names could be pulled from the niches. A lot of people would be running:
+- joint campaign ads
+- shockwave ads
+- red light ads
+- chiropractic ads
+- ChiroThin ads
+- decompression ads
+With each of those you would have to put a customizable price and then a normally priced price, right? That would represent that discount. We could say in the script, "Normally it's $379 but now it's just $37." They may have the same or similar campaign but with different price points. They could have two shockwave therapy campaigns but they could have two totally different price points and those would follow those specific leads.
+We're also going to need to be able to upload leads to each individual campaign or they would be owned by each individual campaign. If I have 50 leads from Shockwave Campaign A (that's a $49 price point) and I have 20 leads from Shockwave Campaign B, I would need to be able to upload a list to Campaign A and then independently upload a separate list to Campaign B for all of those contacts.
+Also technically speaking, we would need to have maybe an API or, even easier, the ability to have a webhook hit our system. I don't know how this would work but we could set up a webhook. I don't know if it's a POST or a webhook POST or if it would be a GET webhook. We would be receiving a webhook and each client campaign would have their own webhook URL that we would send the data to. We could map the fields so we would get:
+- first name
+- last name
+- email address
+- phone number
+If they requested an appointment day and time, we could have a section in there where, if they do have that value filled, it could be a confirmation call or rescheduling them for a different time.
+You're probably going to want to build it out for Go High Level, where you could plug in the Go High Level location ID. You can take the API key and plug it all in together so that when they get a new lead, when a new contact is created in the Go High Level account (or it could be created with a certain tag or something happens, like a trigger happens), it would fire that off. I just don't know how we could pull that. Anyway I think that would be a good starting base but it should not be a separate login.
