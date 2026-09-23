@@ -961,7 +961,7 @@ function main() {
 }
 
 /** Lower-case with straight quotes, a plain ellipsis and single spaces so phrase lists match either typography. */
-function normalisePhraseText(text: string): string {
+export function normalisePhraseText(text: string): string {
   return text
     .toLowerCase()
     .replace(/[\u2018\u2019]/g, "'")

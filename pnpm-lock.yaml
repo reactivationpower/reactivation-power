@@ -262,9 +262,12 @@ importers:
       thread-stream:
         specifier: 3.1.0
         version: 3.1.0
+      typescript:
+        specifier: ~5.9.3
+        version: 5.9.3
       vitest:
         specifier: ^5.0.1
-        version: 5.0.1(@types/node@25.9.6)(jsdom@30.1.0)(vite@7.3.6(@types/node@25.9.6)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.23.13)(yaml@2.9.0))
+        version: 5.0.1(@types/node@25.9.6)(jsdom@30.1.0(@noble/hashes@1.8.0))(vite@7.3.6(@types/node@25.9.6)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.23.13)(yaml@2.9.0))
 
   artifacts/mockup-sandbox:
     devDependencies:
@@ -640,7 +643,7 @@ importers:
         version: 1.5.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       jsdom:
         specifier: ^30.1.0
-        version: 30.1.0
+        version: 30.1.0(@noble/hashes@1.8.0)
       lucide-react:
         specifier: 'catalog:'
         version: 0.545.0(react@19.1.0)
@@ -688,7 +691,7 @@ importers:
         version: 7.3.6(@types/node@25.9.6)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.23.13)(yaml@2.9.0)
       vitest:
         specifier: ^5.0.1
-        version: 5.0.1(@types/node@25.9.6)(jsdom@30.1.0)(vite@7.3.6(@types/node@25.9.6)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.23.13)(yaml@2.9.0))
+        version: 5.0.1(@types/node@25.9.6)(jsdom@30.1.0(@noble/hashes@1.8.0))(vite@7.3.6(@types/node@25.9.6)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.23.13)(yaml@2.9.0))
       wouter:
         specifier: ^3.3.5
         version: 3.11.0(react@19.1.0)
@@ -4364,7 +4367,9 @@ snapshots:
   '@esbuild/linux-x64@0.28.2':
     optional: true
 
-  '@exodus/bytes@1.15.2': {}
+  '@exodus/bytes@1.15.2(@noble/hashes@1.8.0)':
+    optionalDependencies:
+      '@noble/hashes': 1.8.0
 
   '@floating-ui/core@1.8.0':
     dependencies:
@@ -6013,10 +6018,10 @@ snapshots:
 
   d3-timer@3.0.1: {}
 
-  data-urls@7.0.0:
+  data-urls@7.0.0(@noble/hashes@1.8.0):
     dependencies:
       whatwg-mimetype: 5.0.0
-      whatwg-url: 16.0.1
+      whatwg-url: 16.0.1(@noble/hashes@1.8.0)
     transitivePeerDependencies:
       - '@noble/hashes'
 
@@ -6399,9 +6404,9 @@ snapshots:
 
   help-me@5.0.0: {}
 
-  html-encoding-sniffer@6.0.0:
+  html-encoding-sniffer@6.0.0(@noble/hashes@1.8.0):
     dependencies:
-      '@exodus/bytes': 1.15.2
+      '@exodus/bytes': 1.15.2(@noble/hashes@1.8.0)
     transitivePeerDependencies:
       - '@noble/hashes'
 
@@ -6490,17 +6495,17 @@ snapshots:
     dependencies:
       argparse: 2.0.1
 
-  jsdom@30.1.0:
+  jsdom@30.1.0(@noble/hashes@1.8.0):
     dependencies:
       '@asamuzakjp/css-color': 7.0.1
       '@asamuzakjp/dom-selector': 9.2.1
       '@bramus/specificity': 2.4.2
       '@csstools/css-syntax-patches-for-csstree': 1.1.14(css-tree@3.2.1)
-      '@exodus/bytes': 1.15.2
+      '@exodus/bytes': 1.15.2(@noble/hashes@1.8.0)
       css-tree: 3.2.1
-      data-urls: 7.0.0
+      data-urls: 7.0.0(@noble/hashes@1.8.0)
       decimal.js: 10.6.0
-      html-encoding-sniffer: 6.0.0
+      html-encoding-sniffer: 6.0.0(@noble/hashes@1.8.0)
       is-potential-custom-element-name: 1.0.1
       lru-cache: 11.5.3
       parse5: 8.0.1
@@ -6510,7 +6515,7 @@ snapshots:
       w3c-xmlserializer: 5.0.0
       webidl-conversions: 8.0.1
       whatwg-mimetype: 5.0.0
-      whatwg-url: 17.1.2
+      whatwg-url: 17.1.2(@noble/hashes@1.8.0)
       xml-name-validator: 5.0.0
     transitivePeerDependencies:
       - '@noble/hashes'
@@ -7493,7 +7498,7 @@ snapshots:
       tsx: 4.23.13
       yaml: 2.9.0
 
-  vitest@5.0.1(@types/node@25.9.6)(jsdom@30.1.0)(vite@7.3.6(@types/node@25.9.6)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.23.13)(yaml@2.9.0)):
+  vitest@5.0.1(@types/node@25.9.6)(jsdom@30.1.0(@noble/hashes@1.8.0))(vite@7.3.6(@types/node@25.9.6)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.23.13)(yaml@2.9.0)):
     dependencies:
       '@types/chai': 5.2.3
       '@vitest/mocker': 5.0.1(vite@7.3.6(@types/node@25.9.6)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.23.13)(yaml@2.9.0))
@@ -7511,7 +7516,7 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 25.9.6
-      jsdom: 30.1.0
+      jsdom: 30.1.0(@noble/hashes@1.8.0)
     transitivePeerDependencies:
       - msw
 
@@ -7525,17 +7530,17 @@ snapshots:
 
   whatwg-mimetype@5.0.0: {}
 
-  whatwg-url@16.0.1:
+  whatwg-url@16.0.1(@noble/hashes@1.8.0):
     dependencies:
-      '@exodus/bytes': 1.15.2
+      '@exodus/bytes': 1.15.2(@noble/hashes@1.8.0)
       tr46: 6.0.0
       webidl-conversions: 8.0.1
     transitivePeerDependencies:
       - '@noble/hashes'
 
-  whatwg-url@17.1.2:
+  whatwg-url@17.1.2(@noble/hashes@1.8.0):
     dependencies:
-      '@exodus/bytes': 1.15.2
+      '@exodus/bytes': 1.15.2(@noble/hashes@1.8.0)
       tr46: 6.0.0
       webidl-conversions: 8.0.1
     transitivePeerDependencies:
