@@ -1,0 +1,306 @@
+{
+  "niche": {
+    "name": "Red Light / Body Contouring",
+    "sector": "healthcare",
+    "is_active": true,
+    "sort_order": 3
+  },
+  "steps": [
+    {
+      "step_key": "digging_in",
+      "title": "Questions: Which Areas",
+      "content": "(Write down every area they name.)\n\n{{contact_first_name}}, I'm going to run through the areas people usually ask about. Just say yes if it's one you've noticed, even a little.\n\nFirst, the lower belly. Anything there that stays the same no matter what you do?\n\nHow about the sides, the love handle area?\n\nAnd your upper arms?\n\nWhat about under the chin?\n\nHow are your clothes fitting, anything gotten snug in one spot?\n\nAnd how's your energy and recovery, by the end of the day or after a workout?\n\nOf those, which one bothers you the most?\n\n(Tap their answer below.)",
+      "sort_order": 10
+    },
+    {
+      "step_key": "making_it_real",
+      "title": "Making It Real",
+      "content": "{{contact_first_name}}, I'd like to ask three quick questions about {{main_concern}}. This helps us get ready for your visit.\n\nHow long has it been bothering you, like a few weeks, or more like months?\n\n(Let them answer.)\n\nIs it something you notice now and then, or every time you look in the mirror?\n\n(Let them answer.)\n\nWhen it's at its worst, does it ever interfere with photos, going out, or feeling put together?\n\n(Let them answer. Repeat back whatever they name.)\n\nThank you for sharing that.",
+      "sort_order": 11
+    },
+    {
+      "step_key": "review",
+      "title": "The Review",
+      "content": "{{contact_first_name}}, let me make sure I have this right.\n\n(Read back their three answers: how long, how often, what it gets in the way of.)\n\nSo it's been on your mind a while, and you notice it most times you look in the mirror. At its worst it gets in the way of what you mentioned. Did I get that right?\n\n(Say what they named: photos, going out, or feeling put together. Let them answer. If they correct you, take the correction and move on.)\n\nAnd it sounds like you'd really like to look in the mirror and feel good about it. Is that fair to say?\n\n(Most people say yes. Tap what you hear.)",
+      "sort_order": 12
+    },
+    {
+      "step_key": "recommendation",
+      "title": "The Recommendation",
+      "content": "{{contact_first_name}}, that's exactly what the {{offer_name}} is for. Can I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you in for the {{offer_name}}. Here's what it includes:\n\n{{offer_items}}\n\n{{price_line}}\n\n{{provider_name}} takes a look at {{main_concern}} and tells you what's realistic for that spot. If we can help, we'll walk you through the options. If it's not the right fit, we'll say so. Either way you'll know where you stand. Does that sound reasonable?\n\n(Tap what you hear.)",
+      "sort_order": 13
+    },
+    {
+      "step_key": "obj_skeptical",
+      "title": "Objection: “Does this actually work?”",
+      "content": "That's a fair question, {{contact_first_name}}, and I'd rather you ask it than wonder.\n\nIs it that you've never heard of it, or that you've tried other things that didn't do much?\n\n(Let them answer. Do not promise results on the call.)\n\nRed light works on the spots that don't budge no matter what the scale says. It isn't a diet, and it isn't magic. Some areas respond well and some don't, and that's what the visit sorts out. {{provider_name}} looks at {{main_concern}} and tells you what's realistic before you spend anything.\n\nIf it isn't a fit for that spot, you'll hear that too.\n\nWouldn't you rather have a real answer than a guess?",
+      "sort_order": 101
+    },
+    {
+      "step_key": "obj_diet_exercise",
+      "title": "Objection: “I should just diet and exercise”",
+      "content": "Good for you, {{contact_first_name}}. That's the right foundation, and I'd keep it up.\n\nIs that spot changing with what you're already doing, or is it staying put?\n\n(Let them answer. Give them credit for it.)\n\nThat's the frustrating part for most people who reach out. The rest of them changes, and that one area stays right where it is. Diet and exercise work on the whole body. They can't pick one spot. That's the gap this fills.\n\nThe {{offer_name}} is a look at {{main_concern}} and what's realistic for it. If what you're doing is enough, we'll tell you to keep going.\n\nWould it help to know whether that spot will move on its own?",
+      "sort_order": 102
+    },
+    {
+      "step_key": "obj_self_conscious",
+      "title": "Objection: “I’m self-conscious about coming in”",
+      "content": "That's more common than you'd think, {{contact_first_name}}. Nobody here is keeping score.\n\nIs it the visit itself, or the thought of someone looking at that area?\n\n(Let them answer. Stay warm.)\n\nEveryone who comes in for this is there for the same reason. {{provider_name}} does this all day, and the visit is private and quick. The only thing being self-conscious does is keep people away from the thing that would help.\n\nWe'd rather see you now than have you keep putting it off.\n\nWould it feel better to just get that first step done?",
+      "sort_order": 103
+    }
+  ],
+  "choices": [
+    {
+      "from_step_key": "digging_in",
+      "label": "They named their biggest concern",
+      "to_step_key": "making_it_real",
+      "variant": "caution",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "digging_in",
+      "label": "Nothing specific: just curious about the offer",
+      "to_step_key": "recommendation",
+      "variant": "positive",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“Yes, that sounds reasonable”",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "Hesitant or soft no",
+      "to_step_key": "uncover",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“Does this actually work?”",
+      "to_step_key": "obj_skeptical",
+      "variant": "objection",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“I should just diet and exercise”",
+      "to_step_key": "obj_diet_exercise",
+      "variant": "objection",
+      "sort_order": 3
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“I’m self-conscious about coming in”",
+      "to_step_key": "obj_self_conscious",
+      "variant": "objection",
+      "sort_order": 4
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“I’m considering another option”",
+      "to_step_key": "obj_other_option",
+      "variant": "objection",
+      "sort_order": 5
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“It’s the cost or insurance”",
+      "to_step_key": "obj_cost",
+      "variant": "objection",
+      "sort_order": 6
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“I’m worried about the time”",
+      "to_step_key": "obj_time",
+      "variant": "objection",
+      "sort_order": 7
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“I need to talk to my spouse”",
+      "to_step_key": "obj_spouse",
+      "variant": "objection",
+      "sort_order": 8
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“I need to think about it”",
+      "to_step_key": "obj_think",
+      "variant": "objection",
+      "sort_order": 9
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“Just send me some info”",
+      "to_step_key": "obj_send_info",
+      "variant": "objection",
+      "sort_order": 10
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "They’re ready to schedule",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“Does this actually work?”",
+      "to_step_key": "obj_skeptical",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I should just diet and exercise”",
+      "to_step_key": "obj_diet_exercise",
+      "variant": "objection",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I’m self-conscious about coming in”",
+      "to_step_key": "obj_self_conscious",
+      "variant": "objection",
+      "sort_order": 3
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I’m considering another option”",
+      "to_step_key": "obj_other_option",
+      "variant": "objection",
+      "sort_order": 4
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“It’s the cost or insurance”",
+      "to_step_key": "obj_cost",
+      "variant": "objection",
+      "sort_order": 5
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I’m worried about the time”",
+      "to_step_key": "obj_time",
+      "variant": "objection",
+      "sort_order": 6
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I need to talk to my spouse”",
+      "to_step_key": "obj_spouse",
+      "variant": "objection",
+      "sort_order": 7
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I need to think about it”",
+      "to_step_key": "obj_think",
+      "variant": "objection",
+      "sort_order": 8
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“Just send me some info”",
+      "to_step_key": "obj_send_info",
+      "variant": "objection",
+      "sort_order": 9
+    },
+    {
+      "from_step_key": "bridge_no",
+      "label": "They’re ready to move forward",
+      "to_step_key": "recommendation",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "bridge_no",
+      "label": "“Does this actually work?”",
+      "to_step_key": "obj_skeptical",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "bridge_no",
+      "label": "“I should just diet and exercise”",
+      "to_step_key": "obj_diet_exercise",
+      "variant": "objection",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "bridge_no",
+      "label": "“It’s the cost or insurance”",
+      "to_step_key": "obj_cost",
+      "variant": "objection",
+      "sort_order": 3
+    },
+    {
+      "from_step_key": "bridge_no",
+      "label": "“I’m worried about the time”",
+      "to_step_key": "obj_time",
+      "variant": "objection",
+      "sort_order": 4
+    },
+    {
+      "from_step_key": "bridge_no",
+      "label": "“I need to talk to my spouse”",
+      "to_step_key": "obj_spouse",
+      "variant": "objection",
+      "sort_order": 5
+    },
+    {
+      "from_step_key": "bridge_no",
+      "label": "Another reason came up",
+      "to_step_key": "uncover",
+      "variant": "caution",
+      "sort_order": 6
+    },
+    {
+      "from_step_key": "obj_skeptical",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_skeptical",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_diet_exercise",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_diet_exercise",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_self_conscious",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_self_conscious",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    }
+  ]
+}

@@ -1,0 +1,294 @@
+{
+  "niche": {
+    "name": "Decompression",
+    "sector": "healthcare",
+    "is_active": true,
+    "sort_order": 4
+  },
+  "steps": [
+    {
+      "step_key": "digging_in",
+      "title": "Questions: Where It Shows Up",
+      "content": "(Write down every concern they name.)\n\n{{contact_first_name}}, I'm going to run through a few things people often notice. Just say yes if you get them at all, even if they're mild or come and go.\n\nHave you had any neck pain?\n\nHave you had any back pain?\n\nAre you having trouble sitting?\n\nDoes any pain travel down a leg or arm?\n\nDo you have morning stiffness?\n\nAre you having trouble bending or lifting?\n\nHave you had any flare-ups?\n\nAre there activities you've given up because of it?\n\nOf those, which one bothers you the most?\n\n(Tap their answer below.)",
+      "sort_order": 10
+    },
+    {
+      "step_key": "recommendation",
+      "title": "The Recommendation",
+      "content": "{{contact_first_name}}, that's exactly what the {{offer_name}} is for. Can I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you in for the {{offer_name}}. Here's what it includes:\n\n{{offer_items}}\n\n{{price_line}}\n\n{{provider_name}} takes a look at {{main_concern}} and whether decompression is a fit for it. If decompression can help, we'll walk you through the options. If it's not the right fit, we'll say so. Either way you'll know where you stand. Does that sound reasonable?\n\n(Tap what you hear.)",
+      "sort_order": 13
+    },
+    {
+      "step_key": "obj_tried_before",
+      "title": "Objection: “I’ve tried chiropractic or PT. It didn’t help”",
+      "content": "That's fair, {{contact_first_name}}, and I'm glad you told me.\n\nWhat did you try, and how long did you give it?\n\n(Let them answer. Do not knock the other office.)\n\nAdjustments and exercises work on the muscles and joints around the spot. Decompression works on the pressure inside it. If the pressure was never taken off, the other things wouldn't have held. That's not a reason to give up on it. It's a reason to try something that works differently.\n\n{{provider_name}} will tell you straight whether decompression fits {{main_concern}}. If it doesn't, we'll say so and point you in a better direction.\n\nIs that worth one visit to find out?",
+      "sort_order": 101
+    },
+    {
+      "step_key": "obj_managing_own",
+      "title": "Objection: “I’m managing on my own”",
+      "content": "Good for you, {{contact_first_name}}. That takes some discipline.\n\nWhat have you been doing for it?\n\n(Let them answer. Give them credit for it.)\n\nStretching and home care can keep you moving, and that matters. What they can't do is take the pressure off the way decompression does. Managing something and fixing it are two different things.\n\nA check with {{provider_name}} tells you which one you're dealing with. If what you're doing is enough, we'll tell you to keep going. If it isn't, you'll find out now instead of a year from now.\n\nWould it help to know for sure?",
+      "sort_order": 102
+    },
+    {
+      "step_key": "obj_injections_surgery",
+      "title": "Objection: Injections or Surgery",
+      "content": "Okay. That tells me it's gotten bad enough that you want it handled.\n\nHas a doctor recommended that, or is it something you're looking into yourself?\n\n(Let them answer. Do not talk down injections or surgery.)\n\nBoth of those are real options, and sometimes they're the right call. They're also hard to undo once you've done them. Decompression is one of the things people try before going that route. A visit with {{provider_name}} doesn't rule anything out. It gives you a second look at {{main_concern}} before you commit to something permanent.\n\nIf decompression isn't the answer here, we'll say so. Either way you'll walk into that decision knowing more than you do today.\n\nDoes it make sense to get that second look first?",
+      "sort_order": 103
+    }
+  ],
+  "choices": [
+    {
+      "from_step_key": "digging_in",
+      "label": "They named their biggest concern",
+      "to_step_key": "making_it_real",
+      "variant": "caution",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "digging_in",
+      "label": "Nothing specific: just curious about the offer",
+      "to_step_key": "recommendation",
+      "variant": "positive",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“Yes, that sounds reasonable”",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "Hesitant or soft no",
+      "to_step_key": "uncover",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“I’ve tried chiropractic or PT. It didn’t help”",
+      "to_step_key": "obj_tried_before",
+      "variant": "objection",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“I’m managing on my own”",
+      "to_step_key": "obj_managing_own",
+      "variant": "objection",
+      "sort_order": 3
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“I’m thinking about injections or surgery”",
+      "to_step_key": "obj_injections_surgery",
+      "variant": "objection",
+      "sort_order": 4
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“I’m considering another option”",
+      "to_step_key": "obj_other_option",
+      "variant": "objection",
+      "sort_order": 5
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“It’s the cost or insurance”",
+      "to_step_key": "obj_cost",
+      "variant": "objection",
+      "sort_order": 6
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“I’m worried about the time”",
+      "to_step_key": "obj_time",
+      "variant": "objection",
+      "sort_order": 7
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“I need to talk to my spouse”",
+      "to_step_key": "obj_spouse",
+      "variant": "objection",
+      "sort_order": 8
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“I need to think about it”",
+      "to_step_key": "obj_think",
+      "variant": "objection",
+      "sort_order": 9
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“Just send me some info”",
+      "to_step_key": "obj_send_info",
+      "variant": "objection",
+      "sort_order": 10
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "They’re ready to schedule",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I’ve tried chiropractic or PT. It didn’t help”",
+      "to_step_key": "obj_tried_before",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I’m managing on my own”",
+      "to_step_key": "obj_managing_own",
+      "variant": "objection",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I’m thinking about injections or surgery”",
+      "to_step_key": "obj_injections_surgery",
+      "variant": "objection",
+      "sort_order": 3
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I’m considering another option”",
+      "to_step_key": "obj_other_option",
+      "variant": "objection",
+      "sort_order": 4
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“It’s the cost or insurance”",
+      "to_step_key": "obj_cost",
+      "variant": "objection",
+      "sort_order": 5
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I’m worried about the time”",
+      "to_step_key": "obj_time",
+      "variant": "objection",
+      "sort_order": 6
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I need to talk to my spouse”",
+      "to_step_key": "obj_spouse",
+      "variant": "objection",
+      "sort_order": 7
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I need to think about it”",
+      "to_step_key": "obj_think",
+      "variant": "objection",
+      "sort_order": 8
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“Just send me some info”",
+      "to_step_key": "obj_send_info",
+      "variant": "objection",
+      "sort_order": 9
+    },
+    {
+      "from_step_key": "bridge_no",
+      "label": "They’re ready to move forward",
+      "to_step_key": "recommendation",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "bridge_no",
+      "label": "“I’ve tried chiropractic or PT. It didn’t help”",
+      "to_step_key": "obj_tried_before",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "bridge_no",
+      "label": "“I’m thinking about injections or surgery”",
+      "to_step_key": "obj_injections_surgery",
+      "variant": "objection",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "bridge_no",
+      "label": "“It’s the cost or insurance”",
+      "to_step_key": "obj_cost",
+      "variant": "objection",
+      "sort_order": 3
+    },
+    {
+      "from_step_key": "bridge_no",
+      "label": "“I’m worried about the time”",
+      "to_step_key": "obj_time",
+      "variant": "objection",
+      "sort_order": 4
+    },
+    {
+      "from_step_key": "bridge_no",
+      "label": "“I need to talk to my spouse”",
+      "to_step_key": "obj_spouse",
+      "variant": "objection",
+      "sort_order": 5
+    },
+    {
+      "from_step_key": "bridge_no",
+      "label": "Another reason came up",
+      "to_step_key": "uncover",
+      "variant": "caution",
+      "sort_order": 6
+    },
+    {
+      "from_step_key": "obj_tried_before",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_tried_before",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_managing_own",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_managing_own",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_injections_surgery",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_injections_surgery",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    }
+  ]
+}

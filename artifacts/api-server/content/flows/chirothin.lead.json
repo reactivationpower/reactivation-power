@@ -1,0 +1,256 @@
+{
+  "niche": {
+    "name": "ChiroThin",
+    "sector": "healthcare",
+    "is_active": true,
+    "sort_order": 2
+  },
+  "steps": [
+    {
+      "step_key": "digging_in",
+      "title": "Questions: What Made Them Reach Out",
+      "content": "(Write down every concern they name.)\n\n{{contact_first_name}}, I'm going to run through a few things people often notice. Just say yes if you get them at all, even if they're mild or come and go.\n\nYou reached out about the program. About how much weight would you like to lose?\n\nHave your eating habits slipped lately, more than you'd like?\n\nHow's your energy through the day, any afternoon crashes?\n\nHow have you been sleeping?\n\nDo you feel irritable or under a lot of stress?\n\nAny allergy or sinus problems, even ones you think are normal?\n\nAny pain, stiffness, or soreness in your neck or back?\n\nWhat about your knees, hips, or feet?\n\nAny headaches, even mild ones?\n\nAnd are you taking any medications, prescribed or over the counter?\n\nOf those, which one bothers you the most?\n\n(Tap their answer below. If the weight is the whole reason they reached out, use the weight-focus button.)",
+      "sort_order": 10
+    },
+    {
+      "step_key": "making_it_real",
+      "title": "Making It Real",
+      "content": "{{contact_first_name}}, I'd like to ask three quick questions about {{main_concern}}. This helps us get ready for your visit.\n\nHow long has it been bothering you, like a month or two, or longer than that?\n\n(Let them answer.)\n\nIs it something you notice like a few days a month, or is it most days?\n\n(Let them answer.)\n\nWhen it's at its worst, does it ever interfere with work, at home, or relaxing and doing your own thing?\n\n(Let them answer. Repeat back whatever they name.)\n\nThank you for sharing that.",
+      "sort_order": 11
+    },
+    {
+      "step_key": "making_it_real_nw",
+      "title": "Making It Real",
+      "content": "{{contact_first_name}}, I'd like to ask three quick questions about {{main_concern}}. This helps us get ready for your visit.\n\nHow long has it been bothering you, like a week or two, or longer than that?\n\n(Let them answer.)\n\nIs it something you experience like 1 to 2 times a month, or is it more often than that?\n\n(Let them answer.)\n\nWhen it's at its worst, does it ever interfere with work, at home, or relaxing and doing your own thing?\n\n(Let them answer. Repeat back whatever they name.)\n\nThank you for sharing that.",
+      "sort_order": 11
+    },
+    {
+      "step_key": "recommendation",
+      "title": "The Recommendation",
+      "content": "{{contact_first_name}}, that's exactly what the {{offer_name}} is for. Can I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you in for the {{offer_name}}. Here's what it includes:\n\n{{offer_items}}\n\n{{price_line}}\n\n{{provider_name}} takes a look at {{main_concern}} and where things are. If the program can help, we'll walk you through what it would look like for you. If it's not the right fit, we'll say so. Either way you'll know where you stand. Does that sound reasonable?\n\n(Tap what you hear.)",
+      "sort_order": 13
+    },
+    {
+      "step_key": "recommendation_weight_focus",
+      "title": "The Recommendation: Weight Focus",
+      "content": "{{contact_first_name}}, can I say something? You already did the hardest part by reaching out. Most people carry this around for years before they do that. Does that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you in for the {{offer_name}}. Here's what it includes:\n\n{{offer_items}}\n\n{{price_line}}\n\n{{provider_name}} sees where things are and what the program would look like for you. If we can help, we'll tell you. If it's not the right fit, we'll tell you that too. Does that sound reasonable?\n\n(Tap what you hear.)",
+      "sort_order": 13
+    },
+    {
+      "step_key": "obj_do_it_myself",
+      "title": "Objection: “I should be able to do it on my own”",
+      "content": "I understand, {{contact_first_name}}, and that's a good instinct.\n\nWhat's happened the times you've tried on your own?\n\n(Let them answer. Give them credit for trying.)\n\nMost people know what to do. What's missing isn't the knowledge, it's the structure and someone checking in. On your own, the first busy week undoes a month of effort. That's not a willpower problem. It's a support problem.\n\nThe {{offer_name}} isn't a whole program. It's a look at {{main_concern}} and what the smallest version of that support would be.\n\nWould it help to have that structure, even for a few weeks?",
+      "sort_order": 101
+    },
+    {
+      "step_key": "obj_cost_weight",
+      "title": "Objection: Cost (weight is the focus)",
+      "content": "I understand, {{contact_first_name}}. Is it the cost of the first visit, or the thought of paying for a whole program?\n\n(Let them answer.)\n\n{{price_line}}\n\nThat covers the first visit, and you're not signing up for the program on the phone. The visit is where you find out what it would take for you. You hear the numbers before you decide anything.\n\nThink about how you'd feel in your clothes, the energy, all of it. How much does getting there matter to you?\n\n(Let them answer. This is the question that does the work.)\n\nCan we at least get you in so we can see where you're at?",
+      "sort_order": 102
+    },
+    {
+      "step_key": "obj_nw_chiro_didnt_help",
+      "title": "Objection: “I’ve seen a chiropractor. It didn’t help”",
+      "content": "That's fair, {{contact_first_name}}, and I'm glad you told me.\n\nWhat were they treating, and how long did you give it?\n\n(Let them answer. Do not knock the other office.)\n\nNo two offices approach this the same way, and a lot comes down to finding what's driving the problem. If the cause of {{main_concern}} was never found, adjustments alone wouldn't have held. That's not a reason to give up on it. It's a reason to get a proper look.\n\n{{provider_name}} will tell you straight whether this is something we can help with. If it isn't, we'll say so and point you in a better direction.\n\nIs that worth one visit to find out?",
+      "sort_order": 103
+    }
+  ],
+  "choices": [
+    {
+      "from_step_key": "digging_in",
+      "label": "They named their biggest concern",
+      "to_step_key": "making_it_real",
+      "variant": "caution",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "digging_in",
+      "label": "The weight is the whole reason they reached out",
+      "to_step_key": "recommendation_weight_focus",
+      "variant": "positive",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "digging_in",
+      "label": "Nothing specific: just curious about the offer",
+      "to_step_key": "recommendation",
+      "variant": "positive",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "making_it_real_nw",
+      "label": "Continue to the review",
+      "to_step_key": "review",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "recommendation_weight_focus",
+      "label": "“Yes, that sounds reasonable”",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "recommendation_weight_focus",
+      "label": "Hesitant or soft no",
+      "to_step_key": "uncover",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "recommendation_weight_focus",
+      "label": "“I’m considering another option”",
+      "to_step_key": "obj_other_option",
+      "variant": "objection",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "recommendation_weight_focus",
+      "label": "“It’s the cost or insurance”",
+      "to_step_key": "obj_cost",
+      "variant": "objection",
+      "sort_order": 3
+    },
+    {
+      "from_step_key": "recommendation_weight_focus",
+      "label": "“I’m worried about the time”",
+      "to_step_key": "obj_time",
+      "variant": "objection",
+      "sort_order": 4
+    },
+    {
+      "from_step_key": "recommendation_weight_focus",
+      "label": "“I need to talk to my spouse”",
+      "to_step_key": "obj_spouse",
+      "variant": "objection",
+      "sort_order": 5
+    },
+    {
+      "from_step_key": "recommendation_weight_focus",
+      "label": "“I need to think about it”",
+      "to_step_key": "obj_think",
+      "variant": "objection",
+      "sort_order": 6
+    },
+    {
+      "from_step_key": "recommendation_weight_focus",
+      "label": "“Just send me some info”",
+      "to_step_key": "obj_send_info",
+      "variant": "objection",
+      "sort_order": 7
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "They’re ready to schedule",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I should be able to do it on my own”",
+      "to_step_key": "obj_do_it_myself",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I’ve seen a chiropractor before. It didn’t help”",
+      "to_step_key": "obj_nw_chiro_didnt_help",
+      "variant": "objection",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "Cost (their focus is something else)",
+      "to_step_key": "obj_cost",
+      "variant": "objection",
+      "sort_order": 3
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "Cost (the weight is the focus)",
+      "to_step_key": "obj_cost_weight",
+      "variant": "objection",
+      "sort_order": 4
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I’m worried about the time”",
+      "to_step_key": "obj_time",
+      "variant": "objection",
+      "sort_order": 5
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I need to talk to my spouse”",
+      "to_step_key": "obj_spouse",
+      "variant": "objection",
+      "sort_order": 6
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I’m considering another option”",
+      "to_step_key": "obj_other_option",
+      "variant": "objection",
+      "sort_order": 7
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I need to think about it”",
+      "to_step_key": "obj_think",
+      "variant": "objection",
+      "sort_order": 8
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“Just send me some info”",
+      "to_step_key": "obj_send_info",
+      "variant": "objection",
+      "sort_order": 9
+    },
+    {
+      "from_step_key": "obj_do_it_myself",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_do_it_myself",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_cost_weight",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_cost_weight",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_nw_chiro_didnt_help",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_nw_chiro_didnt_help",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    }
+  ]
+}
