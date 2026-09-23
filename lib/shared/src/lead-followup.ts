@@ -418,6 +418,24 @@ export const LEAD_DISPOSITIONS = [
 
 export const LEAD_MAX_UNANSWERED_ATTEMPTS = 3
 
+export function isParkedLead(lead: {
+  status: string
+  nextDueAt: Date | string | null
+  unansweredAttempts: number
+}): boolean {
+  return lead.status === 'attempted' && lead.nextDueAt === null &&
+    lead.unansweredAttempts >= LEAD_MAX_UNANSWERED_ATTEMPTS
+}
+
+/** Reset only the retry cadence; call history and the last outcome stay intact. */
+export function reopenParkedLead(
+  lead: { status: string; nextDueAt: Date | string | null; unansweredAttempts: number },
+  now: Date,
+): { unansweredAttempts: number; nextDueAt: Date } {
+  if (!isParkedLead(lead)) throw new Error('This lead is no longer parked.')
+  return { unansweredAttempts: 0, nextDueAt: now }
+}
+
 export function formatRate(rate: number): string {
   return `${Math.round(rate * 100)}%`
 }

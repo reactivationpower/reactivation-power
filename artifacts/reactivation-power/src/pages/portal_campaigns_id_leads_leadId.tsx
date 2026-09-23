@@ -1,9 +1,12 @@
 // @ts-nocheck
+import { useState, useTransition } from 'react'
 import { Link, useParams } from 'wouter'
 import { ArrowLeft, Clock, History, Mail, Phone, PhoneCall } from 'lucide-react'
 import { formatDateTime } from '@workspace/shared/format'
 import { formatPhone } from '@workspace/shared/phone'
-import { LEAD_DISPOSITION_LABELS, LEAD_SOURCE_LABELS, timeAgo } from '@workspace/shared/lead-followup'
+import { LEAD_DISPOSITION_LABELS, LEAD_SOURCE_LABELS, isParkedLead, timeAgo } from '@workspace/shared/lead-followup'
+import { retryParkedLead } from '@/app/actions/lead-followup'
+import { useRouter } from '@/hooks/use-router'
 import { usePageData } from '@/hooks/use-page-data'
 import { PageError, PageLoading } from '@/components/page-status'
 import { Button } from '@/components/ui/button'
@@ -14,6 +17,10 @@ import NotFound from '@/pages/not-found'
 export default function LeadDetailPage() {
   const { id, leadId } = useParams()
   const { data, loading, error, notFound } = usePageData<any>(`/portal/campaigns/${id}/leads/${leadId}`)
+  const router = useRouter()
+  const [pending, startTransition] = useTransition()
+  const [actionError, setActionError] = useState<string | null>(null)
+  const [success, setSuccess] = useState(false)
   if (loading) return <PageLoading />
   if (notFound) return <NotFound />
   if (error) return <PageError error={error} />
@@ -65,6 +72,29 @@ export default function LeadDetailPage() {
           ) : null}
         </div>
       </div>
+
+      {isParkedLead(lead) ? (
+        <section className="mt-6 rounded-lg border border-border bg-muted/40 p-4">
+          <p className="font-medium">Parked lead</p>
+          <p className="mt-1 text-sm text-muted-foreground">The unanswered attempts stopped automatic retries. Try again to reset the attempts and make this lead due now.</p>
+          {campaign.status === 'paused' ? <p className="mt-1 text-sm text-muted-foreground">Resume this campaign for the lead to appear in Call next.</p> : null}
+          <Button className="mt-3" disabled={pending || !!data.callBlocked} data-testid="button-retry-lead" onClick={() => {
+            setActionError(null)
+            setSuccess(false)
+            startTransition(async () => {
+              try {
+                const result = await retryParkedLead(lead.id)
+                if (result?.error) setActionError(result.error)
+                else { setSuccess(true); router.refresh() }
+              } catch {
+                setActionError('Could not reopen this lead. Please try again.')
+              }
+            })
+          }}>{pending ? 'Reopening…' : 'Try again'}</Button>
+        </section>
+      ) : null}
+      {actionError ? <p className="mt-3 text-sm text-destructive" role="alert">{actionError}</p> : null}
+      {success ? <p className="mt-3 text-sm text-muted-foreground" role="status">Attempts reset. This lead is due now{campaign.status === 'paused' ? '; resume the campaign to include it in Call next' : ' and back in Call next'}.</p> : null}
 
       <div className="mt-8 grid gap-6 md:grid-cols-2">
         <section className="rounded-lg border border-border bg-card p-6">

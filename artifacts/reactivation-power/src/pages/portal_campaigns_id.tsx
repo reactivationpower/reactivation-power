@@ -16,7 +16,7 @@ import { PORTAL_WIDTH } from '@/lib/portal-layout'
 import { cn } from '@/lib/utils'
 import NotFound from '@/pages/not-found'
 import { ArrowLeft, Archive, ArchiveRestore, BookOpen, Pause, Pencil, PhoneCall, Play, Users } from 'lucide-react'
-import { LEAD_SOURCE_LABELS, campaignConversion, formatRate, isLeadDue, leadCallBlockReason, timeAgo } from '@workspace/shared/lead-followup'
+import { LEAD_SOURCE_LABELS, campaignConversion, formatRate, isLeadDue, isParkedLead, leadCallBlockReason, timeAgo } from '@workspace/shared/lead-followup'
 
 type Tab = 'leads' | 'sources' | 'offer'
 
@@ -27,6 +27,7 @@ export default function CampaignDetailPage() {
   const { data, loading, error, notFound } = usePageData<any>(`/portal/campaigns/${id}`)
   const router = useRouter()
   const [tab, setTab] = useState<Tab>('leads')
+  const [parkedOnly, setParkedOnly] = useState(false)
   const [pending, startTransition] = useTransition()
   const [actionError, setActionError] = useState<string | null>(null)
   if (loading) return <PageLoading />
@@ -36,6 +37,8 @@ export default function CampaignDetailPage() {
   const nowMs = new Date(now).getTime()
   const newCount = leads.filter((l) => l.status === 'new').length
   const conversion = campaignConversion(leads)
+  const parkedLeads = leads.filter(isParkedLead)
+  const visibleLeads = parkedOnly ? parkedLeads : leads
 
   function changeStatus(status: 'active' | 'paused' | 'archived') {
     setActionError(null)
@@ -152,6 +155,12 @@ export default function CampaignDetailPage() {
         ) : null}
       </div>
 
+      {tab === 'leads' && leads.length > 0 ? (
+        <div className="mt-4 flex gap-2" aria-label="Filter leads">
+          <Button variant={parkedOnly ? 'outline' : 'default'} aria-pressed={!parkedOnly} onClick={() => setParkedOnly(false)}>All leads ({leads.length})</Button>
+          <Button variant={parkedOnly ? 'default' : 'outline'} aria-pressed={parkedOnly} onClick={() => setParkedOnly(true)} data-testid="filter-parked-leads">Parked ({parkedLeads.length})</Button>
+        </div>
+      ) : null}
       {tab === 'offer' ? (
         <div className="mt-6 max-w-xl rounded-lg border border-border bg-card p-6">
           <OfferSummary campaign={campaign} />
@@ -190,7 +199,8 @@ export default function CampaignDetailPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {leads.map((lead) => {
+              {visibleLeads.length === 0 ? <TableRow><TableCell colSpan={6} className="py-8 text-center text-muted-foreground">No parked leads in this campaign.</TableCell></TableRow> : null}
+              {visibleLeads.map((lead) => {
                 const blocked = leadCallBlockReason(campaign, lead)
                 const canCall = !blocked
                 return (
@@ -208,7 +218,7 @@ export default function CampaignDetailPage() {
                     <p className="text-xs text-muted-foreground">{LEAD_SOURCE_LABELS[lead.source] ?? lead.source}</p>
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">{lead.requestedTime ?? '—'}</TableCell>
-                  <TableCell><LeadStatusBadge status={lead.status} /></TableCell>
+                  <TableCell><LeadStatusBadge status={lead.status} />{isParkedLead(lead) ? <p className="mt-1 text-xs text-muted-foreground">Parked</p> : null}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">
                     {lead.lastAttemptAt ? timeAgo(lead.lastAttemptAt, nowMs) : '—'}
                     {isLeadDue(lead, nowMs) ? (

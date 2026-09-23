@@ -15,6 +15,7 @@ import {
 import type { MappedLead, WebhookFieldMapping } from "@workspace/shared/lead-webhooks";
 import {
   applyLeadDisposition,
+  reopenParkedLead,
   leadCallBlockReason,
   leadDispositionFieldError,
   planLeadImport,
@@ -437,6 +438,31 @@ export async function setLeadStatus(
 }
 
 // ---------- lead calls ----------
+
+export async function retryParkedLead(ownerId: string, leadId: string) {
+  return db.transaction(async (tx) => {
+    const [lead] = await tx.select().from(campaignLeadsTable)
+      .where(and(eq(campaignLeadsTable.id, leadId), eq(campaignLeadsTable.ownerId, ownerId)))
+      .for("update");
+    if (!lead) throw new LeadCallBlockedError("Lead not found.");
+    const [campaign] = await tx.select().from(leadCampaignsTable)
+      .where(and(eq(leadCampaignsTable.id, lead.campaignId), eq(leadCampaignsTable.ownerId, ownerId)))
+      .for("share");
+    const blocked = leadCallBlockReason(campaign ?? { status: "archived" }, lead);
+    if (blocked) throw new LeadCallBlockedError(blocked);
+    const now = new Date();
+    let reset;
+    try {
+      reset = reopenParkedLead(lead, now);
+    } catch {
+      throw new LeadCallBlockedError("This lead is no longer parked.");
+    }
+    const [updated] = await tx.update(campaignLeadsTable)
+      .set({ ...reset, updatedAt: now })
+      .where(eq(campaignLeadsTable.id, lead.id)).returning();
+    return updated;
+  });
+}
 
 export interface LogLeadCallInput {
   lead: Pick<CampaignLeadRow, "id">;

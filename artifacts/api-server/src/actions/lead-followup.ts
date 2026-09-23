@@ -72,6 +72,22 @@ export async function updateCampaign(campaignId: string, draft: CampaignDraft) {
   return { campaign }
 }
 
+/** Explicitly restart retries for a parked lead in the caller's account. */
+export async function retryParkedLead(leadId: string) {
+  const guard = await leadFollowUpContextOrError()
+  if (!guard.ok) return { error: guard.error }
+  try {
+    const lead = await store.retryParkedLead(guard.ctx.ownerId, String(leadId ?? ''))
+    revalidatePath('/portal/campaigns')
+    revalidatePath(`/portal/campaigns/${lead.campaignId}`)
+    revalidatePath(`/portal/campaigns/${lead.campaignId}/leads/${lead.id}`)
+    return { lead }
+  } catch (error) {
+    if (error instanceof store.LeadCallBlockedError) return { error: error.message }
+    throw error
+  }
+}
+
 /** Pause, resume (back to active) or archive a campaign. */
 export async function setCampaignStatus(campaignId: string, status: CampaignStatus) {
   const guard = await leadFollowUpContextOrError()
