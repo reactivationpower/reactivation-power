@@ -45,13 +45,13 @@
     {
       "step_key": "digging_in",
       "title": "The Questions: Update the File",
-      "content": "(Write down every concern they name. You'll recap them in a moment.)\n\nAre you having any breakouts now?\n\nAny breakouts along your jawline or chin?\n\nAre dark marks staying after breakouts clear?\n\nHave you noticed any scarring or pitting?\n\nHow about oily skin or large pores?\n\nAny breakouts on your back or chest?\n\nAre you seeing any redness?\n\nDo your products feel like they're not working?\n\nDo you feel like you have to cover it with makeup?\n\n(Recap what you wrote down, then ask:)\n\n{{contact_first_name}}, of those, which one bothers you the most?\n\n(Tap their answer below.)",
+      "content": "(Write down every concern they name. You'll recap them in a moment.)\n\n{{contact_first_name}}, I'm going to run through a few skin concerns people often notice. Just let me know which ones apply to you, even if they're mild or come and go.\n\nAre you having any breakouts now?\n\nAny breakouts along your jawline or chin?\n\nAre dark marks staying after breakouts clear?\n\nHave you noticed any scarring or pitting?\n\nHow about oily skin or large pores?\n\nAny breakouts on your back or chest?\n\nAre you seeing any redness?\n\nDo your products feel like they're not working?\n\nDo you feel like you have to cover it with makeup?\n\n(Recap what you wrote down, then ask:)\n\n{{contact_first_name}}, of those, which one bothers you the most?\n\n(Tap their answer below.)",
       "sort_order": 7
     },
     {
       "step_key": "digging_in_concern",
       "title": "The Questions: Update the File",
-      "content": "(Write down every concern they name, including the first one.)\n\nAre you having any breakouts now?\n\nAny breakouts along your jawline or chin?\n\nAre dark marks staying after breakouts clear?\n\nHave you noticed any scarring or pitting?\n\nHow about oily skin or large pores?\n\nAny breakouts on your back or chest?\n\nAre you seeing any redness?\n\nDo your products feel like they're not working?\n\nDo you feel like you have to cover it with makeup?\n\n(Recap everything, including what they mentioned first, then ask:)\n\n{{contact_first_name}}, between these, which one bothers you the most?\n\n(Tap their answer below.)",
+      "content": "(Write down every concern they name, including the first one.)\n\n{{contact_first_name}}, I'm going to run through a few skin concerns people often notice. Just let me know which ones apply to you, even if they're mild or come and go.\n\nAre you having any breakouts now?\n\nAny breakouts along your jawline or chin?\n\nAre dark marks staying after breakouts clear?\n\nHave you noticed any scarring or pitting?\n\nHow about oily skin or large pores?\n\nAny breakouts on your back or chest?\n\nAre you seeing any redness?\n\nDo your products feel like they're not working?\n\nDo you feel like you have to cover it with makeup?\n\n(Recap everything, including what they mentioned first, then ask:)\n\n{{contact_first_name}}, between these, which one bothers you the most?\n\n(Tap their answer below.)",
       "sort_order": 7
     },
     {

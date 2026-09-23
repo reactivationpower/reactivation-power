@@ -45,7 +45,7 @@
     {
       "step_key": "digging_in",
       "title": "The Questions: Update the File",
-      "content": "(Write down every area they name. You'll recap them in a moment.)\n\n{{contact_first_name}}, I'm going to run through a few things people often notice. Just say yes if you get them at all, even if they're mild or come and go.\n\nFirst, the area we treated. How is that looking these days?\n\nHow about the backs of your thighs, any dimpling there?\n\nAnd the buttocks area?\n\nWhat about just above the knees?\n\nHow are your clothes fitting, anything you avoid wearing now?\n\nAnd the skin texture in general, any spots that look less firm than they used to?\n\n(Recap what you wrote down, then ask:)\n\n{{contact_first_name}}, of those, which one bothers you the most?\n\n(Tap their answer below.)",
+      "content": "(Write down every area they name. You'll recap them in a moment.)\n\n{{contact_first_name}}, I'm going to run through a few areas and changes people often notice. Just let me know which ones apply to you, even if they're subtle.\n\nFirst, the area we treated. How is that looking these days?\n\nHow about the backs of your thighs, any dimpling there?\n\nAnd the buttocks area?\n\nWhat about just above the knees?\n\nHow are your clothes fitting, anything you avoid wearing now?\n\nAnd the skin texture in general, any spots that look less firm than they used to?\n\n(Recap what you wrote down, then ask:)\n\n{{contact_first_name}}, of those, which one bothers you the most?\n\n(Tap their answer below.)",
       "sort_order": 7
     },
     {

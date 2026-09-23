@@ -45,13 +45,13 @@
     {
       "step_key": "digging_in",
       "title": "The Questions: Update the File",
-      "content": "(Write down every area they name. You'll recap them in a moment.)\n\nFirst, your jawline and neck. Any loosening there, the kind you catch in photos from the side?\n\nHow about your arms, any thin-looking skin there?\n\nWhat about just above the knees?\n\nAnd your chest?\n\nHow about the backs of your hands?\n\nIf your weight has changed since we saw you, are there areas where the skin didn't keep up?\n\n(Recap what you wrote down, then ask:)\n\n{{contact_first_name}}, of those areas, which one would you most like to firm up?\n\n(Tap their answer below.)",
+      "content": "(Write down every area they name. You'll recap them in a moment.)\n\n{{contact_first_name}}, I'm going to run through a few changes people often notice. Just let me know which ones apply to you, even if they're subtle.\n\nFirst, your jawline and neck. Any loosening there, the kind you catch in photos from the side?\n\nHow about your arms, any thin-looking skin there?\n\nWhat about just above the knees?\n\nAnd your chest?\n\nHow about the backs of your hands?\n\nIf your weight has changed since we saw you, are there areas where the skin didn't keep up?\n\n(Recap what you wrote down, then ask:)\n\n{{contact_first_name}}, of those areas, which one would you most like to firm up?\n\n(Tap their answer below.)",
       "sort_order": 7
     },
     {
       "step_key": "digging_in_concern",
       "title": "The Questions: Update the File",
-      "content": "(They already named one area. Write down every area they name, including that one.)\n\nFirst, your jawline and neck. Any loosening there, the kind you catch in photos from the side?\n\nHow about your arms, any thin-looking skin there?\n\nWhat about just above the knees?\n\nAnd your chest?\n\nHow about the backs of your hands?\n\nIf your weight has changed since we saw you, are there areas where the skin didn't keep up?\n\n(Recap everything, including what they mentioned at the start, then ask:)\n\n{{contact_first_name}}, between what you mentioned earlier and these, which one would you most like to firm up?\n\n(Tap their answer below.)",
+      "content": "(They already named one area. Write down every area they name, including that one.)\n\n{{contact_first_name}}, I'm going to run through a few changes people often notice. Just let me know which ones apply to you, even if they're subtle.\n\nFirst, your jawline and neck. Any loosening there, the kind you catch in photos from the side?\n\nHow about your arms, any thin-looking skin there?\n\nWhat about just above the knees?\n\nAnd your chest?\n\nHow about the backs of your hands?\n\nIf your weight has changed since we saw you, are there areas where the skin didn't keep up?\n\n(Recap everything, including what they mentioned at the start, then ask:)\n\n{{contact_first_name}}, between what you mentioned earlier and these, which one would you most like to firm up?\n\n(Tap their answer below.)",
       "sort_order": 7
     },
     {
