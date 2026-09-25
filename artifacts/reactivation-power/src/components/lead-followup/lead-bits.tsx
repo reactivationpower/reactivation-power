@@ -37,7 +37,7 @@ export function LeadStatusBadge({ status }: { status: LeadStatus }) {
 
 /**
  * "Requested: Tue Oct 6, 2:00 PM" for a lead whose form answer resolved to a
- * day and time; falls back to their free text, or explicitly notes an empty form answer.
+ * day and time; free-text preferences get the same emphasis without implying a booking.
  */
 export function RequestedTimeBadge({
   requestedAt,
@@ -61,7 +61,17 @@ export function RequestedTimeBadge({
       </span>
     )
   }
-  if (requestedTime?.trim()) return <span className={cn('text-sm text-muted-foreground', className)}>{requestedTime}</span>
+  if (requestedTime?.trim()) {
+    return (
+      <span
+        className={cn('inline-flex items-center gap-1 rounded-md border border-teal-200 bg-teal-50 px-2 py-0.5 text-xs font-medium text-teal-900', className)}
+        data-testid="badge-lead-requested-text"
+      >
+        <CalendarClock className="size-3.5 shrink-0" aria-hidden="true" />
+        Requested: {requestedTime.trim()}
+      </span>
+    )
+  }
   if (!status || status === 'booked' || status === 'confirmed') return null
   return <span className={cn('text-xs text-muted-foreground', className)} data-testid="label-lead-no-time">Form submitted · No time requested</span>
 }

@@ -13,7 +13,7 @@ describe('form requested-time label', () => {
     rerender(<RequestedTimeBadge status="attempted" requestedTime="   " requestedAt={null} />)
     expect(screen.getByText('Form submitted · No time requested')).toBeTruthy()
     rerender(<RequestedTimeBadge status="reached" requestedTime="Any weekday afternoon" requestedAt={null} />)
-    expect(screen.getByText('Any weekday afternoon')).toBeTruthy()
+    expect(screen.getByText('Requested: Any weekday afternoon')).toBeTruthy()
     expect(screen.queryByText('Form submitted · No time requested')).toBeNull()
     rerender(<RequestedTimeBadge status="new" requestedTime="Tomorrow 3pm" requestedAt="2026-10-06T15:00" />)
     expect(screen.getByText(/Requested:.*Oct 6/)).toBeTruthy()
@@ -21,6 +21,18 @@ describe('form requested-time label', () => {
     expect(screen.queryByText('Form submitted · No time requested')).toBeNull()
     rerender(<RequestedTimeBadge status="confirmed" requestedTime={null} requestedAt={null} />)
     expect(screen.queryByText('Form submitted · No time requested')).toBeNull()
+  })
+
+  it('highlights a free-text time preference without treating it as booked or no-time', () => {
+    const { rerender } = render(<RequestedTimeBadge status="new" requestedTime="  tomorrow morning  " />)
+    const badge = screen.getByTestId('badge-lead-requested-text')
+    expect(badge.textContent).toBe('Requested: tomorrow morning')
+    expect(badge.className).toContain('bg-teal-50')
+    expect(screen.queryByTestId('label-lead-no-time')).toBeNull()
+    expect(screen.queryByText(/booked/i)).toBeNull()
+    rerender(<RequestedTimeBadge status="new" requestedTime=" " />)
+    expect(screen.queryByTestId('badge-lead-requested-text')).toBeNull()
+    expect(screen.getByTestId('label-lead-no-time').className).not.toContain('bg-teal')
   })
 
   it('shows the distinction on the shared leads table', () => {
@@ -33,8 +45,14 @@ describe('form requested-time label', () => {
         id: 'l2', firstName: 'Jo', lastName: 'West', phone: '4805550101', source: 'webhook',
         status: 'booked', submittedAt: '2026-10-05T11:00:00Z', requestedAt: null, requestedTime: null,
       } },
+      { campaign: { id: 'c1', name: 'Offer', status: 'active' }, lead: {
+        id: 'l3', firstName: 'Elliot', lastName: 'Ramirez', phone: '4805550102', source: 'webhook',
+        status: 'new', submittedAt: '2026-10-05T11:00:00Z', requestedAt: null, requestedTime: 'tomorrow morning',
+      } },
     ]} />)
     expect(screen.getByTestId('row-lead-l1').textContent).toContain('Form submitted · No time requested')
     expect(screen.getByTestId('row-lead-l2').textContent).not.toContain('No time requested')
+    expect(screen.getByTestId('row-lead-l3').textContent).toContain('Requested: tomorrow morning')
+    expect(screen.getByTestId('badge-lead-requested-text').className).toContain('bg-teal-50')
   })
 })

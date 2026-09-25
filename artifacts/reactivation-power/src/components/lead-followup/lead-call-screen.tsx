@@ -300,7 +300,7 @@ export function LeadCallScreen({
                   </span>
                 </>
               ) : lead.requestedTime?.trim() ? (
-                ` \u00b7 asked for ${lead.requestedTime}`
+                <> {' \u00b7 '}<RequestedTimeBadge requestedTime={lead.requestedTime} status={lead.status} /></>
               ) : lead.status !== 'booked' && lead.status !== 'confirmed' ? (
                 <> {' \u00b7 '}<RequestedTimeBadge status={lead.status} /></>
               ) : (
