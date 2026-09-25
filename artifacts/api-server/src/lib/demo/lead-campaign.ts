@@ -280,7 +280,7 @@ export const DEMO_LEAD_CAMPAIGNS: Record<DemoPracticeKey, readonly DemoLeadCampa
         },
         {
           firstName: 'Nia', lastName: 'Patel', phone: '(602) 555-0184', email: 'nia.patel@example.com',
-          appointmentSlot: { daysAhead: 5, hour: 10, minute: 30 },
+          requestedTime: 'Tuesday',
           message: 'Would the consultation cover texture and marks from breakouts?',
           minutesAgo: 60 * 25 + 12,
         },
@@ -304,7 +304,7 @@ export const DEMO_LEAD_CAMPAIGNS: Record<DemoPracticeKey, readonly DemoLeadCampa
       leads: [
         {
           firstName: 'Marissa', lastName: 'Cole', phone: '(480) 555-0169', email: 'marissa.cole@example.com',
-          appointmentSlot: { daysAhead: 3, hour: 11 },
+          requestedTime: 'Any afternoon next week',
           message: 'I saw the $37 new-patient package. Can we talk about my thighs?',
           minutesAgo: 60 * 2 + 8,
         },

@@ -119,7 +119,14 @@ describe('Lead Follow-Up demo campaigns', () => {
       expect(Math.max(...ages)).toBeGreaterThan(48 * 60)
       expect(Math.max(...ages)).toBeLessThan(72 * 60)
       expect(group.map((l) => l.status)).toEqual(['new', 'new', 'reached'])
-      for (const lead of group.slice(0, 2)) {
+      const fixture = DEMO_LEAD_CAMPAIGNS.aesthetics.find((c) => c.name === campaign.name)!
+      for (const [index, lead] of group.slice(0, 2).entries()) {
+        if (!fixture.leads[index].appointmentSlot) {
+          expect(lead.requestedTime).toBe(fixture.leads[index].requestedTime)
+          expect(lead.requestedAt).toBeNull()
+          expect(leadEntryStepKey(lead)).not.toBe(LEAD_CONFIRM_STEP_KEY)
+          continue
+        }
         expect(lead.requestedTime).toMatch(/^\d{4}-\d\d-\d\dT\d\d:\d\d$/)
         expect(lead.requestedAt).toBe(lead.requestedTime)
         expect(leadEntryStepKey(lead)).toBe(LEAD_CONFIRM_STEP_KEY)
@@ -135,7 +142,7 @@ describe('Lead Follow-Up demo campaigns', () => {
     vi.setSystemTime(first)
     await reset(AESTHETICS_DEMO, 'spa-owner')
     const oldSlots = leads.filter((lead) => lead.ownerId === 'spa-owner').map((lead) => lead.requestedAt)
-    expect(oldSlots.filter(Boolean)).toHaveLength(6)
+    expect(oldSlots.filter(Boolean)).toHaveLength(4)
     const oldAged = leads.filter((lead) => lead.ownerId === 'spa-owner' && lead.requestedAt)
     expect(oldAged.some((lead) => officeClock(new Date(lead.submittedAt)).getDate() !== officeClock(first).getDate())).toBe(true)
     for (const lead of oldAged) {
@@ -148,7 +155,7 @@ describe('Lead Follow-Up demo campaigns', () => {
     vi.setSystemTime(next)
     await reset(AESTHETICS_DEMO, 'spa-owner')
     const newSlots = leads.filter((lead) => lead.ownerId === 'spa-owner').map((lead) => lead.requestedAt)
-    expect(newSlots.filter(Boolean)).toHaveLength(6)
+    expect(newSlots.filter(Boolean)).toHaveLength(4)
     for (let i = 0; i < newSlots.length; i++) {
       if (!newSlots[i]) continue
       const previous = requestedAtLocalDate(oldSlots[i])!
