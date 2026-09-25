@@ -310,7 +310,6 @@ export const DEMO_LEAD_CAMPAIGNS: Record<DemoPracticeKey, readonly DemoLeadCampa
         },
         {
           firstName: 'Talia', lastName: 'Brooks', phone: '(602) 555-0127', email: 'talia.brooks@example.com',
-          appointmentSlot: { daysAhead: 6, hour: 16 },
           message: 'Looking into body sculpting for my hips and thighs.',
           minutesAgo: 60 * 31,
         },
@@ -334,7 +333,6 @@ export const DEMO_LEAD_CAMPAIGNS: Record<DemoPracticeKey, readonly DemoLeadCampa
       leads: [
         {
           firstName: 'Elise', lastName: 'Morgan', phone: '(480) 555-0113', email: 'elise.morgan@example.com',
-          appointmentSlot: { daysAhead: 4, hour: 13 },
           message: 'Curious whether microneedling could help with uneven skin texture.',
           minutesAgo: 44,
         },

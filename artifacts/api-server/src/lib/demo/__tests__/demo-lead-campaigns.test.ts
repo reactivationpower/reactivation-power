@@ -122,7 +122,7 @@ describe('Lead Follow-Up demo campaigns', () => {
       const fixture = DEMO_LEAD_CAMPAIGNS.aesthetics.find((c) => c.name === campaign.name)!
       for (const [index, lead] of group.slice(0, 2).entries()) {
         if (!fixture.leads[index].appointmentSlot) {
-          expect(lead.requestedTime).toBe(fixture.leads[index].requestedTime)
+          expect(lead.requestedTime ?? null).toBe(fixture.leads[index].requestedTime ?? null)
           expect(lead.requestedAt).toBeNull()
           expect(leadEntryStepKey(lead)).not.toBe(LEAD_CONFIRM_STEP_KEY)
           continue
@@ -138,11 +138,11 @@ describe('Lead Follow-Up demo campaigns', () => {
 
   it('keeps slots ahead of reset time even when submissions precede an office-day boundary, and refreshes them on reset', async () => {
     vi.useFakeTimers()
-    const first = new Date('2026-12-31T04:55:00.000Z') // Dec 30, 11:55 PM at the office
+    const first = new Date('2026-12-30T05:05:00.000Z') // Dec 30, 12:05 AM at the office
     vi.setSystemTime(first)
     await reset(AESTHETICS_DEMO, 'spa-owner')
     const oldSlots = leads.filter((lead) => lead.ownerId === 'spa-owner').map((lead) => lead.requestedAt)
-    expect(oldSlots.filter(Boolean)).toHaveLength(4)
+    expect(oldSlots.filter(Boolean)).toHaveLength(2)
     const oldAged = leads.filter((lead) => lead.ownerId === 'spa-owner' && lead.requestedAt)
     expect(oldAged.some((lead) => officeClock(new Date(lead.submittedAt)).getDate() !== officeClock(first).getDate())).toBe(true)
     for (const lead of oldAged) {
@@ -155,7 +155,7 @@ describe('Lead Follow-Up demo campaigns', () => {
     vi.setSystemTime(next)
     await reset(AESTHETICS_DEMO, 'spa-owner')
     const newSlots = leads.filter((lead) => lead.ownerId === 'spa-owner').map((lead) => lead.requestedAt)
-    expect(newSlots.filter(Boolean)).toHaveLength(4)
+    expect(newSlots.filter(Boolean)).toHaveLength(2)
     for (let i = 0; i < newSlots.length; i++) {
       if (!newSlots[i]) continue
       const previous = requestedAtLocalDate(oldSlots[i])!
