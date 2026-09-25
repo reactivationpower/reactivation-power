@@ -129,6 +129,7 @@ export interface CronFailedData {
   dashboardUrl: string
 }
 export interface TemplateDataMap {
+  new_leads: { count: number; portalUrl: string }
   portal_welcome: PortalWelcomeData
   cron_failed: CronFailedData
   admin_invite: AdminInviteData
@@ -885,6 +886,20 @@ export interface AccessRestoredData {
 
 type AnyTemplate = { [K in TemplateId]: TemplateDefinition<K> }[TemplateId]
 export const TEMPLATES: { [K in TemplateId]: TemplateDefinition<K> } = {
+  new_leads: {
+    id: 'new_leads',
+    name: 'New office leads',
+    description: 'Opt-in office alert without patient details; imports receive one summary.',
+    sample: { count: 1, portalUrl: `${BRAND.siteUrl}/portal/campaigns` },
+    render: d => {
+      const text = d.count === 1 ? 'A new lead has been added to your account.' : `${d.count} new leads have been added to your account.`
+      return {
+        subject: d.count === 1 ? 'You have a new lead' : `You have ${d.count} new leads`,
+        previewText: text,
+        html: layout([h1('New leads in Reactivation Power'), p(text), p('Sign in to review and follow up. No contact or treatment details are included in this email.'), button('View leads', d.portalUrl), p('Manage these alerts in Settings → New lead email notifications.')], { previewText: text }),
+      }
+    },
+  },
   portal_welcome: portalWelcome,
   admin_invite: adminInvite,
   payment_received: paymentReceived,

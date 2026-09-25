@@ -55,9 +55,15 @@ d('agreement lifecycle', () => {
       monthlyCents: 47500,
       termMonths: 12,
     } as never)
-  })
+  // This integration setup imports the server graph and writes to remote
+  // Supabase. Workspace-wide tests also start browser workers concurrently,
+  // so the default 10-second hook budget is not a reliable cold-start limit.
+  }, 30_000)
 
   afterAll(async () => {
+    // Preserve the setup error instead of masking it with a cleanup TypeError
+    // when an import fails before the database client has been assigned.
+    if (!db || !schema) return
     const { eq } = await import('drizzle-orm')
     const rows = await db.select({ id: schema.agreementsTable.id }).from(schema.agreementsTable).where(eq(schema.agreementsTable.linkId, linkId))
     for (const r of rows) {
@@ -68,7 +74,7 @@ d('agreement lifecycle', () => {
     await db.delete(schema.agreementsTable).where(eq(schema.agreementsTable.linkId, linkId))
     await db.delete(schema.paymentLinkTermsTable).where(eq(schema.paymentLinkTermsTable.linkId, linkId))
     await db.delete(schema.customersTable).where(eq(schema.customersTable.id, customerId))
-  })
+  }, 30_000)
 
   const terms = { termMonths: 12, monthlyCents: 47500, setupFeeCents: 47500 }
   const sender = { id: null, name: 'Test Rep' }

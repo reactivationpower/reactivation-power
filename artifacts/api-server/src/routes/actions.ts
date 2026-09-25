@@ -23,6 +23,7 @@ import * as agreements from "../actions/agreements";
 import * as commissions from "../actions/commissions";
 import * as customerBilling from "../actions/customer-billing";
 import * as cron from "../actions/cron";
+import * as leadNotifications from "../actions/lead-notifications";
 
 /**
  * RPC bridge for the former Next.js server actions.
@@ -48,6 +49,7 @@ type ActionFn = (...args: unknown[]) => Promise<unknown>;
 type ActionModule = Record<string, unknown>;
 
 const MODULES: Record<string, ActionModule> = {
+  "lead-notifications": leadNotifications,
   "admin-auth": adminAuth,
   "admin-team": adminTeam,
   "admin-view-as": adminViewAs,
@@ -73,6 +75,7 @@ type Auth = "public" | "portal" | "admin" | "super_admin";
 // hint: Logic changed on both sides. Requires understanding intent of each change.
 /** Allow-list: module -> action -> required auth. Anything else is 404. */
 const ACTIONS: Record<string, Record<string, Auth>> = {
+  "lead-notifications": { getLeadEmailSettings: "portal", saveLeadEmailSettings: "portal" },
   "admin-auth": {
     adminLogin: "public", completeAdminInvite: "public", adminLogout: "public",
     getCurrentAdmin: "admin",

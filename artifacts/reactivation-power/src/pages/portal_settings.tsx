@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { Settings } from 'lucide-react'
+import { LeadEmailSettings } from '@/components/lead-followup/lead-email-settings'
 import { PORTAL_WIDTH } from '@/lib/portal-layout'
 import { PracticeNameForm } from '@/components/reactivation/practice-name-form'
 import { OfficePhoneForm } from '@/components/reactivation/office-phone-form'
@@ -97,10 +98,17 @@ export default function SettingsPage() {
 
             <SettingsSection
               title="Callers"
-              description="The people making reactivation calls. Each caller signs in with their own email and sees your scripts, contacts, and call queue."
+              description="Up to 5 active callers, shared across Reactivation Power and Lead Follow-Up. Each signs in with their own email and inherits your account’s product access. The owner does not use a caller seat."
             >
               <TeamManager members={staff} entityLabel={entityLabel} />
             </SettingsSection>
+
+            {!participant.is_demo && <SettingsSection
+              title="New lead email notifications"
+              description="Choose whether your office receives an email when new campaign leads are added, and where to send it."
+            >
+              <LeadEmailSettings />
+            </SettingsSection>}
 
             <SettingsSection
               title="Pipeline stages"

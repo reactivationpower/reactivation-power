@@ -141,6 +141,7 @@ router.post(
         lead: mapped.lead,
         phoneKey: phoneKey(mapped.lead.phone),
         source: leadSource,
+        suppressNotification: isTest,
       });
       await store.recordWebhookEvent({
         campaign,

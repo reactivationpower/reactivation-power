@@ -32,15 +32,17 @@ export interface ProductAccess {
 /** Where each product's home page lives in the portal. */
 export const PRODUCT_HOME: Record<ProductId, string> = {
   reactivation: '/portal',
-  lead_followup: '/portal/campaigns',
+  lead_followup: '/portal/leads',
 }
 
 /** Path prefixes that belong to Lead Follow-Up; everything else is reactivation. */
-export const LEAD_FOLLOWUP_PATH_PREFIX = '/portal/campaigns'
+export const LEAD_FOLLOWUP_PATH_PREFIX = '/portal/leads'
 
 export function productForPath(pathname: string): ProductId {
   return pathname === LEAD_FOLLOWUP_PATH_PREFIX ||
-    pathname.startsWith(`${LEAD_FOLLOWUP_PATH_PREFIX}/`)
+    pathname.startsWith(`${LEAD_FOLLOWUP_PATH_PREFIX}/`) ||
+    pathname === '/portal/campaigns' ||
+    pathname.startsWith('/portal/campaigns/')
     ? 'lead_followup'
     : 'reactivation'
 }

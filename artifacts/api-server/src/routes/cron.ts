@@ -2,6 +2,7 @@ import { Router, type IRouter, type Request, type Response } from "express";
 import { runWithRequestContext } from "@/lib/request-context";
 import { currentDueKey, runCronJob, type CronJobName } from "@/lib/cron/jobs";
 import { retryFailedNotifications } from "@/lib/billing/notifications";
+import { deliverLeadEmails } from "@/lib/lead-followup/notifications";
 
 const router: IRouter = Router();
 
@@ -39,6 +40,16 @@ function cronRoute(job: CronJobName) {
 
 router.get("/cron/demo-reset", cronRoute("demo-reset"));
 router.get("/cron/billing-retry", cronRoute("billing-retry"));
+// Five-minute external trigger keeps retries moving when autoscale sleeps.
+router.get("/cron/lead-emails", async (req, res) => {
+  const expected = process.env.CRON_SECRET;
+  if (!expected || req.get("authorization") !== `Bearer ${expected}`) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
+  await deliverLeadEmails();
+  res.json({ ok: true });
+});
 
 export default router;
 

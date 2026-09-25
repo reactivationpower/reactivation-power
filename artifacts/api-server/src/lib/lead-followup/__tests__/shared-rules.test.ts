@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   formatPriceLine,
+  PRODUCT_HOME,
   landingPathFor,
   parseDollarsToCents,
   planLeadImport,
@@ -126,6 +127,8 @@ describe('products and paths', () => {
   })
 
   it('knows which product a path belongs to', () => {
+    expect(PRODUCT_HOME.lead_followup).toBe('/portal/leads')
+    expect(productForPath('/portal/leads')).toBe('lead_followup')
     expect(productForPath('/portal/campaigns/abc/leads/def')).toBe('lead_followup')
     expect(productForPath('/portal/campaigns')).toBe('lead_followup')
     expect(productForPath('/portal/campaignsx')).toBe('reactivation')

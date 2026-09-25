@@ -45,7 +45,7 @@ export default function PortalStartPage() {
           </span>
         </Link>
         <Link
-          href="/portal/campaigns"
+          href="/portal/leads"
           data-testid="tile-lead-followup"
           className="group flex flex-col gap-4 rounded-xl border border-border bg-card p-6 transition-colors hover:border-accent"
         >

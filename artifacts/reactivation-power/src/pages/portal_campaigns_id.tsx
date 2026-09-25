@@ -2,21 +2,20 @@
 import { useState, useTransition } from 'react'
 import { Link, useParams } from 'wouter'
 import { formatDateTime } from '@workspace/shared/format'
-import { formatPhone } from '@workspace/shared/phone'
 import { setCampaignStatus } from '@/app/actions/lead-followup'
 import { usePageData } from '@/hooks/use-page-data'
 import { useRouter } from '@/hooks/use-router'
 import { PageError, PageLoading } from '@/components/page-status'
 import { Button } from '@/components/ui/button'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { LeadsTable } from '@/components/lead-followup/leads-table'
 import { ImportLeadsDialog } from '@/components/lead-followup/import-leads-dialog'
 import { LeadSourcesTab } from '@/components/lead-followup/lead-sources-tab'
 import { PORTAL_WIDTH } from '@/lib/portal-layout'
 import { cn } from '@/lib/utils'
 import NotFound from '@/pages/not-found'
-import { ArrowLeft, Archive, ArchiveRestore, BookOpen, Pause, Pencil, PhoneCall, Play, Users } from 'lucide-react'
-import { LEAD_SOURCE_LABELS, campaignConversion, formatRate, isLeadDue, isParkedLead, leadCallBlockReason, timeAgo } from '@workspace/shared/lead-followup'
-import { CampaignStatusBadge, LeadStatusBadge, OfferSummary, RequestedTimeBadge } from '@/components/lead-followup/lead-bits'
+import { ArrowLeft, Archive, ArchiveRestore, BookOpen, Pause, Pencil, Play, Users } from 'lucide-react'
+import { campaignConversion, formatRate, isParkedLead } from '@workspace/shared/lead-followup'
+import { CampaignStatusBadge, OfferSummary } from '@/components/lead-followup/lead-bits'
 
 type Tab = 'leads' | 'sources' | 'offer'
 
@@ -184,70 +183,7 @@ export default function CampaignDetailPage() {
           </p>
         </div>
       ) : (
-        <div className="mt-4 overflow-hidden rounded-lg border border-border bg-card">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Lead</TableHead>
-                <TableHead>Submitted</TableHead>
-                <TableHead>Requested time</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Last attempt</TableHead>
-                <TableHead className="text-right">
-                  <span className="sr-only">Call</span>
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {visibleLeads.length === 0 ? <TableRow><TableCell colSpan={6} className="py-8 text-center text-muted-foreground">No parked leads in this campaign.</TableCell></TableRow> : null}
-              {visibleLeads.map((lead) => {
-                const blocked = leadCallBlockReason(campaign, lead)
-                const canCall = !blocked
-                return (
-                <TableRow key={lead.id} data-testid={`row-lead-${lead.id}`}>
-                  <TableCell>
-                    <Link href={`/portal/campaigns/${campaign.id}/leads/${lead.id}`} className="font-medium text-foreground hover:underline" data-testid={`link-lead-${lead.id}`}>
-                      {lead.firstName} {lead.lastName}
-                    </Link>
-                    <p className="text-xs text-muted-foreground">{formatPhone(lead.phone)}{lead.email ? ` · ${lead.email}` : ''}</p>
-                  </TableCell>
-                  <TableCell>
-                    <span className={cn('text-sm', lead.status === 'new' ? 'font-medium text-foreground' : 'text-muted-foreground')} title={formatDateTime(lead.submittedAt)}>
-                      {timeAgo(lead.submittedAt, nowMs)}
-                    </span>
-                    <p className="text-xs text-muted-foreground">{LEAD_SOURCE_LABELS[lead.source] ?? lead.source}</p>
-                  </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
-                    <RequestedTimeBadge requestedAt={lead.requestedAt} requestedTime={lead.requestedTime} /> {!lead.requestedAt && !lead.requestedTime ? '—' : null}
-                  </TableCell>
-                  <TableCell><LeadStatusBadge status={lead.status} />{isParkedLead(lead) ? <p className="mt-1 text-xs text-muted-foreground">Parked</p> : null}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
-                    {lead.lastAttemptAt ? timeAgo(lead.lastAttemptAt, nowMs) : '—'}
-                    {isLeadDue(lead, nowMs) ? (
-                      <p className="text-xs font-medium text-amber-700">Due now</p>
-                    ) : null}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      render={<Link href={`/portal/campaigns/${campaign.id}/leads/${lead.id}/call`} />}
-                      nativeButton={false}
-                      size="sm"
-                      variant={lead.status === 'new' ? 'default' : 'outline'}
-                      className={cn('gap-1.5', !canCall && 'pointer-events-none opacity-50')}
-                      aria-disabled={!canCall}
-                      title={blocked ?? undefined}
-                      data-testid={`button-call-lead-${lead.id}`}
-                    >
-                      <PhoneCall className="size-3.5" />
-                      Call
-                    </Button>
-                  </TableCell>
-                </TableRow>
-                )
-              })}
-            </TableBody>
-          </Table>
-        </div>
+        <LeadsTable rows={visibleLeads.map((lead) => ({ lead, campaign }))} nowMs={nowMs} emptyText="No parked leads in this campaign." />
       )}
     </div>
   )

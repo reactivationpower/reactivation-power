@@ -40,6 +40,8 @@ import Page_portal from '@/pages/portal';
 import Page_portal_analytics from '@/pages/portal_analytics';
 import Page_portal_start from '@/pages/portal_start';
 import Page_portal_campaigns from '@/pages/portal_campaigns';
+import LeadAnalyticsPage from '@/pages/portal_leads_analytics';
+import Page_portal_leads from '@/pages/portal_leads';
 import Page_portal_campaigns_new from '@/pages/portal_campaigns_new';
 import Page_portal_campaigns_id from '@/pages/portal_campaigns_id';
 import Page_portal_campaigns_id_edit from '@/pages/portal_campaigns_id_edit';
@@ -298,6 +300,16 @@ function Router() {
         <RoutedErrorBoundary>
           <PortalLayout>
             <Page_portal_start />
+          </PortalLayout>
+        </RoutedErrorBoundary>
+      </Route>
+      <Route path="/portal/leads/analytics">
+        <RoutedErrorBoundary><PortalLayout><LeadAnalyticsPage /></PortalLayout></RoutedErrorBoundary>
+      </Route>
+      <Route path="/portal/leads">
+        <RoutedErrorBoundary>
+          <PortalLayout>
+            <Page_portal_leads />
           </PortalLayout>
         </RoutedErrorBoundary>
       </Route>

@@ -1,5 +1,6 @@
 import { randomBytes, randomUUID } from "node:crypto";
-import { and, asc, desc, eq, gte, inArray, isNotNull, lt, lte, ne, notInArray, sql } from "drizzle-orm";
+import { queueLeadEmail, deliverLeadEmails } from './notifications';
+import { and, asc, desc, eq, gte, ilike, inArray, isNotNull, isNull, lt, lte, ne, notInArray, or, sql } from "drizzle-orm";
 import {
   campaignLeadsTable,
   campaignWebhookEventsTable,
@@ -213,6 +214,48 @@ export async function setCampaignStatus(
 
 // ---------- leads ----------
 
+/** Account-scoped, newest-first list. Filtering and pagination happen in SQL so
+ * an office with many campaigns never has to download every lead to open Leads. */
+export async function listAccountLeads(
+  ownerId: string,
+  options: { campaignId?: string; search?: string; status?: "all" | "new" | "parked"; page?: number } = {},
+) {
+  const pageSize = 50;
+  const page = Math.max(1, Math.min(10000, Math.floor(options.page || 1)));
+  const search = (options.search ?? "").trim().slice(0, 100);
+  const pattern = `%${search.replace(/[\\%_]/g, "\\$&")}%`;
+  const where = and(
+    eq(campaignLeadsTable.ownerId, ownerId),
+    eq(leadCampaignsTable.ownerId, ownerId),
+    options.campaignId ? eq(campaignLeadsTable.campaignId, options.campaignId) : undefined,
+    options.status === "new" ? eq(campaignLeadsTable.status, "new") : undefined,
+    options.status === "parked"
+      ? and(eq(campaignLeadsTable.status, "attempted"), isNull(campaignLeadsTable.nextDueAt), gte(campaignLeadsTable.unansweredAttempts, 3))
+      : undefined,
+    search ? or(
+      ilike(campaignLeadsTable.firstName, pattern),
+      ilike(campaignLeadsTable.lastName, pattern),
+      ilike(campaignLeadsTable.phone, pattern),
+      ilike(campaignLeadsTable.email, pattern),
+      ilike(leadCampaignsTable.name, pattern),
+    ) : undefined,
+  );
+  const [rows, [{ total }]] = await Promise.all([
+    db.select({ lead: campaignLeadsTable, campaign: leadCampaignsTable })
+      .from(campaignLeadsTable)
+      .innerJoin(leadCampaignsTable, eq(campaignLeadsTable.campaignId, leadCampaignsTable.id))
+      .where(where)
+      .orderBy(desc(campaignLeadsTable.submittedAt), desc(campaignLeadsTable.createdAt), desc(campaignLeadsTable.id))
+      .limit(pageSize)
+      .offset((page - 1) * pageSize),
+    db.select({ total: sql<number>`count(*)::int` })
+      .from(campaignLeadsTable)
+      .innerJoin(leadCampaignsTable, eq(campaignLeadsTable.campaignId, leadCampaignsTable.id))
+      .where(where),
+  ]);
+  return { rows, total, page, pageSize };
+}
+
 /** Newest first: leads decay by the hour, so the freshest response is always on top. */
 export async function listLeads(
   campaignId: string,
@@ -281,9 +324,10 @@ export async function importLeads(opts: {
   let imported = 0;
   const insertedIds: string[] = [];
   const CHUNK = 250;
+  await db.transaction(async tx => {
   for (let i = 0; i < plan.toInsert.length; i += CHUNK) {
     const chunk = plan.toInsert.slice(i, i + CHUNK);
-    const inserted = await db
+    const inserted = await tx
       .insert(campaignLeadsTable)
       .values(
         chunk.map((lead) => ({
@@ -311,6 +355,12 @@ export async function importLeads(opts: {
     imported += inserted.length;
     insertedIds.push(...inserted.map((r) => r.id));
   }
+  if (insertedIds.length) await queueLeadEmail(tx, {
+    id: `import/${insertedIds[0]}`, ownerId: opts.campaign.ownerId,
+    campaignId: opts.campaign.id, count: insertedIds.length,
+  });
+  });
+  if (insertedIds.length) await deliverLeadEmails(opts.campaign.ownerId);
 
   return {
     imported,
@@ -337,6 +387,7 @@ export async function upsertWebhookLead(opts: {
   phoneKey: string
   source: LeadSource
   submittedAt?: Date
+  suppressNotification?: boolean
 }): Promise<WebhookLeadOutcome> {
   const submittedAt = opts.submittedAt ?? new Date()
   const values = {
@@ -356,7 +407,8 @@ export async function upsertWebhookLead(opts: {
     status: 'new' as const,
     createdBy: null,
   }
-  const [row] = await db
+  const row = await db.transaction(async tx => {
+  const [saved] = await tx
     .insert(campaignLeadsTable)
     .values(values)
     .onConflictDoUpdate({
@@ -373,6 +425,12 @@ export async function upsertWebhookLead(opts: {
     })
     // xmax is 0 on a freshly inserted row and non-zero after ON CONFLICT UPDATE.
     .returning({ id: campaignLeadsTable.id, inserted: sql<boolean>`(xmax = 0)` })
+  if (saved.inserted && !opts.suppressNotification) await queueLeadEmail(tx, {
+    id: `lead/${saved.id}`, ownerId: opts.campaign.ownerId, campaignId: opts.campaign.id, count: 1,
+  })
+  return saved
+  })
+  if (row.inserted && !opts.suppressNotification) await deliverLeadEmails(opts.campaign.ownerId)
   return { outcome: row.inserted ? 'created' : 'updated', leadId: row.id }
 }
 

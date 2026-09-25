@@ -40,6 +40,7 @@ import { demoIsStale } from "../lib/demo/seed";
 import { demoPracticeByOwnerEmail } from "../lib/demo/config";
 import { hasLeadFollowUp, productAccessFor, requireLeadFollowUp } from "../lib/lead-followup/access";
 import * as leadStore from "../lib/lead-followup/store";
+import { loadLeadAnalytics } from "../lib/lead-followup/analytics";
 import { leadWebhookUrl } from "../lib/lead-followup/webhook-url";
 import { parseInactiveCount, parsePatientValue } from '@workspace/shared/opportunity';
 import { publicServiceName } from "@workspace/niche-catalog";
@@ -231,6 +232,31 @@ add("/portal/campaigns", "portal", async () => {
   const [campaigns, niches] = await Promise.all([leadStore.listCampaigns(ownerId), campaignNicheOptions(ownerId)]);
   const nicheName = Object.fromEntries(niches.map((n) => [n.id, n.name]));
   return { participant, ownerId, isOwner, campaigns, niches, nicheName };
+});
+
+add("/portal/leads/analytics", "portal", async () => loadLeadAnalytics());
+
+add("/portal/leads", "portal", async (req) => {
+  const { participant, ownerId, isOwner } = await requireLeadFollowUp("/portal/leads");
+  const campaigns = await leadStore.listCampaigns(ownerId);
+  // Keep an unknown campaign ID as a filter: an invalid or other-account ID
+  // must not silently broaden this request back to the whole account.
+  const campaignId = queryString(req, "campaign") || undefined;
+  const rawStatus = queryString(req, "status");
+  const status = rawStatus === "new" || rawStatus === "parked" ? rawStatus : "all";
+  const search = (queryString(req, "search") ?? "").trim().slice(0, 100);
+  const page = Math.max(1, Math.min(10000, Number.parseInt(queryString(req, "page") ?? "1", 10) || 1));
+  const result = await leadStore.listAccountLeads(ownerId, { campaignId, status, search, page });
+  return {
+    participant, isOwner, campaigns, ...result,
+    stats: {
+      received: campaigns.reduce((n, c) => n + c.leadCount, 0),
+      new: campaigns.reduce((n, c) => n + c.newLeadCount, 0),
+      reached: campaigns.reduce((n, c) => n + c.reachedCount, 0),
+      booked: campaigns.reduce((n, c) => n + c.bookedCount, 0),
+    },
+    now: new Date().toISOString(),
+  };
 });
 
 add("/portal/campaigns/new", "portal", async () => {

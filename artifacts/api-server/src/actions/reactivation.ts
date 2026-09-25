@@ -14,8 +14,9 @@ import { matchNicheByName } from '@workspace/niche-catalog'
 import { easternWallClockToUtc } from '@workspace/shared/call-time'
 import { sanitizeNotes } from '@/lib/notes-html'
 import type { CallDisposition } from '@workspace/shared/types'
-import { CALL_BATCH_SIZES, RETRY_WINDOW_MONTHS, MAX_STAFF } from '@workspace/shared/types'
+import { CALL_BATCH_SIZES, RETRY_WINDOW_MONTHS } from '@workspace/shared/types'
 import { sendPortalWelcomeEmail } from '@/lib/mail'
+import { changeCallerSeat } from '@/lib/data/caller-seats'
 
 // ---------- Admin: niches ----------
 
@@ -726,35 +727,10 @@ export async function addTeamMember(formData: FormData) {
     return { error: 'First name, last name, and email are required' }
   }
 
-  const supabase = getAdminClient()
-
-  // Only active staff count toward the limit — deactivating frees a seat.
-  const { count } = await supabase
-    .from('participants')
-    .select('id', { count: 'exact', head: true })
-    .eq('parent_id', participant.id)
-    .eq('is_active', true)
-  if ((count ?? 0) >= MAX_STAFF) {
-    return { error: `You can have up to ${MAX_STAFF} active callers.` }
-  }
-
-  const { data: member, error } = await supabase
-    .from('participants')
-    .insert({
-      first_name: firstName,
-      last_name: lastName,
-      email,
-      phone: phone || null,
-      parent_id: participant.id,
-      role: 'staff',
-    })
-    .select('id')
-    .single()
-  if (error || !member) {
-    if (error?.code === '23505')
-      return { error: 'Someone with this email already exists.' }
-    return { error: error?.message ?? 'Could not add the caller.' }
-  }
+  const member = await changeCallerSeat(participant.id, {
+    kind: 'add', firstName, lastName, email, phone: phone || null,
+  })
+  if (member.error || !member.id) return { error: member.error ?? 'Could not add the caller.' }
   await sendPortalWelcomeEmail({
     participantId: member.id,
     firstName,
@@ -779,26 +755,8 @@ export async function setTeamMemberActive(memberId: string, isActive: boolean) {
     return { error: 'Only the account owner can manage callers' }
   if (!memberId) return { error: 'Missing caller' }
 
-  const supabase = getAdminClient()
-
-  // Re-enabling counts against the active limit.
-  if (isActive) {
-    const { count } = await supabase
-      .from('participants')
-      .select('id', { count: 'exact', head: true })
-      .eq('parent_id', participant.id)
-      .eq('is_active', true)
-    if ((count ?? 0) >= MAX_STAFF) {
-      return { error: `You can have up to ${MAX_STAFF} active callers.` }
-    }
-  }
-
-  const { error } = await supabase
-    .from('participants')
-    .update({ is_active: isActive })
-    .eq('id', memberId)
-    .eq('parent_id', participant.id) // ownership guard
-  if (error) return { error: error.message }
+  const result = await changeCallerSeat(participant.id, { kind: 'active', memberId, active: isActive })
+  if (result.error) return { error: result.error }
   revalidatePath('/portal', 'layout')
   return {}
 }

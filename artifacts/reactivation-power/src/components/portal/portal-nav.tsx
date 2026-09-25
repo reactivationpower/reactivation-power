@@ -8,6 +8,7 @@ import {
   CreditCard,
   GraduationCap,
   Megaphone,
+  Inbox,
   PhoneCall,
   Settings,
   Users,
@@ -23,9 +24,11 @@ const NAV = [
   { href: '/portal/analytics', label: 'Analytics', icon: BarChart3 },
 ] as const
 
-/** Lead Follow-Up's own nav: everything hangs off campaigns for now. */
+/** Leads are the first stop; campaign administration remains one click away. */
 const LEAD_NAV = [
+  { href: '/portal/leads', label: 'Leads', icon: Inbox },
   { href: '/portal/campaigns', label: 'Campaigns', icon: Megaphone },
+  { href: '/portal/leads/analytics', label: 'Analytics', icon: BarChart3, ownerOnly: true },
 ] as const
 
 function isActive(pathname: string, href: string, exact?: boolean) {
@@ -36,7 +39,7 @@ function isActive(pathname: string, href: string, exact?: boolean) {
 /** Which products this account holds; reactivation is always on. */
 function useProducts() {
   const { data } = usePageData<any>('/portal/_layout')
-  return { reactivation: true, leadFollowUp: Boolean(data?.products?.leadFollowUp) }
+  return { reactivation: true, leadFollowUp: Boolean(data?.products?.leadFollowUp), isOwner: data?.participant?.role === 'owner' }
 }
 
 /** The logo goes home to whichever product you are in. */
@@ -86,7 +89,8 @@ export function PortalNav() {
     <nav className="flex items-center gap-1" aria-label="Portal">
       {products.leadFollowUp ? <ProductSwitch pathname={pathname} /> : null}
       {items.map((item) => {
-        const active = isActive(pathname, item.href, 'exact' in item)
+        if ('ownerOnly' in item && item.ownerOnly && !products.isOwner) return null
+        const active = item.href === '/portal/leads' ? pathname === item.href : isActive(pathname, item.href, 'exact' in item)
         return (
           <Link
             key={item.href}

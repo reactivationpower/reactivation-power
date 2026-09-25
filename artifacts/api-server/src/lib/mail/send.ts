@@ -31,6 +31,8 @@ export interface SendResult {
 }
 
 export interface SendOptions {
+  /** Provider-level deduplication for durable outbox retries (24-hour retention). */
+  idempotencyKey?: string
   /** Free-form context stored with the log row (ids, amounts). Never secrets or links. */
   metadata?: Record<string, unknown>
   replyTo?: string
@@ -77,6 +79,7 @@ export async function sendEmail<K extends TemplateId>(
   try {
     const response = await connectors.proxy('resend', '/emails', {
       method: 'POST',
+      ...(options.idempotencyKey ? { headers: { 'Idempotency-Key': options.idempotencyKey } } : {}),
       body: {
         from: fromAddress(),
         to: [recipient],
@@ -94,7 +97,7 @@ export async function sendEmail<K extends TemplateId>(
             }
           : {}),
         tags: [{ name: 'type', value: type }],
-        headers: { 'X-Entity-Ref-ID': logId },
+        headers: { 'X-Entity-Ref-ID': options.idempotencyKey ?? logId },
       },
     })
     const payload = (await response.json().catch(() => ({}))) as ResendSendResponse
