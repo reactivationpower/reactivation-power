@@ -35,10 +35,10 @@ describe('demo practice config', () => {
     expect(CHIRO_DEMO.rngSeed).toBe('ridgeline-chiro-demo-v1')
   })
 
-  it('splits the niches: body-contouring niches live on the aesthetics demo only', () => {
+  it('shares red light for both lead demos but keeps cellulite reduction aesthetics-only', () => {
     expect(CHIRO_DEMO.niches).toEqual([
       'Chiropractic', 'Decompression', 'Joint Pain', 'Neuropathy', 'Acupuncture',
-      'Massage Therapy', 'Acoustic Wave Therapy', 'Gut Health', 'ChiroThin',
+      'Massage Therapy', 'Acoustic Wave Therapy', 'Red Light / Body Contouring', 'Gut Health', 'ChiroThin',
       'Weight Loss (Not ChiroThin)', 'GLP Patients',
     ])
     expect(AESTHETICS_DEMO.niches).toEqual([
@@ -48,10 +48,9 @@ describe('demo practice config', () => {
       'Medical-Grade Skincare', 'Skin Tightening', 'Cellulite Reduction',
       'Red Light / Body Contouring', 'Laser Hair Removal', 'Body Waxing',
     ])
-    for (const n of ['Red Light / Body Contouring', 'Cellulite Reduction']) {
-      expect(CHIRO_DEMO.niches).not.toContain(n)
-      expect(CHIRO_DEMO.showcaseNiches).not.toContain(n)
-    }
+    expect(CHIRO_DEMO.niches).toContain('Red Light / Body Contouring')
+    expect(CHIRO_DEMO.niches).not.toContain('Cellulite Reduction')
+    expect(CHIRO_DEMO.showcaseNiches).not.toContain('Cellulite Reduction')
   })
 
   it('every aesthetics niche has a showcase patient and they all fit the batch', () => {

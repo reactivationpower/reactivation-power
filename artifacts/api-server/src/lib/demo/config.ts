@@ -207,6 +207,7 @@ export const CHIRO_DEMO: DemoPractice = {
     'Acupuncture',
     'Massage Therapy',
     'Acoustic Wave Therapy',
+    'Red Light / Body Contouring',
     'Gut Health',
     'ChiroThin',
     'Weight Loss (Not ChiroThin)',

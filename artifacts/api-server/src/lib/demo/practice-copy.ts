@@ -41,6 +41,7 @@ const CHIRO_COPY: DemoPracticeCopy = {
     Acupuncture: ['Chronic neck and shoulder pain', 'Migraines', 'Stress and poor sleep', 'Low energy'],
     'Massage Therapy': ['Neck and shoulder tension', 'Low back tightness', 'Tension headaches'],
     'Acoustic Wave Therapy': ['Plantar fasciitis', 'Achilles tendonitis', 'Chronic shoulder pain', 'Old knee injury'],
+    'Red Light / Body Contouring': ['Red light body contouring', 'Body contouring series'],
     // Weight niches: name the program, never a number or body area.
     'Weight Loss (Not ChiroThin)': ['Weight loss program', 'Medical weight loss'],
     'GLP Patients': ['GLP-1 weight loss program', 'Semaglutide program'],
@@ -55,6 +56,7 @@ const CHIRO_COPY: DemoPracticeCopy = {
     Acupuncture: ['Acupuncture Session', 'Acupuncture Series'],
     'Massage Therapy': ['Therapeutic Massage', 'Deep Tissue Massage'],
     'Acoustic Wave Therapy': ['Acoustic Wave Therapy', 'Shockwave Session'],
+    'Red Light / Body Contouring': ['Red Light Body Contouring', 'Red Light Sessions'],
     'Weight Loss (Not ChiroThin)': ['Weight Loss Program', 'Medical Weight Loss'],
     'GLP Patients': ['GLP-1 Program', 'Semaglutide Weight Loss'],
   },

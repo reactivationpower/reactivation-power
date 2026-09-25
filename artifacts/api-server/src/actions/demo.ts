@@ -51,7 +51,7 @@ export async function enterDemo(formData: FormData) {
     console.error(`[demo] enter ${practice.key}: sign-in failed:`, err)
     return { error: DB_UNAVAILABLE }
   }
-  // The chiro demo also carries Lead Follow-Up, so it opens on the two-door chooser.
+  // Both demo practices carry Lead Follow-Up, so each opens on the two-door chooser.
   redirect(landingPathFor({ reactivation: true, leadFollowUp: await hasLeadFollowUp(ownerId) }))
 }
 

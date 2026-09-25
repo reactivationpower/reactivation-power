@@ -789,58 +789,63 @@ export async function seedDemoData(practice: DemoPractice): Promise<SeedSummary>
 // ---------- Lead Follow-Up ----------
 
 /**
- * Grant the product and build the practice's one demo campaign with a
- * handful of leads aged relative to now. Practices without a campaign in
- * DEMO_LEAD_CAMPAIGNS stay reactivation-only and never get the grant.
+ * Grant the product and build the practice's campaigns with leads aged
+ * relative to now. Practices without campaigns stay reactivation-only.
  */
-async function seedLeadFollowUp(
+export async function seedLeadFollowUp(
   practice: DemoPractice,
   ownerId: string,
   niches: Map<string, DemoNiche>,
 ) {
-  const config = DEMO_LEAD_CAMPAIGNS[practice.key]
-  if (!config) {
+  const configs = DEMO_LEAD_CAMPAIGNS[practice.key]
+  if (!configs?.length) {
     await setLeadFollowUpAccess(ownerId, false)
     return
   }
-  const niche = niches.get(config.niche)
-  if (!niche) throw new Error(`demo ${practice.key}: lead campaign niche not enabled: ${config.niche}`)
+  // Validate the whole set before granting access or inserting any campaign.
+  for (const config of configs) {
+    if (!niches.has(config.niche)) {
+      throw new Error(`demo ${practice.key}: lead campaign niche not enabled: ${config.niche}`)
+    }
+  }
 
   await setLeadFollowUpAccess(ownerId, true)
-  const campaign = await leadStore.createCampaign(ownerId, ownerId, {
-    nicheId: niche.id,
-    name: config.name,
-    offerItems: config.offerItems,
-    regularPriceCents: config.regularPriceCents,
-    offerPriceCents: config.offerPriceCents,
-    priceLineStyle: config.priceLineStyle,
-    urgencyNote: config.urgencyNote,
-  })
   const now = Date.now()
-  const result = await leadStore.importLeads({
-    campaign,
-    createdBy: ownerId,
-    source: 'webhook',
-    rows: config.leads.map(({ minutesAgo, status: _s, attemptedMinutesAgo: _a, ...lead }) => ({
-      ...lead,
-      submittedAt: new Date(now - minutesAgo * 60_000).toISOString(),
-    })),
-  })
-  if (result.imported !== config.leads.length) {
-    throw new Error(`demo ${practice.key}: expected ${config.leads.length} leads, inserted ${result.imported}`)
+  for (const config of configs) {
+    const campaign = await leadStore.createCampaign(ownerId, ownerId, {
+      nicheId: niches.get(config.niche)!.id,
+      name: config.name,
+      offerItems: config.offerItems,
+      regularPriceCents: config.regularPriceCents,
+      offerPriceCents: config.offerPriceCents,
+      priceLineStyle: config.priceLineStyle,
+      urgencyNote: config.urgencyNote,
+    })
+    const result = await leadStore.importLeads({
+      campaign,
+      createdBy: ownerId,
+      source: 'webhook',
+      rows: config.leads.map(({ minutesAgo, status: _s, attemptedMinutesAgo: _a, ...lead }) => ({
+        ...lead,
+        submittedAt: new Date(now - minutesAgo * 60_000).toISOString(),
+      })),
+    })
+    if (result.imported !== config.leads.length || result.insertedIds.length !== config.leads.length) {
+      throw new Error(`demo ${practice.key}: expected ${config.leads.length} leads, inserted ${result.imported}`)
+    }
+    await Promise.all(
+      config.leads.map((lead, i) =>
+        lead.status && lead.status !== 'new'
+          ? leadStore.setLeadStatus(
+              ownerId,
+              result.insertedIds[i],
+              lead.status,
+              lead.attemptedMinutesAgo ? new Date(now - lead.attemptedMinutesAgo * 60_000) : null,
+            )
+          : Promise.resolve(),
+      ),
+    )
   }
-  await Promise.all(
-    config.leads.map((lead, i) =>
-      lead.status && lead.status !== 'new'
-        ? leadStore.setLeadStatus(
-            ownerId,
-            result.insertedIds[i],
-            lead.status,
-            lead.attemptedMinutesAgo ? new Date(now - lead.attemptedMinutesAgo * 60_000) : null,
-          )
-        : Promise.resolve(),
-    ),
-  )
 }
 
 // ---------- training audit data ----------

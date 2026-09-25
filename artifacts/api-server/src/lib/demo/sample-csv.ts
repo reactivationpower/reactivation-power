@@ -7,8 +7,8 @@ import type { DemoPracticeKey } from './config'
  * - Realistic "EHR export" headers, including columns we ignore (Account #,
  *   Last Appt) so the auto-detection has something to show off.
  * - A Niche column mixing niches enabled on that demo account, plus TWO rows
- *   tagged with a real niche that is NOT enabled on it (chiro: "Red Light /
- *   Body Contouring", now on the aesthetics demo; aesthetics: "Chiropractic"),
+ *   tagged with a real niche that is NOT enabled on it (chiro: "Cellulite
+ *   Reduction"; aesthetics: "Chiropractic"),
  *   which triggers the red "not turned on for this account" warning so the
  *   presenter can explain how entitlements work. (User confirmed 9/4/2026
  *   he wants this warning to appear during the demo — do not "fix" it.)
@@ -31,13 +31,13 @@ const CHIRO_SAMPLE_CSV = `Account #,Patient Last Name,Patient First Name,Mobile 
 10457,Dwyer,Colin,(303) 555-0165,colin.dwyer@example.com,ChiroThin,Weight management,02/10/2025
 10462,Ekwueme,Adaeze,(970) 555-1250,adaeze.e@example.com,Chiropractic,Neck stiffness,04/02/2025
 10478,Fontaine,Marc,(303) 555-0129,marc.fontaine@example.com,Decompression,Herniated disc L4-L5,12/18/2024
-10481,Gallagher,Sheila,(720) 555-0176,sheila.g@example.com,Red Light / Body Contouring,Red light body contouring,03/28/2025
+10481,Gallagher,Sheila,(720) 555-0176,sheila.g@example.com,Cellulite Reduction,Cellulite reduction series,03/28/2025
 10495,Hutchins,Dale,(303) 555-0151,dale.hutchins@example.com,Joint Pain,Hip pain,10/09/2024
 10502,Iqbal,Farah,(720) 555-0134,farah.iqbal@example.com,Chiropractic,Headaches,02/25/2025
 10517,Jankowski,Peter,(303) 555-0108,peter.j@example.com,ChiroThin,Weight management,01/07/2025
 10523,Kirkland,Maureen,(720) 555-0182,maureen.k@example.com,Decompression,Numbness in legs,11/30/2024
 10538,Lindstrom,Erik,(303) 555-0147,erik.lindstrom@example.com,Chiropractic,Mid-back pain,03/03/2025
-10544,Moreau,Celeste,(720) 555-0119,celeste.moreau@example.com,Red Light / Body Contouring,Body contouring series,04/11/2025
+10544,Moreau,Celeste,(720) 555-0119,celeste.moreau@example.com,Cellulite Reduction,Cellulite reduction series,04/11/2025
 10559,Nwosu,Chidi,(303) 555-0193,chidi.nwosu@example.com,Joint Pain,Left shoulder pain,09/21/2024
 10566,Oakes,Trevor,(720) 555-0156,trevor.oakes@example.com,Chiropractic,Lower back pain,02/14/2025
 10571,Pellegrino,Dana,(303) 555-0171,dana.p@example.com,ChiroThin,Weight management,12/02/2024
