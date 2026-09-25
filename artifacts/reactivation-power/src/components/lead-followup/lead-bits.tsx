@@ -37,7 +37,7 @@ export function LeadStatusBadge({ status }: { status: LeadStatus }) {
 
 /**
  * "Requested: Tue Oct 6, 2:00 PM" for a lead whose form answer resolved to a
- * day and time; free-text preferences get the same emphasis without implying a booking.
+ * day and time; pink distinguishes free-text preferences from resolved time slots.
  */
 export function RequestedTimeBadge({
   requestedAt,
@@ -64,7 +64,7 @@ export function RequestedTimeBadge({
   if (requestedTime?.trim()) {
     return (
       <span
-        className={cn('inline-flex items-center gap-1 rounded-md border border-teal-200 bg-teal-50 px-2 py-0.5 text-xs font-medium text-teal-900', className)}
+        className={cn('inline-flex items-center gap-1 rounded-md border border-pink-200 bg-pink-100 px-2 py-0.5 text-xs font-medium text-pink-900', className)}
         data-testid="badge-lead-requested-text"
       >
         <CalendarClock className="size-3.5 shrink-0" aria-hidden="true" />
