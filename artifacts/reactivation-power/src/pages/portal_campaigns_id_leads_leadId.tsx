@@ -114,10 +114,10 @@ export default function LeadDetailPage() {
                   <RequestedTimeBadge requestedAt={lead.requestedAt} />
                   {lead.requestedTime ? <span className="text-xs text-muted-foreground">they wrote &ldquo;{lead.requestedTime}&rdquo;</span> : null}
                 </span>
-              ) : lead.requestedTime ? (
+              ) : lead.requestedTime?.trim() ? (
                 <span className="inline-flex items-center gap-1.5"><Clock className="size-4 text-muted-foreground" />{lead.requestedTime}</span>
               ) : (
-                <span className="text-muted-foreground">Not given</span>
+                <RequestedTimeBadge status={lead.status} />
               )}
             </dd>
             <dt className="text-muted-foreground">Last attempt</dt>

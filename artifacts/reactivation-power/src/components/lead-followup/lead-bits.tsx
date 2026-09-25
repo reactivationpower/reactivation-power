@@ -37,15 +37,17 @@ export function LeadStatusBadge({ status }: { status: LeadStatus }) {
 
 /**
  * "Requested: Tue Oct 6, 2:00 PM" for a lead whose form answer resolved to a
- * day and time; falls back to the free text they typed, or nothing.
+ * day and time; falls back to their free text, or explicitly notes an empty form answer.
  */
 export function RequestedTimeBadge({
   requestedAt,
   requestedTime,
+  status,
   className,
 }: {
   requestedAt?: string | null
   requestedTime?: string | null
+  status?: string
   className?: string
 }) {
   if (requestedAt) {
@@ -59,8 +61,9 @@ export function RequestedTimeBadge({
       </span>
     )
   }
-  if (requestedTime) return <span className={cn('text-sm text-muted-foreground', className)}>{requestedTime}</span>
-  return null
+  if (requestedTime?.trim()) return <span className={cn('text-sm text-muted-foreground', className)}>{requestedTime}</span>
+  if (!status || status === 'booked' || status === 'confirmed') return null
+  return <span className={cn('text-xs text-muted-foreground', className)} data-testid="label-lead-no-time">Form submitted · No time requested</span>
 }
 
 export function CampaignStatusBadge({ status }: { status: CampaignStatus }) {

@@ -48,7 +48,7 @@ export function LeadsTable({
                 <p className="text-xs text-muted-foreground">{LEAD_SOURCE_LABELS[lead.source as keyof typeof LEAD_SOURCE_LABELS] ?? lead.source}</p>
               </TableCell>
               <TableCell className="text-sm text-muted-foreground">
-                <RequestedTimeBadge requestedAt={lead.requestedAt} requestedTime={lead.requestedTime} /> {!lead.requestedAt && !lead.requestedTime ? '—' : null}
+                <RequestedTimeBadge requestedAt={lead.requestedAt} requestedTime={lead.requestedTime} status={lead.status} />
               </TableCell>
               <TableCell><LeadStatusBadge status={lead.status} />{isParkedLead(lead) ? <p className="mt-1 text-xs text-muted-foreground">Parked</p> : null}</TableCell>
               <TableCell className="text-sm text-muted-foreground">

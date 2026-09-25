@@ -156,6 +156,7 @@ describe('Lead Follow-Up demo campaigns', () => {
       expect(refreshed.getTime() - previous.getTime()).toBe(86_400_000)
       expect(refreshed.getTime()).toBeGreaterThan(officeClock(next).getTime())
     }
+    expect(leads.filter((lead) => lead.ownerId === 'spa-owner' && lead.status === 'booked')).toHaveLength(0)
   })
 
   it('seeds the original chiro offer plus five new offers, including two separate red light packages', async () => {

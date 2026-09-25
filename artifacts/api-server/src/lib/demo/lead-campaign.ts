@@ -33,6 +33,7 @@ export function demoAppointmentTime(now: Date, slot: { daysAhead: number; hour: 
   return `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())}T${pad(slot.hour)}:${pad(slot.minute ?? 0)}`
 }
 
+
 export interface DemoLeadCampaign {
   /** Exact niche name; must be one of the practice's enabled niches. */
   niche: string

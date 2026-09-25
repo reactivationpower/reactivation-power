@@ -37,6 +37,7 @@ import {
   type LeadDisposition,
 } from '@workspace/shared/lead-followup'
 import { formatRequestedAt, requestedAtLocalDate } from '@workspace/shared/lead-requested-time'
+import { RequestedTimeBadge } from './lead-bits'
 import { CONCERN_OPTIONS } from '@workspace/niche-catalog'
 import type { ScriptFlowChoice, ScriptFlowStep } from '@workspace/shared/types'
 import { logLeadCall } from '@/app/actions/lead-followup'
@@ -298,10 +299,12 @@ export function LeadCallScreen({
                     Requested: {formatRequestedAt(lead.requestedAt)}
                   </span>
                 </>
-              ) : lead.requestedTime ? (
+              ) : lead.requestedTime?.trim() ? (
                 ` \u00b7 asked for ${lead.requestedTime}`
+              ) : lead.status !== 'booked' && lead.status !== 'confirmed' ? (
+                <> {' \u00b7 '}<RequestedTimeBadge status={lead.status} /></>
               ) : (
-                ''
+                null
               )}
             </p>
             <p className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
