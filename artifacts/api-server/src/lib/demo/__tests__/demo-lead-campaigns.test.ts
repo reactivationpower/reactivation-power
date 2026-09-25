@@ -3,13 +3,14 @@ import { resolve } from 'node:path'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { AESTHETICS_DEMO, CHIRO_DEMO, demoEmail } from '../config'
 import { DEMO_LEAD_CAMPAIGNS } from '../lead-campaign'
-import { planLeadImport, leadEntryStepKey, LEAD_CONFIRM_STEP_KEY } from '@workspace/shared/lead-followup'
+import { planLeadImport, leadEntryStepKey, LEAD_CONFIRM_STEP_KEY, applyLeadDisposition } from '@workspace/shared/lead-followup'
 import { officeClock, requestedAtLocalDate } from '@workspace/shared/lead-requested-time'
 
 type Campaign = { id: string; ownerId: string; nicheId: string; name: string; offerPriceCents: number | null; priceLineStyle: string }
 type Lead = { id: string; campaignId: string; ownerId: string; submittedAt: string; requestedTime: string | null; requestedAt: string | null; status: string; attemptedAt: Date | null }
 const campaigns: Campaign[] = []
 const leads: Lead[] = []
+const calls: any[] = []
 const grants = new Map<string, boolean>()
 let wipingOwner: string | null = null
 const participants = [
@@ -33,13 +34,18 @@ vi.mock('@/lib/lead-followup/store', () => ({
     })
     return { imported: insertedIds.length, insertedIds }
   },
-  setLeadStatus: async (ownerId: string, id: string, status: string, attemptedAt: Date | null) => {
-    const lead = leads.find((l) => l.id === id && l.ownerId === ownerId)
-    if (!lead) throw new Error('cross-practice status update')
-    lead.status = status
-    lead.attemptedAt = attemptedAt
+  logLeadCall: async (input: any) => {
+    const lead = leads.find((l) => l.id === input.lead.id)
+    if (!lead || lead.ownerId !== input.callerId) throw new Error('cross-practice call')
+    const next = applyLeadDisposition({ status: lead.status as any, unansweredAttempts: 0, bookedAt: null }, input)
+    lead.status = next.status
+    lead.attemptedAt = input.now
+    calls.push({ ...input, ownerId: lead.ownerId })
   },
   wipeLeadFollowUpForOwners: async (ids: string[]) => {
+    for (let i = calls.length - 1; i >= 0; i--) {
+      if (ids.includes(calls[i].ownerId)) calls.splice(i, 1)
+    }
     for (let i = campaigns.length - 1; i >= 0; i--) {
       if (ids.includes(campaigns[i].ownerId)) campaigns.splice(i, 1)
     }
@@ -90,6 +96,7 @@ const reset = async (practice: typeof AESTHETICS_DEMO | typeof CHIRO_DEMO, owner
 }
 
 beforeEach(() => {
+  calls.length = 0
   campaigns.length = 0
   leads.length = 0
   grants.clear()
@@ -98,6 +105,30 @@ beforeEach(() => {
 })
 
 describe('Lead Follow-Up demo campaigns', () => {
+  it('backs every contacted lead with a matching call, notes, and valid chronology in both demos', async () => {
+    const now = new Date('2026-09-25T17:00:00Z')
+    vi.useFakeTimers()
+    vi.setSystemTime(now)
+    await seedLeadFollowUp(AESTHETICS_DEMO, 'spa-owner', nichesFor(AESTHETICS_DEMO))
+    await seedLeadFollowUp(CHIRO_DEMO, 'chiro-owner', nichesFor(CHIRO_DEMO))
+    for (const lead of leads) {
+      const history = calls.filter((c) => c.lead.id === lead.id)
+      if (lead.status === 'new') {
+        expect(history).toHaveLength(0)
+        expect(lead.attemptedAt).toBeNull()
+        continue
+      }
+      expect(history).toHaveLength(1)
+      const call = history[0]
+      expect(call.notes.length).toBeGreaterThan(20)
+      expect(call.now).toEqual(lead.attemptedAt)
+      expect(call.now.getTime()).toBeGreaterThan(new Date(lead.submittedAt).getTime())
+      expect(call.now.getTime()).toBeLessThan(now.getTime())
+      expect(call.bookedAt).toBeNull()
+      expect(call.disposition).toBe(lead.status === 'reached' ? 'callback_later' : 'voicemail')
+      if (lead.status === 'reached') expect(call.callBackAt.getTime()).toBeGreaterThan(now.getTime())
+    }
+  })
   it('seeds all three aesthetics offers, with three submissions each spanning nearly three days', async () => {
     const now = new Date('2026-09-25T17:00:00.000Z')
     vi.useFakeTimers()

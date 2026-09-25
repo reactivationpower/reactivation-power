@@ -17,7 +17,7 @@ import {
   type DemoPracticeKey,
 } from './config'
 import { DEMO_PRACTICE_COPY, type DemoPracticeCopy } from './practice-copy'
-import { DEMO_LEAD_CAMPAIGNS, demoAppointmentTime } from './lead-campaign'
+import { DEMO_LEAD_CAMPAIGNS, demoAppointmentTime, demoLeadCall } from './lead-campaign'
 import { setLeadFollowUpAccess } from '@/lib/lead-followup/access'
 import * as leadStore from '@/lib/lead-followup/store'
 
@@ -837,12 +837,16 @@ export async function seedLeadFollowUp(
     await Promise.all(
       config.leads.map((lead, i) =>
         lead.status && lead.status !== 'new'
-          ? leadStore.setLeadStatus(
-              ownerId,
-              result.insertedIds[i],
-              lead.status,
-              lead.attemptedMinutesAgo ? new Date(now - lead.attemptedMinutesAgo * 60_000) : null,
-            )
+          ? (() => {
+              if (lead.attemptedMinutesAgo == null || lead.attemptedMinutesAgo >= lead.minutesAgo) {
+                throw new Error('Demo call must occur after the lead submission')
+              }
+              return leadStore.logLeadCall({
+                lead: { id: result.insertedIds[i] },
+                callerId: ownerId,
+                ...demoLeadCall(lead.status, new Date(now - lead.attemptedMinutesAgo * 60_000), new Date(now)),
+              })
+            })()
           : Promise.resolve(),
       ),
     )

@@ -21,6 +21,22 @@ export interface DemoLead extends Omit<LeadImportRow, 'submittedAt'> {
   appointmentSlot?: { daysAhead: number; hour: number; minute?: number }
 }
 
+/** Use real call logging so every demo status has matching history and cadence. */
+export function demoLeadCall(status: LeadStatus, attemptedAt: Date, referenceNow: Date) {
+  if (status !== 'attempted' && status !== 'reached') {
+    throw new Error(`Unsupported demo call status: ${status}`)
+  }
+  return {
+    disposition: status === 'reached' ? 'callback_later' as const : 'voicemail' as const,
+    notes: status === 'reached'
+      ? 'Spoke about the advertised offer. Requested a follow-up call to discuss availability; no appointment scheduled.'
+      : 'No answer. Left a voicemail about the advertised offer with the office callback number.',
+    callBackAt: status === 'reached' ? new Date(referenceNow.getTime() + 24 * 60 * 60_000) : null,
+    bookedAt: null,
+    now: attemptedAt,
+  }
+}
+
 /** Absolute office wall-clock text accepted literally by parseRequestedTime. */
 export function demoAppointmentTime(now: Date, slot: { daysAhead: number; hour: number; minute?: number }): string {
   if (!Number.isInteger(slot.daysAhead) || slot.daysAhead < 1 || !Number.isInteger(slot.hour) || slot.hour < 0 || slot.hour > 23 ||
