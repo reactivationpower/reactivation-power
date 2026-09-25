@@ -3,9 +3,11 @@ import { resolve } from 'node:path'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { AESTHETICS_DEMO, CHIRO_DEMO, demoEmail } from '../config'
 import { DEMO_LEAD_CAMPAIGNS } from '../lead-campaign'
+import { planLeadImport, leadEntryStepKey, LEAD_CONFIRM_STEP_KEY } from '@workspace/shared/lead-followup'
+import { officeClock, requestedAtLocalDate } from '@workspace/shared/lead-requested-time'
 
 type Campaign = { id: string; ownerId: string; nicheId: string; name: string; offerPriceCents: number | null; priceLineStyle: string }
-type Lead = { id: string; campaignId: string; ownerId: string; submittedAt: string; status: string; attemptedAt: Date | null }
+type Lead = { id: string; campaignId: string; ownerId: string; submittedAt: string; requestedTime: string | null; requestedAt: string | null; status: string; attemptedAt: Date | null }
 const campaigns: Campaign[] = []
 const leads: Lead[] = []
 const grants = new Map<string, boolean>()
@@ -22,10 +24,11 @@ vi.mock('@/lib/lead-followup/store', () => ({
     campaigns.push(row)
     return row
   },
-  importLeads: async ({ campaign, rows }: { campaign: Campaign; rows: { submittedAt: string }[] }) => {
-    const insertedIds = rows.map((row) => {
+  importLeads: async ({ campaign, rows }: { campaign: Campaign; rows: { submittedAt: string; firstName: string; phone: string; requestedTime?: string }[] }) => {
+    const plan = planLeadImport(rows, [])
+    const insertedIds = plan.toInsert.map((row) => {
       const id = `lead-${leads.length + 1}`
-      leads.push({ id, campaignId: campaign.id, ownerId: campaign.ownerId, submittedAt: row.submittedAt, status: 'new', attemptedAt: null })
+      leads.push({ id, campaignId: campaign.id, ownerId: campaign.ownerId, submittedAt: row.submittedAt!.toISOString(), requestedTime: row.requestedTime, requestedAt: row.requestedAt, status: 'new', attemptedAt: null })
       return id
     })
     return { imported: insertedIds.length, insertedIds }
@@ -115,8 +118,43 @@ describe('Lead Follow-Up demo campaigns', () => {
       expect(Math.min(...ages)).toBeLessThan(180)
       expect(Math.max(...ages)).toBeGreaterThan(48 * 60)
       expect(Math.max(...ages)).toBeLessThan(72 * 60)
-      expect(group.map((l) => l.status)).toEqual(['new', 'attempted', 'reached'])
-      expect(group[1].attemptedAt!.getTime()).toBeGreaterThan(new Date(group[1].submittedAt).getTime())
+      expect(group.map((l) => l.status)).toEqual(['new', 'new', 'reached'])
+      for (const lead of group.slice(0, 2)) {
+        expect(lead.requestedTime).toMatch(/^\d{4}-\d\d-\d\dT\d\d:\d\d$/)
+        expect(lead.requestedAt).toBe(lead.requestedTime)
+        expect(leadEntryStepKey(lead)).toBe(LEAD_CONFIRM_STEP_KEY)
+        expect(requestedAtLocalDate(lead.requestedAt)!.getTime()).toBeGreaterThan(officeClock(now).getTime())
+      }
+      expect(group[2].requestedAt).toBeNull()
+    }
+  })
+
+  it('keeps slots ahead of reset time even when submissions precede an office-day boundary, and refreshes them on reset', async () => {
+    vi.useFakeTimers()
+    const first = new Date('2026-12-31T04:55:00.000Z') // Dec 30, 11:55 PM at the office
+    vi.setSystemTime(first)
+    await reset(AESTHETICS_DEMO, 'spa-owner')
+    const oldSlots = leads.filter((lead) => lead.ownerId === 'spa-owner').map((lead) => lead.requestedAt)
+    expect(oldSlots.filter(Boolean)).toHaveLength(6)
+    const oldAged = leads.filter((lead) => lead.ownerId === 'spa-owner' && lead.requestedAt)
+    expect(oldAged.some((lead) => officeClock(new Date(lead.submittedAt)).getDate() !== officeClock(first).getDate())).toBe(true)
+    for (const lead of oldAged) {
+      expect(lead.requestedAt).toBe(lead.requestedTime)
+      expect(requestedAtLocalDate(lead.requestedAt)!.getTime()).toBeGreaterThan(officeClock(first).getTime())
+      expect(leadEntryStepKey(lead)).toBe(LEAD_CONFIRM_STEP_KEY)
+    }
+
+    const next = new Date('2026-12-31T05:05:00.000Z') // Dec 31, 12:05 AM at the office
+    vi.setSystemTime(next)
+    await reset(AESTHETICS_DEMO, 'spa-owner')
+    const newSlots = leads.filter((lead) => lead.ownerId === 'spa-owner').map((lead) => lead.requestedAt)
+    expect(newSlots.filter(Boolean)).toHaveLength(6)
+    for (let i = 0; i < newSlots.length; i++) {
+      if (!newSlots[i]) continue
+      const previous = requestedAtLocalDate(oldSlots[i])!
+      const refreshed = requestedAtLocalDate(newSlots[i])!
+      expect(refreshed.getTime() - previous.getTime()).toBe(86_400_000)
+      expect(refreshed.getTime()).toBeGreaterThan(officeClock(next).getTime())
     }
   })
 

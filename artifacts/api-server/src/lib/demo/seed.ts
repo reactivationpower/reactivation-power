@@ -17,7 +17,7 @@ import {
   type DemoPracticeKey,
 } from './config'
 import { DEMO_PRACTICE_COPY, type DemoPracticeCopy } from './practice-copy'
-import { DEMO_LEAD_CAMPAIGNS } from './lead-campaign'
+import { DEMO_LEAD_CAMPAIGNS, demoAppointmentTime } from './lead-campaign'
 import { setLeadFollowUpAccess } from '@/lib/lead-followup/access'
 import * as leadStore from '@/lib/lead-followup/store'
 
@@ -825,8 +825,9 @@ export async function seedLeadFollowUp(
       campaign,
       createdBy: ownerId,
       source: 'webhook',
-      rows: config.leads.map(({ minutesAgo, status: _s, attemptedMinutesAgo: _a, ...lead }) => ({
+      rows: config.leads.map(({ minutesAgo, status: _s, attemptedMinutesAgo: _a, appointmentSlot, ...lead }) => ({
         ...lead,
+        ...(appointmentSlot ? { requestedTime: demoAppointmentTime(new Date(now), appointmentSlot) } : {}),
         submittedAt: new Date(now - minutesAgo * 60_000).toISOString(),
       })),
     })

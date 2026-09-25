@@ -1,5 +1,6 @@
 import type { DemoPracticeKey } from './config'
 import type { LeadImportRow, LeadStatus, PriceLineStyle } from '@workspace/shared/lead-followup'
+import { officeClock } from '@workspace/shared/lead-requested-time'
 
 /**
  * The Lead Follow-Up half of each sales demo. Each practice has its own
@@ -16,6 +17,20 @@ export interface DemoLead extends Omit<LeadImportRow, 'submittedAt'> {
   status?: LeadStatus
   /** Minutes before now the last attempt was made (only with a non-new status). */
   attemptedMinutesAgo?: number
+  /** Requested office slot, anchored to reset time rather than submission age. */
+  appointmentSlot?: { daysAhead: number; hour: number; minute?: number }
+}
+
+/** Absolute office wall-clock text accepted literally by parseRequestedTime. */
+export function demoAppointmentTime(now: Date, slot: { daysAhead: number; hour: number; minute?: number }): string {
+  if (!Number.isInteger(slot.daysAhead) || slot.daysAhead < 1 || !Number.isInteger(slot.hour) || slot.hour < 0 || slot.hour > 23 ||
+    !Number.isInteger(slot.minute ?? 0) || (slot.minute ?? 0) < 0 || (slot.minute ?? 0) > 59) {
+    throw new Error('Invalid demo appointment slot')
+  }
+  const officeToday = officeClock(now)
+  const date = new Date(Date.UTC(officeToday.getFullYear(), officeToday.getMonth(), officeToday.getDate() + slot.daysAhead))
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())}T${pad(slot.hour)}:${pad(slot.minute ?? 0)}`
 }
 
 export interface DemoLeadCampaign {
@@ -258,20 +273,18 @@ export const DEMO_LEAD_CAMPAIGNS: Record<DemoPracticeKey, readonly DemoLeadCampa
       leads: [
         {
           firstName: 'Keira', lastName: 'Mendoza', phone: '(480) 555-0148', email: 'keira.mendoza@example.com',
-          requestedTime: 'Tomorrow afternoon',
+          appointmentSlot: { daysAhead: 2, hour: 14 },
           message: 'I have old acne scars on my cheeks and want to know what might help.',
           minutesAgo: 18,
         },
         {
           firstName: 'Nia', lastName: 'Patel', phone: '(602) 555-0184', email: 'nia.patel@example.com',
+          appointmentSlot: { daysAhead: 5, hour: 10, minute: 30 },
           message: 'Would the consultation cover texture and marks from breakouts?',
           minutesAgo: 60 * 25 + 12,
-          status: 'attempted',
-          attemptedMinutesAgo: 60 * 23,
         },
         {
           firstName: 'April', lastName: 'Santos', phone: '(623) 555-0136',
-          requestedTime: 'Next week in the morning',
           message: 'Interested in options for acne scarring before an event later this year.',
           minutesAgo: 60 * 58,
           status: 'reached',
@@ -290,16 +303,15 @@ export const DEMO_LEAD_CAMPAIGNS: Record<DemoPracticeKey, readonly DemoLeadCampa
       leads: [
         {
           firstName: 'Marissa', lastName: 'Cole', phone: '(480) 555-0169', email: 'marissa.cole@example.com',
+          appointmentSlot: { daysAhead: 3, hour: 11 },
           message: 'I saw the $37 new-patient package. Can we talk about my thighs?',
           minutesAgo: 60 * 2 + 8,
         },
         {
           firstName: 'Talia', lastName: 'Brooks', phone: '(602) 555-0127', email: 'talia.brooks@example.com',
-          requestedTime: 'Any weekday after 4',
+          appointmentSlot: { daysAhead: 6, hour: 16 },
           message: 'Looking into body sculpting for my hips and thighs.',
           minutesAgo: 60 * 31,
-          status: 'attempted',
-          attemptedMinutesAgo: 60 * 29,
         },
         {
           firstName: 'Daphne', lastName: 'Kim', phone: '(623) 555-0192',
@@ -321,20 +333,18 @@ export const DEMO_LEAD_CAMPAIGNS: Record<DemoPracticeKey, readonly DemoLeadCampa
       leads: [
         {
           firstName: 'Elise', lastName: 'Morgan', phone: '(480) 555-0113', email: 'elise.morgan@example.com',
-          requestedTime: 'Tomorrow around noon',
+          appointmentSlot: { daysAhead: 4, hour: 13 },
           message: 'Curious whether microneedling could help with uneven skin texture.',
           minutesAgo: 44,
         },
         {
           firstName: 'Priya', lastName: 'Hale', phone: '(602) 555-0156', email: 'priya.hale@example.com',
+          appointmentSlot: { daysAhead: 7, hour: 15, minute: 30 },
           message: 'Is RF microneedling one of the options we could discuss?',
           minutesAgo: 60 * 20 + 35,
-          status: 'attempted',
-          attemptedMinutesAgo: 60 * 18,
         },
         {
           firstName: 'Camila', lastName: 'Reyes', phone: '(623) 555-0174',
-          requestedTime: 'Next week in the morning',
           message: 'I would like to discuss microneedling for fine lines.',
           minutesAgo: 60 * 52 + 10,
           status: 'reached',
