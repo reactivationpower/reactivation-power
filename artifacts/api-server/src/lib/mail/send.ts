@@ -15,7 +15,7 @@ import { renderTemplate, type TemplateDataMap, type TemplateId } from './templat
  * delivered / opened / clicked on the same row (see routes/webhooks-resend).
  */
 
-export const DEFAULT_FROM = 'Reactivation Power <noreply@links.reactivationpower.com>'
+export const DEFAULT_FROM = 'Reactivation Power <team@reactivationpower.com>'
 
 export function fromAddress(): string {
   return process.env.RESEND_FROM?.trim() || DEFAULT_FROM

@@ -4,6 +4,8 @@ Training portal + patient-reactivation dialer for healthcare/service businesses:
 
 ## Run & Operate
 
+- Customer-facing email links must use `https://reactivationpower.com`, not a Replit hostname. Keep the shared `APP_URL` set to this canonical origin; existing link builders preserve their paths and tokens.
+
 - Workflows: `artifacts/api-server: API Server` (Express, `/api/*`) and `artifacts/reactivation-power: web` (Vite SPA at `/`). Restart both after server changes. Both `dev` scripts run `scripts/free-port.mjs` first, which terminates any leftover process still listening on `$PORT` (logged as `[free-port] port … is held by stale pid …`) so a restart can never fail with `EADDRINUSE` while an old build keeps answering; production `start` scripts do not run it. If a workflow log ever shows "address already in use" anyway, compare the listener's start time with `dist/index.mjs`'s mtime before debugging code.
 - `pnpm run typecheck` — full typecheck. Verify artifacts with `pnpm --filter @workspace/<pkg> run typecheck`, not `build`.
 - Data: **everything lives in the one Supabase project** `jbdymqqpolkoevyypjxd`, in development and production alike. Two access paths: the REST/Auth client with the service role (`SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY`) for the older tables (participants, payment_links, courses, scripts …), and a direct Postgres connection through drizzle (`lib/db`, `SUPABASE_DB_URL` = the Session-pooler URI from the Supabase dashboard) for the billing/agreement/email/commission/cron/notification tables. `lib/db` throws at startup if `SUPABASE_DB_URL` is unset. There is no Replit database; `DATABASE_URL` is not read anywhere. Media (videos, thumbnails, attachments): Vercel Blob (`BLOB_READ_WRITE_TOKEN`).
