@@ -96,8 +96,8 @@ export function CampaignForm({
     })
   }, [values.priceLineStyle, values.regularPrice, values.offerPrice])
 
-  function submit(e: React.FormEvent) {
-    e.preventDefault()
+  function submit(e: React.FormEvent, later = false) {
+    e?.preventDefault?.()
     setServerError(null)
     const checked = validateCampaignInput(values)
     if (!checked.ok) {
@@ -116,7 +116,12 @@ export function CampaignForm({
         return
       }
       router.refresh()
-      navigate(`/portal/campaigns/${res.campaign.id}`)
+      const newId = res?.campaign?.id ?? campaignId
+      if (!newId) {
+        setServerError('Saved, but we could not open the campaign. Find it on the Campaigns page.')
+        return
+      }
+      navigate(campaignId ? `/portal/campaigns/${newId}` : `/portal/campaigns/${newId}${later ? '' : '?setup=1'}`)
     })
   }
 
@@ -175,7 +180,7 @@ export function CampaignForm({
                   next[i] = e.target.value
                   set('offerItems', next)
                 }}
-                placeholder={i === 0 ? 'Consultation with the doctor' : i === 1 ? 'Full exam' : 'Another item'}
+                placeholder={i === 0 ? 'Example: Consultation with the doctor' : i === 1 ? 'Example: Full exam' : 'Enter another item'}
                 maxLength={120}
                 aria-label={`Offer item ${i + 1}`}
                 data-testid={`input-offer-item-${i}`}
@@ -255,7 +260,7 @@ export function CampaignForm({
                 inputMode="decimal"
                 value={values.regularPrice}
                 onChange={(e) => set('regularPrice', e.target.value)}
-                placeholder="249"
+                placeholder="Example: 249"
                 className="pl-7"
                 data-testid="input-regular-price"
               />
@@ -306,11 +311,22 @@ export function CampaignForm({
 
       {serverError ? <p className="text-sm text-destructive" role="alert">{serverError}</p> : null}
 
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         <Button type="submit" disabled={pending || niches.length === 0} data-testid="button-save-campaign" className="gap-2">
           {pending ? <Loader2 className="size-4 animate-spin" /> : null}
-          {campaignId ? 'Save changes' : 'Create campaign'}
+          {campaignId ? 'Save changes' : 'Save & Connect Leads'}
         </Button>
+        {!campaignId ? (
+          <Button
+            type="button"
+            variant="outline"
+            disabled={pending || niches.length === 0}
+            onClick={(e) => submit(e, true)}
+            data-testid="button-save-later"
+          >
+            Save, connect later
+          </Button>
+        ) : null}
         <Button
           type="button"
           variant="ghost"

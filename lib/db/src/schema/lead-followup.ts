@@ -44,6 +44,8 @@ export const leadCampaignsTable = pgTable(
     /** "Offer ends Friday" / "only 10 spots" — read aloud when set. */
     urgencyNote: text("urgency_note"),
     status: text("status").notNull().default("active"), // active | paused | archived
+    /** Owner-selected guide for connecting incoming leads; not evidence of a live integration. */
+    leadSourceSetup: text("lead_source_setup").notNull().default("unsure"), // ghl | facebook | website | unsure
     /**
      * Secret path segment of this campaign's intake URL. Regenerating it is
      * the only way to revoke a URL that leaked. The SQL default only

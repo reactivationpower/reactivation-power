@@ -60,7 +60,7 @@ function ProductSwitch({ pathname }: { pathname: string }) {
   const current = productForPath(pathname)
   const other = current === 'reactivation' ? 'lead_followup' : 'reactivation'
   return (
-    <div className="mr-2 flex items-center gap-1 rounded-md border border-border bg-muted/40 py-1 pl-2.5 pr-1" data-testid="product-switch">
+    <div className="mr-2 flex shrink-0 items-center gap-1 whitespace-nowrap rounded-md border border-border bg-muted/40 py-1 pl-2.5 pr-1" data-testid="product-switch">
       <span
         className={cn('text-xs font-semibold uppercase tracking-wide', current === 'lead_followup' ? 'text-amber-800' : 'text-primary')}
         data-testid="text-current-product"
@@ -86,7 +86,7 @@ export function PortalNav() {
   const inLeadFollowUp = productForPath(pathname) === 'lead_followup'
   const items = inLeadFollowUp ? LEAD_NAV : NAV
   return (
-    <nav className="flex items-center gap-1" aria-label="Portal">
+    <nav className="order-last -mx-1 flex w-full min-w-0 items-center gap-1 overflow-x-auto px-1 lg:order-none lg:mx-0 lg:w-auto lg:px-0" aria-label="Portal">
       {products.leadFollowUp ? <ProductSwitch pathname={pathname} /> : null}
       {items.map((item) => {
         if ('ownerOnly' in item && item.ownerOnly && !products.isOwner) return null
@@ -97,7 +97,7 @@ export function PortalNav() {
             href={item.href}
             aria-current={active ? 'page' : undefined}
             className={cn(
-              'flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+              'flex shrink-0 items-center gap-2 whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium transition-colors',
               active
                 ? 'bg-primary text-primary-foreground'
                 : 'text-foreground hover:bg-muted',

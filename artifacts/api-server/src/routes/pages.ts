@@ -270,16 +270,18 @@ add("/portal/campaigns/:id", "portal", async (req) => {
   const { participant, ownerId, isOwner } = await requireLeadFollowUp(`/portal/campaigns/${id}`);
   const campaign = await leadStore.getCampaign(ownerId, id);
   if (!campaign) notFound();
-  const [leads, niches, webhookEvents] = await Promise.all([
+  const [leads, niches, webhookEvents, connectionSummary] = await Promise.all([
     leadStore.listLeads(campaign.id),
     campaignNicheOptions(ownerId),
     leadStore.listWebhookEvents(campaign.id),
+    leadStore.getCampaignConnectionSummary(campaign.id),
   ]);
   const niche = niches.find((n) => n.id === campaign.nicheId) ?? null;
   return {
     id, participant, ownerId, isOwner, campaign, leads, niche, now: new Date().toISOString(),
     webhookUrl: leadWebhookUrl(campaign.webhookToken),
     webhookEvents,
+    connectionSummary,
   };
 });
 

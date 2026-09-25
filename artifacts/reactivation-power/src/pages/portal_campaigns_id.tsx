@@ -9,12 +9,13 @@ import { PageError, PageLoading } from '@/components/page-status'
 import { Button } from '@/components/ui/button'
 import { LeadsTable } from '@/components/lead-followup/leads-table'
 import { ImportLeadsDialog } from '@/components/lead-followup/import-leads-dialog'
+import { ConnectLeadsPanel } from '@/components/lead-followup/connect-leads-panel'
 import { LeadSourcesTab } from '@/components/lead-followup/lead-sources-tab'
 import { PORTAL_WIDTH } from '@/lib/portal-layout'
 import { cn } from '@/lib/utils'
 import NotFound from '@/pages/not-found'
 import { ArrowLeft, Archive, ArchiveRestore, BookOpen, Pause, Pencil, Play, Users } from 'lucide-react'
-import { campaignConversion, formatRate, isParkedLead } from '@workspace/shared/lead-followup'
+import { campaignConversion, formatPriceLine, formatRate, isParkedLead } from '@workspace/shared/lead-followup'
 import { CampaignStatusBadge, OfferSummary } from '@/components/lead-followup/lead-bits'
 
 type Tab = 'leads' | 'sources' | 'offer'
@@ -32,7 +33,8 @@ export default function CampaignDetailPage() {
   if (loading) return <PageLoading />
   if (notFound) return <NotFound />
   if (error) return <PageError error={error} />
-  const { campaign, leads, niche, now, webhookUrl, webhookEvents } = data
+  const { campaign, leads, niche, now, webhookUrl, webhookEvents, connectionSummary } = data
+  const setupRequested = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('setup') === '1'
   const nowMs = new Date(now).getTime()
   const newCount = leads.filter((l) => l.status === 'new').length
   const conversion = campaignConversion(leads)
@@ -56,12 +58,12 @@ export default function CampaignDetailPage() {
       </Link>
 
       <div className="mt-4 flex flex-wrap items-start justify-between gap-4">
-        <div className="min-w-0">
+        <div className="min-w-0 max-w-full">
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
             {niche?.name ?? 'Service not enabled'}
           </p>
           <div className="mt-0.5 flex flex-wrap items-center gap-3">
-            <h1 className="text-3xl font-bold text-foreground" data-testid="text-campaign-name">{campaign.name}</h1>
+            <h1 className="min-w-0 break-words text-3xl font-bold text-foreground" data-testid="text-campaign-name">{campaign.name}</h1>
             <CampaignStatusBadge status={campaign.status} />
           </div>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -114,6 +116,19 @@ export default function CampaignDetailPage() {
         </p>
       ) : null}
 
+      <ConnectLeadsPanel
+        campaign={campaign}
+        webhookUrl={webhookUrl}
+        offerLine={formatPriceLine(campaign) ?? ''}
+        connectionSummary={connectionSummary ?? null}
+        nowMs={nowMs}
+        initiallyOpen={setupRequested}
+        onOpenSettings={() => {
+          setTab('sources')
+          requestAnimationFrame(() => document.querySelector('[role=tablist]')?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
+        }}
+      />
+
       <dl className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4" data-testid="campaign-stats">
         {[
           ['Leads received', String(conversion.received), 'stat-received'],
@@ -128,8 +143,8 @@ export default function CampaignDetailPage() {
         ))}
       </dl>
 
-      <div className="mt-8 flex items-center justify-between gap-4 border-b border-border">
-        <div className="flex gap-1" role="tablist">
+      <div className="mt-8 flex flex-wrap items-center justify-between gap-x-4 border-b border-border">
+        <div className="-mb-px flex min-w-0 gap-1 overflow-x-auto" role="tablist">
           {(['leads', 'sources', 'offer'] as Tab[]).map((t) => (
             <button
               key={t}
@@ -139,7 +154,7 @@ export default function CampaignDetailPage() {
               onClick={() => setTab(t)}
               data-testid={`tab-${t}`}
               className={cn(
-                '-mb-px border-b-2 px-3 py-2 text-sm font-medium transition-colors',
+                '-mb-px shrink-0 whitespace-nowrap border-b-2 px-3 py-2 text-sm font-medium transition-colors',
                 tab === t ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground',
               )}
             >

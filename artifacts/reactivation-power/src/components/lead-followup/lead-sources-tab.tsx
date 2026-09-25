@@ -328,7 +328,7 @@ export function LeadSourcesTab({ campaignId, campaignName, webhookUrl, fieldMapp
   )
 }
 
-function GhlGuide({ webhookUrl, campaignName, copy, copied }: { webhookUrl: string; campaignName: string; copy: (t: string) => void; copied: boolean }) {
+export function GhlGuide({ webhookUrl, campaignName, copy, copied }: { webhookUrl: string; campaignName: string; copy: (t: string) => void; copied: boolean }) {
   const tag = campaignName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'new-lead'
   const steps: Array<{ title: string; body: React.ReactNode }> = [
     {
@@ -395,7 +395,7 @@ function GhlGuide({ webhookUrl, campaignName, copy, copied }: { webhookUrl: stri
   ]
 
   return (
-    <div className="border-t border-border px-6 py-5">
+    <div className="min-w-0 border-t border-border px-4 py-5 sm:px-6">
       <ol className="space-y-5">
         {steps.map((s, i) => (
           <li key={s.title} className="flex gap-4">
@@ -443,5 +443,5 @@ function GhlGuide({ webhookUrl, campaignName, copy, copied }: { webhookUrl: stri
 }
 
 function Chip({ children }: { children: React.ReactNode }) {
-  return <code className="rounded border border-border bg-muted/50 px-1.5 py-0.5 font-mono text-xs text-foreground">{children}</code>
+  return <code className="break-all rounded border border-border bg-muted/50 px-1.5 py-0.5 font-mono text-xs text-foreground">{children}</code>
 }

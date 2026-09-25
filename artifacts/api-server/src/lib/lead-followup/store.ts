@@ -28,6 +28,7 @@ import {
   leadDispositionFieldError,
   planLeadImport,
   type CampaignInput,
+  type CampaignLeadSource,
   type CampaignStatus,
   type LeadDisposition,
   type LeadImportPlan,
@@ -162,6 +163,19 @@ export async function updateFieldMapping(
   const [row] = await db
     .update(leadCampaignsTable)
     .set({ fieldMapping: mapping as Record<string, string>, updatedAt: new Date() })
+    .where(and(eq(leadCampaignsTable.id, id), eq(leadCampaignsTable.ownerId, ownerId)))
+    .returning()
+  return row ?? null
+}
+
+export async function updateCampaignLeadSource(
+  ownerId: string,
+  id: string,
+  source: CampaignLeadSource,
+): Promise<LeadCampaignRow | null> {
+  const [row] = await db
+    .update(leadCampaignsTable)
+    .set({ leadSourceSetup: source, updatedAt: new Date() })
     .where(and(eq(leadCampaignsTable.id, id), eq(leadCampaignsTable.ownerId, ownerId)))
     .returning()
   return row ?? null
@@ -487,6 +501,24 @@ export async function listWebhookEvents(campaignId: string, limit = WEBHOOK_EVEN
     .where(eq(campaignWebhookEventsTable.campaignId, campaignId))
     .orderBy(desc(campaignWebhookEventsTable.receivedAt))
     .limit(limit)
+}
+
+/** Receipt timestamps for successful retained events; an internal test is never external traffic. */
+export async function getCampaignConnectionSummary(campaignId: string): Promise<{
+  lastExternalReceivedAt: string | null
+  lastInternalTestAt: string | null
+}> {
+  const [row] = await db
+    .select({
+      external: sql<string | null>`max(${campaignWebhookEventsTable.receivedAt}) filter (where ${campaignWebhookEventsTable.source} <> 'test' and ${campaignWebhookEventsTable.outcome} in ('created', 'updated'))`,
+      internal: sql<string | null>`max(${campaignWebhookEventsTable.receivedAt}) filter (where ${campaignWebhookEventsTable.source} = 'test' and ${campaignWebhookEventsTable.outcome} in ('created', 'updated'))`,
+    })
+    .from(campaignWebhookEventsTable)
+    .where(eq(campaignWebhookEventsTable.campaignId, campaignId))
+  return {
+    lastExternalReceivedAt: row.external ? new Date(row.external).toISOString() : null,
+    lastInternalTestAt: row.internal ? new Date(row.internal).toISOString() : null,
+  }
 }
 
 export async function setLeadStatus(

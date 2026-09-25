@@ -1,0 +1,1 @@
+ALTER TABLE "lead_campaigns" ADD COLUMN "lead_source_setup" text DEFAULT 'unsure' NOT NULL;

@@ -13,3 +13,4 @@
 - [Scheduled jobs on autoscale](scheduled-jobs.md) — day slot claimed in cron_runs by both in-process ticker and external cron route; external trigger still needed for on-time runs; off in dev.
 - [Two sales-demo practices](demo-practices.md) — keep resets isolated to one demo family; sample CSV entitlement and dedupe constraints.
 - [Stale dev process after failed restart](stale-dev-process.md) — EADDRINUSE in a workflow log = old build still serving; check listener start time vs dist mtime before debugging code.
+- [Campaign setup audience](campaign-setup-guidance.md) — self-service office setup is primary; agency handoff is secondary, and receipt claims must stay factual.

@@ -18,7 +18,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
       </Suspense>
       <header className="border-b border-border bg-card">
         <div
-          className={`${PORTAL_WIDTH} flex h-16 items-center justify-between gap-4`}
+          className={`${PORTAL_WIDTH} flex min-h-16 flex-wrap items-center justify-between gap-x-4 gap-y-2 py-2 lg:h-16 lg:flex-nowrap lg:py-0`}
         >
           <PortalHomeLink>
             <img
@@ -31,7 +31,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
             <span className="sr-only">Reactivation Power Portal</span>
           </PortalHomeLink>
           <PortalNav />
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-2 lg:order-last">
             <BillingNavLink />
             <SettingsNavLink />
             <form onSubmit={async (e) => {

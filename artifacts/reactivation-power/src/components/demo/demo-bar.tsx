@@ -137,7 +137,7 @@ export function DemoBar({
           {seededLabel}
         </span>
 
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex max-w-full flex-wrap items-center gap-2">
           <label className="flex items-center gap-2 text-muted-foreground">
             <Eye className="size-4" aria-hidden="true" />
             <span className="sr-only sm:not-sr-only">Viewing as</span>

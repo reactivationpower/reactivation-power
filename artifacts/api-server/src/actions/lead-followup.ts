@@ -1,6 +1,7 @@
 import { revalidatePath } from 'next/cache'
 import {
   CAMPAIGN_STATUSES,
+  CAMPAIGN_LEAD_SOURCES,
   MAX_LEAD_IMPORT_ROWS,
   isAppointmentDisposition,
   isLeadDisposition,
@@ -9,6 +10,7 @@ import {
   validateCampaignInput,
   type CampaignDraft,
   type CampaignStatus,
+  type CampaignLeadSource,
   type LeadDisposition,
   type LeadImportRow,
 } from '@workspace/shared/lead-followup'
@@ -194,6 +196,20 @@ export async function logLeadCall(input: {
 }
 
 // ---------- lead sources (webhook intake) ----------
+
+/** Save setup guidance without changing the campaign draft or implying a connection. */
+export async function saveCampaignLeadSource(campaignId: string, source: CampaignLeadSource) {
+  const guard = await leadFollowUpContextOrError()
+  if (!guard.ok) return { error: guard.error }
+  if (!guard.ctx.isOwner) return { error: 'Only the account owner can change lead source setup.' }
+  if (!(CAMPAIGN_LEAD_SOURCES as readonly unknown[]).includes(source)) {
+    return { error: 'Unknown lead source.' }
+  }
+  const campaign = await store.updateCampaignLeadSource(guard.ctx.ownerId, String(campaignId ?? ''), source)
+  if (!campaign) return { error: 'Campaign not found.' }
+  revalidatePath(`/portal/campaigns/${campaign.id}`)
+  return { campaign }
+}
 
 /** New secret URL for a campaign; the previous one stops working at once. */
 export async function regenerateWebhookUrl(campaignId: string) {

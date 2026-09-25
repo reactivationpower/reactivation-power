@@ -60,6 +60,10 @@ export function landingPathFor(access: ProductAccess): string {
 export const CAMPAIGN_STATUSES = ['active', 'paused', 'archived'] as const
 export type CampaignStatus = (typeof CAMPAIGN_STATUSES)[number]
 
+/** Setup guidance only; receipt evidence is tracked separately from this choice. */
+export const CAMPAIGN_LEAD_SOURCES = ['ghl', 'facebook', 'website', 'unsure'] as const
+export type CampaignLeadSource = (typeof CAMPAIGN_LEAD_SOURCES)[number]
+
 export const CAMPAIGN_STATUS_LABELS: Record<CampaignStatus, string> = {
   active: 'Active',
   paused: 'Paused',
