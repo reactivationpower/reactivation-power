@@ -6,8 +6,14 @@ import {
   Crosshair,
   MousePointerClick,
   RotateCcw,
+  Sparkles,
   Voicemail,
 } from 'lucide-react'
+import {
+  LiveAssist,
+  type AssistContext,
+  type AssistSuggestion,
+} from '@/components/reactivation/live-assist'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -38,6 +44,9 @@ interface Props {
    * Shown on the questions screen; the tapped concern fills the
    * {{main_concern}} token on every later screen. */
   concernOptions?: ConcernOption[]
+  /** Practice-mode listening: the mic suggests which button matches the
+   * patient's reply. The caller still taps to move on. */
+  assist?: boolean
   /** When true, show the "Leave VM" chip on the opener step (every 2nd call). */
   showLeaveVm?: boolean
   /** Opens the voicemail script dialog (owned by the call screen). */
@@ -142,6 +151,35 @@ const CHOICE_STYLES: Record<ScriptFlowVariant, string> = {
   default: 'border-border bg-card text-foreground hover:bg-muted',
 }
 
+const SUGGESTED_RING =
+  'ring-2 ring-primary ring-offset-2 ring-offset-background'
+
+function SuggestionRow({
+  label,
+  actionLabel,
+  onConfirm,
+}: {
+  label: string
+  actionLabel: string
+  onConfirm: () => void
+}) {
+  return (
+    <div
+      className="mb-3 flex items-center gap-3 rounded-md border border-primary/40 bg-primary/10 px-3 py-2"
+      role="status"
+    >
+      <Sparkles className="size-4 shrink-0 text-primary" aria-hidden="true" />
+      <p className="min-w-0 flex-1 text-sm leading-relaxed text-foreground">
+        <span className="text-muted-foreground">Sounds like: </span>
+        <span className="font-semibold">{label}</span>
+      </p>
+      <Button size="sm" className="min-h-11 shrink-0 px-4" onClick={onConfirm}>
+        {actionLabel}
+      </Button>
+    </div>
+  )
+}
+
 export function ScriptFlowPlayer({
   steps,
   choices,
@@ -152,7 +190,9 @@ export function ScriptFlowPlayer({
   concernOptions,
   showLeaveVm = false,
   onLeaveVoicemail,
+  assist = false,
 }: Props) {
+  const [suggestion, setSuggestion] = useState<AssistSuggestion | null>(null)
   // Resolve niche overrides: a niche row with the same step_key replaces the
   // general row; a niche's choice set for a step replaces the general set.
   const { stepMap, choiceMap, startKey } = useMemo(() => {
@@ -352,6 +392,54 @@ export function ScriptFlowPlayer({
     return { label: 'Original complaint', spoken: COMPLAINT_FALLBACK }
   }, [extras.complaint_reference])
 
+  const showsConcernChips = Boolean(
+    step?.step_key.startsWith('digging_in') &&
+      concernOptions &&
+      concernOptions.length > 0,
+  )
+
+  const assistContext = useMemo<AssistContext | null>(() => {
+    if (!step) return null
+    return {
+      stepKey: step.step_key,
+      stepTitle: step.title,
+      stepText: paragraphs.join('\n\n'),
+      choices: stepChoices.map((c) => ({
+        id: c.id,
+        label: mergeScript(c.label, [], effectiveExtras),
+      })),
+      concerns: showsConcernChips
+        ? [originalChip, ...(concernOptions ?? [])].map((o) => o.label)
+        : [],
+    }
+  }, [
+    step,
+    paragraphs,
+    stepChoices,
+    effectiveExtras,
+    showsConcernChips,
+    originalChip,
+    concernOptions,
+  ])
+
+  // A suggestion only counts for the screen it was made on.
+  const activeSuggestion =
+    suggestion && step && suggestion.stepKey === step.step_key
+      ? suggestion
+      : null
+  const suggestedChoice = activeSuggestion?.choiceId
+    ? (stepChoices.find((c) => c.id === activeSuggestion.choiceId) ?? null)
+    : null
+  const suggestedConcernLabel =
+    activeSuggestion?.concern && activeSuggestion.concern !== concern?.label
+      ? activeSuggestion.concern
+      : null
+  const suggestedConcern = suggestedConcernLabel
+    ? ([originalChip, ...(concernOptions ?? [])].find(
+        (o) => o.label === suggestedConcernLabel,
+      ) ?? null)
+    : null
+
   if (!step) {
     return (
       <article className="rounded-lg border border-border bg-card p-6 text-center text-muted-foreground">
@@ -418,6 +506,10 @@ export function ScriptFlowPlayer({
         </div>
       </div>
 
+      {assist && assistContext && (
+        <LiveAssist context={assistContext} onSuggestion={setSuggestion} />
+      )}
+
       {/* Script text */}
       <div className="px-5 py-6 sm:px-8">
         <div
@@ -456,14 +548,19 @@ export function ScriptFlowPlayer({
       {/* Main-concern capture: shown on the questions screen for niches with
           a concern list. Tapping records the patient's answer to the magic
           question; the routing buttons below still control navigation. */}
-      {step.step_key.startsWith('digging_in') &&
-        concernOptions &&
-        concernOptions.length > 0 && (
+      {showsConcernChips && concernOptions && (
           <div className="border-t border-border bg-primary/5 px-5 py-4 sm:px-8">
             <p className="mb-3 flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
               <Crosshair className="size-3.5" />
               Tap their answer: which one do they want gone?
             </p>
+            {suggestedConcern && (
+              <SuggestionRow
+                label={suggestedConcern.label}
+                actionLabel="Use it"
+                onConfirm={() => pickConcern(suggestedConcern)}
+              />
+            )}
             <div className="flex flex-wrap gap-2">
               {[originalChip, ...concernOptions].map((opt) => (
                 <button
@@ -473,6 +570,8 @@ export function ScriptFlowPlayer({
                   aria-pressed={concern?.label === opt.label}
                   className={cn(
                     'inline-flex min-h-10 items-center rounded-full border px-4 py-2 text-sm font-medium transition-colors',
+                    suggestedConcern?.label === opt.label &&
+                      'ring-2 ring-primary ring-offset-2 ring-offset-background',
                     concern?.label === opt.label && !otherOpen
                       ? 'border-primary bg-primary text-primary-foreground'
                       : opt === originalChip
@@ -541,13 +640,23 @@ export function ScriptFlowPlayer({
                 ? 'Click what you hear'
                 : 'When you\u2019re ready'}
             </p>
+            {suggestedChoice && (
+              <SuggestionRow
+                label={mergeScript(suggestedChoice.label, [], effectiveExtras)}
+                actionLabel="Go"
+                onConfirm={() => go(suggestedChoice)}
+              />
+            )}
             <div className="flex flex-wrap gap-2">
               {stepChoices.map((c) =>
                 c.variant === 'positive' ? (
                   <Button
                     key={c.id}
                     size="lg"
-                    className="h-auto min-h-11 whitespace-normal py-2.5 text-left"
+                    className={cn(
+                      'h-auto min-h-11 whitespace-normal py-2.5 text-left',
+                      suggestedChoice?.id === c.id && SUGGESTED_RING,
+                    )}
                     onClick={() => go(c)}
                   >
                     {mergeScript(c.label, [], effectiveExtras)}
@@ -560,6 +669,7 @@ export function ScriptFlowPlayer({
                     className={cn(
                       'inline-flex min-h-11 items-center rounded-md border px-4 py-2.5 text-sm font-medium transition-colors',
                       CHOICE_STYLES[c.variant] ?? CHOICE_STYLES.default,
+                      suggestedChoice?.id === c.id && SUGGESTED_RING,
                     )}
                   >
                     {mergeScript(c.label, [], effectiveExtras)}

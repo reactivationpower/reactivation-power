@@ -141,6 +141,7 @@ export function ScriptViewer({
         extras={extras}
         fontSize={FONT_SIZES[sizeIndex]}
         initialStepKey={initialStepKey}
+        assist
         concernOptions={
           CONCERN_OPTIONS[
             niches.find((n) => n.id === nicheId)?.name ?? ''
