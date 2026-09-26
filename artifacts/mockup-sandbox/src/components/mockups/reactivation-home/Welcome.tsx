@@ -15,8 +15,8 @@ const preventNavigation = (event: MouseEvent<HTMLAnchorElement>) => event.preven
 
 const destinations = [
   {
-    title: 'Go to Training',
-    description: 'Learn how to use the system and prepare for your calls.',
+    title: 'Go to Training & Practice Scripts',
+    description: 'Get your whole team confident before the first live call. Watch the training, then rehearse with the same dynamic scripts they will use on real patients.',
     icon: GraduationCap,
     href: '/portal',
     number: '01',
@@ -24,7 +24,7 @@ const destinations = [
   },
   {
     title: 'Contacts',
-    description: 'Upload, review, and screen your patient list.',
+    description: 'Your next appointments are already in your patient list. Upload it once, and we sort out who is worth calling first based on the service they had.',
     icon: Users,
     href: '/portal/contacts',
     number: '02',
@@ -32,7 +32,7 @@ const destinations = [
   },
   {
     title: 'Dialer',
-    description: 'Start calling with scripts tailored to each patient’s service.',
+    description: 'Work through today’s calls with dynamic scripts tailored to the service each patient previously received, so your team can handle hesitation and book the return visit.',
     icon: PhoneCall,
     href: '/portal/dialer',
     number: '03',
@@ -40,7 +40,7 @@ const destinations = [
   },
   {
     title: 'Analytics',
-    description: 'See your team’s activity, appointments, and results.',
+    description: 'See exactly what your calls are producing: who is calling, how many patients they reach, and how many appointments come back on the books.',
     icon: BarChart3,
     href: '/portal/analytics',
     number: '04',
@@ -49,7 +49,7 @@ const destinations = [
 ] as const
 
 const guidance = [
-  { question: 'New here?', answer: 'Start with Training.', href: '/portal' },
+  { question: 'New here?', answer: 'Start with Training & Practice Scripts.', href: '/portal' },
   { question: 'Need to add or screen patients?', answer: 'Go to Contacts.', href: '/portal/contacts' },
   { question: 'Ready to make calls?', answer: 'Open the Dialer.', href: '/portal/dialer' },
   { question: 'Want to evaluate your team’s performance?', answer: 'Go to Analytics.', href: '/portal/analytics' },
