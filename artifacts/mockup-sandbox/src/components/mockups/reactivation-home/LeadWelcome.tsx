@@ -7,6 +7,7 @@ import {
   LogOut,
   Megaphone,
   MessageSquareText,
+  PhoneCall,
   Settings,
 } from 'lucide-react'
 
@@ -33,9 +34,9 @@ const destinations = [
     className: 'welcome-card--training',
   },
   {
-    title: 'Leads',
-    description: 'Every lead here already raised their hand. See who responded, who to call first, and who is still waiting before their interest cools off.',
-    icon: Inbox,
+    title: 'Leads & Dialer',
+    description: 'Turn interested leads into booked appointments. See who to call first, then start calling with dynamic scripts tailored to the exact service and offer each lead responded to.',
+    icon: PhoneCall,
     href: '/portal/leads',
     number: '02',
     className: 'welcome-card--contacts',
@@ -60,7 +61,7 @@ const destinations = [
 
 const guidance = [
   { question: 'New here?', answer: 'Set up your first Campaign.', href: '/portal/campaigns' },
-  { question: 'Have a new lead waiting?', answer: 'Go to Leads.', href: '/portal/leads' },
+  { question: 'Ready to follow up and make calls?', answer: 'Open Leads & Dialer.', href: '/portal/leads' },
   { question: 'Want to rehearse before a live call?', answer: 'Practice the Script.', href: '/portal/campaigns' },
   { question: 'Want to evaluate your team’s performance?', answer: 'Go to Analytics.', href: '/portal/leads/analytics' },
 ] as const
