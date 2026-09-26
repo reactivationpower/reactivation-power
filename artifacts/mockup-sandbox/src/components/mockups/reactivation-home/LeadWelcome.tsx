@@ -26,7 +26,7 @@ const NAV = [
 const destinations = [
   {
     title: 'Campaigns',
-    description: 'Connect each ad or offer so new leads arrive ready to call.',
+    description: 'Connect each ad or offer once, and every new lead is added automatically and arrives ready to call, matched to the exact offer they responded to.',
     icon: Megaphone,
     href: '/portal/campaigns',
     number: '01',
@@ -34,7 +34,7 @@ const destinations = [
   },
   {
     title: 'Leads',
-    description: 'See who responded, who to call next, and who is still waiting.',
+    description: 'Every lead here already raised their hand. See who responded, who to call first, and who is still waiting before their interest cools off.',
     icon: Inbox,
     href: '/portal/leads',
     number: '02',
@@ -42,7 +42,7 @@ const destinations = [
   },
   {
     title: 'Practice the Script',
-    description: 'Rehearse a call for any campaign before a live lead is on the line.',
+    description: 'Rehearse with scripts built around the exact campaigns you have running, so your team sounds ready the moment a real lead picks up.',
     icon: MessageSquareText,
     href: '/portal/campaigns',
     number: '03',
