@@ -6,5 +6,7 @@ export const modules: ModuleMap = {
   "./components/mockups/admin-dashboard/EditorialHierarchy.tsx": () => import("../components/mockups/admin-dashboard/EditorialHierarchy.tsx"),
   "./components/mockups/admin-dashboard/StructuredOverview.tsx": () => import("../components/mockups/admin-dashboard/StructuredOverview.tsx"),
   "./components/mockups/admin-dashboard/UnifiedWorkspace.tsx": () => import("../components/mockups/admin-dashboard/UnifiedWorkspace.tsx"),
-  "./components/mockups/landing-home/WarmAdvisory.tsx": () => import("../components/mockups/landing-home/WarmAdvisory.tsx")
+  "./components/mockups/landing-home/WarmAdvisory.tsx": () => import("../components/mockups/landing-home/WarmAdvisory.tsx"),
+  "./components/mockups/reactivation-home/Current.tsx": () => import("../components/mockups/reactivation-home/Current.tsx"),
+  "./components/mockups/reactivation-home/Welcome.tsx": () => import("../components/mockups/reactivation-home/Welcome.tsx")
 };
