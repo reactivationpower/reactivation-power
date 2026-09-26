@@ -63,7 +63,7 @@ export default function PortalStartPage() {
           <div>
             <h2 className="text-xl font-semibold text-foreground">Reactivation</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Call past patients who haven&rsquo;t been in for a while and bring them back.
+              Your next appointment could be someone already in your patient list. Give your team dynamic scripts tailored to the service each patient previously received—helping them reconnect, address hesitation, and turn conversations into return visits.
             </p>
           </div>
           <span className="mt-auto flex items-center gap-1 text-sm font-medium">
@@ -82,7 +82,7 @@ export default function PortalStartPage() {
           <div>
             <h2 className="text-xl font-semibold text-foreground">Lead Follow-Up</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Call people who responded to an ad but never booked, while the lead is still warm.
+              You paid to get their attention. Now turn that interest into an appointment. Give your team dynamic scripts tailored to the specific service and offer each lead responded to—so every conversation builds on what interested them in the first place.
             </p>
             {products?.leadFollowUp && <p className="mt-2 text-sm text-foreground" data-testid="text-lead-summary">
               <span className="font-semibold">{newLeads}</span> new lead{newLeads === 1 ? '' : 's'} ·{' '}
