@@ -14,3 +14,4 @@
 - [Two sales-demo practices](demo-practices.md) — keep resets isolated to one demo family; sample CSV entitlement and dedupe constraints.
 - [Stale dev process after failed restart](stale-dev-process.md) — EADDRINUSE in a workflow log = old build still serving; check listener start time vs dist mtime before debugging code.
 - [Campaign setup audience](campaign-setup-guidance.md) — self-service office setup is primary; agency handoff is secondary, and receipt claims must stay factual.
+- [Portal welcome intent](portal-welcome-intent.md) — beginner-friendly product entry, familiar top tabs, and explicit calling and tailored-script benefits.

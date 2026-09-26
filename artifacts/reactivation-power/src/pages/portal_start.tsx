@@ -72,7 +72,7 @@ export default function PortalStartPage() {
         </ProductTile>
         <ProductTile
           active={Boolean(products?.leadFollowUp)}
-          href="/portal/leads"
+          href="/portal/leads/start"
           name="Lead Follow-Up"
           testId="tile-lead-followup"
         >

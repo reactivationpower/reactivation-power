@@ -37,6 +37,9 @@ import Page_login from '@/pages/login';
 import Page_pay_token from '@/pages/pay_token';
 import Page_pay_token_thank_you from '@/pages/pay_token_thank-you';
 import Page_portal from '@/pages/portal';
+import Page_portal_training from '@/pages/portal_training';
+import Page_portal_leads_start from '@/pages/portal_leads_start';
+import Page_portal_leads_practice from '@/pages/portal_leads_practice';
 import Page_portal_analytics from '@/pages/portal_analytics';
 import Page_portal_start from '@/pages/portal_start';
 import Page_portal_campaigns from '@/pages/portal_campaigns';
@@ -302,6 +305,15 @@ function Router() {
             <Page_portal_start />
           </PortalLayout>
         </RoutedErrorBoundary>
+      </Route>
+      <Route path="/portal/training">
+        <RoutedErrorBoundary><PortalLayout><Page_portal_training /></PortalLayout></RoutedErrorBoundary>
+      </Route>
+      <Route path="/portal/leads/start">
+        <RoutedErrorBoundary><PortalLayout><Page_portal_leads_start /></PortalLayout></RoutedErrorBoundary>
+      </Route>
+      <Route path="/portal/leads/practice">
+        <RoutedErrorBoundary><PortalLayout><Page_portal_leads_practice /></PortalLayout></RoutedErrorBoundary>
       </Route>
       <Route path="/portal/leads/analytics">
         <RoutedErrorBoundary><PortalLayout><LeadAnalyticsPage /></PortalLayout></RoutedErrorBoundary>

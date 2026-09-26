@@ -127,7 +127,8 @@ describe('products and paths', () => {
   })
 
   it('knows which product a path belongs to', () => {
-    expect(PRODUCT_HOME.lead_followup).toBe('/portal/leads')
+    expect(PRODUCT_HOME.lead_followup).toBe('/portal/leads/start')
+    expect(productForPath('/portal/leads/start')).toBe('lead_followup')
     expect(productForPath('/portal/leads')).toBe('lead_followup')
     expect(productForPath('/portal/campaigns/abc/leads/def')).toBe('lead_followup')
     expect(productForPath('/portal/campaigns')).toBe('lead_followup')

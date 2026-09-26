@@ -19,7 +19,7 @@ import { usePageData } from '@/hooks/use-page-data'
 
 const NAV = [
   { href: '/portal/contacts', label: 'Contacts', icon: Users },
-  { href: '/portal', label: 'Training', icon: GraduationCap, exact: true },
+  { href: '/portal/training', label: 'Training', icon: GraduationCap, exact: true },
   { href: '/portal/dialer', label: 'Dialer', icon: PhoneCall },
   { href: '/portal/analytics', label: 'Analytics', icon: BarChart3 },
 ] as const
@@ -32,7 +32,8 @@ const LEAD_NAV = [
 ] as const
 
 function isActive(pathname: string, href: string, exact?: boolean) {
-  if (exact) return pathname === href || pathname.startsWith('/portal/course')
+  if (exact) return pathname === href || pathname.startsWith('/portal/course') || pathname === '/portal/dialer/script'
+  if (href === '/portal/dialer' && pathname === '/portal/dialer/script') return false
   return pathname === href || pathname.startsWith(`${href}/`)
 }
 

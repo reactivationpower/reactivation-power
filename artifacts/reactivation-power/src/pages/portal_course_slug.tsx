@@ -21,6 +21,7 @@ export default function CoursePage() {
 
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-12">
+      <Link href="/portal/training" className="text-sm font-medium text-accent hover:underline" data-testid="link-course-training">← Training</Link>
       <div className="flex justify-end">
         <Link
           href={`/portal/dialer/script?from=course&course=${course.slug}`}

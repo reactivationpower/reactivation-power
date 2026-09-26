@@ -32,7 +32,7 @@ describe('portal start product doors', () => {
 
       for (const { name, enabled, testId, href } of [
         { name: 'Reactivation', enabled: reactivation, testId: 'tile-reactivation', href: '/portal' },
-        { name: 'Lead Follow-Up', enabled: leadFollowUp, testId: 'tile-lead-followup', href: '/portal/leads' },
+        { name: 'Lead Follow-Up', enabled: leadFollowUp, testId: 'tile-lead-followup', href: '/portal/leads/start' },
       ]) {
         const card = screen.getByTestId(testId)
         if (enabled) {

@@ -177,6 +177,12 @@ add("/admin-login", undefined, async (req) => {
 add("/portal", "portal", async () => {
   const participant = await getCurrentParticipant();
   if (!participant) redirect("/login");
+  return { participant };
+});
+
+add("/portal/training", "portal", async () => {
+  const participant = await getCurrentParticipant();
+  if (!participant) redirect("/login");
   const ownerId = accessOwnerId(participant);
   const isOwner = participant.role === "owner";
   const [courses, staff, sectors] = await Promise.all([
@@ -196,6 +202,16 @@ add("/portal", "portal", async () => {
 });
 
 // ---------- Lead Follow-Up ----------
+
+add("/portal/leads/start", "portal", async () => {
+  const { participant, isOwner } = await requireLeadFollowUp("/portal/leads/start");
+  return { participant, isOwner };
+});
+
+add("/portal/leads/practice", "portal", async () => {
+  const { participant, ownerId } = await requireLeadFollowUp("/portal/leads/practice");
+  return { participant, campaigns: await leadStore.listCampaigns(ownerId) };
+});
 
 /** Both doors remain visible, including for accounts with only one product. */
 add("/portal/start", "portal", async () => {
@@ -347,7 +363,7 @@ add("/portal/course/:slug", "portal", async (req) => {
   const course = await getCourseBySlug(slug);
   if (!course || course.status !== "live") notFound();
   const accessibleIds = await getAccessibleCourseIds(accessOwnerId(participant));
-  if (!accessibleIds.includes(course.id)) redirect("/portal");
+  if (!accessibleIds.includes(course.id)) redirect("/portal/training");
   const tree = await getCourseTree(course.id, true);
   if (!tree) notFound();
   const videoIds = tree.modules.flatMap((m) => m.videos.map((v) => v.id));
@@ -463,8 +479,8 @@ add("/portal/dialer/script", "portal", async (req) => {
   const participant = await getCurrentParticipant();
   if (!participant) redirect("/login?next=/portal/dialer");
   const courseSlug = from === "course" && course && /^[a-z0-9-]+$/i.test(course) ? course : null;
-  const backHref = courseSlug ? `/portal/course/${courseSlug}` : "/portal/dialer";
-  const backLabel = courseSlug ? "Back to Training" : "Back to Dialer";
+  const backHref = courseSlug ? `/portal/course/${courseSlug}` : from === "training" ? "/portal/training" : "/portal/dialer";
+  const backLabel = courseSlug || from === "training" ? "Back to Training" : "Back to Dialer";
   const ownerId = accessOwnerId(participant);
   const sectors = await getOwnerSectors(ownerId);
   const [niches, flow, owner] = await Promise.all([
