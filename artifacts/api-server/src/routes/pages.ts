@@ -6,6 +6,7 @@ import { adminHomeFor, getAdminSessionFromRequest, satisfies } from "../lib/auth
 import { listAdminUsers } from "../lib/data/admin-users";
 import { SESSION_COOKIE_NAME, decodeSession } from "../lib/auth/token";
 import { clearSessionCookie, getSession } from "../lib/auth/session";
+import { resolveLoginDestination } from "../lib/auth/login-destination";
 import { billingBlockForOwner } from "../lib/billing/dunning";
 import { UPCOMING_WINDOW_DAYS, getBillingDashboard, parseDateRange } from "../lib/billing/dashboard";
 import { getBillingByToken, getMyBilling } from "../actions/customer-billing";
@@ -161,7 +162,7 @@ add("/login", undefined, async (req) => {
     // portal; clear its cookie so it does not bounce back and forth.
     const participant = await getParticipantById(session.participantId);
     const block = participant && !participant.is_demo ? await billingBlockForOwner(accessOwnerId(participant)) : null;
-    if (!block) redirect("/portal");
+    if (!block) redirect(resolveLoginDestination(queryString(req, "next") ?? ""));
     await clearSessionCookie();
     return { next: queryString(req, "next"), billing: { reason: block.reason, status: block.status, email: block.email } };
   }

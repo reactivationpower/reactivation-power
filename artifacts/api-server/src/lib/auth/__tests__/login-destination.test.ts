@@ -1,25 +1,25 @@
 import { describe, expect, it } from 'vitest'
 import { resolveLoginDestination } from '../login-destination'
 
-const both = { reactivation: true as const, leadFollowUp: true }
-const reactivationOnly = { reactivation: true as const, leadFollowUp: false }
-
 describe('resolveLoginDestination', () => {
-  it('sends a dual-product account to the two-door chooser on a plain login', () => {
-    expect(resolveLoginDestination('', both)).toBe('/portal/start')
-  })
+  it.each(['', ' ', '/portal', '/portal/', '/portal?tab=courses', '/portal/#courses'])(
+    'sends a normal login (%s) to the chooser regardless of product access',
+    (next) => {
+      expect(resolveLoginDestination(next)).toBe('/portal/start')
+    },
+  )
 
-  it('sends a reactivation-only account straight into the portal', () => {
-    expect(resolveLoginDestination('', reactivationOnly)).toBe('/portal')
-  })
+  it.each(['/portal/start', '/portal/campaigns/abc', '/portal/dialer', '/portal/course/example/video/123?from=email#play'])(
+    'preserves the specific deep link %s',
+    (next) => {
+      expect(resolveLoginDestination(next)).toBe(next)
+    },
+  )
 
-  it('honours an explicit same-origin deep link for either account', () => {
-    expect(resolveLoginDestination('/portal/campaigns/abc', both)).toBe('/portal/campaigns/abc')
-    expect(resolveLoginDestination('/portal/dialer', reactivationOnly)).toBe('/portal/dialer')
-  })
-
-  it('ignores off-site or protocol-relative return paths', () => {
-    expect(resolveLoginDestination('https://evil.example', both)).toBe('/portal/start')
-    expect(resolveLoginDestination('//evil.example', reactivationOnly)).toBe('/portal')
-  })
+  it.each(['https://evil.example', '//evil.example', '/\\evil.example'])(
+    'ignores unsafe return path %s',
+    (next) => {
+      expect(resolveLoginDestination(next)).toBe('/portal/start')
+    },
+  )
 })

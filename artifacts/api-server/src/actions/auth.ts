@@ -9,7 +9,6 @@ import {
 } from '@/lib/auth/session'
 import { accessOwnerId, getParticipantByEmail } from '@/lib/data/participants'
 import { billingBlockForOwner } from '@/lib/billing/dunning'
-import { productAccessFor } from '@/lib/lead-followup/access'
 import { resolveLoginDestination } from '@/lib/auth/login-destination'
 import { logEvent } from '@/lib/data/activity'
 
@@ -32,7 +31,7 @@ export async function login(
   const email = norm(String(formData.get('email') ?? ''))
   const phone = String(formData.get('phone') ?? '').trim()
   // Only an explicit return path (a deep link that bounced to login) is honoured;
-  // with none, the account's products decide where it lands.
+  // with none (or the portal root), show the product chooser.
   const next = String(formData.get('next') ?? '').trim()
 
   if (!firstName || !lastName || !email) {
@@ -135,7 +134,7 @@ export async function login(
     issuedAt: Date.now(),
   })
 
-  redirect(resolveLoginDestination(next, await productAccessFor(participant)))
+  redirect(resolveLoginDestination(next))
 }
 
 export async function logout() {
