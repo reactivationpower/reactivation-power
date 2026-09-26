@@ -1,22 +1,47 @@
 // @ts-nocheck
 import { Link } from 'wouter'
-import { ArrowRight, Megaphone, PhoneCall } from 'lucide-react'
+import { ArrowRight, LockKeyhole, Megaphone, PhoneCall } from 'lucide-react'
 import { formatPhone } from '@workspace/shared/phone'
 import { timeAgo } from '@workspace/shared/lead-followup'
 import { formatRequestedAt } from '@workspace/shared/lead-requested-time'
 import { usePageData } from '@/hooks/use-page-data'
 import { PageError, PageLoading } from '@/components/page-status'
 import { PORTAL_NARROW } from '@/lib/portal-layout'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 
-/**
- * The two-door landing. Shown only to accounts that hold both products; a
- * single-product account is redirected by the loader before it renders.
- */
+const tileClass = 'group flex w-full flex-col gap-4 rounded-xl border border-border bg-card p-6 text-left transition-colors hover:border-accent'
+
+function ProductTile({ active, href, name, testId, children }: {
+  active: boolean
+  href: string
+  name: string
+  testId: string
+  children: React.ReactNode
+}) {
+  if (active) return <Link href={href} data-testid={testId} className={tileClass}>{children}</Link>
+  return (
+    <Dialog>
+      <DialogTrigger
+        render={<button type="button" data-testid={testId} className={`${tileClass} border-dashed bg-muted/40 text-muted-foreground hover:border-border`} />}
+      >
+        {children}
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{name} is not active</DialogTitle>
+          <DialogDescription>Contact us to activate {name}.</DialogDescription>
+        </DialogHeader>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+/** Both products remain discoverable even if the account holds neither grant. */
 export default function PortalStartPage() {
   const { data, loading, error } = usePageData<any>('/portal/start')
   if (loading) return <PageLoading />
   if (error) return <PageError error={error} />
-  const { participant, practiceName, activeCampaigns, newLeads, callNext = [], now } = data
+  const { participant, products, practiceName, activeCampaigns, newLeads, callNext = [], now } = data
   const nowMs = now ? new Date(now).getTime() : Date.now()
 
   return (
@@ -26,10 +51,11 @@ export default function PortalStartPage() {
         {practiceName ? `${practiceName} — ` : ''}where are you calling today?
       </h1>
       <div className="mt-8 grid gap-4 sm:grid-cols-2">
-        <Link
+        <ProductTile
+          active={Boolean(products?.reactivation)}
           href="/portal"
-          data-testid="tile-reactivation"
-          className="group flex flex-col gap-4 rounded-xl border border-border bg-card p-6 transition-colors hover:border-accent"
+          name="Reactivation"
+          testId="tile-reactivation"
         >
           <span className="flex size-11 items-center justify-center rounded-lg bg-primary/10 text-primary">
             <PhoneCall className="size-5" />
@@ -40,14 +66,15 @@ export default function PortalStartPage() {
               Call past patients who haven&rsquo;t been in for a while and bring them back.
             </p>
           </div>
-          <span className="mt-auto flex items-center gap-1 text-sm font-medium text-accent group-hover:underline">
-            Open Reactivation <ArrowRight className="size-4" />
+          <span className="mt-auto flex items-center gap-1 text-sm font-medium">
+            {products?.reactivation ? <>Open Reactivation <ArrowRight className="size-4" /></> : <>Not active <LockKeyhole className="size-4" /></>}
           </span>
-        </Link>
-        <Link
+        </ProductTile>
+        <ProductTile
+          active={Boolean(products?.leadFollowUp)}
           href="/portal/leads"
-          data-testid="tile-lead-followup"
-          className="group flex flex-col gap-4 rounded-xl border border-border bg-card p-6 transition-colors hover:border-accent"
+          name="Lead Follow-Up"
+          testId="tile-lead-followup"
         >
           <span className="flex size-11 items-center justify-center rounded-lg bg-amber-100 text-amber-800">
             <Megaphone className="size-5" />
@@ -57,18 +84,18 @@ export default function PortalStartPage() {
             <p className="mt-1 text-sm text-muted-foreground">
               Call people who responded to an ad but never booked, while the lead is still warm.
             </p>
-            <p className="mt-2 text-sm text-foreground" data-testid="text-lead-summary">
+            {products?.leadFollowUp && <p className="mt-2 text-sm text-foreground" data-testid="text-lead-summary">
               <span className="font-semibold">{newLeads}</span> new lead{newLeads === 1 ? '' : 's'} ·{' '}
               <span className="font-semibold">{activeCampaigns}</span> active campaign{activeCampaigns === 1 ? '' : 's'}
-            </p>
+            </p>}
           </div>
-          <span className="mt-auto flex items-center gap-1 text-sm font-medium text-accent group-hover:underline">
-            Open Lead Follow-Up <ArrowRight className="size-4" />
+          <span className="mt-auto flex items-center gap-1 text-sm font-medium">
+            {products?.leadFollowUp ? <>Open Lead Follow-Up <ArrowRight className="size-4" /></> : <>Not active <LockKeyhole className="size-4" /></>}
           </span>
-        </Link>
+        </ProductTile>
       </div>
 
-      <section className="mt-10" aria-labelledby="call-next-heading">
+      {products?.leadFollowUp && <section className="mt-10" aria-labelledby="call-next-heading">
         <div className="flex items-end justify-between gap-3">
           <div>
             <h2 id="call-next-heading" className="text-xl font-semibold text-foreground">Call next</h2>
@@ -117,7 +144,7 @@ export default function PortalStartPage() {
             ))}
           </ul>
         )}
-      </section>
+      </section>}
     </div>
   )
 }

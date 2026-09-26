@@ -196,16 +196,18 @@ add("/portal", "portal", async () => {
 
 // ---------- Lead Follow-Up ----------
 
-/** Two-door chooser. Only meaningful when the account holds both products. */
+/** Both doors remain visible, including for accounts with only one product. */
 add("/portal/start", "portal", async () => {
   const participant = await getCurrentParticipant();
   if (!participant) redirect("/login");
   const products = await productAccessFor(participant);
-  if (!products.leadFollowUp) redirect("/portal");
   const ownerId = accessOwnerId(participant);
   const owner = participant.role === "owner" ? participant : await getParticipantById(ownerId);
   const now = new Date();
-  const [campaigns, callNext] = await Promise.all([leadStore.listCampaigns(ownerId), leadStore.callNext(ownerId, now, 25)]);
+  // Do not load lead data for an account without a lead grant.
+  const [campaigns, callNext] = products.leadFollowUp
+    ? await Promise.all([leadStore.listCampaigns(ownerId), leadStore.callNext(ownerId, now, 25)])
+    : [[], []];
   const activeCampaigns = campaigns.filter((c) => c.status === "active").length;
   const newLeads = campaigns.reduce((n, c) => n + c.newLeadCount, 0);
   return { participant, products, practiceName: owner?.practice_name ?? null, activeCampaigns, newLeads, callNext, now: now.toISOString() };
