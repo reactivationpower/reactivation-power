@@ -48,6 +48,13 @@ const destinations = [
   },
 ] as const
 
+const guidance = [
+  { question: 'New here?', answer: 'Start with Training.', href: '/portal' },
+  { question: 'Need to add or screen patients?', answer: 'Go to Contacts.', href: '/portal/contacts' },
+  { question: 'Ready to make calls?', answer: 'Open the Dialer.', href: '/portal/dialer' },
+  { question: 'Want to evaluate your team’s performance?', answer: 'Go to Analytics.', href: '/portal/analytics' },
+] as const
+
 export function Welcome() {
   return (
     <PortalShell trainingActive={false}>
@@ -89,13 +96,22 @@ export function Welcome() {
             ))}
           </div>
 
-          <div className="welcome-guidance">
+          <div className="welcome-guidance" aria-label="Not sure where to start?">
             <span className="welcome-guidance-mark" aria-hidden="true">
               <span />
               <span />
               <span />
             </span>
-            <p><strong>New here?</strong> Start with Training. <span className="welcome-guidance-divider" aria-hidden="true" /> <strong>Ready to make calls?</strong> Open the Dialer.</p>
+            <ul className="welcome-guidance-list">
+              {guidance.map(({ question, answer, href }) => (
+                <li key={question}>
+                  <a href={href} onClick={preventNavigation}>
+                    <strong>{question}</strong>
+                    <span>{answer}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </div>
