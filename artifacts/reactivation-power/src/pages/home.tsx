@@ -3,8 +3,8 @@ import {
   ArrowRight, CalendarCheck, ClipboardList, DollarSign, Headset,
   ListChecks, Megaphone, PhoneCall, ShieldCheck, Users,
 } from 'lucide-react'
-import { HeroOpportunity } from '@/components/landing/hero-opportunity'
 import { OpportunityProvider } from '@/components/landing/opportunity-context'
+import { CombinedCalculator } from '@/components/homepage/combined-calculator'
 import { GuidedScriptDemo } from '@/components/homepage/guided-script-demo'
 import { ServicesWeSupport } from '@/components/site/services-we-support'
 import { SiteFooter } from '@/components/site/site-footer'
@@ -19,6 +19,7 @@ const PRODUCTS = [
     body: 'Your front desk works through your inactive patient list with a word-for-word script written for the service each patient originally came in for — so a lapsed decompression patient hears a different conversation than a past Botox client.',
     points: ['Scripts written per service, not one generic pitch', 'Leads with care, handles every common objection', 'Follow-ups and callbacks resurface on schedule'],
     cta: 'Explore Reactivation', href: '#reactivation',
+    secondary: 'See what your inactive list could be worth',
   },
   {
     id: 'lead', tone: 'navy', icon: Megaphone, kicker: 'Product 02',
@@ -26,6 +27,7 @@ const PRODUCTS = [
     body: 'When someone responds to a campaign or promotion, your team calls with a script built around that exact ad or offer — what they saw, what it costs, what happens next — instead of a cold “I saw you filled out a form.”',
     points: ['Scripts written per campaign or offer', 'Works from a lead list or a connected lead source', 'Missed and unbooked leads stay in the follow-up queue'],
     cta: 'Explore Lead Follow-Up', href: '#lead-follow-up',
+    secondary: 'See what more booked leads could be worth',
   },
 ] as const
 
@@ -49,6 +51,7 @@ const BENEFITS = [
 const PRODUCT_NAV = [
   { href: '#reactivation', label: 'Reactivation' },
   { href: '#lead-follow-up', label: 'Lead Follow-Up' },
+  { href: '#calculator', label: 'Revenue Calculator' },
   { href: '#how-it-works', label: 'How It Works' },
 ]
 
@@ -86,7 +89,7 @@ function PathCard({ title, description, steps, navy = false }: {
   )
 }
 
-export default function HomePage() {
+function HomeContent() {
   return (
     <div className="dph flex min-h-svh flex-col bg-background">
       <SiteHeader />
@@ -133,11 +136,25 @@ export default function HomePage() {
                   <div className="flex flex-col gap-2"><h3 className="text-2xl font-bold tracking-tight text-foreground md:text-3xl">{p.title}</h3><p className={`text-base font-semibold ${p.tone === 'navy' ? 'text-primary' : 'text-accent'}`}>{p.tagline}</p></div>
                   <p className="text-pretty text-base leading-relaxed text-muted-foreground">{p.body}</p>
                   <ul className="flex flex-col gap-2.5 border-t border-border pt-5">{p.points.map(pt => <li key={pt} className="flex items-start gap-2.5 text-sm leading-snug text-foreground"><span className={`mt-1.5 size-1.5 shrink-0 rounded-full ${p.tone === 'navy' ? 'bg-primary' : 'bg-accent'}`} aria-hidden="true" />{pt}</li>)}</ul>
-                  <div className="mt-auto pt-2"><AnchorLink href={p.href} className={`inline-flex items-center gap-2 rounded-md px-5 py-3 text-sm font-semibold transition-colors ${p.tone === 'navy' ? 'bg-primary text-primary-foreground hover:bg-primary/90' : 'bg-accent text-accent-foreground hover:bg-accent/90'}`}>{p.cta}<ArrowRight className="size-4" aria-hidden="true" /></AnchorLink></div>
+                  <div className="mt-auto flex flex-col items-start gap-3 pt-2">
+                    <AnchorLink href={p.href} className={`inline-flex items-center gap-2 rounded-md px-5 py-3 text-sm font-semibold transition-colors ${p.tone === 'navy' ? 'bg-primary text-primary-foreground hover:bg-primary/90' : 'bg-accent text-accent-foreground hover:bg-accent/90'}`}>{p.cta}<ArrowRight className="size-4" aria-hidden="true" /></AnchorLink>
+                    <AnchorLink href="#calculator" className={`inline-flex min-h-5 items-center gap-1.5 text-sm font-semibold underline-offset-4 transition-colors hover:underline ${p.tone === 'navy' ? 'text-primary' : 'text-accent'}`}>{p.secondary}<ArrowRight className="size-3.5" aria-hidden="true" /></AnchorLink>
+                  </div>
                 </article>
               ))}
             </div>
             <p className="mt-8 text-center text-sm text-muted-foreground">Two products. Choose the right fit for your practice.</p>
+          </div>
+        </section>
+        <section id="calculator" className="dph-band scroll-mt-24 border-b border-border">
+          <div className="mx-auto max-w-6xl px-4 py-16 md:px-6 md:py-24">
+            <div className="mx-auto mb-10 max-w-3xl text-center md:mb-12">
+              <p className="dph-eyebrow justify-center">Your Revenue Opportunity</p>
+              <h2 className="mt-4 text-balance text-3xl font-bold tracking-tight text-foreground md:text-4xl">Two ways to grow. See what they could mean together.</h2>
+              <p className="mt-5 text-pretty text-lg leading-relaxed text-muted-foreground">Set each side to match your practice. Reactivation works your existing inactive list; Lead Follow-Up converts more of the leads you already pay for. Each estimate stands on its own, and the combined figure shows the scale if you ran both.</p>
+            </div>
+            <CombinedCalculator />
+            <p className="mt-6 text-center text-sm text-muted-foreground">Revenue estimates exclude advertising and operating costs. We&apos;ll walk through your assumptions on the strategy call.</p>
           </div>
         </section>
         <section id="how-it-works" className="scroll-mt-24">
@@ -145,7 +162,7 @@ export default function HomePage() {
             <div className="mx-auto max-w-3xl text-center">
               <p className="dph-eyebrow justify-center">How it works</p>
               <h2 className="mt-4 text-balance text-3xl font-bold tracking-tight text-foreground md:text-4xl">Two paths to a booked appointment</h2>
-              <p className="mt-5 text-pretty text-lg leading-relaxed text-muted-foreground">The starting point is different, so the script is different. Most offices don&apos;t know how to talk to a past patient differently based on the service they came in for, or to a lead differently based on the campaign that brought them in. The program does. It hands your front desk the right words for that patient, that service, that offer, on every call.</p>
+              <p className="mt-5 text-pretty text-lg leading-relaxed text-muted-foreground">The starting point is different, so the script is different. Most offices don&apos;t know how to talk to a past patient differently based on the service they came in for, or to a lead differently based on the campaign that brought them in. Pipeline Power does. Our software gives you and your team the right words for that patient, that service, and that offer!</p>
             </div>
             <div className="mx-auto mt-8 grid max-w-4xl grid-cols-1 gap-3 md:grid-cols-2">
               <div className="dph-script-keyed"><span className="dph-script-keyed-dot bg-accent" aria-hidden="true" /><div><p className="text-sm font-semibold text-foreground">Reactivation scripts are keyed to the service they last received</p><p className="mt-1 text-sm leading-relaxed text-muted-foreground">A lapsed whitening patient and a lapsed implant consult hear two different calls, not one generic recall.</p></div></div>
@@ -162,17 +179,6 @@ export default function HomePage() {
             <div className="mx-auto max-w-3xl text-center"><p className="dph-eyebrow justify-center">Patient Reactivation</p><h2 className="mt-4 text-balance text-3xl font-bold tracking-tight text-foreground md:text-4xl">The most profitable patients are the ones you already have</h2><p className="mt-5 text-pretty text-lg leading-relaxed text-muted-foreground">A past patient already knows you, already trusts you, and already said yes once. Reactivation gives your team the right conversation for each of them — organized by the service they came in for.</p></div>
           </div>
           <ServicesWeSupport surface="card" className="!bg-transparent" />
-          <div className="mx-auto max-w-6xl px-4 pb-16 md:px-6 md:pb-24">
-            <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-[1fr_1.1fr]">
-              <div className="flex flex-col gap-5">
-                <p className="dph-eyebrow">Reactivation calculator</p>
-                <h3 className="text-balance text-2xl font-bold tracking-tight text-foreground md:text-3xl">What could your inactive list be worth?</h3>
-                <p className="text-pretty text-base leading-relaxed text-muted-foreground">Move the sliders to match your practice. The estimate uses an illustrative 5% reactivation rate so you can see the scale of the opportunity — actual results depend on your list, your services, and how consistently the calls get made. It is not a guarantee.</p>
-                <ul className="flex flex-col gap-2 text-sm text-muted-foreground">{['Applies to the Reactivation product only', 'No ad spend assumed — these are patients you already have', 'We walk through your real numbers on the strategy call'].map(line => <li key={line} className="flex items-start gap-2.5"><span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-accent" aria-hidden="true" />{line}</li>)}</ul>
-              </div>
-              <OpportunityProvider><HeroOpportunity /></OpportunityProvider>
-            </div>
-          </div>
         </section>
         <section id="lead-follow-up" className="scroll-mt-24">
           <div className="mx-auto max-w-6xl px-4 py-16 md:px-6 md:py-24">
@@ -216,4 +222,8 @@ export default function HomePage() {
       <SiteFooter />
     </div>
   )
+}
+
+export default function HomePage() {
+  return <OpportunityProvider><HomeContent /></OpportunityProvider>
 }

@@ -2,13 +2,15 @@
 
 import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { LeadForm } from '@/components/landing/lead-form'
+import type { CalculatorScenario } from '@workspace/shared/opportunity'
 
 interface LeadDialogProps {
   /** The button/link that opens the dialog */
   children: React.ReactElement
+  calculatorScenario?: CalculatorScenario
 }
 
-export function LeadDialog({ children }: LeadDialogProps) {
+export function LeadDialog({ children, calculatorScenario }: LeadDialogProps) {
   return (
     <Dialog>
       <DialogTrigger render={children} />
@@ -21,7 +23,7 @@ export function LeadDialog({ children }: LeadDialogProps) {
             Fill this out, then pick a time for your call on the next page.
           </DialogDescription>
         </DialogHeader>
-        <LeadForm />
+        <LeadForm calculatorScenario={calculatorScenario} />
       </DialogContent>
     </Dialog>
   )

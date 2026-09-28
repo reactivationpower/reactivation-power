@@ -88,4 +88,73 @@ describe('schedule lead validation and submission', () => {
       source_path: '/healthcare', inactive_patients_estimate: '50',
     }))
   })
+
+  it('saves both components of the combined estimate and carries inputs to booking', async () => {
+    const data = form('both', '1,200')
+    data.delete('leadSource')
+    data.set('calculatorScenario', 'combined')
+    data.set('patientValue', '10000')
+    data.set('additionalPatientsPerMonth', '4')
+    data.set('newPatientValue', '3000')
+    data.set('combinedEstimate', '999999999') // never trust client-provided totals
+    expect(validateLeadFields(readLeadFields(data))).toEqual({})
+    await expect(submitHealthcareLead({}, data)).rejects.toThrow('REDIRECT:')
+    const row = insert.mock.calls[0][0]
+    const source = new URL(row.source_path, 'https://example.com')
+    expect(source.pathname).toBe('/healthcare')
+    expect(Object.fromEntries(source.searchParams)).toEqual({
+      interest: 'both', inactive: '1200', value: '10000', newMonthly: '4', newValue: '3000',
+      reactivationEstimate: '600000', newPatientEstimate: '144000', combinedEstimate: '744000',
+    })
+    expect(row.inactive_patients_estimate).toBe('1200')
+    expect(note.mock.calls.some(([, text]) =>
+      text.includes('Reactivation estimate shown to lead: $600,000') &&
+      text.includes('New patient first-year cohort value estimate: $144,000') &&
+      text.includes('Combined illustrative opportunity: $744,000'),
+    )).toBe(true)
+    expect(redirect.mock.calls[0][0]).toContain('newMonthly=4&newValue=3000')
+  })
+
+  it.each([
+    ['patientValue', '10001'], ['patientValue', 'NaN'], ['patientValue', 'Infinity'],
+    ['patientValue', '-1000'], ['additionalPatientsPerMonth', '0'],
+    ['additionalPatientsPerMonth', '41'], ['additionalPatientsPerMonth', '1e2'],
+    ['newPatientValue', '999'], ['newPatientValue', '10001'],
+    ['newPatientValue', 'Infinity'], ['inactivePatients', '1000000'],
+  ])('rejects invalid combined %s=%s before any writes', async (key, value) => {
+    const data = form('both', '1200')
+    data.set('calculatorScenario', 'combined')
+    data.set('patientValue', '10000')
+    data.set('additionalPatientsPerMonth', '4')
+    data.set('newPatientValue', '3000')
+    data.set(key, value)
+    expect((await submitHealthcareLead({}, data)).fieldErrors?.[key]).toBeTruthy()
+    expect(insert).not.toHaveBeenCalled()
+    expect(upsert).not.toHaveBeenCalled()
+  })
+
+  it('does not let a lead-only submission carry a combined reactivation estimate', async () => {
+    const data = form('lead-follow-up', '1200')
+    data.set('calculatorScenario', 'combined')
+    data.set('patientValue', '2000')
+    data.set('additionalPatientsPerMonth', '4')
+    data.set('newPatientValue', '3000')
+    expect((await submitHealthcareLead({}, data)).fieldErrors?.productInterest).toBeTruthy()
+    expect(insert).not.toHaveBeenCalled()
+  })
+
+  it('accepts the scenario lower bounds and requires all scenario fields', async () => {
+    const data = form('both', '1')
+    data.set('calculatorScenario', 'combined')
+    data.set('patientValue', '1000')
+    data.set('additionalPatientsPerMonth', '1')
+    data.set('newPatientValue', '1000')
+    await expect(submitHealthcareLead({}, data)).rejects.toThrow('REDIRECT:')
+    expect(insert.mock.calls[0][0].source_path).toContain('combinedEstimate=13000')
+
+    vi.clearAllMocks()
+    data.delete('newPatientValue')
+    expect((await submitHealthcareLead({}, data)).fieldErrors?.newPatientValue).toBeTruthy()
+    expect(insert).not.toHaveBeenCalled()
+  })
 })

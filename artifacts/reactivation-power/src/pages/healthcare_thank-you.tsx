@@ -8,7 +8,7 @@ import { PageError, PageLoading } from '@/components/page-status'
 export default function ThankYouPage() {
   const search = new URLSearchParams(useSearch())
   const query = Object.fromEntries(
-    ['name', 'services', 'inactive', 'value', 'tz', 'slot', 'interest'].map((key) => [
+    ['name', 'services', 'inactive', 'value', 'newMonthly', 'newValue', 'tz', 'slot', 'interest'].map((key) => [
       key,
       search.get(key) ?? undefined,
     ]),
@@ -21,7 +21,7 @@ export default function ThankYouPage() {
   if (error) return <PageError error={error} />
   const {
     firstName, inactiveCount, patientValue, timezone, timezoneLabel, bookedFor,
-    servicesLabel,
+    servicesLabel, scenario, estimates, scenarioSupplied,
   } = data
   const leadOnly = search.get('interest') === 'lead-follow-up'
 
@@ -71,7 +71,31 @@ export default function ThankYouPage() {
           </>
         )}
 
-        {leadOnly ? (
+        {scenario && estimates ? (
+          <div className="mt-14 w-full border-t border-border pt-12 md:mt-16">
+            <h2 className="text-center text-2xl font-bold text-foreground">Your illustrative opportunity</h2>
+            <p className="mt-3 text-center text-sm text-muted-foreground">
+              These estimates are based on your inputs, not a guarantee of results or annual cash.
+            </p>
+            <div className="mt-8 grid gap-4 sm:grid-cols-3">
+              {[
+                ['Reactivation estimate', estimates.reactivation, `${scenario.inactivePatients.toLocaleString('en-US')} inactive patients × 5% reactivation × $${scenario.patientValue.toLocaleString('en-US')} annual patient value`],
+                ['New patient first-year cohort value', estimates.newPatients, `${scenario.additionalPatientsPerMonth} additional new patients/month × 12 months × $${scenario.newPatientValue.toLocaleString('en-US')} first-year value`],
+                ['Combined illustrative opportunity', estimates.combined, 'Reactivation + new patient first-year cohort value'],
+              ].map(([label, amount, detail]) => (
+                <div key={label} className="rounded-xl border border-border bg-card p-6 text-center">
+                  <h3 className="text-sm font-semibold text-foreground">{label}</h3>
+                  <p className="mt-3 text-2xl font-bold text-accent">${Number(amount).toLocaleString('en-US')}</p>
+                  <p className="mt-3 text-xs leading-relaxed text-muted-foreground">{detail}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : scenarioSupplied ? (
+          <p role="alert" className="mt-10 text-center text-muted-foreground">
+            The calculator values in this link are invalid. Please return to the calculator to review your estimate.
+          </p>
+        ) : leadOnly ? (
           <p className="mt-10 max-w-xl text-center text-muted-foreground">
             We&apos;ll discuss your lead campaign and offer on the call.
           </p>

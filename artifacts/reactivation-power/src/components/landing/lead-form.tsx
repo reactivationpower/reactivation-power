@@ -10,6 +10,7 @@ import { useOpportunity } from '@/components/landing/opportunity-context'
 import { ServicesMultiSelect } from '@/components/landing/services-multi-select'
 import { Button } from '@/components/ui/button'
 import { readLeadFields, validateLeadFields } from '@workspace/shared/lead-validation'
+import type { CalculatorScenario } from '@workspace/shared/opportunity'
 
 const initialState: LeadState = {}
 
@@ -44,7 +45,10 @@ function inputClass(hasError: boolean): string {
   return `${inputBase} ${hasError ? 'border-destructive ring-2 ring-destructive/20' : 'border-input'}`
 }
 
-export function LeadForm({ scheduleMode = false }: { scheduleMode?: boolean }) {
+export function LeadForm({ scheduleMode = false, calculatorScenario }: {
+  scheduleMode?: boolean
+  calculatorScenario?: CalculatorScenario
+}) {
   const [state, formAction, pending] = useActionState(
     submitHealthcareLead,
     initialState,
@@ -63,14 +67,14 @@ export function LeadForm({ scheduleMode = false }: { scheduleMode?: boolean }) {
   // Slider values from the hero calculator, when this page has one
   const calc = useOpportunity()
   const [inactive, setInactive] = useState(() =>
-    calc ? String(calc.inactiveCount) : '',
+    calculatorScenario ? String(calculatorScenario.inactivePatients) : calc ? String(calc.inactiveCount) : '',
   )
   // Set once the visitor types in the count field — even retyping the same
   // number counts, because they've now confirmed it
   const [inactiveEdited, setInactiveEdited] = useState(false)
   const [productInterest, setProductInterest] = useState('')
   // Follow the slider if the visitor moves it after this form has mounted
-  const sliderCount = calc?.inactiveCount
+  const sliderCount = calculatorScenario?.inactivePatients ?? calc?.inactiveCount
   useEffect(() => {
     if (sliderCount !== undefined) setInactive(String(sliderCount))
   }, [sliderCount])
@@ -162,6 +166,14 @@ export function LeadForm({ scheduleMode = false }: { scheduleMode?: boolean }) {
       noValidate
       className="flex flex-col gap-4"
     >
+      {calculatorScenario && !scheduleMode && (
+        <>
+          <input type="hidden" name="calculatorScenario" value="combined" />
+          <input type="hidden" name="productInterest" value="both" />
+          <input type="hidden" name="additionalPatientsPerMonth" value={calculatorScenario.additionalPatientsPerMonth} />
+          <input type="hidden" name="newPatientValue" value={calculatorScenario.newPatientValue} />
+        </>
+      )}
       {scheduleMode && (
         <>
           <input type="hidden" name="leadSource" value="schedule-a-call" />
@@ -406,7 +418,7 @@ export function LeadForm({ scheduleMode = false }: { scheduleMode?: boolean }) {
             </p>
           ) : (
             <p className="text-xs text-muted-foreground">
-              {calc
+              {calculatorScenario || calc
                 ? 'Carried over from your calculator — edit if needed.'
                 : productInterest === 'lead-follow-up'
                   ? 'Optional for lead follow-up.'
@@ -416,18 +428,18 @@ export function LeadForm({ scheduleMode = false }: { scheduleMode?: boolean }) {
         </div>
       </div>
 
-      {calc ? (
+      {calculatorScenario || calc ? (
         <>
-          <input type="hidden" name="patientValue" value={calc.patientValue} />
+          <input type="hidden" name="patientValue" value={calculatorScenario?.patientValue ?? calc?.patientValue} />
           <input
             type="hidden"
             name="inactiveAdjusted"
-            value={calc.inactiveTouched || inactiveEdited ? 'yes' : 'no'}
+            value={calculatorScenario ? 'yes' : calc?.inactiveTouched || inactiveEdited ? 'yes' : 'no'}
           />
           <input
             type="hidden"
             name="valueAdjusted"
-            value={calc.valueTouched ? 'yes' : 'no'}
+            value={calculatorScenario ? 'yes' : calc?.valueTouched ? 'yes' : 'no'}
           />
         </>
       ) : null}
@@ -473,6 +485,12 @@ export function LeadForm({ scheduleMode = false }: { scheduleMode?: boolean }) {
           {state.error}
         </p>
       ) : null}
+
+      {(errors.patientValue || errors.additionalPatientsPerMonth || errors.newPatientValue) && (
+        <p role="alert" className="text-sm font-medium text-destructive">
+          Calculator values are outside the allowed range. Adjust the calculator and try again.
+        </p>
+      )}
 
       <Button
         type="submit"

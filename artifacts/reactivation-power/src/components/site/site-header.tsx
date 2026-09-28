@@ -18,12 +18,12 @@ export function SiteHeader() {
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 md:px-6">
         <Link href="/" aria-label="Reactivation Power — Home">
           <img
-            src="/images/logo-slogan.png"
-            alt="Reactivation Power — Turning Old Business Into New Business & New Money!"
-            width={1189}
-            height={578}
+            src="/images/pipeline-power-logo.png"
+            alt="Pipeline Power"
+            width={2172}
+            height={724}
             priority
-            className="h-12 w-auto md:h-14"
+            className="h-14 w-auto md:h-16"
           />
         </Link>
 

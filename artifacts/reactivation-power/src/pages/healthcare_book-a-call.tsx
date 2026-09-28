@@ -11,7 +11,7 @@ import { PageError, PageLoading } from '@/components/page-status'
 export default function BookACallPage() {
   const search = new URLSearchParams(useSearch())
   const query = Object.fromEntries(
-    ['cid', 'name', 'inactive', 'value', 'services', 'interest'].map((key) => [
+    ['cid', 'name', 'inactive', 'value', 'newMonthly', 'newValue', 'services', 'interest'].map((key) => [
       key,
       search.get(key) ?? undefined,
     ]),

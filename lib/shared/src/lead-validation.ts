@@ -3,7 +3,7 @@
  * errors appear the instant someone clicks submit) and the server action (the
  * real gate), so the two can never disagree about what "required" means.
  */
-import { INACTIVE_TYPED_MAX } from './opportunity'
+import { INACTIVE_TYPED_MAX, NEW_PATIENTS_MONTHLY_MAX, NEW_PATIENTS_MONTHLY_MIN, SCENARIO_VALUE_MAX, VALUE_MIN, parseCalculatorScenario, type CalculatorScenario } from './opportunity'
 
 export const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -33,6 +33,9 @@ export interface LeadFieldValues {
   services: string[]
   /** Missing on legacy /healthcare submissions; those remain reactivation. */
   productInterest?: string
+  calculatorScenario: boolean
+  additionalPatientsPerMonth: string
+  newPatientValue: string
 }
 
 /** The slice of FormData this helper reads. Declared structurally so the
@@ -53,7 +56,12 @@ export function readLeadFields(formData: LeadFormDataLike): LeadFieldValues {
     zip: str('zip').replace(/\D/g, '').slice(0, 5),
     yearsInPractice: str('yearsInPractice'),
     inactivePatients: str('inactivePatients').replace(/,/g, ''),
-    patientValue: str('patientValue').replace(/\D/g, ''),
+    patientValue: str('patientValue').replace(/[$,]/g, ''),
+    calculatorScenario: formData.get('calculatorScenario') !== null ||
+      formData.get('additionalPatientsPerMonth') !== null ||
+      formData.get('newPatientValue') !== null,
+    additionalPatientsPerMonth: str('additionalPatientsPerMonth'),
+    newPatientValue: str('newPatientValue').replace(/[$,]/g, ''),
     consent: formData.get('consent') === 'on',
     services: formData
       .getAll('services')
@@ -95,9 +103,28 @@ export function validateLeadFields(
   }
   if (v.services.length === 0)
     errors.services = 'Select at least one service.'
+  if (v.calculatorScenario) {
+    const wholeInRange = (raw: string, min: number, max: number) =>
+      /^\d+$/.test(raw) && Number.isSafeInteger(Number(raw)) &&
+      Number(raw) >= min && Number(raw) <= max
+    if (!wholeInRange(v.patientValue, VALUE_MIN, SCENARIO_VALUE_MAX))
+      errors.patientValue = 'Enter an annual patient value from $1,000 to $10,000.'
+    if (!wholeInRange(v.additionalPatientsPerMonth, NEW_PATIENTS_MONTHLY_MIN, NEW_PATIENTS_MONTHLY_MAX))
+      errors.additionalPatientsPerMonth = 'Enter 1 to 40 additional new patients per month.'
+    if (!wholeInRange(v.newPatientValue, VALUE_MIN, SCENARIO_VALUE_MAX))
+      errors.newPatientValue = 'Enter a first-year new patient value from $1,000 to $10,000.'
+    if (v.productInterest === 'lead-follow-up')
+      errors.productInterest = 'Select Both for a combined calculator estimate.'
+  }
   if (!v.consent)
     errors.consent =
       'Please check this box so we can contact you about your call.'
 
   return errors
+}
+
+/** Only call after validateLeadFields reports no errors. */
+export function validatedCalculatorScenario(v: LeadFieldValues): CalculatorScenario | null {
+  if (!v.calculatorScenario) return null
+  return parseCalculatorScenario(v)
 }

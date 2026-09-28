@@ -7,11 +7,12 @@ import {
   ghlConfigured,
   upsertGhlContact,
 } from '@/lib/ghl'
-import { isProductInterest, PRODUCT_INTEREST_LABELS, readLeadFields, validateLeadFields } from '@workspace/shared/lead-validation'
+import { isProductInterest, PRODUCT_INTEREST_LABELS, readLeadFields, validateLeadFields, validatedCalculatorScenario } from '@workspace/shared/lead-validation'
 import {
   parseInactiveCount,
   parsePatientValue,
   reactivatedPatients,
+  scenarioEstimates,
 } from '@workspace/shared/opportunity'
 
 export interface LeadState {
@@ -79,7 +80,7 @@ export async function submitHealthcareLead(
   const hasReactivation = interest !== 'lead-follow-up'
   // source_path already stores landing attribution; use its query to retain
   // interest without requiring a new column in the existing Supabase table.
-  const sourcePath = scheduleSource
+  const baseSourcePath = scheduleSource
     ? `/schedule-a-call?interest=${interest}`
     : productInterest ? `/healthcare?interest=${interest}` : '/healthcare'
 
@@ -94,6 +95,9 @@ export async function submitHealthcareLead(
     inactivePatients,
     consent: consent ? 'on' : '',
     productInterest: productInterest ?? '',
+    patientValue: fields.patientValue,
+    additionalPatientsPerMonth: fields.additionalPatientsPerMonth,
+    newPatientValue: fields.newPatientValue,
   }
 
   // The client runs these same rules before submitting; this is the real gate.
@@ -103,15 +107,28 @@ export async function submitHealthcareLead(
   if (Object.keys(fieldErrors).length > 0) {
     return { fieldErrors, values, services }
   }
+  const scenario = validatedCalculatorScenario(fields)
+  const estimates = scenario ? scenarioEstimates(scenario) : null
+  const sourceParams = new URLSearchParams(baseSourcePath.split('?')[1] ?? '')
+  if (scenario) {
+    sourceParams.set('inactive', String(scenario.inactivePatients))
+    sourceParams.set('value', String(scenario.patientValue))
+    sourceParams.set('newMonthly', String(scenario.additionalPatientsPerMonth))
+    sourceParams.set('newValue', String(scenario.newPatientValue))
+    sourceParams.set('reactivationEstimate', String(estimates!.reactivation))
+    sourceParams.set('newPatientEstimate', String(estimates!.newPatients))
+    sourceParams.set('combinedEstimate', String(estimates!.combined))
+  }
+  const sourcePath = `${baseSourcePath.split('?')[0]}${sourceParams.size ? `?${sourceParams}` : ''}`
 
   const phoneDigits = phone.replace(/\D/g, '')
 
   // The figures the lead saw on the calculator, carried to the thank-you page
   // and the CRM note so the salesperson sees the same number the lead did
   const inactiveCount = inactivePatients ? parseInactiveCount(inactivePatients) : null
-  const patientValue = parsePatientValue(fields.patientValue)
+  const patientValue = scenario?.patientValue ?? parsePatientValue(fields.patientValue)
   const revenueShown = hasReactivation && inactiveCount !== null
-    ? reactivatedPatients(inactiveCount) * patientValue
+    ? estimates?.reactivation ?? reactivatedPatients(inactiveCount) * patientValue
     : null
   const money = (n: number) => '$' + n.toLocaleString('en-US')
 
@@ -178,8 +195,14 @@ export async function submitHealthcareLead(
         ] : ['Inactive patient files: (not provided)']),
         ...(revenueShown !== null ? [
           `Annual patient value used: ${money(patientValue)}${valueNote}`,
-          `Revenue estimate shown to lead: ${money(revenueShown)}`,
+          `${scenario ? 'Reactivation estimate shown to lead' : 'Revenue estimate shown to lead'}: ${money(revenueShown)} (illustrative, not guaranteed)`,
         ] : ['Revenue estimate: not applicable to lead-only inquiry']),
+        ...(scenario && estimates ? [
+          `Additional new patients per month: ${scenario.additionalPatientsPerMonth}`,
+          `New patient first-year value used: ${money(scenario.newPatientValue)}`,
+          `New patient first-year cohort value estimate: ${money(estimates.newPatients)} (12 months of additional new patients; illustrative, not guaranteed)`,
+          `Combined illustrative opportunity: ${money(estimates.combined)} (reactivation + new patient first-year cohort value; not annual cash or guaranteed revenue)`,
+        ] : []),
         `Services offered: ${services.length > 0 ? services.join(', ') : '(none selected)'}`,
       ].join('\n')
 
@@ -234,6 +257,10 @@ export async function submitHealthcareLead(
   if (hasReactivation && inactiveCount !== null) {
     params.set('inactive', String(inactiveCount))
     params.set('value', String(patientValue))
+  }
+  if (scenario) {
+    params.set('newMonthly', String(scenario.additionalPatientsPerMonth))
+    params.set('newValue', String(scenario.newPatientValue))
   }
   if (scheduleSource || productInterest) params.set('interest', interest)
   if (services.length > 0) params.set('services', services.join('|'))

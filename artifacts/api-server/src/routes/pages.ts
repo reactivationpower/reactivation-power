@@ -43,7 +43,7 @@ import { hasLeadFollowUp, productAccessFor, requireLeadFollowUp } from "../lib/l
 import * as leadStore from "../lib/lead-followup/store";
 import { loadLeadAnalytics } from "../lib/lead-followup/analytics";
 import { leadWebhookUrl } from "../lib/lead-followup/webhook-url";
-import { parseInactiveCount, parsePatientValue } from '@workspace/shared/opportunity';
+import { parseInactiveCount, parsePatientValue, parseCalculatorScenario, scenarioEstimates } from '@workspace/shared/opportunity';
 import { publicServiceName } from "@workspace/niche-catalog";
 import { DEFAULT_TIMEZONE, isUsTimezone, timezoneLabel } from '@workspace/shared/us-timezones';
 import {
@@ -791,7 +791,7 @@ add("/healthcare/book-a-call", undefined, async (req) => {
   const contactId = (queryString(req, "cid") ?? "").slice(0, 64);
   const firstName = (queryString(req, "name") ?? "").slice(0, 40);
   const carried = new URLSearchParams();
-  for (const key of ["name", "cid", "inactive", "value", "services", "interest"]) {
+  for (const key of ["name", "cid", "inactive", "value", "newMonthly", "newValue", "services", "interest"]) {
     const value = queryString(req, key);
     if (value) carried.set(key, value.slice(0, 600));
   }
@@ -805,6 +805,14 @@ add("/healthcare/thank-you", undefined, async (req) => {
   const services = str("services", 600).split("|").filter(Boolean).slice(0, 30).map(publicServiceName);
   const inactiveCount = parseInactiveCount(str("inactive", 12) || undefined);
   const patientValue = parsePatientValue(str("value", 12) || undefined);
+  const newMonthly = str("newMonthly", 12);
+  const newValue = str("newValue", 12);
+  const scenario = newMonthly || newValue ? parseCalculatorScenario({
+    inactivePatients: str("inactive", 12),
+    patientValue: str("value", 12),
+    additionalPatientsPerMonth: newMonthly,
+    newPatientValue: newValue,
+  }) : null;
   const tzParam = str("tz", 40);
   const timezone = isUsTimezone(tzParam) ? tzParam : DEFAULT_TIMEZONE;
   const slotMs = Date.parse(str("slot", 40));
@@ -813,7 +821,9 @@ add("/healthcare/thank-you", undefined, async (req) => {
   }).format(new Date(slotMs));
   const serviceLabel = services.length === 0 ? "" : services.length === 1 ? services[0]
     : services.length === 2 ? `${services[0]} and ${services[1]}` : `${services[0]}, ${services[1]}, and more`;
-  return { params: req.query, firstName, services, inactiveCount, patientValue, tzParam, timezone,
+  return { params: req.query, firstName, services, inactiveCount, patientValue, scenario,
+    scenarioSupplied: Boolean(newMonthly || newValue),
+    estimates: scenario ? scenarioEstimates(scenario) : null, tzParam, timezone,
     timezoneLabel: timezoneLabel(timezone), slotMs: Number.isNaN(slotMs) ? null : slotMs, bookedFor, servicesLabel: serviceLabel };
 });
 

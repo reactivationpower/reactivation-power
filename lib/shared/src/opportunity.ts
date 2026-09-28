@@ -24,6 +24,45 @@ export const VALUE_MAX = 5000
 export const VALUE_STEP = 100
 export const VALUE_DEFAULT = 2000
 
+/** Scenario submitted by the combined reactivation + new-patient calculator. */
+export interface CalculatorScenario {
+  inactivePatients: number
+  patientValue: number
+  additionalPatientsPerMonth: number
+  newPatientValue: number
+}
+
+export const SCENARIO_VALUE_MAX = 10_000
+export const NEW_PATIENTS_MONTHLY_MIN = 1
+export const NEW_PATIENTS_MONTHLY_MAX = 40
+
+export function parseCalculatorScenario(raw: {
+  inactivePatients: string
+  patientValue: string
+  additionalPatientsPerMonth: string
+  newPatientValue: string
+}): CalculatorScenario | null {
+  const integer = (value: string, min: number, max: number) =>
+    /^\d+$/.test(value) && Number.isSafeInteger(Number(value)) &&
+    Number(value) >= min && Number(value) <= max
+  if (!integer(raw.inactivePatients, 1, INACTIVE_TYPED_MAX) ||
+      !integer(raw.patientValue, VALUE_MIN, SCENARIO_VALUE_MAX) ||
+      !integer(raw.additionalPatientsPerMonth, NEW_PATIENTS_MONTHLY_MIN, NEW_PATIENTS_MONTHLY_MAX) ||
+      !integer(raw.newPatientValue, VALUE_MIN, SCENARIO_VALUE_MAX)) return null
+  return {
+    inactivePatients: Number(raw.inactivePatients),
+    patientValue: Number(raw.patientValue),
+    additionalPatientsPerMonth: Number(raw.additionalPatientsPerMonth),
+    newPatientValue: Number(raw.newPatientValue),
+  }
+}
+
+export function scenarioEstimates(scenario: CalculatorScenario) {
+  const reactivation = reactivatedPatients(scenario.inactivePatients) * scenario.patientValue
+  const newPatients = scenario.additionalPatientsPerMonth * 12 * scenario.newPatientValue
+  return { reactivation, newPatients, combined: reactivation + newPatients }
+}
+
 export function reactivatedPatients(inactiveCount: number): number {
   return Math.max(1, Math.round(inactiveCount * REACTIVATION_RATE))
 }
