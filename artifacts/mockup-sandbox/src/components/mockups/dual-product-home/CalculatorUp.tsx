@@ -797,7 +797,7 @@ export function CalculatorUp() {
                   common questions — so the first call picks up exactly where
                   the ad left off.
                 </p>
-                <p className="text-pretty text-base leading-relaxed text-muted-foreground">
+                <p className="text-pretty text-lg leading-relaxed text-muted-foreground">
                   Lead scripts are built per campaign as you launch them. They
                   are not a copy of the reactivation library; each one is
                   written for the offer it supports.
