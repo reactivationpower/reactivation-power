@@ -665,9 +665,9 @@ export function CalculatorUp() {
                 The starting point is different, so the script is different.
                 Most offices don&apos;t know how to talk to a past patient
                 differently based on the service they came in for, or to a lead
-                differently based on the campaign that brought them in. The
-                program does. It hands your front desk the right words for that
-                patient, that service, that offer, on every call.
+                differently based on the campaign that brought them in.
+                Pipeline Power does. Our software gives you and your team the
+                right words for that patient, that service, and that offer!
               </p>
             </div>
 
