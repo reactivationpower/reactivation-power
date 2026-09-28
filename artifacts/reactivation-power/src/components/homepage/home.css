@@ -40,7 +40,12 @@
 .dph .dph-band { background: color-mix(in oklch, var(--accent) 6%, var(--background)); }
 .dph .dph-cta { background: var(--primary); color: var(--primary-foreground); border-radius: calc(var(--radius) * 2.4); background-image: radial-gradient(40rem 20rem at 100% 0%, color-mix(in oklch, var(--accent) 45%, transparent), transparent 70%); }
 .dph .dph-mock-note { font-size: .6875rem; letter-spacing: .06em; text-transform: uppercase; font-weight: 600; color: var(--muted-foreground); }
-@media (max-width: 430px) { .dph .dph-script-bar { flex-wrap: wrap; } .dph .dph-heard { white-space: normal; } }
+@media (max-width: 767px) {
+  .dph .dph-script-bar { flex-direction: column; align-items: stretch; }
+  .dph .dph-seg { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; }
+  .dph .dph-seg button { min-height: 44px; padding-inline: .5rem; white-space: nowrap; }
+  .dph .dph-heard { white-space: normal; }
+}
 .dph .dph-combo { overflow: hidden; box-shadow: 0 1px 2px rgb(15 23 42 / .04), 0 24px 48px -28px rgb(15 23 42 / .3); }
 .dph .dph-combo-total {
   background: var(--primary);
