@@ -355,7 +355,7 @@ const PRODUCTS = [
     ],
     cta: 'Explore Lead Follow-Up',
     href: '#lead-follow-up',
-    secondary: null,
+    secondary: { label: 'See what more booked leads could be worth', href: '#calculator' },
   },
 ] as const satisfies ReadonlyArray<{
   id: string
@@ -368,7 +368,7 @@ const PRODUCTS = [
   points: readonly string[]
   cta: string
   href: string
-  secondary: { label: string; href: string } | null
+  secondary: { label: string; href: string }
 }>
 
 const REACTIVATION_PATH = [
@@ -598,7 +598,8 @@ export function CalculatorUp() {
                       </li>
                     ))}
                   </ul>
-                  <div className="mt-auto flex flex-wrap items-center gap-x-5 gap-y-3 pt-2">
+                  {/* Footer pinned to the bottom of each card so both buttons share a baseline */}
+                  <div className="mt-auto flex flex-col items-start gap-3 pt-2">
                     <AnchorLink
                       href={p.href}
                       className={`inline-flex items-center gap-2 rounded-md px-5 py-3 text-sm font-semibold transition-colors ${
@@ -610,15 +611,15 @@ export function CalculatorUp() {
                       {p.cta}
                       <ArrowRight className="size-4" aria-hidden="true" />
                     </AnchorLink>
-                    {p.secondary ? (
-                      <AnchorLink
-                        href={p.secondary.href}
-                        className="inline-flex items-center gap-1.5 text-sm font-semibold text-accent underline-offset-4 transition-colors hover:underline"
-                      >
-                        {p.secondary.label}
-                        <ArrowRight className="size-3.5" aria-hidden="true" />
-                      </AnchorLink>
-                    ) : null}
+                    <AnchorLink
+                      href={p.secondary.href}
+                      className={`inline-flex min-h-5 items-center gap-1.5 text-sm font-semibold underline-offset-4 transition-colors hover:underline ${
+                        p.tone === 'navy' ? 'text-primary' : 'text-accent'
+                      }`}
+                    >
+                      {p.secondary.label}
+                      <ArrowRight className="size-3.5" aria-hidden="true" />
+                    </AnchorLink>
                   </div>
                 </article>
               ))}
