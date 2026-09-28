@@ -14,3 +14,17 @@ mtime_ms = 1790085160453
 storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/406937ad-a923-4d75-ba97-d94e614f5fb8/64984a94-1d7f-49fe-86b8-ad92b17a7ba6"
 storage_version_token = "1790085167767420"
 content_type = "application/pdf"
+
+[[outputs]]
+id = "nAOeCrx5YTQiaAHhGffXq"
+uri = "file://screenshots/homepage-logo-only-mockup.png"
+type = "image"
+title = "Current homepage — logo swap only"
+description = "Screenshot of the live homepage with only the top-left logo replaced by your uploaded Pipeline Power logo. All pixels outside the logo area are unchanged."
+logical_id = "10115b70-2069-4a30-a347-bdde013295b9"
+content_hash = "sha256:d46ce93bf49d295304701ddc1c3da6d8b036567d2957efb9920cf5bbc87cc275"
+size = 320472
+mtime_ms = 1790624421180
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/10115b70-2069-4a30-a347-bdde013295b9/c3956202-8204-412e-9723-b18b973c04e4"
+storage_version_token = "1790624426757605"
+content_type = "image/png"
