@@ -28,3 +28,17 @@ mtime_ms = 1790624421180
 storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/10115b70-2069-4a30-a347-bdde013295b9/c3956202-8204-412e-9723-b18b973c04e4"
 storage_version_token = "1790624426757605"
 content_type = "image/png"
+
+[[outputs]]
+id = "6xFeepSBwhEseWx-Ut3ID"
+uri = "file://attached_assets/products-larger-headings-mockup.png"
+type = "image"
+title = "Product section — larger headings, no icons"
+description = "Static visual concept only: larger product headings and tagline, with the two decorative icons removed. No website code or existing mockups changed. AI-rendered small body text is illustrative, not proposed copy."
+logical_id = "d6c74552-f7de-4e0f-bd84-1e9c29eea836"
+content_hash = "sha256:fac8cce9f78562e629919994309f13ace8cfe581ddd8f2bc0b96bb5e0c981dc4"
+size = 809857
+mtime_ms = 1790629700908
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/d6c74552-f7de-4e0f-bd84-1e9c29eea836/3454c7a4-d620-4dea-a49b-07daabed3849"
+storage_version_token = "1790629711704145"
+content_type = "image/png"
