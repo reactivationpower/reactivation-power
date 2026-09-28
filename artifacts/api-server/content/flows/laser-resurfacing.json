@@ -57,7 +57,7 @@
     {
       "step_key": "making_it_real",
       "title": "Making It Real",
-      "content": "{{contact_first_name}}, I'd like to ask about {{main_concern}} so your file is up to date.\n\n(Ask these three questions in order. Pause after each.)\n\nHow long has it been bothering you, like a few weeks, or more like months?\n\n(Let them answer.)\n\nIs it something you notice now and then, or every time you look in the mirror?\n\n(Let them answer.)\n\nWhen it's at its worst, does it ever interfere with photos, going out, or feeling put together?\n\n(Let them answer. Repeat back whatever they name.)\n\nThank you for sharing that.",
+      "content": "{{contact_first_name}}, I'd like to ask about {{main_concern}} so your file is up to date.\n\n(Ask these three questions in order. Pause after each.)\n\nHow long has it been bothering you, like a few weeks, or more like months?\n\n(Let them answer. If it fits, you can say \"Got it.\")\n\nIs it something you notice now and then, or every time you look in the mirror?\n\n(Let them answer. If it fits, you can say \"I see.\" or \"I understand.\")\n\nWhen it's at its worst, does it ever interfere with photos, going out, or feeling put together?\n\n(Let them answer. If they name an impact, reflect only what they said; if they mention photos, you might say \"You notice it in photos.\" If none, you can say \"Got it, thank you.\")",
       "sort_order": 8
     },
     {

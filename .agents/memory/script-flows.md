@@ -45,6 +45,13 @@ description: Constraints and quirks when rewriting or applying reactivation call
 - Banned/retired phrase checks also run over code-authored copy (demo seed, provider tokens, web player fixtures) via a vitest allow-list of files; a new seed or fixture with spoken lines must be added to that list or it is not linted. Typescript is a devDependency of api-server only so that test can parse string literals (comments excluded on purpose).
 
 ## Lead flow family
+### Caller acknowledgments
+Keep Making It Real at three questions; acknowledgment replies are optional coaching, not required spoken lines.
+
+**Why:** The user declined an additional symptom-description question and approved natural listening cues instead. Aesthetics wording must not manufacture distress or imply something is wrong with the patient's appearance.
+
+**How to apply:** Offer “Got it” after duration and “I see” / “I understand” after frequency. Reflect only the impact actually named after the third question; use a neutral acknowledgment when there is none. Avoid “That's not okay.” Keep coaching in whole-paragraph parentheses and adapt reflections for the niche and parent/child context.
+
 - Each script family has its own general file; a test or tool that pairs a niche flow with "the" general must resolve the general for that family, or lead files fail with phantom missing-step / objection-shape errors.
 - Some spoken wording lives in the web player, outside the flow lint (the first concern chip, provider fallbacks). A new script family must audit those UI-authored phrases for family-specific assumptions and pin them with a player test.
 - Lead files for a niche: only override digging_in / recommendation / niche obj_* and redeclare the recommendation+uncover+bridge_no choice sets; making_it_real, review and obj_cost fall through to general.lead (obj_cost already reads {{price_line}}). Put {{offer_items}} / {{price_line}} as their own paragraphs in the recommendation so no_price style just drops the paragraph. Verifying on the practice page needs a campaign in that niche AND the niche in the owner's niche_access (chips come from the owner's enabled niches, the flow from campaign.nicheId).

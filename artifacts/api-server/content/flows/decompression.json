@@ -57,7 +57,7 @@
     {
       "step_key": "making_it_real",
       "title": "Making It Real",
-      "content": "{{contact_first_name}}, I'd like to ask three quick questions about {{main_concern}}.\n\n(Ask each question in order. Let them answer.)\n\nHow long has it been bothering you, like a week or two, or longer than that?\n\n(Let them answer.)\n\nIs it something you experience like 1 to 2 times a month, or is it more often than that?\n\n(Let them answer.)\n\nWhen it's at its worst, does it ever interfere with work, at home, or relaxing and doing your own thing?\n\n(Let them answer. Repeat back whatever they name.)\n\nThank you for sharing that. It makes sense, and it's something we may be able to help with.",
+      "content": "{{contact_first_name}}, I'd like to ask three quick questions about {{main_concern}}.\n\n(Ask each question in order. Let them answer.)\n\nHow long has it been bothering you, like a week or two, or longer than that?\n\n(Let them answer. If it fits, you can say \"Got it.\")\n\nIs it something you experience like 1 to 2 times a month, or is it more often than that?\n\n(Let them answer. If it fits, you can say \"I see.\" or \"I understand.\")\n\nWhen it's at its worst, does it ever interfere with work, at home, or relaxing and doing your own thing?\n\n(Let them answer. If they name an impact, reflect only what they said about work, home, or their own time. If not, you can say \"Got it, thank you.\")",
       "sort_order": 8
     },
     {
