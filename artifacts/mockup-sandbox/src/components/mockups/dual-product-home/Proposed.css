@@ -191,6 +191,25 @@
   box-shadow: 0 1px 2px rgb(15 23 42 / 0.1);
 }
 
+/* How-it-works: script-keying callouts */
+.dph .dph-script-keyed {
+  display: grid;
+  grid-template-columns: 0.625rem 1fr;
+  gap: 0.875rem;
+  align-items: start;
+  padding: 1rem 1.125rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: calc(var(--radius) * 1.5);
+  background: color-mix(in oklch, hsl(var(--accent)) 4%, hsl(var(--card)));
+}
+.dph .dph-script-keyed-dot {
+  display: block;
+  width: 0.625rem;
+  height: 0.625rem;
+  margin-top: 0.375rem;
+  border-radius: 999px;
+}
+
 /* How-it-works paths */
 .dph .dph-path {
   border: 1px solid hsl(var(--border));

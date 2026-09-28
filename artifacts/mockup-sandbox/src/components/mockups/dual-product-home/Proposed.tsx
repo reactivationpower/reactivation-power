@@ -494,9 +494,40 @@ export function Proposed() {
                 Two paths to a booked appointment
               </h2>
               <p className="mt-5 text-pretty text-lg leading-relaxed text-muted-foreground">
-                The starting point is different. The call screen, the guided
-                wording, and the outcome tracking are the same.
+                The starting point is different, so the script is different.
+                Most offices don&apos;t know how to talk to a past patient
+                differently based on the service they came in for, or to a lead
+                differently based on the campaign that brought them in. The
+                program does. It hands your front desk the right words for that
+                patient, that service, that offer, on every call.
               </p>
+            </div>
+
+            <div className="mx-auto mt-8 grid max-w-4xl grid-cols-1 gap-3 md:grid-cols-2">
+              <div className="dph-script-keyed">
+                <span className="dph-script-keyed-dot bg-accent" aria-hidden="true" />
+                <div>
+                  <p className="text-sm font-semibold text-foreground">
+                    Reactivation scripts are keyed to the service they last received
+                  </p>
+                  <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                    A lapsed whitening patient and a lapsed implant consult hear
+                    two different calls, not one generic recall.
+                  </p>
+                </div>
+              </div>
+              <div className="dph-script-keyed">
+                <span className="dph-script-keyed-dot bg-primary" aria-hidden="true" />
+                <div>
+                  <p className="text-sm font-semibold text-foreground">
+                    Lead scripts are keyed to the campaign they came in from
+                  </p>
+                  <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                    The offer, the promise, and the objections all match the ad
+                    that made them raise their hand.
+                  </p>
+                </div>
+              </div>
             </div>
 
             <div className="mt-12 grid grid-cols-1 gap-6 lg:grid-cols-2">
