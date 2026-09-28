@@ -122,18 +122,17 @@ function HomeContent() {
         <section id="products" className="scroll-mt-24 border-y border-border bg-card">
           <div className="mx-auto max-w-6xl px-4 py-16 md:px-6 md:py-24">
             <div className="mx-auto max-w-3xl text-center">
-              <p className="dph-eyebrow justify-center">Two products, one front desk</p>
+              <p className="text-xl font-semibold uppercase tracking-wide text-accent md:text-[26px]">Two products, one front desk</p>
               <h2 className="mt-4 text-balance text-3xl font-bold tracking-tight text-foreground md:text-4xl">Choose the calls your practice needs to make</h2>
               <p className="mt-5 text-pretty text-lg leading-relaxed text-muted-foreground">Reactivation and Lead Follow-Up are separate offerings. Start with one, add the other when it makes sense — both run on the same guided-script call screen your team already knows.</p>
             </div>
             <div className="mt-12 grid grid-cols-1 gap-6 lg:grid-cols-2">
               {PRODUCTS.map(p => (
                 <article key={p.id} className={`dph-panel flex flex-col gap-6 p-7 md:p-9 ${p.tone === 'navy' ? 'dph-panel--navy' : ''}`}>
-                  <div className="flex items-center justify-between gap-4">
-                    <span className={`flex size-12 items-center justify-center rounded-xl ${p.tone === 'navy' ? 'bg-primary/10' : 'bg-accent/10'}`}><p.icon className={`size-6 ${p.tone === 'navy' ? 'text-primary' : 'text-accent'}`} aria-hidden="true" /></span>
+                  <div className="flex items-center justify-end gap-4">
                     <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{p.kicker}</span>
                   </div>
-                  <div className="flex flex-col gap-2"><h3 className="text-2xl font-bold tracking-tight text-foreground md:text-3xl">{p.title}</h3><p className={`text-base font-semibold ${p.tone === 'navy' ? 'text-primary' : 'text-accent'}`}>{p.tagline}</p></div>
+                  <div className="flex flex-col gap-2"><h3 className="text-3xl font-bold leading-tight tracking-tight text-foreground md:text-[38px]">{p.title}</h3><p className={`text-base font-semibold ${p.tone === 'navy' ? 'text-primary' : 'text-accent'}`}>{p.tagline}</p></div>
                   <p className="text-pretty text-base leading-relaxed text-muted-foreground">{p.body}</p>
                   <ul className="flex flex-col gap-2.5 border-t border-border pt-5">{p.points.map(pt => <li key={pt} className="flex items-start gap-2.5 text-sm leading-snug text-foreground"><span className={`mt-1.5 size-1.5 shrink-0 rounded-full ${p.tone === 'navy' ? 'bg-primary' : 'bg-accent'}`} aria-hidden="true" />{pt}</li>)}</ul>
                   <div className="mt-auto flex flex-col items-start gap-3 pt-2">
