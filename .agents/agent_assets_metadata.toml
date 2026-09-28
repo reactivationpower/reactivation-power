@@ -42,3 +42,17 @@ mtime_ms = 1790629700908
 storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/d6c74552-f7de-4e0f-bd84-1e9c29eea836/3454c7a4-d620-4dea-a49b-07daabed3849"
 storage_version_token = "1790629711704145"
 content_type = "image/png"
+
+[[outputs]]
+id = "IIbXPjmm_rprwj6jOMNVv"
+uri = "file://attached_assets/current-mobile-single-row-preview.jpg"
+type = "image"
+title = "Current mobile preview"
+description = "Actual website preview at 390px phone width, showing the single-row navigation and script selector. Not yet republished."
+logical_id = "ead071d7-8f86-4c5d-bb12-a1c7073d6e0a"
+content_hash = "sha256:a6fb23417b72501b587a634fb2153a54f417b71d90dcb90f65b9714ad4e9f918"
+size = 100283
+mtime_ms = 1790636505134
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/ead071d7-8f86-4c5d-bb12-a1c7073d6e0a/d3bf6e4c-1f53-4a7c-a761-b17eac9bf7ce"
+storage_version_token = "1790636514086090"
+content_type = "image/jpeg"
