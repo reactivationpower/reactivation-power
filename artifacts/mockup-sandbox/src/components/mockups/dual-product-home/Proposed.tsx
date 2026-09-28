@@ -26,83 +26,186 @@ import './_group.css'
 import './Proposed.css'
 
 /* ------------------------------------------------------------------ */
-/* Guided-script demo content (mockup only)                            */
+/* Guided-script demo: two screens of the real script                  */
+/* Wording below is lifted from the live chiropractic reactivation and */
+/* lead follow-up flows. Only the {{tokens}} (names, offer details)    */
+/* are filled with sample values.                                      */
 /* ------------------------------------------------------------------ */
 
 type ScriptMode = 'reactivation' | 'lead'
 
+type ScriptParagraph = { kind: 'say' | 'coach'; text: string }
+
+type ScriptScreen = {
+  title: string
+  paragraphs: ScriptParagraph[]
+}
+
 type ScriptBranch = {
   label: string
-  next: string
-  outcome: string
+  screen: ScriptScreen
 }
 
 type ScriptExample = {
   contextLabel: string
   contextValue: string
   reason: string
-  opening: string
+  first: ScriptScreen
   prompt: string
   branches: ScriptBranch[]
 }
 
+const say = (text: string): ScriptParagraph => ({ kind: 'say', text })
+const coach = (text: string): ScriptParagraph => ({ kind: 'coach', text })
+
 const SCRIPT_EXAMPLES: Record<ScriptMode, ScriptExample> = {
   reactivation: {
     contextLabel: 'Previous service',
-    contextValue: 'Spinal Decompression',
-    reason: 'Last visit 14 months ago',
-    opening:
-      "Hi Marcus, it's Dana from Lakeview Chiropractic. You did a decompression series with Dr. Patel a while back and I'm just checking in — how has your lower back been holding up since then?",
-    prompt: 'What did the patient say?',
+    contextValue: 'Chiropractic',
+    reason: 'Marcus, last seen 14 months ago',
+    first: {
+      title: 'Opening Question',
+      paragraphs: [
+        say(
+          'So Marcus, how have you felt since you finished your chiropractic care with us? I usually hear one of three things. Still feeling great, starting to flare up, or pretty much back to where you started. Which one is closest for you?',
+        ),
+        coach('Only three answers. Tap the one you hear.'),
+      ],
+    },
+    prompt: 'Tap what the patient says',
     branches: [
       {
-        label: 'Feeling good, no issues',
-        next:
-          "That's great to hear. A lot of our decompression patients come in for a quick maintenance check every six months or so to keep it that way — would a morning or an afternoon work better for you?",
-        outcome: 'Offer maintenance visit',
+        label: '\u201cStill feeling great\u201d',
+        screen: {
+          title: 'Still feeling great',
+          paragraphs: [
+            say(
+              "That's great to hear, Marcus. That's exactly what we hope for when someone finishes care with us. Dr. Patel will be glad to know you're still doing well.",
+            ),
+            coach('Let them respond, then continue.'),
+          ],
+        },
       },
       {
-        label: 'It has flared up again',
-        next:
-          "I'm sorry to hear that. Dr. Patel would want to see how things have changed before recommending anything — I can get you in this week for a re-evaluation. Does Tuesday or Thursday work?",
-        outcome: 'Book re-evaluation',
+        label: '\u201cIt\u2019s starting to flare up again\u201d',
+        screen: {
+          title: 'Starting to flare up',
+          paragraphs: [
+            say(
+              'Thanks for telling me, Marcus. Your notes say you were moving and feeling better when you finished. What seems to bring the flare-up on?',
+            ),
+            coach('Let them answer. Stay warm. Do not book yet.'),
+          ],
+        },
       },
       {
-        label: 'Too busy right now',
-        next:
-          "Totally understand. Would it be okay if I made a note to check back in a couple of months? And if the back acts up before then, just call us and we'll find you a spot.",
-        outcome: 'Schedule follow-up',
+        label: '\u201cPretty much back to where I was\u201d',
+        screen: {
+          title: 'Back to where they started',
+          paragraphs: [
+            say(
+              "I'm sorry to hear that, Marcus. Your notes say you were moving and feeling better when you finished. What do you think brought it back?",
+            ),
+            coach('Let them answer. Stay warm. Do not book yet.'),
+          ],
+        },
       },
     ],
   },
   lead: {
-    contextLabel: 'Campaign / offer',
-    contextValue: 'Spring Botox Special — $99 First Area',
-    reason: 'Facebook lead form, 22 minutes ago',
-    opening:
-      "Hi Priya, this is Dana with Glow Aesthetics. You just requested info on our $99 first-area Botox special — I wanted to reach out while it's fresh. Have you had Botox before, or would this be your first time?",
-    prompt: 'What did the lead say?',
+    contextLabel: 'Campaign',
+    contextValue: 'New Patient Exam Special',
+    reason: 'Priya, web form 2 days ago, no time booked',
+    first: {
+      title: 'Why they haven\u2019t booked',
+      paragraphs: [
+        say("Great. Just so we're on the same page, here's what the New Patient Exam Special includes:"),
+        say('A consultation, a full exam, and any X-rays that are needed.'),
+        say("It's $49 for that first visit."),
+        say("I noticed you didn't get a time set up yet. Can I ask what got in the way?"),
+        coach('Let them answer. Tap what you hear.'),
+      ],
+    },
+    prompt: 'Tap what the lead says',
     branches: [
       {
-        label: 'First time, a little nervous',
-        next:
-          "That's really common, and honestly the consult is the best place to start. Our nurse walks through exactly what to expect and there's no commitment. I have a spot Friday at 2 or Saturday at 10 — which is better?",
-        outcome: 'Book consult',
+        label: '\u201cI never got a call back\u201d',
+        screen: {
+          title: 'Never got a call back',
+          paragraphs: [
+            say(
+              "I'm sorry about that, Priya. That's on us, and I'm glad I caught you now. You're still interested in getting that looked at, right?",
+            ),
+            coach('Let them answer.'),
+          ],
+        },
       },
       {
-        label: 'Had it before, asking about price',
-        next:
-          "Perfect. The $99 covers your first treatment area, and additional areas are priced at our standard rate — I can text you the breakdown. Want me to hold a time this week while the special is running?",
-        outcome: 'Send pricing, offer time',
+        label: '\u201cI got busy\u201d',
+        screen: {
+          title: 'Got busy',
+          paragraphs: [
+            say(
+              'Totally understand. Life fills up fast. The good news is the first visit is quick, and we work around your schedule. Is what you reached out about still bothering you?',
+            ),
+            coach('Let them answer.'),
+          ],
+        },
       },
       {
-        label: 'Just browsing for now',
-        next:
-          "No problem at all. The special runs through the end of the month — can I text you a reminder a few days before it ends so you don't miss it?",
-        outcome: 'Set reminder follow-up',
+        label: '\u201cIt was the cost\u201d',
+        screen: {
+          title: 'It was the cost',
+          paragraphs: [
+            say(
+              "That's fair, and I'm glad you said so. It's $49 for that first visit. That covers the first visit, and there's no commitment past it. Is the cost the only thing that held you back?",
+            ),
+            coach('Let them answer. If they name another reason, tap that button.'),
+          ],
+        },
+      },
+      {
+        label: '\u201cI\u2019m still deciding\u201d',
+        screen: {
+          title: 'Still deciding',
+          paragraphs: [
+            say(
+              "That makes sense. Most people want to know a bit more before they book. Can I ask what you're weighing?",
+            ),
+            coach('Let them answer. Tap what you hear.'),
+          ],
+        },
+      },
+      {
+        label: '\u201cI booked somewhere else\u201d',
+        screen: {
+          title: 'Booked somewhere else',
+          paragraphs: [
+            say('Good for you for taking care of it. How\u2019s it going so far?'),
+            coach('Let them answer. Do not knock the other office.'),
+            say("If it doesn't turn out the way you hoped, we're here. Thanks for letting me know, Priya."),
+            coach('Add your notes and log the call as Booked elsewhere.'),
+          ],
+        },
       },
     ],
   },
+}
+
+function ScriptScreenBody({ screen }: { screen: ScriptScreen }) {
+  return (
+    <div className="dph-say flex flex-col gap-2.5">
+      {screen.paragraphs.map((p, i) =>
+        p.kind === 'say' ? (
+          <p key={i}>{p.text}</p>
+        ) : (
+          <p key={i} className="dph-coach">
+            ({p.text})
+          </p>
+        ),
+      )}
+    </div>
+  )
 }
 
 function GuidedScriptDemo() {
@@ -117,13 +220,13 @@ function GuidedScriptDemo() {
   }
 
   return (
-    <div className="dph-script" aria-label="Guided script example">
+    <div className="dph-script" aria-label="Two screens of the real script">
       <div className="dph-script-bar">
         <div className="flex items-center gap-2">
           <span className="flex size-7 items-center justify-center rounded-md bg-accent/10">
             <Headset className="size-4 text-accent" aria-hidden="true" />
           </span>
-          <span className="text-sm font-semibold text-foreground">Front-desk call screen</span>
+          <span className="text-sm font-semibold text-foreground whitespace-nowrap">Try the real script</span>
         </div>
         <div className="dph-seg" role="group" aria-label="Script type">
           <button type="button" aria-pressed={mode === 'reactivation'} onClick={() => switchMode('reactivation')}>
@@ -145,42 +248,26 @@ function GuidedScriptDemo() {
           <span>{example.reason}</span>
         </div>
 
-        <div className="flex flex-col gap-2">
-          <p className="dph-mock-note">Say this</p>
-          <p className="dph-say">{example.opening}</p>
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <p className="dph-mock-note">{example.prompt}</p>
-          <div className="flex flex-col gap-2">
-            {example.branches.map((branch, i) => (
-              <button
-                key={branch.label}
-                type="button"
-                className="dph-choice"
-                aria-pressed={choice === i}
-                onClick={() => setChoice(i)}
-              >
-                <span>{branch.label}</span>
-                <ChevronRight className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
-              </button>
-            ))}
-          </div>
-        </div>
-
         {selected ? (
-          <div key={`${mode}-${choice}`} className="dph-next flex flex-col gap-2">
-            <p className="dph-mock-note">Then say</p>
-            <p className="dph-say">{selected.next}</p>
-            <div className="flex items-center justify-between gap-3 pt-1">
-              <span className="inline-flex items-center gap-1.5 rounded-full dph-success-bg dph-success px-2.5 py-1 text-xs font-semibold">
-                <CalendarCheck className="size-3.5" aria-hidden="true" />
-                {selected.outcome}
+          <div key={`${mode}-${choice}`} className="dph-next flex flex-col gap-4">
+            <div className="flex items-center justify-between gap-3">
+              <p className="dph-mock-note">
+                Screen 2 of 2 <span aria-hidden="true">&middot;</span> {selected.screen.title}
+              </p>
+              <span className="dph-heard">
+                Heard: <span>{selected.label}</span>
               </span>
+            </div>
+            <ScriptScreenBody screen={selected.screen} />
+            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
+              <p className="max-w-[26rem] text-xs leading-relaxed text-muted-foreground">
+                The script keeps going from here inside the portal: every follow-up question, every objection, voicemail,
+                and the booking itself.
+              </p>
               <button
                 type="button"
                 onClick={() => setChoice(null)}
-                className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+                className="inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-accent transition-colors hover:text-foreground"
               >
                 <RotateCcw className="size-3.5" aria-hidden="true" />
                 Try another response
@@ -188,9 +275,37 @@ function GuidedScriptDemo() {
             </div>
           </div>
         ) : (
-          <p className="text-xs leading-relaxed text-muted-foreground">
-            Pick a response to see the next wording. Your team stays on the call — the script simply keeps up.
-          </p>
+          <>
+            <div className="flex flex-col gap-2">
+              <p className="dph-mock-note">
+                Screen 1 of 2 <span aria-hidden="true">&middot;</span> {example.first.title}
+              </p>
+              <ScriptScreenBody screen={example.first} />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <p className="dph-mock-note">{example.prompt}</p>
+              <div className="flex flex-col gap-2">
+                {example.branches.map((branch, i) => (
+                  <button
+                    key={branch.label}
+                    type="button"
+                    className="dph-choice"
+                    aria-pressed={choice === i}
+                    onClick={() => setChoice(i)}
+                  >
+                    <span>{branch.label}</span>
+                    <ChevronRight className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <p className="text-xs leading-relaxed text-muted-foreground">
+              This is the exact wording your front desk sees. The notes in italics are the coaching cues that come with
+              every screen.
+            </p>
+          </>
         )}
       </div>
     </div>

@@ -137,6 +137,30 @@
   line-height: 1.55;
   color: hsl(var(--foreground));
 }
+.dph .dph-say p {
+  margin: 0;
+}
+.dph .dph-coach {
+  font-style: italic;
+  font-size: 0.85rem;
+  color: hsl(var(--muted-foreground));
+}
+.dph .dph-heard {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: 999px;
+  border: 1px solid hsl(var(--accent) / 0.35);
+  background: hsl(var(--accent) / 0.1);
+  padding: 0.2rem 0.65rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: hsl(var(--muted-foreground));
+  white-space: nowrap;
+}
+.dph .dph-heard span {
+  color: hsl(var(--foreground));
+}
 .dph .dph-choice {
   display: flex;
   align-items: center;
