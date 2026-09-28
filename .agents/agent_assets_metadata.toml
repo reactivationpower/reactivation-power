@@ -56,3 +56,31 @@ mtime_ms = 1790636505134
 storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/ead071d7-8f86-4c5d-bb12-a1c7073d6e0a/d3bf6e4c-1f53-4a7c-a761-b17eac9bf7ce"
 storage_version_token = "1790636514086090"
 content_type = "image/jpeg"
+
+[[outputs]]
+id = "s837DjUkpgtWqNsG-Mp2P"
+uri = "file://attached_assets/proposed-header-desktop.jpg"
+type = "image"
+title = "Proposed header — desktop"
+description = "Logo and larger call button above a single navigation row. Mockup only; website unchanged."
+logical_id = "8f34deba-bb8c-44cb-8856-7ba3e9ae61a0"
+content_hash = "sha256:ca84021e5d3fb35a4a2063c5d78d4e75a6f4176a60267bd14ba0fa27da2f6024"
+size = 92585
+mtime_ms = 1790637397365
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/8f34deba-bb8c-44cb-8856-7ba3e9ae61a0/36b1fe44-2729-41a1-9303-149532bc4bf7"
+storage_version_token = "1790637404293462"
+content_type = "image/jpeg"
+
+[[outputs]]
+id = "h0xQ1o4sV1sXXX51umJeV"
+uri = "file://attached_assets/proposed-header-mobile.jpg"
+type = "image"
+title = "Proposed header — mobile"
+description = "Four navigation links on one line. Client Login remains in the footer on mobile. Mockup only."
+logical_id = "c9105f07-794f-4166-a868-594c44f4a5f2"
+content_hash = "sha256:8bb070b234a930bfd3996bb0c52c767fd5788da48cb7aeebcfcdc34480db94ec"
+size = 44790
+mtime_ms = 1790637399353
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/c9105f07-794f-4166-a868-594c44f4a5f2/aa8cafc9-a1a9-4789-8ace-0a1ee1a8ef88"
+storage_version_token = "1790637404912122"
+content_type = "image/jpeg"
