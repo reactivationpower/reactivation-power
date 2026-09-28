@@ -16,10 +16,10 @@ import {
 import {
   ServicesWeSupport,
   SiteFooter,
-  SiteHeader,
   StaticLink,
   PRACTICE_TYPES_LINE,
 } from './Shell'
+import { SiteHeader } from './PipelineShell'
 import { CombinedCalculator } from './CombinedCalculator'
 import './_group.css'
 import './Proposed.css'
