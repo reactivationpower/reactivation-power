@@ -104,7 +104,7 @@ function HomeContent() {
           <div className="mx-auto max-w-6xl px-4 pb-16 pt-14 md:px-6 md:pb-24 md:pt-20">
             <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-[1.05fr_1fr]">
               <div className="flex flex-col gap-6">
-                <p className="w-fit rounded-full border border-accent/40 bg-accent/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-accent">{PRACTICE_TYPES_LINE}</p>
+                <p className="w-fit rounded-full border border-accent/40 bg-accent/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-accent">{PRACTICE_TYPES_LINE.replace(/med spa/gi, match => match.replace(' ', '\u00a0'))}</p>
                 <h1 className="text-balance text-4xl font-bold leading-[1.08] tracking-tight text-foreground md:text-5xl lg:text-[3.4rem]">Bring past patients back.<br /><span className="text-accent">Turn new leads into booked appointments.</span></h1>
                 <p className="max-w-xl text-pretty text-lg leading-relaxed text-muted-foreground">Reactivation Power gives your front desk guided, word-for-word phone scripts that change based on who is on the line — the service a past patient last received, or the specific ad or offer a new lead responded to.</p>
                 <div className="flex flex-wrap items-center gap-3">
