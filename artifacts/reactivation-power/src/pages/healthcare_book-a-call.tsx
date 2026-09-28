@@ -11,7 +11,7 @@ import { PageError, PageLoading } from '@/components/page-status'
 export default function BookACallPage() {
   const search = new URLSearchParams(useSearch())
   const query = Object.fromEntries(
-    ['cid', 'name', 'inactive', 'value', 'services'].map((key) => [
+    ['cid', 'name', 'inactive', 'value', 'services', 'interest'].map((key) => [
       key,
       search.get(key) ?? undefined,
     ]),
@@ -23,6 +23,7 @@ export default function BookACallPage() {
   if (loading) return <PageLoading />
   if (error) return <PageError error={error} />
   const { contactId, firstName, thankYouHref } = data
+  const leadOnly = search.get('interest') === 'lead-follow-up'
 
   return (
     <main className="flex min-h-screen flex-col bg-background">
@@ -54,8 +55,7 @@ export default function BookACallPage() {
         </h1>
         <p className="mt-4 max-w-2xl text-pretty text-center text-lg leading-relaxed text-muted-foreground">
           Choose whatever time works best. The call takes about 20 minutes,
-          and you&apos;ll leave with a realistic picture of what your inactive
-          patient list is worth — whether or not we ever work together.
+          and we&apos;ll talk through {leadOnly ? 'your campaign leads and offer' : 'your practice and calling workflow'}.
         </p>
 
         <div className="mt-10 w-full">
@@ -63,6 +63,7 @@ export default function BookACallPage() {
             <BookingCalendar
               contactId={contactId}
               thankYouHref={thankYouHref}
+              productInterest={search.get('interest') ?? undefined}
             />
           ) : (
             <div className="flex flex-col items-center gap-4 rounded-xl border border-dashed border-border bg-card px-6 py-16 text-center">

@@ -791,7 +791,7 @@ add("/healthcare/book-a-call", undefined, async (req) => {
   const contactId = (queryString(req, "cid") ?? "").slice(0, 64);
   const firstName = (queryString(req, "name") ?? "").slice(0, 40);
   const carried = new URLSearchParams();
-  for (const key of ["name", "cid", "inactive", "value", "services"]) {
+  for (const key of ["name", "cid", "inactive", "value", "services", "interest"]) {
     const value = queryString(req, key);
     if (value) carried.set(key, value.slice(0, 600));
   }

@@ -8,6 +8,7 @@ import {
   PhoneCall,
   Upload,
   UserCheck,
+  Megaphone,
 } from 'lucide-react'
 import { ServicesWeSupport } from '@/components/site/services-we-support'
 import { SiteFooter } from '@/components/site/site-footer'
@@ -18,22 +19,22 @@ const INCLUDES = [
   {
     icon: BookOpen,
     title: 'Step-by-step video training',
-    body: 'Your team learns the reactivation approach through short, practical video courses — the mindset, the method, and the exact process, with nothing left to guess.',
+    body: 'Short, practical lessons help your team learn the reactivation approach before they start calling past patients.',
   },
   {
     icon: MessageSquareText,
     title: 'Word-for-word interactive scripts',
-    body: 'Callers read exactly what appears on screen. Whatever the patient says, one tap shows the right next words — objections, hesitations, and voicemail included. Zero sales experience required.',
+    body: 'Callers follow on-screen conversation paths, with options for objections, hesitations and voicemail. Lead Follow-Up has its own campaign-aware scripts.',
   },
   {
     icon: LayoutDashboard,
     title: 'A complete calling portal',
-    body: 'Import your patient list and the portal builds an organized call queue with full history on every contact, automatic follow-up reminders, and a dashboard tracking recovered revenue.',
+    body: 'Import past patients into a reactivation queue, or receive leads from a campaign intake form. Call outcomes and follow-ups stay visible in the portal.',
   },
   {
     icon: UserCheck,
     title: 'Scripts built for your services',
-    body: 'The system covers more than twenty services across chiropractic, acupuncture, dental, med spa, and weight loss, each with a script written specifically for that service and that patient.',
+    body: 'Choose supported services for your practice and use the relevant conversation paths. Lead campaigns can be set up around a specific offer.',
   },
 ]
 
@@ -54,7 +55,7 @@ const PROCESS = [
     icon: CalendarCheck,
     step: 'Step 3',
     title: 'Appointments get booked and tracked',
-    body: 'Every call is logged with an outcome. Callbacks resurface on schedule, the pipeline updates itself, and you watch recovered revenue accumulate month after month.',
+    body: 'Log each outcome, see callbacks due, and review activity in the portal. Your team handles the actual calls and scheduling.',
   },
 ]
 
@@ -69,14 +70,41 @@ export default function HowItWorksPage() {
             The Program
           </p>
           <h1 className="mt-5 text-balance text-4xl font-bold leading-tight tracking-tight text-foreground md:text-5xl">
-            A complete system, not just advice
+             Two ways to keep conversations moving
           </h1>
           <p className="mt-5 text-pretty text-lg leading-relaxed text-muted-foreground">
-            Reactivation Power is training and software together. Your team
-            learns the approach, then works inside a portal that tells them
-            exactly who to call and exactly what to say — from the first hello
-            to the booked appointment.
+             Reactivation starts with people who have visited your practice
+             before. Lead Follow-Up starts with new people responding to a
+             campaign or offer. Both give your team a structured way to call,
+             track outcomes and keep follow-ups organized.
           </p>
+        </section>
+
+        <section className="mx-auto max-w-6xl px-4 py-12 md:px-6">
+          <div className="grid gap-6 md:grid-cols-2">
+            <div className="rounded-xl border border-border bg-card p-7">
+              <Upload className="size-7 text-accent" aria-hidden="true" />
+              <h2 className="mt-4 text-2xl font-bold text-foreground">Reactivation</h2>
+              <p className="mt-3 leading-relaxed text-muted-foreground">
+                Bring an inactive patient list from your practice software into
+                a calling queue. Your team checks in with former patients using
+                service-specific scripts, records each outcome, and follows up
+                when a callback is due. This path starts with your existing files,
+                not an ad campaign.
+              </p>
+            </div>
+            <div className="rounded-xl border border-border bg-card p-7">
+              <Megaphone className="size-7 text-accent" aria-hidden="true" />
+              <h2 className="mt-4 text-2xl font-bold text-foreground">Lead Follow-Up</h2>
+              <p className="mt-3 leading-relaxed text-muted-foreground">
+                Set up a campaign around an offer and connect its lead intake.
+                New inquiries enter that campaign&apos;s lead queue, where your
+                team can call with the offer in context, log dispositions and
+                see which leads need another attempt. No inactive patient list
+                is needed for this workflow.
+              </p>
+            </div>
+          </div>
         </section>
 
         {/* What you get */}
@@ -113,7 +141,7 @@ export default function HowItWorksPage() {
         <section className="border-y border-border bg-card">
           <div className="mx-auto max-w-6xl px-4 py-14 md:px-6 md:py-20">
             <h2 className="text-balance text-center text-3xl font-bold tracking-tight text-foreground md:text-4xl">
-              What it looks like day to day
+             What reactivation looks like day to day
             </h2>
             <ol className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-3">
               {PROCESS.map((item) => (
@@ -144,6 +172,24 @@ export default function HowItWorksPage() {
           </div>
         </section>
 
+        <section className="mx-auto max-w-6xl px-4 py-14 md:px-6 md:py-20">
+          <h2 className="text-center text-3xl font-bold tracking-tight text-foreground md:text-4xl">For new campaign leads</h2>
+          <ol className="mt-10 grid gap-6 md:grid-cols-3">
+            {[
+              { icon: Megaphone, title: 'Set up your offer', body: 'Create a lead campaign for the service and offer you are promoting, then connect its intake form.' },
+              { icon: PhoneCall, title: 'Work the lead queue', body: 'New inquiries appear in the campaign. Callers use the lead follow-up script with that offer in context.' },
+              { icon: CalendarCheck, title: 'Log and follow up', body: 'Record call results and booked times; see which leads are due for another attempt.' },
+            ].map((item, index) => (
+              <li key={item.title} className="rounded-xl border border-border bg-card p-6">
+                <item.icon className="size-6 text-accent" aria-hidden="true" />
+                <p className="mt-3 text-sm font-semibold text-muted-foreground">Step {index + 1}</p>
+                <h3 className="mt-2 text-lg font-semibold text-foreground">{item.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{item.body}</p>
+              </li>
+            ))}
+          </ol>
+        </section>
+
         {/* Services we have scripts for */}
         <ServicesWeSupport />
 
@@ -155,8 +201,8 @@ export default function HowItWorksPage() {
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-pretty text-lg leading-relaxed text-muted-foreground">
               That&apos;s exactly what the strategy call is for. We&apos;ll
-              look at your services, your inactive list, and give you a
-              realistic picture — whether or not we ever work together.
+               talk through your services, your inactive list or campaign
+               leads, and which workflow suits your team.
             </p>
             <Link
               href="/schedule-a-call"

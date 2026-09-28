@@ -44,7 +44,7 @@ function inputClass(hasError: boolean): string {
   return `${inputBase} ${hasError ? 'border-destructive ring-2 ring-destructive/20' : 'border-input'}`
 }
 
-export function LeadForm() {
+export function LeadForm({ scheduleMode = false }: { scheduleMode?: boolean }) {
   const [state, formAction, pending] = useActionState(
     submitHealthcareLead,
     initialState,
@@ -68,6 +68,7 @@ export function LeadForm() {
   // Set once the visitor types in the count field — even retyping the same
   // number counts, because they've now confirmed it
   const [inactiveEdited, setInactiveEdited] = useState(false)
+  const [productInterest, setProductInterest] = useState('')
   // Follow the slider if the visitor moves it after this form has mounted
   const sliderCount = calc?.inactiveCount
   useEffect(() => {
@@ -88,6 +89,8 @@ export function LeadForm() {
       if (state.values.zip) setZip(state.values.zip)
       if (state.values.inactivePatients)
         setInactive(state.values.inactivePatients)
+      if (state.values.productInterest !== undefined)
+        setProductInterest(state.values.productInterest)
     }
   }, [state.values])
 
@@ -113,6 +116,8 @@ export function LeadForm() {
   // with preventDefault stops React from running the server action.
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     const found = validateLeadFields(readLeadFields(new FormData(e.currentTarget)))
+    if (scheduleMode && !productInterest)
+      found.productInterest = 'Select how we can help your practice.'
     if (Object.keys(found).length > 0) {
       e.preventDefault()
       setErrors(found)
@@ -157,6 +162,35 @@ export function LeadForm() {
       noValidate
       className="flex flex-col gap-4"
     >
+      {scheduleMode && (
+        <>
+          <input type="hidden" name="leadSource" value="schedule-a-call" />
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor={`${uid}-interest`} className="text-sm font-medium text-foreground">
+              What can we help with?<RequiredMark />
+            </label>
+            <select
+              id={`${uid}-interest`}
+              name="productInterest"
+              data-testid="select-product-interest"
+              required
+              value={productInterest}
+              onChange={(e) => {
+                setProductInterest(e.target.value)
+                clearError('productInterest')
+              }}
+              aria-invalid={errors.productInterest ? 'true' : undefined}
+              className={inputClass(Boolean(errors.productInterest))}
+            >
+              <option value="" disabled>Select one</option>
+              <option value="reactivation">Reactivation</option>
+              <option value="lead-follow-up">Lead Follow-Up</option>
+              <option value="both">Both</option>
+            </select>
+            {errors.productInterest && <p className="text-xs font-medium text-destructive">{errors.productInterest}</p>}
+          </div>
+        </>
+      )}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
           <label
@@ -349,12 +383,12 @@ export function LeadForm() {
             className="text-sm font-medium text-foreground"
           >
             Inactive patient files
-            <RequiredMark />
+            {productInterest !== 'lead-follow-up' && <RequiredMark />}
           </label>
           <input
             id={`${uid}-inactive`}
             name="inactivePatients"
-            required
+            required={productInterest !== 'lead-follow-up'}
             inputMode="numeric"
             autoComplete="off"
             placeholder="e.g. 1,000"
@@ -374,7 +408,9 @@ export function LeadForm() {
             <p className="text-xs text-muted-foreground">
               {calc
                 ? 'Carried over from your calculator — edit if needed.'
-                : 'Your best estimate is fine.'}
+                : productInterest === 'lead-follow-up'
+                  ? 'Optional for lead follow-up.'
+                  : 'Your best estimate is fine.'}
             </p>
           )}
         </div>

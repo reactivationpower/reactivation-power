@@ -145,10 +145,12 @@ function fullDateLabel(key: string, tz: string): string {
 export function BookingCalendar({
   contactId,
   thankYouHref,
+  productInterest,
 }: {
   contactId: string
   /** Thank-you page URL with the lead's details; slot + tz are appended */
   thankYouHref: string
+  productInterest?: string
 }) {
   const [, setLocation] = useLocation();
   const [timezone, setTimezone] = useState<string>(() => detectTimezone())
@@ -201,6 +203,7 @@ export function BookingCalendar({
       contactId,
       slot: selectedSlot,
       timezone,
+      productInterest,
     })
     if (res.ok) {
       // Leave the button in its "Booking…" state while the thank-you page loads

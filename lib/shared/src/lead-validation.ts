@@ -3,8 +3,20 @@
  * errors appear the instant someone clicks submit) and the server action (the
  * real gate), so the two can never disagree about what "required" means.
  */
+import { INACTIVE_TYPED_MAX } from './opportunity'
 
 export const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+export const PRODUCT_INTERESTS = ['reactivation', 'lead-follow-up', 'both'] as const
+export type ProductInterest = (typeof PRODUCT_INTERESTS)[number]
+export const PRODUCT_INTEREST_LABELS: Record<ProductInterest, string> = {
+  reactivation: 'Reactivation',
+  'lead-follow-up': 'Lead Follow-Up',
+  both: 'Both',
+}
+export function isProductInterest(value: string): value is ProductInterest {
+  return PRODUCT_INTERESTS.some((interest) => interest === value)
+}
 
 export interface LeadFieldValues {
   firstName: string
@@ -19,6 +31,8 @@ export interface LeadFieldValues {
   patientValue: string
   consent: boolean
   services: string[]
+  /** Missing on legacy /healthcare submissions; those remain reactivation. */
+  productInterest?: string
 }
 
 /** The slice of FormData this helper reads. Declared structurally so the
@@ -38,7 +52,7 @@ export function readLeadFields(formData: LeadFormDataLike): LeadFieldValues {
     phone: str('phone'),
     zip: str('zip').replace(/\D/g, '').slice(0, 5),
     yearsInPractice: str('yearsInPractice'),
-    inactivePatients: str('inactivePatients').replace(/\D/g, ''),
+    inactivePatients: str('inactivePatients').replace(/,/g, ''),
     patientValue: str('patientValue').replace(/\D/g, ''),
     consent: formData.get('consent') === 'on',
     services: formData
@@ -46,6 +60,7 @@ export function readLeadFields(formData: LeadFormDataLike): LeadFieldValues {
       .map((s) => String(s).trim())
       .filter(Boolean)
       .slice(0, 30),
+    productInterest: str('productInterest') || undefined,
   }
 }
 
@@ -69,10 +84,15 @@ export function validateLeadFields(
 
   if (v.zip.length !== 5) errors.zip = 'Enter your 5-digit zip code.'
   if (!v.yearsInPractice) errors.yearsInPractice = 'Select an option.'
-  if (!v.inactivePatients)
+  if (v.productInterest && !isProductInterest(v.productInterest))
+    errors.productInterest = 'Select how we can help your practice.'
+  if (!v.inactivePatients && v.productInterest !== 'lead-follow-up')
     errors.inactivePatients = 'Enter your inactive patient count.'
-  else if (Number(v.inactivePatients) < 1)
-    errors.inactivePatients = 'Enter a count of at least 1.'
+  else if (v.inactivePatients) {
+    const count = Number(v.inactivePatients)
+    if (!/^\d+$/.test(v.inactivePatients) || !Number.isSafeInteger(count) || count < 1 || count > INACTIVE_TYPED_MAX)
+      errors.inactivePatients = `Enter a whole number from 1 to ${INACTIVE_TYPED_MAX.toLocaleString('en-US')}.`
+  }
   if (v.services.length === 0)
     errors.services = 'Select at least one service.'
   if (!v.consent)

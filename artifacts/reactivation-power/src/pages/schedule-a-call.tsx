@@ -6,9 +6,9 @@ import { SiteHeader } from '@/components/site/site-header'
 
 
 const EXPECT = [
-  'A realistic revenue estimate for your inactive list',
-  'A walkthrough of the interactive calling system',
-  'The biggest reactivation mistakes to avoid',
+  'Talk through your inactive patient list, new campaign leads, or both',
+  'See how the calling workflows fit your practice',
+  'Choose a time on the calendar after sending the form',
 ]
 
 const STEPS = [
@@ -41,9 +41,9 @@ export default function ScheduleACallPage() {
               Schedule your free strategy call
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-pretty text-lg leading-relaxed text-muted-foreground">
-              The call takes about 20 minutes. You&apos;ll leave with a
-              realistic picture of what your inactive patient list is worth,
-              whether or not we ever work together.
+              The call takes about 20 minutes. We&apos;ll discuss
+              reactivating past patients, following up
+              with new campaign leads, or both — whichever fits your practice.
             </p>
           </div>
 
@@ -109,7 +109,7 @@ export default function ScheduleACallPage() {
               Our calendar opens on the next screen so you can pick whatever
               time works best for you.
             </p>
-            <LeadForm />
+            <LeadForm scheduleMode />
           </div>
         </section>
       </main>

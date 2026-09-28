@@ -8,6 +8,7 @@ import {
   setGhlContactCustomField,
 } from '@/lib/ghl'
 import { US_TIMEZONES } from '@workspace/shared/us-timezones'
+import { isProductInterest, PRODUCT_INTEREST_LABELS } from '@workspace/shared/lead-validation'
 
 const BOOKING_WINDOW_DAYS = 45
 
@@ -106,12 +107,20 @@ export async function bookStrategyCall(params: {
   contactId: string
   slot: string
   timezone: string
+  productInterest?: string
 }): Promise<BookResult> {
   const contactId = params.contactId?.trim().slice(0, 64)
   const slot = params.slot?.trim()
   const timezone = VALID_TZ.has(params.timezone)
     ? params.timezone
     : 'America/New_York'
+  const productInterest = params.productInterest
+  const validatedInterest = productInterest && isProductInterest(productInterest)
+    ? productInterest
+    : undefined
+  if (productInterest && !validatedInterest) {
+    return { ok: false, error: 'Select a valid product interest.' }
+  }
 
   if (!contactId) {
     return {
@@ -169,6 +178,7 @@ export async function bookStrategyCall(params: {
         `Time: ${pretty} (${timezone.replace('_', ' ')})`,
         `Booked from: /healthcare/book-a-call`,
         `Status: Confirmed`,
+        ...(validatedInterest ? [`Interested in: ${PRODUCT_INTEREST_LABELS[validatedInterest]}`] : []),
         `Booked at: ${new Date().toISOString()}`,
       ].join('\n'),
     ).catch((err) => {

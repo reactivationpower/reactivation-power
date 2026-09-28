@@ -7,7 +7,7 @@ import {
   ghlConfigured,
   upsertGhlContact,
 } from '@/lib/ghl'
-import { readLeadFields, validateLeadFields } from '@workspace/shared/lead-validation'
+import { isProductInterest, PRODUCT_INTEREST_LABELS, readLeadFields, validateLeadFields } from '@workspace/shared/lead-validation'
 import {
   parseInactiveCount,
   parsePatientValue,
@@ -71,8 +71,17 @@ export async function submitHealthcareLead(
     inactivePatients,
     consent,
     services,
+    productInterest,
   } = fields
   const practiceName = String(formData.get('practiceName') ?? '').trim()
+  const scheduleSource = formData.get('leadSource') === 'schedule-a-call'
+  const interest = productInterest && isProductInterest(productInterest) ? productInterest : 'reactivation'
+  const hasReactivation = interest !== 'lead-follow-up'
+  // source_path already stores landing attribution; use its query to retain
+  // interest without requiring a new column in the existing Supabase table.
+  const sourcePath = scheduleSource
+    ? `/schedule-a-call?interest=${interest}`
+    : productInterest ? `/healthcare?interest=${interest}` : '/healthcare'
 
   const values: Record<string, string> = {
     firstName: firstNameRaw,
@@ -84,10 +93,13 @@ export async function submitHealthcareLead(
     yearsInPractice,
     inactivePatients,
     consent: consent ? 'on' : '',
+    productInterest: productInterest ?? '',
   }
 
   // The client runs these same rules before submitting; this is the real gate.
   const fieldErrors = validateLeadFields(fields)
+  if (scheduleSource && !productInterest)
+    fieldErrors.productInterest = 'Select how we can help your practice.'
   if (Object.keys(fieldErrors).length > 0) {
     return { fieldErrors, values, services }
   }
@@ -96,9 +108,11 @@ export async function submitHealthcareLead(
 
   // The figures the lead saw on the calculator, carried to the thank-you page
   // and the CRM note so the salesperson sees the same number the lead did
-  const inactiveCount = parseInactiveCount(inactivePatients)
+  const inactiveCount = inactivePatients ? parseInactiveCount(inactivePatients) : null
   const patientValue = parsePatientValue(fields.patientValue)
-  const revenueShown = reactivatedPatients(inactiveCount) * patientValue
+  const revenueShown = hasReactivation && inactiveCount !== null
+    ? reactivatedPatients(inactiveCount) * patientValue
+    : null
   const money = (n: number) => '$' + n.toLocaleString('en-US')
 
   // An untouched slider default looks identical to a real answer in the CRM,
@@ -142,21 +156,30 @@ export async function submitHealthcareLead(
         postalCode: zip,
         city: city || undefined,
         state: state || undefined,
-        tags: ['reactivation-power-lead', 'healthcare-funnel'],
-        source: 'Reactivation Power /healthcare landing page',
+        tags: [
+          'reactivation-power-lead',
+          'healthcare-funnel',
+          ...(scheduleSource ? [`interest-${interest}`] : []),
+        ],
+        source: `Reactivation Power ${scheduleSource ? '/schedule-a-call' : '/healthcare'} landing page`,
       })
 
       const submissionNote = [
-        'HEALTHCARE FUNNEL SUBMISSION — Reactivation Power',
+        `${scheduleSource ? 'SCHEDULE A CALL' : 'HEALTHCARE FUNNEL'} SUBMISSION — Reactivation Power`,
         '',
         `Name: ${firstName} ${lastName}`,
         `Practice: ${practiceName || '(not provided)'}`,
         `Location: ${city && state ? `${city}, ${state} ${zip}` : zip}`,
         '',
         `Years in practice: ${yearsInPractice}`,
-        `Inactive patient files: ${inactiveCount.toLocaleString('en-US')}${inactiveNote}`,
-        `Annual patient value used: ${money(patientValue)}${valueNote}`,
-        `Revenue estimate shown to lead: ${money(revenueShown)}`,
+        `Interested in: ${PRODUCT_INTEREST_LABELS[interest]}`,
+        ...(inactiveCount !== null ? [
+          `Inactive patient files: ${inactiveCount.toLocaleString('en-US')}${inactiveNote}`,
+        ] : ['Inactive patient files: (not provided)']),
+        ...(revenueShown !== null ? [
+          `Annual patient value used: ${money(patientValue)}${valueNote}`,
+          `Revenue estimate shown to lead: ${money(revenueShown)}`,
+        ] : ['Revenue estimate: not applicable to lead-only inquiry']),
         `Services offered: ${services.length > 0 ? services.join(', ') : '(none selected)'}`,
       ].join('\n')
 
@@ -167,7 +190,7 @@ export async function submitHealthcareLead(
         '',
         `Submitted: ${new Date().toISOString()}`,
         `IP address: ${ip}`,
-        `Page: /healthcare`,
+        `Page: ${scheduleSource ? '/schedule-a-call' : '/healthcare'}`,
       ].join('\n')
 
       await Promise.all([
@@ -195,9 +218,9 @@ export async function submitHealthcareLead(
     consent_ip: ip,
     ghl_contact_id: ghlContactId || null,
     years_in_practice: yearsInPractice,
-    inactive_patients_estimate: String(inactiveCount),
+    inactive_patients_estimate: inactiveCount === null ? '' : String(inactiveCount),
     services,
-    source_path: '/healthcare',
+    source_path: sourcePath,
   })
 
   if (error) {
@@ -207,9 +230,12 @@ export async function submitHealthcareLead(
 
   const params = new URLSearchParams({
     name: firstName,
-    inactive: String(inactiveCount),
-    value: String(patientValue),
   })
+  if (hasReactivation && inactiveCount !== null) {
+    params.set('inactive', String(inactiveCount))
+    params.set('value', String(patientValue))
+  }
+  if (scheduleSource || productInterest) params.set('interest', interest)
   if (services.length > 0) params.set('services', services.join('|'))
   if (ghlContactId) params.set('cid', ghlContactId)
   // Straight to the calendar; the calculator now lives on the thank-you page
