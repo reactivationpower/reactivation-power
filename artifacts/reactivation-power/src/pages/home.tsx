@@ -94,9 +94,9 @@ function HomeContent() {
     <div className="dph flex min-h-svh flex-col bg-background">
       <SiteHeader />
       <div className="border-b border-border bg-card">
-        <nav aria-label="On this page" className="mx-auto grid grid-cols-2 max-w-6xl items-center gap-1 px-4 py-2 md:flex md:px-6">
+        <nav aria-label="On this page" className="mx-auto flex max-w-6xl items-center justify-between gap-1 px-2 py-1 md:justify-start md:px-6 md:py-2">
           <span className="mr-2 hidden text-xs font-semibold uppercase tracking-wide text-muted-foreground md:block">Two products</span>
-          {PRODUCT_NAV.map(item => <AnchorLink key={item.href} href={item.href} className="flex min-h-11 items-center justify-center rounded-md px-2 py-2 text-center text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground md:min-h-0 md:whitespace-nowrap md:px-3 md:py-1.5">{item.label}</AnchorLink>)}
+          {PRODUCT_NAV.map(item => <AnchorLink key={item.href} href={item.href} className="flex min-h-11 items-center justify-center whitespace-nowrap rounded-md px-1 py-2 text-center text-[11px] min-[375px]:text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground md:min-h-0 md:px-3 md:py-1.5 md:text-sm">{item.href === '#calculator' ? <><span className="md:hidden">Calculator</span><span className="hidden md:inline">{item.label}</span></> : item.label}</AnchorLink>)}
         </nav>
       </div>
       <main className="flex-1">
