@@ -1,0 +1,263 @@
+/* Scoped to the dual-product homepage proposal. Brand tokens come from _group.css. */
+
+/*
+ * Token bridge. The sandbox's global @theme maps utilities as
+ * `hsl(var(--accent))`, but _group.css (extracted verbatim from the source
+ * app) stores tokens as oklch() colors, so `hsl(oklch(...))` is invalid and
+ * every bg-/text-/border- utility silently falls back to black / currentColor.
+ * Inside .dph we restate the same source palette as HSL triplets so the
+ * utilities resolve. Values are the oklch source colors converted to HSL.
+ */
+.dph {
+  --background: 210 34.5% 98%;
+  --foreground: 217.3 36.1% 17.5%;
+  --card: 0 0% 100%;
+  --card-foreground: 217.3 36.1% 17.5%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 217.3 36.1% 17.5%;
+  --primary: 217.3 36.1% 17.5%;
+  --primary-foreground: 210 34.5% 98%;
+  --secondary: 210 40.6% 96%;
+  --secondary-foreground: 215.3 27.9% 26.8%;
+  --muted: 210 40.6% 96%;
+  --muted-foreground: 215.4 18.4% 47%;
+  --accent: 193.7 47.2% 42.5%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 357.2 100% 45.3%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 214.3 33% 91.4%;
+  --input: 212.7 29.9% 84%;
+  --ring: 193.7 47.2% 42.5%;
+  --success: 143.9 55.3% 40.5%;
+  --radius: 0.5rem;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: 'Geist', 'Geist Fallback', sans-serif;
+}
+
+/* Success token is not part of the sandbox theme; provide scoped utilities. */
+.dph .dph-success { color: hsl(var(--success)); }
+.dph .dph-success-bg { background: hsl(var(--success) / 0.12); }
+
+/* _group.css's .range-slider paints with raw var(--accent); re-paint in hsl(). */
+.dph .range-slider {
+  background: linear-gradient(
+    to right,
+    hsl(var(--accent)) 0%,
+    hsl(var(--accent)) var(--range-pct),
+    hsl(var(--input)) var(--range-pct),
+    hsl(var(--input)) 100%
+  );
+}
+.dph .range-slider:focus-visible {
+  box-shadow: 0 0 0 3px hsl(var(--accent) / 0.3);
+}
+.dph .range-slider::-webkit-slider-thumb {
+  background: hsl(var(--card));
+  border-color: hsl(var(--accent));
+}
+.dph .range-slider::-moz-range-thumb {
+  background: hsl(var(--card));
+  border-color: hsl(var(--accent));
+}
+
+.dph .dph-hero {
+  background:
+    radial-gradient(60rem 30rem at 85% -10%, color-mix(in oklch, hsl(var(--accent)) 14%, transparent), transparent 70%),
+    linear-gradient(180deg, color-mix(in oklch, hsl(var(--accent)) 5%, hsl(var(--background))) 0%, hsl(var(--background)) 100%);
+}
+
+.dph .dph-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: hsl(var(--accent));
+}
+.dph .dph-eyebrow::before {
+  content: '';
+  width: 1.5rem;
+  height: 2px;
+  border-radius: 999px;
+  background: hsl(var(--accent));
+}
+
+/* Product panels */
+.dph .dph-panel {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid hsl(var(--border));
+  border-radius: calc(var(--radius) * 2);
+  background: hsl(var(--card));
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.04), 0 12px 32px -20px rgb(15 23 42 / 0.25);
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+.dph .dph-panel:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.05), 0 20px 40px -20px rgb(15 23 42 / 0.3);
+}
+.dph .dph-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 4px;
+  background: hsl(var(--accent));
+}
+.dph .dph-panel--navy::before {
+  background: hsl(var(--primary));
+}
+
+/* Guided script UI */
+.dph .dph-script {
+  border: 1px solid hsl(var(--border));
+  border-radius: calc(var(--radius) * 2);
+  background: hsl(var(--card));
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.05), 0 24px 48px -24px rgb(15 23 42 / 0.35);
+  overflow: hidden;
+}
+.dph .dph-script-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid hsl(var(--border));
+  background: color-mix(in oklch, hsl(var(--primary)) 4%, hsl(var(--card)));
+}
+.dph .dph-say {
+  position: relative;
+  border-left: 3px solid hsl(var(--accent));
+  background: color-mix(in oklch, hsl(var(--accent)) 7%, hsl(var(--card)));
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 0.875rem 1rem;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: hsl(var(--foreground));
+}
+.dph .dph-choice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+  text-align: left;
+  border: 1px solid hsl(var(--input));
+  border-radius: var(--radius);
+  background: hsl(var(--card));
+  padding: 0.625rem 0.875rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: hsl(var(--foreground));
+  transition: border-color 150ms ease, background-color 150ms ease, transform 150ms ease;
+}
+.dph .dph-choice:hover {
+  border-color: hsl(var(--accent));
+  background: color-mix(in oklch, hsl(var(--accent)) 5%, hsl(var(--card)));
+}
+.dph .dph-choice[aria-pressed='true'] {
+  border-color: hsl(var(--accent));
+  background: color-mix(in oklch, hsl(var(--accent)) 12%, hsl(var(--card)));
+  box-shadow: inset 0 0 0 1px hsl(var(--accent));
+}
+.dph .dph-next {
+  animation: dph-rise 260ms ease both;
+}
+@keyframes dph-rise {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.dph .dph-seg {
+  display: inline-flex;
+  padding: 0.25rem;
+  border-radius: 999px;
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--muted));
+}
+.dph .dph-seg button {
+  border-radius: 999px;
+  padding: 0.375rem 0.875rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: hsl(var(--muted-foreground));
+  transition: background-color 150ms ease, color 150ms ease;
+}
+.dph .dph-seg button[aria-pressed='true'] {
+  background: hsl(var(--card));
+  color: hsl(var(--foreground));
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.1);
+}
+
+/* How-it-works paths */
+.dph .dph-path {
+  border: 1px solid hsl(var(--border));
+  border-radius: calc(var(--radius) * 2);
+  background: hsl(var(--card));
+  padding: 1.5rem;
+}
+@media (min-width: 768px) {
+  .dph .dph-path { padding: 2rem; }
+}
+.dph .dph-path ol {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.dph .dph-path ol::before {
+  content: '';
+  position: absolute;
+  left: 1.125rem;
+  top: 1.25rem;
+  bottom: 1.25rem;
+  width: 2px;
+  background: linear-gradient(to bottom, hsl(var(--accent)), color-mix(in oklch, hsl(var(--accent)) 20%, transparent));
+}
+.dph .dph-path-step {
+  display: grid;
+  grid-template-columns: 2.25rem 1fr;
+  gap: 1rem;
+  align-items: start;
+}
+.dph .dph-path-num {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 999px;
+  background: hsl(var(--card));
+  border: 2px solid hsl(var(--accent));
+  color: hsl(var(--accent));
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+.dph .dph-path--navy .dph-path-num { border-color: hsl(var(--primary)); color: hsl(var(--primary)); }
+.dph .dph-path--navy ol::before {
+  background: linear-gradient(to bottom, hsl(var(--primary)), color-mix(in oklch, hsl(var(--primary)) 20%, transparent));
+}
+
+/* Reactivation section band */
+.dph .dph-band {
+  background: color-mix(in oklch, hsl(var(--accent)) 6%, hsl(var(--background)));
+}
+
+.dph .dph-cta {
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border-radius: calc(var(--radius) * 2.4);
+  background-image:
+    radial-gradient(40rem 20rem at 100% 0%, color-mix(in oklch, hsl(var(--accent)) 45%, transparent), transparent 70%);
+}
+
+.dph .dph-mock-note {
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: hsl(var(--muted-foreground));
+}
