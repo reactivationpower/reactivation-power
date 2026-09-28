@@ -1,5 +1,14 @@
 /* Styles specific to the CalculatorUp variant's combined calculator. */
 
+/*
+ * Product cards: no hover lift. The shared .dph-panel:hover rule nudges the
+ * hovered card up 2px, which makes the two "Explore" buttons look misaligned
+ * whenever the cursor rests on one card. Keep the shadow change, drop the move.
+ */
+.dph .dph-panel:hover {
+  transform: none;
+}
+
 .dph .dph-combo {
   overflow: hidden;
   box-shadow: 0 1px 2px rgb(15 23 42 / 0.04), 0 24px 48px -28px rgb(15 23 42 / 0.3);
