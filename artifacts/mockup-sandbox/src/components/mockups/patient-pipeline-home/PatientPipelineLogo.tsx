@@ -3,7 +3,7 @@ import {
   ArrowRight, CalendarCheck, ClipboardList, DollarSign, Headset,
   ListChecks, Megaphone, PhoneCall, ShieldCheck, Users,
 } from 'lucide-react'
-import { OpportunityProvider, SiteFooter, SiteHeader, StaticLink as Link } from './_Shared'
+import { OpportunityProvider, SiteHeader, StaticLink, StaticLink as Link } from './_Shared'
 import { CombinedCalculator } from './_CombinedCalculator'
 import { GuidedScriptDemo } from './_GuidedScriptDemo'
 import { ServicesWeSupport } from './_ServicesWeSupport'
@@ -88,6 +88,31 @@ function PathCard({ title, description, steps, navy = false }: {
         </li>
       ))}</ol>
     </div>
+  )
+}
+
+function SiteFooter() {
+  return (
+    <footer className="border-t border-border bg-card">
+      <div className="mx-auto flex max-w-6xl flex-col items-center gap-5 px-4 py-10 text-center md:px-6">
+        <img
+          src="/__mockup/images/patient-pipeline-logo.png"
+          alt="Patient Pipeline"
+          width={2172}
+          height={724}
+          className="h-14 w-auto"
+        />
+        <nav aria-label="Footer" className="flex flex-wrap justify-center gap-x-6 gap-y-2">
+          <StaticLink href="/" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Home</StaticLink>
+          <StaticLink href="/how-it-works" className="text-sm text-muted-foreground transition-colors hover:text-foreground">How It Works</StaticLink>
+          <StaticLink href="/schedule-a-call" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Schedule a Call</StaticLink>
+          <StaticLink href="/login" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Client Login</StaticLink>
+        </nav>
+        <p className="text-xs text-muted-foreground">
+          {`© ${new Date().getFullYear()} Reactivation Power. All rights reserved.`}
+        </p>
+      </div>
+    </footer>
   )
 }
 

@@ -7,10 +7,10 @@ export function SiteFooter() {
     <footer className="border-t border-border bg-card">
       <div className="mx-auto flex max-w-6xl flex-col items-center gap-5 px-4 py-10 text-center md:px-6">
         <img
-          src="/images/logo-slogan.png"
-          alt="Reactivation Power — Turning Old Business Into New Business & New Money!"
-          width={1189}
-          height={578}
+          src="/images/patient-pipeline-logo.png"
+          alt="Patient Pipeline"
+          width={2172}
+          height={724}
           className="h-14 w-auto"
         />
         <nav aria-label="Footer" className="flex flex-wrap justify-center gap-x-6 gap-y-2">
