@@ -47,6 +47,7 @@ type ScriptBranch = {
 }
 
 type ScriptExample = {
+  sample: string
   contextLabel: string
   contextValue: string
   reason: string
@@ -60,6 +61,7 @@ const coach = (text: string): ScriptParagraph => ({ kind: 'coach', text })
 
 const SCRIPT_EXAMPLES: Record<ScriptMode, ScriptExample> = {
   reactivation: {
+    sample: 'Sample: Checking in on a past chiropractic patient',
     contextLabel: 'Previous service',
     contextValue: 'Chiropractic',
     reason: 'Marcus, last seen 14 months ago',
@@ -113,6 +115,7 @@ const SCRIPT_EXAMPLES: Record<ScriptMode, ScriptExample> = {
     ],
   },
   lead: {
+    sample: 'Sample: Following up on an unbooked campaign lead',
     contextLabel: 'Campaign',
     contextValue: 'New Patient Exam Special',
     reason: 'Priya, web form 2 days ago, no time booked',
@@ -121,7 +124,7 @@ const SCRIPT_EXAMPLES: Record<ScriptMode, ScriptExample> = {
       paragraphs: [
         say("Great. Just so we're on the same page, here's what the New Patient Exam Special includes:"),
         say('A consultation, a full exam, and any X-rays that are needed.'),
-        say("It's $49 for that first visit."),
+        say('The first visit is $49.'),
         say("I noticed you didn't get a time set up yet. Can I ask what got in the way?"),
         coach('Let them answer. Tap what you hear.'),
       ],
@@ -158,7 +161,7 @@ const SCRIPT_EXAMPLES: Record<ScriptMode, ScriptExample> = {
           title: 'It was the cost',
           paragraphs: [
             say(
-              "That's fair, and I'm glad you said so. It's $49 for that first visit. That covers the first visit, and there's no commitment past it. Is the cost the only thing that held you back?",
+              "That's fair, and I'm glad you said so. The first visit is $49. That covers the first visit, and there's no commitment past it. Is the cost the only thing that held you back?",
             ),
             coach('Let them answer. If they name another reason, tap that button.'),
           ],
@@ -239,13 +242,16 @@ function GuidedScriptDemo() {
       </div>
 
       <div className="flex flex-col gap-4 p-5 md:p-6">
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+        <div className="flex flex-col gap-1.5">
+          <p className="dph-sample">{example.sample}</p>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
           <span>
             {example.contextLabel}:{' '}
             <span className="font-semibold text-foreground">{example.contextValue}</span>
           </span>
           <span aria-hidden="true" className="hidden h-3 w-px bg-border sm:block" />
           <span>{example.reason}</span>
+          </div>
         </div>
 
         {selected ? (
