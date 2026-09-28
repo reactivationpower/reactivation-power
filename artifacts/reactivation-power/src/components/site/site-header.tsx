@@ -16,10 +16,10 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-card/95 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 md:px-6">
-        <Link href="/" aria-label="Reactivation Power — Home">
+        <Link href="/" aria-label="Patient Pipeline — Home">
           <img
-            src="/images/pipeline-power-logo.png"
-            alt="Pipeline Power"
+            src="/images/patient-pipeline-logo.png"
+            alt="Patient Pipeline"
             width={2172}
             height={724}
             priority
