@@ -14,16 +14,16 @@ import {
   Users,
 } from 'lucide-react'
 import {
-  HeroOpportunity,
-  OpportunityProvider,
   ServicesWeSupport,
   SiteFooter,
   SiteHeader,
   StaticLink,
   PRACTICE_TYPES_LINE,
 } from './Shell'
+import { CombinedCalculator } from './CombinedCalculator'
 import './_group.css'
 import './Proposed.css'
+import './CalculatorUp.css'
 
 /* ------------------------------------------------------------------ */
 /* Guided-script demo: two screens of the real script                  */
@@ -630,39 +630,25 @@ export function CalculatorUp() {
           </div>
         </section>
 
-        {/* Reactivation revenue calculator — moved up, directly under the two products */}
+        {/* Two-part revenue calculator — directly under the two products */}
         <section id="calculator" className="dph-band scroll-mt-24 border-b border-border">
           <div className="mx-auto max-w-6xl px-4 py-16 md:px-6 md:py-24">
-            <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-[1fr_1.1fr]">
-              <div className="flex flex-col gap-5">
-                <p className="dph-eyebrow">Your Reactivation Revenue Opportunity</p>
-                <h2 className="text-balance text-3xl font-bold tracking-tight text-foreground md:text-4xl">
-                  See how much money is sitting in your inactive list
-                </h2>
-                <p className="text-pretty text-base leading-relaxed text-muted-foreground">
-                  Move the sliders to match your practice. The estimate uses an
-                  illustrative 5% reactivation rate so you can see the scale of
-                  the opportunity — actual results depend on your list, your
-                  services, and how consistently the calls get made. It is not
-                  a guarantee.
-                </p>
-                <ul className="flex flex-col gap-2 text-sm text-muted-foreground">
-                  {[
-                    'Applies to the Reactivation product only',
-                    'No ad spend assumed — these are patients you already have',
-                    'We walk through your real numbers on the strategy call',
-                  ].map((line) => (
-                    <li key={line} className="flex items-start gap-2.5">
-                      <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-accent" aria-hidden="true" />
-                      {line}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <OpportunityProvider>
-                <HeroOpportunity />
-              </OpportunityProvider>
+            <div className="mx-auto mb-10 max-w-3xl text-center md:mb-12">
+              <p className="dph-eyebrow justify-center">Your Revenue Opportunity</p>
+              <h2 className="mt-4 text-balance text-3xl font-bold tracking-tight text-foreground md:text-4xl">
+                Two ways to grow. See what they could mean together.
+              </h2>
+              <p className="mt-5 text-pretty text-base leading-relaxed text-muted-foreground md:text-lg">
+                Set each side to match your practice. Reactivation works your
+                existing inactive list; Lead Follow-Up converts more of the
+                leads you already pay for. Each estimate stands on its own, and
+                the combined figure shows the scale if you ran both.
+              </p>
             </div>
+            <CombinedCalculator />
+            <p className="mt-6 text-center text-sm text-muted-foreground">
+              Revenue estimates exclude advertising and operating costs. We&apos;ll walk through your assumptions on the strategy call.
+            </p>
           </div>
         </section>
 
