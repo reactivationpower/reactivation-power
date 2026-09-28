@@ -51,15 +51,22 @@ function SliderField({
 }) {
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex items-baseline justify-between gap-4">
-        <label htmlFor={id} className="text-sm font-medium text-foreground">
-          {label}
-        </label>
-        <span
-          className={`shrink-0 whitespace-nowrap text-lg font-bold tabular-nums ${tone === 'navy' ? 'text-primary' : 'text-accent'}`}
-        >
-          {display}
-        </span>
+      {/*
+        On desktop the two halves sit side by side, so every label row reserves
+        two lines (min-h) and bottom-aligns its content. A one-line label and a
+        two-line label then leave their slider tracks at the same y position.
+      */}
+      <div className="flex flex-col justify-end lg:min-h-10">
+        <div className="flex items-baseline justify-between gap-4">
+          <label htmlFor={id} className="text-sm font-medium leading-5 text-foreground">
+            {label}
+          </label>
+          <span
+            className={`shrink-0 whitespace-nowrap text-lg font-bold leading-5 tabular-nums ${tone === 'navy' ? 'text-primary' : 'text-accent'}`}
+          >
+            {display}
+          </span>
+        </div>
       </div>
       <input
         id={id}
