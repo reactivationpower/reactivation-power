@@ -66,6 +66,7 @@ export interface LeadCallRecord {
 }
 
 interface Props {
+  leaseToken: string
   campaign: {
     id: string
     name: string
@@ -88,6 +89,7 @@ interface Props {
     requestedAt?: string | null
     message: string | null
     status: string
+    lastDisposition?: string | null
   }
   niche: { id: string; name: string } | null
   callerName: string
@@ -143,6 +145,7 @@ function appointmentWord(d: LeadDisposition | string): string {
  * the outcomes follow the lead cadence instead of the quarterly cycle.
  */
 export function LeadCallScreen({
+  leaseToken,
   campaign,
   lead,
   niche,
@@ -176,7 +179,9 @@ export function LeadCallScreen({
   // appointment time for "confirmed".
   const entryStepKey = leadEntryStepKey(lead)
   const requestedLocal = useMemo(() => requestedAtLocalDate(lead.requestedAt), [lead.requestedAt])
-  const isLongTermCheckIn = !lead.requestedAt && isLongTermLeadCheckIn(lead.submittedAt, new Date(now))
+  const requestedCallback = lead.lastDisposition === 'callback_later'
+    ? calls.find(call => call.disposition === 'callback_later' && call.callBackAt) : null
+  const isLongTermCheckIn = !requestedCallback && !lead.requestedAt && isLongTermLeadCheckIn(lead.submittedAt, new Date(now))
   const extras = useMemo(
     () => {
       const tokens = leadScriptExtras({
@@ -197,6 +202,17 @@ export function LeadCallScreen({
   // check-in opening; replace its first offer description until terms have
   // been verified with the office.
   const displayedSteps = useMemo(() => {
+    if (requestedCallback && !lead.requestedAt) {
+      const first = flowSteps.find(step => step.step_key === 'open') ?? flowSteps[0]
+      if (!first) return flowSteps
+      const callbackDay = new Date(requestedCallback.callBackAt!).toLocaleDateString('en-US', {
+        timeZone: 'America/New_York', month: 'long', day: 'numeric',
+      })
+      return flowSteps.map(step => step.step_key === first.step_key ? {
+        ...step, title: 'Requested callback',
+        content: `Hi, this is {{caller_name}} with {{provider_name}}'s office. Is {{contact_first_name}} available, please?\n\nHi {{contact_first_name}}. You spoke with our office previously about {{offer_name}}, and asked us to call you back${new Date(now) <= new Date(new Date(requestedCallback.callBackAt!).getTime() + 24 * 60 * 60_000) ? ` around ${callbackDay}` : ''}. Is now still a good time for a quick chat?\n\n(Let them answer. Choose what you hear.)`,
+      } : step)
+    }
     if (!isLongTermCheckIn) return flowSteps
     const first = flowSteps.find(step => step.step_key === 'open') ?? flowSteps[0]
     if (!first) return flowSteps
@@ -216,7 +232,7 @@ export function LeadCallScreen({
                 .replace(/You'll get everything in the \{\{offer_name\}\} at that visit/g, "We'll confirm what's currently included before the visit")}`,
       })),
     ]
-  }, [flowSteps, isLongTermCheckIn, lead.sourceSubmittedAt])
+  }, [flowSteps, isLongTermCheckIn, lead.sourceSubmittedAt, lead.requestedAt, requestedCallback, now])
   const displayedChoices = useMemo(() => {
     if (!isLongTermCheckIn) return flowChoices
     const first = flowChoices[0]
@@ -247,6 +263,7 @@ export function LeadCallScreen({
     startSaving(async () => {
       const result = await logLeadCall({
         leadId: lead.id,
+        leaseToken,
         disposition: d,
         notes,
         callBackAt: d === 'callback_later' && callBackAt ? callBackAt.toISOString() : null,

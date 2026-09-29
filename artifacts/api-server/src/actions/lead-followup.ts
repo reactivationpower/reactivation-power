@@ -7,6 +7,7 @@ import {
   isLeadDisposition,
   leadCallBlockReason,
   leadDispositionFieldError,
+  withoutLeadLeaseToken,
   validateCampaignInput,
   type CampaignDraft,
   type CampaignStatus,
@@ -84,7 +85,7 @@ export async function retryParkedLead(leadId: string) {
     revalidatePath('/portal/campaigns')
     revalidatePath(`/portal/campaigns/${lead.campaignId}`)
     revalidatePath(`/portal/campaigns/${lead.campaignId}/leads/${lead.id}`)
-    return { lead }
+    return { lead: withoutLeadLeaseToken(lead) }
   } catch (error) {
     if (error instanceof store.LeadCallBlockedError) return { error: error.message }
     throw error
@@ -141,6 +142,7 @@ export async function importLeads(input: { campaignId: string; rows: LeadImportR
  */
 export async function logLeadCall(input: {
   leadId: string
+  leaseToken: string
   disposition: LeadDisposition
   notes?: string | null
   callBackAt?: string | null
@@ -178,6 +180,7 @@ export async function logLeadCall(input: {
     result = await store.logLeadCall({
       lead,
       callerId: participant.id,
+      leaseToken: String(input.leaseToken ?? ''),
       disposition: input.disposition,
       notes,
       callBackAt,
@@ -192,7 +195,31 @@ export async function logLeadCall(input: {
   revalidatePath(`/portal/campaigns/${lead.campaignId}`)
   revalidatePath(`/portal/campaigns/${lead.campaignId}/leads/${lead.id}`)
   revalidatePath('/portal/start')
-  return { call: result.call, lead: result.lead }
+  return { call: result.call, lead: withoutLeadLeaseToken(result.lead) }
+}
+
+export async function claimLeadCall(leadId: string) {
+  const guard = await leadFollowUpContextOrError()
+  if (!guard.ok) return { error: guard.error }
+  try {
+    return await store.claimLeadCall(guard.ctx.ownerId, String(leadId ?? ''), guard.ctx.participant.id)
+  } catch (error) {
+    if (error instanceof store.LeadCallBlockedError) return { error: error.message }
+    throw error
+  }
+}
+
+export async function renewLeadCall(leadId: string, token: string) {
+  const guard = await leadFollowUpContextOrError()
+  if (!guard.ok) return { error: guard.error }
+  return { renewed: await store.renewLeadCall(guard.ctx.ownerId, String(leadId ?? ''), guard.ctx.participant.id, String(token ?? '')) }
+}
+
+export async function releaseLeadCall(leadId: string, token: string) {
+  const guard = await leadFollowUpContextOrError()
+  if (!guard.ok) return { error: guard.error }
+  await store.releaseLeadCall(guard.ctx.ownerId, String(leadId ?? ''), guard.ctx.participant.id, String(token ?? ''))
+  return { released: true }
 }
 
 // ---------- lead sources (webhook intake) ----------

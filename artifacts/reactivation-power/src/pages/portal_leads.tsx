@@ -6,19 +6,69 @@ import { PageError, PageLoading } from '@/components/page-status'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { LeadsTable } from '@/components/lead-followup/leads-table'
-import { isLongTermLeadCheckIn } from '@workspace/shared/lead-followup'
+import { LeadStatusBadge, RequestedTimeBadge } from '@/components/lead-followup/lead-bits'
+import { formatPhone } from '@workspace/shared/phone'
+import { LEAD_DISPOSITION_LABELS, isLongTermLeadCheckIn, timeAgo } from '@workspace/shared/lead-followup'
 import { PORTAL_WIDTH } from '@/lib/portal-layout'
 
+type QueueItem = { lead: any; campaign: any; reason: 'new' | 'requested' | 'due' }
 type LeadDashboard = {
   campaigns: Array<{ id: string; name: string }>
   rows: Array<{ lead: any; campaign: any }>
-  callsNow?: Array<{ lead: any; campaign: any; reason: 'new' | 'requested' | 'due' }>
-  comingUp?: Array<{ lead: any; campaign: any; reason: 'requested' | 'due' }>
+  callsNow?: QueueItem[]
+  inProgress?: QueueItem[]
+  comingUp?: QueueItem[]
+  callDetails?: Record<string, { createdAt: string; disposition: keyof typeof LEAD_DISPOSITION_LABELS; callerName: string | null }>
+  callerNames?: Record<string, string>
   total: number
   page: number
   pageSize: number
   stats: { received: number; new: number; reached: number; booked: number }
   now: string
+}
+
+const officeTime = (date: string | Date) => new Date(date).toLocaleString('en-US', {
+  timeZone: 'America/New_York', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short',
+})
+
+function QueueRow({ item, data, mode }: { item: QueueItem; data: LeadDashboard; mode: 'ready' | 'upcoming' | 'progress' }) {
+  const { lead, campaign, reason } = item
+  const last = data.callDetails?.[lead.id]
+  const due = lead.nextDueAt ? new Date(lead.nextDueAt).getTime() : null
+  const now = new Date(data.now).getTime()
+  const soon = mode === 'upcoming' && due !== null && due - now <= 5 * 60_000 && due > now
+  const overdue = mode === 'ready' && due !== null && now - due >= 60_000
+  const reasonText = reason === 'requested' ? 'Confirm appointment' :
+    lead.lastDisposition === 'callback_later' ? 'Requested callback' :
+    reason === 'new' ? 'First call' :
+    isLongTermLeadCheckIn(lead.submittedAt, new Date(due ?? data.now)) ?
+      (lead.sourceSubmittedAt ? 'Two-month check-in' : 'Check-in') :
+      `Attempt ${lead.unansweredAttempts + 1} · Automatic retry`
+  const detailHref = `/portal/campaigns/${campaign.id}/leads/${lead.id}`
+  return <li className="grid gap-3 border-b border-border px-4 py-4 last:border-0 lg:grid-cols-[minmax(155px,1.2fr)_minmax(160px,1fr)_minmax(145px,1fr)_minmax(145px,1fr)_minmax(145px,1fr)_auto] lg:items-center" data-testid={`queue-lead-${lead.id}`}>
+    <div>
+      <Link href={detailHref} className="font-semibold text-foreground hover:underline">{lead.firstName} {lead.lastName}</Link>
+      <p className="text-xs text-muted-foreground">{formatPhone(lead.phone)}</p>
+    </div>
+    <div className="text-sm">
+      <p className="font-medium text-foreground">{campaign.name}</p>
+      <p className="text-xs text-muted-foreground">{lead.sourceSubmittedAt ? `Submitted ${officeTime(lead.sourceSubmittedAt)} · ${timeAgo(lead.sourceSubmittedAt, now)}` : 'Original submission date unknown'}</p>
+    </div>
+    <div><RequestedTimeBadge requestedAt={lead.requestedAt} requestedTime={lead.requestedTime} status={lead.status} /></div>
+    <div className="text-sm">
+      <LeadStatusBadge status={lead.status} />
+      <p className="mt-1 font-medium text-foreground">{reasonText}</p>
+    </div>
+    <div className="text-xs text-muted-foreground">
+      <p className="font-medium text-foreground">{mode === 'progress' ? `Being called by ${data.callerNames?.[lead.callLeaseCallerId] ?? 'team member'}` : last ? `Last: ${officeTime(last.createdAt)}` : 'Not called yet'}</p>
+      <p>{mode === 'progress' ? `Started ${officeTime(lead.callLeaseStartedAt)}` : last ? `${last.callerName ?? 'Team member'} · ${LEAD_DISPOSITION_LABELS[last.disposition] ?? last.disposition}` : null}</p>
+      {mode === 'upcoming' && due !== null && <p className={soon ? 'mt-1 font-semibold text-accent' : 'mt-1 font-medium text-foreground'}>{soon ? 'Due in 5 minutes · ' : 'Next: '}{officeTime(lead.nextDueAt)}</p>}
+      {mode === 'ready' && due !== null && <p className={overdue ? 'mt-1 font-semibold text-amber-700' : 'mt-1 font-medium text-accent'}>{overdue ? `Overdue · ${officeTime(lead.nextDueAt)}` : `Due now · ${officeTime(lead.nextDueAt)}`}</p>}
+    </div>
+    <div>{mode === 'ready' ? <Button render={<Link href={`${detailHref}/call`} />} nativeButton={false} size="sm" className="gap-2 whitespace-nowrap"><PhoneCall className="size-4" />Call Now</Button> :
+      mode === 'upcoming' ? <Button render={<Link href={detailHref} />} nativeButton={false} variant="outline" size="sm">View details</Button> :
+      <span className="text-xs font-semibold text-muted-foreground">Call in progress</span>}</div>
+  </li>
 }
 
 export default function LeadsPage() {
@@ -79,24 +129,20 @@ export default function LeadsPage() {
         <h2 className="text-xl font-semibold text-foreground">Ready to call</h2>
         <p className="mt-1 text-sm text-muted-foreground">Only new leads, pending appointment confirmations, and follow-ups due now. Callbacks take priority over retries.</p>
         {outsideHours && <p className="mt-3 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">Outside office calling hours (9 AM–6 PM Eastern). Calls will be ready when calling hours begin.</p>}
-        {!data.callsNow?.length ? <p className="mt-4 rounded-lg border border-dashed border-border bg-card p-6 text-sm text-muted-foreground">No calls are due right now. Scheduled leads appear below when their time comes.</p> : <ul className="mt-4 divide-y divide-border overflow-hidden rounded-lg border border-border bg-card">
-          {data.callsNow.map(({ lead, campaign, reason }) => <li key={lead.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
-            <div>
-              <p className="font-semibold text-foreground">{lead.firstName} {lead.lastName}</p>
-              <p className="text-sm text-muted-foreground">{campaign.name} · {reason === 'requested' ? 'Confirm appointment' : reason === 'new' ? 'New inquiry — first call' : lead.lastDisposition === 'callback_later' ? 'Requested callback' : isLongTermLeadCheckIn(lead.submittedAt, new Date(data.now)) ? lead.sourceSubmittedAt ? 'Two-month check-in' : 'Check-in' : `Follow-up attempt ${lead.unansweredAttempts + 1}`}</p>
-            </div>
-            <Button render={<Link href={`/portal/campaigns/${campaign.id}/leads/${lead.id}/call`} />} nativeButton={false} size="sm" className="gap-2"><PhoneCall className="size-4" />Open script</Button>
-          </li>)}
+        {!data.callsNow?.length ? <p className="mt-4 rounded-lg border border-dashed border-border bg-card p-6 text-sm text-muted-foreground">No calls are due right now. Scheduled leads appear below when their time comes.</p> : <ul className="mt-4 overflow-hidden rounded-lg border border-border bg-card">
+          {data.callsNow.map(item => <QueueRow key={item.lead.id} item={item} data={data} mode="ready" />)}
         </ul>}
       </section>
-      <section aria-label="Coming up" className="mt-8">
-        <h2 className="text-xl font-semibold text-foreground">Coming up</h2>
+      <section aria-label="In progress" className="mt-8">
+        <h2 className="text-xl font-semibold text-foreground">In Progress ({data.inProgress?.length ?? 0})</h2>
+        <p className="mt-1 text-sm text-muted-foreground">Calls in progress are reserved for one caller. If a browser closes unexpectedly, its reservation expires within two minutes.</p>
+        {!data.inProgress?.length ? <p className="mt-3 text-sm text-muted-foreground">Nobody is calling a lead right now.</p> : <ul className="mt-4 overflow-hidden rounded-lg border border-border bg-card">{data.inProgress.map(item => <QueueRow key={item.lead.id} item={item} data={data} mode="progress" />)}</ul>}
+      </section>
+      <section aria-label="Calls upcoming" className="mt-8">
+        <h2 className="text-xl font-semibold text-foreground">Calls Upcoming</h2>
         <p className="mt-1 text-sm text-muted-foreground">These leads stay visible, but are not due for a call yet.</p>
-        {!data.comingUp?.length ? <p className="mt-4 text-sm text-muted-foreground">Nothing scheduled yet.</p> : <ul className="mt-4 divide-y divide-border rounded-lg border border-border bg-card">
-          {data.comingUp.map(({ lead, campaign, reason }) => <li key={lead.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
-            <div><Link href={`/portal/campaigns/${campaign.id}/leads/${lead.id}`} className="font-medium text-foreground hover:underline">{lead.firstName} {lead.lastName}</Link><p className="text-sm text-muted-foreground">{campaign.name} · {reason === 'requested' ? 'Confirmation retry' : lead.lastDisposition === 'callback_later' ? 'Requested callback' : lead.nextDueAt && isLongTermLeadCheckIn(lead.submittedAt, new Date(lead.nextDueAt)) ? lead.sourceSubmittedAt ? 'Two-month check-in' : 'Check-in' : 'Scheduled follow-up'}</p></div>
-            {lead.nextDueAt ? <time dateTime={lead.nextDueAt} className="text-sm text-muted-foreground">{new Date(lead.nextDueAt).toLocaleString('en-US', { timeZone: 'America/New_York', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' })}</time> : <span className="text-sm text-muted-foreground">Next office calling hours</span>}
-          </li>)}
+        {!data.comingUp?.length ? <p className="mt-4 text-sm text-muted-foreground">Nothing scheduled yet.</p> : <ul className="mt-4 overflow-hidden rounded-lg border border-border bg-card">
+          {data.comingUp.map(item => <QueueRow key={item.lead.id} item={item} data={data} mode="upcoming" />)}
         </ul>}
       </section>
     </> : <>

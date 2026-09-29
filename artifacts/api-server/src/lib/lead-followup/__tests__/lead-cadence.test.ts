@@ -12,11 +12,29 @@ import {
   leadDispositionFieldError,
   nextLeadAttemptAt,
   nextConfirmationAttemptAt,
+  withoutLeadLeaseToken,
 } from '@workspace/shared/lead-followup'
 
 /** The lead retry cadence and the per-campaign conversion math. */
 
 const NOW = new Date('2026-09-23T15:00:00Z')
+
+describe('lead response security', () => {
+  it('removes the lease credential without losing queue owner and timing context', () => {
+    const original = {
+      id: 'lead-1', callLeaseToken: 'secret-claim-token',
+      callLeaseCallerId: 'caller-1', callLeaseStartedAt: NOW,
+      callLeaseExpiresAt: new Date(NOW.getTime() + 120_000),
+    }
+    const visible = withoutLeadLeaseToken(original)
+    expect(JSON.stringify(visible)).not.toContain('secret-claim-token')
+    expect(visible).toEqual({
+      id: 'lead-1', callLeaseCallerId: 'caller-1',
+      callLeaseStartedAt: NOW, callLeaseExpiresAt: original.callLeaseExpiresAt,
+    })
+    expect(original.callLeaseToken).toBe('secret-claim-token')
+  })
+})
 
 describe('nextLeadAttemptAt', () => {
   const submitted = new Date('2026-09-23T13:00:00Z') // 9 AM Eastern
@@ -38,6 +56,12 @@ describe('nextLeadAttemptAt', () => {
   it('skips expired slots instead of creating a catch-up burst', () => {
     expect(nextLeadAttemptAt(1, new Date('2026-09-28T15:00:00Z'), submitted).toISOString()).toBe('2026-09-29T19:00:00.000Z')
   })
+  it('keeps four hours after the actual call, including day-two and later attempts', () => {
+    // The day-two planned 10 AM Eastern slot is too early after a 9:30 AM
+    // actual call; the next call is no earlier than 1:30 PM Eastern.
+    const actual = new Date('2026-09-24T13:30:00Z')
+    expect(nextLeadAttemptAt(3, actual, submitted).toISOString()).toBe('2026-09-24T17:30:00.000Z')
+  })
   it('uses the rolling first 24 hours for a lead submitted after office hours', () => {
     const evening = new Date('2026-09-23T23:00:00Z') // 7pm Eastern
     const morning = new Date('2026-09-24T13:00:00Z') // first office call at 9am
@@ -52,7 +76,7 @@ describe('nextLeadAttemptAt', () => {
     const first = new Date('2026-09-23T18:00:00Z')
     expect(nextLeadAttemptAt(1, ten, ten).toISOString()).toBe('2026-09-23T18:00:00.000Z')
     expect(nextLeadAttemptAt(2, first, ten).toISOString()).toBe('2026-09-24T13:00:00.000Z')
-    expect(nextLeadAttemptAt(2, new Date('2026-09-24T13:00:00Z'), ten).toISOString()).toBe('2026-09-24T16:00:00.000Z')
+    expect(nextLeadAttemptAt(2, new Date('2026-09-24T13:00:00Z'), ten).toISOString()).toBe('2026-09-24T17:00:00.000Z')
   })
   it('bounds appointment confirmation to before the requested time', () => {
     expect(nextConfirmationAttemptAt(NOW, '2026-09-24T09:00')?.toISOString()).toBe('2026-09-23T19:00:00.000Z')

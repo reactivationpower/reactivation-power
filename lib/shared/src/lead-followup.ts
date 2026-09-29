@@ -621,7 +621,7 @@ export function isLongTermLeadCheckIn(submittedAt: Date | string, now: Date): bo
 export function nextLeadAttemptAt(unansweredAttempts: number, now: Date, submittedAt?: Date | string | null): Date {
   const parsed = submittedAt ? new Date(submittedAt) : now
   const anchor = Number.isFinite(parsed.getTime()) ? parsed : now
-  const earliest = now.getTime() + 3 * HOUR
+  const earliest = now.getTime() + 4 * HOUR
   // A rolling 24-hour window, not "same calendar date": evening inquiries
   // can receive their remaining spaced attempts during next morning's hours.
   for (let i = Math.max(1, unansweredAttempts); i < 3; i++) {
@@ -641,7 +641,7 @@ export function nextLeadAttemptAt(unansweredAttempts: number, now: Date, submitt
   let month = Math.max(2, Math.floor(((today.y - start.y) * 12 + today.m - start.m) / 2) * 2)
   for (;;) {
     const target = officeMonths(anchor, month, month % 4 === 0 ? 15 : 10)
-    if (target.getTime() > earliest) return target
+    if (target.getTime() >= earliest) return target
     month += 2
   }
 }
@@ -759,6 +759,16 @@ export function leadQueueBlockReason(
   }
   if (lead.status === 'new' || isLeadDue(lead, now)) return null
   return 'No call is due for this lead.'
+}
+
+/** A lease token is a per-call credential, not part of a lead's public view.
+ * Preserve the visible lease caller/timestamps for the In Progress queue.
+ */
+export function withoutLeadLeaseToken<T extends { callLeaseToken?: string | null }>(
+  lead: T,
+): Omit<T, 'callLeaseToken'> {
+  const { callLeaseToken: _callLeaseToken, ...visible } = lead
+  return visible
 }
 
 export interface CampaignConversion {

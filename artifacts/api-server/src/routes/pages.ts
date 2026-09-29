@@ -35,7 +35,7 @@ import {
 import { getAdminClient } from "../lib/supabase/admin";
 import { getStripeMode } from "../lib/stripe";
 import { getCronJobStatuses } from "../lib/cron/jobs";
-import { leadCallBlockReason, leadQueueBlockReason } from '@workspace/shared/lead-followup';
+import { leadCallBlockReason, leadQueueBlockReason, withoutLeadLeaseToken } from '@workspace/shared/lead-followup';
 import { DEFAULT_CALL_BATCH_SIZE } from '@workspace/shared/types';
 import { demoIsStale } from "../lib/demo/seed";
 import { demoPracticeByOwnerEmail } from "../lib/demo/config";
@@ -53,6 +53,8 @@ import {
   agreementTokenForLink, getAgreementDetail, getAgreementForLink, getAgreementPublic, listAgreements,
 } from "../actions/agreements";
 import { listCommissions } from "../actions/commissions";
+
+const visibleQueueItem = (item: leadStore.CallNextItem) => ({ ...item, lead: withoutLeadLeaseToken(item.lead) });
 
 type Loader = (req: Request) => Promise<Record<string, unknown>>;
 type AuthKind = "portal" | "admin" | "super_admin" | undefined;
@@ -227,7 +229,7 @@ add("/portal/start", "portal", async () => {
     : [[], []];
   const activeCampaigns = campaigns.filter((c) => c.status === "active").length;
   const newLeads = campaigns.reduce((n, c) => n + c.newLeadCount, 0);
-  return { participant, products, practiceName: owner?.practice_name ?? null, activeCampaigns, newLeads, callNext, now: now.toISOString() };
+  return { participant, products, practiceName: owner?.practice_name ?? null, activeCampaigns, newLeads, callNext: callNext.map(visibleQueueItem), now: now.toISOString() };
 });
 
 /** Everything a lead call or practice screen needs about the account: caller, provider, script. */
@@ -266,13 +268,31 @@ add("/portal/leads", "portal", async (req) => {
   const search = (queryString(req, "search") ?? "").trim().slice(0, 100);
   const page = Math.max(1, Math.min(10000, Number.parseInt(queryString(req, "page") ?? "1", 10) || 1));
   const now = new Date();
-  const [result, callsNow, comingUp] = await Promise.all([
+  const [result, callsNow, comingUp, active] = await Promise.all([
     leadStore.listAccountLeads(ownerId, { campaignId, status, search, page }),
     leadStore.callNext(ownerId, now),
     leadStore.upcomingLeadCalls(ownerId, now),
+    leadStore.activeLeadCalls(ownerId, now),
   ]);
+  const activeIds = new Set(active.map(item => item.lead.id));
+  const ready = callsNow.filter(item => !activeIds.has(item.lead.id));
+  const scheduled = comingUp.filter(item => !activeIds.has(item.lead.id));
+  const history = await leadStore.queueCallHistory(ownerId,
+    [...ready, ...active, ...scheduled].map(item => item.lead.id));
+  const callerIds = [...new Set([
+    ...history.map(h => h.callerId), ...active.map(item => item.lead.callLeaseCallerId),
+  ].filter((id): id is string => Boolean(id)))];
+  const callers = await Promise.all(callerIds.map(id => getParticipantById(id)));
+  const callerNames = Object.fromEntries(callerIds.map((id, index) =>
+    [id, callers[index] ? [callers[index]!.first_name, callers[index]!.last_name].filter(Boolean).join(" ") : "Team member"]));
+  const callDetails = Object.fromEntries(history.map(h => [h.leadId, {
+    ...h, callerName: h.callerId ? callerNames[h.callerId] : null,
+  }]));
   return {
-    participant, isOwner, campaigns, ...result, callsNow, comingUp,
+    participant, isOwner, campaigns, ...result,
+    rows: result.rows.map(item => ({ ...item, lead: withoutLeadLeaseToken(item.lead) })),
+    callsNow: ready.map(visibleQueueItem), inProgress: active.map(visibleQueueItem),
+    comingUp: scheduled.map(visibleQueueItem), callDetails, callerNames,
     stats: {
       received: campaigns.reduce((n, c) => n + c.leadCount, 0),
       new: campaigns.reduce((n, c) => n + c.newLeadCount, 0),
@@ -302,7 +322,7 @@ add("/portal/campaigns/:id", "portal", async (req) => {
   ]);
   const niche = niches.find((n) => n.id === campaign.nicheId) ?? null;
   return {
-    id, participant, ownerId, isOwner, campaign, leads, niche, now: new Date().toISOString(),
+    id, participant, ownerId, isOwner, campaign, leads: leads.map(withoutLeadLeaseToken), niche, now: new Date().toISOString(),
     webhookUrl: leadWebhookUrl(campaign.webhookToken),
     webhookEvents,
     connectionSummary,
@@ -327,7 +347,7 @@ add("/portal/campaigns/:id/leads/:leadId", "portal", async (req) => {
   const [niches, calls] = await Promise.all([campaignNicheOptions(ownerId), leadStore.listLeadCalls(lead.id)]);
   const niche = niches.find((n) => n.id === campaign.nicheId) ?? null;
   const callBlocked = leadCallBlockReason(campaign, lead) ?? leadQueueBlockReason(lead, new Date());
-  return { id, leadId, participant, ownerId, isOwner, campaign, lead, niche, calls, callBlocked, now: new Date().toISOString() };
+  return { id, leadId, participant, ownerId, isOwner, campaign, lead: withoutLeadLeaseToken(lead), niche, calls, callBlocked, now: new Date().toISOString() };
 });
 
 add("/portal/campaigns/:id/leads/:leadId/call", "portal", async (req) => {
@@ -348,7 +368,7 @@ add("/portal/campaigns/:id/leads/:leadId/call", "portal", async (req) => {
   const niche = niches.find((n) => n.id === campaign.nicheId) ?? null;
   const next = queue.find((q) => q.lead.id !== lead.id) ?? null;
   const nextHref = next ? `/portal/campaigns/${next.campaign.id}/leads/${next.lead.id}/call` : null;
-  return { id, leadId, participant, ownerId, isOwner, campaign, lead, niche, owner, flow, calls, nextHref, now: now.toISOString() };
+  return { id, leadId, participant, ownerId, isOwner, campaign, lead: withoutLeadLeaseToken(lead), niche, owner, flow, calls, nextHref, now: now.toISOString() };
 });
 
 add("/portal/campaigns/:id/practice", "portal", async (req) => {

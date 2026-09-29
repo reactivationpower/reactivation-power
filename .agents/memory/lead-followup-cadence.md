@@ -20,3 +20,9 @@ The user wants natural relative-date wording directly in the spoken script, with
 **Why:** The timing and original service/offer help the person remember the inquiry without making the caller calculate dates. An import date is not evidence of when someone submitted a form.
 
 **How to apply:** Preserve known original dates. Omit timing when unknown. Long-term follow-ups must not promise an expired offer is still available.
+
+The approved daily queue has three sections: Ready to Call, In Progress, and Calls Upcoming, alongside All Leads. It uses the same appointment-intent color badges as All Leads. Call Now opens the selected lead's existing offer-specific script, not an autodialer.
+
+**Why:** Multiple staff need the last call time, caller, outcome, next due time, and current call ownership without checking separate records. A queue that hides this context is not useful as a team worklist.
+
+**How to apply:** An internal automatic retry that goes overdue stays ready until handled, with no mention of the missed internal target in its script. Only a person-requested callback after an actual conversation is identified as such and may acknowledge the earlier request in the script. Upcoming calls may say "due in five minutes" but become callable only at the actual due time. Never put sample script panels beneath the queue.

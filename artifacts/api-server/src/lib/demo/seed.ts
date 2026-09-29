@@ -844,6 +844,7 @@ export async function seedLeadFollowUp(
               return leadStore.logLeadCall({
                 lead: { id: result.insertedIds[i] },
                 callerId: ownerId,
+                trustedHistoricalSeed: true,
                 ...demoLeadCall(lead.status, new Date(now - lead.attemptedMinutesAgo * 60_000), new Date(now)),
               })
             })()

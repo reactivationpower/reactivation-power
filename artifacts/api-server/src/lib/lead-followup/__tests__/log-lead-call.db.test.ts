@@ -1,5 +1,5 @@
 import { eq } from 'drizzle-orm'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 
 /**
  * logLeadCall against a real Postgres: the lead row is locked while the
@@ -38,13 +38,42 @@ async function seedLead(phone: string) {
   return { campaign, lead }
 }
 
-const base = { callerId: OWNER, notes: null, callBackAt: null, bookedAt: null }
+const base = { callerId: OWNER, notes: null, callBackAt: null, bookedAt: null, trustedHistoricalSeed: true as const }
 
 describe.skipIf(!hasDb)('logLeadCall (Postgres)', () => {
   beforeAll(cleanup)
   afterAll(async () => {
     await cleanup()
     await pool.end()
+  })
+
+  it('atomically claims, renews, and excludes another tab; rejects stale log tokens', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] })
+    vi.setSystemTime(new Date('2026-09-29T14:00:00Z'))
+    try {
+      const { lead } = await seedLead('3035550918')
+      const first = await store.claimLeadCall(OWNER, lead.id, OWNER)
+      await expect(store.claimLeadCall(OWNER, lead.id, 'other-caller')).rejects.toThrow(/already working/)
+      await expect(store.claimLeadCall(OWNER, lead.id, OWNER)).rejects.toThrow(/already working/)
+      expect(await store.renewLeadCall(OWNER, lead.id, OWNER, first.token)).toBe(true)
+      await expect(store.logLeadCall({ ...base, trustedHistoricalSeed: undefined, lead, leaseToken: 'wrong', disposition: 'no_answer' }))
+        .rejects.toThrow(/session expired/)
+      await store.releaseLeadCall(OWNER, lead.id, OWNER, 'wrong')
+      await expect(store.claimLeadCall(OWNER, lead.id, 'other-caller')).rejects.toThrow(/already working/)
+      vi.setSystemTime(new Date('2026-09-29T14:03:00Z'))
+      expect(await store.renewLeadCall(OWNER, lead.id, OWNER, first.token)).toBe(false)
+      const second = await store.claimLeadCall(OWNER, lead.id, 'other-caller')
+      await store.releaseLeadCall(OWNER, lead.id, OWNER, first.token)
+      await expect(store.logLeadCall({ ...base, trustedHistoricalSeed: undefined, callerId: OWNER, lead, leaseToken: first.token, disposition: 'no_answer' }))
+        .rejects.toThrow(/session expired/)
+      await expect(store.logLeadCall({ ...base, trustedHistoricalSeed: undefined, callerId: OWNER, lead, leaseToken: second.token, disposition: 'no_answer' }))
+        .rejects.toThrow(/session expired/)
+      const result = await store.logLeadCall({ ...base, trustedHistoricalSeed: undefined, callerId: 'other-caller', lead, leaseToken: second.token, disposition: 'no_answer' })
+      expect(result.lead.unansweredAttempts).toBe(1)
+      expect(result.lead.nextDueAt).not.toBeNull()
+      await expect(store.logLeadCall({ ...base, trustedHistoricalSeed: undefined, callerId: 'other-caller', lead, leaseToken: second.token, disposition: 'no_answer' }))
+        .rejects.toThrow(/session expired/)
+    } finally { vi.useRealTimers() }
   })
 
   it('preserves the original submission anchor on duplicate webhook delivery', async () => {

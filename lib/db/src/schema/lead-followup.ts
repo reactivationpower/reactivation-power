@@ -111,6 +111,11 @@ export const campaignLeadsTable = pgTable(
     message: text("message"),
     status: text("status").notNull().default("new"), // new | attempted | reached | booked | confirmed | closed
     lastAttemptAt: timestamp("last_attempt_at", { withTimezone: true }),
+    /** Expiring exclusive call-screen lease. Token distinguishes tabs for the same staff member. */
+    callLeaseToken: text("call_lease_token"),
+    callLeaseCallerId: text("call_lease_caller_id"),
+    callLeaseStartedAt: timestamp("call_lease_started_at", { withTimezone: true }),
+    callLeaseExpiresAt: timestamp("call_lease_expires_at", { withTimezone: true }),
     /** Outcome of the most recent call (a LeadDisposition); explains a `closed` status. */
     lastDisposition: text("last_disposition"),
     /** When the lead is next due on the "call next" list: a retry from the lead cadence or a requested callback. Null when parked, booked or closed. */

@@ -23,6 +23,7 @@ import {
   applyLeadDisposition,
   reopenParkedLead,
   leadCallBlockReason,
+  leadQueueBlockReason,
   leadDispositionFieldError,
   planLeadImport,
   type CampaignInput,
@@ -569,6 +570,9 @@ export async function retryParkedLead(ownerId: string, leadId: string) {
 export interface LogLeadCallInput {
   lead: Pick<CampaignLeadRow, "id">;
   callerId: string | null;
+  leaseToken?: string;
+  /** Internal historical demo seeding only. Never pass from a portal action. */
+  trustedHistoricalSeed?: true;
   disposition: LeadDisposition;
   notes: string | null;
   callBackAt: Date | null;
@@ -582,6 +586,48 @@ export class LeadCallBlockedError extends Error {
     super(message);
     this.name = "LeadCallBlockedError";
   }
+}
+
+const LEASE_MS = 120_000;
+
+/** A row-locked compare-and-swap makes a lead callable by just one browser tab. */
+export async function claimLeadCall(ownerId: string, leadId: string, callerId: string) {
+  return db.transaction(async tx => {
+    const [lead] = await tx.select().from(campaignLeadsTable)
+      .where(and(eq(campaignLeadsTable.id, leadId), eq(campaignLeadsTable.ownerId, ownerId))).for("update");
+    if (!lead) throw new LeadCallBlockedError("Lead not found.");
+    const [campaign] = await tx.select({ status: leadCampaignsTable.status }).from(leadCampaignsTable)
+      .where(eq(leadCampaignsTable.id, lead.campaignId));
+    const blocked = leadCallBlockReason(campaign ?? { status: "archived" }, lead)
+      ?? leadQueueBlockReason(lead, new Date());
+    if (blocked) throw new LeadCallBlockedError(blocked);
+    const now = new Date();
+    if (lead.callLeaseToken && lead.callLeaseExpiresAt && lead.callLeaseExpiresAt > now) {
+      throw new LeadCallBlockedError("Another caller is already working on this lead.");
+    }
+    const token = randomUUID();
+    await tx.update(campaignLeadsTable).set({
+      callLeaseToken: token, callLeaseCallerId: callerId, callLeaseStartedAt: now,
+      callLeaseExpiresAt: new Date(now.getTime() + LEASE_MS),
+    }).where(eq(campaignLeadsTable.id, leadId));
+    return { token };
+  });
+}
+
+export async function renewLeadCall(ownerId: string, leadId: string, callerId: string, token: string) {
+  const now = new Date();
+  const [row] = await db.update(campaignLeadsTable).set({ callLeaseExpiresAt: new Date(now.getTime() + LEASE_MS) })
+    .where(and(eq(campaignLeadsTable.id, leadId), eq(campaignLeadsTable.ownerId, ownerId),
+      eq(campaignLeadsTable.callLeaseCallerId, callerId), eq(campaignLeadsTable.callLeaseToken, token),
+      gt(campaignLeadsTable.callLeaseExpiresAt, now))).returning({ id: campaignLeadsTable.id });
+  return Boolean(row);
+}
+
+export async function releaseLeadCall(ownerId: string, leadId: string, callerId: string, token: string) {
+  await db.update(campaignLeadsTable).set({
+    callLeaseToken: null, callLeaseCallerId: null, callLeaseStartedAt: null, callLeaseExpiresAt: null,
+  }).where(and(eq(campaignLeadsTable.id, leadId), eq(campaignLeadsTable.ownerId, ownerId),
+    eq(campaignLeadsTable.callLeaseCallerId, callerId), eq(campaignLeadsTable.callLeaseToken, token)));
 }
 
 /**
@@ -609,6 +655,13 @@ export async function logLeadCall(
       .where(eq(campaignLeadsTable.id, input.lead.id))
       .for("update");
     if (!current) throw new LeadCallBlockedError("Lead not found.");
+    if (!input.trustedHistoricalSeed && (!input.leaseToken || current.callLeaseToken !== input.leaseToken ||
+      current.callLeaseCallerId !== input.callerId ||
+      !current.callLeaseExpiresAt || current.callLeaseExpiresAt <= new Date())) {
+      throw new LeadCallBlockedError("Your call session expired or belongs to another caller. Return to Calls Now and reopen it.");
+    }
+    // Eligibility was checked when the lease was acquired. A caller may
+    // finish recording an already-started conversation after office hours.
     const [campaign] = await tx
       .select({ status: leadCampaignsTable.status })
       .from(leadCampaignsTable)
@@ -655,6 +708,10 @@ export async function logLeadCall(
         lastDisposition: next.lastDisposition,
         bookedAt: next.bookedAt,
         lastAttemptAt: now,
+        callLeaseToken: null,
+        callLeaseCallerId: null,
+        callLeaseStartedAt: null,
+        callLeaseExpiresAt: null,
         updatedAt: now,
       })
       .where(eq(campaignLeadsTable.id, current.id))
@@ -677,6 +734,31 @@ export interface CallNextItem {
   campaign: Pick<LeadCampaignRow, "id" | "name" | "nicheId">;
   /** Why it is on the list. */
   reason: "requested" | "new" | "due";
+}
+
+/** Latest actual logged attempt for queue context (not a computed due slot). */
+export async function queueCallHistory(ownerId: string, leadIds: string[]) {
+  if (!leadIds.length) return [];
+  return db.selectDistinctOn([leadCallsTable.leadId], {
+    leadId: leadCallsTable.leadId, disposition: leadCallsTable.disposition,
+    callerId: leadCallsTable.callerId, createdAt: leadCallsTable.createdAt,
+  }).from(leadCallsTable)
+    .where(and(eq(leadCallsTable.ownerId, ownerId), inArray(leadCallsTable.leadId, leadIds)))
+    .orderBy(leadCallsTable.leadId, desc(leadCallsTable.createdAt));
+}
+
+/** Leases remain visible while a caller finishes after calling hours. */
+export async function activeLeadCalls(ownerId: string, now: Date = new Date(), limit = 100): Promise<CallNextItem[]> {
+  const rows = await db.select({
+    lead: campaignLeadsTable,
+    campaign: { id: leadCampaignsTable.id, name: leadCampaignsTable.name, nicheId: leadCampaignsTable.nicheId },
+  }).from(campaignLeadsTable).innerJoin(leadCampaignsTable, eq(leadCampaignsTable.id, campaignLeadsTable.campaignId))
+    .where(and(eq(campaignLeadsTable.ownerId, ownerId),
+      eq(leadCampaignsTable.status, "active"),
+      gt(campaignLeadsTable.callLeaseExpiresAt, now)))
+    .orderBy(asc(campaignLeadsTable.callLeaseStartedAt)).limit(limit);
+  return rows.map(row => ({ ...row, reason: row.lead.requestedAt ? "requested" as const :
+    row.lead.status === "new" ? "new" as const : "due" as const }));
 }
 
 /**
