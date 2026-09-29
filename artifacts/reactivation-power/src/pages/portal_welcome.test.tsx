@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { cleanup, render, screen } from '@testing-library/react'
+import { act, cleanup, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Router } from 'wouter'
 import { memoryLocation } from 'wouter/memory-location'
@@ -16,7 +16,7 @@ afterEach(() => { cleanup(); vi.clearAllMocks() })
 describe('graduated welcome navigation', () => {
   for (const [product, path, cards, guide] of [
     ['reactivation', '/portal', ['/portal/training', '/portal/contacts', '/portal/dialer', '/portal/analytics'], ['/portal/training', '/portal/contacts', '/portal/dialer', '/portal/analytics']],
-    ['lead', '/portal/leads/start', ['/portal/campaigns', '/portal/leads', '/portal/leads/practice', '/portal/leads/analytics'], ['/portal/campaigns', '/portal/leads', '/portal/leads/practice', '/portal/leads/analytics']],
+    ['lead', '/portal/leads/start', ['/portal/campaigns', '/portal/leads?view=calls', '/portal/leads/practice', '/portal/leads/analytics'], ['/portal/campaigns', '/portal/leads?view=calls', '/portal/leads/practice', '/portal/leads/analytics']],
   ] as const) {
     it(`${product} keeps each card and guidance link navigable`, async () => {
       const { hook, history } = memoryLocation({ path, record: true })
@@ -56,6 +56,31 @@ describe('graduated welcome navigation', () => {
     expect(screen.queryByTestId('link-welcome-lead-4')).toBeNull()
     expect(screen.queryByTestId('link-guidance-lead-4')).toBeNull()
     expect(screen.getByTestId('link-welcome-lead-3').getAttribute('href')).toBe('/portal/leads/practice')
+  })
+  it('offers distinct persistent call queue and lead inventory links to owner and staff', async () => {
+    for (const role of ['owner', 'staff']) {
+      usePageData.mockReturnValue({ data: { products: { leadFollowUp: true }, participant: { role } } })
+      const { hook, history, navigate } = memoryLocation({ path: '/portal/campaigns', record: true })
+      const view = render(<Router hook={hook}><PortalNav /></Router>)
+      const nav = screen.getByRole('navigation', { name: 'Portal' })
+      const labels = Array.from(nav.querySelectorAll('a[href^="/portal/"]')).filter(a => a.getAttribute('data-testid')?.startsWith('link-lead-nav-')).map(a => a.textContent?.trim())
+      expect(labels).toEqual(role === 'owner' ? ['Calls Now', 'Leads', 'Campaigns', 'Analytics'] : ['Calls Now', 'Leads', 'Campaigns'])
+      const calls = screen.getByRole('link', { name: 'Calls Now' })
+      const leads = screen.getByRole('link', { name: 'Leads' })
+      expect(calls.getAttribute('href')).toBe('/portal/leads?view=calls')
+      expect(leads.getAttribute('href')).toBe('/portal/leads?view=all')
+      await userEvent.click(calls)
+      expect(history.at(-1)).toBe('/portal/leads?view=calls')
+      expect(calls.getAttribute('aria-current')).toBe('page')
+      expect(leads.getAttribute('aria-current')).toBeNull()
+      await userEvent.click(leads)
+      expect(leads.getAttribute('aria-current')).toBe('page')
+      expect(calls.getAttribute('aria-current')).toBeNull()
+      act(() => navigate('/portal/leads'))
+      expect(calls.getAttribute('aria-current')).toBe('page')
+      expect(leads.getAttribute('aria-current')).toBeNull()
+      view.unmount()
+    }
   })
 })
 

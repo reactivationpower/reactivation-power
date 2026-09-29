@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'wouter'
+import { Link, useSearch } from 'wouter'
 import { Inbox, Megaphone, PhoneCall } from 'lucide-react'
 import { usePageData } from '@/hooks/use-page-data'
 import { PageError, PageLoading } from '@/components/page-status'
@@ -72,7 +72,14 @@ function QueueRow({ item, data, mode }: { item: QueueItem; data: LeadDashboard; 
 }
 
 export default function LeadsPage() {
-  const [view, setView] = useState<'calls' | 'leads'>('calls')
+  const searchParams = new URLSearchParams(useSearch())
+  // Legacy /portal/leads (and unknown view values) still open the call queue.
+  const view = searchParams.get('view') === 'all' ? 'leads' : 'calls'
+  const viewHref = (target: 'calls' | 'all') => {
+    const params = new URLSearchParams(searchParams)
+    params.set('view', target)
+    return `/portal/leads?${params.toString()}`
+  }
   const [searchInput, setSearchInput] = useState('')
   const [search, setSearch] = useState('')
   const [campaign, setCampaign] = useState('')
@@ -121,8 +128,8 @@ export default function LeadsPage() {
       </div>)}
     </dl>
     <nav aria-label="Lead views" className="mt-8 flex gap-2 border-b border-border">
-      <button type="button" onClick={() => setView('calls')} aria-current={view === 'calls' ? 'page' : undefined} className={`px-4 py-3 text-sm font-semibold ${view === 'calls' ? 'border-b-2 border-accent text-foreground' : 'text-muted-foreground'}`}>Calls Now ({data.callsNow?.length ?? 0})</button>
-      <button type="button" onClick={() => setView('leads')} aria-current={view === 'leads' ? 'page' : undefined} className={`px-4 py-3 text-sm font-semibold ${view === 'leads' ? 'border-b-2 border-accent text-foreground' : 'text-muted-foreground'}`}>All Leads</button>
+      <Link href={viewHref('calls')} data-testid="link-lead-view-calls" aria-current={view === 'calls' ? 'page' : undefined} className={`px-4 py-3 text-sm font-semibold ${view === 'calls' ? 'border-b-2 border-accent text-foreground' : 'text-muted-foreground'}`}>Calls Now ({data.callsNow?.length ?? 0})</Link>
+      <Link href={viewHref('all')} data-testid="link-lead-view-all" aria-current={view === 'leads' ? 'page' : undefined} className={`px-4 py-3 text-sm font-semibold ${view === 'leads' ? 'border-b-2 border-accent text-foreground' : 'text-muted-foreground'}`}>All Leads</Link>
     </nav>
     {view === 'calls' ? <>
       <section aria-label="Ready to call" className="mt-7">

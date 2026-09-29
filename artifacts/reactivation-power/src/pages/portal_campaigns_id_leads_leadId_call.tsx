@@ -94,7 +94,7 @@ function ClaimedCall({ data }: { data: any }) {
       }, 300)
     }
   }, [lead.id])
-  if (claimError) return <div role="alert" className="mt-5 rounded-md border border-border bg-card p-5">{claimError} <Link href="/portal/leads" className="font-semibold underline">Back to Calls Now</Link></div>
+  if (claimError) return <div role="alert" className="mt-5 rounded-md border border-border bg-card p-5">{claimError} <Link href="/portal/leads?view=calls" className="font-semibold underline">Back to Calls Now</Link></div>
   if (!token) return <PageLoading />
   return <LeadCallScreen key={lead.id} leaseToken={token} campaign={campaign} lead={lead} niche={niche}
     callerName={participant.first_name} practiceName={owner?.practice_name ?? null}

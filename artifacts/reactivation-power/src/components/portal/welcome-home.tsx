@@ -11,7 +11,7 @@ const reactivation = [
 
 const leads = [
   { title: 'Campaigns', description: 'Connect each ad or offer once, and every new lead is added automatically and arrives ready to call, matched to the exact offer they responded to.', icon: Megaphone, href: '/portal/campaigns' },
-  { title: 'Calls Now & Leads', description: 'Work only the leads due for a call, see scheduled follow-ups coming up, or search the full leads list. Each call opens the script for the service and offer they asked about.', icon: PhoneCall, href: '/portal/leads' },
+  { title: 'Calls Now & Leads', description: 'Work only the leads due for a call, see scheduled follow-ups coming up, or search the full leads list. Each call opens the script for the service and offer they asked about.', icon: PhoneCall, href: '/portal/leads?view=calls' },
   { title: 'Practice the Script', description: 'Rehearse with scripts built around the exact campaigns you have running, so your team sounds ready the moment a real lead picks up.', icon: MessageSquareText, href: '/portal/leads/practice' },
   { title: 'Analytics', description: 'See response times, conversations, and appointments booked from leads.', icon: BarChart3, href: '/portal/leads/analytics' },
 ]
@@ -24,7 +24,7 @@ const reactivationGuidance = [
 ]
 const leadGuidance = [
   { question: 'New here?', answer: 'Set up your first Campaign.', href: '/portal/campaigns' },
-  { question: 'Ready to follow up and make calls?', answer: 'Open Calls Now & Leads.', href: '/portal/leads' },
+  { question: 'Ready to follow up and make calls?', answer: 'Open Calls Now & Leads.', href: '/portal/leads?view=calls' },
   { question: 'Want to rehearse before a live call?', answer: 'Practice the Script.', href: '/portal/leads/practice' },
   { question: 'Want to evaluate your team’s performance?', answer: 'Go to Analytics.', href: '/portal/leads/analytics' },
 ]

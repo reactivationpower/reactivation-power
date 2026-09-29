@@ -1,7 +1,7 @@
 // @ts-nocheck
 
 import { Link } from "wouter";
-import { useLocation, useParams } from "wouter";
+import { useLocation, useSearch } from "wouter";
 import {
   ArrowLeftRight,
   BarChart3,
@@ -24,9 +24,10 @@ const NAV = [
   { href: '/portal/analytics', label: 'Analytics', icon: BarChart3 },
 ] as const
 
-/** Leads are the first stop; campaign administration remains one click away. */
+/** Give the call queue and the full lead inventory their own persistent entries. */
 const LEAD_NAV = [
-  { href: '/portal/leads', label: 'Leads', icon: Inbox },
+  { href: '/portal/leads?view=calls', label: 'Calls Now', icon: PhoneCall },
+  { href: '/portal/leads?view=all', label: 'Leads', icon: Inbox },
   { href: '/portal/campaigns', label: 'Campaigns', icon: Megaphone },
   { href: '/portal/leads/analytics', label: 'Analytics', icon: BarChart3, ownerOnly: true },
 ] as const
@@ -83,6 +84,7 @@ function ProductSwitch({ pathname }: { pathname: string }) {
 
 export function PortalNav() {
   const [pathname] = useLocation();
+  const search = useSearch()
   const products = useProducts()
   const inLeadFollowUp = productForPath(pathname) === 'lead_followup'
   const items = inLeadFollowUp ? LEAD_NAV : NAV
@@ -91,11 +93,15 @@ export function PortalNav() {
       {products.leadFollowUp ? <ProductSwitch pathname={pathname} /> : null}
       {items.map((item) => {
         if ('ownerOnly' in item && item.ownerOnly && !products.isOwner) return null
-        const active = item.href === '/portal/leads' ? pathname === item.href : isActive(pathname, item.href, 'exact' in item)
+        const active = item.href.startsWith('/portal/leads?')
+          ? pathname === '/portal/leads' &&
+            (item.href.endsWith('view=all') ? new URLSearchParams(search).get('view') === 'all' : new URLSearchParams(search).get('view') !== 'all')
+          : isActive(pathname, item.href, 'exact' in item)
         return (
           <Link
             key={item.href}
             href={item.href}
+            data-testid={`link-lead-nav-${item.label.toLowerCase().replaceAll(' ', '-')}`}
             aria-current={active ? 'page' : undefined}
             className={cn(
               'flex shrink-0 items-center gap-2 whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium transition-colors',
