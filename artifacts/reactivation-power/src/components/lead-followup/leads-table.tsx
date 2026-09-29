@@ -2,7 +2,7 @@ import { Link } from 'wouter'
 import { PhoneCall } from 'lucide-react'
 import { formatDateTime } from '@workspace/shared/format'
 import { formatPhone } from '@workspace/shared/phone'
-import { LEAD_SOURCE_LABELS, isLeadDue, isParkedLead, leadCallBlockReason, timeAgo } from '@workspace/shared/lead-followup'
+import { LEAD_SOURCE_LABELS, isLeadDue, isParkedLead, leadCallBlockReason, leadQueueBlockReason, timeAgo } from '@workspace/shared/lead-followup'
 import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { LeadStatusBadge, RequestedTimeBadge } from './lead-bits'
@@ -33,6 +33,7 @@ export function LeadsTable({
           {!rows.length && <TableRow><TableCell colSpan={showCampaign ? 7 : 6} className="py-8 text-center text-muted-foreground">{emptyText}</TableCell></TableRow>}
           {rows.map(({ lead, campaign }) => {
             const blocked = leadCallBlockReason(campaign, lead)
+              ?? leadQueueBlockReason(lead, new Date(nowMs))
             return <TableRow key={lead.id} data-testid={`row-lead-${lead.id}`}>
               <TableCell>
                 <Link href={`/portal/campaigns/${campaign.id}/leads/${lead.id}`} className="font-medium text-foreground hover:underline" data-testid={`link-lead-${lead.id}`}>
@@ -50,7 +51,11 @@ export function LeadsTable({
               <TableCell className="text-sm text-muted-foreground">
                 <RequestedTimeBadge requestedAt={lead.requestedAt} requestedTime={lead.requestedTime} status={lead.status} />
               </TableCell>
-              <TableCell><LeadStatusBadge status={lead.status} />{isParkedLead(lead) ? <p className="mt-1 text-xs text-muted-foreground">Parked</p> : null}</TableCell>
+              <TableCell><LeadStatusBadge status={lead.status} />
+                {lead.requestedAt && lead.status === 'attempted' && !lead.nextDueAt
+                  ? <p className="mt-1 text-xs text-amber-700">Confirmation pending · review manually</p>
+                  : isParkedLead(lead) ? <p className="mt-1 text-xs text-muted-foreground">Parked</p> : null}
+              </TableCell>
               <TableCell className="text-sm text-muted-foreground">
                 {lead.lastAttemptAt ? timeAgo(lead.lastAttemptAt, nowMs) : '—'}
                 {isLeadDue(lead, nowMs) && <p className="text-xs font-medium text-amber-700">Due now</p>}

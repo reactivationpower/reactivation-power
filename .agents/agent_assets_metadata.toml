@@ -84,3 +84,59 @@ mtime_ms = 1790637399353
 storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/c9105f07-794f-4166-a868-594c44f4a5f2/aa8cafc9-a1a9-4789-8ace-0a1ee1a8ef88"
 storage_version_token = "1790637404912122"
 content_type = "image/jpeg"
+
+[[outputs]]
+id = "ICR3fVFPLk82rtwKgauzJ"
+uri = "file://attached_assets/lead-calls-now-ready-coming-up.png"
+type = "image"
+title = "Calls Now and Coming Up"
+description = "Actual demo portal: ready calls are separated from scheduled follow-ups."
+logical_id = "1cbbed02-71a3-4739-a8c8-7c76a919375c"
+content_hash = "sha256:363af2ee611d0d6562f8995e29076a8795b555de24ebb53ff1ba5ca3c2a3b177"
+size = 297576
+mtime_ms = 1790688982463
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/1cbbed02-71a3-4739-a8c8-7c76a919375c/9b16151f-c346-4dec-bcb5-cab52024c659"
+storage_version_token = "1790689273147515"
+content_type = "image/png"
+
+[[outputs]]
+id = "cxLvZv_DJBUSK2hgZ6cfL"
+uri = "file://attached_assets/lead-all-leads-table.png"
+type = "image"
+title = "All Leads"
+description = "All lead records remain searchable outside the daily calling queue."
+logical_id = "b441492b-3061-4ae4-9255-eb15152934e7"
+content_hash = "sha256:da0b67184fb4cbb27327a91e9407404d764c6cbd81f237b069166d762511e260"
+size = 436431
+mtime_ms = 1790688991727
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/b441492b-3061-4ae4-9255-eb15152934e7/b725e92c-a777-46bb-a213-c5e4cffd1999"
+storage_version_token = "1790689273867528"
+content_type = "image/png"
+
+[[outputs]]
+id = "yuhN79pZkFI1G23EVqDV4"
+uri = "file://attached_assets/lead-day5-script.png"
+type = "image"
+title = "Day-five calling script"
+description = "Actual script with automatic “a few days ago” wording and the original submission date. Synthetic demonstration lead."
+logical_id = "007b857e-7826-4892-8924-74f1e13f0ae3"
+content_hash = "sha256:9d7aee0dcda814902a8be0c634fe14a6876f920c2df33d50676e1039fb6b992e"
+size = 153456
+mtime_ms = 1790689226563
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/007b857e-7826-4892-8924-74f1e13f0ae3/6b3733bf-c207-4031-9680-b8a057600b0d"
+storage_version_token = "1790689274457063"
+content_type = "image/png"
+
+[[outputs]]
+id = "4VzlA3q6v8rjzpHlGgozC"
+uri = "file://attached_assets/lead-two-month-script.png"
+type = "image"
+title = "Two-month check-in script"
+description = "Actual long-term follow-up opening with a warning to confirm current offer terms. Synthetic demonstration lead."
+logical_id = "71e47e51-d0a5-4f1b-ad0a-1bd8d2fc6508"
+content_hash = "sha256:37290d89b3438025f5bc821d1e19b2af26de0dbd024f61675d9a3fc1aaed743f"
+size = 178673
+mtime_ms = 1790689234023
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/71e47e51-d0a5-4f1b-ad0a-1bd8d2fc6508/a1285a29-d572-41a6-ad7a-e410e4f5912e"
+storage_version_token = "1790689274968256"
+content_type = "image/png"

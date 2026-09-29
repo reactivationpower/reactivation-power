@@ -6,7 +6,7 @@
  * api-server (server-side validation, import dedupe).
  */
 
-import { officeClock, parseRequestedTime } from './lead-requested-time.ts'
+import { officeClock, officeWallClockOf, parseRequestedTime } from './lead-requested-time.ts'
 
 // ---------- products ----------
 
@@ -434,7 +434,7 @@ export const LEAD_DISPOSITIONS = [
   'do_not_call',
 ] as const
 
-export const LEAD_MAX_UNANSWERED_ATTEMPTS = 3
+export const LEAD_MAX_UNANSWERED_ATTEMPTS = 9
 
 export function isParkedLead(lead: {
   status: string
@@ -477,7 +477,9 @@ export function formatRate(rate: number): string {
  * - booked_elsewhere / do_not_call: closed; last_disposition says why.
  */
 export function applyLeadDisposition(
-  lead: Pick<LeadCadenceState, 'status' | 'unansweredAttempts'> & { bookedAt?: Date | null },
+  lead: Pick<LeadCadenceState, 'status' | 'unansweredAttempts'> & {
+    bookedAt?: Date | null; submittedAt?: Date | string | null; requestedAt?: string | null
+  },
   input: LeadDispositionInput,
 ): LeadCadenceState {
   const { disposition, now } = input
@@ -485,10 +487,13 @@ export function applyLeadDisposition(
   const keptBooking = holdsBooking ? (lead.bookedAt ?? null) : null
   if (disposition === 'no_answer' || disposition === 'voicemail') {
     const unansweredAttempts = lead.unansweredAttempts + 1
+    const confirmation = Boolean(lead.requestedAt) && !holdsBooking
     return {
       status: lead.status === 'new' ? 'attempted' : lead.status,
       unansweredAttempts,
-      nextDueAt: holdsBooking ? null : nextLeadAttemptAt(unansweredAttempts, now),
+      nextDueAt: holdsBooking ? null : confirmation
+        ? nextConfirmationAttemptAt(now, lead.requestedAt!)
+        : nextLeadAttemptAt(unansweredAttempts, now, lead.submittedAt),
       lastDisposition: disposition,
       bookedAt: keptBooking,
     }
@@ -552,22 +557,105 @@ export function isReachedDisposition(d: LeadDisposition): boolean {
   return REACHED_DISPOSITIONS.includes(d)
 }
 
+const OFFICE_TZ = 'America/New_York'
+const cadenceDays = [0, 0, 0, 1, 2, 4, 6, 9, 13] as const
+const officeParts = (instant: Date) => {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: OFFICE_TZ, year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+  }).formatToParts(instant)
+  const num = (key: string) => Number(parts.find((p) => p.type === key)?.value)
+  return { y: num('year'), m: num('month'), d: num('day'), h: num('hour') % 24, min: num('minute') }
+}
+
+/** Convert an office wall-clock time to an instant, including DST changes. */
+function officeInstant(y: number, m: number, d: number, hour: number, minute = 0): Date {
+  const wall = Date.UTC(y, m - 1, d, hour, minute)
+  let instant = wall
+  for (let i = 0; i < 3; i++) {
+    const p = officeParts(new Date(instant))
+    const displayed = Date.UTC(p.y, p.m - 1, p.d, p.h, p.min)
+    instant += wall - displayed
+  }
+  return new Date(instant)
+}
+
+function officeDay(anchor: Date, offset: number, hour: number): Date {
+  const p = officeParts(anchor)
+  const date = new Date(Date.UTC(p.y, p.m - 1, p.d + offset))
+  return officeInstant(date.getUTCFullYear(), date.getUTCMonth() + 1, date.getUTCDate(), hour)
+}
+
+function officeMonths(anchor: Date, months: number, hour: number): Date {
+  const p = officeParts(anchor)
+  const first = new Date(Date.UTC(p.y, p.m - 1 + months, 1))
+  const last = new Date(Date.UTC(first.getUTCFullYear(), first.getUTCMonth() + 1, 0)).getUTCDate()
+  return officeInstant(first.getUTCFullYear(), first.getUTCMonth() + 1, Math.min(p.d, last), hour)
+}
+
+/** Nearest eligible office-hour instant, without changing a source timestamp. */
+function duringOfficeHours(at: Date): Date {
+  const p = officeParts(at)
+  if (p.h < 9) return officeInstant(p.y, p.m, p.d, 9)
+  if (p.h >= 18) return officeDay(at, 1, 9)
+  return at
+}
+
+function sameOfficeDay(a: Date, b: Date): boolean {
+  const left = officeParts(a)
+  const right = officeParts(b)
+  return left.y === right.y && left.m === right.m && left.d === right.d
+}
+
+/** Start the distinct check-in script at the same two-month calendar anchor as the queue. */
+export function isLongTermLeadCheckIn(submittedAt: Date | string, now: Date): boolean {
+  const anchor = new Date(submittedAt)
+  return Number.isFinite(anchor.getTime()) && now >= officeMonths(anchor, 2, 10)
+}
+
 /**
- * Retry cadence for a lead nobody has reached yet. Leads go cold within
- * days, so the cadence is front-loaded and short — nothing like the
- * quarterly reactivation cycle:
- *   1st unanswered attempt -> again later today (4 hours)
- *   2nd                    -> tomorrow
- *   3rd                    -> day three
- *   4th and later          -> parked (null): off the call-next list until
- *                             the lead calls back or someone reopens them.
- * `unansweredAttempts` counts consecutive no-answer/voicemail attempts
- * INCLUDING the one just logged.
+ * Nine attempts: initial call, two spaced calls in the first 24 hours,
+ * then days 2, 3, 5, 7, 10 and 14. Later, one check-in every two calendar
+ * months. Expired slots are skipped, never stacked into a catch-up burst.
  */
-export function nextLeadAttemptAt(unansweredAttempts: number, now: Date): Date | null {
-  if (unansweredAttempts <= 1) return new Date(now.getTime() + 4 * HOUR)
-  if (unansweredAttempts <= 3) return new Date(now.getTime() + DAY)
-  return null
+export function nextLeadAttemptAt(unansweredAttempts: number, now: Date, submittedAt?: Date | string | null): Date {
+  const parsed = submittedAt ? new Date(submittedAt) : now
+  const anchor = Number.isFinite(parsed.getTime()) ? parsed : now
+  const earliest = now.getTime() + 3 * HOUR
+  // A rolling 24-hour window, not "same calendar date": evening inquiries
+  // can receive their remaining spaced attempts during next morning's hours.
+  for (let i = Math.max(1, unansweredAttempts); i < 3; i++) {
+    const candidate = duringOfficeHours(new Date(Math.max(anchor.getTime() + i * 4 * HOUR, now.getTime() + 4 * HOUR)))
+    if (candidate.getTime() < anchor.getTime() + 24 * HOUR) return candidate
+  }
+  for (let i = Math.max(3, unansweredAttempts); i < cadenceDays.length; i++) {
+    const planned = officeDay(anchor, cadenceDays[i], i % 2 === 0 ? 15 : 10)
+    const candidate = duringOfficeHours(new Date(Math.max(
+      planned.getTime(), earliest, anchor.getTime() + 24 * HOUR,
+    )))
+    // If the intended day ran out, skip it; never bunch several missed calls.
+    if (sameOfficeDay(candidate, planned)) return candidate
+  }
+  const start = officeParts(anchor)
+  const today = officeParts(now)
+  let month = Math.max(2, Math.floor(((today.y - start.y) * 12 + today.m - start.m) / 2) * 2)
+  for (;;) {
+    const target = officeMonths(anchor, month, month % 4 === 0 ? 15 : 10)
+    if (target.getTime() > earliest) return target
+    month += 2
+  }
+}
+
+/** Unanswered appointment confirmations never join the sales cadence. */
+export function nextConfirmationAttemptAt(now: Date, requestedAt: string): Date | null {
+  const parts = requestedAt.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/)
+  if (!parts) return null
+  const appointment = officeInstant(+parts[1], +parts[2], +parts[3], +parts[4], +parts[5])
+  const tomorrow = officeDay(now, 1, 9)
+  if (tomorrow < appointment) return tomorrow
+  const laterToday = new Date(now.getTime() + 4 * HOUR)
+  return officeParts(laterToday).h >= 9 && officeParts(laterToday).h < 18 && laterToday < appointment
+    ? laterToday : null
 }
 
 export const LEAD_DISPOSITION_LABELS: Record<LeadDisposition, string> = {
@@ -655,6 +743,22 @@ export function isLeadDue(
   const due = typeof lead.nextDueAt === 'string' ? new Date(lead.nextDueAt).getTime() : lead.nextDueAt.getTime()
   const at = typeof now === 'number' ? now : now.getTime()
   return due <= at
+}
+
+/** Why a lead is not in the working queue yet (separate from campaign/DNC blocking). */
+export function leadQueueBlockReason(
+  lead: { status: string; nextDueAt: Date | string | null; requestedAt?: string | null },
+  now: Date,
+): string | null {
+  const hour = officeClock(now).getHours()
+  if (hour < 9 || hour >= 18) return 'Please call during office hours (9 AM–6 PM Eastern).'
+  if (lead.nextDueAt && new Date(lead.nextDueAt).getTime() > now.getTime()) return 'The next call is scheduled for later.'
+  if (lead.requestedAt && !['booked', 'confirmed'].includes(lead.status) &&
+    lead.requestedAt.slice(0, 16).replace(' ', 'T') <= officeWallClockOf(now)) {
+    return 'The requested appointment time has passed; review this lead before calling.'
+  }
+  if (lead.status === 'new' || isLeadDue(lead, now)) return null
+  return 'No call is due for this lead.'
 }
 
 export interface CampaignConversion {

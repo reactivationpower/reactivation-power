@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { readFileSync } from 'node:fs'
 import {
   campaignPriceSentence,
   campaignTokens,
@@ -51,6 +52,21 @@ describe('campaignTokens', () => {
     expect(t.submitted_ago).toBe('yesterday')
     expect(t.submitted_date).toMatch(/September 22/)
   })
+  it('does not make up a submission date when an uploaded file had none', () => {
+    const t = campaignTokens(campaign, { submittedAt: null }, NOW)
+    expect(t.submitted_date).toBe('')
+    expect(t.submitted_ago).toBe('')
+  })
+  it('renders the real opening with natural timing, including unknown dates', () => {
+    const flow = JSON.parse(readFileSync('content/flows/general.lead.json', 'utf8')) as {
+      steps: Array<{ step_key: string; content: string }>
+    }
+    const opening = flow.steps.find(step => step.step_key === 'open')!.content
+    const render = (ago: string) => opening.replace('{{submitted_ago}}', ago).replace(/\s+/g, ' ')
+    expect(render(spokenAgo(new Date('2026-09-23T13:00:00Z'), NOW))).toContain('You reached out earlier today about')
+    expect(render('')).toContain('You reached out about')
+    expect(render('earlier today')).not.toContain('earlier today ago')
+  })
 
   it('never leaves a raw bracket when the campaign is sparse', () => {
     const t = campaignTokens(
@@ -85,9 +101,14 @@ describe('spoken helpers', () => {
     expect(spokenAgo(NOW, NOW)).toBe('earlier today')
     expect(spokenAgo(at(30), NOW)).toBe('yesterday')
     expect(spokenAgo(at(24 * 4), NOW)).toBe('a few days ago')
-    expect(spokenAgo(at(24 * 10), NOW)).toBe('a couple of weeks ago')
-    expect(spokenAgo(at(24 * 40), NOW)).toBe('a little while ago')
-    expect(spokenAgo('not a date', NOW)).toBe('recently')
+    expect(spokenAgo(at(24 * 10), NOW)).toBe('last week')
+    expect(spokenAgo(at(24 * 14), NOW)).toBe('about two weeks ago')
+    expect(spokenAgo(at(24 * 40), NOW)).toBe('a few weeks ago')
+    expect(spokenAgo(at(24 * 65), NOW)).toBe('a couple of months ago')
+    expect(spokenAgo('not a date', NOW)).toBe('')
+    // The office calendar, not UTC, decides whether a late-evening lead
+    // submitted today or yesterday.
+    expect(spokenAgo('2026-09-23T03:30:00Z', new Date('2026-09-23T14:00:00Z'))).toBe('yesterday')
   })
   it('drops the year for the current year only', () => {
     expect(formatSubmittedDate('2026-03-04T12:00:00Z', NOW)).not.toMatch(/2026/)

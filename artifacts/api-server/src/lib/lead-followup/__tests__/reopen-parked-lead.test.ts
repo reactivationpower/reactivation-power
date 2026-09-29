@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { applyLeadDisposition, isLeadDue, isParkedLead, reopenParkedLead } from '@workspace/shared/lead-followup'
 
 const now = new Date('2026-09-23T12:00:00Z')
-const parked = { status: 'attempted' as const, nextDueAt: null, unansweredAttempts: 3 }
+const parked = { status: 'attempted' as const, nextDueAt: null, unansweredAttempts: 9 }
 
 describe('reopening parked leads', () => {
   it('resets attempts and makes the lead immediately due without changing history', () => {
@@ -17,12 +17,12 @@ describe('reopening parked leads', () => {
     expect(next.nextDueAt?.getTime()).toBe(now.getTime() + 4 * 60 * 60 * 1000)
   })
 
-  it('includes leads with more than three missed attempts', () => {
-    expect(isParkedLead({ ...parked, unansweredAttempts: 7 })).toBe(true)
+  it('includes stranded legacy leads with nine or more missed attempts', () => {
+    expect(isParkedLead({ ...parked, unansweredAttempts: 10 })).toBe(true)
   })
 
   it.each([
-    { ...parked, unansweredAttempts: 2 },
+    { ...parked, unansweredAttempts: 8 },
     { ...parked, nextDueAt: now },
     ...['new', 'reached', 'booked', 'confirmed', 'closed'].map(status => ({ ...parked, status })),
   ])('does not reopen a non-parked lead: %j', lead => {

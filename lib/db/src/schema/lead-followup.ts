@@ -96,6 +96,8 @@ export const campaignLeadsTable = pgTable(
     source: text("source").notNull(), // upload | webhook | gohighlevel | manual
     /** When the lead responded to the ad (list uploads default to the upload time). */
     submittedAt: timestamp("submitted_at", { withTimezone: true }).notNull().defaultNow(),
+    /** Source-provided submission instant. Null for imports whose original date is unknown. */
+    sourceSubmittedAt: timestamp("source_submitted_at", { withTimezone: true }),
     /** Free text the lead gave for when they'd like to come in, exactly as written. */
     requestedTime: text("requested_time"),
     /**

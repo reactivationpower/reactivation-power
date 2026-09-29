@@ -1,5 +1,6 @@
 import { formatDollars, type PriceLineStyle } from './lead-followup.ts'
 import { spokenRequestedTime } from './lead-requested-time.ts'
+import { officeClock } from './lead-requested-time.ts'
 
 /**
  * Merge tokens a LEAD script reads from the campaign the lead answered.
@@ -81,8 +82,9 @@ export function formatSubmittedDate(when: string | Date | null, now: Date = new 
   if (!when) return ''
   const d = typeof when === 'string' ? new Date(when) : when
   if (!Number.isFinite(d.getTime())) return ''
-  const sameYear = d.getFullYear() === now.getFullYear()
+  const sameYear = officeClock(d).getFullYear() === officeClock(now).getFullYear()
   return d.toLocaleDateString('en-US', {
+    timeZone: 'America/New_York',
     weekday: 'long',
     month: 'long',
     day: 'numeric',
@@ -92,19 +94,22 @@ export function formatSubmittedDate(when: string | Date | null, now: Date = new 
 
 /** "earlier today" / "yesterday" / "a few days ago" / "a couple of weeks ago" — how a caller would say it. */
 export function spokenAgo(when: string | Date | null, now: Date = new Date()): string {
-  // No lead (practice page) or an unparseable date: "You reached out recently about..."
-  if (!when) return 'recently'
+  // Unknown original date must never be replaced with the upload date.
+  if (!when) return ''
   const d = typeof when === 'string' ? new Date(when) : when
-  if (!Number.isFinite(d.getTime())) return 'recently'
-  // Calendar days, not 24-hour blocks: a form filled at 9 pm is "yesterday"
-  // on a 9 am call, the way a person would say it.
+  if (!Number.isFinite(d.getTime())) return ''
+  const officeNow = officeClock(now)
+  const officeSubmitted = officeClock(d)
   const startOfDay = (x: Date) => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime()
-  const days = Math.round((startOfDay(now) - startOfDay(d)) / 86_400_000)
+  const days = Math.round((startOfDay(officeNow) - startOfDay(officeSubmitted)) / 86_400_000)
   if (days <= 0) return 'earlier today'
   if (days === 1) return 'yesterday'
   if (days < 7) return 'a few days ago'
-  if (days < 21) return 'a couple of weeks ago'
-  return 'a little while ago'
+  if (days < 14) return 'last week'
+  if (days < 21) return 'about two weeks ago'
+  if (days < 45) return 'a few weeks ago'
+  if (days < 90) return 'a couple of months ago'
+  return 'a while ago'
 }
 
 export function campaignTokens(
@@ -122,7 +127,7 @@ export function campaignTokens(
     price_line: campaignPriceSentence(campaign),
     urgency_note: (campaign.urgencyNote ?? '').trim(),
     submitted_date: formatSubmittedDate(lead?.submittedAt ?? null, now),
-    submitted_ago: spokenAgo(lead?.submittedAt ?? null, now),
+    submitted_ago: lead ? spokenAgo(lead.submittedAt, now) : 'recently',
     // "Tuesday at 2": only the confirmation screens read it, and they are
     // only shown to a lead who has a slot, so the fallback is for practice.
     requested_time: spokenRequestedTime(lead?.requestedAt ?? null, now) || REQUESTED_TIME_PLACEHOLDER,

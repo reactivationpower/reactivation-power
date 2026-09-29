@@ -35,7 +35,7 @@ import {
 import { getAdminClient } from "../lib/supabase/admin";
 import { getStripeMode } from "../lib/stripe";
 import { getCronJobStatuses } from "../lib/cron/jobs";
-import { leadCallBlockReason } from '@workspace/shared/lead-followup';
+import { leadCallBlockReason, leadQueueBlockReason } from '@workspace/shared/lead-followup';
 import { DEFAULT_CALL_BATCH_SIZE } from '@workspace/shared/types';
 import { demoIsStale } from "../lib/demo/seed";
 import { demoPracticeByOwnerEmail } from "../lib/demo/config";
@@ -265,16 +265,21 @@ add("/portal/leads", "portal", async (req) => {
   const status = rawStatus === "new" || rawStatus === "parked" ? rawStatus : "all";
   const search = (queryString(req, "search") ?? "").trim().slice(0, 100);
   const page = Math.max(1, Math.min(10000, Number.parseInt(queryString(req, "page") ?? "1", 10) || 1));
-  const result = await leadStore.listAccountLeads(ownerId, { campaignId, status, search, page });
+  const now = new Date();
+  const [result, callsNow, comingUp] = await Promise.all([
+    leadStore.listAccountLeads(ownerId, { campaignId, status, search, page }),
+    leadStore.callNext(ownerId, now),
+    leadStore.upcomingLeadCalls(ownerId, now),
+  ]);
   return {
-    participant, isOwner, campaigns, ...result,
+    participant, isOwner, campaigns, ...result, callsNow, comingUp,
     stats: {
       received: campaigns.reduce((n, c) => n + c.leadCount, 0),
       new: campaigns.reduce((n, c) => n + c.newLeadCount, 0),
       reached: campaigns.reduce((n, c) => n + c.reachedCount, 0),
       booked: campaigns.reduce((n, c) => n + c.bookedCount, 0),
     },
-    now: new Date().toISOString(),
+    now: now.toISOString(),
   };
 });
 
@@ -321,7 +326,7 @@ add("/portal/campaigns/:id/leads/:leadId", "portal", async (req) => {
   if (!campaign || !lead || lead.campaignId !== campaign.id) notFound();
   const [niches, calls] = await Promise.all([campaignNicheOptions(ownerId), leadStore.listLeadCalls(lead.id)]);
   const niche = niches.find((n) => n.id === campaign.nicheId) ?? null;
-  const callBlocked = leadCallBlockReason(campaign, lead);
+  const callBlocked = leadCallBlockReason(campaign, lead) ?? leadQueueBlockReason(lead, new Date());
   return { id, leadId, participant, ownerId, isOwner, campaign, lead, niche, calls, callBlocked, now: new Date().toISOString() };
 });
 
@@ -333,7 +338,7 @@ add("/portal/campaigns/:id/leads/:leadId/call", "portal", async (req) => {
   if (!campaign || !lead || lead.campaignId !== campaign.id) notFound();
   // Archived campaigns and closed (do-not-call) leads have no call screen;
   // the detail page explains why. The action re-checks under a row lock.
-  if (leadCallBlockReason(campaign, lead)) redirect(`/portal/campaigns/${id}/leads/${leadId}`);
+  if (leadCallBlockReason(campaign, lead) ?? leadQueueBlockReason(lead, new Date())) redirect(`/portal/campaigns/${id}/leads/${leadId}`);
   const now = new Date();
   const [{ owner, flow, niches }, calls, queue] = await Promise.all([
     leadCallContext(ownerId, participant),

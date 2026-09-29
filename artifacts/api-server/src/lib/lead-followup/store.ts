@@ -1,6 +1,6 @@
 import { randomBytes, randomUUID } from "node:crypto";
 import { queueLeadEmail, deliverLeadEmails } from './notifications';
-import { and, asc, desc, eq, gte, ilike, inArray, isNotNull, isNull, lt, lte, ne, notInArray, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gt, gte, ilike, inArray, isNotNull, isNull, lt, lte, ne, notInArray, or, sql } from "drizzle-orm";
 import {
   campaignLeadsTable,
   campaignWebhookEventsTable,
@@ -15,8 +15,6 @@ import {
 } from "@workspace/db";
 import type { MappedLead, WebhookFieldMapping } from "@workspace/shared/lead-webhooks";
 import {
-  REQUESTED_GRACE_MS,
-  REQUESTED_SOON_MS,
   officeClock,
   officeWallClockOf,
   parseRequestedTime,
@@ -355,6 +353,7 @@ export async function importLeads(opts: {
           email: lead.email,
           source: opts.source,
           submittedAt: lead.submittedAt ?? submittedAt,
+          sourceSubmittedAt: lead.submittedAt,
           requestedTime: lead.requestedTime,
           requestedAt: lead.requestedAt,
           message: lead.message,
@@ -415,6 +414,7 @@ export async function upsertWebhookLead(opts: {
     email: opts.lead.email || null,
     source: opts.source,
     submittedAt,
+    sourceSubmittedAt: submittedAt,
     requestedTime: opts.lead.requestedTime || null,
     requestedAt: parseRequestedTime(opts.lead.requestedTime, officeClock(submittedAt)),
     message: opts.lead.message || null,
@@ -428,7 +428,8 @@ export async function upsertWebhookLead(opts: {
     .onConflictDoUpdate({
       target: [campaignLeadsTable.campaignId, campaignLeadsTable.phoneKey],
       set: {
-        submittedAt,
+        // A duplicate webhook delivery must not rewrite the original intake
+        // instant: it anchors both the cadence and the caller's age wording.
         updatedAt: submittedAt,
         email: sql`coalesce(excluded.email, ${campaignLeadsTable.email})`,
         requestedTime: sql`coalesce(excluded.requested_time, ${campaignLeadsTable.requestedTime})`,
@@ -620,6 +621,8 @@ export async function logLeadCall(
         status: current.status as LeadStatus,
         unansweredAttempts: current.unansweredAttempts,
         bookedAt: current.bookedAt,
+        submittedAt: current.submittedAt,
+        requestedAt: current.requestedAt,
       },
       {
         disposition: input.disposition,
@@ -678,8 +681,8 @@ export interface CallNextItem {
 
 /**
  * The "call next" list across the owner's ACTIVE campaigns: first the leads
- * who asked for an appointment time on the ad form that falls within the
- * next two days (or was missed less than a day ago) and are not yet locked
+ * who asked for an appointment time on the ad form (or missed one less
+ * than a day ago) and are not yet locked
  * in, soonest slot first; then every untouched lead newest first; then
  * callbacks and retries that have come due, soonest first (a booked lead's
  * requested callback included). Parked leads (next_due_at null after the
@@ -691,8 +694,10 @@ export interface CallNextItem {
 export async function callNext(
   ownerId: string,
   now: Date = new Date(),
-  limit = 50,
+  limit = 5000,
 ): Promise<CallNextItem[]> {
+  const officeHour = officeClock(now).getHours();
+  if (officeHour < 9 || officeHour >= 18) return [];
   const campaignCols = {
     id: leadCampaignsTable.id,
     name: leadCampaignsTable.name,
@@ -716,8 +721,9 @@ export async function callNext(
           // Mirrors leadEntryStepKey: anyone whose slot is not locked in yet.
           notInArray(campaignLeadsTable.status, ["booked", "confirmed", "closed"]),
           isNotNull(campaignLeadsTable.requestedAt),
-          gte(campaignLeadsTable.requestedAt, officeWallClockOf(new Date(now.getTime() - REQUESTED_GRACE_MS))),
-          lte(campaignLeadsTable.requestedAt, officeWallClockOf(new Date(now.getTime() + REQUESTED_SOON_MS))),
+          // After a failed confirmation call, wait for its own next due time.
+          sql`(${campaignLeadsTable.status} = 'new' OR (${campaignLeadsTable.nextDueAt} IS NOT NULL AND ${campaignLeadsTable.nextDueAt} <= ${now}))`,
+          gt(campaignLeadsTable.requestedAt, officeWallClockOf(now)),
         ),
       )
       .orderBy(asc(campaignLeadsTable.requestedAt))
@@ -729,7 +735,7 @@ export async function callNext(
         leadCampaignsTable,
         eq(leadCampaignsTable.id, campaignLeadsTable.campaignId),
       )
-      .where(and(base, eq(campaignLeadsTable.status, "new")))
+      .where(and(base, eq(campaignLeadsTable.status, "new"), sql`${campaignLeadsTable.requestedAt} IS NULL`))
       .orderBy(
         desc(campaignLeadsTable.submittedAt),
         desc(campaignLeadsTable.createdAt),
@@ -750,6 +756,8 @@ export async function callNext(
           ne(campaignLeadsTable.status, "closed"),
           isNotNull(campaignLeadsTable.nextDueAt),
           lte(campaignLeadsTable.nextDueAt, now),
+          // Confirmation work has its own reason and appointment window.
+          sql`(${campaignLeadsTable.requestedAt} IS NULL OR ${campaignLeadsTable.status} IN ('booked', 'confirmed'))`,
         ),
       )
       .orderBy(asc(campaignLeadsTable.nextDueAt))
@@ -759,8 +767,41 @@ export async function callNext(
   return [
     ...requested.map((r) => ({ ...r, reason: "requested" as const })),
     ...fresh.filter((r) => !seen.has(r.lead.id)).map((r) => ({ ...r, reason: "new" as const })),
-    ...due.filter((r) => !seen.has(r.lead.id)).map((r) => ({ ...r, reason: "due" as const })),
+    ...due.filter((r) => !seen.has(r.lead.id))
+      .sort((a, b) => Number(b.lead.lastDisposition === 'callback_later') - Number(a.lead.lastDisposition === 'callback_later'))
+      .map((r) => ({ ...r, reason: "due" as const })),
   ].slice(0, limit);
+}
+
+/** Scheduled leads stay visible without being presented as callable yet. */
+export async function upcomingLeadCalls(ownerId: string, now: Date = new Date(), limit = 100): Promise<CallNextItem[]> {
+  const campaignCols = {
+    id: leadCampaignsTable.id,
+    name: leadCampaignsTable.name,
+    nicheId: leadCampaignsTable.nicheId,
+  };
+  const outsideHours = officeClock(now).getHours() < 9 || officeClock(now).getHours() >= 18;
+  const rows = await db.select({ lead: campaignLeadsTable, campaign: campaignCols })
+    .from(campaignLeadsTable)
+    .innerJoin(leadCampaignsTable, eq(leadCampaignsTable.id, campaignLeadsTable.campaignId))
+    .where(and(
+      eq(campaignLeadsTable.ownerId, ownerId),
+      eq(leadCampaignsTable.status, 'active'),
+      ne(campaignLeadsTable.status, 'closed'),
+      or(
+        sql`${campaignLeadsTable.nextDueAt} > ${now}`,
+        outsideHours
+          ? sql`(${campaignLeadsTable.status} = 'new' OR ${campaignLeadsTable.nextDueAt} <= ${now})`
+          : sql`false`,
+      ),
+    ))
+    .orderBy(asc(campaignLeadsTable.nextDueAt))
+    .limit(limit);
+  return rows.map(row => ({
+    ...row,
+    reason: row.lead.requestedAt && row.lead.status !== 'booked' && row.lead.status !== 'confirmed'
+      ? 'requested' as const : 'due' as const,
+  }));
 }
 
 // ---------- demo / maintenance ----------

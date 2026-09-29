@@ -47,6 +47,22 @@ describe.skipIf(!hasDb)('logLeadCall (Postgres)', () => {
     await pool.end()
   })
 
+  it('preserves the original submission anchor on duplicate webhook delivery', async () => {
+    const { campaign } = await seedLead('3035550981')
+    const lead = { firstName: 'Form', lastName: 'Test', phone: '3035550982', email: '', requestedTime: '', message: '' }
+    const first = new Date('2026-09-23T13:00:00Z')
+    const repeated = new Date('2026-10-05T13:00:00Z')
+    const args = { campaign, lead, phoneKey: '3035550982', source: 'webhook' as const, suppressNotification: true }
+    const inserted = await store.upsertWebhookLead({ ...args, submittedAt: first })
+    const duplicate = await store.upsertWebhookLead({ ...args, submittedAt: repeated })
+    expect(inserted.outcome).toBe('created')
+    expect(duplicate.outcome).toBe('updated')
+    expect(duplicate.leadId).toBe(inserted.leadId)
+    const [row] = await db.select().from(campaignLeadsTable).where(eq(campaignLeadsTable.id, inserted.leadId))
+    expect(row.submittedAt.toISOString()).toBe(first.toISOString())
+    expect(row.sourceSubmittedAt?.toISOString()).toBe(first.toISOString())
+  })
+
   it('counts every concurrent unanswered attempt', async () => {
     const { lead } = await seedLead('3035550901')
     await Promise.all([
@@ -94,16 +110,20 @@ describe.skipIf(!hasDb)('logLeadCall (Postgres)', () => {
     const { lead: after } = await store.logLeadCall({ ...base, lead, disposition: 'callback_later', callBackAt })
     expect(after).toMatchObject({ status: 'booked' })
     expect(after.bookedAt?.toISOString()).toBe(appt.toISOString())
-    const queue = await store.callNext(OWNER, new Date())
+    // Queue only opens during Eastern calling hours; use tomorrow at 11 AM ET.
+    const officeOpen = new Date()
+    officeOpen.setUTCDate(officeOpen.getUTCDate() + 1)
+    officeOpen.setUTCHours(15, 0, 0, 0)
+    const queue = await store.callNext(OWNER, officeOpen)
     const hit = queue.find((q) => q.lead.id === lead.id)
     expect(hit?.reason).toBe('due')
     // Not yet due: off the list.
-    const later = new Date(Date.now() + 60 * 60_000)
+    const later = new Date(officeOpen.getTime() + 60 * 60_000)
     await store.logLeadCall({ ...base, lead, disposition: 'callback_later', callBackAt: later })
-    expect((await store.callNext(OWNER, new Date())).some((q) => q.lead.id === lead.id)).toBe(false)
+    expect((await store.callNext(OWNER, officeOpen)).some((q) => q.lead.id === lead.id)).toBe(false)
   })
 
-  it('puts a lead whose requested slot is within two days ahead of everyone, until it is confirmed', async () => {
+  it('prioritizes every new calendar booking for confirmation, even when the appointment is further out', async () => {
     const campaign = await store.createCampaign(OWNER, OWNER, {
       nicheId: 'vt-niche',
       name: 'Requested times',
@@ -113,16 +133,17 @@ describe.skipIf(!hasDb)('logLeadCall (Postgres)', () => {
       priceLineStyle: 'no_price',
       urgencyNote: null,
     })
-    const now = new Date()
-    const soon = new Date(now.getTime() + 6 * 3_600_000)
+    const now = new Date('2026-09-23T14:00:00Z')
+    const soon = new Date(now.getTime() + 6 * 3_600_000) // 4pm Eastern
     const far = new Date(now.getTime() + 10 * 86_400_000)
     const isoWall = (d: Date) => d.toISOString().slice(0, 16)
     await store.importLeads({
       campaign,
       source: 'manual',
       createdBy: OWNER,
+      submittedAt: now,
       rows: [
-        { firstName: 'Soon', phone: '3035550911', requestedTime: isoWall(soon) },
+        { firstName: 'Soon', phone: '3035550911', requestedTime: '2026-09-23T16:00' },
         { firstName: 'Far', phone: '3035550912', requestedTime: isoWall(far) },
         { firstName: 'Vague', phone: '3035550913', requestedTime: 'Saturday' },
         { firstName: 'Plain', phone: '3035550914' },
@@ -130,16 +151,17 @@ describe.skipIf(!hasDb)('logLeadCall (Postgres)', () => {
     })
     const leads = await store.listLeads(campaign.id)
     const byName = Object.fromEntries(leads.map((l) => [l.firstName, l]))
-    expect(byName.Soon.requestedAt?.slice(0, 16).replace(' ', 'T')).toBe(isoWall(soon))
+    expect(byName.Soon.requestedAt?.slice(0, 16).replace(' ', 'T')).toBe('2026-09-23T16:00')
     expect(byName.Vague.requestedAt).toBeNull()
 
     const queue = await store.callNext(OWNER, now)
     const ids = queue.map((q) => q.lead.id)
     expect(queue.find((q) => q.lead.id === byName.Soon.id)?.reason).toBe('requested')
     expect(ids.indexOf(byName.Soon.id)).toBeLessThan(ids.indexOf(byName.Plain.id))
-    // A slot more than two days out is an ordinary new lead, listed once.
-    expect(queue.find((q) => q.lead.id === byName.Far.id)?.reason).toBe('new')
+    // A booking further out still needs a prompt confirmation call.
+    expect(queue.find((q) => q.lead.id === byName.Far.id)?.reason).toBe('requested')
     expect(ids.filter((id) => id === byName.Soon.id)).toHaveLength(1)
+    expect((await store.callNext(OWNER, new Date(soon.getTime() + 60_000))).some((q) => q.lead.id === byName.Soon.id)).toBe(false)
 
     const { lead: after } = await store.logLeadCall({ ...base, lead: byName.Soon, disposition: 'confirmed', bookedAt: soon })
     expect(after).toMatchObject({ status: 'confirmed', lastDisposition: 'confirmed' })
@@ -173,9 +195,9 @@ describe.skipIf(!hasDb)('logLeadCall (Postgres)', () => {
     // At 9 am Eastern on Tuesday the slot is six hours out: top of the list.
     const queue = await store.callNext(OWNER, new Date('2026-09-22T13:00:00Z'))
     expect(queue.find((q) => q.lead.id === lead.id)?.reason).toBe('requested')
-    // Three days later it is just a stale new lead.
+    // Once the appointment has passed, it must not be pitched as a new lead.
     const later = await store.callNext(OWNER, new Date('2026-09-25T13:00:00Z'))
-    expect(later.find((q) => q.lead.id === lead.id)?.reason).toBe('new')
+    expect(later.find((q) => q.lead.id === lead.id)).toBeUndefined()
   })
 
   it('refuses booked without an appointment time and a callback without a time', async () => {

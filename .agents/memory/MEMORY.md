@@ -3,6 +3,7 @@
 - [Supabase admin accounts](supabase-admin-accounts.md) — admin roles live in auth app_metadata (kept after DDL access arrived); invite needs manual-link fallback; Base UI menu API.
 - [Transactional email via Resend](transactional-email.md) — send-only connector key, RESEND_FROM override, email_log in Supabase via drizzle, once-per-event mail needs an outbox not a log lookup.
 - [Lead caller analytics interpretation](lead-caller-analytics.md) — confirmation work stays separate from acquisition close rates to avoid duplicate booking credit and penalizing confirmation callers.
+- [Lead Follow-Up cadence and portal queue](lead-followup-cadence.md) — nine anchored attempts, calendar confirmations, authentic source dates, legacy retry migration, and authenticated visual preview.
 - [Script flow content-as-code](script-flows.md) — player italics need whole-paragraph parens; apply pairs duplicate from+to by sort_order; lead family needs per-slug general in tests; confirm_requested third entry + wall-clock slots.
 - [Stripe modes & billing tables](stripe-modes-and-billing.md) — env keys are LIVE; workspace uses sandbox via Stripe integration, STRIPE_MODE overrides; billing tables in Supabase via drizzle.
 - [Stripe dunning & webhook verification](stripe-dunning.md) — access keyed on customers.billing_status; Stripe retries are a Dashboard setting; sandbox test recipe without Stripe CLI.

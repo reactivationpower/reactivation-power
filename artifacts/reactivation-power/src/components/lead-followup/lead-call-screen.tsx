@@ -32,6 +32,7 @@ import { formatPhone } from '@workspace/shared/phone'
 import {
   LEAD_DISPOSITION_LABELS,
   isAppointmentDisposition,
+  isLongTermLeadCheckIn,
   leadEntryStepKey,
   timeAgo,
   type LeadDisposition,
@@ -82,6 +83,7 @@ interface Props {
     phone: string
     email: string | null
     submittedAt: string
+    sourceSubmittedAt?: string | null
     requestedTime: string | null
     requestedAt?: string | null
     message: string | null
@@ -174,9 +176,10 @@ export function LeadCallScreen({
   // appointment time for "confirmed".
   const entryStepKey = leadEntryStepKey(lead)
   const requestedLocal = useMemo(() => requestedAtLocalDate(lead.requestedAt), [lead.requestedAt])
+  const isLongTermCheckIn = !lead.requestedAt && isLongTermLeadCheckIn(lead.submittedAt, new Date(now))
   const extras = useMemo(
-    () =>
-      leadScriptExtras({
+    () => {
+      const tokens = leadScriptExtras({
         campaign,
         lead,
         callerName,
@@ -184,9 +187,54 @@ export function LeadCallScreen({
         owner,
         isProvider,
         now: new Date(now),
-      }),
-    [campaign, lead, callerName, practiceName, owner, isProvider, now],
+      })
+      // Never read a months-old promotion's price or deadline as current.
+      return isLongTermCheckIn ? { ...tokens, price_line: '', urgency_note: '', offer_price: '', regular_price: '' } : tokens
+    },
+    [campaign, lead, callerName, practiceName, owner, isProvider, now, isLongTermCheckIn],
   )
+  // Keep the established objection/booking branches available after the
+  // check-in opening; replace its first offer description until terms have
+  // been verified with the office.
+  const displayedSteps = useMemo(() => {
+    if (!isLongTermCheckIn) return flowSteps
+    const first = flowSteps.find(step => step.step_key === 'open') ?? flowSteps[0]
+    if (!first) return flowSteps
+    return [
+      { ...first, niche_id: null, step_key: 'open', title: lead.sourceSubmittedAt ? 'Two-month check-in' : 'Follow-up check-in', content: "Hi, this is {{caller_name}} with {{provider_name}}'s office. Is {{contact_first_name}} available, please?\n\nHi {{contact_first_name}}. You reached out {{submitted_ago}} about our {{offer_name}}. I'm checking in to see whether you're still interested in that service. Is now a good time for a quick chat?\n\n(Let them answer. Choose what you hear.)", sort_order: 0 },
+      { ...first, niche_id: null, id: `${first.id}-interested`, step_key: 'checkin_interested', title: 'Still interested', content: "I'm glad to hear that. What were you hoping to get help with?\n\n(Let them answer.)\n\nThe offer you saw before may have changed. I'll confirm what's currently available with the office before promising any price or terms.\n\n(Continue to the established questions below. If you need to check current options first, agree on a time to call back and choose Spoke, call back later.)", sort_order: 1 },
+      { ...first, niche_id: null, id: `${first.id}-unsure`, step_key: 'checkin_unsure', title: 'Not interested right now', content: "Of course, I understand. I don't want to keep calling if that isn't helpful. Would you prefer that we don't contact you about this again?\n\n(If they ask you to stop, choose Do not call below. Otherwise choose Spoke, didn't book; the unanswered sequence ends.)", sort_order: 2 },
+      { ...first, niche_id: null, id: `${first.id}-remember`, step_key: 'checkin_remember', title: "They don't remember", content: "No problem. You reached out about {{offer_name}}. Does that sound familiar?\n\n(If helpful, the exact form date is shown above. Don't claim the earlier offer is still valid. Choose what they say next.)", sort_order: 3 },
+      ...flowSteps.filter(step => step.step_key !== 'open').map(step => ({
+        ...step,
+        content: step.step_key === 'why_not_booked'
+          ? "Great. What got in the way of setting up a time before?\n\n(Do not promise the earlier promotion, price or included services. Verify what is currently available before quoting terms. Choose the reason they give.)"
+          : step.step_key === 'resp_dont_remember'
+            ? "No problem. It was an online inquiry about {{offer_name}}. Does that sound familiar?\n\n(The earlier promotion may have changed. Don't quote it until you've confirmed current terms.)"
+            : `(Older inquiry: confirm current offer details with the office before quoting any price, deadline or included services.)\n\n${step.content
+                .replace(/You get everything the offer includes/g, "We'll confirm what's currently included before booking")
+                .replace(/You'll get everything in the \{\{offer_name\}\} at that visit/g, "We'll confirm what's currently included before the visit")}`,
+      })),
+    ]
+  }, [flowSteps, isLongTermCheckIn, lead.sourceSubmittedAt])
+  const displayedChoices = useMemo(() => {
+    if (!isLongTermCheckIn) return flowChoices
+    const first = flowChoices[0]
+    if (!first) return flowChoices
+    const choice = (from: string, to: string, label: string, order: number): ScriptFlowChoice => ({
+      ...first, niche_id: null, id: `checkin-${from}-${to}`, from_step_key: from, to_step_key: to,
+      label, variant: 'default', sort_order: order,
+    })
+    return [
+      ...flowChoices.filter(choice => choice.from_step_key !== 'open'),
+      choice('open', 'checkin_interested', 'Still interested', 0),
+      choice('open', 'checkin_unsure', 'Not interested right now', 1),
+      choice('open', 'checkin_remember', "Don't remember", 2),
+      choice('checkin_interested', 'why_not_booked', 'Continue to the regular questions', 0),
+      choice('checkin_remember', 'checkin_interested', 'Interested', 0),
+      choice('checkin_remember', 'checkin_unsure', 'Not interested', 1),
+    ]
+  }, [flowChoices, isLongTermCheckIn])
 
   const fullName = `${lead.firstName} ${lead.lastName}`.trim()
   const vmBusiness = practiceName?.trim() || 'our office'
@@ -291,7 +339,8 @@ export function LeadCallScreen({
                 {formatPhone(lead.phone)}
               </a>
               {' \u00b7 '}
-              responded {timeAgo(lead.submittedAt, nowMs)}
+              {lead.sourceSubmittedAt ? <>responded {timeAgo(lead.sourceSubmittedAt, nowMs)}
+                {' \u00b7 '}submitted {new Date(lead.sourceSubmittedAt).toLocaleDateString('en-US', { timeZone: 'America/New_York', month: 'long', day: 'numeric', year: 'numeric' })}</> : 'Original submission date unknown'}
               {lead.requestedAt ? (
                 <>
                   {' \u00b7 '}
@@ -348,12 +397,15 @@ export function LeadCallScreen({
           {lead.message}
         </div>
       ) : null}
+      {isLongTermCheckIn && <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+        Two-month check-in: the original promotion may have changed. Confirm current pricing, terms, and availability with the office before offering an appointment; do not promise the old offer.
+      </div>}
 
       {/* 2. Script */}
       {flowSteps.length > 0 ? (
         <ScriptFlowPlayer
-          steps={flowSteps}
-          choices={flowChoices}
+          steps={displayedSteps}
+          choices={displayedChoices}
           nicheId={campaign.nicheId}
           sector="healthcare"
           extras={extras}

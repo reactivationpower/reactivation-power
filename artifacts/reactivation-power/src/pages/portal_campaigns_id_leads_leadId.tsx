@@ -104,8 +104,10 @@ export default function LeadDetailPage() {
             <dd className="text-foreground" data-testid="text-lead-source">{LEAD_SOURCE_LABELS[lead.source] ?? lead.source}</dd>
             <dt className="text-muted-foreground">Submitted</dt>
             <dd className="text-foreground" data-testid="text-lead-submitted">
-              {timeAgo(lead.submittedAt, nowMs)}
-              <span className="text-muted-foreground"> · {formatDateTime(lead.submittedAt)}</span>
+              {lead.sourceSubmittedAt ? <>
+                {timeAgo(lead.sourceSubmittedAt, nowMs)}
+                <span className="text-muted-foreground"> · {formatDateTime(lead.sourceSubmittedAt)}</span>
+              </> : <>Original submission date unknown <span className="text-muted-foreground">· imported {formatDateTime(lead.createdAt)}</span></>}
             </dd>
             <dt className="text-muted-foreground">Requested time</dt>
             <dd className="text-foreground" data-testid="text-lead-requested">

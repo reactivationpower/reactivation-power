@@ -6,48 +6,80 @@ import {
   formatRate,
   isLeadDisposition,
   isLeadDue,
+  isLongTermLeadCheckIn,
   leadCallBlockReason,
+  leadQueueBlockReason,
   leadDispositionFieldError,
   nextLeadAttemptAt,
+  nextConfirmationAttemptAt,
 } from '@workspace/shared/lead-followup'
 
 /** The lead retry cadence and the per-campaign conversion math. */
 
 const NOW = new Date('2026-09-23T15:00:00Z')
-const HOUR = 3_600_000
 
 describe('nextLeadAttemptAt', () => {
-  it('goes later today, tomorrow, day three, then parks', () => {
-    expect(nextLeadAttemptAt(1, NOW)?.getTime()).toBe(NOW.getTime() + 4 * HOUR)
-    expect(nextLeadAttemptAt(2, NOW)?.getTime()).toBe(NOW.getTime() + 24 * HOUR)
-    expect(nextLeadAttemptAt(3, NOW)?.getTime()).toBe(NOW.getTime() + 24 * HOUR)
-    expect(nextLeadAttemptAt(4, NOW)).toBeNull()
-    expect(nextLeadAttemptAt(9, NOW)).toBeNull()
+  const submitted = new Date('2026-09-23T13:00:00Z') // 9 AM Eastern
+  it('schedules three on day one, days 2, 3, 5, 7, 10, 14, then every two months', () => {
+    const expected = [
+      '2026-09-23T17:00:00.000Z', '2026-09-23T21:00:00.000Z',
+      '2026-09-24T14:00:00.000Z', '2026-09-25T19:00:00.000Z',
+      '2026-09-27T14:00:00.000Z', '2026-09-29T19:00:00.000Z',
+      '2026-10-02T14:00:00.000Z', '2026-10-06T19:00:00.000Z',
+      '2026-11-23T15:00:00.000Z', '2027-01-23T20:00:00.000Z',
+    ]
+    let attempt = submitted
+    expected.forEach((time, index) => {
+      const due = nextLeadAttemptAt(index + 1, attempt, submitted)
+      expect(due.toISOString()).toBe(time)
+      attempt = due
+    })
+  })
+  it('skips expired slots instead of creating a catch-up burst', () => {
+    expect(nextLeadAttemptAt(1, new Date('2026-09-28T15:00:00Z'), submitted).toISOString()).toBe('2026-09-29T19:00:00.000Z')
+  })
+  it('uses the rolling first 24 hours for a lead submitted after office hours', () => {
+    const evening = new Date('2026-09-23T23:00:00Z') // 7pm Eastern
+    const morning = new Date('2026-09-24T13:00:00Z') // first office call at 9am
+    expect(nextLeadAttemptAt(1, morning, evening).toISOString()).toBe('2026-09-24T17:00:00.000Z')
+    expect(nextLeadAttemptAt(2, new Date('2026-09-24T17:00:00Z'), evening).toISOString()).toBe('2026-09-24T21:00:00.000Z')
+    // Day-two cannot add another call to that same date; the next
+    // available named slot is day three.
+    expect(nextLeadAttemptAt(3, new Date('2026-09-24T21:00:00Z'), evening).toISOString()).toBe('2026-09-25T19:00:00.000Z')
+  })
+  it('keeps the second first-day opportunity across midnight without duplicating day two', () => {
+    const ten = new Date('2026-09-23T14:00:00Z') // 10am Eastern
+    const first = new Date('2026-09-23T18:00:00Z')
+    expect(nextLeadAttemptAt(1, ten, ten).toISOString()).toBe('2026-09-23T18:00:00.000Z')
+    expect(nextLeadAttemptAt(2, first, ten).toISOString()).toBe('2026-09-24T13:00:00.000Z')
+    expect(nextLeadAttemptAt(2, new Date('2026-09-24T13:00:00Z'), ten).toISOString()).toBe('2026-09-24T16:00:00.000Z')
+  })
+  it('bounds appointment confirmation to before the requested time', () => {
+    expect(nextConfirmationAttemptAt(NOW, '2026-09-24T09:00')?.toISOString()).toBe('2026-09-23T19:00:00.000Z')
+    expect(nextConfirmationAttemptAt(NOW, '2026-09-23T12:00')).toBeNull()
+  })
+  it('switches to the check-in script on the same two-month calendar date', () => {
+    expect(isLongTermLeadCheckIn(submitted, new Date('2026-11-23T14:59:00Z'))).toBe(false)
+    expect(isLongTermLeadCheckIn(submitted, new Date('2026-11-23T15:00:00Z'))).toBe(true)
   })
 })
 
 describe('applyLeadDisposition', () => {
   const fresh = { status: 'new' as const, unansweredAttempts: 0 }
 
-  it('walks a never-answered lead through the cadence and parks it', () => {
-    let state = applyLeadDisposition(fresh, { disposition: 'no_answer', now: NOW })
+  it('keeps an unanswered lead scheduled beyond week two', () => {
+    const submittedAt = new Date('2026-09-23T13:00:00Z')
+    let state = applyLeadDisposition({ ...fresh, submittedAt }, { disposition: 'no_answer', now: submittedAt })
     expect(state.status).toBe('attempted')
     expect(state.unansweredAttempts).toBe(1)
-    expect(state.nextDueAt?.getTime()).toBe(NOW.getTime() + 4 * HOUR)
-
-    state = applyLeadDisposition(state, { disposition: 'voicemail', now: NOW })
-    expect(state.unansweredAttempts).toBe(2)
-    expect(state.nextDueAt?.getTime()).toBe(NOW.getTime() + 24 * HOUR)
-
-    state = applyLeadDisposition(state, { disposition: 'no_answer', now: NOW })
-    expect(state.unansweredAttempts).toBe(3)
-    expect(state.nextDueAt?.getTime()).toBe(NOW.getTime() + 24 * HOUR)
-
-    state = applyLeadDisposition(state, { disposition: 'no_answer', now: NOW })
-    expect(state.unansweredAttempts).toBe(4)
-    expect(state.nextDueAt).toBeNull()
+    for (let i = 2; i <= 10; i++) {
+      const at = state.nextDueAt!
+      state = applyLeadDisposition({ ...state, submittedAt }, { disposition: 'voicemail', now: at })
+      expect(state.unansweredAttempts).toBe(i)
+      expect(state.nextDueAt?.getTime()).toBeGreaterThan(at.getTime())
+    }
     expect(state.status).toBe('attempted')
-    expect(state.lastDisposition).toBe('no_answer')
+    expect(state.lastDisposition).toBe('voicemail')
   })
 
   it('never demotes a reached lead back to attempted on a missed retry', () => {
@@ -137,6 +169,14 @@ describe('booked leads survive later calls', () => {
 })
 
 describe('who may be called', () => {
+  it('keeps future callbacks out of the working queue and stops office-hour calling', () => {
+    const open = new Date('2026-09-23T15:00:00Z')
+    expect(leadQueueBlockReason({ status: 'new', nextDueAt: null }, open)).toBeNull()
+    expect(leadQueueBlockReason({ status: 'attempted', nextDueAt: new Date('2026-09-24T14:00:00Z') }, open)).toMatch(/later/)
+    expect(leadQueueBlockReason({ status: 'new', nextDueAt: null }, new Date('2026-09-23T01:00:00Z'))).toMatch(/office hours/)
+    expect(leadQueueBlockReason({ status: 'booked', nextDueAt: null }, open)).toMatch(/No call is due/)
+    expect(leadQueueBlockReason({ status: 'new', nextDueAt: null, requestedAt: '2026-09-23T10:59' }, open)).toMatch(/passed/)
+  })
   it('blocks archived campaigns and closed leads with a reason the caller can read', () => {
     expect(leadCallBlockReason({ status: 'archived' }, { status: 'new' })).toMatch(/archived/)
     expect(leadCallBlockReason({ status: 'active' }, { status: 'closed', lastDisposition: 'do_not_call' })).toMatch(/not to be called/)
