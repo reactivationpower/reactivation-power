@@ -154,3 +154,17 @@ mtime_ms = 1790690788358
 storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/2d280863-0527-416a-8ec7-8e875f98d486/364b962e-3da6-4edd-b3dc-cfce03fcabff"
 storage_version_token = "1790690801186829"
 content_type = "image/png"
+
+[[outputs]]
+id = "WrrrhrYWPX6IY1X3oK2Yw"
+uri = "file://attached_assets/generated_images/retry-versus-requested-callback.png"
+type = "image"
+title = "Automatic retry vs. requested callback"
+description = "Static comparison showing the queue labels and different script openings. Illustrative wording and sample data only; no code or app changes."
+logical_id = "c1e782f6-04c9-48d9-b639-14ff99c3fc3c"
+content_hash = "sha256:6b80d854afc196d7dad9cb3f2f4ec6c2544ab970167ef37e56b7e402b41061f9"
+size = 1056227
+mtime_ms = 1790691385758
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/c1e782f6-04c9-48d9-b639-14ff99c3fc3c/e22510a5-754d-4147-9efe-f9032cf24b2e"
+storage_version_token = "1790691399337595"
+content_type = "image/png"
