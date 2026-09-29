@@ -17,6 +17,10 @@ describe('graduated welcome navigation', () => {
   it('uses the approved due-calls wording and descriptions for owners and staff', () => {
     for (const isOwner of [true, false]) {
       const view = render(<WelcomeHome product="lead" isOwner={isOwner} />)
+      expect(screen.getByTestId('link-welcome-lead-1').textContent).toContain('Connect Your Campaigns')
+      expect(screen.getByTestId('link-welcome-lead-1').textContent).toContain('Start here. We’ll guide you step by step to add your offer, connect your lead form, and check that new leads are coming through.')
+      expect(screen.getByTestId('link-guidance-lead-1').textContent).toContain('Start with Connect Your Campaigns.')
+      expect(screen.getByText('New here? Start by connecting your first campaign. We’ll guide you from setup to your first follow-up call.')).toBeTruthy()
       expect(screen.getByTestId('link-welcome-lead-2').textContent).toContain('Calls Due Now & Leads')
       expect(screen.getByTestId('link-welcome-lead-2').textContent).toContain('See new leads and follow-ups that are ready for a call right now, or browse the full list of every lead.')
       expect(screen.getByTestId('link-guidance-lead-2').textContent).toContain('Open Calls Due Now & Leads.')

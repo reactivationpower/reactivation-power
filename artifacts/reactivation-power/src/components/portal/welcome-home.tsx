@@ -10,7 +10,7 @@ const reactivation = [
 ]
 
 const leads = [
-  { title: 'Campaigns', description: 'Connect each ad or offer once. Every new lead arrives ready to call, matched to the offer they chose.', icon: Megaphone, href: '/portal/campaigns' },
+  { title: 'Connect Your Campaigns', description: 'Start here. We’ll guide you step by step to add your offer, connect your lead form, and check that new leads are coming through.', icon: Megaphone, href: '/portal/campaigns' },
   { title: 'Calls Due Now & Leads', description: 'See new leads and follow-ups that are ready for a call right now, or browse the full list of every lead.', icon: PhoneCall, href: '/portal/leads?view=calls' },
   { title: 'Practice the Script', description: 'Rehearse scripts built around your live campaigns, so your team sounds ready when a real lead picks up.', icon: MessageSquareText, href: '/portal/leads/practice' },
   { title: 'Analytics', description: 'See response times, conversations, and appointments booked from leads, by campaign and team member.', icon: BarChart3, href: '/portal/leads/analytics' },
@@ -23,7 +23,7 @@ const reactivationGuidance = [
   { question: 'Want to evaluate your team’s performance?', answer: 'Go to Analytics.', href: '/portal/analytics' },
 ]
 const leadGuidance = [
-  { question: 'New here?', answer: 'Set up your first Campaign.', href: '/portal/campaigns' },
+  { question: 'New here?', answer: 'Start with Connect Your Campaigns.', href: '/portal/campaigns' },
   { question: 'Ready to follow up and make calls?', answer: 'Open Calls Due Now & Leads.', href: '/portal/leads?view=calls' },
   { question: 'Want to rehearse before a live call?', answer: 'Practice the Script.', href: '/portal/leads/practice' },
   { question: 'Want to evaluate your team’s performance?', answer: 'Go to Analytics.', href: '/portal/leads/analytics' },
@@ -37,7 +37,7 @@ export function WelcomeHome({ product, isOwner = true }: { product: 'reactivatio
       <div className="welcome-intro">
         <div className="welcome-eyebrow"><span className="welcome-eyebrow-line" aria-hidden="true" />{product === 'lead' ? 'LEAD FOLLOW-UP' : 'YOUR WORKSPACE'}</div>
         <h1>Where would you like to go?</h1>
-        <p>{product === 'lead' ? 'Turn the people who responded to your ads into booked appointments.' : 'Everything you need to reconnect with patients, in one place.'}</p>
+        <p>{product === 'lead' ? 'New here? Start by connecting your first campaign. We’ll guide you from setup to your first follow-up call.' : 'Everything you need to reconnect with patients, in one place.'}</p>
       </div>
       <div className="welcome-grid" aria-label="Choose a destination">
         {cards.map(({ title, description, icon: Icon, href }, index) => {

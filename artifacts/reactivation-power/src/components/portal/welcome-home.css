@@ -24,7 +24,8 @@
 .welcome-card-title { color: #263a4c; font-size: 21px; font-weight: 680; line-height: 1.2; letter-spacing: -.025em; }
 .welcome-card-description { max-width: 315px; color: #697a88; font-size: 14px; line-height: 1.55; }
 .welcome-home--lead .welcome-card-description { min-height: calc(3 * 1.55em); }
-.welcome-home--lead .welcome-card-title { white-space: nowrap; }
+.welcome-home--lead .welcome-card-copy { min-width: 0; flex: 1; }
+.welcome-home--lead .welcome-card-title { display: block; white-space: nowrap; font-size: clamp(18px, 2.05vw, 21px); }
 /* Anchor the copy below the icon even when a staff-only notice adds height. */
 .welcome-home--lead .welcome-card { justify-content: flex-start; }
 .welcome-home--lead .welcome-card-bottom { margin-top: 12px; flex: 1; align-items: flex-start; }
@@ -46,9 +47,12 @@
 .welcome-guidance-list a:hover span { text-decoration: underline; }
 .welcome-guidance-unavailable { display: block; padding: 6px 8px; margin: 0 -8px; font-size: 13px; line-height: 1.6; opacity: .7; }
 .welcome-guidance strong { color: #354c5c; font-weight: 680; }
+@media (max-width: 900px) and (min-width: 701px) {
+  .welcome-home--lead .welcome-card-description { min-height: calc(4 * 1.55em); }
+}
 @media (max-width: 700px) {
   .welcome-home--lead .welcome-card-description { min-height: 0; }
-  .welcome-home--lead .welcome-card-title { white-space: normal; }
+  .welcome-home--lead .welcome-card-title { white-space: normal; font-size: 21px; }
   .welcome-home { min-height: auto; padding: 50px 18px 72px; }
   .welcome-intro { margin-bottom: 30px; }
   .welcome-grid { grid-template-columns: 1fr; gap: 13px; }
