@@ -18,6 +18,7 @@ import {
 } from './config'
 import { DEMO_PRACTICE_COPY, type DemoPracticeCopy } from './practice-copy'
 import { DEMO_LEAD_CAMPAIGNS, demoAppointmentTime, demoLeadCall } from './lead-campaign'
+import { seedDemoLeadAnalyticsHistory } from './lead-analytics-history'
 import { setLeadFollowUpAccess } from '@/lib/lead-followup/access'
 import * as leadStore from '@/lib/lead-followup/store'
 
@@ -759,6 +760,7 @@ export async function seedDemoData(practice: DemoPractice): Promise<SeedSummary>
 
   // ----- stamp the owner -----
   await seedLeadFollowUp(practice, ownerId, niches)
+  await seedDemoLeadAnalyticsHistory(practice, ownerId, callerIds)
 
   must(
     await supabase
