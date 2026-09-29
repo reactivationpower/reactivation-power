@@ -168,3 +168,17 @@ mtime_ms = 1790691385758
 storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/c1e782f6-04c9-48d9-b639-14ff99c3fc3c/e22510a5-754d-4147-9efe-f9032cf24b2e"
 storage_version_token = "1790691399337595"
 content_type = "image/png"
+
+[[outputs]]
+id = "ugW0lNLlRcIUQeZTj_4mT"
+uri = "file://documents/Lead_Follow_Up_First_Campaign_Guide.docx"
+type = "word_document"
+title = "Lead Follow-Up: First Campaign Guide"
+description = "Downloadable Word document with beginner-friendly setup instructions, connection testing, and a first-campaign checklist."
+logical_id = "fc6f2130-d4cb-4da8-a124-5f4286360f06"
+content_hash = "sha256:73b31e4c6cc84370a62660298f8a6109e2359ac8ee868148bda57e6412a30350"
+size = 5117
+mtime_ms = 1790702240650
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/fc6f2130-d4cb-4da8-a124-5f4286360f06/001bbb72-fa26-4512-8337-4002b63cab4f"
+storage_version_token = "1790702244785333"
+content_type = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
