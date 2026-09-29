@@ -140,3 +140,17 @@ mtime_ms = 1790689234023
 storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/71e47e51-d0a5-4f1b-ad0a-1bd8d2fc6508/a1285a29-d572-41a6-ad7a-e410e4f5912e"
 storage_version_token = "1790689274968256"
 content_type = "image/png"
+
+[[outputs]]
+id = "cddp_wmqPsQGGx0oQ3TJH"
+uri = "file://attached_assets/generated_images/proposed-calls-now-review.png"
+type = "image"
+title = "Proposed Calls Now layout"
+description = "Static visual proposal only: restored lead details, green/pink appointment labels, Call Now buttons, and Coming Up with next-call times. No app code changed."
+logical_id = "14ff9aef-277c-4841-bd97-4071be1b9609"
+content_hash = "sha256:0f09f247cb4b8b429915d89ff7e480a3a5051f774f29c9c9dc741b898a2cee3a"
+size = 975414
+mtime_ms = 1790689983875
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/14ff9aef-277c-4841-bd97-4071be1b9609/c0e4d53d-046f-47a5-a9f5-0fa346184121"
+storage_version_token = "1790689995046244"
+content_type = "image/png"
