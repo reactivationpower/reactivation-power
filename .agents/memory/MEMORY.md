@@ -1,4 +1,5 @@
 - [Next.js port architecture](next-port-architecture.md) — actions via allow-listed RPC + per-page loaders; CRLF sources, headless H.264 limits, placeholder-grep first.
+- [Private video streaming](private-video-streaming.md) — cached Blob ranges can misreport totals and offsets; validate actual bytes, and distinguish protocol checks from real iPad playback.
 - [Supabase Postgres access & migrations](supabase-postgres-access.md) — SUPABASE_DB_URL pooler + relaxed TLS; never drizzle-kit push; MCP tools not mounted; ask for a reset DB password up front.
 - [Supabase admin accounts](supabase-admin-accounts.md) — admin roles live in auth app_metadata (kept after DDL access arrived); invite needs manual-link fallback; Base UI menu API.
 - [Transactional email via Resend](transactional-email.md) — send-only connector key, RESEND_FROM override, email_log in Supabase via drizzle, once-per-event mail needs an outbox not a log lookup.

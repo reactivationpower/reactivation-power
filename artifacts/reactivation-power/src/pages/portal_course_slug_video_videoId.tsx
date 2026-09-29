@@ -56,6 +56,7 @@ export default function VideoPage() {
         <div className="lg:col-span-2">
           <div className="mt-5">
             <VideoPlayer
+              key={video.id}
               videoId={video.id}
               courseId={course.id}
               moduleId={module.id}
