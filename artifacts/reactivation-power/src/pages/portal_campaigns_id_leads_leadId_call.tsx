@@ -63,7 +63,7 @@ function ClaimedCall({ data }: { data: any }) {
       // claim. Do not let it display a stale script or log with a stale token.
       if (event.persisted) {
         setToken(null)
-        setClaimError('Call session ended when you left this page. Return to Calls Now to reopen it.')
+        setClaimError('Call session ended when you left this page. Return to Calls Due Now to reopen it.')
       }
     }
     window.addEventListener('pageshow', onPageShow)
@@ -71,7 +71,7 @@ function ClaimedCall({ data }: { data: any }) {
       if (entry.leavingPage || !entry.token) return
       try {
         const result = await renewLeadCall(lead.id, entry.token)
-        if (mounted && !result?.renewed) { setToken(null); setClaimError('Call session expired. Return to Calls Now to reopen it.') }
+        if (mounted && !result?.renewed) { setToken(null); setClaimError('Call session expired. Return to Calls Due Now to reopen it.') }
       } catch {
         // A brief network interruption does not grant another user access;
         // the next heartbeat retries. The server rejects stale logging.
@@ -94,7 +94,7 @@ function ClaimedCall({ data }: { data: any }) {
       }, 300)
     }
   }, [lead.id])
-  if (claimError) return <div role="alert" className="mt-5 rounded-md border border-border bg-card p-5">{claimError} <Link href="/portal/leads?view=calls" className="font-semibold underline">Back to Calls Now</Link></div>
+  if (claimError) return <div role="alert" className="mt-5 rounded-md border border-border bg-card p-5">{claimError} <Link href="/portal/leads?view=calls" className="font-semibold underline">Back to Calls Due Now</Link></div>
   if (!token) return <PageLoading />
   return <LeadCallScreen key={lead.id} leaseToken={token} campaign={campaign} lead={lead} niche={niche}
     callerName={participant.first_name} practiceName={owner?.practice_name ?? null}

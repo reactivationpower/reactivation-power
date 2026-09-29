@@ -98,18 +98,18 @@ export default function PortalStartPage() {
       {products?.leadFollowUp && <section className="mt-10" aria-labelledby="call-next-heading">
         <div className="flex items-end justify-between gap-3">
           <div>
-            <h2 id="call-next-heading" className="text-xl font-semibold text-foreground">Calls Now</h2>
+            <h2 id="call-next-heading" className="text-xl font-semibold text-foreground">Calls Due Now</h2>
             <p className="mt-1 text-sm text-muted-foreground">
               New inquiries, appointment confirmations, and callbacks or follow-ups due now.
             </p>
           </div>
           <Link href="/portal/leads" className="text-sm font-medium text-accent hover:underline">
-            Calls Now &amp; All Leads
+            Calls Due Now &amp; All Leads
           </Link>
         </div>
         {callNext.length === 0 ? (
           <p className="mt-4 rounded-lg border border-dashed border-border bg-card p-6 text-center text-sm text-muted-foreground" data-testid="text-call-next-empty">
-            No calls ready during office calling hours (9 AM–6 PM Eastern). Open Calls Now to see upcoming follow-ups.
+            No calls ready during office calling hours (9 AM–6 PM Eastern). Open Calls Due Now to see upcoming follow-ups.
           </p>
         ) : (
           <ul className="mt-4 divide-y divide-border overflow-hidden rounded-lg border border-border bg-card" data-testid="list-call-next">

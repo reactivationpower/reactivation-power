@@ -11,7 +11,7 @@ beforeEach(() => { window.history.replaceState(null, '', '/portal/leads') })
 afterEach(() => { cleanup(); vi.clearAllMocks() })
 
 describe('account-wide leads landing', () => {
-  it('refreshes the Calls Now list while left open', () => {
+  it('refreshes the Calls Due Now list while left open', () => {
     const reload = vi.fn()
     usePageData.mockReturnValue({ loading: false, error: null, reload, data: {
       campaigns: [], rows: [], callsNow: [], comingUp: [],
@@ -60,7 +60,7 @@ describe('account-wide leads landing', () => {
       } }],
     } })
     render(<LeadsPage />)
-    expect(screen.getByRole('link', { name: 'Calls Now (1)' })).toBeTruthy()
+    expect(screen.getByRole('link', { name: 'Calls Due Now (1)' })).toBeTruthy()
     expect(screen.getByText('Jane Doe')).toBeTruthy()
     expect(screen.getByText('Alex Lee')).toBeTruthy()
      expect(screen.getByRole('button', { name: 'Call Now' }).getAttribute('href')).toBe('/portal/campaigns/c1/leads/l1/call')
@@ -77,9 +77,9 @@ describe('account-wide leads landing', () => {
     render(<Router hook={hook}><LeadsPage /></Router>)
     expect(screen.getByRole('link', { name: 'All Leads' }).getAttribute('aria-current')).toBe('page')
     expect(screen.getByRole('search')).toBeTruthy()
-    fireEvent.click(screen.getByRole('link', { name: 'Calls Now (0)' }))
+    fireEvent.click(screen.getByRole('link', { name: 'Calls Due Now (0)' }))
     expect(history?.at(-1)).toBe('/portal/leads?view=calls&campaign=c1')
-    expect(screen.getByRole('link', { name: 'Calls Now (0)' }).getAttribute('aria-current')).toBe('page')
+    expect(screen.getByRole('link', { name: 'Calls Due Now (0)' }).getAttribute('aria-current')).toBe('page')
     expect(screen.queryByRole('search')).toBeNull()
     act(() => navigate('/portal/leads?view=all&campaign=c1'))
     expect(screen.getByRole('search')).toBeTruthy()
