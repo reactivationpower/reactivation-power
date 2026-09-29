@@ -13,3 +13,5 @@ Published Autoscale responses cannot carry unbounded large video bodies through 
 **Why:** Direct authenticated HTTP probes of both training videos returned a published-site HTTP 500 with an explicit 32 MiB response-size limit for open-ended ranges, while smaller ranges succeeded. This explained a shared delivery failure that correct two-byte and seeking probes had missed; the initial range-header fix alone did not restore iPad playback.
 
 **How to apply:** Keep video range responses bounded below the platform limit and verify complete consecutive chunks, not only headers or the first few bytes. Include published-endpoint checks when testing streaming changes: localhost bypasses this limit. Real-device playback remains a separate verification step.
+
+On 2026-09-29, the user confirmed both affected Module 1 videos played on their actual iPad after the bounded-response change. This confirms the approach for playback on that device; it does not establish that seeking or every lesson was tested.
