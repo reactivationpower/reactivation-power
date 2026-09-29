@@ -1,17 +1,18 @@
 import { ArrowLeftRight, ArrowUpRight, BarChart3, CreditCard, LogOut, Megaphone, MessageSquareText, PhoneCall, Settings, Inbox } from 'lucide-react'
 import './_group.css'
+import './Proposed.css'
 
 // Extracted from portal/welcome-home.tsx, portal-nav.tsx and portal_layout.tsx.
 // No routes, sessions, progress or customer records are accessed in this preview.
 const cards = [
-  { title: 'Campaigns', description: 'Connect each ad or offer once, and every new lead is added automatically and arrives ready to call, matched to the exact offer they responded to.', icon: Megaphone },
-  { title: 'Calls Due Now', description: 'See new leads and follow-ups ready for a call.', icon: PhoneCall },
-  { title: 'Practice the Script', description: 'Rehearse with scripts built around the exact campaigns you have running, so your team sounds ready the moment a real lead picks up.', icon: MessageSquareText },
-  { title: 'Analytics', description: 'See response times, conversations, and appointments booked from leads.', icon: BarChart3 },
+  { title: 'Campaigns', description: 'Connect each ad or offer once. Every new lead arrives ready to call, matched to the offer they chose.', icon: Megaphone },
+  { title: 'Calls Due Now & Leads', description: 'See new leads and follow-ups that are ready for a call right now, or browse the full list of every lead.', icon: PhoneCall },
+  { title: 'Practice the Script', description: 'Rehearse scripts built around your live campaigns, so your team sounds ready when a real lead picks up.', icon: MessageSquareText },
+  { title: 'Analytics', description: 'See response times, conversations, and appointments booked from leads, by campaign and team member.', icon: BarChart3 },
 ]
 const guidance = [
   { question: 'New here?', answer: 'Set up your first Campaign.' },
-  { question: 'Ready to follow up and make calls?', answer: 'Open Calls Due Now.' },
+  { question: 'Ready to follow up and make calls?', answer: 'Open Calls Due Now & Leads.' },
   { question: 'Want to rehearse before a live call?', answer: 'Practice the Script.' },
   { question: 'Want to evaluate your team’s performance?', answer: 'Go to Analytics.' },
 ]

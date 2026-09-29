@@ -1,0 +1,8 @@
+/* Proposed-only tweaks: keep every card's heading on the same baseline by
+   reserving a fixed three-line block for the description. */
+.welcome-card-description { min-height: calc(3 * 1.55em); }
+.welcome-card-title { white-space: nowrap; }
+@media (max-width: 700px) {
+  .welcome-card-description { min-height: 0; }
+  .welcome-card-title { white-space: normal; }
+}
