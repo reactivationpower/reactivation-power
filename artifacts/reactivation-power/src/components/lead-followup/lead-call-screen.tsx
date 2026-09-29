@@ -217,10 +217,10 @@ export function LeadCallScreen({
     const first = flowSteps.find(step => step.step_key === 'open') ?? flowSteps[0]
     if (!first) return flowSteps
     return [
-      { ...first, niche_id: null, step_key: 'open', title: lead.sourceSubmittedAt ? 'Two-month check-in' : 'Follow-up check-in', content: "Hi, this is {{caller_name}} with {{provider_name}}'s office. Is {{contact_first_name}} available, please?\n\nHi {{contact_first_name}}. You reached out {{submitted_ago}} about our {{offer_name}}. I'm checking in to see whether you're still interested in that service. Is now a good time for a quick chat?\n\n(Let them answer. Choose what you hear.)", sort_order: 0 },
+      { ...first, niche_id: null, step_key: 'open', title: lead.sourceSubmittedAt ? 'Two-month check-in' : 'Follow-up check-in', content: "Hi, this is {{caller_name}} with {{provider_name}}'s office. Is {{contact_first_name}} available, please?\n\nHi {{contact_first_name}}. You submitted a form{{submission_timing}} about our {{offer_name}}. I'm checking in to see whether you're still interested in that service. Is now a good time for a quick chat?\n\n(Let them answer. Choose what you hear.)", sort_order: 0 },
       { ...first, niche_id: null, id: `${first.id}-interested`, step_key: 'checkin_interested', title: 'Still interested', content: "I'm glad to hear that. What were you hoping to get help with?\n\n(Let them answer.)\n\nThe offer you saw before may have changed. I'll confirm what's currently available with the office before promising any price or terms.\n\n(Continue to the established questions below. If you need to check current options first, agree on a time to call back and choose Spoke, call back later.)", sort_order: 1 },
       { ...first, niche_id: null, id: `${first.id}-unsure`, step_key: 'checkin_unsure', title: 'Not interested right now', content: "Of course, I understand. I don't want to keep calling if that isn't helpful. Would you prefer that we don't contact you about this again?\n\n(If they ask you to stop, choose Do not call below. Otherwise choose Spoke, didn't book; the unanswered sequence ends.)", sort_order: 2 },
-      { ...first, niche_id: null, id: `${first.id}-remember`, step_key: 'checkin_remember', title: "They don't remember", content: "No problem. You reached out about {{offer_name}}. Does that sound familiar?\n\n(If helpful, the exact form date is shown above. Don't claim the earlier offer is still valid. Choose what they say next.)", sort_order: 3 },
+      { ...first, niche_id: null, id: `${first.id}-remember`, step_key: 'checkin_remember', title: "They don't remember", content: "No problem. You submitted a form about {{offer_name}}. Does that sound familiar?\n\n(If helpful, the exact form date is shown above. Don't claim the earlier offer is still valid. Choose what they say next.)", sort_order: 3 },
       ...flowSteps.filter(step => step.step_key !== 'open').map(step => ({
         ...step,
         content: step.step_key === 'why_not_booked'
@@ -255,7 +255,7 @@ export function LeadCallScreen({
   const fullName = `${lead.firstName} ${lead.lastName}`.trim()
   const vmBusiness = practiceName?.trim() || 'our office'
   const vmCallback = officePhone?.trim() || '(your office number)'
-  const voicemailScript = `Hi ${lead.firstName}, this is ${callerName} from ${vmBusiness}. You reached out about our ${campaign.name} and I wanted to help you get that set up. Give me a call back at ${vmCallback} and I'll get you taken care of. Talk soon.`
+  const voicemailScript = `Hi ${lead.firstName}, this is ${callerName} from ${vmBusiness}. You submitted a form about our ${campaign.name}, and I'm following up. Give me a call back at ${vmCallback}. Talk soon.`
   const previousNotes = calls.filter((c) => c.notes?.trim())
 
   function submit(d: LeadDisposition) {

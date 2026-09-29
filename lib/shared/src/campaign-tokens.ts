@@ -22,7 +22,9 @@ export const CAMPAIGN_TOKEN_KEYS = [
   'urgency_note',
   'submitted_date',
   'submitted_ago',
+  'submission_timing',
   'requested_time',
+  'preference_note',
 ] as const
 export type CampaignTokenKey = (typeof CAMPAIGN_TOKEN_KEYS)[number]
 export type CampaignTokens = Record<CampaignTokenKey, string>
@@ -40,6 +42,8 @@ export interface LeadTokenSource {
   submittedAt: string | Date | null
   /** Wall-clock slot from the ad form (see lead-requested-time); null when the lead gave none. */
   requestedAt?: string | null
+  /** Free-text time preference, which is not a confirmed appointment or a callback request. */
+  requestedTime?: string | null
 }
 
 /** What the confirmation screen says on the practice page, where there is no lead. */
@@ -118,6 +122,7 @@ export function campaignTokens(
   now: Date = new Date(),
 ): CampaignTokens {
   const items = campaign.offerItems.map((i) => i.trim()).filter(Boolean)
+  const timing = lead ? spokenAgo(lead.submittedAt, now) : 'recently'
   return {
     offer_name: campaign.name.trim() || 'special offer',
     offer_items: items.map((i) => `${OFFER_ITEM_BULLET} ${i}`).join('\n'),
@@ -127,9 +132,13 @@ export function campaignTokens(
     price_line: campaignPriceSentence(campaign),
     urgency_note: (campaign.urgencyNote ?? '').trim(),
     submitted_date: formatSubmittedDate(lead?.submittedAt ?? null, now),
-    submitted_ago: lead ? spokenAgo(lead.submittedAt, now) : 'recently',
+    submitted_ago: timing,
+    submission_timing: timing ? ` ${timing}` : '',
     // "Tuesday at 2": only the confirmation screens read it, and they are
     // only shown to a lead who has a slot, so the fallback is for practice.
     requested_time: spokenRequestedTime(lead?.requestedAt ?? null, now) || REQUESTED_TIME_PLACEHOLDER,
+    preference_note: lead?.requestedTime?.trim() && !lead.requestedAt
+      ? `You also put down ${lead.requestedTime.trim()} as a time preference. Was that for a call or a visit?`
+      : '',
   }
 }

@@ -9,7 +9,7 @@
     {
       "step_key": "digging_in",
       "title": "Questions: What Made Them Reach Out",
-      "content": "(Write down every concern they name.)\n\n{{contact_first_name}}, I'm going to run through a few things people often notice. Just say yes if you get them at all, even if they're mild or come and go.\n\nYou reached out about the program. About how much weight would you like to lose?\n\nHave your eating habits slipped lately, more than you'd like?\n\nHow's your energy through the day, any afternoon crashes?\n\nHow have you been sleeping?\n\nDo you feel irritable or under a lot of stress?\n\nAny allergy or sinus problems, even ones you think are normal?\n\nAny pain, stiffness, or soreness in your neck or back?\n\nWhat about your knees, hips, or feet?\n\nAny headaches, even mild ones?\n\nAnd are you taking any medications, prescribed or over the counter?\n\nOf those, which one bothers you the most?\n\n(Tap their answer below. If the weight is the whole reason they reached out, use the weight-focus button.)",
+      "content": "(Write down every concern they name.)\n\n{{contact_first_name}}, I'm going to run through a few things people often notice. Just say yes if you get them at all, even if they're mild or come and go.\n\nYou submitted a form about the program. About how much weight would you like to lose?\n\nHave your eating habits slipped lately, more than you'd like?\n\nHow's your energy through the day, any afternoon crashes?\n\nHow have you been sleeping?\n\nDo you feel irritable or under a lot of stress?\n\nAny allergy or sinus problems, even ones you think are normal?\n\nAny pain, stiffness, or soreness in your neck or back?\n\nWhat about your knees, hips, or feet?\n\nAny headaches, even mild ones?\n\nAnd are you taking any medications, prescribed or over the counter?\n\nOf those, which one bothers you the most?\n\n(Tap their answer below. If weight is their only concern, use the weight-focus button.)",
       "sort_order": 10
     },
     {
@@ -65,7 +65,7 @@
     },
     {
       "from_step_key": "digging_in",
-      "label": "The weight is the whole reason they reached out",
+      "label": "Weight is their only concern",
       "to_step_key": "recommendation_weight_focus",
       "variant": "positive",
       "sort_order": 1

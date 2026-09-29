@@ -4,13 +4,13 @@
     {
       "step_key": "open",
       "title": "The Open",
-      "content": "Hi, this is {{caller_name}} with {{provider_name}}'s office. Is {{contact_first_name}} available, please?\n\nHi {{contact_first_name}}. You reached out {{submitted_ago}} about our {{offer_name}}. {{asked_by_provider}} Do you have a quick minute?",
+      "content": "Hi, this is {{caller_name}} with {{provider_name}}'s office. Is {{contact_first_name}} available, please?\n\nHi {{contact_first_name}}. You submitted a form{{submission_timing}} about our {{offer_name}}. {{asked_by_provider}} Do you have a quick minute?\n\n{{preference_note}}",
       "sort_order": 0
     },
     {
       "step_key": "resp_dont_remember",
       "title": "“I don’t remember that”",
-      "content": "No problem, it happens. It was an online form for our {{offer_name}}. Here's what it includes:\n\n{{offer_items}}\n\n{{price_line}}\n\nDoes that ring a bell?\n\n(Let them answer. If it still doesn't, walk through what the visit is for.)",
+      "content": "No problem, it happens. You submitted a form about our {{offer_name}}. Here's what it includes:\n\n{{offer_items}}\n\n{{price_line}}\n\nDoes that ring a bell?\n\n(Let them answer. If it still doesn't, walk through what the visit is for.)",
       "sort_order": 1
     },
     {
@@ -28,7 +28,7 @@
     {
       "step_key": "reason_busy",
       "title": "“I got busy”",
-      "content": "Totally understand. Life fills up fast. The good news is the first visit is quick, and we work around your schedule. Is what you reached out about still bothering you?\n\n(Let them answer.)",
+      "content": "Totally understand. Life fills up fast. The good news is the first visit is quick, and we work around your schedule. Is what you put on the form still bothering you?\n\n(Let them answer.)",
       "sort_order": 4
     },
     {
@@ -142,7 +142,7 @@
     {
       "step_key": "confirm_requested",
       "title": "Confirm Their Requested Time",
-      "content": "Hi, this is {{caller_name}} with {{provider_name}}'s office. Is {{contact_first_name}} available, please?\n\nHi {{contact_first_name}}. You reached out {{submitted_ago}} about our {{offer_name}}, and you asked for {{requested_time}}. I'm calling to lock that in. Does that time still work for you?\n\n(Let them answer. Tap what you hear.)",
+      "content": "Hi, this is {{caller_name}} with {{provider_name}}'s office. Is {{contact_first_name}} available, please?\n\nHi {{contact_first_name}}. You submitted a form{{submission_timing}} about our {{offer_name}} and selected {{requested_time}} as a preferred time. I'm calling to confirm the details. Would that time work for a visit?\n\n(Let them answer. Tap what you hear.)",
       "sort_order": 300
     },
     {

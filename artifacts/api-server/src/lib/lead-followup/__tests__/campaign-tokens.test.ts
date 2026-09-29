@@ -62,10 +62,21 @@ describe('campaignTokens', () => {
       steps: Array<{ step_key: string; content: string }>
     }
     const opening = flow.steps.find(step => step.step_key === 'open')!.content
-    const render = (ago: string) => opening.replace('{{submitted_ago}}', ago).replace(/\s+/g, ' ')
-    expect(render(spokenAgo(new Date('2026-09-23T13:00:00Z'), NOW))).toContain('You reached out earlier today about')
-    expect(render('')).toContain('You reached out about')
-    expect(render('earlier today')).not.toContain('earlier today ago')
+    const render = (submittedAt: string | null, requestedTime: string | null = null, requestedAt: string | null = null) =>
+      mergeScript(opening, [], campaignTokens(campaign, { submittedAt, requestedTime, requestedAt }, NOW))
+    expect(render('2026-09-23T13:00:00Z')).toContain('You submitted a form earlier today about our New Patient Special.')
+    expect(render(null)).toContain('You submitted a form about our New Patient Special.')
+    expect(render(null)).not.toContain('recently')
+    expect(render('2026-09-23T13:00:00Z', 'Thursday afternoon')).toContain('You also put down Thursday afternoon as a time preference. Was that for a call or a visit?')
+    expect(render('2026-09-23T13:00:00Z', 'Thursday 3pm', '2026-09-24T15:00')).not.toContain('You also put down')
+    expect(render(null, null)).not.toContain('You also put down')
+    const confirm = flow.steps.find(step => step.step_key === 'confirm_requested')!.content
+    const selected = mergeScript(confirm, [], campaignTokens(campaign, {
+      submittedAt: '2026-09-23T13:00:00Z', requestedTime: 'Thursday at 3pm', requestedAt: '2026-09-24T15:00',
+    }, NOW))
+    expect(selected).toContain('You submitted a form earlier today about our New Patient Special and selected tomorrow at 3 as a preferred time.')
+    expect(selected).toContain("I'm calling to confirm the details.")
+    expect(selected).not.toContain("I'm calling to lock that in.")
   })
 
   it('never leaves a raw bracket when the campaign is sparse', () => {
@@ -81,12 +92,12 @@ describe('campaignTokens', () => {
     expect(t.offer_name).toBe('special offer')
     expect(t.submitted_ago).toBe('recently')
     const merged = mergeScript(
-      'You reached out {{submitted_ago}} about our {{offer_name}}.\n\n{{price_line}}\n\n{{urgency_note}}\n\n{{offer_items}}',
+      'You submitted a form{{submission_timing}} about our {{offer_name}}.\n\n{{price_line}}\n\n{{urgency_note}}\n\n{{offer_items}}',
       [],
       t,
     )
     expect(merged).not.toMatch(/\[[A-Z ]+\]/)
-    expect(merged.startsWith('You reached out recently about our special offer.')).toBe(true)
+    expect(merged.startsWith('You submitted a form recently about our special offer.')).toBe(true)
   })
 })
 

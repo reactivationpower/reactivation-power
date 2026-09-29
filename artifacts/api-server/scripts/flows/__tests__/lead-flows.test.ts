@@ -49,7 +49,8 @@ describe('flow families', () => {
     const chiro = readFlowFile('chiropractic.lead')
     const openText = (chiro.steps.find((s) => s.step_key === 'open') ?? general.steps.find((s) => s.step_key === 'open'))!.content
     expect(openText).toMatch(/\{\{offer_name\}\}/)
-    expect(openText).toMatch(/\{\{submitted_ago\}\}/)
+    expect(openText).toMatch(/You submitted a form\{\{submission_timing\}\}/)
+    expect(openText).toMatch(/\{\{preference_note\}\}/)
     const cost = (chiro.steps.find((s) => s.step_key === 'obj_cost') ?? general.steps.find((s) => s.step_key === 'obj_cost'))!.content
     expect(cost).toMatch(/\{\{price_line\}\}/)
   })

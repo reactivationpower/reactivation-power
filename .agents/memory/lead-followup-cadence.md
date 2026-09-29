@@ -21,6 +21,12 @@ The user wants natural relative-date wording directly in the spoken script, with
 
 **How to apply:** Preserve known original dates. Omit timing when unknown. Long-term follow-ups must not promise an expired offer is still available.
 
+Use “You submitted a form” rather than “You reached out” for lead-intake openings across all submission variants.
+
+**Why:** The user wants accurate wording that does not overstate the intent behind an ad-form submission. A time preference is not necessarily an appointment or a request for a phone call.
+
+**How to apply:** Retain actual submission timing and offer context; distinguish no preference, general preference, and a specific selected time without claiming a confirmed booking. Keep callbacks after real conversations separate.
+
 The approved daily queue has three sections: Ready to Call, In Progress, and Calls Upcoming, alongside All Leads. It uses the same appointment-intent color badges as All Leads. Call Now opens the selected lead's existing offer-specific script, not an autodialer.
 
 **Why:** Multiple staff need the last call time, caller, outcome, next due time, and current call ownership without checking separate records. A queue that hides this context is not useful as a team worklist.

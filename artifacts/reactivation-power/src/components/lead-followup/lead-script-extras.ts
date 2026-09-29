@@ -16,6 +16,7 @@ export interface LeadScriptLead {
   submittedAt: string | Date | null
   sourceSubmittedAt?: string | Date | null
   requestedAt?: string | null
+  requestedTime?: string | null
 }
 
 /**
@@ -49,6 +50,10 @@ export function leadScriptExtras(opts: {
   if (practiceName) e.practice_name = practiceName
   // Lead campaigns are healthcare-only, so the provider reads as "Dr. Last".
   Object.assign(e, providerTokens(spokenProviderName(owner, 'healthcare'), isProvider))
-  Object.assign(e, campaignTokens(campaign, lead ? { submittedAt: lead.sourceSubmittedAt ?? null, requestedAt: lead.requestedAt ?? null } : null, opts.now))
+  Object.assign(e, campaignTokens(campaign, lead ? {
+    submittedAt: lead.sourceSubmittedAt ?? null,
+    requestedAt: lead.requestedAt ?? null,
+    requestedTime: lead.requestedTime ?? null,
+  } : null, opts.now))
   return e
 }
