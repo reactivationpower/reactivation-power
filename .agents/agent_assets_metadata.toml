@@ -86,20 +86,6 @@ storage_version_token = "1790637404912122"
 content_type = "image/jpeg"
 
 [[outputs]]
-id = "ICR3fVFPLk82rtwKgauzJ"
-uri = "file://attached_assets/lead-calls-now-ready-coming-up.png"
-type = "image"
-title = "Calls Now and Coming Up"
-description = "Actual demo portal: ready calls are separated from scheduled follow-ups."
-logical_id = "1cbbed02-71a3-4739-a8c8-7c76a919375c"
-content_hash = "sha256:363af2ee611d0d6562f8995e29076a8795b555de24ebb53ff1ba5ca3c2a3b177"
-size = 297576
-mtime_ms = 1790688982463
-storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/1cbbed02-71a3-4739-a8c8-7c76a919375c/9b16151f-c346-4dec-bcb5-cab52024c659"
-storage_version_token = "1790689273147515"
-content_type = "image/png"
-
-[[outputs]]
 id = "cxLvZv_DJBUSK2hgZ6cfL"
 uri = "file://attached_assets/lead-all-leads-table.png"
 type = "image"
