@@ -15,7 +15,7 @@ vi.mock('@vercel/blob', async importOriginal => ({
 vi.mock('@/lib/data/participants', () => ({ getAllowedSession: blob.allowed }))
 vi.mock('@/lib/auth/admin-session', () => ({ getAdminSessionFromRequest: blob.admin }))
 
-const { default: router, parseMediaRange } = await import('@/routes/media')
+const { default: router, parseMediaRange, MAX_MEDIA_RANGE_BYTES } = await import('@/routes/media')
 const SIZE = 150_261_622
 const URL = '/api/media?pathname=videos%2Fmodule1.mp4'
 let server: Server
@@ -103,6 +103,18 @@ describe('GET /api/media private video streaming', () => {
     }
   })
 
+  it('serves Safari open-ended requests as 8 MiB bounded 206 streams', async () => {
+    blob.get.mockResolvedValue(upstream(0, MAX_MEDIA_RANGE_BYTES - 1))
+    const response = await request({ Range: 'bytes=0-' })
+    expect(response.status).toBe(206)
+    expect(response.headers.get('content-range')).toBe(`bytes 0-${MAX_MEDIA_RANGE_BYTES - 1}/${SIZE}`)
+    expect(response.headers.get('content-length')).toBe(String(MAX_MEDIA_RANGE_BYTES))
+    expect(blob.get).toHaveBeenCalledWith('videos/module1.mp4', expect.objectContaining({
+      headers: { Range: `bytes=0-${MAX_MEDIA_RANGE_BYTES - 1}` },
+    }))
+    expect((await response.arrayBuffer()).byteLength).toBe(MAX_MEDIA_RANGE_BYTES)
+  })
+
   it('returns 416 for invalid, multi and unsatisfiable ranges without fetching a video body', async () => {
     for (const range of ['bytes=2-1', `bytes=${SIZE}-`, 'bytes=-0', 'bytes=0-1,3-4', 'junk=1-3']) {
       const response = await request({ Range: range })
@@ -181,6 +193,19 @@ describe('GET /api/media private video streaming', () => {
 })
 
 describe('parseMediaRange', () => {
+  it('caps open-ended and long bounded video ranges below the published proxy limit', () => {
+    expect(parseMediaRange('bytes=0-', SIZE))
+      .toEqual({ start: 0, end: MAX_MEDIA_RANGE_BYTES - 1 })
+    expect(parseMediaRange(`bytes=4096-${SIZE - 1}`, SIZE))
+      .toEqual({ start: 4096, end: 4096 + MAX_MEDIA_RANGE_BYTES - 1 })
+    expect(parseMediaRange('bytes=-99999999', SIZE))
+      .toEqual({ start: SIZE - MAX_MEDIA_RANGE_BYTES, end: SIZE - 1 })
+    // Short ranges (including the small Safari metadata probe) stay exact.
+    expect(parseMediaRange('bytes=0-1', SIZE)).toEqual({ start: 0, end: 1 })
+    expect(parseMediaRange(`bytes=${SIZE - 2}-`, SIZE))
+      .toEqual({ start: SIZE - 2, end: SIZE - 1 })
+  })
+
   it('does not accept invalid/unsafe sizes or integer bounds', () => {
     expect(parseMediaRange('bytes=0-1', Number.MAX_SAFE_INTEGER + 1)).toBeNull()
     expect(parseMediaRange('bytes=9007199254740999-', 10)).toBeNull()

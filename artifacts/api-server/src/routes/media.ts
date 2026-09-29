@@ -11,6 +11,13 @@ const router: IRouter = Router();
 
 type ByteRange = { start: number; end: number };
 
+// The published Replit proxy returns HTTP 500 before delivering a 32 MiB
+// Content-Length response (and for Safari's open-ended bytes=0- request
+// against a 150–200 MB video). 8 MiB 206 responses cross the same proxy
+// successfully. Serve bounded partial responses so the browser can request
+// the next slice instead of making an unbounded request that never starts.
+export const MAX_MEDIA_RANGE_BYTES = 8 * 1024 * 1024;
+
 /** Only single byte ranges are supported by the private Blob proxy. A bad or
  * unsatisfiable range gets a 416, rather than accidentally downloading a whole
  * video or returning a partial body with a full-response header. */
@@ -24,10 +31,11 @@ export function parseMediaRange(header: string, size: number): ByteRange | null 
       (endPart !== null && !Number.isSafeInteger(endPart))) return null;
   if (startPart === null) {
     if (!endPart) return null;
-    return { start: Math.max(0, size - endPart), end: size - 1 };
+    const end = size - 1;
+    return { start: Math.max(0, size - Math.min(endPart, MAX_MEDIA_RANGE_BYTES)), end };
   }
   if (startPart >= size || (endPart !== null && endPart < startPart)) return null;
-  return { start: startPart, end: Math.min(endPart ?? size - 1, size - 1) };
+  return { start: startPart, end: Math.min(endPart ?? size - 1, size - 1, startPart + MAX_MEDIA_RANGE_BYTES - 1) };
 }
 
 function matchesIfRange(value: string | undefined, etag: string, uploadedAt: Date): boolean {
