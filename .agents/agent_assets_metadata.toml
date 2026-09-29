@@ -140,3 +140,17 @@ mtime_ms = 1790689983875
 storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/14ff9aef-277c-4841-bd97-4071be1b9609/c0e4d53d-046f-47a5-a9f5-0fa346184121"
 storage_version_token = "1790689995046244"
 content_type = "image/png"
+
+[[outputs]]
+id = "jvxGLCIRONsKRyIcTGAoC"
+uri = "file://attached_assets/generated_images/proposed-call-timing-team.png"
+type = "image"
+title = "Proposed call timing and team coordination"
+description = "Static proposal showing last-call details, scheduled attempts, and an in-progress indicator. Sample data only; no code or app changes."
+logical_id = "2d280863-0527-416a-8ec7-8e875f98d486"
+content_hash = "sha256:0fd67e9fb7281bcd3ba3dddf568d1283a7cff0ca4ebc8c0f4b418898bb811795"
+size = 984872
+mtime_ms = 1790690788358
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/2d280863-0527-416a-8ec7-8e875f98d486/364b962e-3da6-4edd-b3dc-cfce03fcabff"
+storage_version_token = "1790690801186829"
+content_type = "image/png"
