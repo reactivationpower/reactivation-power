@@ -26,7 +26,7 @@ const NAV = [
 
 /** Give the call queue and the full lead inventory their own persistent entries. */
 const LEAD_NAV = [
-  { href: '/portal/leads?view=calls', label: 'Calls Now', icon: PhoneCall },
+  { href: '/portal/leads?view=calls', label: 'Calls Due Now', icon: PhoneCall },
   { href: '/portal/leads?view=all', label: 'Leads', icon: Inbox },
   { href: '/portal/campaigns', label: 'Campaigns', icon: Megaphone },
   { href: '/portal/leads/analytics', label: 'Analytics', icon: BarChart3, ownerOnly: true },

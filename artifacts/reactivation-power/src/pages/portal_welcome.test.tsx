@@ -14,6 +14,16 @@ vi.mock('@/hooks/use-page-data', () => ({ usePageData }))
 afterEach(() => { cleanup(); vi.clearAllMocks() })
 
 describe('graduated welcome navigation', () => {
+  it('uses the approved due-calls wording and descriptions for owners and staff', () => {
+    for (const isOwner of [true, false]) {
+      const view = render(<WelcomeHome product="lead" isOwner={isOwner} />)
+      expect(screen.getByTestId('link-welcome-lead-2').textContent).toContain('Calls Due Now & Leads')
+      expect(screen.getByTestId('link-welcome-lead-2').textContent).toContain('See new leads and follow-ups that are ready for a call right now, or browse the full list of every lead.')
+      expect(screen.getByTestId('link-guidance-lead-2').textContent).toContain('Open Calls Due Now & Leads.')
+      expect(view.container.querySelector('.welcome-home--lead')).toBeTruthy()
+      view.unmount()
+    }
+  })
   for (const [product, path, cards, guide] of [
     ['reactivation', '/portal', ['/portal/training', '/portal/contacts', '/portal/dialer', '/portal/analytics'], ['/portal/training', '/portal/contacts', '/portal/dialer', '/portal/analytics']],
     ['lead', '/portal/leads/start', ['/portal/campaigns', '/portal/leads?view=calls', '/portal/leads/practice', '/portal/leads/analytics'], ['/portal/campaigns', '/portal/leads?view=calls', '/portal/leads/practice', '/portal/leads/analytics']],
@@ -64,8 +74,8 @@ describe('graduated welcome navigation', () => {
       const view = render(<Router hook={hook}><PortalNav /></Router>)
       const nav = screen.getByRole('navigation', { name: 'Portal' })
       const labels = Array.from(nav.querySelectorAll('a[href^="/portal/"]')).filter(a => a.getAttribute('data-testid')?.startsWith('link-lead-nav-')).map(a => a.textContent?.trim())
-      expect(labels).toEqual(role === 'owner' ? ['Calls Now', 'Leads', 'Campaigns', 'Analytics'] : ['Calls Now', 'Leads', 'Campaigns'])
-      const calls = screen.getByRole('link', { name: 'Calls Now' })
+      expect(labels).toEqual(role === 'owner' ? ['Calls Due Now', 'Leads', 'Campaigns', 'Analytics'] : ['Calls Due Now', 'Leads', 'Campaigns'])
+      const calls = screen.getByRole('link', { name: 'Calls Due Now' })
       const leads = screen.getByRole('link', { name: 'Leads' })
       expect(calls.getAttribute('href')).toBe('/portal/leads?view=calls')
       expect(leads.getAttribute('href')).toBe('/portal/leads?view=all')

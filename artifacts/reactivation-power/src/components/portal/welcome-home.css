@@ -23,6 +23,12 @@
 .welcome-card-copy { display: flex; flex-direction: column; gap: 7px; }
 .welcome-card-title { color: #263a4c; font-size: 21px; font-weight: 680; line-height: 1.2; letter-spacing: -.025em; }
 .welcome-card-description { max-width: 315px; color: #697a88; font-size: 14px; line-height: 1.55; }
+.welcome-home--lead .welcome-card-description { min-height: calc(3 * 1.55em); }
+.welcome-home--lead .welcome-card-title { white-space: nowrap; }
+/* Anchor the copy below the icon even when a staff-only notice adds height. */
+.welcome-home--lead .welcome-card { justify-content: flex-start; }
+.welcome-home--lead .welcome-card-bottom { margin-top: 12px; flex: 1; align-items: flex-start; }
+.welcome-home--lead .welcome-arrow { align-self: flex-end; }
 .welcome-arrow { display: flex; width: 31px; height: 31px; flex: none; align-items: center; justify-content: center; border-radius: 50%; color: #7a99aa; background: #f2f6f8; transition: transform .22s ease, background-color .22s ease, color .22s ease; }
 .welcome-card:hover .welcome-arrow, .welcome-card:focus-visible .welcome-arrow { transform: translate(2px, -2px); color: #fff; background: #4f899f; }
 .welcome-card--unavailable { opacity: .7; }
@@ -41,6 +47,8 @@
 .welcome-guidance-unavailable { display: block; padding: 6px 8px; margin: 0 -8px; font-size: 13px; line-height: 1.6; opacity: .7; }
 .welcome-guidance strong { color: #354c5c; font-weight: 680; }
 @media (max-width: 700px) {
+  .welcome-home--lead .welcome-card-description { min-height: 0; }
+  .welcome-home--lead .welcome-card-title { white-space: normal; }
   .welcome-home { min-height: auto; padding: 50px 18px 72px; }
   .welcome-intro { margin-bottom: 30px; }
   .welcome-grid { grid-template-columns: 1fr; gap: 13px; }
