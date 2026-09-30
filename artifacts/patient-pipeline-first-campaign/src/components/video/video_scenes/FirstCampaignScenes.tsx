@@ -2,6 +2,7 @@ import { useContext, useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useSceneTimer } from '@/lib/video'
 import { AudioClockContext } from '../AudioClockContext'
+import { TutorialCursor, type CursorCue } from '../TutorialCursor'
 import '../FirstCampaign.css'
 
 const BASE = import.meta.env.BASE_URL
@@ -19,12 +20,16 @@ function Frame({ chapter, children, light = false }: { chapter: string; children
   </motion.section>
 }
 
-type ScreenBeat = { at:number; image:string; label:string; caption:string; note?:string }
+type ScreenBeat = { at:number; image:string; label:string; caption:string; note?:string; cues?:CursorCue[] }
 function ScreenChapter({ chapter, number, title, intro, beats, light=false }: {
   chapter:string; number:string; title:string; intro:string; beats:ScreenBeat[]; light?:boolean
 }) {
   const [index,setIndex] = useState(0)
+  const [activeCue,setActiveCue] = useState<{ beatIndex:number; cue:CursorCue } | null>(null)
   useSceneTimer(beats.slice(1).map((beat,i)=>({time:beat.at,callback:()=>setIndex(i+1)})))
+  useSceneTimer(beats.flatMap((screen,beatIndex)=>(screen.cues??[]).map(cue=>({
+    time:cue.at,callback:()=>setActiveCue({beatIndex,cue}),
+  }))))
   const beat=beats[index]
   return <Frame chapter={chapter} light={light}>
     <div className="screen-layout">
@@ -36,6 +41,7 @@ function ScreenChapter({ chapter, number, title, intro, beats, light=false }: {
           initial={{opacity:0,scale:1.035,filter:'blur(6px)'}} animate={{opacity:1,scale:1,filter:'blur(0px)'}}
           exit={{opacity:0,scale:.985}} transition={{duration:.5,ease}}>
           <img src={`${BASE}images/${beat.image}.png`} alt={`Actual Patient Pipeline demo: ${beat.label}`} />
+          {activeCue?.beatIndex===index && <TutorialCursor key={`${index}-${activeCue.cue.at}`} cue={activeCue.cue}/>}
           <span className="screen-label">{beat.label}</span>
           {beat.note && <div className="editorial-note">{beat.note}</div>}
         </motion.div>
@@ -90,26 +96,53 @@ export function Preparation() {
   </div></Frame>
 }
 export function OpenCampaigns() { return <ScreenChapter chapter="STEP 01 / OPEN CAMPAIGNS" number="01" title="Find Campaigns" intro="In Patient Pipeline, switch to Lead Follow-Up—not Reactivation."
-  beats={[{at:0,image:'pp-welcome',label:'Patient Pipeline welcome',caption:'Open Campaigns from the welcome screen.'},{at:9000,image:'pp-campaigns',label:'Campaigns',caption:'The top navigation gets you here, too.'},{at:20000,image:'pp-editor-offer',label:'New Campaign',caption:'Choose New Campaign to enter your offer.'}]} /> }
+  beats={[
+    {at:0,image:'pp-welcome',label:'Patient Pipeline welcome',caption:'Choose Lead Follow-Up, not Reactivation.',cues:[{at:2300,x:57,y:79}]},
+    {at:6200,image:'pp-campaigns',label:'Campaigns',caption:'Open Campaigns, then select New Campaign.',cues:[{at:6500,x:61,y:12},{at:10100,x:91,y:23}]},
+    {at:13800,image:'pp-editor-offer',label:'New Campaign',caption:'This is where you enter the offer.'},
+  ]} /> }
 export function EnterOffer() { return <ScreenChapter chapter="STEP 02 / ENTER YOUR OFFER" number="02" title="Match the ad" intro="A campaign carries the right offer into the call."
-  beats={[{at:0,image:'pp-editor-offer',label:'New campaign · sample details',caption:'Select the service advertised.'},{at:16000,image:'pp-editor-offer',label:'Recognizable campaign name',caption:'Make the name easy for your team to recognize.'},{at:30000,image:'pp-editor-offer',label:'What is included',caption:'One actually included item per line.'},{at:46000,image:'pp-editor-offer',label:'Compare with your ad',caption:'Only promise what the original ad offers.'}]} /> }
+  beats={[
+    {at:0,image:'pp-editor-offer',label:'New campaign · sample details',caption:'Select the service advertised.',cues:[{at:2300,x:35,y:37}]},
+    {at:16000,image:'pp-editor-offer',label:'Recognizable campaign name',caption:'Make the name easy for your team to recognize.',cues:[{at:17400,x:38,y:48}]},
+    {at:30000,image:'pp-editor-offer',label:'What is included',caption:'One actually included item per line.',cues:[{at:31400,x:37,y:61},{at:38800,x:25,y:75}]},
+    {at:46000,image:'pp-editor-offer',label:'Compare with your ad',caption:'Only promise what the original ad offers.'},
+  ]} /> }
 export function PriceAndSave() { return <ScreenChapter chapter="STEP 02 / PRICE AND SAVE" number="02" title="Say it clearly" intro="The price style changes spoken copy, not billing."
-  beats={[{at:0,image:'pp-editor-price',label:'Price line styles',caption:'Normally X, now Y · Just Y · Don’t mention price'},{at:14000,image:'pp-editor-price',label:'On the call preview',caption:'Read the actual spoken-price preview.'},{at:27000,image:'pp-editor-price',label:'Save & Connect Leads',caption:'Use only real deadlines. Check the ad before saving.'}]} /> }
+  beats={[
+    {at:0,image:'pp-editor-price',label:'Price line styles',caption:'Normally X, now Y · Just Y · Don’t mention price',cues:[{at:2300,x:27,y:55},{at:8500,x:31,y:66}]},
+    {at:14000,image:'pp-editor-price',label:'On the call preview',caption:'Read the actual spoken-price preview.',cues:[{at:20000,x:37,y:78}]},
+    {at:27000,image:'pp-editor-price',label:'Save & Connect Leads',caption:'Use only real deadlines. Check the ad before saving.',cues:[{at:31500,x:28,y:85}]},
+  ]} /> }
 export function FindForm() { return <ScreenChapter chapter="STEP 03 / FIND THE FORM" number="03" title="Where is the form?" intro="Pick where people enter their name and phone—not just where the ad appears."
-  beats={[{at:0,image:'pp-connect-closed',label:'Finish connecting your lead form',caption:'A saved offer does not mean new leads can arrive.'},{at:7000,image:'pp-connect-options',label:'Choose the form source',caption:'Facebook / Instagram • GoHighLevel • Website • I’m not sure'},{at:22000,image:'pp-connect-facebook',label:'Facebook / Instagram Instant Form',caption:'A Facebook ad that goes to your website uses “Our website.”'}]} /> }
+  beats={[
+    {at:0,image:'pp-connect-closed',label:'Finish connecting your lead form',caption:'A saved offer does not mean new leads can arrive.',cues:[{at:1800,x:90,y:54}]},
+    {at:7000,image:'pp-connect-options',label:'Choose the form source',caption:'Facebook / Instagram • GoHighLevel • Website • I’m not sure',cues:[{at:16900,x:17,y:80}]},
+    {at:22000,image:'pp-connect-facebook',label:'Facebook / Instagram Instant Form',caption:'A Facebook ad that goes to your website uses “Our website.”'},
+  ]} /> }
 export function ConnectForm() { return <ScreenChapter chapter="STEP 04 / CONNECT THE FORM" number="04" title="Connect it safely" intro="A private address belongs in your form connector, never in a public ad."
-  beats={[{at:0,image:'pp-connect-facebook',label:'Facebook Instant Form instructions',caption:'Facebook cannot send directly here. Use GoHighLevel, Zapier or Make.',note:'PRIVATE ADDRESS: HIDDEN IN THIS TUTORIAL'},
+  beats={[{at:0,image:'pp-connect-closed',label:'Campaign overview · private connection link',caption:'Copy the connection link for your own form connector.',cues:[{at:2100,x:10,y:63}]},
+    {at:9000,image:'pp-connect-facebook',label:'Facebook Instant Form instructions',caption:'Facebook cannot send directly here. Use GoHighLevel, Zapier or Make.',note:'PRIVATE ADDRESS: HIDDEN IN THIS TUTORIAL'},
     {at:22000,image:'pp-connect-facebook',label:'Outside Patient Pipeline',caption:'Facebook New Lead → Webhooks POST → JSON',note:'Complete these steps in your own connector.'},
     {at:39000,image:'pp-connect-fields',label:'Map the real form answers',caption:'Send at least first_name and phone.'},
-    {at:58000,image:'pp-connect-waiting',label:'Publish or turn on your connector',caption:'Need help? Have your form manager finish the private setup.'}]} /> }
+    {at:58000,image:'pp-connect-waiting',label:'Publish or turn on your connector',caption:'Need help? Have your form manager finish the private setup.'},
+    {at:64000,image:'pp-connect-closed',label:'Trusted handoff option',caption:'Copy the instructions, then share them privately with your form manager.',cues:[{at:66100,x:24,y:63}]}]} /> }
 export function TestForm() { return <ScreenChapter chapter="STEP 05 / TEST THE ACTUAL FORM" number="05" title="Prove it arrives" intro="Use the same form a prospective patient will use."
-  beats={[{at:0,image:'pp-connect-waiting',label:'Demo waiting for external submission',caption:'Submit the actual form with your own name and phone.',note:'NOT VERIFIED IN THIS DEMO'},
+  beats={[{at:0,image:'pp-connect-waiting',label:'Demo waiting for external submission',caption:'Submit the actual form with your own name and phone.',note:'NOT VERIFIED IN THIS DEMO',cues:[{at:16900,x:16,y:55}]},
     {at:19000,image:'pp-connect-internal',label:'Internal test disclosure',caption:'An internal test checks only Patient Pipeline’s side.',note:'INTERNAL TEST ≠ REAL-FORM TEST'},
-    {at:39000,image:'pp-campaign-detail',label:'Campaign Leads tab',caption:'After a real submission, confirm your test entry here.'}]} /> }
+    {at:39000,image:'pp-campaign-detail',label:'Campaign Leads tab',caption:'After a real submission, confirm your test entry here.',cues:[{at:42200,x:5,y:88}]}]} /> }
 export function PracticeScript() { return <ScreenChapter chapter="STEP 06 / PRACTICE SCRIPT" number="06" title="Rehearse first" intro="Check that the service, included items and price match your ad."
-  beats={[{at:0,image:'pp-campaign-detail',label:'Practice script',caption:'Open the practice script from this campaign.'},{at:9000,image:'pp-practice-open',label:'Actual practice screen',caption:'Read the opening, then try a response button.'},{at:20000,image:'pp-practice-next',label:'Next prompt',caption:'Your team can get comfortable before live calls.'}]} /> }
+  beats={[
+    {at:0,image:'pp-campaign-detail',label:'Practice script',caption:'Open the practice script from this campaign.',cues:[{at:3300,x:8,y:41}]},
+    {at:9000,image:'pp-practice-open',label:'Actual practice screen',caption:'Read the opening, then try a response button.',cues:[{at:14800,x:30,y:82}]},
+    {at:20000,image:'pp-practice-next',label:'Next prompt',caption:'Your team can get comfortable before live calls.'},
+  ]} /> }
 export function FindLeads() { return <ScreenChapter chapter="STEP 07 / FIND NEW LEADS" number="07" title="Find new leads" intro="These are existing seeded demo leads, not evidence of this form being connected."
-  beats={[{at:0,image:'pp-lead-due',label:'Calls Due Now · Ready to call',caption:'Use the due queue when your team is ready.'},{at:13000,image:'pp-lead-call',label:'Example call screen · separate seeded demo lead',caption:'Call Now opens a guided screen. It does not dial a phone.'},{at:25000,image:'pp-all-leads',label:'All Leads',caption:'Browse everyone, including leads not due right now.'}]} /> }
+  beats={[
+    {at:0,image:'pp-lead-due',label:'Calls Due Now · Ready to call',caption:'Use the due queue when your team is ready.',cues:[{at:1800,x:45,y:10},{at:9500,x:89,y:61}]},
+    {at:13000,image:'pp-lead-call',label:'Example call screen · separate seeded demo lead',caption:'Call Now opens a guided screen. It does not dial a phone.',cues:[{at:21700,x:54,y:11}]},
+    {at:25000,image:'pp-all-leads',label:'All Leads',caption:'Browse everyone, including leads not due right now.',cues:[{at:27000,x:19,y:41}]},
+  ]} /> }
 export function Checklist() {
   const [count,setCount]=useState(0)
   useSceneTimer([1000,3100,5300,7400,9600,11800,14000,17400].map((time,i)=>({time,callback:()=>setCount(i+1)})))

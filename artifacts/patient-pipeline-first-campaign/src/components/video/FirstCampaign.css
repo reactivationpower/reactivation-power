@@ -16,6 +16,9 @@
 .screen-shell { position:relative; width:100%; aspect-ratio:16/9; background:#dce6e4; overflow:hidden; border:1px solid #bad9d5; border-radius:1.5vmin; box-shadow:0 4vmin 12vmin #001a25a0; }
 .screen-shell img { display:block; width:100%; height:100%; object-fit:contain; }
 .screen-shell:before { position:absolute; content:''; inset:0; z-index:2; border:1px solid #f8f5ed40; border-radius:inherit; pointer-events:none; }
+.tutorial-cursor { position:absolute; z-index:6; width:5.2vmin; height:6vmin; pointer-events:none; filter:drop-shadow(0 .3vmin .35vmin #092a3b99); }
+.tutorial-cursor svg { display:block; width:100%; height:auto; transform-origin:8% 6%; }
+.tutorial-cursor-pulse { position:absolute; left:-.7vmin; top:-.7vmin; width:2.5vmin; height:2.5vmin; border:.42vmin solid #09a99d; border-radius:50%; background:#57d2c34d; pointer-events:none; }
 .screen-label {position:absolute; z-index:3; bottom:0; left:0; right:0; padding:1.2vmin 2vmin; background:linear-gradient(transparent,#092a3be8); color:#fff; font:600 2.3vmin 'Space Grotesk',sans-serif; text-shadow:0 2px 3px #092a3b;}
 .screen-caption {position:absolute; bottom:8.4%; left:30%; right:5%; font:500 2.38vmin 'Space Grotesk',sans-serif; color:#b7ded7;}
 .screen-caption strong {color:#fff;}
