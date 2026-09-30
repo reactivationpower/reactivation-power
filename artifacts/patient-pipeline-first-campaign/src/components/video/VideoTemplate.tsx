@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { VideoCanvas, VideoPausedContext, useVideoPlayer, type VideoAspectRatio } from '@/lib/video'
 import { Opening, Preparation, OpenCampaigns, EnterOffer, PriceAndSave, FindForm, ConnectForm, TestForm, PracticeScript, FindLeads, Checklist } from './video_scenes/FirstCampaignScenes'
+import { AudioClockContext } from './AudioClockContext'
 
 export const SCENE_DURATIONS = {
   opening:20000, preparation:28000, openCampaigns:28000, enterOffer:57000,
@@ -43,9 +44,11 @@ export default function VideoTemplate({ durations=SCENE_DURATIONS, loop=true, pa
     audio.play().catch(() => {})
   },[currentSceneKey,baseKey,paused,muted])
   return <VideoPausedContext.Provider value={paused}>
+    <AudioClockContext.Provider value={audioRef}>
     <VideoCanvas aspectRatio={VIDEO_ASPECT_RATIO} style={{backgroundColor:'#092a3b'}}>
       <AnimatePresence mode="sync">{Scene && <Scene key={currentSceneKey}/>}</AnimatePresence>
       <audio ref={audioRef} src={`${import.meta.env.BASE_URL}audio/composite_audio_lead_followup.mp3`} preload="auto" autoPlay muted={muted}/>
     </VideoCanvas>
+    </AudioClockContext.Provider>
   </VideoPausedContext.Provider>
 }

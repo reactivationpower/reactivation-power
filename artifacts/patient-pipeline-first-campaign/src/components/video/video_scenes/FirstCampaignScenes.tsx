@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useSceneTimer } from '@/lib/video'
+import { AudioClockContext } from '../AudioClockContext'
 import '../FirstCampaign.css'
 
 const BASE = import.meta.env.BASE_URL
@@ -47,7 +48,26 @@ function ScreenChapter({ chapter, number, title, intro, beats, light=false }: {
 
 export function Opening() {
   const [step,setStep]=useState(0)
-  useSceneTimer([{time:5000,callback:()=>setStep(1)},{time:9000,callback:()=>setStep(2)},{time:13000,callback:()=>setStep(3)},{time:16000,callback:()=>setStep(4)}])
+  const audioClock=useContext(AudioClockContext)
+  const lastStep=useRef(0)
+  useEffect(() => {
+    let frame:number
+    const sync=() => {
+      // The first audio file starts 0.75s into the composite. Follow its
+      // playback position so loading delay cannot put the visuals ahead of VO.
+      const t=audioClock?.current?.currentTime
+      if (t !== undefined) {
+        const next=t>=11.19?4:t>=8.40?3:t>=5.32?2:t>=4.09?1:0
+        if (next!==lastStep.current) {
+          lastStep.current=next
+          setStep(next)
+        }
+      }
+      frame=requestAnimationFrame(sync)
+    }
+    frame=requestAnimationFrame(sync)
+    return () => cancelAnimationFrame(frame)
+  },[audioClock])
   return <Frame chapter="THE BEGINNER'S GUIDE">
     <div className="film-stage" style={{left:'11%',right:'11%'}}>
       <motion.h1 initial={{opacity:0,y:30}} animate={{opacity:1,y:0}} transition={{duration:.7}} style={{fontSize:'9vmin',maxWidth:'100%',marginBottom:'4vmin'}}>Set up your<br/><span style={{color:'#69d7ca'}}>first campaign.</span></motion.h1>
