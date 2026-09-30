@@ -22,3 +22,9 @@ For tutorial narration, prioritize connected American-English conversation and r
 **Why:** The user rejected a first-campaign narration that sounded like disconnected bullet reading, with unnatural rhythm and insufficient punctuation pauses. A shorter timeline did not address that complaint.
 
 **How to apply:** Choose a conversational performance, preserve its full breathing and sentence endings, and retime the existing screen actions to the new narration. Do not claim that waveform checks establish subjective voice quality; offer a short audition alongside the full revised film.
+
+For long tutorial delivery, distinguish a working preview from a finished, downloadable MP4. When workspace exports lose progress, an explicitly authorized direct render can provide a project-saved file and a download card.
+
+**Why:** The user reported two workspace exports appearing to reset after they walked away and approved a direct MP4 render instead. Preview checks and the absence of a local MP4 cannot establish whether a separate platform export job completed.
+
+**How to apply:** Do not claim access to platform export history or the user's browser downloads. Verify the actual rendered file's duration, video and audio streams, decoding, and representative frames before presenting it. Preserve the current narration and approved visual corrections during export; do not shorten the tutorial merely to make rendering easier.

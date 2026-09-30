@@ -942,3 +942,17 @@ type = "audio"
 title = "Conversational readiness check"
 description = "Text-to-speech audio: [warmly] Before you call it ready, take one last look at the campaign. Do the service, the offer, and the price match what your ad promises? [short pause] Then check the connect…"
 logical_id = "3a723562-8bd5-48a2-b767-ce3b27df504c"
+
+[[outputs]]
+id = "woS7y8aPr9y5ETJMJTcnf"
+uri = "file://exports/Patient-Pipeline-Setting-Up-Your-Campaign.mp4"
+type = "video"
+title = "Setting Up Your Campaign — Download MP4"
+description = "Completed 720p MP4, approximately 6 minutes 46 seconds and 20 MB. Includes the revised narration, corrected “Just Y” cursor click, offer-price entry demonstration, and background music."
+logical_id = "751f4858-09bc-4630-8a0f-18b79b2ff098"
+content_hash = "sha256:2b9fcc71123a6f6e3b0e0bf83b782ce09d38b87280b05203991ed9d491f1e6ca"
+size = 20073387
+mtime_ms = 1790811997259
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/751f4858-09bc-4630-8a0f-18b79b2ff098/f5965fc8-db3d-4208-bc28-41721d69a066"
+storage_version_token = "1790812101130095"
+content_type = "video/mp4"

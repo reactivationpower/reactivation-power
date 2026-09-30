@@ -1,0 +1,123 @@
+{
+  "duration": 405.5,
+  "width": 1280,
+  "height": 720,
+  "frames": 1912,
+  "firstFrameTime": 0.13103199005126953,
+  "lastFrameTime": 398.9908080101013,
+  "playbackDuration": 405.86100006103516,
+  "samples": [
+    {
+      "elapsed": 0.2650001049041748,
+      "chapter": "THE BEGINNER'S GUIDE",
+      "audioTime": 0.02322,
+      "audioReady": 4,
+      "paused": false,
+      "controls": false
+    },
+    {
+      "elapsed": 30.312000036239624,
+      "chapter": "BEFORE YOU START",
+      "audioTime": 30.223108,
+      "audioReady": 4,
+      "paused": false,
+      "controls": false
+    },
+    {
+      "elapsed": 60.361000061035156,
+      "chapter": "STEP 01 / OPEN CAMPAIGNS",
+      "audioTime": 60.269641,
+      "audioReady": 4,
+      "paused": false,
+      "controls": false
+    },
+    {
+      "elapsed": 90.39400005340576,
+      "chapter": "STEP 02 / ENTER YOUR OFFER",
+      "audioTime": 90.305692,
+      "audioReady": 4,
+      "paused": false,
+      "controls": false
+    },
+    {
+      "elapsed": 120.43800020217896,
+      "chapter": "STEP 02 / ENTER YOUR OFFER",
+      "audioTime": 120.162822,
+      "audioReady": 4,
+      "paused": false,
+      "controls": false
+    },
+    {
+      "elapsed": 150.49300003051758,
+      "chapter": "STEP 02 / PRICE AND SAVE",
+      "audioTime": 150.219615,
+      "audioReady": 4,
+      "paused": false,
+      "controls": false
+    },
+    {
+      "elapsed": 180.53200006484985,
+      "chapter": "STEP 03 / FIND THE FORM",
+      "audioTime": 180.261951,
+      "audioReady": 4,
+      "paused": false,
+      "controls": false
+    },
+    {
+      "elapsed": 210.57500004768372,
+      "chapter": "STEP 04 / CONNECT THE FORM",
+      "audioTime": 210.301596,
+      "audioReady": 4,
+      "paused": false,
+      "controls": false
+    },
+    {
+      "elapsed": 240.62000012397766,
+      "chapter": "STEP 04 / CONNECT THE FORM",
+      "audioTime": 240.348182,
+      "audioReady": 4,
+      "paused": false,
+      "controls": false
+    },
+    {
+      "elapsed": 270.6640000343323,
+      "chapter": "STEP 05 / TEST THE ACTUAL FORM",
+      "audioTime": 270.394952,
+      "audioReady": 4,
+      "paused": false,
+      "controls": false
+    },
+    {
+      "elapsed": 300.70500016212463,
+      "chapter": "STEP 05 / TEST THE ACTUAL FORM",
+      "audioTime": 300.434142,
+      "audioReady": 4,
+      "paused": false,
+      "controls": false
+    },
+    {
+      "elapsed": 330.7590000629425,
+      "chapter": "STEP 06 / PRACTICE SCRIPT",
+      "audioTime": 330.493166,
+      "audioReady": 4,
+      "paused": false,
+      "controls": false
+    },
+    {
+      "elapsed": 360.80200004577637,
+      "chapter": "STEP 07 / FIND NEW LEADS",
+      "audioTime": 360.534812,
+      "audioReady": 4,
+      "paused": false,
+      "controls": false
+    },
+    {
+      "elapsed": 390.8420000076294,
+      "chapter": "FIRST-CAMPAIGN CHECKLIST",
+      "audioTime": 390.576369,
+      "audioReady": 4,
+      "paused": false,
+      "controls": false
+    }
+  ]
+}
