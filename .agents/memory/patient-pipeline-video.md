@@ -28,3 +28,9 @@ For long tutorial delivery, distinguish a working preview from a finished, downl
 **Why:** The user reported two workspace exports appearing to reset after they walked away and approved a direct MP4 render instead. Preview checks and the absence of a local MP4 cannot establish whether a separate platform export job completed.
 
 **How to apply:** Do not claim access to platform export history or the user's browser downloads. Verify the actual rendered file's duration, video and audio streams, decoding, and representative frames before presenting it. Preserve the current narration and approved visual corrections during export; do not shorten the tutorial merely to make rendering easier.
+
+Beginner campaign-connection teaching uses three standalone walkthroughs with a simple route-selection guide: GoHighLevel forms; Facebook/Instagram forms already feeding GoHighLevel; Facebook/Instagram forms without that connection. Preserve the existing overview separately.
+
+**Why:** The user explicitly approved three complete lessons rather than one branching video. The goal is self-service completion by someone with no technical background, reducing avoidable support requests—not merely explaining the concepts.
+
+**How to apply:** Each lesson must include every external setup step, copying/pasting and tab changes, pause points, expected results, a real authorized form submission into the same campaign, and specific troubleshooting. Do not assume Facebook leads already reach GoHighLevel, invent a successful external test, or require viewers to combine several lessons. Structure approval alone is not authorization to modify external accounts or launch live automations.
