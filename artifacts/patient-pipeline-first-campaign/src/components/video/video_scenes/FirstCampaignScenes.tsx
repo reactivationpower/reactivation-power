@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNarrationTimer, type NarrationScene } from '../useNarrationTimer'
 import { TutorialCursor, type CursorCue } from '../TutorialCursor'
-import { EXAMPLE_CAMPAIGN_NAME, OfferFormOverlay, PriceCampaignName } from '../OfferFormOverlay'
+import { EXAMPLE_CAMPAIGN_NAME, OfferFormOverlay } from '../OfferFormOverlay'
+import { PriceOfferOverlay } from '../PriceOfferOverlay'
 import '../FirstCampaign.css'
 
 const BASE = import.meta.env.BASE_URL
@@ -110,10 +111,11 @@ export function EnterOffer() {
   ]} />
 }
 export function PriceAndSave() { return <ScreenChapter scene="priceAndSave" chapter="STEP 02 / PRICE AND SAVE" number="02" title="Say it clearly" intro="The price style changes spoken copy, not billing."
-  overlay={<PriceCampaignName/>}
+  overlay={<PriceOfferOverlay/>}
   beats={[
-    {at:0,image:'pp-editor-price',label:'Price line styles',caption:'Normally X, now Y · Just Y · Don’t mention price',cues:[{at:4300,x:27,y:55},{at:10500,x:31,y:66}]},
-    {at:17700,image:'pp-editor-price',label:'On the call preview',caption:'Read the actual spoken-price preview.',cues:[{at:17800,x:37,y:78}]},
+    {at:0,image:'pp-editor-price',label:'Price line styles',caption:'Normally X, now Y · Just Y · Don’t mention price',cues:[{at:4300,x:27,y:55},{at:10500,x:45,y:54}]},
+    {at:14400,image:'pp-editor-price',label:'Enter the offer price',caption:'Enter $49 in Offer price—not Regular price.',cues:[{at:14600,x:45,y:65.2}]},
+    {at:17700,image:'pp-editor-price',label:'On the call preview',caption:'“Just Y” gives the caller the offer price: “Just $49.”',cues:[{at:17800,x:34,y:70.2}]},
     {at:28900,image:'pp-editor-price',label:'Save & Connect Leads',caption:'Use only real deadlines. Check the ad before saving.',cues:[{at:30700,x:28,y:85}]},
   ]} /> }
 export function FindForm() { return <ScreenChapter scene="findForm" chapter="STEP 03 / FIND THE FORM" number="03" title="Where is the form?" intro="Pick where people enter their name and phone—not just where the ad appears."

@@ -1,6 +1,7 @@
 # Patient Pipeline — Set Up Your First Campaign
 
 ## Current narration revision
+Price chapter visual correction: at local 10.5s, the cursor moves onto the middle “Just Y” card and clicks at 11.69s. The card visibly becomes selected. At 14.4s, identify Offer price; the cursor focuses that field at 15.79s and types 49 at 16.1–16.45s. An editorial close-up shows the same entry, and the actual-field overlay updates the spoken preview to “Just $49.” Narration and chapter lengths are unchanged.
 The current performance script and shot-by-shot visual contract are in `NARRATION.json`; they supersede the older spoken wording and timing below. Replace the entire former Matilda track, including the separately appended opening line, with Sarah delivering connected American-English paragraphs. Use full sentences, contractions, contextual transitions, and short thought pauses. No speed-up, silence removal, or attempt to force the performance back into the former 5:24 duration. Preserve the existing visuals, large cursor, service dropdown, and typed offer. The new measured timeline must be built from the returned audio files, then used for both the music mix and scene durations.
 
 ## Director's treatment
