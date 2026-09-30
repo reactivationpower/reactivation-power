@@ -813,3 +813,10 @@ uri = "file://artifacts/patient-pipeline-first-campaign/public/audio/vo_11.mp3"
 type = "audio"
 title = "campaign checklist narration"
 description = "Text-to-speech audio: Your checklist: campaign created; service, offer and price checked against the ad; actual form connected; a test submitted through that form and visible in this campaign’s leads…"
+
+[[outputs]]
+id = "wx2nAMh-16SEi2b_z1LQL"
+uri = "file://artifacts/patient-pipeline-first-campaign/public/audio/vo_03_2.mp3"
+type = "audio"
+title = "Lead Follow-Up section tutorial correction"
+description = "Text-to-speech audio: Sign in to Patient Pipeline. Make sure that you’re in Lead Follow-Up, not Reactivation. Open Campaigns from the welcome screen, or from the top navigation. Then choose New Campa…"

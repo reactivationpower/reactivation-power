@@ -69,7 +69,7 @@ export function Preparation() {
     <p className="lede" style={{color:'#496773'}}>Your form manager can help with the connection later.</p>
   </div></Frame>
 }
-export function OpenCampaigns() { return <ScreenChapter chapter="STEP 01 / OPEN CAMPAIGNS" number="01" title="Find Campaigns" intro="Use Patient Pipeline—not Reactivation."
+export function OpenCampaigns() { return <ScreenChapter chapter="STEP 01 / OPEN CAMPAIGNS" number="01" title="Find Campaigns" intro="In Patient Pipeline, switch to Lead Follow-Up—not Reactivation."
   beats={[{at:0,image:'pp-welcome',label:'Patient Pipeline welcome',caption:'Open Campaigns from the welcome screen.'},{at:9000,image:'pp-campaigns',label:'Campaigns',caption:'The top navigation gets you here, too.'},{at:20000,image:'pp-editor-offer',label:'New Campaign',caption:'Choose New Campaign to enter your offer.'}]} /> }
 export function EnterOffer() { return <ScreenChapter chapter="STEP 02 / ENTER YOUR OFFER" number="02" title="Match the ad" intro="A campaign carries the right offer into the call."
   beats={[{at:0,image:'pp-editor-offer',label:'New campaign · sample details',caption:'Select the service advertised.'},{at:16000,image:'pp-editor-offer',label:'Recognizable campaign name',caption:'Make the name easy for your team to recognize.'},{at:30000,image:'pp-editor-offer',label:'What is included',caption:'One actually included item per line.'},{at:46000,image:'pp-editor-offer',label:'Compare with your ad',caption:'Only promise what the original ad offers.'}]} /> }

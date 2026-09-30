@@ -45,7 +45,7 @@ export default function VideoTemplate({ durations=SCENE_DURATIONS, loop=true, pa
   return <VideoPausedContext.Provider value={paused}>
     <VideoCanvas aspectRatio={VIDEO_ASPECT_RATIO} style={{backgroundColor:'#092a3b'}}>
       <AnimatePresence mode="sync">{Scene && <Scene key={currentSceneKey}/>}</AnimatePresence>
-      <audio ref={audioRef} src={`${import.meta.env.BASE_URL}audio/composite_audio.mp3`} preload="auto" autoPlay muted={muted}/>
+      <audio ref={audioRef} src={`${import.meta.env.BASE_URL}audio/composite_audio_lead_followup.mp3`} preload="auto" autoPlay muted={muted}/>
     </VideoCanvas>
   </VideoPausedContext.Provider>
 }
