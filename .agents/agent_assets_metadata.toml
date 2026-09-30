@@ -820,3 +820,10 @@ uri = "file://artifacts/patient-pipeline-first-campaign/public/audio/vo_03_2.mp3
 type = "audio"
 title = "Lead Follow-Up section tutorial correction"
 description = "Text-to-speech audio: Sign in to Patient Pipeline. Make sure that you’re in Lead Follow-Up, not Reactivation. Open Campaigns from the welcome screen, or from the top navigation. Then choose New Campa…"
+
+[[outputs]]
+id = "xr6HT795I37A_k1O3t9LE"
+uri = "file://artifacts/patient-pipeline-first-campaign/public/audio/vo_01_connection.mp3"
+type = "audio"
+title = "opening form connection promise"
+description = "Text-to-speech audio: We'll show you how to connect it after we add the offer."

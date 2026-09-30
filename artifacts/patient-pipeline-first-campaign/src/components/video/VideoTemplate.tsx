@@ -5,9 +5,9 @@ import { Opening, Preparation, OpenCampaigns, EnterOffer, PriceAndSave, FindForm
 import { AudioClockContext } from './AudioClockContext'
 
 export const SCENE_DURATIONS = {
-  opening:20000, preparation:28000, openCampaigns:28000, enterOffer:57000,
-  priceAndSave:39000, findForm:33000, connectForm:75000, testForm:55000,
-  practiceScript:29000, findLeads:34000, checklist:22000,
+  opening:20000, preparation:21000, openCampaigns:21500, enterOffer:34000,
+  priceAndSave:27000, findForm:29500, connectForm:55500, testForm:45500,
+  practiceScript:18500, findLeads:25500, checklist:26000,
 }
 const VIDEO_ASPECT_RATIO: VideoAspectRatio = '16:9'
 const SCENES: Record<string, React.ComponentType> = {
@@ -47,7 +47,7 @@ export default function VideoTemplate({ durations=SCENE_DURATIONS, loop=true, pa
     <AudioClockContext.Provider value={audioRef}>
     <VideoCanvas aspectRatio={VIDEO_ASPECT_RATIO} style={{backgroundColor:'#092a3b'}}>
       <AnimatePresence mode="sync">{Scene && <Scene key={currentSceneKey}/>}</AnimatePresence>
-      <audio ref={audioRef} src={`${import.meta.env.BASE_URL}audio/composite_audio_lead_followup.mp3`} preload="auto" autoPlay muted={muted}/>
+      <audio ref={audioRef} src={`${import.meta.env.BASE_URL}audio/composite_audio_tightened_v2.mp3`} preload="auto" autoPlay muted={muted}/>
     </VideoCanvas>
     </AudioClockContext.Provider>
   </VideoPausedContext.Provider>
