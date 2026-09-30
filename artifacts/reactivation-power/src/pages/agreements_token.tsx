@@ -28,7 +28,7 @@ export default function AgreementPage() {
       <div className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-8 sm:py-10">
         <header className="flex flex-col items-center gap-4 text-center">
           <Link href="/">
-            <img src="/images/logo.png" alt="Reactivation Power" width={1177} height={480} className="h-12 w-auto" />
+            <img src="/images/patient-pipeline-logo.png" alt="Patient Pipeline" width={2172} height={724} className="h-12 w-auto" />
           </Link>
           <div>
             <h1 className="text-2xl font-semibold text-balance text-foreground" data-testid="agreement-title">

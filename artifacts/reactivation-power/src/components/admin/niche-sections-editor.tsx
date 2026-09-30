@@ -4,6 +4,7 @@ import { useMemo, useState, useTransition } from 'react'
 import { Eye } from 'lucide-react'
 import { saveScriptSection } from '@/app/actions/reactivation'
 import { Button } from '@/components/ui/button'
+import { nicheDisplayLabel } from '@/components/reactivation/niche-select'
 import {
   Dialog,
   DialogContent,
@@ -92,7 +93,7 @@ export function NicheSectionsEditor({
         <Select
           value={nicheId}
           onValueChange={(v) => v && setNicheId(v)}
-          items={activeNiches.map((n) => ({ value: n.id, label: n.name }))}
+          items={activeNiches.map((n) => ({ value: n.id, label: nicheDisplayLabel(n.name) }))}
         >
           <SelectTrigger className="w-56" aria-label="Select niche">
             <SelectValue />
@@ -100,7 +101,7 @@ export function NicheSectionsEditor({
           <SelectContent>
             {activeNiches.map((n) => (
               <SelectItem key={n.id} value={n.id}>
-                {n.name}
+                {nicheDisplayLabel(n.name)}
               </SelectItem>
             ))}
           </SelectContent>

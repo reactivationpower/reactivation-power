@@ -1,0 +1,29 @@
+kind = "video"
+videoAspectRatio = "9:16"
+previewPath = "/reactivation-power-launch-mobile/"
+title = "Reactivation Power — Launch Film (Mobile)"
+description = "Vertical narrated companion film for phone viewing, featuring Reactivation and Lead Follow-Up."
+version = "1.0.0"
+id = "artifacts/reactivation-power-launch-mobile"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/reactivation-power-launch-mobile/" ]
+localPort = 19979
+
+[services.development]
+run = "pnpm --filter @workspace/reactivation-power-launch-mobile run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/reactivation-power-launch-mobile", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/reactivation-power-launch-mobile/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "19979"
+BASE_PATH = "/reactivation-power-launch-mobile/"

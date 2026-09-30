@@ -9,7 +9,7 @@ export const EMAIL_AUDIENCES = [
     id: 'chiropractic',
     name: 'Chiropractic',
     description:
-      'Chiropractic practices and doctors. Examples, service lines and language assume a chiropractor\'s patient list — decompression, neuropathy, soft wave, weight loss and the rest.',
+      'Chiropractic practices and doctors. Examples, service lines and language assume a chiropractor\'s patient list — decompression, neuropathy, SoftWave/shock wave, weight loss and the rest.',
   },
 ] as const
 
@@ -95,7 +95,7 @@ ${body}
 
 const header = `        <tr>
           <td align="center" style="background-color:#ffffff;padding:18px 40px 16px 40px;border-bottom:3px solid #39889f;" class="inner">
-            <img src="https://reactivationpower.com/images/logo-slogan.png" alt="Reactivation Power — Turning old business into new business &amp; new money" width="170" style="width:170px;max-width:170px;height:auto;margin:0 auto;" />
+            <img src="https://reactivationpower.com/images/patient-pipeline-logo.png" alt="Patient Pipeline" width="200" style="width:200px;max-width:200px;height:auto;margin:0 auto;" />
           </td>
         </tr>`
 
@@ -1394,11 +1394,11 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         h1('The same list, matched to the right conversation'),
         greet,
         p(
-          'A patient who came in for spinal decompression needs a completely different conversation than one who came in for soft wave, a weight loss program, or even chiropractic care.',
+          'A patient who came in for spinal decompression needs a completely different conversation than one who came in for SoftWave/shock wave, a weight loss program, or even chiropractic care.',
         ),
         image(
           'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/ChatGPT%20Image%20Sep%2010%2C%202026%2C%2005_07_16%20PM-lhr7bi52lt5vjQysKdUpJoL9pVq7CP.png',
-          'The same list, matched to the right conversation. Each service line has a different story, and your team gets the right script for each one: chiropractic care, spinal decompression, neuropathy and joint pain; soft wave, acoustic wave therapy, acupuncture, massage and gut health; weight loss with ChiroThin, in-office programs and GLP patients; red light, body contouring, skin tightening, cellulite reduction and Botox; laser hair removal and body waxing. One import, mixed patient types: each patient carries the service they were treated for, so your team works straight down the queue without switching scripts by hand.',
+          'The same list, matched to the right conversation. Each service line has a different story, and your team gets the right script for each one: chiropractic care, spinal decompression, neuropathy and joint pain; SoftWave/shock wave, acupuncture, massage and gut health; weight loss with ChiroThin, in-office programs and GLP patients; red light, body contouring, skin tightening, cellulite reduction and Botox; laser hair removal and body waxing. One import, mixed patient types: each patient carries the service they were treated for, so your team works straight down the queue without switching scripts by hand.',
         ),
         p(
           'This is where generic call scripts fall apart. One all-purpose script forces your team to improvise the parts that matter most — and those are exactly the parts that decide whether an appointment gets booked.',
@@ -1406,7 +1406,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         p('So the program ships with scripts written for specific service lines:'),
         checks([
           'Chiropractic care, spinal decompression, neuropathy and joint pain',
-          'Acoustic wave therapy / soft wave, acupuncture, massage therapy and gut health',
+          'SoftWave/shock wave, acupuncture, massage therapy and gut health',
           'Weight loss — ChiroThin, in-office programs and GLP patients',
           'Red light / body contouring, skin tightening, cellulite reduction and Botox',
           'Laser hair removal and body waxing',
@@ -1481,7 +1481,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         ),
         image(
           asset('10-3-dont-sort-the-list-first.jpg'),
-          'You don\'t have to sort the list first. A spreadsheet column labeled last service, with rows for chiropractic, decompression, red light, softwave, weight loss and massage, each matched by an arrow to its script. The import reads the column your software already exports.',
+          'You don\'t have to sort the list first. A spreadsheet column labeled last service, with rows for chiropractic, decompression, red light, SoftWave/shock wave, weight loss and massage, each matched by an arrow to its script. The import reads the column your software already exports.',
           360,
         ),
         p(
@@ -1513,7 +1513,7 @@ ${button('Schedule a Call', LANDING_PAGE_URL)}
         p('Now consider what they think you do:'),
         image(
           'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/ChatGPT%20Image%20Sep%2010%2C%202026%2C%2005_10_43%20PM-V0Xv2gCVVYP1Qmh4VYM7ZSjiucswxI.png',
-          'What they\'re still thinking versus what you offer now. A past patient pictures a single adjustment room from years ago and thinks, &ldquo;Oh, I know that office. I went there a few years ago for my back.&rdquo; Outdated, limited, just one service in their mind. Meanwhile the practice now offers chiropractic care, spinal decompression, soft wave, weight loss, red light and aesthetics, and laser hair removal. The warmest possible audience for a new service is the patient who already had a good experience with you and simply doesn\'t know the service exists.',
+          'What they\'re still thinking versus what you offer now. A past patient pictures a single adjustment room from years ago and thinks, &ldquo;Oh, I know that office. I went there a few years ago for my back.&rdquo; Outdated, limited, just one service in their mind. Meanwhile the practice now offers chiropractic care, spinal decompression, SoftWave/shock wave, weight loss, red light and aesthetics, and laser hair removal. The warmest possible audience for a new service is the patient who already had a good experience with you and simply doesn\'t know the service exists.',
         ),
         p(
           'That\'s the whole picture in their head. Not the new technology. Not the program that would be perfect for what they\'re dealing with now. <strong>Just the one thing they came in for, years ago.</strong>',

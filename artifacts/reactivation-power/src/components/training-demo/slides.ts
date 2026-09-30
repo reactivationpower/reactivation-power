@@ -20,7 +20,7 @@ export const SLIDES: Slide[] = [
     narration:
       'Your account has already been set up for you \u2014 so getting started is simple. Go to the training portal\u2019s home page in any web browser \u2014 on a computer, tablet, or phone. You\u2019ll land on this sign-in screen.',
     image: '/training/step-signin-empty.png',
-    imageAlt: 'Reactivation Power sign-in page with empty form fields',
+    imageAlt: 'Patient Pipeline sign-in page with empty form fields',
     duration: 10000,
   },
   {

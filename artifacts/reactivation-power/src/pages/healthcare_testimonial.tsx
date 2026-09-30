@@ -68,10 +68,10 @@ export default function HealthcareTestimonialLandingPage() {
       <header className="border-b border-border bg-card">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 md:px-6">
           <img
-            src="/images/logo-slogan.png"
-            alt="Reactivation Power — Turning Old Business Into New Business & New Money!"
-            width={1189}
-            height={578}
+            src="/images/patient-pipeline-logo.png"
+            alt="Patient Pipeline"
+            width={2172}
+            height={724}
             priority
             className="h-16 w-auto md:h-20"
           />
@@ -281,10 +281,10 @@ export default function HealthcareTestimonialLandingPage() {
       <footer className="border-t border-border bg-card">
         <div className="mx-auto flex max-w-6xl flex-col items-center gap-3 px-4 py-8 text-center md:px-6">
           <img
-            src="/images/logo-slogan.png"
-            alt="Reactivation Power — Turning Old Business Into New Business & New Money!"
-            width={1189}
-            height={578}
+            src="/images/patient-pipeline-logo.png"
+            alt="Patient Pipeline"
+            width={2172}
+            height={724}
             className="h-16 w-auto"
           />
           <p className="text-xs text-muted-foreground">

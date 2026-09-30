@@ -6,6 +6,7 @@ import { DISPOSITION_LABELS } from '@workspace/shared/types'
 import { ContactEditor } from '@/components/reactivation/contact-editor'
 import { DeleteContactButton } from '@/components/reactivation/delete-contact-button'
 import { usePageData } from '@/hooks/use-page-data'
+import { nicheDisplayLabel } from '@/components/reactivation/niche-select'
 import { PageError, PageLoading } from '@/components/page-status'
 import NotFound from '@/pages/not-found'
 
@@ -37,7 +38,7 @@ export default function ContactProfilePage() {
           <p className="mt-1 text-muted-foreground">
             {contact.phone}
             {contact.email ? ` · ${contact.email}` : ''}
-            {contact.niche ? ` · ${contact.niche.name}` : ''}
+            {contact.niche ? ` · ${nicheDisplayLabel(contact.niche.name)}` : ''}
           </p>
           <div className="mt-2 flex flex-wrap items-center gap-2">
             {contact.stage && (

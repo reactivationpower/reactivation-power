@@ -45,10 +45,10 @@ export default function AdminLoginPage() {
       <div className="w-full max-w-sm">
         <div className="mb-8 flex justify-center">
           <img
-            src="/images/logo.png"
-            alt="Reactivation Power"
-            width={200}
-            height={60}
+            src="/images/patient-pipeline-logo.png"
+            alt="Patient Pipeline"
+            width={2172}
+            height={724}
             className="h-auto w-[200px]"
           />
         </div>

@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { SECTOR_LABELS, type Niche, type Sector } from '@workspace/shared/types'
+import { nicheDisplayLabel } from '@/components/reactivation/niche-select'
 
 const SECTOR_ORDER: Sector[] = ['healthcare', 'home_services']
 
@@ -102,9 +103,10 @@ export function NicheManager({ niches }: { niches: Niche[] }) {
                   className="flex items-center justify-between gap-4 border-b border-border px-5 py-3 last:border-b-0"
                 >
                   <Input
-                    defaultValue={niche.name}
+                    defaultValue={nicheDisplayLabel(niche.name)}
                     className="max-w-xs"
-                    aria-label={`Niche name: ${niche.name}`}
+                    aria-label={`Niche name: ${nicheDisplayLabel(niche.name)}`}
+                    disabled={niche.name === 'Acoustic Wave Therapy'}
                     onBlur={(e) => handleRename(niche, e.target.value)}
                   />
                   <div className="flex items-center gap-4">

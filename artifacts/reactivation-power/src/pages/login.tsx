@@ -27,10 +27,10 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         <div className="mb-6 flex flex-col items-center text-center">
           <img
-            src="/images/logo-slogan.png"
-            alt="Reactivation Power — Turning Old Business Into New Business & New Money!"
-            width={1183}
-            height={578}
+            src="/images/patient-pipeline-logo.png"
+            alt="Patient Pipeline"
+            width={2172}
+            height={724}
             className="h-auto w-full max-w-xs sm:max-w-sm"
           />
           <p className="mt-2 text-sm text-muted-foreground text-pretty">

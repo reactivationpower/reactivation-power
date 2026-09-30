@@ -18,6 +18,7 @@ import {
 import { CourseAccessToggle } from '@/components/admin/course-access-toggle'
 import { ProductAccessToggle } from '@/components/admin/product-access-toggle'
 import { NicheAccessToggle } from '@/components/admin/niche-access-toggle'
+import { nicheDisplayLabel } from '@/components/reactivation/niche-select'
 import { AddStaffForm } from '@/components/admin/add-staff-form'
 import { ParticipantActiveToggle } from '@/components/admin/participant-active-toggle'
 import { ViewAsButton } from '@/components/admin/view-as-button'
@@ -281,7 +282,7 @@ export default function ParticipantDetailPage() {
                       className="flex items-center justify-between gap-4 rounded-md border border-border px-4 py-2.5"
                     >
                       <p className="min-w-0 truncate text-sm font-medium">
-                        {niche.name}
+                        {nicheDisplayLabel(niche.name)}
                       </p>
                       {isOwner ? (
                         <NicheAccessToggle

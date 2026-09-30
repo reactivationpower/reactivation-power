@@ -123,8 +123,8 @@ export const DEMO_LEAD_CAMPAIGNS: Record<DemoPracticeKey, readonly DemoLeadCampa
     CHIRO_LEAD_CAMPAIGN,
     {
       niche: 'Acoustic Wave Therapy',
-      name: 'SoftWave / Shockwave — $49 Introductory Consultation and Treatment',
-      offerItems: ['Introductory consultation', 'SoftWave / shockwave treatment session'],
+      name: 'SoftWave/shock wave — $49 Introductory Consultation and Treatment',
+      offerItems: ['Introductory consultation', 'SoftWave/shock wave treatment session'],
       regularPriceCents: null,
       offerPriceCents: 4900,
       priceLineStyle: 'offer_only',
@@ -132,7 +132,7 @@ export const DEMO_LEAD_CAMPAIGNS: Record<DemoPracticeKey, readonly DemoLeadCampa
       leads: [
         {
           firstName: 'Holly', lastName: 'Warren', phone: '(303) 555-0126', email: 'holly.warren@example.com',
-          message: 'Saw the SoftWave offer. Would it be worth discussing for my heel pain?',
+          message: 'Saw the SoftWave/shock wave offer. Would it be worth discussing for my heel pain?',
           minutesAgo: 24,
         },
         {
@@ -145,7 +145,7 @@ export const DEMO_LEAD_CAMPAIGNS: Record<DemoPracticeKey, readonly DemoLeadCampa
         },
         {
           firstName: 'Denise', lastName: 'Park', phone: '(970) 555-0152',
-          message: 'Interested in shockwave treatment for my Achilles tendon.',
+          message: 'Interested in SoftWave/shock wave treatment for my Achilles tendon.',
           minutesAgo: 60 * 57 + 30,
           status: 'reached',
           attemptedMinutesAgo: 60 * 54,

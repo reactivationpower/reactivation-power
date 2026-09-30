@@ -2,7 +2,7 @@ import { Router, type IRouter, type Request, type Response } from "express";
 import { accessOwnerId, getCurrentParticipant } from "@/lib/data/participants";
 import { getOwnerNiches } from "@/lib/data/reactivation";
 import { getOwnerSectors } from "@/lib/data/courses";
-import { suggestNicheForService } from "@workspace/niche-catalog";
+import { displayNicheName, suggestNicheForService } from "@workspace/niche-catalog";
 import { runWithRequestContext } from "@/lib/request-context";
 import { isRedirectSignal } from "@/shims/next-navigation";
 
@@ -20,7 +20,7 @@ const NICHE_SAMPLES: Record<string, { service: string; complaint: string }> = {
   Decompression: { service: "Spinal Decompression", complaint: "Herniated disc L4-L5" },
   Neuropathy: { service: "Neuropathy Treatment", complaint: "Numbness in both feet" },
   "Joint Pain": { service: "Knee Injection", complaint: "Right knee pain" },
-  "Acoustic Wave Therapy": { service: "Softwave", complaint: "Plantar fasciitis" },
+  "Acoustic Wave Therapy": { service: "SoftWave/shock wave", complaint: "Plantar fasciitis" },
   Acupuncture: { service: "Acupuncture", complaint: "Migraines" },
   "Massage Therapy": { service: "60 min Massage", complaint: "Neck and shoulder tension" },
   "Gut Health": { service: "Gut Health Program", complaint: "Bloating and IBS" },
@@ -101,7 +101,7 @@ router.get("/templates/contacts", async (req: Request, res: Response) => {
         if (!hit || hit.id !== niche.id) service = niche.name;
       }
       const cells = [person[0], person[1], samplePhone(i), sampleEmail(person[0], person[1])];
-      if (variant === "niche") cells.push(niche.name);
+      if (variant === "niche") cells.push(displayNicheName(niche.name));
       cells.push(service, sample?.complaint ?? "", person[2]);
       lines.push(csvRow(cells));
     });

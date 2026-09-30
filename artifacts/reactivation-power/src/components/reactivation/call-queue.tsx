@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import { Phone, Clock, Lock } from 'lucide-react'
 type QueueItem = any
 import { suggestedCallTime } from '@workspace/shared/call-time'
+import { nicheDisplayLabel } from '@/components/reactivation/niche-select'
 
 /**
  * Calendar-day comparison, not elapsed hours: a call due yesterday at 2 PM is
@@ -61,13 +62,13 @@ function QueueRow({ follow_up, contact }: QueueItem) {
           {nicheInactive && (
             <span className="inline-flex items-center gap-1 rounded-full border border-destructive/40 bg-destructive/10 px-2 py-0.5 text-xs font-semibold text-destructive">
               <Lock className="size-3" />
-              {contact.niche!.name} — not active
+              {nicheDisplayLabel(contact.niche!.name)} — not active
             </span>
           )}
         </div>
         <p className="mt-0.5 text-sm text-muted-foreground">
           {contact.phone}
-          {contact.niche && !nicheInactive ? ` · ${contact.niche.name}` : ''}
+          {contact.niche && !nicheInactive ? ` · ${nicheDisplayLabel(contact.niche.name)}` : ''}
           {contact.call_count > 0
             ? ` · ${contact.call_count} previous call${contact.call_count === 1 ? '' : 's'}`
             : ' · Never called'}

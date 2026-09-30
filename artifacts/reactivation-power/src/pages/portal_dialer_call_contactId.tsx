@@ -3,6 +3,7 @@ import { useParams } from 'wouter';
 import { Link } from "wouter";
 import { ArrowLeft, Lock } from 'lucide-react'
 import { CallScreen } from '@/components/reactivation/call-screen'
+import { nicheDisplayLabel } from '@/components/reactivation/niche-select'
 import { usePageData } from '@/hooks/use-page-data'
 import { PageError, PageLoading } from '@/components/page-status'
 import NotFound from '@/pages/not-found'
@@ -36,19 +37,19 @@ export default function CallPage() {
             <Lock className="mt-0.5 size-5 shrink-0 text-destructive" />
             <div>
               <h1 className="text-lg font-semibold text-destructive">
-                {contact.niche.name}
+                {nicheDisplayLabel(contact.niche.name)}
                 {' isn\u2019t active on this account'}
               </h1>
               <p className="mt-2 text-sm leading-relaxed text-foreground">
                 {contact.name} was imported for the{' '}
-                <span className="font-semibold">{contact.niche.name}</span>{' '}
+                <span className="font-semibold">{nicheDisplayLabel(contact.niche.name)}</span>{' '}
                 script, but that niche isn&apos;t turned on for your account
                 yet. To protect your call, we won&apos;t load a different
                 script.
               </p>
               <p className="mt-3 text-sm font-semibold text-foreground">
                 Contact the Reactivation Power team to turn on{' '}
-                {contact.niche.name}. Once it&apos;s active, {contact.name} will
+                {nicheDisplayLabel(contact.niche.name)}. Once it&apos;s active, {contact.name} will
                 automatically be ready to call with the right script — no
                 re-import needed.
               </p>

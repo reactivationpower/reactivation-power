@@ -38,10 +38,10 @@ export default function ThankYouPage() {
       <div className="mx-auto flex max-w-lg flex-col items-center gap-6 px-4 py-16 text-center">
         <Link href="/">
           <img
-            src="/images/logo.png"
-            alt="Reactivation Power"
-            width={1177}
-            height={480}
+            src="/images/patient-pipeline-logo.png"
+            alt="Patient Pipeline"
+            width={2172}
+            height={724}
             className="h-12 w-auto"
           />
         </Link>

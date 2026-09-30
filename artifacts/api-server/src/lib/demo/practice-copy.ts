@@ -55,7 +55,7 @@ const CHIRO_COPY: DemoPracticeCopy = {
     Neuropathy: ['Neuropathy Program', 'Neuropathy Treatment'],
     Acupuncture: ['Acupuncture Session', 'Acupuncture Series'],
     'Massage Therapy': ['Therapeutic Massage', 'Deep Tissue Massage'],
-    'Acoustic Wave Therapy': ['Acoustic Wave Therapy', 'Shockwave Session'],
+    'Acoustic Wave Therapy': ['SoftWave/shock wave', 'Shock wave session'],
     'Red Light / Body Contouring': ['Red Light Body Contouring', 'Red Light Sessions'],
     'Weight Loss (Not ChiroThin)': ['Weight Loss Program', 'Medical Weight Loss'],
     'GLP Patients': ['GLP-1 Program', 'Semaglutide Weight Loss'],

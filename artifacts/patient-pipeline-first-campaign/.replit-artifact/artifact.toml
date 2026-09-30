@@ -1,0 +1,29 @@
+kind = "video"
+videoAspectRatio = "16:9"
+previewPath = "/patient-pipeline-first-campaign/"
+title = "Patient Pipeline — Set Up Your First Campaign"
+description = "A 16:9 narrated tutorial based on the First Campaign Guide, showing authentic Patient Pipeline demo setup screens and accurate Facebook/Instagram form-connection guidance."
+version = "1.0.0"
+id = "artifacts/patient-pipeline-first-campaign"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/patient-pipeline-first-campaign/" ]
+localPort = 19885
+
+[services.development]
+run = "pnpm --filter @workspace/patient-pipeline-first-campaign run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/patient-pipeline-first-campaign", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/patient-pipeline-first-campaign/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "19885"
+BASE_PATH = "/patient-pipeline-first-campaign/"

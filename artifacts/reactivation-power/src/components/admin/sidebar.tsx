@@ -69,11 +69,11 @@ export function AdminSidebar({ admin }: { admin: AdminIdentity | null }) {
       <div className="p-4">
         <div className="flex items-center gap-3 rounded-lg border border-border p-3">
           <img
-            src="/images/logo.png"
-            alt="Reactivation Power"
-            width={1177}
-            height={480}
-            className="h-10 w-auto"
+            src="/images/patient-pipeline-logo.png"
+            alt="Patient Pipeline"
+            width={2172}
+            height={724}
+            className="h-auto w-28 shrink-0 rounded bg-white"
           />
           <div className="min-w-0">
             <p className="truncate text-sm font-semibold text-foreground">

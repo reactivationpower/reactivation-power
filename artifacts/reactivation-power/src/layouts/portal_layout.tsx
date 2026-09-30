@@ -22,13 +22,13 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
         >
           <PortalHomeLink>
             <img
-              src="/images/logo.png"
-              alt="Reactivation Power"
-              width={1177}
-              height={480}
+              src="/images/patient-pipeline-logo.png"
+              alt="Patient Pipeline"
+              width={2172}
+              height={724}
               className="h-12 w-auto"
             />
-            <span className="sr-only">Reactivation Power Portal</span>
+            <span className="sr-only">Patient Pipeline Portal</span>
           </PortalHomeLink>
           <PortalNav />
           <div className="flex shrink-0 items-center gap-2 lg:order-last">

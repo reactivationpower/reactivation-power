@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Combobox } from '@base-ui/react/combobox'
 import { Check, ChevronDown, Search } from 'lucide-react'
+import { displayNicheName } from '@workspace/niche-catalog'
 import { cn } from '@/lib/utils'
 
 export interface NicheSelectItem {
@@ -23,20 +24,14 @@ interface NicheSelectProps {
   'data-testid'?: string
 }
 
-const ACOUSTIC_WAVE_NAME = 'Acoustic Wave Therapy'
-const ACOUSTIC_WAVE_LABEL = 'SoftWave/ShockWave'
-
 /** Presentation only: persisted niche names and IDs always remain unchanged. */
 export function nicheDisplayLabel(label: string) {
-  return label === ACOUSTIC_WAVE_NAME ? ACOUSTIC_WAVE_LABEL : label
+  return displayNicheName(label)
 }
 
 function matchesItem(item: NicheSelectItem, query: string) {
   const displayLabel = nicheDisplayLabel(item.label)
-  const searchable =
-    item.label === ACOUSTIC_WAVE_NAME
-      ? `${item.label} ${displayLabel} softwave shockwave`
-      : `${item.label} ${displayLabel}`
+  const searchable = `${item.label} ${displayLabel} softwave shockwave acoustic wave`
   const words = query.toLocaleLowerCase().trim().split(/[\s/_-]+/).filter(Boolean)
   const haystack = searchable.toLocaleLowerCase()
   return words.every((word) => haystack.includes(word))

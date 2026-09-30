@@ -7,7 +7,7 @@ describe('transactional templates', () => {
     for (const t of listTemplates()) {
       const r = t.render(t.sample as never)
       expect(r.subject.length).toBeGreaterThan(5)
-      expect(r.html).toContain('logo-slogan.png')
+      expect(r.html).toContain('patient-pipeline-logo.png')
       expect(r.html).not.toMatch(/\{\{|undefined|\[object/)
       expect(r.html).not.toContain('unsubscribe')
       expect(toPlainText(r.html).length).toBeGreaterThan(80)

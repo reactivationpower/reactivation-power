@@ -29,6 +29,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { formatPhone } from '@workspace/shared/phone'
+import { nicheDisplayLabel } from '@/components/reactivation/niche-select'
 import {
   LEAD_DISPOSITION_LABELS,
   isAppointmentDisposition,
@@ -376,7 +377,7 @@ export function LeadCallScreen({
             <p className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
               <Megaphone className="size-3.5" />
               {campaign.name}
-              {niche ? ` \u00b7 ${niche.name} lead script` : ''}
+              {niche ? ` \u00b7 ${nicheDisplayLabel(niche.name)} lead script` : ''}
             </p>
           </div>
         </div>

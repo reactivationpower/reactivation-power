@@ -18,3 +18,4 @@
 - [Campaign setup audience](campaign-setup-guidance.md) — self-service office setup is primary; agency handoff is secondary, and receipt claims must stay factual.
 - [Portal welcome intent](portal-welcome-intent.md) — beginner-friendly product entry, familiar top tabs, and explicit calling and tailored-script benefits.
 - [Public script previews](public-script-preview.md) — use actual two-screen branches; differentiate past-service scripting from campaign/offer scripting.
+- [Patient Pipeline video positioning](patient-pipeline-video.md) — use Patient Pipeline branding; keep short ads distinct from a detailed, privacy-safe product walkthrough.

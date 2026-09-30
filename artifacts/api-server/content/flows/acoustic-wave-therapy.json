@@ -45,7 +45,7 @@
     {
       "step_key": "recommendation",
       "title": "The Recommendation",
-      "content": "{{contact_first_name}}, that's worth getting looked at instead of just dealing with it. Can I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you in so {{provider_name}} can take a look at {{main_concern}}. If acoustic wave therapy can help, we'll walk you through the options. If it's not the right fit, we'll say so. Either way you'll know where you stand. Does that sound reasonable?\n\n(Tap what you hear.)",
+      "content": "{{contact_first_name}}, that's worth getting looked at instead of just dealing with it. Can I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you in so {{provider_name}} can take a look at {{main_concern}}. If SoftWave/shock wave can help, we'll walk you through the options. If it's not the right fit, we'll say so. Either way you'll know where you stand. Does that sound reasonable?\n\n(Tap what you hear.)",
       "sort_order": 10
     },
     {
@@ -63,7 +63,7 @@
     {
       "step_key": "lapsed_commitment",
       "title": "Nothing Found: Why They Stopped",
-      "content": "{{contact_first_name}}, I'm glad you're still doing well.\n\nCan I ask what changed that led you to stop coming in?\n\n(Let them answer. Do not argue with it.)\n\nAcoustic wave therapy supports healing, but everyday strain can bring problems back. Regular checks help us catch changes early.\n\n(Tap the reason they gave.)",
+      "content": "{{contact_first_name}}, I'm glad you're still doing well.\n\nCan I ask what changed that led you to stop coming in?\n\n(Let them answer. Do not argue with it.)\n\nSoftWave/shock wave supports healing, but everyday strain can bring problems back. Regular checks help us catch changes early.\n\n(Tap the reason they gave.)",
       "sort_order": 16
     },
     {
@@ -129,7 +129,7 @@
     {
       "step_key": "obj_injections_surgery",
       "title": "Objection: Injections or Surgery",
-      "content": "Okay. That tells me it's gotten bad enough that you want it handled.\n\nHas a doctor recommended that, or is it something you're looking into yourself?\n\n(Let them answer. Do not talk down injections or surgery.)\n\nBoth of those are real options, and sometimes they're the right call. They're also hard to undo once you've done them. A visit with {{provider_name}} doesn't rule anything out. It gives you a second look at {{main_concern}} before you commit to something permanent.\n\nIf acoustic wave isn't the answer here, we'll say so. Either way you'll walk into that decision knowing more than you do today.\n\nDoes it make sense to get that second look first?",
+      "content": "Okay. That tells me it's gotten bad enough that you want it handled.\n\nHas a doctor recommended that, or is it something you're looking into yourself?\n\n(Let them answer. Do not talk down injections or surgery.)\n\nBoth of those are real options, and sometimes they're the right call. They're also hard to undo once you've done them. A visit with {{provider_name}} doesn't rule anything out. It gives you a second look at {{main_concern}} before you commit to something permanent.\n\nIf SoftWave/shock wave isn't the answer here, we'll say so. Either way you'll walk into that decision knowing more than you do today.\n\nDoes it make sense to get that second look first?",
       "sort_order": 113
     },
     {

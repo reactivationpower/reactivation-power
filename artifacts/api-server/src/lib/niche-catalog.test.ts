@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url'
 import {
   CONCERN_OPTIONS,
   SERVICE_GROUPS,
+  displayNicheName,
   matchNicheByName,
   suggestNicheForService,
 } from '@workspace/niche-catalog'
@@ -86,6 +87,17 @@ describe('@workspace/niche-catalog is the only copy', () => {
     expect(matchNicheByName('clear-aligners', niches)?.id).toBe('b')
     expect(suggestNicheForService('Invisalign consult', niches)?.id).toBe('b')
     expect(suggestNicheForService('zzz unknown', niches)).toBeNull()
+  })
+
+  it('maps the acoustic-wave canonical niche to its display label without changing its key', () => {
+    const canonicalNiche = 'Acoustic Wave Therapy'
+    const niche = { id: 'acoustic-id', name: canonicalNiche }
+    expect(displayNicheName(canonicalNiche)).toBe('SoftWave/shock wave')
+    expect(SERVICE_GROUPS.flatMap((group) => group.services).find(
+      (service) => service.label === 'SoftWave/shock wave',
+    )?.niche).toBe(canonicalNiche)
+    expect(matchNicheByName('SoftWave/shock wave', [niche])).toBe(niche)
+    expect(displayNicheName('Chiropractic')).toBe('Chiropractic')
   })
 })
 

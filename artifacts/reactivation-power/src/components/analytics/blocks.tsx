@@ -8,6 +8,7 @@ import {
   type TimeInsight,
 } from '@workspace/shared/analytics-types'
 import { cn } from '@/lib/utils'
+import { nicheDisplayLabel } from '@/components/reactivation/niche-select'
 
 // ---------- Section card ----------
 
@@ -290,7 +291,7 @@ export function NicheTable({ rows }: { rows: NicheRow[] }) {
               className="border-b border-border last:border-b-0"
             >
               <td className="py-2.5 pr-4 font-medium text-foreground">
-                {r.name}
+                {nicheDisplayLabel(r.name)}
               </td>
               <td className="py-2.5 pr-4">
                 <span className="flex items-center gap-2">

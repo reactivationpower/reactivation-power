@@ -9,6 +9,7 @@ import {
   type NicheLeaders,
 } from '@workspace/shared/analytics-types'
 import { cn } from '@/lib/utils'
+import { nicheDisplayLabel } from '@/components/reactivation/niche-select'
 
 export function NicheLeaderBoard({ data }: { data: NicheLeaders }) {
   return (
@@ -61,7 +62,7 @@ function NicheCard({ row }: { row: NicheLeaderRow }) {
   return (
     <div className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4">
       <div className="flex items-start justify-between gap-2">
-        <p className="text-xs font-medium text-muted-foreground">{row.name}</p>
+        <p className="text-xs font-medium text-muted-foreground">{nicheDisplayLabel(row.name)}</p>
         <p className="shrink-0 text-xs tabular-nums text-muted-foreground">
           {row.reached} {row.reached === 1 ? 'conversation' : 'conversations'}
         </p>
@@ -114,7 +115,7 @@ function NicheCard({ row }: { row: NicheLeaderRow }) {
             .join(' · ')}
         {isTie && runnerUp && (
           <>
-            {' · '}Next: {runnerUp.name} at {runnerUp.closeRate}%
+            {' · '}Next: {nicheDisplayLabel(runnerUp.name)} at {runnerUp.closeRate}%
           </>
         )}
         {!isTie && row.status === 'leader' && runnerUp && (
@@ -191,7 +192,7 @@ function SoloView({ niches }: { niches: NicheLeaderRow[] }) {
                 )}
               </IconBox>
               <span className="flex-1 text-sm font-medium text-foreground">
-                {n.name}
+                {nicheDisplayLabel(n.name)}
               </span>
               <span className="text-sm font-semibold tabular-nums text-foreground">
                 {c.closeRate}%

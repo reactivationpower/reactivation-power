@@ -104,7 +104,7 @@ export function buildHandoffText({ campaign, offerLine, webhookUrl, source }: { 
         ? [...stepsFor('facebook').map((s) => `[Facebook form] ${s}`), ...stepsFor('website').map((s) => `[Website form] ${s}`)]
         : stepsFor(source)
   return [
-    'Please connect our ad lead form to our calling tool (Reactivation Power).',
+    'Please connect our ad lead form to Patient Pipeline Lead Follow-Up.',
     'PRIVATE: this address lets anyone add leads. Keep it to yourself; do not post it anywhere public.',
     '',
     `Campaign: ${campaign.name}`,
@@ -374,7 +374,7 @@ export function ConnectLeadsPanel({ campaign, webhookUrl, offerLine, connectionS
                 <details className="mt-3 text-sm">
                   <summary className="cursor-pointer text-muted-foreground">Only want to check our side?</summary>
                   <p className="mt-2 text-muted-foreground">
-                    This adds a "Test Lead" from inside Reactivation Power. It confirms our address works, but it does <b>not</b> prove your form is connected.
+                    This adds a "Test Lead" from inside Patient Pipeline. It confirms our address works, but it does <b>not</b> prove your form is connected.
                     {internal ? ` Last internal test ${timeAgo(internal, nowMs)}.` : ''}
                   </p>
                   <Button variant="outline" size="sm" className="mt-2 gap-2" disabled={pending || archived} onClick={internalTest} data-testid="button-internal-test">

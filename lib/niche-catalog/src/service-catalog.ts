@@ -43,7 +43,7 @@ export const SERVICE_GROUPS: ServiceGroup[] = [
       { label: 'Spinal Decompression', niche: 'Decompression' },
       { label: 'Neuropathy', niche: 'Neuropathy' },
       { label: 'Joint Pain', niche: 'Joint Pain' },
-      { label: 'Softwave / Shockwave', niche: 'Acoustic Wave Therapy' },
+      { label: 'SoftWave/shock wave', niche: 'Acoustic Wave Therapy' },
       { label: 'Acupuncture', niche: 'Acupuncture' },
       { label: 'Massage Therapy', niche: 'Massage Therapy' },
       { label: 'Gut Health', niche: 'Gut Health' },
@@ -109,4 +109,9 @@ const LABEL_BY_NICHE = new Map(ALL_SERVICES.map((s) => [s.niche, s.label]))
 /** Public label for an internal niche name; falls back to the input. */
 export function publicServiceName(niche: string): string {
   return LABEL_BY_NICHE.get(niche) ?? niche
+}
+
+/** Display-only name for a niche; never use this value as a persisted key. */
+export function displayNicheName(niche: string): string {
+  return niche === 'Acoustic Wave Therapy' ? 'SoftWave/shock wave' : niche
 }

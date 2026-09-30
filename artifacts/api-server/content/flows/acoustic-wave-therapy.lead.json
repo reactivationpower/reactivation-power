@@ -15,25 +15,25 @@
     {
       "step_key": "recommendation",
       "title": "The Recommendation",
-      "content": "{{contact_first_name}}, that's exactly what the {{offer_name}} is for. Can I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you in for the {{offer_name}}. Here's what it includes:\n\n{{offer_items}}\n\n{{price_line}}\n\n{{provider_name}} takes a look at {{main_concern}} and whether acoustic wave therapy is a fit for it. If it can help, we'll walk you through the options. If it's not the right fit, we'll say so. Either way you'll know where you stand. Does that sound reasonable?\n\n(Tap what you hear.)",
+      "content": "{{contact_first_name}}, that's exactly what the {{offer_name}} is for. Can I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you in for the {{offer_name}}. Here's what it includes:\n\n{{offer_items}}\n\n{{price_line}}\n\n{{provider_name}} takes a look at {{main_concern}} and whether SoftWave/shock wave is a fit for it. If it can help, we'll walk you through the options. If it's not the right fit, we'll say so. Either way you'll know where you stand. Does that sound reasonable?\n\n(Tap what you hear.)",
       "sort_order": 13
     },
     {
       "step_key": "obj_tried_injections",
       "title": "Objection: “I already tried injections”",
-      "content": "Okay, {{contact_first_name}}. That tells me you've been at this a while.\n\nHow long did the relief last after the injection?\n\n(Let them answer. Do not talk down the injection.)\n\nThat's the pattern most people describe. Injections calm the area down, and that's real relief. What they don't do is change the tissue underneath, so it wears off. Acoustic wave works the other way. It gets the area healing instead of quieting it down for a while.\n\nA visit with {{provider_name}} tells you whether {{main_concern}} is the kind of thing it helps with. If it isn't, we'll say so.\n\nWould it be worth finding out if there's a way to make it last?",
+      "content": "Okay, {{contact_first_name}}. That tells me you've been at this a while.\n\nHow long did the relief last after the injection?\n\n(Let them answer. Do not talk down the injection.)\n\nThat's the pattern most people describe. Injections calm the area down, and that's real relief. What they don't do is change the tissue underneath, so it wears off. SoftWave/shock wave works the other way. It gets the area healing instead of quieting it down for a while.\n\nA visit with {{provider_name}} tells you whether {{main_concern}} is the kind of thing it helps with. If it isn't, we'll say so.\n\nWould it be worth finding out if there's a way to make it last?",
       "sort_order": 101
     },
     {
       "step_key": "obj_skeptical",
       "title": "Objection: “I’m not sure it works”",
-      "content": "That's a fair thing to wonder, {{contact_first_name}}, and I'd rather you ask than guess.\n\nIs it that you haven't heard of it before, or that you've tried things that didn't work?\n\n(Let them answer. Do not promise results on the call.)\n\nAcoustic wave has been used on tendons and joints for years. It's the same idea as the shockwave treatment sports teams use. It doesn't work for everything, and that's what the visit is for. {{provider_name}} looks at {{main_concern}} and tells you straight whether it's a good match.\n\nIf it isn't a fit, you'll hear that before you spend anything more.\n\nWouldn't you rather have a straight answer than keep wondering?",
+      "content": "That's a fair thing to wonder, {{contact_first_name}}, and I'd rather you ask than guess.\n\nIs it that you haven't heard of it before, or that you've tried things that didn't work?\n\n(Let them answer. Do not promise results on the call.)\n\nSoftWave/shock wave has been used on tendons and joints for years. It's the same idea as the shock wave treatment sports teams use. It doesn't work for everything, and that's what the visit is for. {{provider_name}} looks at {{main_concern}} and tells you straight whether it's a good match.\n\nIf it isn't a fit, you'll hear that before you spend anything more.\n\nWouldn't you rather have a straight answer than keep wondering?",
       "sort_order": 102
     },
     {
       "step_key": "obj_injections_surgery",
       "title": "Objection: Injections or Surgery",
-      "content": "Okay. That tells me it's gotten bad enough that you want it handled.\n\nHas a doctor recommended that, or is it something you're looking into yourself?\n\n(Let them answer. Do not talk down injections or surgery.)\n\nBoth of those are real options, and sometimes they're the right call. They're also hard to undo once you've done them. A visit with {{provider_name}} doesn't rule anything out. It gives you a second look at {{main_concern}} before you commit to something permanent.\n\nIf acoustic wave isn't the answer here, we'll say so. Either way you'll walk into that decision knowing more than you do today.\n\nDoes it make sense to get that second look first?",
+      "content": "Okay. That tells me it's gotten bad enough that you want it handled.\n\nHas a doctor recommended that, or is it something you're looking into yourself?\n\n(Let them answer. Do not talk down injections or surgery.)\n\nBoth of those are real options, and sometimes they're the right call. They're also hard to undo once you've done them. A visit with {{provider_name}} doesn't rule anything out. It gives you a second look at {{main_concern}} before you commit to something permanent.\n\nIf SoftWave/shock wave isn't the answer here, we'll say so. Either way you'll walk into that decision knowing more than you do today.\n\nDoes it make sense to get that second look first?",
       "sort_order": 103
     }
   ],

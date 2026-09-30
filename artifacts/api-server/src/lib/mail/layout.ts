@@ -16,7 +16,7 @@ export const BRAND = {
   muted: '#62748e',
   panel: '#f1f5f9',
   page: '#f8fafc',
-  logoUrl: 'https://reactivationpower.com/images/logo-slogan.png',
+  logoUrl: 'https://reactivationpower.com/images/patient-pipeline-logo.png',
   siteUrl: 'https://reactivationpower.com',
 } as const
 
@@ -123,7 +123,7 @@ export function layout(parts: string[], opts: LayoutOptions): string {
       <table role="presentation" class="container" width="600" cellpadding="0" cellspacing="0" style="width:600px;max-width:600px;background-color:#ffffff;border-radius:8px;overflow:hidden;">
         <tr>
           <td align="center" class="inner" style="background-color:#ffffff;padding:18px 40px 16px 40px;border-bottom:3px solid ${BRAND.teal};">
-            <a href="${BRAND.siteUrl}" style="text-decoration:none;"><img src="${BRAND.logoUrl}" alt="${BRAND.name} — ${esc(BRAND.tagline)}" width="170" style="width:170px;max-width:170px;height:auto;margin:0 auto;" /></a>
+            <a href="${BRAND.siteUrl}" style="text-decoration:none;"><img src="${BRAND.logoUrl}" alt="Patient Pipeline" width="200" style="width:200px;max-width:200px;height:auto;margin:0 auto;" /></a>
           </td>
         </tr>
         <tr>

@@ -20,6 +20,7 @@ import { PracticeLogPreview } from '@/components/reactivation/practice-log-previ
 import { LEAD_FONT_SIZES } from '@/components/lead-followup/lead-call-screen'
 import { leadScriptExtras } from '@/components/lead-followup/lead-script-extras'
 import { usePageData } from '@/hooks/use-page-data'
+import { nicheDisplayLabel } from '@/components/reactivation/niche-select'
 import { PageError, PageLoading } from '@/components/page-status'
 import NotFound from '@/pages/not-found'
 
@@ -72,7 +73,7 @@ export default function LeadPracticePage() {
         <div className="flex flex-col gap-1">
           <h1 className="text-2xl font-bold text-foreground" data-testid="text-practice-title">Practice the lead script</h1>
           <p className="text-sm text-muted-foreground">
-            {niche ? `${niche.name} lead script for ` : 'Lead script for '}
+            {niche ? `${nicheDisplayLabel(niche.name)} lead script for ` : 'Lead script for '}
             <span className="font-medium text-foreground">{campaign.name}</span>. Click the response buttons to
             practice steering the call, just like on a live one.
           </p>

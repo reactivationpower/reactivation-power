@@ -14,7 +14,7 @@ export const VIDEO2_SLIDES: Slide[] = [
     narration:
       'Welcome back. In this video, I\u2019m going to show you how to log in, how the system works, and why following it exactly as designed is the difference between adding serious revenue and spinning your wheels. First, logging in. Go to the portal link your administrator gave you. You\u2019ll see four simple fields: your first name, your last name, your email address, and your phone number.',
     image: '/training/video2/step-signin-empty.png',
-    imageAlt: 'Reactivation Power sign-in page with empty form fields',
+    imageAlt: 'Patient Pipeline sign-in page with empty form fields',
     duration: 18000,
   },
   {
