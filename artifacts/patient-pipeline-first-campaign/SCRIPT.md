@@ -1,5 +1,8 @@
 # Patient Pipeline — Set Up Your First Campaign
 
+## Current narration revision
+The current performance script and shot-by-shot visual contract are in `NARRATION.json`; they supersede the older spoken wording and timing below. Replace the entire former Matilda track, including the separately appended opening line, with Sarah delivering connected American-English paragraphs. Use full sentences, contractions, contextual transitions, and short thought pauses. No speed-up, silence removal, or attempt to force the performance back into the former 5:24 duration. Preserve the existing visuals, large cursor, service dropdown, and typed offer. The new measured timeline must be built from the returned audio files, then used for both the music mix and scene durations.
+
 ## Director's treatment
 - **Format:** 16:9, 5:24 (324 seconds). Standalone beginner tutorial, separate from the four-minute product walkthrough. The original 7:00 cut had long silent gaps between topics; this cut keeps the instruction while limiting gaps between spoken sections to about two seconds.
 - **Promise:** A first campaign is ready only after an actual form submission reaches the correct campaign; saving the offer is not the connection.

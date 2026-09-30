@@ -16,3 +16,9 @@ For the longer walkthrough, show the complete actual caller viewport, not a cut-
 **Why:** The user corrected the logo and said the short film undersells how the program works; they then explicitly preferred recognizing the whole working call screen and watching the team click a real response. They deferred the vertical adaptation pending approval of the landscape cut.
 
 **How to apply:** In future dual-product video work, use branded but privacy-safe seeded examples, preserve enough screen context to show the actual caller workflow, and avoid a full tour of proprietary scripts or patient records. Do not treat the optional landing page as an approved build until the user chooses it.
+
+For tutorial narration, prioritize connected American-English conversation and real sentence pauses over a short runtime. Write explanations with transitions and reasons, not spoken bullet labels. Shorten dead air between chapters without compressing or removing pauses inside the performance.
+
+**Why:** The user rejected a first-campaign narration that sounded like disconnected bullet reading, with unnatural rhythm and insufficient punctuation pauses. A shorter timeline did not address that complaint.
+
+**How to apply:** Choose a conversational performance, preserve its full breathing and sentence endings, and retime the existing screen actions to the new narration. Do not claim that waveform checks establish subjective voice quality; offer a short audition alongside the full revised film.

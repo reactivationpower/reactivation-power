@@ -743,6 +743,7 @@ uri = "file://artifacts/patient-pipeline-first-campaign/public/audio/vo_01.mp3"
 type = "audio"
 title = "campaign tutorial chapter 1"
 description = "Text-to-speech audio: Let’s set up your first campaign in Patient Pipeline. You’ll add the offer, connect the form where new leads enter their details, then check that a real submission arrives. Savi…"
+logical_id = "cc7928c5-6eac-4373-81bf-5ab24a39a965"
 
 [[outputs]]
 id = "EC49dF6OShg2AXokHKEtd"
@@ -750,6 +751,7 @@ uri = "file://artifacts/patient-pipeline-first-campaign/public/audio/vo_03.mp3"
 type = "audio"
 title = "campaign tutorial chapter 3"
 description = "Text-to-speech audio: Sign in and make sure you’re in Patient Pipeline, not Reactivation. Open Campaigns from the welcome screen, or from the top navigation. Then choose New Campaign. A campaign is t…"
+logical_id = "1e9208b2-caa1-4634-ac12-422e609ab1ff"
 
 [[outputs]]
 id = "bm5SPqlzMYoba7sqQnZyt"
@@ -757,6 +759,7 @@ uri = "file://artifacts/patient-pipeline-first-campaign/public/audio/vo_09.mp3"
 type = "audio"
 title = "campaign tutorial chapter 9"
 description = "Text-to-speech audio: On the campaign page, open Practice script. Try the response buttons and read the next prompts. Confirm that the service, offer items, and price line match your ad. This is the …"
+logical_id = "5fb3ee44-5de5-4d05-adf8-76adeaa55bfb"
 
 [[outputs]]
 id = "tBa-oea8jDbdedNmBoLSY"
@@ -764,6 +767,7 @@ uri = "file://artifacts/patient-pipeline-first-campaign/public/audio/vo_02.mp3"
 type = "audio"
 title = "campaign tutorial chapter 2"
 description = "Text-to-speech audio: Before you begin, have the service you’re promoting, a copy of the ad, the items included in the offer, and its real price. You’ll also need access to the form that collects a p…"
+logical_id = "4208a1b3-f875-4421-9dfa-248cacff3c4d"
 
 [[outputs]]
 id = "VKRZ8Tfc4oVvbnPXbOfVR"
@@ -771,6 +775,7 @@ uri = "file://artifacts/patient-pipeline-first-campaign/public/audio/vo_10.mp3"
 type = "audio"
 title = "campaign tutorial chapter 10"
 description = "Text-to-speech audio: When you’re ready, open Calls Due Now. Under Ready to call, use Call Now beside a lead to open that person’s guided call screen. It does not dial the phone. To browse everyone, …"
+logical_id = "99d063f6-4ad6-455d-813e-fa7cdbeb80b7"
 
 [[outputs]]
 id = "l5gwivcA_iEZsJiPpwWpG"
@@ -778,6 +783,7 @@ uri = "file://artifacts/patient-pipeline-first-campaign/public/audio/vo_06.mp3"
 type = "audio"
 title = "campaign tutorial chapter 6"
 description = "Text-to-speech audio: On the campaign page, open Continue setup if the connection steps are closed. Choose where the person actually types a name and phone number. For an Instant Form inside Facebook…"
+logical_id = "be64a982-4889-41c7-8991-b9689a286f4f"
 
 [[outputs]]
 id = "Oa0EQv-8iXnJPWYQYaU8X"
@@ -785,6 +791,7 @@ uri = "file://artifacts/patient-pipeline-first-campaign/public/audio/vo_04.mp3"
 type = "audio"
 title = "campaign tutorial chapter 4"
 description = "Text-to-speech audio: Choose the service that matches your ad. This selects the relevant call script. Give the campaign a name your team can recognize—for example, Back Pain Relief, forty-nine-dollar…"
+logical_id = "5c84c1b7-b5f0-4d74-bf56-5cf7d18e64a9"
 
 [[outputs]]
 id = "KOi9ILUM8Xw7lnaDY1Ar8"
@@ -792,6 +799,7 @@ uri = "file://artifacts/patient-pipeline-first-campaign/public/audio/vo_05.mp3"
 type = "audio"
 title = "campaign tutorial chapter 5"
 description = "Text-to-speech audio: Choose how the caller should talk about the price. ‘Normally X, now Y’ uses a regular and an offer price. ‘Just Y’ uses only the offer price. Or choose not to mention price in t…"
+logical_id = "9f735aa8-9875-4100-a839-759e7302738a"
 
 [[outputs]]
 id = "uvW637Apjcx4LH-MFqbri"
@@ -799,6 +807,7 @@ uri = "file://artifacts/patient-pipeline-first-campaign/public/audio/vo_08.mp3"
 type = "audio"
 title = "campaign tutorial chapter 8"
 description = "Text-to-speech audio: Do not skip the real-form test. Open the same form a prospective patient would use, and submit it once with your own name and phone number. Return to this campaign’s connection …"
+logical_id = "97142094-c784-42a4-b4aa-b3bca1af200c"
 
 [[outputs]]
 id = "iR8Zk8yijq1Gd4EB1SJ6E"
@@ -806,6 +815,7 @@ uri = "file://artifacts/patient-pipeline-first-campaign/public/audio/vo_07.mp3"
 type = "audio"
 title = "campaign tutorial chapter 7"
 description = "Text-to-speech audio: This campaign has a private connection address. Keep it private; anyone with it could add leads. Facebook cannot send an Instant Form straight to this address, so you need a con…"
+logical_id = "8f397046-0303-4297-b4f4-e5264f45ac2e"
 
 [[outputs]]
 id = "KU15GWkGBmkrVRjohe-pH"
@@ -813,6 +823,7 @@ uri = "file://artifacts/patient-pipeline-first-campaign/public/audio/vo_11.mp3"
 type = "audio"
 title = "campaign checklist narration"
 description = "Text-to-speech audio: Your checklist: campaign created; service, offer and price checked against the ad; actual form connected; a test submitted through that form and visible in this campaign’s leads…"
+logical_id = "18eac695-c76b-47c3-8fc5-b226edf553a4"
 
 [[outputs]]
 id = "wx2nAMh-16SEi2b_z1LQL"
@@ -820,6 +831,7 @@ uri = "file://artifacts/patient-pipeline-first-campaign/public/audio/vo_03_2.mp3
 type = "audio"
 title = "Lead Follow-Up section tutorial correction"
 description = "Text-to-speech audio: Sign in to Patient Pipeline. Make sure that you’re in Lead Follow-Up, not Reactivation. Open Campaigns from the welcome screen, or from the top navigation. Then choose New Campa…"
+logical_id = "37a7f242-f5d8-4220-8858-9b78cf0522e5"
 
 [[outputs]]
 id = "xr6HT795I37A_k1O3t9LE"
@@ -827,3 +839,106 @@ uri = "file://artifacts/patient-pipeline-first-campaign/public/audio/vo_01_conne
 type = "audio"
 title = "opening form connection promise"
 description = "Text-to-speech audio: We'll show you how to connect it after we add the offer."
+logical_id = "8b55b1c0-5fbb-400e-aea4-5ebb7b691ba7"
+
+[[outputs]]
+id = "QNns6m5kKIFSKGrb56qnw"
+uri = "file://artifacts/patient-pipeline-first-campaign/public/audio/conversation_opening.mp3"
+type = "audio"
+title = "Revised narration — 24-second opening"
+description = "The new American voice and conversational opening script. This is the same narration take used in the updated tutorial, without background music."
+logical_id = "9fb021d8-c4b5-4f56-bc72-1c17af3fc17a"
+content_hash = "sha256:d34e5a55b7d0c9467de81b76fa39d276f5a30f303954a7648246a8d7b6620fef"
+size = 386238
+mtime_ms = 1790801221983
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/9fb021d8-c4b5-4f56-bc72-1c17af3fc17a/213be0fc-5d1b-4a18-bdeb-3da4ccc6d1c0"
+storage_version_token = "1790801776705737"
+content_type = "audio/mpeg"
+
+[[outputs]]
+id = "CPQddyhCH62P141D5FqJT"
+uri = "file://artifacts/patient-pipeline-first-campaign/public/audio/conversation_practiceScript.mp3"
+type = "audio"
+title = "Conversational American instructor: Give your team a practice run"
+description = "Text-to-speech audio: [warmly] Before your team starts calling, give the script a quick practice run. From the campaign page, open Practice script. Read the opening, try a response button, and see wh…"
+logical_id = "f28e2bde-4122-4d10-b9db-daea7da7d1fb"
+
+[[outputs]]
+id = "bHfhkHKWA-97ZD2d2BM25"
+uri = "file://artifacts/patient-pipeline-first-campaign/public/audio/conversation_openCampaigns.mp3"
+type = "audio"
+title = "Conversational American instructor: Find the campaign editor"
+description = "Text-to-speech audio: [warmly] Once you're signed in, make sure you're in Lead Follow-Up, rather than Reactivation. From here, open Campaigns. You can get there from the welcome screen, or from the n…"
+logical_id = "8545a225-8c7d-4f38-b4a9-5de919e6dc7d"
+
+[[outputs]]
+id = "y_pDLKuSettirzPMUoPcI"
+uri = "file://artifacts/patient-pipeline-first-campaign/public/audio/conversation_preparation.mp3"
+type = "audio"
+title = "Conversational American instructor: Have the actual ad beside you"
+description = "Text-to-speech audio: [warmly] Before we open the campaign, pull up the ad you're planning to run. That gives you something to check against as you choose the service and enter the offer. You'll want…"
+logical_id = "0a9cc7b3-00d2-416c-a8ae-6505ab873d9e"
+
+[[outputs]]
+id = "l-GsEss6lXQcVL9Gcavcj"
+uri = "file://artifacts/patient-pipeline-first-campaign/public/audio/conversation_findLeads.mp3"
+type = "audio"
+title = "Conversational American instructor: Find the people who need a call"
+description = "Text-to-speech audio: [warmly] When you're ready to work new leads, open Calls Due Now. In the Ready to call section, choose Call Now beside a lead. That opens the guided call screen. It doesn't dial…"
+logical_id = "d1041e9c-3bff-46c7-a5fc-780395bdffb0"
+
+[[outputs]]
+id = "cYYAraWpu5jRB9D1Nlg5X"
+uri = "file://artifacts/patient-pipeline-first-campaign/public/audio/conversation_priceAndSave.mp3"
+type = "audio"
+title = "Conversational American instructor: Choose how the price will sound"
+description = "Text-to-speech audio: [warmly] Now let's decide how the caller should explain the price. If you want to compare the regular price with the offer, choose Normally X, now Y. If you just want to state t…"
+logical_id = "9389abe4-028d-4561-9f6a-0bb87ad94f60"
+
+[[outputs]]
+id = "Gg2n2EA_NDPmP_mr6AYss"
+uri = "file://artifacts/patient-pipeline-first-campaign/public/audio/conversation_checklist.mp3"
+type = "audio"
+title = "Conversational American instructor: Know when the campaign is ready"
+description = "Text-to-speech audio: [warmly] Before you call it ready, take one last look at the campaign. Does the service, the offer, and the price match what your ad promises? [short pause] Then check the conne…"
+logical_id = "5d8db4e3-f15d-41bb-a5d4-e144bbc3a314"
+
+[[outputs]]
+id = "jB5p2MguzG_8Kbca1HNS8"
+uri = "file://artifacts/patient-pipeline-first-campaign/public/audio/conversation_findForm.mp3"
+type = "audio"
+title = "Conversational American instructor: Identify the form, not the ad placement"
+description = "Text-to-speech audio: [warmly] To show the connection steps, we're switching to a separate campaign that's already saved in this demo. If the setup instructions are closed, select Continue setup. [sh…"
+logical_id = "152b5777-a02d-40fb-9a84-450d3c5e3a90"
+
+[[outputs]]
+id = "fIedKBlu5y4MDbFbWH6IE"
+uri = "file://artifacts/patient-pipeline-first-campaign/public/audio/conversation_enterOffer.mp3"
+type = "audio"
+title = "Conversational American instructor: Enter a recognizable offer"
+description = "Text-to-speech audio: [warmly] Let's use a back pain offer as our example. Open the service menu, and choose Chiropractic. That tells Patient Pipeline which call script to use. [short pause] Next, gi…"
+logical_id = "bd34d4d7-9182-4790-b5a3-3fb9d9d398ea"
+
+[[outputs]]
+id = "v15vVDhbh_DhBjQIAcqLt"
+uri = "file://artifacts/patient-pipeline-first-campaign/public/audio/conversation_testForm.mp3"
+type = "audio"
+title = "Conversational American instructor: Check it from the patient's side"
+description = "Text-to-speech audio: [warmly] Now let's check the whole connection, from the patient's side. Open the same form a prospective patient would use, and submit it with your own name and phone number. Th…"
+logical_id = "fa1a6679-8ba0-4981-9eb8-984c6f996f6e"
+
+[[outputs]]
+id = "7p7tUKAdkztG4uZ5c-BD4"
+uri = "file://artifacts/patient-pipeline-first-campaign/public/audio/conversation_connectForm.mp3"
+type = "audio"
+title = "Conversational American instructor: Connect the actual source safely"
+description = "Text-to-speech audio: [warmly] This campaign has its own private connection address. Keep it private, because anyone who has it could add leads. We've hidden it in this tutorial. [short pause] Facebo…"
+logical_id = "468ed372-8c8d-48db-a615-eb227a834947"
+
+[[outputs]]
+id = "O9pAYZhqtPiyFLLGaY-WS"
+uri = "file://artifacts/patient-pipeline-first-campaign/public/audio/conversation_closing_final.mp3"
+type = "audio"
+title = "Conversational readiness check"
+description = "Text-to-speech audio: [warmly] Before you call it ready, take one last look at the campaign. Do the service, the offer, and the price match what your ad promises? [short pause] Then check the connect…"
+logical_id = "3a723562-8bd5-48a2-b767-ce3b27df504c"

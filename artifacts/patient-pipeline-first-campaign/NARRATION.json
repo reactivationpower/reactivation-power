@@ -1,0 +1,72 @@
+{
+  "direction": "A warm American instructor helping one office manager at their desk. Connected thoughts, ordinary contractions, clear sentence endings. Not a commercial, not an announcer, and not a recitation of screen labels. Preserve the generated breathing and punctuation pauses; do not time-compress the performance.",
+  "voice": {"name": "Sarah", "id": "EXAVITQu4vr4xnSDxMaL", "model": "eleven_v3", "settings": {"stability": 0.5, "similarity_boost": 0.75, "speed": 0.96}},
+  "scenes": [
+    {
+      "key": "opening",
+      "title": "Let's set this up together",
+      "text": "[warmly] Let's walk through your first campaign in Patient Pipeline together. We'll start with the offer you want to promote. Then we'll connect the form your new leads fill out, and make sure a real submission actually arrives.\n\n[short pause] There's one important distinction here. Saving your campaign doesn't connect the form by itself. Don't worry, though. We'll show you how to make that connection, right after we add the offer.",
+      "visual": "Preserve the opening, three-step rail, warning, and reassurance. Reveal each idea with its spoken phrase, rather than displaying a list for the narrator to read."
+    },
+    {
+      "key": "preparation",
+      "title": "Have the actual ad beside you",
+      "text": "[warmly] Before we open the campaign, pull up the ad you're planning to run. That gives you something to check against as you choose the service and enter the offer. You'll want to know exactly what's included, and what the patient will pay.\n\n[short pause] You'll also need access to the form that collects their name and phone number. If someone else manages it, that's fine. They can help with the connection. When we get to testing, use your own name and phone number.",
+      "visual": "Preserve the four preparation cards. Highlight service/ad, included items/price, form access, and test details as they are discussed."
+    },
+    {
+      "key": "openCampaigns",
+      "title": "Find the campaign editor",
+      "text": "[warmly] Once you're signed in, make sure you're in Lead Follow-Up, rather than Reactivation. From here, open Campaigns. You can get there from the welcome screen, or from the navigation at the top.\n\n[short pause] Now choose New Campaign. Think of a campaign as the offer that brought someone to your practice. The details you enter here will follow that person into the caller's script, so your team knows what they asked about.",
+      "visual": "Preserve welcome, Campaigns, and New Campaign captures and large cursor. Navigate only when the corresponding control is named."
+    },
+    {
+      "key": "enterOffer",
+      "title": "Enter a recognizable offer",
+      "text": "[warmly] Let's use a back pain offer as our example. Open the service menu, and choose Chiropractic. That tells Patient Pipeline which call script to use.\n\n[short pause] Next, give the campaign a name your team will recognize. We'll type, Back Pain Relief, forty-nine-dollar New Patient Special. That way, when someone calls, your team can immediately tell which offer they responded to.\n\n[short pause] Under What's included, put each item on its own line. For this example, we're showing a consultation, an examination, and a review of findings. If your ad includes something else, use Add a line. The important thing is to match your actual ad, not copy these sample items unless you really offer them.",
+      "visual": "Keep the actual service options, both menu pages, Chiropractic selection, synchronized close-up, character-by-character campaign name, included-item rows, and Add a line cursor. Keep the same typed name in the pricing capture."
+    },
+    {
+      "key": "priceAndSave",
+      "title": "Choose how the price will sound",
+      "text": "[warmly] Now let's decide how the caller should explain the price. If you want to compare the regular price with the offer, choose Normally X, now Y. If you just want to state the offer price, choose Just Y instead. You can also leave the price out of the spoken script.\n\n[short pause] The On the call preview shows you how that wording will sound. This changes the script, not your billing. You can add an expiration date or limited availability, but only if it's real. Once everything matches the ad, select Save and Connect Leads.",
+      "visual": "Preserve price-style capture, typed campaign name, price preview, and Save & Connect Leads cursor."
+    },
+    {
+      "key": "findForm",
+      "title": "Identify the form, not the ad placement",
+      "text": "[warmly] To show the connection steps, we're switching to a separate campaign that's already saved in this demo. If the setup instructions are closed, select Continue setup.\n\n[short pause] Here's the question to answer: where does the person actually enter their name and phone number? If that happens inside Facebook or Instagram, choose that option. But if the ad sends them to a form on your website, choose Our website instead. For a Go High Level form, or leads already arriving there, choose Go High Level. If you're not sure, your ad manager can tell you.",
+      "visual": "Keep the separate-saved-demo label. Show the collapsed setup, source choices, and Facebook instructions. Do not imply the typed example was saved."
+    },
+    {
+      "key": "connectForm",
+      "title": "Connect the actual source safely",
+      "text": "[warmly] This campaign has its own private connection address. Keep it private, because anyone who has it could add leads. We've hidden it in this tutorial.\n\n[short pause] Facebook can't send an Instant Form directly to that address. You'll need a connector. If your leads already arrive in Go High Level, follow the instructions for that option. Otherwise, you can use Zapier or Make. Start with a Facebook Lead Ads new-lead trigger, and select your page and form. Then add a Webhooks post action. Paste your private connection address into the URL field, and choose JSON as the format.\n\n[short pause] Now match the first name and phone fields to the answers from your actual form. Save the connection and turn it on. Connector fees may apply. If someone else handles your ads, use Have someone else finish this, and share the instructions privately. For a website form, use its webhook option, or a connector if it needs one.",
+      "visual": "Preserve hidden-address overview, authentic Facebook instructions, editorial POST/JSON guidance, field mapping, private handoff, and unreceived waiting state. No simulated third-party completion."
+    },
+    {
+      "key": "testForm",
+      "title": "Check it from the patient's side",
+      "text": "[warmly] Now let's check the whole connection, from the patient's side. Open the same form a prospective patient would use, and submit it with your own name and phone number. Then come back here.\n\n[short pause] When that submission reaches Patient Pipeline, you'll see that the form submission was received and the lead form is connected. This demo is still waiting, because we haven't connected an external form. We're showing you what to check, not claiming that it passed.\n\n[short pause] You'll also notice an internal test option. That only checks the Patient Pipeline side. It doesn't prove your actual form is connected. After a real submission, open this campaign's Leads tab and look for your test entry. If it's missing, check that your connector is on, and that first name and phone are mapped correctly.",
+      "visual": "Preserve real waiting status, internal-test disclosure, and campaign Leads tab. Show the internal-test screen only when it is explained, not while describing receipt."
+    },
+    {
+      "key": "practiceScript",
+      "title": "Give your team a practice run",
+      "text": "[warmly] Before your team starts calling, give the script a quick practice run. From the campaign page, open Practice script. Read the opening, try a response button, and see where the conversation goes next.\n\n[short pause] As you do that, check that the service, the included items, and the price all match your ad. This gives your team a chance to get comfortable with the conversation before they're speaking with a real new lead.",
+      "visual": "Preserve campaign Practice script action, actual opening and response button, and next prompt."
+    },
+    {
+      "key": "findLeads",
+      "title": "Find the people who need a call",
+      "text": "[warmly] When you're ready to work new leads, open Calls Due Now. In the Ready to call section, choose Call Now beside a lead. That opens the guided call screen. It doesn't dial the phone for you.\n\n[short pause] If you want to see everyone, rather than just the people who are due for a call, open All Leads. You can also get there through Leads in the top navigation. The people shown here are existing demo examples. They're not evidence that the form we just discussed has been connected.",
+      "visual": "Preserve due queue, large cursor, separately labeled example call screen, and All Leads capture. Do not suggest automatic dialing."
+    },
+    {
+      "key": "checklist",
+      "title": "Know when the campaign is ready",
+      "text": "[warmly] Before you call it ready, take one last look at the campaign. Do the service, the offer, and the price match what your ad promises?\n\n[short pause] Then check the connection from beginning to end. Submit the actual form, and make sure your test entry appears in this campaign's leads. That's the check that matters.\n\n[short pause] Once your team has practiced the script and knows where to find Calls Due Now and All Leads, you're ready to use the campaign. You've gone beyond saving an offer. You've checked that a real person can submit the form, and your team can find them.",
+      "visual": "Preserve the unchecked readiness checklist and closing brand lockup. Highlight grouped concepts as explanations, not seven equally spaced bullet readings. Never imply the demo passed a real-form test."
+    }
+  ]
+}
