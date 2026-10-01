@@ -52,8 +52,8 @@ Assets: logo and sanitized reactivation capture. Sound: same voice; music unbrok
 Purpose: demonstrate prior-service context and response-driven branching; staff make calls.
 VO: “With reactivation, the conversation starts with the care that patient received before. As they explain what’s happening now, your team selects their response, and the script follows the conversation. Your staff still makes the call and listens to the patient—they’re simply not having to invent every next question.”
 Exact editorial copy: “Reactivation”; “Care they received before”; “The conversation follows their answer”; original verified product screen text.
-Composition: actual full caller screenshot at large scale, top editorial strip outside the image; all cursor coordinates relative to that same screenshot. Names, phone numbers and staff identities blurred.
-Choreography: initial full-screen recognition; modest push around 5s; cursor moves to verified response around 9s and clicks; actual next-screen capture replaces the previous capture after the click; result readable; final pullback restores whole-screen context.
+Composition: actual connected-call starting screen at large scale, showing the opening question and its three patient-state choices. Preserve the real button copy: “Still feeling great,” “It’s starting to flare up again,” and “Pretty much back to where I was.” These represent still doing good, starting to come back and back all the way. Top editorial strip outside the image; all cursor coordinates relative to that same screenshot. Small privacy masks cover individual names, phone numbers and email addresses without obscuring surrounding script text or labels.
+Choreography: initial full-screen recognition; modest push around 5s; cursor moves to an actual patient-state response around 9s and clicks; its genuine next screen replaces the starting screen after the click; result readable; final pullback restores whole-screen context. Do not jump into an unexplained middle-of-script objection.
 Handoff: viewport persists, teal rail changes to blue and lead viewport cross-replaces with a short camera settle.
 Assets: real before/after captures and actual target coordinates. Sound: narration guides action timing. No synthetic caller audio.
 
@@ -70,9 +70,9 @@ Assets: actual lead choice/result captures, target coordinates. Sound: connected
 ## Shot 5 — repeatability
 
 Purpose: show queue, outcome and note recording, not claim bookings occurred.
-VO: “And it isn’t just about the script. Your team has an organized way to see who needs attention, record what happened, and keep follow-up moving instead of relying on memory.”
+VO: “And it isn’t just about the script. You and your team have an organized way to see who needs attention, record what happened, and keep follow-up moving instead of relying on memory.”
 Exact editorial copy: “Know who needs attention”; “Record what happened”; note text “Asked for a callback.”; original actual queue/outcome controls.
-Composition: real queue shown wide; then actual logging view, with close framing only during text entry. Any reconstructed text overlay is confined to the real existing note field.
+Composition: real queue shown as a tighter, list-focused crop with eight complete rows visible, rather than spending the frame on the dashboard header and two clipped rows; then the preserved actual logging view, with close framing only during text entry. Privacy masks cover individual names (including staff in call history), phone numbers and email addresses, not whole headers or script paragraphs. Any reconstructed text overlay is confined to the real existing note field.
 Choreography: recognize queue; transition to logging view; cursor clicks the real notes field; “Asked for a callback.” types character by character over 2.5s. Do not click the disabled Log call control or depict a server success state. This deliberately stops at note entry rather than claiming a call was logged; the actual callback outcome opens a scheduling dialog, which is outside this short sales example.
 Handoff: round avatar/queue marker becomes first of four additional reactivation tokens.
 Assets: real sanitized queue and logging captures. Sound: same voice; no fake booking confirmation.
@@ -103,8 +103,8 @@ Alternates dark audience graphic, light brand system, large real product screens
 
 ## Final audio/action reconciliation
 
-Matilda voice identity confirmed in provider search. Original settings were not saved; the new reading uses eleven_multilingual_v2, speed .82, stability .5, similarity .75, style .08, speaker boost enabled. Each complete paragraph begins .25s into its scene; no mid-sentence cuts or artificial speeding. Speech lengths: 22.230, 14.341, 24.189, 18.286, 12.434, 33.280, 16.849 seconds. The longest non-speaking tail is the note-entry scene, allowing the complete note to remain readable.
+Matilda voice identity confirmed in provider search. Original settings were not saved; the new reading uses eleven_multilingual_v2, speed .82, stability .5, similarity .75, style .08, speaker boost enabled. Each complete paragraph begins .25s into its scene; no mid-sentence cuts or artificial speeding. Speech lengths: 22.230, 14.341, 24.189, 18.286, 12.800, 33.280, 16.849 seconds. The revised workflow reading says “You and your team”; all other narration, including the monthly financial example, is preserved.
 
 Actions relative to scenes: reactivation cursor starts 8.9s, presses 10.15s, actual result 10.6s; lead cursor starts 12.2s, presses 13.45s, actual result 13.9s; logging view 7.2s, notes cursor 7.55s, press 8.8s, typing 9.25–11.34s. Monthly financial groups reveal 4.3s and 11.1s, per-patient value at 18.5s, total at 22.8s. End invitation appears 12.8s into the final scene. The current source event timings supersede the initial per-shot draft timings above.
 
-The original walkthrough instrumental is reused for brand continuity, quiet beneath narration; one mixed continuous audio track supplies playback and export. Patient/contact/staff header details and lead-form text are blurred in copies only. No app records, original captures, walkthrough, or landing page are changed.
+The original walkthrough instrumental is reused for brand continuity, quiet beneath narration; one mixed continuous audio track supplies playback and export. Patient/contact/staff names and contact values are individually blurred in copies only; surrounding script paragraphs and synthetic demo offer/form context remain readable. No app records, original captures, walkthrough video, or landing page are changed. The existing identifier-free notes screenshot is retained because it depicts the actual notes field; a similarly named older walkthrough logging capture does not.

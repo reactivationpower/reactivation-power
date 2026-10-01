@@ -6,10 +6,10 @@ export function Lead() {
     <div className="screen-heading"><span className="product-indicator blue" />Lead Follow-Up
       <span className="screen-context">{beat < 3 ? 'The offer they responded to' : 'Context for the next conversation'}</span>
     </div>
-    <CallFrame src={beat < 3 ? 'lead-choice.png' : 'lead-result.png'}
+    <CallFrame src={beat < 3 ? 'lead-choice-refined.png' : 'lead-result-refined.png'}
       alt={beat < 3 ? 'Actual campaign-aware lead caller screen' : 'Actual lead response screen for a different appointment time'}
       zoom={beat >= 1 && beat < 4 ? 1.035 : 1} focus="40% 61%">
-      {beat === 2 && <Cursor x={32} y={90} />}
+      {beat === 2 && <Cursor x={32.19} y={90.42} />}
     </CallFrame>
   </Scene>
 }

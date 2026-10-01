@@ -1,6 +1,6 @@
 {
   "totalMs": 149200,
-  "mixFile": "public/audio/landing-composite-monthly.mp3",
+  "mixFile": "public/audio/landing-composite-refined.mp3",
   "scenes": [
     {
       "key": "opportunity",
@@ -35,7 +35,7 @@
       "startMs": 83000,
       "durationMs": 14100,
       "voiceoverDelayMs": 250,
-      "voiceoverFile": "artifacts/patient-pipeline-landing-video/public/audio/vo-workflow-final.mp3"
+      "voiceoverFile": "artifacts/patient-pipeline-landing-video/public/audio/vo-workflow-owner-team.mp3"
     },
     {
       "key": "revenue",

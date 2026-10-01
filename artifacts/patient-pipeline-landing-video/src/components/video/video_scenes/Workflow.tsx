@@ -2,7 +2,7 @@ import { Scene, CallFrame, Cursor, TypedNote, useBeats } from '../Motion'
 
 export function Workflow() {
   const beat = useBeats([7200, 7550, 9250, 12700])
-  const src = beat === 0 ? 'queue.png' : 'logging.png'
+  const src = beat === 0 ? 'queue-refined.png?v=readable-rows' : 'logging.png'
   return <Scene name="workflow" tone="ivory">
     <div className="screen-heading"><span className="product-indicator teal" />A repeatable process
       <span className="screen-context">{beat === 0 ? 'Know who needs attention' : beat < 4 ? 'Record what happened' : 'Keep follow-up moving'}</span>

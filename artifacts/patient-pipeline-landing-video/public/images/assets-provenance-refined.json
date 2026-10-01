@@ -1,0 +1,89 @@
+{
+  "outputDimensions": {
+    "width": 1280,
+    "height": 720,
+    "aspectRatio": "16:9"
+  },
+  "maskMethod": "Local Gaussian blur; rectangle coordinates are pixels in the 1280x720 source/output frame. No personal values are recorded.",
+  "assets": [
+    {
+      "output": "reactivation-choice-refined.png",
+      "source": "artifacts/patient-pipeline-walkthrough/public/images/rev-live-question.png",
+      "masks": [
+        { "x": 823, "y": 5, "width": 100, "height": 32, "category": "personal name in demo identity bar" },
+        { "x": 278, "y": 199, "width": 88, "height": 28, "category": "patient name in call header" },
+        { "x": 278, "y": 226, "width": 118, "height": 25, "category": "phone number in call header" },
+        { "x": 317, "y": 369, "width": 38, "height": 27, "category": "patient name in spoken text" }
+      ]
+    },
+    {
+      "output": "reactivation-result-refined.png",
+      "source": "artifacts/patient-pipeline-walkthrough/public/images/rev-live-still-good.png",
+      "masks": [
+        { "x": 823, "y": 5, "width": 100, "height": 32, "category": "personal name in demo identity bar" },
+        { "x": 278, "y": 199, "width": 88, "height": 28, "category": "patient name in call header" },
+        { "x": 278, "y": 226, "width": 118, "height": 25, "category": "phone number in call header" },
+        { "x": 473, "y": 366, "width": 47, "height": 28, "category": "patient name in spoken text" },
+        { "x": 520, "y": 401, "width": 83, "height": 28, "category": "staff name in spoken text" }
+      ]
+    },
+    {
+      "output": "lead-choice-refined.png",
+      "source": "artifacts/patient-pipeline-walkthrough/public/images/rev-lead-choice.png",
+      "masks": [
+        { "x": 805, "y": 5, "width": 95, "height": 32, "category": "personal name in demo identity bar" },
+        { "x": 177, "y": 183, "width": 103, "height": 27, "category": "patient name in call header" },
+        { "x": 177, "y": 207, "width": 115, "height": 22, "category": "phone number in call header" },
+        { "x": 409, "y": 400, "width": 57, "height": 30, "category": "staff name in spoken text" },
+        { "x": 527, "y": 398, "width": 103, "height": 30, "category": "staff name in spoken text" },
+        { "x": 682, "y": 398, "width": 82, "height": 30, "category": "patient name in spoken text" },
+        { "x": 355, "y": 445, "width": 75, "height": 28, "category": "patient name in spoken text" }
+      ]
+    },
+    {
+      "output": "lead-result-refined.png",
+      "source": "artifacts/patient-pipeline-walkthrough/public/images/rev-lead-move-choice.png",
+      "masks": [],
+      "verifiedTransition": "This is the genuine Move the Time branch corresponding to the Needs a different time choice visible in lead-choice-refined.png.",
+      "notesField": {
+        "visible": true,
+        "entryPointPixels": { "x": 150, "y": 650 },
+        "entryPointPercent": { "x": 11.71875, "y": 90.27778 }
+      }
+    },
+    {
+      "output": "logging-refined.png",
+      "source": "artifacts/patient-pipeline-walkthrough/public/images/rev-lead-logging.png",
+      "masks": [
+        { "x": 403, "y": 178, "width": 48, "height": 28, "category": "patient name in spoken text" }
+      ],
+      "notesField": {
+        "visible": false,
+        "reason": "The supplied rev-lead-logging capture shows the call script and Log call footer, but no Notes for this call field; no controls were reconstructed."
+      }
+    }
+  ],
+  "cursorTargets": {
+    "firstReactivationPatientStateButtonCenter": {
+      "asset": "reactivation-choice-refined.png",
+      "xPixels": 314,
+      "yPixels": 634,
+      "xPercent": 24.53125,
+      "yPercent": 88.05556
+    },
+    "leadNeedsDifferentTimeButtonCenter": {
+      "asset": "lead-choice-refined.png",
+      "xPixels": 412,
+      "yPixels": 651,
+      "xPercent": 32.1875,
+      "yPercent": 90.41667
+    },
+    "notesEntryPoint": {
+      "asset": "lead-result-refined.png",
+      "xPixels": 150,
+      "yPixels": 650,
+      "xPercent": 11.71875,
+      "yPercent": 90.27778
+    }
+  }
+}

@@ -11,7 +11,7 @@ import { fileURLToPath } from 'node:url'
 const workspaceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const artifactRoot = path.join(workspaceRoot, 'artifacts/patient-pipeline-landing-video')
 const videoSource = path.join(artifactRoot, 'src/components/video/VideoTemplate.tsx')
-const audioPath = path.join(artifactRoot, 'public/audio/landing-composite-monthly.mp3')
+const audioPath = path.join(artifactRoot, 'public/audio/landing-composite-refined.mp3')
 const captureRoot = path.join(workspaceRoot, 'exports/.landing-capture')
 const defaultOutput = path.join(workspaceRoot, 'exports/Patient-Pipeline-Landing-Video.mp4')
 const width = 1280
@@ -103,9 +103,13 @@ function buildMilestones(durations, duration) {
     add(`${scene}-representative`, scene, representative, 'scene representative')
     add(`${scene}-end`, scene, Math.max(0.1, sceneDuration - 0.35), 'scene end')
   }
-  if (sceneKeys.includes('reactivation')) add('reactivation-cursor', 'reactivation', 9.6, 'cursor')
+  if (sceneKeys.includes('reactivation')) {
+    add('reactivation-starting-screen', 'reactivation', 3.8, 'opening script')
+    add('reactivation-cursor', 'reactivation', 9.6, 'cursor')
+  }
   if (sceneKeys.includes('lead')) add('lead-cursor', 'lead', 13.1, 'cursor')
   if (sceneKeys.includes('workflow')) {
+    add('workflow-queue', 'workflow', 4.5, 'queue')
     add('workflow-cursor-note', 'workflow', 8.8, 'cursor')
     add('workflow-partial-note', 'workflow', 10.2, 'typing')
     add('workflow-typed-note', 'workflow', 12.2, 'typing')
@@ -477,6 +481,25 @@ async function sampleRuntime(elapsed, force = false) {
   audioSamples.push({ elapsed, ...sample })
 }
 
+// CDP screencasts emit damaged frames, not a continuous stream. A final
+// static hold must still be sampled for review even when nothing repaints.
+async function capturePendingMilestones(elapsed) {
+  const due = milestones.filter(item => (
+    !milestoneTaken.has(item.label) && elapsed >= item.targetTime
+  ))
+  if (!due.length) return
+  const screenshot = await send('Page.captureScreenshot', {
+    format: 'jpeg', quality: 90, captureBeyondViewport: false,
+  })
+  const actualElapsed = Date.now() / 1000 - startedAt
+  const jpeg = Buffer.from(screenshot.data, 'base64')
+  for (const milestone of due) {
+    if (milestoneTaken.has(milestone.label)) continue
+    milestoneTaken.add(milestone.label)
+    scheduleRepresentative(milestone, jpeg, actualElapsed, representativeFrames.length)
+  }
+}
+
 async function waitForPlayback() {
   const naturalCompletion = stopAtPlayerSignal
   const deadline = Date.now() + (duration + 60) * 1000
@@ -491,6 +514,7 @@ async function waitForPlayback() {
     }
     if (startedAt !== null) {
       await sampleRuntime(elapsed)
+      await capturePendingMilestones(elapsed)
       if (elapsed >= lastReport + 15) {
         console.log(`PLAYBACK ${Math.min(100, elapsed / duration * 100).toFixed(0)}% | ${lastScene} | ${frameIndex} frames`)
         lastReport = elapsed
@@ -503,6 +527,7 @@ async function waitForPlayback() {
     throw new Error('The player reached the expected duration without calling window.stopRecording().')
   }
   await sampleRuntime(Math.min(duration, Date.now() / 1000 - startedAt), true)
+  await capturePendingMilestones(Math.min(duration, Date.now() / 1000 - startedAt))
 }
 
 async function waitForSocket(socketToOpen) {

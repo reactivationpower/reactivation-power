@@ -53,7 +53,7 @@ export default function VideoTemplate({ durations = SCENE_DURATIONS, loop = true
     <VideoCanvas className="landing-film" data-audio-blocked={audioBlocked} data-current-scene={baseKey}
       aspectRatio={VIDEO_ASPECT_RATIO} style={{ backgroundColor: '#092a3b' }}>
       <AnimatePresence mode="sync">{SceneComponent && <SceneComponent key={currentSceneKey} />}</AnimatePresence>
-      <audio ref={audioRef} src={`${import.meta.env.BASE_URL}audio/landing-composite-monthly.mp3`} preload="auto" muted={muted} />
+      <audio ref={audioRef} src={`${import.meta.env.BASE_URL}audio/landing-composite-refined.mp3`} preload="auto" muted={muted} />
     </VideoCanvas>
   </VideoPausedContext.Provider>
 }

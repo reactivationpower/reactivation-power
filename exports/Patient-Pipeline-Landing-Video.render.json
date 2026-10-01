@@ -1,0 +1,24 @@
+{
+  "artifact": "artifacts/patient-pipeline-landing-video",
+  "durationSeconds": 149.2,
+  "dimensions": {
+    "width": 1280,
+    "height": 720
+  },
+  "frameCount": 1618,
+  "firstCapturedFrameSeconds": 0.11404585838317871,
+  "lastCapturedFrameSeconds": 145.60870790481567,
+  "playerPlaybackSeconds": 149.377,
+  "captureDirectory": "exports/.landing-capture/2026-10-01T17-46-30-563Z-6860",
+  "captureLog": "/tmp/replit-shell-output-logs/H0W346XJ55J14RZG8DZ3L/log",
+  "audioSource": "artifacts/patient-pipeline-landing-video/public/audio/landing-composite-monthly.mp3",
+  "finalHold": "Last emitted frame contains complete invitation and CTA; held to canonical end. Static final state visually checked. Screencast emits changed frames only; the original review gate rejected three milestones after the final repaint.",
+  "financialExample": {
+    "additionalReactivations": 4,
+    "additionalLeadBookings": 3,
+    "patientValue": 1500,
+    "totalAdditionalPatientValue": 10500,
+    "period": "one month"
+  },
+  "output": "exports/Patient-Pipeline-Landing-Video.mp4"
+}

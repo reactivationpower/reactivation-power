@@ -1,0 +1,624 @@
+{
+  "artifact": "artifacts/patient-pipeline-landing-video",
+  "renderUrl": "http://127.0.0.1:80/patient-pipeline-landing-video/",
+  "mode": "mp4-export",
+  "generatedAt": "2026-10-01T18:11:23.308Z",
+  "dimensions": {
+    "width": 1280,
+    "height": 720
+  },
+  "canonicalDurationSeconds": 149.2,
+  "requestedDurationSeconds": 149.2,
+  "durationOverrideSeconds": null,
+  "sceneDurationsMilliseconds": {
+    "opportunity": 23200,
+    "introduction": 15300,
+    "reactivation": 25200,
+    "lead": 19300,
+    "workflow": 14100,
+    "revenue": 34300,
+    "invitation": 17800
+  },
+  "sceneStartSeconds": {
+    "opportunity": 0,
+    "introduction": 23.2,
+    "reactivation": 38.5,
+    "lead": 63.7,
+    "workflow": 83,
+    "revenue": 97.1,
+    "invitation": 131.4
+  },
+  "playbackStartedAtEpochSeconds": 1790878133.124,
+  "playbackStoppedAtEpochSeconds": 1790878282.474,
+  "playerPlaybackSeconds": 149.34999990463257,
+  "capturedElapsedSeconds": 149.2,
+  "frameCount": 1632,
+  "firstCapturedFrameSeconds": 0.11052584648132324,
+  "lastCapturedFrameSeconds": 146.95406484603882,
+  "representativeFrames": [
+    {
+      "label": "early-opening",
+      "cue": "opening",
+      "expectedScene": "opportunity",
+      "observedScene": "opportunity",
+      "observedCues": {
+        "cursorVisible": false,
+        "typedNoteText": "",
+        "financialPeak": ""
+      },
+      "targetElapsed": 1.5,
+      "actualElapsed": 1.5275769233703613,
+      "path": "exports/.landing-capture/2026-10-01T18-08-46-260Z-10210/representative/00-early-opening.jpg"
+    },
+    {
+      "label": "opportunity-representative",
+      "cue": "scene representative",
+      "expectedScene": "opportunity",
+      "observedScene": "opportunity",
+      "observedCues": {
+        "cursorVisible": false,
+        "typedNoteText": "",
+        "financialPeak": ""
+      },
+      "targetElapsed": 19.5,
+      "actualElapsed": 19.528143882751465,
+      "path": "exports/.landing-capture/2026-10-01T18-08-46-260Z-10210/representative/01-opportunity-representative.jpg"
+    },
+    {
+      "label": "opportunity-end",
+      "cue": "scene end",
+      "expectedScene": "opportunity",
+      "observedScene": "opportunity",
+      "observedCues": {
+        "cursorVisible": false,
+        "typedNoteText": "",
+        "financialPeak": ""
+      },
+      "targetElapsed": 22.849999999999998,
+      "actualElapsed": 23.01403784751892,
+      "path": "exports/.landing-capture/2026-10-01T18-08-46-260Z-10210/representative/02-opportunity-end.jpg"
+    },
+    {
+      "label": "introduction-representative",
+      "cue": "scene representative",
+      "expectedScene": "introduction",
+      "observedScene": "introduction",
+      "observedCues": {
+        "cursorVisible": false,
+        "typedNoteText": "",
+        "financialPeak": ""
+      },
+      "targetElapsed": 35.6,
+      "actualElapsed": 35.91931700706482,
+      "path": "exports/.landing-capture/2026-10-01T18-08-46-260Z-10210/representative/03-introduction-representative.jpg"
+    },
+    {
+      "label": "introduction-end",
+      "cue": "scene end",
+      "expectedScene": "introduction",
+      "observedScene": "introduction",
+      "observedCues": {
+        "cursorVisible": false,
+        "typedNoteText": "",
+        "financialPeak": ""
+      },
+      "targetElapsed": 38.15,
+      "actualElapsed": 38.39299988746643,
+      "path": "exports/.landing-capture/2026-10-01T18-08-46-260Z-10210/representative/04-introduction-end.jpg"
+    },
+    {
+      "label": "reactivation-starting-screen",
+      "cue": "opening script",
+      "expectedScene": "reactivation",
+      "observedScene": "reactivation",
+      "observedCues": {
+        "cursorVisible": false,
+        "typedNoteText": "",
+        "financialPeak": ""
+      },
+      "targetElapsed": 42.3,
+      "actualElapsed": 42.45899987220764,
+      "path": "exports/.landing-capture/2026-10-01T18-08-46-260Z-10210/representative/05-reactivation-starting-screen.jpg"
+    },
+    {
+      "label": "reactivation-cursor",
+      "cue": "cursor",
+      "expectedScene": "reactivation",
+      "observedScene": "reactivation",
+      "observedCues": {
+        "cursorVisible": true,
+        "typedNoteText": "",
+        "financialPeak": ""
+      },
+      "targetElapsed": 48.1,
+      "actualElapsed": 48.13112497329712,
+      "path": "exports/.landing-capture/2026-10-01T18-08-46-260Z-10210/representative/06-reactivation-cursor.jpg"
+    },
+    {
+      "label": "reactivation-representative",
+      "cue": "scene representative",
+      "expectedScene": "reactivation",
+      "observedScene": "reactivation",
+      "observedCues": {
+        "cursorVisible": false,
+        "typedNoteText": "",
+        "financialPeak": ""
+      },
+      "targetElapsed": 49.4,
+      "actualElapsed": 49.70445895195007,
+      "path": "exports/.landing-capture/2026-10-01T18-08-46-260Z-10210/representative/07-reactivation-representative.jpg"
+    },
+    {
+      "label": "reactivation-end",
+      "cue": "scene end",
+      "expectedScene": "reactivation",
+      "observedScene": "reactivation",
+      "observedCues": {
+        "cursorVisible": false,
+        "typedNoteText": "",
+        "financialPeak": ""
+      },
+      "targetElapsed": 63.349999999999994,
+      "actualElapsed": 63.416987895965576,
+      "path": "exports/.landing-capture/2026-10-01T18-08-46-260Z-10210/representative/08-reactivation-end.jpg"
+    },
+    {
+      "label": "lead-cursor",
+      "cue": "cursor",
+      "expectedScene": "lead",
+      "observedScene": "lead",
+      "observedCues": {
+        "cursorVisible": true,
+        "typedNoteText": "",
+        "financialPeak": ""
+      },
+      "targetElapsed": 76.8,
+      "actualElapsed": 76.81544804573059,
+      "path": "exports/.landing-capture/2026-10-01T18-08-46-260Z-10210/representative/09-lead-cursor.jpg"
+    },
+    {
+      "label": "lead-representative",
+      "cue": "scene representative",
+      "expectedScene": "lead",
+      "observedScene": "lead",
+      "observedCues": {
+        "cursorVisible": false,
+        "typedNoteText": "",
+        "financialPeak": ""
+      },
+      "targetElapsed": 78.10000000000001,
+      "actualElapsed": 78.35899996757507,
+      "path": "exports/.landing-capture/2026-10-01T18-08-46-260Z-10210/representative/10-lead-representative.jpg"
+    },
+    {
+      "label": "lead-end",
+      "cue": "scene end",
+      "expectedScene": "lead",
+      "observedScene": "lead",
+      "observedCues": {
+        "cursorVisible": false,
+        "typedNoteText": "",
+        "financialPeak": ""
+      },
+      "targetElapsed": 82.65,
+      "actualElapsed": 82.80799984931946,
+      "path": "exports/.landing-capture/2026-10-01T18-08-46-260Z-10210/representative/11-lead-end.jpg"
+    },
+    {
+      "label": "workflow-queue",
+      "cue": "queue",
+      "expectedScene": "workflow",
+      "observedScene": "workflow",
+      "observedCues": {
+        "cursorVisible": false,
+        "typedNoteText": "",
+        "financialPeak": ""
+      },
+      "targetElapsed": 87.5,
+      "actualElapsed": 87.6466019153595,
+      "path": "exports/.landing-capture/2026-10-01T18-08-46-260Z-10210/representative/12-workflow-queue.jpg"
+    },
+    {
+      "label": "workflow-cursor-note",
+      "cue": "cursor",
+      "expectedScene": "workflow",
+      "observedScene": "workflow",
+      "observedCues": {
+        "cursorVisible": true,
+        "typedNoteText": "",
+        "financialPeak": ""
+      },
+      "targetElapsed": 91.8,
+      "actualElapsed": 91.95855188369751,
+      "path": "exports/.landing-capture/2026-10-01T18-08-46-260Z-10210/representative/13-workflow-cursor-note.jpg"
+    },
+    {
+      "label": "workflow-partial-note",
+      "cue": "typing",
+      "expectedScene": "workflow",
+      "observedScene": "workflow",
+      "observedCues": {
+        "cursorVisible": false,
+        "typedNoteText": "Asked",
+        "financialPeak": ""
+      },
+      "targetElapsed": 93.2,
+      "actualElapsed": 93.20735788345337,
+      "path": "exports/.landing-capture/2026-10-01T18-08-46-260Z-10210/representative/14-workflow-partial-note.jpg"
+    },
+    {
+      "label": "workflow-representative",
+      "cue": "scene representative",
+      "expectedScene": "workflow",
+      "observedScene": "workflow",
+      "observedCues": {
+        "cursorVisible": false,
+        "typedNoteText": "Asked for a callback.",
+        "financialPeak": ""
+      },
+      "targetElapsed": 95.2,
+      "actualElapsed": 95.34503602981567,
+      "path": "exports/.landing-capture/2026-10-01T18-08-46-260Z-10210/representative/15-workflow-representative.jpg"
+    },
+    {
+      "label": "workflow-typed-note",
+      "cue": "typing",
+      "expectedScene": "workflow",
+      "observedScene": "workflow",
+      "observedCues": {
+        "cursorVisible": false,
+        "typedNoteText": "Asked for a callback.",
+        "financialPeak": ""
+      },
+      "targetElapsed": 95.2,
+      "actualElapsed": 95.34503602981567,
+      "path": "exports/.landing-capture/2026-10-01T18-08-46-260Z-10210/representative/16-workflow-typed-note.jpg"
+    },
+    {
+      "label": "workflow-end",
+      "cue": "scene end",
+      "expectedScene": "workflow",
+      "observedScene": "workflow",
+      "observedCues": {
+        "cursorVisible": false,
+        "typedNoteText": "Asked for a callback.",
+        "financialPeak": ""
+      },
+      "targetElapsed": 96.75,
+      "actualElapsed": 96.99648404121399,
+      "path": "exports/.landing-capture/2026-10-01T18-08-46-260Z-10210/representative/17-workflow-end.jpg"
+    },
+    {
+      "label": "revenue-financial-peak",
+      "cue": "financial peak",
+      "expectedScene": "revenue",
+      "observedScene": "revenue",
+      "observedCues": {
+        "cursorVisible": false,
+        "typedNoteText": "",
+        "financialPeak": "$10,500"
+      },
+      "targetElapsed": 121.3,
+      "actualElapsed": 121.57399988174438,
+      "path": "exports/.landing-capture/2026-10-01T18-08-46-260Z-10210/representative/18-revenue-financial-peak.jpg"
+    },
+    {
+      "label": "revenue-representative",
+      "cue": "scene representative",
+      "expectedScene": "revenue",
+      "observedScene": "revenue",
+      "observedCues": {
+        "cursorVisible": false,
+        "typedNoteText": "",
+        "financialPeak": "$10,500"
+      },
+      "targetElapsed": 121.3,
+      "actualElapsed": 121.57399988174438,
+      "path": "exports/.landing-capture/2026-10-01T18-08-46-260Z-10210/representative/19-revenue-representative.jpg"
+    },
+    {
+      "label": "revenue-qualified-close",
+      "cue": "financial close",
+      "expectedScene": "revenue",
+      "observedScene": "revenue",
+      "observedCues": {
+        "cursorVisible": false,
+        "typedNoteText": "",
+        "financialPeak": "$10,500"
+      },
+      "targetElapsed": 128.29999999999998,
+      "actualElapsed": 128.30600881576538,
+      "path": "exports/.landing-capture/2026-10-01T18-08-46-260Z-10210/representative/20-revenue-qualified-close.jpg"
+    },
+    {
+      "label": "revenue-end",
+      "cue": "scene end",
+      "expectedScene": "revenue",
+      "observedScene": "revenue",
+      "observedCues": {
+        "cursorVisible": false,
+        "typedNoteText": "",
+        "financialPeak": "$10,500"
+      },
+      "targetElapsed": 131.04999999999998,
+      "actualElapsed": 131.2829999923706,
+      "path": "exports/.landing-capture/2026-10-01T18-08-46-260Z-10210/representative/21-revenue-end.jpg"
+    },
+    {
+      "label": "invitation-call-to-action",
+      "cue": "call to action",
+      "expectedScene": "invitation",
+      "observedScene": "invitation",
+      "observedCues": {
+        "cursorVisible": false,
+        "typedNoteText": "",
+        "financialPeak": ""
+      },
+      "targetElapsed": 146.70000000000002,
+      "actualElapsed": 146.95406484603882,
+      "path": "exports/.landing-capture/2026-10-01T18-08-46-260Z-10210/representative/22-invitation-call-to-action.jpg"
+    },
+    {
+      "label": "invitation-representative",
+      "cue": "scene representative",
+      "expectedScene": "invitation",
+      "observedScene": "invitation",
+      "observedCues": {
+        "cursorVisible": false,
+        "typedNoteText": "",
+        "financialPeak": ""
+      },
+      "targetElapsed": 146.70000000000002,
+      "actualElapsed": 146.95406484603882,
+      "path": "exports/.landing-capture/2026-10-01T18-08-46-260Z-10210/representative/23-invitation-representative.jpg"
+    },
+    {
+      "label": "invitation-end",
+      "cue": "scene end",
+      "expectedScene": "invitation",
+      "observedScene": "invitation",
+      "observedCues": {
+        "cursorVisible": false,
+        "typedNoteText": "",
+        "financialPeak": ""
+      },
+      "targetElapsed": 148.85,
+      "actualElapsed": 149.0039999485016,
+      "path": "exports/.landing-capture/2026-10-01T18-08-46-260Z-10210/representative/24-invitation-end.jpg"
+    }
+  ],
+  "audioRuntimeSamples": [
+    {
+      "elapsed": 0.08899998664855957,
+      "scene": "opportunity",
+      "audioTime": 0.018946,
+      "audioDuration": 149.2,
+      "audioReadyState": 4,
+      "audioPaused": false,
+      "audioError": null,
+      "audioBlocked": false,
+      "cursorVisible": false,
+      "typedNoteText": "",
+      "financialPeak": ""
+    },
+    {
+      "elapsed": 10.141999959945679,
+      "scene": "opportunity",
+      "audioTime": 10.043305,
+      "audioDuration": 149.2,
+      "audioReadyState": 4,
+      "audioPaused": false,
+      "audioError": null,
+      "audioBlocked": false,
+      "cursorVisible": false,
+      "typedNoteText": "",
+      "financialPeak": ""
+    },
+    {
+      "elapsed": 20.185999870300293,
+      "scene": "opportunity",
+      "audioTime": 20.087722,
+      "audioDuration": 149.2,
+      "audioReadyState": 4,
+      "audioPaused": false,
+      "audioError": null,
+      "audioBlocked": false,
+      "cursorVisible": false,
+      "typedNoteText": "",
+      "financialPeak": ""
+    },
+    {
+      "elapsed": 30.277999877929688,
+      "scene": "introduction",
+      "audioTime": 30.179743,
+      "audioDuration": 149.2,
+      "audioReadyState": 4,
+      "audioPaused": false,
+      "audioError": null,
+      "audioBlocked": false,
+      "cursorVisible": false,
+      "typedNoteText": "",
+      "financialPeak": ""
+    },
+    {
+      "elapsed": 40.40299987792969,
+      "scene": "reactivation",
+      "audioTime": 40.30582,
+      "audioDuration": 149.2,
+      "audioReadyState": 4,
+      "audioPaused": false,
+      "audioError": null,
+      "audioBlocked": false,
+      "cursorVisible": false,
+      "typedNoteText": "",
+      "financialPeak": ""
+    },
+    {
+      "elapsed": 50.5239999294281,
+      "scene": "reactivation",
+      "audioTime": 50.427048,
+      "audioDuration": 149.2,
+      "audioReadyState": 4,
+      "audioPaused": false,
+      "audioError": null,
+      "audioBlocked": false,
+      "cursorVisible": false,
+      "typedNoteText": "",
+      "financialPeak": ""
+    },
+    {
+      "elapsed": 60.58500003814697,
+      "scene": "reactivation",
+      "audioTime": 60.488656,
+      "audioDuration": 149.2,
+      "audioReadyState": 4,
+      "audioPaused": false,
+      "audioError": null,
+      "audioBlocked": false,
+      "cursorVisible": false,
+      "typedNoteText": "",
+      "financialPeak": ""
+    },
+    {
+      "elapsed": 70.68400001525879,
+      "scene": "lead",
+      "audioTime": 70.591897,
+      "audioDuration": 149.2,
+      "audioReadyState": 4,
+      "audioPaused": false,
+      "audioError": null,
+      "audioBlocked": false,
+      "cursorVisible": false,
+      "typedNoteText": "",
+      "financialPeak": ""
+    },
+    {
+      "elapsed": 80.76999998092651,
+      "scene": "lead",
+      "audioTime": 80.674032,
+      "audioDuration": 149.2,
+      "audioReadyState": 4,
+      "audioPaused": false,
+      "audioError": null,
+      "audioBlocked": false,
+      "cursorVisible": false,
+      "typedNoteText": "",
+      "financialPeak": ""
+    },
+    {
+      "elapsed": 90.89800000190735,
+      "scene": "workflow",
+      "audioTime": 90.806143,
+      "audioDuration": 149.2,
+      "audioReadyState": 4,
+      "audioPaused": false,
+      "audioError": null,
+      "audioBlocked": false,
+      "cursorVisible": true,
+      "typedNoteText": "",
+      "financialPeak": ""
+    },
+    {
+      "elapsed": 101.03999996185303,
+      "scene": "revenue",
+      "audioTime": 100.945575,
+      "audioDuration": 149.2,
+      "audioReadyState": 4,
+      "audioPaused": false,
+      "audioError": null,
+      "audioBlocked": false,
+      "cursorVisible": false,
+      "typedNoteText": "",
+      "financialPeak": ""
+    },
+    {
+      "elapsed": 111.08999991416931,
+      "scene": "revenue",
+      "audioTime": 110.995198,
+      "audioDuration": 149.2,
+      "audioReadyState": 4,
+      "audioPaused": false,
+      "audioError": null,
+      "audioBlocked": false,
+      "cursorVisible": false,
+      "typedNoteText": "",
+      "financialPeak": ""
+    },
+    {
+      "elapsed": 121.14499998092651,
+      "scene": "revenue",
+      "audioTime": 121.021584,
+      "audioDuration": 149.2,
+      "audioReadyState": 4,
+      "audioPaused": false,
+      "audioError": null,
+      "audioBlocked": false,
+      "cursorVisible": false,
+      "typedNoteText": "",
+      "financialPeak": "$10,500"
+    },
+    {
+      "elapsed": 131.2300000190735,
+      "scene": "revenue",
+      "audioTime": 131.107396,
+      "audioDuration": 149.2,
+      "audioReadyState": 4,
+      "audioPaused": false,
+      "audioError": null,
+      "audioBlocked": false,
+      "cursorVisible": false,
+      "typedNoteText": "",
+      "financialPeak": "$10,500"
+    },
+    {
+      "elapsed": 141.32200002670288,
+      "scene": "invitation",
+      "audioTime": 141.199498,
+      "audioDuration": 149.2,
+      "audioReadyState": 4,
+      "audioPaused": false,
+      "audioError": null,
+      "audioBlocked": false,
+      "cursorVisible": false,
+      "typedNoteText": "",
+      "financialPeak": ""
+    },
+    {
+      "elapsed": 149.2,
+      "scene": "opportunity",
+      "audioTime": 0.00265,
+      "audioDuration": 149.2,
+      "audioReadyState": 4,
+      "audioPaused": false,
+      "audioError": null,
+      "audioBlocked": false,
+      "cursorVisible": false,
+      "typedNoteText": "",
+      "financialPeak": ""
+    }
+  ],
+  "assetPreload": {
+    "images": 13,
+    "fonts": "loaded",
+    "audioSource": "http://127.0.0.1/patient-pipeline-landing-video/audio/landing-composite-refined.mp3"
+  },
+  "iframeControlProbe": {
+    "checked": false,
+    "available": false,
+    "reason": "Only run during --verify-only."
+  },
+  "capturesDirectory": "exports/.landing-capture/2026-10-01T18-08-46-260Z-10210",
+  "frameJournal": "exports/.landing-capture/2026-10-01T18-08-46-260Z-10210/frames.jsonl",
+  "contactSheet": "exports/.landing-capture/2026-10-01T18-08-46-260Z-10210/contact-sheet.jpg",
+  "outputMp4": "exports/Patient-Pipeline-Landing-Video-Refined.mp4",
+  "audioSource": "artifacts/patient-pipeline-landing-video/public/audio/landing-composite-refined.mp3",
+  "encodedFileBytes": 8928177,
+  "ffmpeg": {
+    "videoCodec": "H.264 / libx264",
+    "pixelFormat": "yuv420p",
+    "frameRate": 30,
+    "audioCodec": "AAC",
+    "faststart": true,
+    "threads": 2
+  }
+}

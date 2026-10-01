@@ -84,3 +84,15 @@ For the landing-video financial example, frame both workstreams as **additional 
 **Why:** The user corrected annual revenue framing and emphasized that the benefit must be incremental to what the office already does, not all of its patients or bookings.
 
 **How to apply:** State the month, the incremental baseline for each product, and the assumed per-patient value. Describe the sum as potential additional patient value from that month's patients, not guaranteed cash collected, profit, or a claim that most offices achieve no results.
+
+For the landing film's product shots, start Reactivation at the connected-call opening question, then demonstrate an actual response and branch. Privacy masks should cover individual identifiers, not whole script paragraphs or seeded offer-context banners.
+
+**Why:** The user found the mid-script opening confusing and the large blur blocks visually excessive. They preferred the clearer product-screen presentation in the walkthrough.
+
+**How to apply:** Preserve real UI button wording and surrounding script context. Mask names (including staff names inside call-history text), phones and emails locally. Show several complete queue rows without clipping them. Use synthetic demo captures, not actual patient data.
+
+CDP screencasts emit changed frames, not a constant frame stream; an intentional final still can produce no events at later review checkpoints.
+
+**Why:** A complete playback with a correct final invitation was flagged incomplete solely because the last hold did not repaint.
+
+**How to apply:** Explicitly screenshot review checkpoints during static holds and retain real capture timestamps. For encoding, hold the verified final static frame to the canonical end; do not invent missing motion or claim a held frame was freshly captured later.

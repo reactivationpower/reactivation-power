@@ -1520,3 +1520,25 @@ type = "audio"
 title = "Monthly incremental patient value"
 description = "Text-to-speech audio: Imagine a month where Patient Pipeline helps reactivate four additional patients, beyond your current reactivation efforts. Better lead follow-up also gets three additional new …"
 logical_id = "78180c0f-7ebf-45dd-a469-9547d83f4689"
+
+[[outputs]]
+id = "td4Vf79ODgWwpj0q3t9I_"
+uri = "file://artifacts/patient-pipeline-landing-video/public/audio/vo-workflow-owner-team.mp3"
+type = "audio"
+title = "You and your team follow-up"
+description = "Text-to-speech audio: And it isn’t just about the script. You and your team have an organized way to see who needs attention, record what happened, and keep follow-up moving instead of relying on mem…"
+logical_id = "f48f1da3-1fee-4188-88b2-2b807dc731c5"
+
+[[outputs]]
+id = "CobfhxuRbS_oD2QICMm64"
+uri = "file://exports/Patient-Pipeline-Landing-Video-Refined.mp4"
+type = "video"
+title = "Patient Pipeline — Revised Landing-Page Video"
+description = "2:29 landscape MP4, 1280×720. Starts Reactivation at the connected-call opening question, includes “you and your team,” eight complete follow-up rows and localized identifier masking. Preserves the $10,500 one-month incremental example. H.264 video and AAC audio; full playback capture and decoding verified."
+logical_id = "3b6dd2db-771d-4af3-8a09-6ce4a709385c"
+content_hash = "sha256:1f81d242ada30cbe69036bb3fe78eee6f5fc2956b8cd8a5c8d33575dcdb6e136"
+size = 8928177
+mtime_ms = 1790878308863
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/3b6dd2db-771d-4af3-8a09-6ce4a709385c/cbeca893-ae12-4299-b1f0-9bf65bc2417b"
+storage_version_token = "1790878379868614"
+content_type = "video/mp4"
