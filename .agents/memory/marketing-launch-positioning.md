@@ -14,3 +14,9 @@ Marketing rebranding is not authorization for a domain migration, entitlement ch
 **Why:** The approved work concerns public copy and email branding, not contractual or billing changes. Working delivery URLs and sender addresses were intentionally retained.
 
 **How to apply:** Use Patient Pipeline display branding, preserve existing operational addresses and legal/billing data, and treat changes to those as separate work requiring explicit direction.
+
+When moving public marketing to a new domain, preserve the old domain's email destinations through a live domain mapping or path-preserving redirects; updating source templates alone cannot repair links in delivered emails.
+
+**Why:** A successfully published Patient Pipeline site did not prevent older-domain marketing links from showing Replit's “This app isn't live yet” page. Shared templates intentionally retained those older destinations, and imported email templates are independent copies.
+
+**How to apply:** Compare the actual email destination with verified deployment domains. Check both apex and www hosts, restore old-link reachability, and update exported/imported templates separately. Do not infer an unpublished app merely from the error page.
