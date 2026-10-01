@@ -35,6 +35,12 @@ Beginner campaign-connection teaching uses three standalone walkthroughs with a 
 
 **How to apply:** Each lesson must include every external setup step, copying/pasting and tab changes, pause points, expected results, a real authorized form submission into the same campaign, and specific troubleshooting. Do not assume Facebook leads already reach GoHighLevel, invent a successful external test, or require viewers to combine several lessons. Structure approval alone is not authorization to modify external accounts or launch live automations.
 
+The three beginner lessons must match the approved first-campaign video's voice, speaking speed, animated cursor clicks, visible typing, zooms, pauses, and branding. Real external demo-account recordings are source material, not a request to replace that produced style with raw screencasts.
+
+**Why:** The user selected real external recordings rather than illustrated recreations, then explicitly clarified that all three finished videos should look and sound just like the earlier animated-cursor tutorial.
+
+**How to apply:** Reuse the approved production treatment and voice settings. Obtain authentic external screen states without treating a style clarification as permission to fabricate a completed setup or verified delivery.
+
 For the native-GoHighLevel-form lesson, teach one dedicated Form Submitted workflow filtered to the exact form, followed by the ordinary outbound Webhook action. Do not mix in a tag-based route, Custom Webhook, or manual JSON entry.
 
 **Why:** A single form-based route minimizes beginner decisions and makes the triggering event match the required end-to-end form test. Documentation/code compatibility is evidence for the draft, not a substitute for an authorized live rehearsal.
