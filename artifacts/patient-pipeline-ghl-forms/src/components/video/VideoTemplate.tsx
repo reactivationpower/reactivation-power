@@ -65,7 +65,7 @@ export default function VideoTemplate({ durations = SCENE_DURATIONS, loop = true
   return <VideoPausedContext.Provider value={paused || frameMode}>
     <VideoCanvas aspectRatio={VIDEO_ASPECT_RATIO} style={{ backgroundColor: '#092a3b' }}>
       <TimedScene key={forced === null ? currentSceneKey : scene.key} scene={scene} audio={audio} paused={paused} forced={forced === null ? null : forced - scene.startMs}/>
-      <audio ref={audio} src={`${import.meta.env.BASE_URL}audio/tutorial-mix.mp3`} preload="auto" muted={muted || frameMode}/>
+      <audio ref={audio} src={`${import.meta.env.BASE_URL}audio/${LESSON.audioFile ?? 'tutorial-mix.mp3'}`} preload="auto" muted={muted || frameMode}/>
     </VideoCanvas>
   </VideoPausedContext.Provider>
 }

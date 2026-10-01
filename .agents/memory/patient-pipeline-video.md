@@ -21,6 +21,14 @@ For tutorial narration, prioritize connected American-English conversation and r
 
 **Why:** The user rejected a first-campaign narration that sounded like disconnected bullet reading, with unnatural rhythm and insufficient punctuation pauses, and raised the same issue after hearing the GoHighLevel tutorial. Warm voice settings and non-bulleted paragraph text alone did not solve it.
 
+The user explicitly approved the 85-second desk-side teaching audition for all three lessons. Its natural explanation of why a campaign matters, followed by connected service/name setup, is the speaking-style reference—not the earlier rejected chapter recordings. The approved reference is `attached_assets/generated_audio/patient-pipeline-desk-side-audition.mp3`, with its text in `scripts/tutorial-series/conversational-audition.txt`.
+
+For long tutorial exports, keep resumable frame captures inside the workspace rather than `/tmp`.
+
+**Why:** A workspace restart discarded temporary frame captures during an export even though the authored videos and generated narration survived. Reusing workspace-backed captures then avoided repeating completed capture work.
+
+**How to apply:** Use an ignored workspace capture directory for each distinct render; keep source/audio signature validation. An interrupted MP4 without a finalized container is not a deliverable—check it and resume encoding from the saved frames.
+
 **How to apply:** Confirm the speaking style with a short actual-setup audition before generating another full series. Preserve the approved voice identity and speaking pace, use connected explanations rather than a chain of commands, and retain breathing and sentence endings. Rebuild each lesson's scene durations and action timings from the new audio: clicks, typing, and screen changes must follow the relevant spoken instructions, not old timings or a uniformly stretched timeline. Do not claim that waveform checks establish subjective voice quality.
 
 For long tutorial delivery, distinguish a working preview from a finished, downloadable MP4. When workspace exports lose progress, an explicitly authorized direct render can provide a project-saved file and a download card.

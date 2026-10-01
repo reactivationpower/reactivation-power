@@ -1,14 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
 export type Field = { label: string; value: string; kind: string }
-export type Action = { target: string; at: number; result: string; typing?: boolean }
+export type Action = { target: string; at?: number; startMs?: number; clickDelayMs?: number; typingMs?: number; result: string; typing?: boolean }
 export type Scene = {
   key: string; title: string; app: string; page: string; narration: string; fields: Field[]; actions: Action[]
   image?: string; screenSequence?: string[]; checkpoint: string; startMs: number; voiceMs: number; durationMs: number
 }
-export type Lesson = { title: string; number: number; short: string; durationMs: number; scenes: Scene[] }
+export type Lesson = { title: string; number: number; short: string; durationMs: number; audioFile?: string; scenes: Scene[] }
 const base = import.meta.env.BASE_URL
 const clamp = (n: number) => Math.max(0, Math.min(1, n))
-const startAt = (a: Action, s: Scene) => 650 + a.at * s.voiceMs
+const startAt = (a: Action, s: Scene) => a.startMs ?? (650 + (a.at ?? 0) * s.voiceMs)
+const clickAt = (a: Action, s: Scene) => startAt(a, s) + (a.clickDelayMs ?? 1180)
 const apps: Record<string, string> = { patient: 'Patient Pipeline', ghl: 'GoHighLevel', zapier: 'Zapier', meta: 'Facebook / Instagram', form: 'Your published form', guide: 'Your browser' }
 const navs: Record<string, string[]> = {
   ghl: ['Dashboard', 'Contacts', 'Automation', 'Sites', 'Settings'],
@@ -19,24 +20,25 @@ const navs: Record<string, string[]> = {
   guide: [],
 }
 function valueFor(field: Field, scene: Scene, time: number) {
-  const action = [...scene.actions].reverse().find(a => a.target === field.label && time >= startAt(a, scene) + 1250)
+  const action = [...scene.actions].reverse().find(a => a.target === field.label && time >= clickAt(a, scene) + 70)
   const dynamic = scene.actions.some(a => a.target === field.label) && ['text', 'private', 'select', 'mapping', 'toggle'].includes(field.kind)
   if (!action) return dynamic ? '' : field.value
   if (!action.typing) return field.value || action.result
-  const progress = Math.floor(Math.max(0, time - startAt(action, scene) - 1400) / 92)
+  const perCharacter = (action.typingMs ?? action.result.length * 92) / Math.max(1, action.result.length)
+  const progress = Math.floor(Math.max(0, time - clickAt(action, scene) - 220) / perCharacter)
   return action.result.slice(0, progress)
 }
 function FieldRow({ field, scene, time, active }: { field: Field; scene: Scene; time: number; active?: Action }) {
   const focus = active?.target === field.label
   const value = valueFor(field, scene, time)
   const staticKind = ['note', 'legend', 'check', 'waiting', 'preview'].includes(field.kind)
-  const done = scene.actions.some(a => a.target === field.label && time > startAt(a, scene) + 1800)
+  const done = scene.actions.some(a => a.target === field.label && time > clickAt(a, scene) + 620)
   if (field.kind === 'button') return <div className={`ui-button ${focus ? 'focused' : ''}`} data-target={field.label}>
     {field.label}{done && <span className="button-tick">✓</span>}
   </div>
   if (field.kind === 'price') return <div className="field-row"><label>{field.label}</label><div className="price-options">
     {['Normally X, now Y', 'Just Y', "Don’t mention price"].map(x => <div key={x} data-target={x}
-      className={(x === 'Just Y' && time > startAt(scene.actions[0], scene) + 1250) ? 'selected' : ''}>◯ {x}</div>)}
+      className={(x === 'Just Y' && time > clickAt(scene.actions[0], scene) + 70) ? 'selected' : ''}>◯ {x}</div>)}
   </div></div>
   return <div className={`field-row ${staticKind ? 'static-field' : ''} ${focus ? 'active-row' : ''}`} data-target={staticKind ? field.label : undefined}>
     <label>{field.kind === 'check' && <i className="empty-check"/>}{field.label}</label>
@@ -46,7 +48,7 @@ function FieldRow({ field, scene, time, active }: { field: Field; scene: Scene; 
       {(field.kind === 'select' || field.kind === 'mapping') && <b>⌄</b>}
       {field.kind === 'toggle' && <i className={`toggle ${value ? 'on' : ''}`}/>}
     </div>
-    {focus && ['select', 'mapping'].includes(field.kind) && time - startAt(active!, scene) < 2400 &&
+    {focus && ['select', 'mapping'].includes(field.kind) && time < clickAt(active!, scene) + 1220 &&
       <div className="select-menu"><small>{field.kind === 'mapping' ? 'Insert data from trigger' : 'Select an option'}</small><div>{field.value}</div></div>}
   </div>
 }
@@ -61,11 +63,12 @@ function Cursor({ root, scene, time, active }: { root: React.RefObject<HTMLDivEl
   }, [active?.target, scene.key, root])
   if (!point || !active) return null
   const elapsed = (time - startAt(active, scene)) / 1000
-  if (scene.key === 'campaigns' && elapsed > 1.4) return null
-  const travel = 1 - Math.pow(1 - clamp((elapsed - .1) / 1.05), 4)
-  const click = clamp((elapsed - 1.18) / .32)
+  const clickTime = (active.clickDelayMs ?? 1180) / 1000
+  if (scene.key === 'campaigns' && elapsed > clickTime + .22) return null
+  const travel = 1 - Math.pow(1 - clamp((elapsed - .03) / Math.max(.05, clickTime - .03)), 4)
+  const click = clamp((elapsed - clickTime) / .32)
   const scale = 1 - Math.sin(click * Math.PI) * .26
-  const pulse = clamp((elapsed - 1.19) / .75)
+  const pulse = clamp((elapsed - clickTime - .01) / .75)
   return <div className="tutorial-cursor" style={{
     left: `${point.x - 13 * (1 - travel)}%`, top: `${point.y + 12 * (1 - travel)}%`,
     opacity: clamp(elapsed / .2) * (elapsed > 6 ? .4 : 1),
@@ -79,7 +82,7 @@ function Browser({ scene, time, active, connector = 'GoHighLevel' }: { scene: Sc
     <div className={scene.app === 'patient' ? 'current' : ''} data-target="tab-patient">Patient Pipeline</div>
     <div className={!['patient', 'guide', 'form'].includes(scene.app) ? 'current' : ''} data-target="tab-external">{scene.app === 'meta' ? 'Facebook' : connector}</div>
     <div className={scene.app === 'form' ? 'current' : ''}>Published form</div><span data-target="tab-plus">+</span>
-    <em>{active?.target === 'tab-plus' && time > startAt(active, scene) + 1300 ? 'New tab' : ''}</em>
+    <em>{active?.target === 'tab-plus' && time > clickAt(active, scene) + 120 ? 'New tab' : ''}</em>
   </div>
 }
 export function TutorialScene({ lesson, scene, time }: { lesson: Lesson; scene: Scene; time: number; paused: boolean }) {
@@ -90,11 +93,11 @@ export function TutorialScene({ lesson, scene, time }: { lesson: Lesson; scene: 
   const isClosing = scene.key === 'finish'
   const light = isGuide && scene.key !== 'intro'
   const focusField = active && scene.fields.find(f => f.label === active.target)
-  const showZoom = focusField && ['text', 'private', 'mapping'].includes(focusField.kind) && time > startAt(active!, scene) + 1250 && time < startAt(active!, scene) + 9000
+  const showZoom = focusField && ['text', 'private', 'mapping'].includes(focusField.kind) && time > clickAt(active!, scene) + 70 && time < clickAt(active!, scene) + 7820
   const enter = clamp(time / 550)
   let image = scene.image
   if (scene.key === 'campaigns') {
-    const step = scene.actions.filter(a => time >= startAt(a, scene) + 1400).length
+    const step = scene.actions.filter(a => time >= clickAt(a, scene) + 220).length
     image = scene.screenSequence?.[step === 0 ? 0 : step < 3 ? 1 : 2]
   }
   return <section className={`campaign-film ${light ? 'light' : ''}`} data-scene={scene.key}>
