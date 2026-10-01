@@ -426,7 +426,7 @@ describe('subscription cancelled', () => {
       to: 'owner@example.com',
       data: {
         name: 'Dr. Michael Chen',
-        description: 'Reactivation Power — $475.00/month',
+        description: 'Patient Pipeline — $475.00/month',
         accessEndsAt: '2026-09-23T15:00:00.000Z',
         reactivateUrl: 'https://app.test/billing?email=owner%40example.com',
       },
@@ -454,6 +454,6 @@ describe('subscription cancelled', () => {
 
   it('falls back to a generic description when no monthly amount is on file', async () => {
     await notifySubscriptionCancelled({ customer, subscriptionId: 'sub_3', monthlyCents: null, accessEndsAt: new Date() })
-    expect(sent[0].data.description).toBe('Reactivation Power — monthly subscription')
+    expect(sent[0].data.description).toBe('Patient Pipeline — monthly subscription')
   })
 })

@@ -54,7 +54,7 @@ describe('combined revenue calculator', () => {
     fireEvent.change(screen.getByLabelText("What's a patient worth to you per year?"), { target: { value: '3000' } })
     fireEvent.change(screen.getByLabelText('How many additional new patients could better follow-up bring in each month?'), { target: { value: '10' } })
     fireEvent.change(screen.getByLabelText("What's a new patient worth over their first year?"), { target: { value: '4000' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Show Me How to Capture This' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Talk Through This Opportunity' }))
     expect(screen.getByTestId('forwarded-calculator').textContent).toBe('2000,3000,10,4000')
   })
 })
