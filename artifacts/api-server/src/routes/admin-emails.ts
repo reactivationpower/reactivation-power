@@ -60,7 +60,7 @@ function buildIndexHtml(sets: AudienceSet[], exportedAt: string): string {
   const total = sets.reduce((count, set) => count + set.templates.length, 0);
   const scope = sets.length === 1 ? `${sets[0].audience.name} sequence` : "All sequences";
   return `<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><title>Reactivation Power — Marketing Email Handoff</title><meta name="viewport" content="width=device-width, initial-scale=1">
+<html lang="en"><head><meta charset="utf-8"><title>Patient Pipeline — Marketing Email Handoff</title><meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 body { font-family: Arial, Helvetica, sans-serif; color: #1f2933; margin: 0; padding: 32px; line-height: 1.5; }
 .wrap { max-width: 1100px; margin: 0 auto; } h1 { font-size: 24px; margin: 0 0 4px; }
@@ -81,15 +81,17 @@ td.subj { width: 30%; } td.pre { width: 34%; color: #52606d; font-size: 13px; }
 .foot { margin-top: 24px; font-size: 12px; color: #9aa5b1; }
 </style></head><body><div class="wrap">
 <h1>Marketing Email Handoff — ${scope}, ${total} emails</h1>
-<p class="sub">Reactivation Power · exported ${esc(exportedAt)}</p>
+<p class="sub">Patient Pipeline · exported ${esc(exportedAt)} · Reactivation + Lead Follow-Up together at one launch price</p>
 <div class="steps"><h2>How to load each email into GoHighLevel</h2><ol>
 <li>Each folder under <code>emails/</code> is one audience — a full sequence written for one kind of office. Keep the sequences separate in GHL; they go to different lists.</li>
 <li>In GHL go to <strong>Marketing → Emails → Templates → New → Blank Template</strong> (or Import from HTML if available).</li>
 <li>Open the matching file in a text editor, select all, copy.</li>
 <li>In the GHL builder, add a <strong>Custom Code</strong> block (or switch to the code view) and paste the HTML.</li>
 <li>Set the <strong>subject line</strong> and <strong>preview text</strong> exactly as listed in the table below.</li>
-<li>Name the template with the audience plus the email's own number and name from the <strong>Email</strong> column — for example <em>Chiropractic — Email 1.1 — The Revenue Hiding in Your Patient List</em> or <em>Chiropractic — Email 15 — When Your Best Person Leaves</em>. Use the email's own number, not the <strong>#</strong> column: the # is only the send order.</li>
-</ol><p style="margin:12px 0 0;font-size:13px;color:#52606d">Merge tags are already in GHL format — <code>{{contact.first_name}}</code> and <code>{{unsubscribe_link}}</code> — so leave them exactly as they are. Every call-to-action button already links to the live landing page.</p></div>
+<li>Name the template with the audience plus the email's own number and name from the <strong>Email</strong> column. Use the email's own number, not the <strong>#</strong> column: the # is only the editorial order, not a sending schedule.</li>
+<li>These files replace the earlier reactivation-only copy. Previously imported GHL templates will not update automatically; replace their HTML, subjects, and preview text before using the revised sequence.</li>
+<li>Publish the updated landing pages before sending, verify the logo and call-booking link, and send yourself a test from GHL. Check personalization, mobile layout, sender details, your business mailing address, permission to contact the list, and the working unsubscribe link.</li>
+</ol><p style="margin:12px 0 0;font-size:13px;color:#52606d">Merge tags are already in GHL format — <code>{{contact.first_name}}</code> and <code>{{unsubscribe_link}}</code> — so leave them exactly as they are. The existing landing-page URLs are preserved. Both products are included in the launch offer; no numeric price or expiry has been supplied. Choose your own sending cadence in GHL; downloading this set does not schedule or send any email.</p></div>
 ${sets.map(buildSection).join("\n")}
 <p class="foot">A spreadsheet version of these tables is in <code>emails.csv</code>.</p>
 </div></body></html>`;
@@ -127,7 +129,7 @@ router.get("/admin/emails/export", async (req: Request, res: Response) => {
     const scope = requested ? `-${requested}` : "";
     res.set({
       "Content-Type": "application/zip",
-      "Content-Disposition": `attachment; filename="reactivation-power-emails${scope}-${stamp}.zip"`,
+      "Content-Disposition": `attachment; filename="patient-pipeline-emails${scope}-${stamp}.zip"`,
       "Cache-Control": "no-store",
     }).send(Buffer.from(zipSync(files, { level: 6 })));
   });

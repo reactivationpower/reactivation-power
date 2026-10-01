@@ -8,8 +8,8 @@
  */
 
 export const BRAND = {
-  name: 'Reactivation Power',
-  tagline: 'Turning old business into new business & new money',
+  name: 'Patient Pipeline',
+  tagline: 'Patient reactivation & new-lead follow-up for your practice',
   teal: '#39889f',
   ink: '#1d293d',
   body: '#314158',

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { listTemplates, renderTemplate } from '@/lib/mail/templates'
-import { toPlainText } from '@/lib/mail/layout'
+import { listTemplates, renderTemplate, TEMPLATES } from '@/lib/mail/templates'
+import { BRAND, toPlainText } from '@/lib/mail/layout'
 
 describe('transactional templates', () => {
   it('every template renders its sample with branding, a subject and no leftover placeholders', () => {
@@ -8,10 +8,53 @@ describe('transactional templates', () => {
       const r = t.render(t.sample as never)
       expect(r.subject.length).toBeGreaterThan(5)
       expect(r.html).toContain('patient-pipeline-logo.png')
+      expect(r.html).toContain('Patient Pipeline')
+      expect(r.html).toContain('Patient reactivation &amp; new-lead follow-up for your practice')
+      expect(r.subject).not.toContain('Reactivation Power')
+      expect(r.html).not.toContain('Reactivation Power')
       expect(r.html).not.toMatch(/\{\{|undefined|\[object/)
       expect(r.html).not.toContain('unsubscribe')
       expect(toPlainText(r.html).length).toBeGreaterThan(80)
     }
+  })
+
+  it('keeps the existing website and uses the new shared brand', () => {
+    expect(BRAND.name).toBe('Patient Pipeline')
+    expect(BRAND.siteUrl).toBe('https://reactivationpower.com')
+  })
+
+  it('preserves saved agreement titles in signature and signed-copy emails', () => {
+    const agreementTitle = 'Reactivation Power 12-Month Service Agreement'
+    for (const resend of [false, true]) {
+      const r = renderTemplate('agreement_sent', {
+        ...TEMPLATES.agreement_sent.sample,
+        agreementTitle,
+        resend,
+      })
+      expect(r.subject).toContain(agreementTitle)
+      expect(r.html).toContain(`<strong>${agreementTitle}</strong>`)
+      expect(r.html).toContain('The Patient Pipeline Team')
+    }
+    for (const adminCopy of [false, true]) {
+      const r = renderTemplate('agreement_signed', {
+        ...TEMPLATES.agreement_signed.sample,
+        agreementTitle,
+        adminCopy,
+      })
+      expect(r.subject).toContain(agreementTitle)
+      expect(r.html).toContain(`<strong>${agreementTitle}</strong>`)
+      expect(r.html).toContain('The Patient Pipeline Team')
+    }
+  })
+
+  it('preserves supplied billing descriptions rather than renaming historical charges', () => {
+    const description = 'Reactivation Power Access'
+    const r = renderTemplate('payment_received', {
+      ...TEMPLATES.payment_received.sample,
+      description,
+    })
+    expect(r.subject).toContain('Patient Pipeline')
+    expect(r.html).toContain(`<strong>${description}</strong>`)
   })
 
   it('escapes user-supplied values', () => {

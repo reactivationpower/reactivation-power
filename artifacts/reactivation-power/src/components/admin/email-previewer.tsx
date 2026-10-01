@@ -17,7 +17,10 @@ import { cn } from '@/lib/utils'
  * The copied and exported HTML keeps the production URLs untouched.
  */
 function previewHtml(html: string) {
-  return html.split(EMAIL_ASSET_BASE).join('/images/emails')
+  const base = import.meta.env.BASE_URL
+  return html.split(EMAIL_ASSET_BASE).join(`${base}images/emails`)
+    .replace(/https:\/\/(?:www\.)?reactivationpower\.com\/images\/patient-pipeline-logo\.png/g,
+      `${base}images/patient-pipeline-logo.png`)
 }
 
 export function EmailPreviewer() {
@@ -119,7 +122,7 @@ export function EmailPreviewer() {
             {audience.name} sequence
           </span>
           <span className="text-xs text-muted-foreground">
-            {templates.length} ready to send
+            {templates.length} templates
           </span>
         </div>
         <div className="max-h-52 overflow-y-auto p-2">

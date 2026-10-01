@@ -1,6 +1,6 @@
 kind = "web"
 previewPath = "/"
-title = "Reactivation Power"
+title = "Patient Pipeline"
 description = "A healthcare practice reactivation platform with public lead-generation pages, training courses, progress tracking, call workflows, payments, and administrative management tools."
 version = "1.0.0"
 id = "artifacts/reactivation-power"

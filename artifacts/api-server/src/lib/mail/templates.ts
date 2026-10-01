@@ -264,7 +264,7 @@ const paymentReceived: TemplateDefinition<'payment_received'> = {
   sample: {
     name: 'Dr. Michael Chen',
     amountCents: 149700,
-    description: 'Reactivation Power Access',
+    description: 'Patient Pipeline Access',
     paidAt: new Date().toISOString(),
     receiptUrl: 'https://pay.stripe.com/receipts/sample',
     cardBrand: 'Visa',
@@ -307,7 +307,7 @@ const paymentFailed: TemplateDefinition<'payment_failed'> = {
   sample: {
     name: 'Dr. Michael Chen',
     amountCents: 49700,
-    description: 'Reactivation Power — monthly',
+    description: 'Patient Pipeline — monthly',
     reason: 'Your card was declined.',
     accessSuspended: true,
     nextRetryAt: null,
@@ -359,7 +359,7 @@ const subscriptionCancelled: TemplateDefinition<'subscription_cancelled'> = {
   description: 'Confirms a cancellation and states when portal access ends.',
   sample: {
     name: 'Dr. Michael Chen',
-    description: 'Reactivation Power — monthly',
+    description: 'Patient Pipeline — monthly',
     accessEndsAt: new Date(Date.now() + 21 * 86400000).toISOString(),
     reactivateUrl: `${BRAND.siteUrl}/billing`,
   },
@@ -402,7 +402,7 @@ const agreementSent: TemplateDefinition<'agreement_sent'> = {
   description: 'Delivers the service agreement with a link to review and sign it.',
   sample: {
     name: 'Dr. Michael Chen',
-    agreementTitle: 'Reactivation Power 12-Month Service Agreement',
+    agreementTitle: 'Patient Pipeline 12-Month Service Agreement',
     termMonths: 12,
     signUrl: `${BRAND.siteUrl}/agreements/sample-token`,
     expiresAt: new Date(Date.now() + 7 * 86400000).toISOString(),
@@ -454,15 +454,15 @@ const billingLink: TemplateDefinition<'billing_link'> = {
     expiresAt: new Date(Date.now() + 14 * 86400000).toISOString(),
     accessPaused: true,
     outstandingCents: 49700,
-    sentByName: 'Sarah from Reactivation Power',
+    sentByName: 'Sarah from Patient Pipeline',
   },
   render: (d) => {
     const updateCard = d.purpose === 'update_card'
     const subject = d.accessPaused
-      ? 'Update your card to restore your Reactivation Power access'
+      ? 'Update your card to restore your Patient Pipeline access'
       : updateCard
-        ? 'Please add a new card for your Reactivation Power subscription'
-        : 'Your Reactivation Power billing page'
+        ? 'Please add a new card for your Patient Pipeline subscription'
+        : 'Your Patient Pipeline billing page'
     const intro = updateCard
       ? `${d.sentByName ? `${esc(d.sentByName)} has` : 'We have'} sent you a secure link to add a new card to your account. The card you enter becomes your primary card; your current cards stay on file.`
       : `Here is the secure link to your billing page you asked for. From there you can see your balance, pay it, and add or update a card.`
@@ -502,7 +502,7 @@ const agreementSigned: TemplateDefinition<'agreement_signed'> = {
     name: 'Dr. Michael Chen',
     signerName: 'Dr. Michael Chen',
     businessName: 'Chen Family Dental',
-    agreementTitle: 'Reactivation Power 12-Month Service Agreement',
+    agreementTitle: 'Patient Pipeline 12-Month Service Agreement',
     termMonths: 12,
     monthlyCents: 47500,
     setupFeeCents: 47500,
@@ -680,7 +680,7 @@ const cancellationScheduled: TemplateDefinition<'cancellation_scheduled'> = {
         h1('Your cancellation is scheduled'),
         p(`Hi ${esc(d.name)},`),
         p(
-          `As you requested, your Reactivation Power subscription will end on <strong>${longDate(d.cancelAt)}</strong>, the last day of your agreement. Until then, you keep full access for you and your team.`,
+          `As you requested, your Patient Pipeline subscription will end on <strong>${longDate(d.cancelAt)}</strong>, the last day of your agreement. Until then, you keep full access for you and your team.`,
         ),
         details([
           ['Subscription ends', longDate(d.cancelAt)],
@@ -896,7 +896,7 @@ export const TEMPLATES: { [K in TemplateId]: TemplateDefinition<K> } = {
       return {
         subject: d.count === 1 ? 'You have a new lead' : `You have ${d.count} new leads`,
         previewText: text,
-        html: layout([h1('New leads in Reactivation Power'), p(text), p('Sign in to review and follow up. No contact or treatment details are included in this email.'), button('View leads', d.portalUrl), p('Manage these alerts in Settings → New lead email notifications.')], { previewText: text }),
+        html: layout([h1('New leads in Patient Pipeline'), p(text), p('Sign in to review and follow up. No contact or treatment details are included in this email.'), button('View leads', d.portalUrl), p('Manage these alerts in Settings → New lead email notifications.')], { previewText: text }),
       }
     },
   },

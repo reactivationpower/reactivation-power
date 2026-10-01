@@ -23,7 +23,6 @@ export default function BookACallPage() {
   if (loading) return <PageLoading />
   if (error) return <PageError error={error} />
   const { contactId, firstName, thankYouHref } = data
-  const leadOnly = search.get('interest') === 'lead-follow-up'
 
   return (
     <main className="flex min-h-screen flex-col bg-background">
@@ -55,7 +54,9 @@ export default function BookACallPage() {
         </h1>
         <p className="mt-4 max-w-2xl text-pretty text-center text-lg leading-relaxed text-muted-foreground">
           Choose whatever time works best. The call takes about 20 minutes,
-          and we&apos;ll talk through {leadOnly ? 'your campaign leads and offer' : 'your practice and calling workflow'}.
+           and we&apos;ll talk through your inactive patient outreach and incoming
+           campaign leads. Patient Pipeline includes Reactivation and Lead
+           Follow-Up together in one launch offer.
         </p>
 
         <div className="mt-10 w-full">
@@ -94,7 +95,7 @@ export default function BookACallPage() {
       <footer className="border-t border-border bg-card">
         <div className="mx-auto flex max-w-5xl flex-col items-center gap-2 px-4 py-8 text-center md:px-6">
           <p className="text-xs text-muted-foreground">
-            {`© ${new Date().getFullYear()} Reactivation Power Program. All rights reserved.`}
+             {`© ${new Date().getFullYear()} Patient Pipeline. All rights reserved.`}
           </p>
         </div>
       </footer>

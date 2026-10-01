@@ -40,7 +40,7 @@ export function SiteFooter() {
           </Link>
         </nav>
         <p className="text-xs text-muted-foreground">
-          {`© ${new Date().getFullYear()} Reactivation Power. All rights reserved.`}
+          {`© ${new Date().getFullYear()} Patient Pipeline. All rights reserved.`}
         </p>
       </div>
     </footer>

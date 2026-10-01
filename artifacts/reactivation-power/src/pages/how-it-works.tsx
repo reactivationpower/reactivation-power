@@ -67,16 +67,17 @@ export default function HowItWorksPage() {
         {/* Intro */}
         <section className="mx-auto max-w-3xl px-4 pb-4 pt-14 text-center md:px-6 md:pt-20">
           <p className="mx-auto w-fit rounded-full border border-accent/40 bg-accent/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-accent">
-            The Program
+             Patient Pipeline
           </p>
           <h1 className="mt-5 text-balance text-4xl font-bold leading-tight tracking-tight text-foreground md:text-5xl">
              Two ways to keep conversations moving
           </h1>
           <p className="mt-5 text-pretty text-lg leading-relaxed text-muted-foreground">
-             Reactivation starts with people who have visited your practice
-             before. Lead Follow-Up starts with new people responding to a
-             campaign or offer. Both give your team a structured way to call,
-             track outcomes and keep follow-ups organized.
+             Reactivation starts with inactive patients; Lead Follow-Up starts
+             with incoming inquiries from a specific campaign or offer. Both
+             staff-led workflows are included together in one Patient Pipeline
+             launch offer for one launch price. Your team can call, track
+             outcomes and keep follow-ups organized.
           </p>
         </section>
 
@@ -110,7 +111,7 @@ export default function HowItWorksPage() {
         {/* What you get */}
         <section className="mx-auto max-w-6xl px-4 py-14 md:px-6 md:py-20">
           <h2 className="text-balance text-center text-3xl font-bold tracking-tight text-foreground md:text-4xl">
-            What&apos;s included
+             What&apos;s included in both workflows
           </h2>
           <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2">
             {INCLUDES.map((item) => (
@@ -200,9 +201,9 @@ export default function HowItWorksPage() {
               Wondering if it fits your practice?
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-pretty text-lg leading-relaxed text-muted-foreground">
-              That&apos;s exactly what the strategy call is for. We&apos;ll
-               talk through your services, your inactive list or campaign
-               leads, and which workflow suits your team.
+               That&apos;s exactly what the strategy call is for. We&apos;ll
+               talk through your services, inactive list and incoming campaign
+               inquiries so you can see how both included workflows fit your team.
             </p>
             <Link
               href="/schedule-a-call"

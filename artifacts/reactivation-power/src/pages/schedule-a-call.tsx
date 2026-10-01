@@ -6,8 +6,8 @@ import { SiteHeader } from '@/components/site/site-header'
 
 
 const EXPECT = [
-  'Talk through your inactive patient list, new campaign leads, or both',
-  'See how the calling workflows fit your practice',
+  'Talk through your inactive patient list and incoming campaign leads',
+  'See how both included calling workflows fit your practice',
   'Choose a time on the calendar after sending the form',
 ]
 
@@ -41,9 +41,10 @@ export default function ScheduleACallPage() {
               Schedule your free strategy call
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-pretty text-lg leading-relaxed text-muted-foreground">
-              The call takes about 20 minutes. We&apos;ll discuss
-              reactivating past patients, following up
-              with new campaign leads, or both — whichever fits your practice.
+               The call takes about 20 minutes. We&apos;ll discuss
+               staff-led Reactivation for inactive patients and campaign-specific
+               Lead Follow-Up for incoming inquiries. Both are included together
+               in one Patient Pipeline launch offer for one launch price.
             </p>
           </div>
 

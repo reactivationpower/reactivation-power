@@ -17,48 +17,48 @@ import { OpportunityProvider } from '@/components/landing/opportunity-context'
 
 
 const STATS = [
-  { value: '5–7x', label: 'cheaper than acquiring a new patient' },
-  { value: '$0', label: 'in ad spend required' },
+  { value: 'Both', label: 'workflows included together' },
+  { value: 'Staff-led', label: 'calls guided by scripts' },
 ]
 
 const STEPS = [
   {
     icon: Users,
-    title: 'Import your inactive patient list',
-    body: 'Upload your patient export and the system automatically builds an organized call queue — who to call, in what order, with full history on every contact.',
+    title: 'Add patients and campaign leads',
+    body: 'Import your inactive patient list for Reactivation and connect incoming inquiries to their Lead Follow-Up campaign.',
   },
   {
     icon: PhoneCall,
-    title: 'Call with a word-for-word interactive script',
-    body: 'Your team reads exactly what appears on screen. Whatever the patient says, they click the matching response and the script instantly shows the right next words — objections included.',
+    title: 'Your team calls with guided scripts',
+    body: 'Use service-specific wording to check in with past patients and campaign-specific wording to follow up with new leads about the offer they saw.',
   },
   {
     icon: CalendarCheck,
     title: 'Book appointments and track everything',
-    body: 'Every call is logged with an outcome and notes. Callbacks resurface automatically, and you watch recovered revenue climb on your dashboard.',
+    body: 'Log outcomes and notes, see callbacks due, and keep both calling queues organized in the portal.',
   },
 ]
 
 const BENEFITS = [
   {
     icon: DollarSign,
-    title: 'Revenue hiding in plain sight',
-    body: 'Your inactive patient list is the highest-ROI asset you own. These patients already know and trust you — they just drifted away.',
+    title: 'Reconnect with past patients',
+    body: 'Your team can work through inactive patient files with a conversation tailored to the service each person last received.',
   },
   {
     icon: ShieldCheck,
-    title: 'Reputation-safe by design',
-    body: 'Most reactivation attempts sound like pushy sales calls and damage goodwill. Our scripts lead with genuine care, so patients feel valued — not sold to.',
+    title: 'Follow up with new inquiries',
+    body: 'Lead Follow-Up gives your staff a script tied to the campaign and offer each new inquiry responded to.',
   },
   {
     icon: ListChecks,
-    title: 'No guesswork for your team',
-    body: 'Front-desk staff need zero sales experience. The interactive script tells them exactly what to say at every turn, including every common objection.',
+    title: 'Guidance for real conversations',
+    body: 'Interactive scripts help your team respond to questions, hesitations, and requests for a callback.',
   },
   {
     icon: TrendingUp,
-    title: 'Compounds month after month',
-    body: 'Reactivation is not a one-time blitz. The system keeps surfacing due follow-ups so recovered revenue becomes a repeatable monthly process.',
+    title: 'Keep follow-ups organized',
+    body: 'See logged call results and due follow-ups across both workflows rather than losing track after a first attempt.',
   },
 ]
 
@@ -96,14 +96,13 @@ export default function HealthcareLandingPage() {
               For Healthcare Practices
             </p>
             <h1 className="text-balance text-4xl font-bold leading-tight tracking-tight text-foreground md:text-5xl">
-              Your inactive patients are worth tens of thousands. We help you
-              bring them back.
+              Bring past patients back. Follow up with new campaign leads.
             </h1>
             <p className="text-pretty text-lg leading-relaxed text-muted-foreground">
-              The Reactivation Power Program gives your front desk a proven,
-              word-for-word calling system that reactivates lapsed patients —
-              without ads, without new leads, and without sounding like a sales
-              call.
+              Patient Pipeline helps your team call inactive patients with
+              service-specific Reactivation scripts and incoming inquiries with
+              campaign-specific Lead Follow-Up scripts. Both staff-led workflows
+              are included together in one launch offer for one launch price.
             </p>
             <div className="flex flex-wrap items-center gap-3">
               <LeadDialog>
@@ -145,16 +144,13 @@ export default function HealthcareLandingPage() {
       <section className="border-y border-border bg-card">
         <div className="mx-auto max-w-3xl px-4 py-16 text-center md:px-6 md:py-20">
           <h2 className="text-balance text-3xl font-bold tracking-tight text-foreground md:text-4xl">
-            Every practice has a goldmine it never touches
+            Two kinds of conversations, one place to manage them
           </h2>
           <p className="mt-5 text-pretty text-lg leading-relaxed text-muted-foreground">
-            Most practices spend thousands chasing brand-new patients while
-            hundreds of past patients — people who already trust you — quietly
-            drift away. They didn&apos;t leave because they were unhappy. Life
-            got busy. Nobody checked in. And when reactivation is attempted the
-            wrong way, it sounds like a pushy sales pitch that damages the very
-            trust you built. Done the right way, it books appointments and
-            deepens loyalty at the same time.
+            Inactive patients and new campaign inquiries need different
+            follow-up. Patient Pipeline gives your staff a way to check in with
+            past patients based on their last service and call new leads about
+            the specific campaign or offer they responded to.
           </p>
         </div>
       </section>
@@ -168,8 +164,7 @@ export default function HealthcareLandingPage() {
           How it works
         </h2>
         <p className="mx-auto mt-4 max-w-2xl text-pretty text-center text-lg leading-relaxed text-muted-foreground">
-          Three steps, fully systemized — from dormant list to booked
-          appointments.
+          Three steps to organize both staff-led calling workflows.
         </p>
         <ol className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-3">
           {STEPS.map((step, i) => (
@@ -200,7 +195,7 @@ export default function HealthcareLandingPage() {
       <section className="border-y border-border bg-card">
         <div className="mx-auto max-w-6xl px-4 py-16 md:px-6 md:py-24">
           <h2 className="text-balance text-center text-3xl font-bold tracking-tight text-foreground md:text-4xl">
-            Why practices choose the Reactivation Power Program
+            How Patient Pipeline supports your team
           </h2>
           <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2">
             {BENEFITS.map((b) => (
@@ -233,18 +228,18 @@ export default function HealthcareLandingPage() {
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
           <div className="flex flex-col gap-5">
             <h2 className="text-balance text-3xl font-bold tracking-tight text-foreground md:text-4xl">
-              See what your patient list is really worth
+              Talk through both workflows for your practice
             </h2>
             <p className="text-pretty text-lg leading-relaxed text-muted-foreground">
-              Book a free strategy call and we&apos;ll walk through your
-              practice, your inactive list, and exactly how the Reactivation
-              Power Program would work for you — no pressure, no obligation.
+              Book a strategy call to discuss your inactive patient list,
+              incoming campaign leads, and how both included Patient Pipeline
+              workflows could fit your team — no pressure, no obligation.
             </p>
             <ul className="flex flex-col gap-3">
               {[
-                'A realistic revenue estimate for your inactive list',
-                'A walkthrough of the interactive calling system',
-                'The biggest reactivation mistakes to avoid',
+                'How Reactivation handles inactive patient outreach',
+                'How Lead Follow-Up handles campaign-specific inquiries',
+                'What both workflows in one launch offer look like for your practice',
               ].map((item) => (
                 <li key={item} className="flex items-start gap-3">
                   <Headset
@@ -281,7 +276,7 @@ export default function HealthcareLandingPage() {
             className="h-16 w-auto"
           />
           <p className="text-xs text-muted-foreground">
-            {`© ${new Date().getFullYear()} Reactivation Power Program. All rights reserved.`}
+            {`© ${new Date().getFullYear()} Patient Pipeline. All rights reserved.`}
           </p>
         </div>
       </footer>

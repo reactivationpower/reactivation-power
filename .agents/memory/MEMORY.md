@@ -20,3 +20,4 @@
 - [Public script previews](public-script-preview.md) — use actual two-screen branches; differentiate past-service scripting from campaign/offer scripting.
 - [Patient Pipeline video positioning](patient-pipeline-video.md) — use Patient Pipeline branding; keep short ads distinct from a detailed, privacy-safe product walkthrough.
 - [Generated audio paths](generated-audio-paths.md) — audio generation may suffix an existing requested filename even with overwrite; mix from the returned path and bust playback caches.
+- [Marketing launch positioning](marketing-launch-positioning.md) — approved combined launch offer; do not invent numeric terms or treat rebranding as a billing/domain migration.

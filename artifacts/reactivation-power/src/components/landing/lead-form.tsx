@@ -468,7 +468,7 @@ export function LeadForm({ scheduleMode = false, calculatorScenario }: {
           />
           <span className="text-muted-foreground">
             I consent to being contacted by text message and phone call for
-            marketing related to Reactivation Power. Message and data rates
+            marketing related to Patient Pipeline. Message and data rates
             may apply. Reply STOP to opt out at any time.
             <RequiredMark />
           </span>

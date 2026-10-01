@@ -139,12 +139,12 @@ export async function bookStrategyCall(params: {
 
   try {
     // Pull the contact's real name from GHL so the calendar event reads
-    // "Reactivation Power Strategy Call w/ First Last". If the lookup
+    // "Patient Pipeline Strategy Call w/ First Last". If the lookup
     // fails, fall back to the plain title — never block the booking.
     const contactName = await getGhlContactName(contactId).catch(() => null)
     const title = contactName
-      ? `Reactivation Power Strategy Call w/ ${contactName}`
-      : 'Reactivation Power Strategy Call'
+      ? `Patient Pipeline Strategy Call w/ ${contactName}`
+      : 'Patient Pipeline Strategy Call'
 
     await bookGhlAppointment({
       contactId,
@@ -173,7 +173,7 @@ export async function bookStrategyCall(params: {
     await addGhlContactNote(
       contactId,
       [
-        'STRATEGY CALL BOOKED — Reactivation Power',
+        'STRATEGY CALL BOOKED — Patient Pipeline',
         '',
         `Time: ${pretty} (${timezone.replace('_', ' ')})`,
         `Booked from: /healthcare/book-a-call`,

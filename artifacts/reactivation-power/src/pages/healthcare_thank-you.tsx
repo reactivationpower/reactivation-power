@@ -97,10 +97,17 @@ export default function ThankYouPage() {
           </p>
         ) : leadOnly ? (
           <p className="mt-10 max-w-xl text-center text-muted-foreground">
-            We&apos;ll discuss your lead campaign and offer on the call.
+             We&apos;ll discuss your lead campaign and offer, as well as how
+             Reactivation fits alongside Lead Follow-Up in the Patient Pipeline
+             launch offer.
           </p>
         ) : (
-          <div className="mt-14 w-full border-t border-border pt-12 md:mt-16">
+           <div className="mt-14 w-full border-t border-border pt-12 md:mt-16">
+             <p className="mb-6 text-center text-sm leading-relaxed text-muted-foreground">
+               Patient Pipeline includes staff-led Reactivation and campaign-specific
+               Lead Follow-Up together in one launch offer. This calculator
+               illustrates the inactive-patient side only.
+             </p>
             <OpportunityCalculator
               inactiveCount={inactiveCount}
               defaultPatientValue={patientValue}
@@ -113,7 +120,7 @@ export default function ThankYouPage() {
       <footer className="border-t border-border bg-card">
         <div className="mx-auto flex max-w-5xl flex-col items-center gap-2 px-4 py-8 text-center md:px-6">
           <p className="text-xs text-muted-foreground">
-            {`© ${new Date().getFullYear()} Reactivation Power Program. All rights reserved.`}
+             {`© ${new Date().getFullYear()} Patient Pipeline. All rights reserved.`}
           </p>
         </div>
       </footer>

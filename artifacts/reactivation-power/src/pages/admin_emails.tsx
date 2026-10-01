@@ -20,10 +20,16 @@ export default function AdminEmailsPage() {
       <header>
         <h1 className="text-2xl font-semibold text-foreground">Emails</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Marketing sequences you paste into GoHighLevel, and the account
-          emails the app sends on its own through Resend.
+          Patient Pipeline marketing for Reactivation + Lead Follow-Up together
+          at one launch price, plus the account emails the app sends through Resend.
         </p>
       </header>
+      <p className="rounded-lg border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
+        The marketing sequence has been rewritten for both products. Copy or download
+        it to replace previously imported GoHighLevel templates. Existing imports do
+        not update automatically; publish the revised landing pages and send yourself
+        a test before sending to your list. Nothing here starts a campaign.
+      </p>
       <Tabs defaultValue="transactional" className="flex min-h-0 flex-1 flex-col gap-2">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <TabsList>
