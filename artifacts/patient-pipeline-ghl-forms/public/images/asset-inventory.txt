@@ -1,0 +1,1 @@
+Original Patient Pipeline stills and logo copied from patient-pipeline-first-campaign. Prior capture provenance is retained there; these stills do not demonstrate this lesson's external connection. All overlays are example entries. External UIs are instructional recreations based on sources in SCRIPT.md. No real credentials, private tokens, or patient details added.

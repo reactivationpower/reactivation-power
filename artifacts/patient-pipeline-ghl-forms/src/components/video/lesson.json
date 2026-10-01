@@ -1,0 +1,1194 @@
+{
+  "slug": "patient-pipeline-ghl-forms",
+  "number": 1,
+  "title": "Connect a GoHighLevel Form",
+  "short": "GOHIGHLEVEL FORMS",
+  "scenes": [
+    {
+      "key": "intro",
+      "title": "Connect your GoHighLevel form",
+      "app": "guide",
+      "page": "Lesson 1 \u2022 Native GoHighLevel forms",
+      "narration": "Let's connect your Go High Level form to Patient Pipeline, one step at a time. This lesson is for a form built in Go High Level, even if it's displayed on your website. We'll add your offer, set up the connection, and show you how to verify your own submission. External screens are instructional recreations, so their appearance may differ from your account. Pause whenever you need time to follow along.",
+      "fields": [
+        {
+          "label": "Your route",
+          "value": "GoHighLevel form \u2192 workflow \u2192 Patient Pipeline",
+          "kind": "preview"
+        },
+        {
+          "label": "We'll show",
+          "value": "Every click, typed entry, and check",
+          "kind": "note"
+        }
+      ],
+      "actions": [],
+      "checkpoint": "This is a walkthrough\u2014not a recording of a live connected account.",
+      "audioId": "c2d0cb5a18c1",
+      "voiceMs": 24529,
+      "durationMs": 27000,
+      "startMs": 0
+    },
+    {
+      "key": "prepare",
+      "title": "Before we begin",
+      "app": "guide",
+      "page": "Keep three browser tabs open",
+      "narration": "Before we start, have your actual offer beside you, and make sure you can sign in to the accounts this lesson uses. You'll need permission to edit the connection. Keep Patient Pipeline open in one browser tab and the other service in another. The little plus sign opens a new tab without closing your work. For testing, use your own name and a phone number you control. Existing emails or texts may run, so let your office know you're doing a setup check. Pause here until you're ready.",
+      "fields": [
+        {
+          "label": "Have ready",
+          "value": "Your actual ad and offer",
+          "kind": "text"
+        },
+        {
+          "label": "Account access",
+          "value": "Patient Pipeline Lead Follow-Up and the source service",
+          "kind": "text"
+        },
+        {
+          "label": "Test information",
+          "value": "Your own name and phone; no patient information",
+          "kind": "text"
+        }
+      ],
+      "actions": [
+        {
+          "target": "tab-plus",
+          "at": 0.2,
+          "result": "New tab",
+          "typing": false
+        },
+        {
+          "target": "Test information",
+          "at": 0.67,
+          "result": "Your own details",
+          "typing": false
+        }
+      ],
+      "checkpoint": "Sign in before continuing. Never show passwords or private links.",
+      "audioId": "8c7ce057e719",
+      "voiceMs": 28918,
+      "durationMs": 31500,
+      "startMs": 27000
+    },
+    {
+      "key": "find-form",
+      "title": "Find the exact form",
+      "app": "ghl",
+      "page": "Sites \u2192 Forms",
+      "narration": "In Go High Level, check the practice name first. Click Sites, then Forms, and open the form used by your offer. Our example is Back Pain New Patient Form. Write down your form's exact name. Check that it collects a standard name and phone number. If either is missing, add the normal contact field in the form builder, mark it required, and save. Don't remove consent fields or other requirements already on your form.",
+      "fields": [
+        {
+          "label": "Forms",
+          "value": "",
+          "kind": "button"
+        },
+        {
+          "label": "Back Pain New Patient Form",
+          "value": "",
+          "kind": "button"
+        },
+        {
+          "label": "Name field",
+          "value": "Standard First Name or Full Name \u2022 Required",
+          "kind": "note"
+        },
+        {
+          "label": "Phone field",
+          "value": "Standard Phone \u2022 Required",
+          "kind": "note"
+        }
+      ],
+      "actions": [
+        {
+          "target": "nav-Sites",
+          "at": 0.1,
+          "result": "Sites",
+          "typing": false
+        },
+        {
+          "target": "Forms",
+          "at": 0.19,
+          "result": "Forms",
+          "typing": false
+        },
+        {
+          "target": "Back Pain New Patient Form",
+          "at": 0.32,
+          "result": "Back Pain New Patient Form",
+          "typing": false
+        },
+        {
+          "target": "Phone field",
+          "at": 0.64,
+          "result": "Required",
+          "typing": false
+        }
+      ],
+      "checkpoint": "Use this exact form name in the workflow filter.",
+      "audioId": "3b6d3a62f3c2",
+      "voiceMs": 27873,
+      "durationMs": 30500,
+      "startMs": 58500
+    },
+    {
+      "key": "public-form",
+      "title": "Keep the public form open",
+      "app": "ghl",
+      "page": "Form builder \u2192 Integrate",
+      "narration": "Open the page where a visitor actually fills out this form. If your ad already links to a website page, use that published page. For a shared Go High Level form, click Integrate and copy its direct form link. Open a new browser tab, paste that link into the address bar, and press Enter. Keep this form tab open, but don't submit yet. We'll turn on the connection first.",
+      "fields": [
+        {
+          "label": "Integrate",
+          "value": "",
+          "kind": "button"
+        },
+        {
+          "label": "Direct form link",
+          "value": "[Your public form link]",
+          "kind": "private"
+        },
+        {
+          "label": "Copy link",
+          "value": "",
+          "kind": "button"
+        },
+        {
+          "label": "Browser address bar",
+          "value": "[Your public form link]",
+          "kind": "text"
+        }
+      ],
+      "actions": [
+        {
+          "target": "Integrate",
+          "at": 0.27,
+          "result": "Sharing options",
+          "typing": false
+        },
+        {
+          "target": "Copy link",
+          "at": 0.4,
+          "result": "Copied",
+          "typing": false
+        },
+        {
+          "target": "tab-plus",
+          "at": 0.54,
+          "result": "New tab",
+          "typing": false
+        },
+        {
+          "target": "Browser address bar",
+          "at": 0.66,
+          "result": "[Your public form link]",
+          "typing": false
+        }
+      ],
+      "checkpoint": "Public form link and private campaign address are different.",
+      "audioId": "115131dd97c2",
+      "voiceMs": 24921,
+      "durationMs": 27500,
+      "startMs": 89000
+    },
+    {
+      "key": "campaigns",
+      "title": "Open a new campaign",
+      "app": "patient",
+      "page": "Lead Follow-Up \u2192 Campaigns",
+      "narration": "Let's start in Patient Pipeline. Choose Lead Follow-Up, rather than Reactivation. Then open Campaigns. On the Campaigns page, click New Campaign. A campaign is the offer that brought someone to your practice. We're going to use the same campaign all the way through this lesson, so the connection and the test stay together. Pause here when the new campaign form is open.",
+      "fields": [],
+      "actions": [
+        {
+          "target": "lead-followup",
+          "at": 0.13,
+          "result": "Lead Follow-Up",
+          "typing": false
+        },
+        {
+          "target": "campaigns",
+          "at": 0.29,
+          "result": "Campaigns",
+          "typing": false
+        },
+        {
+          "target": "new-campaign",
+          "at": 0.47,
+          "result": "New campaign",
+          "typing": false
+        }
+      ],
+      "image": "pp-campaigns.png",
+      "checkpoint": "You should be in Lead Follow-Up, with New Campaign open.",
+      "screenSequence": [
+        "pp-welcome.png",
+        "pp-campaigns.png",
+        "pp-editor-offer.png"
+      ],
+      "audioId": "e17e7ffef6aa",
+      "voiceMs": 22988,
+      "durationMs": 25500,
+      "startMs": 116500
+    },
+    {
+      "key": "service",
+      "title": "Choose the service",
+      "app": "patient",
+      "page": "New campaign",
+      "narration": "Click Service type to open the list. Choose the service your ad actually promotes. We're choosing Chiropractic for our back pain example. If your offer is for another service, choose that instead. This choice determines which call script your team will use. Check the selected service before moving on. You don't have to copy our example if it doesn't match your practice.",
+      "fields": [
+        {
+          "label": "Service type",
+          "value": "Chiropractic",
+          "kind": "select"
+        }
+      ],
+      "actions": [
+        {
+          "target": "Service type",
+          "at": 0.1,
+          "result": "Chiropractic",
+          "typing": false
+        }
+      ],
+      "image": "pp-editor-offer.png",
+      "checkpoint": "The selected service must match your ad.",
+      "audioId": "4de03aae7b83",
+      "voiceMs": 21891,
+      "durationMs": 24500,
+      "startMs": 142000
+    },
+    {
+      "key": "name",
+      "title": "Type a recognizable name",
+      "app": "patient",
+      "page": "New campaign",
+      "narration": "Now click Campaign name. Give this offer a name your team will recognize. We're typing Back Pain Relief, forty-nine-dollar New Patient Special. You can see the words appearing in the field as we type them. For your campaign, use your own offer name. Keep it specific enough that you can recognize it when we return to check the test.",
+      "fields": [
+        {
+          "label": "Campaign name",
+          "value": "Back Pain Relief \u2014 $49 New Patient Special",
+          "kind": "text"
+        }
+      ],
+      "actions": [
+        {
+          "target": "Campaign name",
+          "at": 0.2,
+          "result": "Back Pain Relief \u2014 $49 New Patient Special",
+          "typing": true
+        }
+      ],
+      "image": "pp-editor-offer.png",
+      "checkpoint": "Use the same campaign for setup, connection, and testing.",
+      "audioId": "d354d9f9b11c",
+      "voiceMs": 20114,
+      "durationMs": 22500,
+      "startMs": 166500
+    },
+    {
+      "key": "included",
+      "title": "Enter what the offer includes",
+      "app": "patient",
+      "page": "What's included in the offer",
+      "narration": "Under What's included in the offer, enter one item on each line. Our example has a consultation, an examination, and a review of findings. Click the first row and type the first item. Use Add a line for another row, then enter the next item. These details become part of what the caller says, so only include what your ad really promises. Pause and compare your entries with the offer.",
+      "fields": [
+        {
+          "label": "Included item 1",
+          "value": "Consultation",
+          "kind": "text"
+        },
+        {
+          "label": "Included item 2",
+          "value": "Examination",
+          "kind": "text"
+        },
+        {
+          "label": "Included item 3",
+          "value": "Review of findings",
+          "kind": "text"
+        },
+        {
+          "label": "Add a line",
+          "value": "",
+          "kind": "button"
+        }
+      ],
+      "actions": [
+        {
+          "target": "Included item 1",
+          "at": 0.14,
+          "result": "Consultation",
+          "typing": true
+        },
+        {
+          "target": "Add a line",
+          "at": 0.37,
+          "result": "Add a line",
+          "typing": false
+        },
+        {
+          "target": "Included item 2",
+          "at": 0.45,
+          "result": "Examination",
+          "typing": true
+        },
+        {
+          "target": "Included item 3",
+          "at": 0.64,
+          "result": "Review of findings",
+          "typing": true
+        }
+      ],
+      "image": "pp-editor-offer.png",
+      "checkpoint": "One real included item per row.",
+      "audioId": "7e4b1c872432",
+      "voiceMs": 25966,
+      "durationMs": 28500,
+      "startMs": 189000
+    },
+    {
+      "key": "price",
+      "title": "Choose Just Y, then type 49",
+      "app": "patient",
+      "page": "Price",
+      "narration": "For our example, we only want to say the offer price. Click the middle choice, Just Y. Then click Offer price and type 49. Look at the On the call preview: it now says Just forty-nine dollars. That's the wording your caller will use. This does not change your software bill. If your ad compares a regular price with the offer, use Normally X, now Y and enter both real prices instead. For this example, we'll keep Just Y.",
+      "fields": [
+        {
+          "label": "Price style",
+          "value": "Just Y",
+          "kind": "price"
+        },
+        {
+          "label": "Offer price",
+          "value": "49",
+          "kind": "text"
+        },
+        {
+          "label": "On the call",
+          "value": "Just $49",
+          "kind": "preview"
+        }
+      ],
+      "actions": [
+        {
+          "target": "Just Y",
+          "at": 0.13,
+          "result": "Just Y",
+          "typing": false
+        },
+        {
+          "target": "Offer price",
+          "at": 0.3,
+          "result": "49",
+          "typing": true
+        }
+      ],
+      "image": "pp-editor-price.png",
+      "checkpoint": "Just Y selected \u2022 Offer price 49 \u2022 Preview Just $49",
+      "audioId": "284d1948aa59",
+      "voiceMs": 30276,
+      "durationMs": 32500,
+      "startMs": 217500
+    },
+    {
+      "key": "save",
+      "title": "Save and connect leads",
+      "app": "patient",
+      "page": "Back Pain Relief \u2014 $49 New Patient Special",
+      "narration": "Leave the expiration or limited-spots box blank unless your offer really has that restriction. Check your service, campaign name, included items, and price once more. Now click Save and Connect Leads. Wait for the campaign's setup page to open. Saving stores your offer, but it doesn't connect the form by itself. We'll make that connection next. Keep this campaign open in its browser tab.",
+      "fields": [
+        {
+          "label": "Offer expiration or limited spots",
+          "value": "",
+          "kind": "optional"
+        },
+        {
+          "label": "Save & Connect Leads",
+          "value": "",
+          "kind": "button"
+        }
+      ],
+      "actions": [
+        {
+          "target": "Save & Connect Leads",
+          "at": 0.44,
+          "result": "Connection setup",
+          "typing": false
+        }
+      ],
+      "image": "pp-editor-price.png",
+      "checkpoint": "Wait until the saved campaign's connection setup opens.",
+      "audioId": "8f74d49f74c4",
+      "voiceMs": 25469,
+      "durationMs": 28000,
+      "startMs": 250000
+    },
+    {
+      "key": "copy",
+      "title": "Copy this campaign's address",
+      "app": "patient",
+      "page": "Finish connecting your lead form",
+      "narration": "In the campaign setup, choose Go High Level. Find this campaign's private connection address and click its Copy button. Don't copy the ordinary page address from the top of your browser. This special address tells the other service where to send the lead. Keep it private, and don't put it in your ad. We're hiding it in this lesson. You'll paste your own full address into the connection shortly.",
+      "fields": [
+        {
+          "label": "Where is the form?",
+          "value": "GoHighLevel",
+          "kind": "select"
+        },
+        {
+          "label": "This campaign's connection address",
+          "value": "[Your private campaign connection address]",
+          "kind": "private"
+        },
+        {
+          "label": "Copy",
+          "value": "",
+          "kind": "button"
+        }
+      ],
+      "actions": [
+        {
+          "target": "Where is the form?",
+          "at": 0.12,
+          "result": "GoHighLevel",
+          "typing": false
+        },
+        {
+          "target": "Copy",
+          "at": 0.33,
+          "result": "Copied",
+          "typing": false
+        }
+      ],
+      "checkpoint": "Copy the special campaign address\u2014not the browser's page URL.",
+      "audioId": "6a28af680b65",
+      "voiceMs": 23171,
+      "durationMs": 25500,
+      "startMs": 278000
+    },
+    {
+      "key": "workflow",
+      "title": "Create a separate workflow",
+      "app": "ghl",
+      "page": "Automation \u2192 Workflows",
+      "narration": "Click your Go High Level browser tab. Check that you're in the right practice. Open Automation, then Workflows. Click Create Workflow and choose Start from scratch. We're making a separate connection workflow so we don't change your existing follow-up messages. Click the workflow name and type Send Back Pain Form to Patient Pipeline. Use a name that identifies your own form. Pause here when the new workflow is open.",
+      "fields": [
+        {
+          "label": "Create Workflow",
+          "value": "",
+          "kind": "button"
+        },
+        {
+          "label": "Start from scratch",
+          "value": "",
+          "kind": "button"
+        },
+        {
+          "label": "Workflow name",
+          "value": "Send Back Pain Form to Patient Pipeline",
+          "kind": "text"
+        }
+      ],
+      "actions": [
+        {
+          "target": "nav-Automation",
+          "at": 0.12,
+          "result": "Automation",
+          "typing": false
+        },
+        {
+          "target": "Create Workflow",
+          "at": 0.29,
+          "result": "Create Workflow",
+          "typing": false
+        },
+        {
+          "target": "Start from scratch",
+          "at": 0.39,
+          "result": "Start from scratch",
+          "typing": false
+        },
+        {
+          "target": "Workflow name",
+          "at": 0.64,
+          "result": "Send Back Pain Form to Patient Pipeline",
+          "typing": true
+        }
+      ],
+      "checkpoint": "Use a new workflow, not an existing messaging sequence.",
+      "audioId": "bd982d55fcc1",
+      "voiceMs": 27481,
+      "durationMs": 30000,
+      "startMs": 303500
+    },
+    {
+      "key": "trigger",
+      "title": "Choose Form Submitted",
+      "app": "ghl",
+      "page": "Workflow builder \u2192 Trigger",
+      "narration": "Click Add New Trigger. In the search box, type Form Submitted and select that trigger. A trigger tells Go High Level when to start. Now add the Form Is filter and select the exact form name you wrote down earlier. We're choosing Back Pain New Patient Form. Do not leave this set to every form. Save the trigger, then check that the chosen form is still correct.",
+      "fields": [
+        {
+          "label": "Add New Trigger",
+          "value": "",
+          "kind": "button"
+        },
+        {
+          "label": "Search triggers",
+          "value": "Form Submitted",
+          "kind": "text"
+        },
+        {
+          "label": "Form Submitted",
+          "value": "",
+          "kind": "button"
+        },
+        {
+          "label": "Form Is",
+          "value": "Back Pain New Patient Form",
+          "kind": "select"
+        },
+        {
+          "label": "Save Trigger",
+          "value": "",
+          "kind": "button"
+        }
+      ],
+      "actions": [
+        {
+          "target": "Add New Trigger",
+          "at": 0.07,
+          "result": "Trigger settings",
+          "typing": false
+        },
+        {
+          "target": "Search triggers",
+          "at": 0.18,
+          "result": "Form Submitted",
+          "typing": true
+        },
+        {
+          "target": "Form Submitted",
+          "at": 0.29,
+          "result": "Form Submitted",
+          "typing": false
+        },
+        {
+          "target": "Form Is",
+          "at": 0.48,
+          "result": "Back Pain New Patient Form",
+          "typing": false
+        },
+        {
+          "target": "Save Trigger",
+          "at": 0.79,
+          "result": "Trigger saved",
+          "typing": false
+        }
+      ],
+      "checkpoint": "Native GoHighLevel form: Form Submitted \u2192 Form Is \u2192 your exact form.",
+      "audioId": "8dcfad78f715",
+      "voiceMs": 26044,
+      "durationMs": 28500,
+      "startMs": 333500
+    },
+    {
+      "key": "webhook",
+      "title": "Choose Webhook\u2014not Custom Webhook",
+      "app": "ghl",
+      "page": "Workflow builder \u2192 Add action",
+      "narration": "Click the plus sign below your saved trigger. In the action search, type webhook. Choose the ordinary action called Webhook, not Custom Webhook and not an inbound webhook. This is the step that sends contact information out to Patient Pipeline. If the screen asks you to buy something or doesn't show this action, stop and check your account's access. Don't choose a different action just because its name is similar.",
+      "fields": [
+        {
+          "label": "+ Add action",
+          "value": "",
+          "kind": "button"
+        },
+        {
+          "label": "Search actions",
+          "value": "webhook",
+          "kind": "text"
+        },
+        {
+          "label": "Webhook",
+          "value": "",
+          "kind": "button"
+        },
+        {
+          "label": "Custom Webhook",
+          "value": "Not used in this lesson",
+          "kind": "note"
+        }
+      ],
+      "actions": [
+        {
+          "target": "+ Add action",
+          "at": 0.08,
+          "result": "Add action",
+          "typing": false
+        },
+        {
+          "target": "Search actions",
+          "at": 0.21,
+          "result": "webhook",
+          "typing": true
+        },
+        {
+          "target": "Webhook",
+          "at": 0.35,
+          "result": "Webhook",
+          "typing": false
+        }
+      ],
+      "checkpoint": "Select the standard outbound Webhook action.",
+      "audioId": "1998d73dd6a8",
+      "voiceMs": 27089,
+      "durationMs": 29500,
+      "startMs": 362000
+    },
+    {
+      "key": "destination",
+      "title": "Set POST and paste the address",
+      "app": "ghl",
+      "page": "Webhook",
+      "narration": "Name the action Send lead to Patient Pipeline. Open Method and choose POST. Then click inside URL and paste the campaign address you copied. On Windows, hold Control and press V. On a Mac, hold Command and press V. If you copied something else in between, switch back to Patient Pipeline, click Copy again, then return here. The whole private address goes in this URL box. Don't type the example text shown in this lesson.",
+      "fields": [
+        {
+          "label": "Action Name",
+          "value": "Send lead to Patient Pipeline",
+          "kind": "text"
+        },
+        {
+          "label": "Method",
+          "value": "POST",
+          "kind": "select"
+        },
+        {
+          "label": "URL",
+          "value": "[Your private campaign connection address]",
+          "kind": "private"
+        }
+      ],
+      "actions": [
+        {
+          "target": "Action Name",
+          "at": 0.08,
+          "result": "Send lead to Patient Pipeline",
+          "typing": true
+        },
+        {
+          "target": "Method",
+          "at": 0.24,
+          "result": "POST",
+          "typing": false
+        },
+        {
+          "target": "URL",
+          "at": 0.37,
+          "result": "[Your private campaign connection address]",
+          "typing": false
+        }
+      ],
+      "checkpoint": "Method POST \u2022 URL is your campaign's full private address.",
+      "audioId": "b41bc6f4c96e",
+      "voiceMs": 29388,
+      "durationMs": 32000,
+      "startMs": 391500
+    },
+    {
+      "key": "save-action",
+      "title": "Save the sending step",
+      "app": "ghl",
+      "page": "Webhook settings",
+      "narration": "For this basic connection, leave Headers and Custom Data empty. The standard Webhook action already sends the contact's name and phone, so you don't need to type code or map those ordinary contact fields here. Click Save Action. You should now see your form trigger followed by one Webhook step. We are not adding an email, text message, or phone call to this workflow.",
+      "fields": [
+        {
+          "label": "Headers",
+          "value": "Leave empty",
+          "kind": "note"
+        },
+        {
+          "label": "Custom Data",
+          "value": "Leave empty for this lesson",
+          "kind": "note"
+        },
+        {
+          "label": "Save Action",
+          "value": "",
+          "kind": "button"
+        }
+      ],
+      "actions": [
+        {
+          "target": "Headers",
+          "at": 0.13,
+          "result": "Empty",
+          "typing": false
+        },
+        {
+          "target": "Custom Data",
+          "at": 0.25,
+          "result": "Empty",
+          "typing": false
+        },
+        {
+          "target": "Save Action",
+          "at": 0.58,
+          "result": "Action saved",
+          "typing": false
+        }
+      ],
+      "checkpoint": "One form trigger \u2192 one Webhook action. No handwritten JSON.",
+      "audioId": "bd7ca03ad633",
+      "voiceMs": 23249,
+      "durationMs": 25500,
+      "startMs": 423500
+    },
+    {
+      "key": "publish",
+      "title": "Allow re-entry, save, and publish",
+      "app": "ghl",
+      "page": "Workflow settings and status",
+      "narration": "Open the workflow's Settings tab. Turn on Allow Re-entry for this new connection workflow. That lets someone submit again after their previous run has finished. Return to the Builder and click Save. Now change Draft to Publish. If another save indicator appears, click Save again. Saved and published are different: one stores the instructions, and the other allows them to run. Check both before testing.",
+      "fields": [
+        {
+          "label": "Settings",
+          "value": "",
+          "kind": "button"
+        },
+        {
+          "label": "Allow Re-entry",
+          "value": "On",
+          "kind": "toggle"
+        },
+        {
+          "label": "Builder",
+          "value": "",
+          "kind": "button"
+        },
+        {
+          "label": "Save",
+          "value": "",
+          "kind": "button"
+        },
+        {
+          "label": "Draft / Publish",
+          "value": "Publish",
+          "kind": "toggle"
+        }
+      ],
+      "actions": [
+        {
+          "target": "Settings",
+          "at": 0.06,
+          "result": "Settings",
+          "typing": false
+        },
+        {
+          "target": "Allow Re-entry",
+          "at": 0.19,
+          "result": "On",
+          "typing": false
+        },
+        {
+          "target": "Builder",
+          "at": 0.42,
+          "result": "Builder",
+          "typing": false
+        },
+        {
+          "target": "Save",
+          "at": 0.51,
+          "result": "Saved",
+          "typing": false
+        },
+        {
+          "target": "Draft / Publish",
+          "at": 0.63,
+          "result": "Publish",
+          "typing": false
+        },
+        {
+          "target": "Save",
+          "at": 0.83,
+          "result": "Saved",
+          "typing": false
+        }
+      ],
+      "checkpoint": "Saved AND Published. This demonstration has not activated your account.",
+      "audioId": "640b490eb00f",
+      "voiceMs": 25887,
+      "durationMs": 28500,
+      "startMs": 449000
+    },
+    {
+      "key": "submit",
+      "title": "Submit the actual form once",
+      "app": "form",
+      "page": "Back Pain New Patient Form",
+      "narration": "Click the tab containing your actual form. Enter your own first name and phone number, plus any other required information. Review the phone carefully. Complete the required consent boxes and any verification check, then click Submit once. Wait for its thank-you message or next page. That only tells us the form accepted the response. Back in Go High Level, open Sites, Forms, this form, and Submissions. Find your entry before we check Patient Pipeline.",
+      "fields": [
+        {
+          "label": "First Name",
+          "value": "Your first name",
+          "kind": "text"
+        },
+        {
+          "label": "Phone",
+          "value": "Your own phone number",
+          "kind": "text"
+        },
+        {
+          "label": "Required consent",
+          "value": "Read and complete in your own form",
+          "kind": "note"
+        },
+        {
+          "label": "Submit",
+          "value": "",
+          "kind": "button"
+        },
+        {
+          "label": "Submissions",
+          "value": "",
+          "kind": "button"
+        }
+      ],
+      "actions": [
+        {
+          "target": "First Name",
+          "at": 0.15,
+          "result": "Your first name",
+          "typing": true
+        },
+        {
+          "target": "Phone",
+          "at": 0.29,
+          "result": "Your own phone number",
+          "typing": true
+        },
+        {
+          "target": "Submit",
+          "at": 0.52,
+          "result": "Submit once",
+          "typing": false
+        },
+        {
+          "target": "Submissions",
+          "at": 0.79,
+          "result": "Find your actual response",
+          "typing": false
+        }
+      ],
+      "checkpoint": "Demonstration only. Submit your own real form after publishing.",
+      "audioId": "9dc32a8d4cb2",
+      "voiceMs": 29884,
+      "durationMs": 32500,
+      "startMs": 477500
+    },
+    {
+      "key": "verify",
+      "title": "Check the receipt, then the lead",
+      "app": "patient",
+      "page": "This campaign \u2192 Connection setup",
+      "narration": "After your real form submission, return to the same campaign in Patient Pipeline. Look for a recent Form submission received message. If it still says it's waiting, give it a moment and refresh the page with your browser's circular-arrow button. Then open this campaign's Leads tab. Match the name and phone you entered. The illustration here is showing where to check, not claiming that a live connection has passed.",
+      "fields": [
+        {
+          "label": "Latest receipt",
+          "value": "Waiting for a submission from your form",
+          "kind": "waiting"
+        },
+        {
+          "label": "Refresh page",
+          "value": "",
+          "kind": "button"
+        },
+        {
+          "label": "Leads",
+          "value": "",
+          "kind": "button"
+        },
+        {
+          "label": "Match your test",
+          "value": "Name + phone + correct campaign",
+          "kind": "note"
+        }
+      ],
+      "actions": [
+        {
+          "target": "Latest receipt",
+          "at": 0.18,
+          "result": "Check the time",
+          "typing": false
+        },
+        {
+          "target": "Refresh page",
+          "at": 0.42,
+          "result": "Refresh",
+          "typing": false
+        },
+        {
+          "target": "Leads",
+          "at": 0.58,
+          "result": "Leads",
+          "typing": false
+        }
+      ],
+      "checkpoint": "No success is assumed. Find your own submission in this campaign.",
+      "audioId": "e6311744fb53",
+      "voiceMs": 24842,
+      "durationMs": 27000,
+      "startMs": 510000
+    },
+    {
+      "key": "duplicates",
+      "title": "Recognize a successful repeat test",
+      "app": "patient",
+      "page": "Lead sources \u2192 Last 20 received",
+      "narration": "For a closer check, open Lead sources and look under Last twenty received. Match the delivery time to your test. New lead means a new entry was created. Updated lead can also be successful: that phone number was already in this campaign. A repeat test may not add another row or move the old one to the top. Rejected means something needs fixing. Open that receipt and read the reason before changing settings.",
+      "fields": [
+        {
+          "label": "Lead sources",
+          "value": "",
+          "kind": "button"
+        },
+        {
+          "label": "New lead",
+          "value": "A new campaign lead was created",
+          "kind": "legend"
+        },
+        {
+          "label": "Updated lead",
+          "value": "Same campaign + same phone may update the existing lead",
+          "kind": "legend"
+        },
+        {
+          "label": "Rejected",
+          "value": "Open the receipt and read the reason",
+          "kind": "legend"
+        }
+      ],
+      "actions": [
+        {
+          "target": "Lead sources",
+          "at": 0.11,
+          "result": "Last 20 received",
+          "typing": false
+        },
+        {
+          "target": "New lead",
+          "at": 0.29,
+          "result": "Meaning",
+          "typing": false
+        },
+        {
+          "target": "Updated lead",
+          "at": 0.44,
+          "result": "Meaning",
+          "typing": false
+        },
+        {
+          "target": "Rejected",
+          "at": 0.77,
+          "result": "Read the reason",
+          "typing": false
+        }
+      ],
+      "checkpoint": "Status explanations\u2014not a fabricated delivery log.",
+      "audioId": "7e2535f36f37",
+      "voiceMs": 27089,
+      "durationMs": 29500,
+      "startMs": 537000
+    },
+    {
+      "key": "internal",
+      "title": "Don't mistake an internal test for proof",
+      "app": "patient",
+      "page": "Only want to check our side?",
+      "narration": "There are shortcuts that check only part of the connection. Patient Pipeline's internal test checks its own intake. A connector's test action checks a sending step. Neither proves that a new submission to your actual form will arrive automatically. That's why our final check starts with the form itself and ends with the matching campaign lead. Your test entry is a real lead, so let your caller know which entry was the setup check.",
+      "fields": [
+        {
+          "label": "Send internal test",
+          "value": "Checks only Patient Pipeline's side",
+          "kind": "note"
+        },
+        {
+          "label": "Connector action test",
+          "value": "Can send real data; does not prove the trigger",
+          "kind": "note"
+        },
+        {
+          "label": "Final check",
+          "value": "Actual form \u2192 matching campaign lead",
+          "kind": "preview"
+        }
+      ],
+      "actions": [
+        {
+          "target": "Send internal test",
+          "at": 0.22,
+          "result": "Not end-to-end proof",
+          "typing": false
+        },
+        {
+          "target": "Final check",
+          "at": 0.65,
+          "result": "Check the complete route",
+          "typing": false
+        }
+      ],
+      "checkpoint": "Keep private details out of screenshots and shared troubleshooting messages.",
+      "audioId": "b3e2002b84ad",
+      "voiceMs": 26201,
+      "durationMs": 28500,
+      "startMs": 566500
+    },
+    {
+      "key": "troubleshoot",
+      "title": "If nothing arrives",
+      "app": "ghl",
+      "page": "Connection workflow \u2192 Execution Logs",
+      "narration": "If the lead is missing, check in this order. First, find the submission under the correct form in Go High Level. Next, open your connection workflow's Execution Logs and look for the test contact and time. If no run appears, check the exact form filter, Save, and Publish. If the Webhook step failed, check POST and recopy the correct campaign address. Don't click Regenerate URL as a general fix; that invalidates the old address.",
+      "fields": [
+        {
+          "label": "1 \u2022 Submissions",
+          "value": "Correct form and today's response",
+          "kind": "note"
+        },
+        {
+          "label": "2 \u2022 Execution Logs",
+          "value": "Match the contact and time",
+          "kind": "note"
+        },
+        {
+          "label": "3 \u2022 Workflow",
+          "value": "Form Is correct; Saved AND Published",
+          "kind": "note"
+        },
+        {
+          "label": "4 \u2022 Webhook",
+          "value": "POST and the current campaign address",
+          "kind": "note"
+        }
+      ],
+      "actions": [
+        {
+          "target": "1 \u2022 Submissions",
+          "at": 0.16,
+          "result": "First",
+          "typing": false
+        },
+        {
+          "target": "2 \u2022 Execution Logs",
+          "at": 0.36,
+          "result": "Then",
+          "typing": false
+        },
+        {
+          "target": "3 \u2022 Workflow",
+          "at": 0.55,
+          "result": "Check settings",
+          "typing": false
+        },
+        {
+          "target": "4 \u2022 Webhook",
+          "at": 0.73,
+          "result": "Check destination",
+          "typing": false
+        }
+      ],
+      "checkpoint": "Fix the first missing step, then repeat the actual form submission.",
+      "audioId": "0d6eddd680bd",
+      "voiceMs": 30198,
+      "durationMs": 32500,
+      "startMs": 595000
+    },
+    {
+      "key": "finish",
+      "title": "Before you call it ready",
+      "app": "guide",
+      "page": "Set up. Connect. Verify.",
+      "narration": "Before you call this ready, check four things. Your campaign matches the offer. Your connection watches the right form and is turned on. You submitted that actual form after turning it on. And your matching test entry appears in this campaign. Leave the connection active, and make sure your team knows which entry was the test. One successful test confirms that delivery; it isn't a guarantee that every future delivery will work. You now know where to check.",
+      "fields": [
+        {
+          "label": "1",
+          "value": "Campaign matches the actual offer",
+          "kind": "check"
+        },
+        {
+          "label": "2",
+          "value": "Correct form selected; connection is active",
+          "kind": "check"
+        },
+        {
+          "label": "3",
+          "value": "Actual form submitted after activation",
+          "kind": "check"
+        },
+        {
+          "label": "4",
+          "value": "Matching receipt and lead in the correct campaign",
+          "kind": "check"
+        }
+      ],
+      "actions": [
+        {
+          "target": "1",
+          "at": 0.15,
+          "result": "Check your account",
+          "typing": false
+        },
+        {
+          "target": "2",
+          "at": 0.29,
+          "result": "Check your account",
+          "typing": false
+        },
+        {
+          "target": "3",
+          "at": 0.43,
+          "result": "Check your account",
+          "typing": false
+        },
+        {
+          "target": "4",
+          "at": 0.57,
+          "result": "Check your account",
+          "typing": false
+        }
+      ],
+      "checkpoint": "Complete these checks in your own accounts. No live result is asserted here.",
+      "audioId": "9816dd7f1961",
+      "voiceMs": 28682,
+      "durationMs": 31000,
+      "startMs": 627500
+    }
+  ],
+  "durationMs": 658500,
+  "voice": {
+    "voiceId": "EXAVITQu4vr4xnSDxMaL",
+    "name": "Sarah",
+    "modelId": "eleven_v3",
+    "voiceSettings": {
+      "stability": 0.5,
+      "similarity_boost": 0.75,
+      "speed": 0.96
+    }
+  },
+  "sources": [
+    "https://help.gohighlevel.com/support/solutions/articles/155000002550-workflow-trigger-form-submitted",
+    "https://help.gohighlevel.com/support/solutions/articles/155000003299-workflow-action-webhook-outbound-",
+    "https://help.gohighlevel.com/support/solutions/articles/155000004549-how-to-create-a-contact-form-in-highlevel-",
+    "https://help.gohighlevel.com/support/solutions/articles/155000001254",
+    "https://help.gohighlevel.com/support/solutions/articles/48001239875-workflow-settings-overview",
+    "https://help.gohighlevel.com/support/solutions/articles/155000003095-workflow-trigger-facebook-lead-form-submitted",
+    "https://help.gohighlevel.com/support/solutions/articles/48001157632-step-by-step-guide-to-facebook-integration-in-highlevel",
+    "https://help.zapier.com/hc/en-us/articles/8496061306253-How-to-get-started-with-Facebook-Lead-Ads-on-Zapier",
+    "https://help.zapier.com/hc/en-us/articles/8496061345805-Use-the-Facebook-Lead-Ads-testing-tool-to-create-sample-leads",
+    "https://help.zapier.com/hc/en-us/articles/8496326446989-Send-webhooks-in-Zap-workflows",
+    "https://developers.facebook.com/docs/marketing-api/guides/lead-ads/testing-troubleshooting/"
+  ],
+  "illustrated": true
+}

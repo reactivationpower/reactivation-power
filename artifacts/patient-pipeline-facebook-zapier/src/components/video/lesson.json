@@ -1,0 +1,1431 @@
+{
+  "slug": "patient-pipeline-facebook-zapier",
+  "number": 3,
+  "title": "Facebook & Instagram Without GoHighLevel",
+  "short": "FACEBOOK \u2192 ZAPIER",
+  "scenes": [
+    {
+      "key": "intro",
+      "title": "Facebook forms without GoHighLevel",
+      "app": "guide",
+      "page": "Lesson 3 \u2022 Connect through Zapier",
+      "narration": "This lesson connects a Facebook or Instagram Instant Form to Patient Pipeline without Go High Level. We'll use Zapier as the connector and follow one complete route. You do not need to sign up for Go High Level for this method. Facebook Lead Ads on Zapier requires a paid Zapier account, so check your plan first. We'll show each setup step with labeled instructional screen recreations and explain how to verify your own actual submission.",
+      "fields": [
+        {
+          "label": "Your route",
+          "value": "Facebook / Instagram \u2192 Zapier \u2192 Patient Pipeline",
+          "kind": "preview"
+        },
+        {
+          "label": "Required",
+          "value": "Paid Zapier access for Facebook Lead Ads",
+          "kind": "note"
+        },
+        {
+          "label": "Not required",
+          "value": "A GoHighLevel account",
+          "kind": "note"
+        }
+      ],
+      "actions": [],
+      "checkpoint": "No current price is promised. Check the plan available in your account.",
+      "audioId": "15cc6fc3d12a",
+      "voiceMs": 27951,
+      "durationMs": 30500,
+      "startMs": 0
+    },
+    {
+      "key": "prepare",
+      "title": "Before we begin",
+      "app": "guide",
+      "page": "Keep three browser tabs open",
+      "narration": "Before we start, have your actual offer beside you, and make sure you can sign in to the accounts this lesson uses. You'll need permission to edit the connection. Keep Patient Pipeline open in one browser tab and the other service in another. The little plus sign opens a new tab without closing your work. For testing, use your own name and a phone number you control. Existing emails or texts may run, so let your office know you're doing a setup check. Pause here until you're ready.",
+      "fields": [
+        {
+          "label": "Have ready",
+          "value": "Your actual ad and offer",
+          "kind": "text"
+        },
+        {
+          "label": "Account access",
+          "value": "Patient Pipeline Lead Follow-Up and the source service",
+          "kind": "text"
+        },
+        {
+          "label": "Test information",
+          "value": "Your own name and phone; no patient information",
+          "kind": "text"
+        }
+      ],
+      "actions": [
+        {
+          "target": "tab-plus",
+          "at": 0.2,
+          "result": "New tab",
+          "typing": false
+        },
+        {
+          "target": "Test information",
+          "at": 0.67,
+          "result": "Your own details",
+          "typing": false
+        }
+      ],
+      "checkpoint": "Sign in before continuing. Never show passwords or private links.",
+      "audioId": "8c7ce057e719",
+      "voiceMs": 28918,
+      "durationMs": 31500,
+      "startMs": 30500
+    },
+    {
+      "key": "access",
+      "title": "Check Page and leads access",
+      "app": "meta",
+      "page": "Facebook Page and Instant Form",
+      "narration": "Have the Facebook Page and published Instant Form for this offer ready. The Facebook account you connect must have the Page, ad account, and leads access Zapier needs. If your business has customized leads access, the account owner may need to give Zapier CRM access too. For Instagram, use the Facebook Page linked to the business account. Write down the Page and form names so we can select the correct pair.",
+      "fields": [
+        {
+          "label": "Facebook Page",
+          "value": "Example Practice",
+          "kind": "select"
+        },
+        {
+          "label": "Instant Form",
+          "value": "Back Pain New Patient Form",
+          "kind": "select"
+        },
+        {
+          "label": "Access",
+          "value": "Manage Pages \u2022 Manage Ad Account \u2022 Leads Access",
+          "kind": "note"
+        },
+        {
+          "label": "Customized leads access",
+          "value": "Allow Zapier CRM access when required",
+          "kind": "note"
+        }
+      ],
+      "actions": [
+        {
+          "target": "Facebook Page",
+          "at": 0.17,
+          "result": "Example Practice",
+          "typing": false
+        },
+        {
+          "target": "Instant Form",
+          "at": 0.28,
+          "result": "Back Pain New Patient Form",
+          "typing": false
+        },
+        {
+          "target": "Access",
+          "at": 0.48,
+          "result": "Check your permissions",
+          "typing": false
+        }
+      ],
+      "checkpoint": "Missing permissions cannot be fixed by choosing a different form.",
+      "audioId": "9126a12e2300",
+      "voiceMs": 25966,
+      "durationMs": 28500,
+      "startMs": 62000
+    },
+    {
+      "key": "campaigns",
+      "title": "Open a new campaign",
+      "app": "patient",
+      "page": "Lead Follow-Up \u2192 Campaigns",
+      "narration": "Let's start in Patient Pipeline. Choose Lead Follow-Up, rather than Reactivation. Then open Campaigns. On the Campaigns page, click New Campaign. A campaign is the offer that brought someone to your practice. We're going to use the same campaign all the way through this lesson, so the connection and the test stay together. Pause here when the new campaign form is open.",
+      "fields": [],
+      "actions": [
+        {
+          "target": "lead-followup",
+          "at": 0.13,
+          "result": "Lead Follow-Up",
+          "typing": false
+        },
+        {
+          "target": "campaigns",
+          "at": 0.29,
+          "result": "Campaigns",
+          "typing": false
+        },
+        {
+          "target": "new-campaign",
+          "at": 0.47,
+          "result": "New campaign",
+          "typing": false
+        }
+      ],
+      "image": "pp-campaigns.png",
+      "checkpoint": "You should be in Lead Follow-Up, with New Campaign open.",
+      "screenSequence": [
+        "pp-welcome.png",
+        "pp-campaigns.png",
+        "pp-editor-offer.png"
+      ],
+      "audioId": "e17e7ffef6aa",
+      "voiceMs": 22988,
+      "durationMs": 25500,
+      "startMs": 90500
+    },
+    {
+      "key": "service",
+      "title": "Choose the service",
+      "app": "patient",
+      "page": "New campaign",
+      "narration": "Click Service type to open the list. Choose the service your ad actually promotes. We're choosing Chiropractic for our back pain example. If your offer is for another service, choose that instead. This choice determines which call script your team will use. Check the selected service before moving on. You don't have to copy our example if it doesn't match your practice.",
+      "fields": [
+        {
+          "label": "Service type",
+          "value": "Chiropractic",
+          "kind": "select"
+        }
+      ],
+      "actions": [
+        {
+          "target": "Service type",
+          "at": 0.1,
+          "result": "Chiropractic",
+          "typing": false
+        }
+      ],
+      "image": "pp-editor-offer.png",
+      "checkpoint": "The selected service must match your ad.",
+      "audioId": "4de03aae7b83",
+      "voiceMs": 21891,
+      "durationMs": 24500,
+      "startMs": 116000
+    },
+    {
+      "key": "name",
+      "title": "Type a recognizable name",
+      "app": "patient",
+      "page": "New campaign",
+      "narration": "Now click Campaign name. Give this offer a name your team will recognize. We're typing Back Pain Relief, forty-nine-dollar New Patient Special. You can see the words appearing in the field as we type them. For your campaign, use your own offer name. Keep it specific enough that you can recognize it when we return to check the test.",
+      "fields": [
+        {
+          "label": "Campaign name",
+          "value": "Back Pain Relief \u2014 $49 New Patient Special",
+          "kind": "text"
+        }
+      ],
+      "actions": [
+        {
+          "target": "Campaign name",
+          "at": 0.2,
+          "result": "Back Pain Relief \u2014 $49 New Patient Special",
+          "typing": true
+        }
+      ],
+      "image": "pp-editor-offer.png",
+      "checkpoint": "Use the same campaign for setup, connection, and testing.",
+      "audioId": "d354d9f9b11c",
+      "voiceMs": 20114,
+      "durationMs": 22500,
+      "startMs": 140500
+    },
+    {
+      "key": "included",
+      "title": "Enter what the offer includes",
+      "app": "patient",
+      "page": "What's included in the offer",
+      "narration": "Under What's included in the offer, enter one item on each line. Our example has a consultation, an examination, and a review of findings. Click the first row and type the first item. Use Add a line for another row, then enter the next item. These details become part of what the caller says, so only include what your ad really promises. Pause and compare your entries with the offer.",
+      "fields": [
+        {
+          "label": "Included item 1",
+          "value": "Consultation",
+          "kind": "text"
+        },
+        {
+          "label": "Included item 2",
+          "value": "Examination",
+          "kind": "text"
+        },
+        {
+          "label": "Included item 3",
+          "value": "Review of findings",
+          "kind": "text"
+        },
+        {
+          "label": "Add a line",
+          "value": "",
+          "kind": "button"
+        }
+      ],
+      "actions": [
+        {
+          "target": "Included item 1",
+          "at": 0.14,
+          "result": "Consultation",
+          "typing": true
+        },
+        {
+          "target": "Add a line",
+          "at": 0.37,
+          "result": "Add a line",
+          "typing": false
+        },
+        {
+          "target": "Included item 2",
+          "at": 0.45,
+          "result": "Examination",
+          "typing": true
+        },
+        {
+          "target": "Included item 3",
+          "at": 0.64,
+          "result": "Review of findings",
+          "typing": true
+        }
+      ],
+      "image": "pp-editor-offer.png",
+      "checkpoint": "One real included item per row.",
+      "audioId": "7e4b1c872432",
+      "voiceMs": 25966,
+      "durationMs": 28500,
+      "startMs": 163000
+    },
+    {
+      "key": "price",
+      "title": "Choose Just Y, then type 49",
+      "app": "patient",
+      "page": "Price",
+      "narration": "For our example, we only want to say the offer price. Click the middle choice, Just Y. Then click Offer price and type 49. Look at the On the call preview: it now says Just forty-nine dollars. That's the wording your caller will use. This does not change your software bill. If your ad compares a regular price with the offer, use Normally X, now Y and enter both real prices instead. For this example, we'll keep Just Y.",
+      "fields": [
+        {
+          "label": "Price style",
+          "value": "Just Y",
+          "kind": "price"
+        },
+        {
+          "label": "Offer price",
+          "value": "49",
+          "kind": "text"
+        },
+        {
+          "label": "On the call",
+          "value": "Just $49",
+          "kind": "preview"
+        }
+      ],
+      "actions": [
+        {
+          "target": "Just Y",
+          "at": 0.13,
+          "result": "Just Y",
+          "typing": false
+        },
+        {
+          "target": "Offer price",
+          "at": 0.3,
+          "result": "49",
+          "typing": true
+        }
+      ],
+      "image": "pp-editor-price.png",
+      "checkpoint": "Just Y selected \u2022 Offer price 49 \u2022 Preview Just $49",
+      "audioId": "284d1948aa59",
+      "voiceMs": 30276,
+      "durationMs": 32500,
+      "startMs": 191500
+    },
+    {
+      "key": "save",
+      "title": "Save and connect leads",
+      "app": "patient",
+      "page": "Back Pain Relief \u2014 $49 New Patient Special",
+      "narration": "Leave the expiration or limited-spots box blank unless your offer really has that restriction. Check your service, campaign name, included items, and price once more. Now click Save and Connect Leads. Wait for the campaign's setup page to open. Saving stores your offer, but it doesn't connect the form by itself. We'll make that connection next. Keep this campaign open in its browser tab.",
+      "fields": [
+        {
+          "label": "Offer expiration or limited spots",
+          "value": "",
+          "kind": "optional"
+        },
+        {
+          "label": "Save & Connect Leads",
+          "value": "",
+          "kind": "button"
+        }
+      ],
+      "actions": [
+        {
+          "target": "Save & Connect Leads",
+          "at": 0.44,
+          "result": "Connection setup",
+          "typing": false
+        }
+      ],
+      "image": "pp-editor-price.png",
+      "checkpoint": "Wait until the saved campaign's connection setup opens.",
+      "audioId": "8f74d49f74c4",
+      "voiceMs": 25469,
+      "durationMs": 28000,
+      "startMs": 224000
+    },
+    {
+      "key": "copy",
+      "title": "Copy this campaign's address",
+      "app": "patient",
+      "page": "Finish connecting your lead form",
+      "narration": "In the campaign setup, choose Facebook or Instagram. Find this campaign's private connection address and click its Copy button. Don't copy the ordinary page address from the top of your browser. This special address tells the other service where to send the lead. Keep it private, and don't put it in your ad. We're hiding it in this lesson. You'll paste your own full address into the connection shortly.",
+      "fields": [
+        {
+          "label": "Where is the form?",
+          "value": "Facebook / Instagram",
+          "kind": "select"
+        },
+        {
+          "label": "This campaign's connection address",
+          "value": "[Your private campaign connection address]",
+          "kind": "private"
+        },
+        {
+          "label": "Copy",
+          "value": "",
+          "kind": "button"
+        }
+      ],
+      "actions": [
+        {
+          "target": "Where is the form?",
+          "at": 0.12,
+          "result": "Facebook / Instagram",
+          "typing": false
+        },
+        {
+          "target": "Copy",
+          "at": 0.33,
+          "result": "Copied",
+          "typing": false
+        }
+      ],
+      "checkpoint": "Copy the special campaign address\u2014not the browser's page URL.",
+      "audioId": "e28747023878",
+      "voiceMs": 24268,
+      "durationMs": 26500,
+      "startMs": 252000
+    },
+    {
+      "key": "zap-create",
+      "title": "Create a Zap and its trigger",
+      "app": "zapier",
+      "page": "New Zap",
+      "narration": "Open Zapier in another browser tab and sign in. Create a new Zap and give it a name such as Send Back Pain Form to Patient Pipeline. Click the Trigger step. Search for Facebook Lead Ads and select that app. For the trigger event, choose New Lead, then continue. A trigger is what starts the instructions. In our case, it's a new submission to the form we're about to select.",
+      "fields": [
+        {
+          "label": "Create Zap",
+          "value": "",
+          "kind": "button"
+        },
+        {
+          "label": "Zap name",
+          "value": "Send Back Pain Form to Patient Pipeline",
+          "kind": "text"
+        },
+        {
+          "label": "Trigger app",
+          "value": "Facebook Lead Ads",
+          "kind": "select"
+        },
+        {
+          "label": "Trigger event",
+          "value": "New Lead",
+          "kind": "select"
+        },
+        {
+          "label": "Continue",
+          "value": "",
+          "kind": "button"
+        }
+      ],
+      "actions": [
+        {
+          "target": "Create Zap",
+          "at": 0.11,
+          "result": "New Zap",
+          "typing": false
+        },
+        {
+          "target": "Zap name",
+          "at": 0.26,
+          "result": "Send Back Pain Form to Patient Pipeline",
+          "typing": true
+        },
+        {
+          "target": "Trigger app",
+          "at": 0.48,
+          "result": "Facebook Lead Ads",
+          "typing": false
+        },
+        {
+          "target": "Trigger event",
+          "at": 0.66,
+          "result": "New Lead",
+          "typing": false
+        },
+        {
+          "target": "Continue",
+          "at": 0.83,
+          "result": "Continue",
+          "typing": false
+        }
+      ],
+      "checkpoint": "Trigger app Facebook Lead Ads \u2022 event New Lead",
+      "audioId": "e83f1d76f8fe",
+      "voiceMs": 25313,
+      "durationMs": 27500,
+      "startMs": 278500
+    },
+    {
+      "key": "zap-account",
+      "title": "Connect the correct Facebook account",
+      "app": "zapier",
+      "page": "Trigger \u2192 Account",
+      "narration": "In the trigger's account step, connect your Facebook account, or select the existing connection that owns the right access. Complete Facebook's sign-in and permission prompts in your own account. Never send your password to someone in a message. Return to Zapier and check which account is selected. Then continue to the trigger setup. If your Page is missing later, revisit access rather than selecting a different business by mistake.",
+      "fields": [
+        {
+          "label": "Account",
+          "value": "Your authorized Facebook account",
+          "kind": "select"
+        },
+        {
+          "label": "Sign in",
+          "value": "Complete securely in Facebook",
+          "kind": "button"
+        },
+        {
+          "label": "Continue",
+          "value": "",
+          "kind": "button"
+        }
+      ],
+      "actions": [
+        {
+          "target": "Account",
+          "at": 0.13,
+          "result": "Choose authorized account",
+          "typing": false
+        },
+        {
+          "target": "Sign in",
+          "at": 0.33,
+          "result": "Secure sign-in",
+          "typing": false
+        },
+        {
+          "target": "Continue",
+          "at": 0.72,
+          "result": "Continue",
+          "typing": false
+        }
+      ],
+      "checkpoint": "Sign-in screens are not reproduced. Follow the real permission prompts.",
+      "audioId": "ec7b3cb8b71b",
+      "voiceMs": 25234,
+      "durationMs": 27500,
+      "startMs": 306000
+    },
+    {
+      "key": "zap-form",
+      "title": "Select the Page and exact form",
+      "app": "zapier",
+      "page": "Trigger \u2192 Configure",
+      "narration": "Open Page and select the Facebook Page for this offer. Next, open Form and choose the exact Instant Form used by the ad. Don't leave the form choice broad if it would send unrelated offers into this campaign. Check both names carefully, then continue to the test step. The next step needs a sample from this form so we can connect its name and phone fields.",
+      "fields": [
+        {
+          "label": "Page",
+          "value": "Example Practice",
+          "kind": "select"
+        },
+        {
+          "label": "Form",
+          "value": "Back Pain New Patient Form",
+          "kind": "select"
+        },
+        {
+          "label": "Continue",
+          "value": "",
+          "kind": "button"
+        },
+        {
+          "label": "Test trigger",
+          "value": "",
+          "kind": "button"
+        }
+      ],
+      "actions": [
+        {
+          "target": "Page",
+          "at": 0.12,
+          "result": "Example Practice",
+          "typing": false
+        },
+        {
+          "target": "Form",
+          "at": 0.32,
+          "result": "Back Pain New Patient Form",
+          "typing": false
+        },
+        {
+          "target": "Continue",
+          "at": 0.68,
+          "result": "Continue",
+          "typing": false
+        },
+        {
+          "target": "Test trigger",
+          "at": 0.83,
+          "result": "Look for a sample",
+          "typing": false
+        }
+      ],
+      "checkpoint": "Choose a specific Page AND Form. Generic sample data is not your live test.",
+      "audioId": "ff65164b7a27",
+      "voiceMs": 24189,
+      "durationMs": 26500,
+      "startMs": 333500
+    },
+    {
+      "key": "zap-sample",
+      "title": "Create an identifiable sample",
+      "app": "meta",
+      "page": "Lead Ads Testing Tool",
+      "narration": "If Zapier doesn't have a useful sample, open Meta's Lead Ads Testing Tool in another tab. Select the same Page and Form. Click Preview Form, enter your own test details, and complete the form's Next and Submit steps. Close the preview and use Create lead as directed by the tool. Then return to Zapier and click Test trigger. Match the sample's name and phone before you use it for field mapping.",
+      "fields": [
+        {
+          "label": "Page",
+          "value": "Example Practice",
+          "kind": "select"
+        },
+        {
+          "label": "Form",
+          "value": "Back Pain New Patient Form",
+          "kind": "select"
+        },
+        {
+          "label": "Preview Form",
+          "value": "",
+          "kind": "button"
+        },
+        {
+          "label": "Your test details",
+          "value": "Your own name and phone",
+          "kind": "text"
+        },
+        {
+          "label": "Next / Submit",
+          "value": "",
+          "kind": "button"
+        },
+        {
+          "label": "Create lead",
+          "value": "",
+          "kind": "button"
+        }
+      ],
+      "actions": [
+        {
+          "target": "Page",
+          "at": 0.13,
+          "result": "Example Practice",
+          "typing": false
+        },
+        {
+          "target": "Form",
+          "at": 0.25,
+          "result": "Back Pain New Patient Form",
+          "typing": false
+        },
+        {
+          "target": "Preview Form",
+          "at": 0.35,
+          "result": "Preview Form",
+          "typing": false
+        },
+        {
+          "target": "Your test details",
+          "at": 0.49,
+          "result": "Your own name and phone",
+          "typing": true
+        },
+        {
+          "target": "Next / Submit",
+          "at": 0.63,
+          "result": "Complete and close preview",
+          "typing": false
+        },
+        {
+          "target": "Create lead",
+          "at": 0.75,
+          "result": "Create sample",
+          "typing": false
+        }
+      ],
+      "checkpoint": "developers.facebook.com/tools/lead-ads-testing/ \u2022 sample only, not live-ad proof.",
+      "audioId": "7fd32791afa3",
+      "voiceMs": 27089,
+      "durationMs": 29500,
+      "startMs": 360000
+    },
+    {
+      "key": "zap-sample-check",
+      "title": "Find that sample in Zapier",
+      "app": "zapier",
+      "page": "Trigger \u2192 Test",
+      "narration": "Back in Zapier, click Test trigger and select the sample that matches the details you just entered. Make sure a usable name and phone are present. If Meta says a test already exists, its Delete lead button removes the tool's sample, not a real production lead. Remove only that test sample if you need to repeat this setup check. Do not delete customer leads to make a tutorial test work.",
+      "fields": [
+        {
+          "label": "Test trigger",
+          "value": "",
+          "kind": "button"
+        },
+        {
+          "label": "Selected sample",
+          "value": "Match your actual sample",
+          "kind": "select"
+        },
+        {
+          "label": "Name",
+          "value": "Must contain a usable value",
+          "kind": "note"
+        },
+        {
+          "label": "Phone",
+          "value": "Must contain a usable value",
+          "kind": "note"
+        }
+      ],
+      "actions": [
+        {
+          "target": "Test trigger",
+          "at": 0.12,
+          "result": "Fetch samples",
+          "typing": false
+        },
+        {
+          "target": "Selected sample",
+          "at": 0.29,
+          "result": "Choose your sample",
+          "typing": false
+        },
+        {
+          "target": "Phone",
+          "at": 0.47,
+          "result": "Check the value",
+          "typing": false
+        }
+      ],
+      "checkpoint": "Do not use an invented generic sample as evidence of the form connection.",
+      "audioId": "1859f8b3f2f9",
+      "voiceMs": 24451,
+      "durationMs": 27000,
+      "startMs": 389500
+    },
+    {
+      "key": "zap-action",
+      "title": "Add Webhooks by Zapier",
+      "app": "zapier",
+      "page": "Action \u2192 Setup",
+      "narration": "Click the plus below the Facebook Lead Ads trigger to add an action. Search for Webhooks by Zapier and select it. For the action event, choose POST, then continue. We're using the ordinary POST action because it gives us simple rows for the information we're sending. Don't choose Custom Request for this lesson. Next, we'll paste the destination and match the form answers.",
+      "fields": [
+        {
+          "label": "+ Add action",
+          "value": "",
+          "kind": "button"
+        },
+        {
+          "label": "Action app",
+          "value": "Webhooks by Zapier",
+          "kind": "select"
+        },
+        {
+          "label": "Action event",
+          "value": "POST",
+          "kind": "select"
+        },
+        {
+          "label": "Continue",
+          "value": "",
+          "kind": "button"
+        }
+      ],
+      "actions": [
+        {
+          "target": "+ Add action",
+          "at": 0.12,
+          "result": "Action",
+          "typing": false
+        },
+        {
+          "target": "Action app",
+          "at": 0.29,
+          "result": "Webhooks by Zapier",
+          "typing": false
+        },
+        {
+          "target": "Action event",
+          "at": 0.48,
+          "result": "POST",
+          "typing": false
+        },
+        {
+          "target": "Continue",
+          "at": 0.63,
+          "result": "Continue",
+          "typing": false
+        }
+      ],
+      "checkpoint": "Webhooks by Zapier \u2192 POST",
+      "audioId": "60a386e2e1d7",
+      "voiceMs": 23719,
+      "durationMs": 26000,
+      "startMs": 416500
+    },
+    {
+      "key": "zap-url",
+      "title": "Paste the URL and choose JSON",
+      "app": "zapier",
+      "page": "POST \u2192 Configure",
+      "narration": "Switch to Patient Pipeline, check your campaign name, and click Copy beside its private connection address. Return to the Zapier tab and click the URL box. Paste with Control V on Windows or Command V on a Mac. Now open Payload Type and select JSON. That is a format choice in the menu; you do not need to write computer code. Leave optional headers and authentication empty for this connection.",
+      "fields": [
+        {
+          "label": "Patient Pipeline \u2022 Copy",
+          "value": "",
+          "kind": "button"
+        },
+        {
+          "label": "URL",
+          "value": "[Your private campaign connection address]",
+          "kind": "private"
+        },
+        {
+          "label": "Payload Type",
+          "value": "JSON",
+          "kind": "select"
+        },
+        {
+          "label": "Headers / authentication",
+          "value": "Leave empty for this campaign address",
+          "kind": "note"
+        }
+      ],
+      "actions": [
+        {
+          "target": "Patient Pipeline \u2022 Copy",
+          "at": 0.12,
+          "result": "Copied",
+          "typing": false
+        },
+        {
+          "target": "URL",
+          "at": 0.33,
+          "result": "[Your private campaign connection address]",
+          "typing": false
+        },
+        {
+          "target": "Payload Type",
+          "at": 0.56,
+          "result": "JSON",
+          "typing": false
+        }
+      ],
+      "checkpoint": "URL from this campaign \u2022 Payload Type JSON",
+      "audioId": "0bdfd6ad1b66",
+      "voiceMs": 26906,
+      "durationMs": 29500,
+      "startMs": 442500
+    },
+    {
+      "key": "zap-map",
+      "title": "Match the name and phone fields",
+      "app": "zapier",
+      "page": "POST \u2192 Data",
+      "narration": "Under Data, the left side names the information Patient Pipeline expects. The right side must use an answer from the Facebook trigger, not a name or phone you type yourself. In the first left-hand box, type first underscore name. On its right, open the field picker and choose the form's First Name answer. Add another row. Type phone on the left, then choose the form's Phone Number answer on the right. Pause and check both rows.",
+      "fields": [
+        {
+          "label": "Data key 1",
+          "value": "first_name",
+          "kind": "text"
+        },
+        {
+          "label": "Data value 1",
+          "value": "Facebook Lead Ads \u2192 First Name",
+          "kind": "mapping"
+        },
+        {
+          "label": "Add row",
+          "value": "",
+          "kind": "button"
+        },
+        {
+          "label": "Data key 2",
+          "value": "phone",
+          "kind": "text"
+        },
+        {
+          "label": "Data value 2",
+          "value": "Facebook Lead Ads \u2192 Phone Number",
+          "kind": "mapping"
+        }
+      ],
+      "actions": [
+        {
+          "target": "Data key 1",
+          "at": 0.24,
+          "result": "first_name",
+          "typing": true
+        },
+        {
+          "target": "Data value 1",
+          "at": 0.41,
+          "result": "Facebook Lead Ads \u2192 First Name",
+          "typing": false
+        },
+        {
+          "target": "Add row",
+          "at": 0.53,
+          "result": "Add row",
+          "typing": false
+        },
+        {
+          "target": "Data key 2",
+          "at": 0.63,
+          "result": "phone",
+          "typing": true
+        },
+        {
+          "target": "Data value 2",
+          "at": 0.77,
+          "result": "Facebook Lead Ads \u2192 Phone Number",
+          "typing": false
+        }
+      ],
+      "checkpoint": "Left: first_name / phone \u2022 Right: dynamic form answers\u2014not fixed test values.",
+      "audioId": "49c626cad26e",
+      "voiceMs": 29074,
+      "durationMs": 31500,
+      "startMs": 472000
+    },
+    {
+      "key": "zap-full-name",
+      "title": "If your form has only Full Name",
+      "app": "zapier",
+      "page": "POST \u2192 Data \u2022 alternative name row",
+      "narration": "Your form may provide Full Name instead of separate first and last names. In that case, use full underscore name as the left-hand key, and choose the form's Full Name answer on the right. Keep the phone row. Patient Pipeline can split that full name. Use this as an alternative to the first-name row, not a second conflicting name rule. Email is optional; if you include it, select the actual Email answer from the trigger.",
+      "fields": [
+        {
+          "label": "Alternative name key",
+          "value": "full_name",
+          "kind": "text"
+        },
+        {
+          "label": "Alternative name value",
+          "value": "Facebook Lead Ads \u2192 Full Name",
+          "kind": "mapping"
+        },
+        {
+          "label": "Phone key",
+          "value": "phone",
+          "kind": "note"
+        },
+        {
+          "label": "Phone value",
+          "value": "Facebook Lead Ads \u2192 Phone Number",
+          "kind": "note"
+        },
+        {
+          "label": "Optional email",
+          "value": "email \u2192 Facebook Lead Ads Email",
+          "kind": "note"
+        }
+      ],
+      "actions": [
+        {
+          "target": "Alternative name key",
+          "at": 0.23,
+          "result": "full_name",
+          "typing": true
+        },
+        {
+          "target": "Alternative name value",
+          "at": 0.4,
+          "result": "Facebook Lead Ads \u2192 Full Name",
+          "typing": false
+        },
+        {
+          "target": "Phone key",
+          "at": 0.55,
+          "result": "Keep phone mapping",
+          "typing": false
+        }
+      ],
+      "checkpoint": "Use either first_name or full_name, according to the fields your form supplies.",
+      "audioId": "b7e6e295b7e0",
+      "voiceMs": 29309,
+      "durationMs": 31500,
+      "startMs": 503500
+    },
+    {
+      "key": "zap-test",
+      "title": "Test the sending action",
+      "app": "zapier",
+      "page": "POST \u2192 Test",
+      "narration": "Continue to the action's test step and send the selected sample. This action test really sends information to the campaign, so use only your approved test details. Check Patient Pipeline for the sample and correct phone. If the action reports an error, check the destination, JSON choice, and mapped name and phone. A successful action test is useful, but it does not yet prove the Zap will run automatically for a new form submission.",
+      "fields": [
+        {
+          "label": "Test step",
+          "value": "",
+          "kind": "button"
+        },
+        {
+          "label": "Sample data",
+          "value": "Your selected, authorized test details",
+          "kind": "note"
+        },
+        {
+          "label": "Check Patient Pipeline",
+          "value": "Match the sample's phone",
+          "kind": "note"
+        }
+      ],
+      "actions": [
+        {
+          "target": "Sample data",
+          "at": 0.15,
+          "result": "Review before sending",
+          "typing": false
+        },
+        {
+          "target": "Test step",
+          "at": 0.31,
+          "result": "Send your sample",
+          "typing": false
+        },
+        {
+          "target": "Check Patient Pipeline",
+          "at": 0.49,
+          "result": "Check your campaign",
+          "typing": false
+        }
+      ],
+      "checkpoint": "An action test can create a real lead. It is not end-to-end proof.",
+      "audioId": "9266c1574e34",
+      "voiceMs": 28996,
+      "durationMs": 31500,
+      "startMs": 535000
+    },
+    {
+      "key": "zap-publish",
+      "title": "Publish and turn the Zap on",
+      "app": "zapier",
+      "page": "Review and publish",
+      "narration": "Review the Zap from top to bottom. The trigger should be Facebook Lead Ads, New Lead, with your exact Page and Form. The action should be Webhooks by Zapier, POST, with your campaign address and mapped fields. Publish the Zap and check that it's on. The wording of the publish control can vary with the editor. A saved draft is not enough. Once it's active, new matching submissions can be sent automatically.",
+      "fields": [
+        {
+          "label": "Trigger",
+          "value": "Facebook Lead Ads \u2022 New Lead \u2022 exact Page and Form",
+          "kind": "note"
+        },
+        {
+          "label": "Action",
+          "value": "Webhooks by Zapier \u2022 POST \u2022 JSON \u2022 mapped fields",
+          "kind": "note"
+        },
+        {
+          "label": "Publish",
+          "value": "",
+          "kind": "button"
+        },
+        {
+          "label": "Zap status",
+          "value": "On",
+          "kind": "toggle"
+        }
+      ],
+      "actions": [
+        {
+          "target": "Trigger",
+          "at": 0.15,
+          "result": "Review",
+          "typing": false
+        },
+        {
+          "target": "Action",
+          "at": 0.35,
+          "result": "Review",
+          "typing": false
+        },
+        {
+          "target": "Publish",
+          "at": 0.53,
+          "result": "Publish",
+          "typing": false
+        },
+        {
+          "target": "Zap status",
+          "at": 0.68,
+          "result": "On",
+          "typing": false
+        }
+      ],
+      "checkpoint": "Publish control is illustrative; confirm active status in your actual editor.",
+      "audioId": "c02ee7eaff4d",
+      "voiceMs": 27011,
+      "durationMs": 29500,
+      "startMs": 566500
+    },
+    {
+      "key": "submit",
+      "title": "Now test a new real submission",
+      "app": "meta",
+      "page": "Actual ad \u2192 Same Instant Form",
+      "narration": "After the Zap is on, submit the actual Instant Form again through the ad using your own name and phone. Don't just rerun the action test. Wait for the form's confirmation, then open Zapier's Zap History and look for this new run. Match its time and form details. After that, check the same campaign in Patient Pipeline. A Meta testing-tool sample is useful for setup, but submitting through the actual ad checks the real route your lead will take.",
+      "fields": [
+        {
+          "label": "Your name",
+          "value": "Your own name",
+          "kind": "text"
+        },
+        {
+          "label": "Your phone",
+          "value": "Your own phone number",
+          "kind": "text"
+        },
+        {
+          "label": "Submit",
+          "value": "",
+          "kind": "button"
+        },
+        {
+          "label": "Zap History",
+          "value": "",
+          "kind": "button"
+        }
+      ],
+      "actions": [
+        {
+          "target": "Your name",
+          "at": 0.12,
+          "result": "Your own name",
+          "typing": true
+        },
+        {
+          "target": "Your phone",
+          "at": 0.23,
+          "result": "Your own phone number",
+          "typing": true
+        },
+        {
+          "target": "Submit",
+          "at": 0.4,
+          "result": "Submit once",
+          "typing": false
+        },
+        {
+          "target": "Zap History",
+          "at": 0.61,
+          "result": "Find the new run",
+          "typing": false
+        }
+      ],
+      "checkpoint": "New form submission after activation \u2192 new Zap run \u2192 campaign lead.",
+      "audioId": "c1ef123f3fe9",
+      "voiceMs": 29649,
+      "durationMs": 32000,
+      "startMs": 596000
+    },
+    {
+      "key": "verify",
+      "title": "Check the receipt, then the lead",
+      "app": "patient",
+      "page": "This campaign \u2192 Connection setup",
+      "narration": "After your real form submission, return to the same campaign in Patient Pipeline. Look for a recent Form submission received message. If it still says it's waiting, give it a moment and refresh the page with your browser's circular-arrow button. Then open this campaign's Leads tab. Match the name and phone you entered. The illustration here is showing where to check, not claiming that a live connection has passed.",
+      "fields": [
+        {
+          "label": "Latest receipt",
+          "value": "Waiting for a submission from your form",
+          "kind": "waiting"
+        },
+        {
+          "label": "Refresh page",
+          "value": "",
+          "kind": "button"
+        },
+        {
+          "label": "Leads",
+          "value": "",
+          "kind": "button"
+        },
+        {
+          "label": "Match your test",
+          "value": "Name + phone + correct campaign",
+          "kind": "note"
+        }
+      ],
+      "actions": [
+        {
+          "target": "Latest receipt",
+          "at": 0.18,
+          "result": "Check the time",
+          "typing": false
+        },
+        {
+          "target": "Refresh page",
+          "at": 0.42,
+          "result": "Refresh",
+          "typing": false
+        },
+        {
+          "target": "Leads",
+          "at": 0.58,
+          "result": "Leads",
+          "typing": false
+        }
+      ],
+      "checkpoint": "No success is assumed. Find your own submission in this campaign.",
+      "audioId": "e6311744fb53",
+      "voiceMs": 24842,
+      "durationMs": 27000,
+      "startMs": 628000
+    },
+    {
+      "key": "duplicates",
+      "title": "Recognize a successful repeat test",
+      "app": "patient",
+      "page": "Lead sources \u2192 Last 20 received",
+      "narration": "For a closer check, open Lead sources and look under Last twenty received. Match the delivery time to your test. New lead means a new entry was created. Updated lead can also be successful: that phone number was already in this campaign. A repeat test may not add another row or move the old one to the top. Rejected means something needs fixing. Open that receipt and read the reason before changing settings.",
+      "fields": [
+        {
+          "label": "Lead sources",
+          "value": "",
+          "kind": "button"
+        },
+        {
+          "label": "New lead",
+          "value": "A new campaign lead was created",
+          "kind": "legend"
+        },
+        {
+          "label": "Updated lead",
+          "value": "Same campaign + same phone may update the existing lead",
+          "kind": "legend"
+        },
+        {
+          "label": "Rejected",
+          "value": "Open the receipt and read the reason",
+          "kind": "legend"
+        }
+      ],
+      "actions": [
+        {
+          "target": "Lead sources",
+          "at": 0.11,
+          "result": "Last 20 received",
+          "typing": false
+        },
+        {
+          "target": "New lead",
+          "at": 0.29,
+          "result": "Meaning",
+          "typing": false
+        },
+        {
+          "target": "Updated lead",
+          "at": 0.44,
+          "result": "Meaning",
+          "typing": false
+        },
+        {
+          "target": "Rejected",
+          "at": 0.77,
+          "result": "Read the reason",
+          "typing": false
+        }
+      ],
+      "checkpoint": "Status explanations\u2014not a fabricated delivery log.",
+      "audioId": "7e2535f36f37",
+      "voiceMs": 27089,
+      "durationMs": 29500,
+      "startMs": 655000
+    },
+    {
+      "key": "internal",
+      "title": "Don't mistake an internal test for proof",
+      "app": "patient",
+      "page": "Only want to check our side?",
+      "narration": "There are shortcuts that check only part of the connection. Patient Pipeline's internal test checks its own intake. A connector's test action checks a sending step. Neither proves that a new submission to your actual form will arrive automatically. That's why our final check starts with the form itself and ends with the matching campaign lead. Your test entry is a real lead, so let your caller know which entry was the setup check.",
+      "fields": [
+        {
+          "label": "Send internal test",
+          "value": "Checks only Patient Pipeline's side",
+          "kind": "note"
+        },
+        {
+          "label": "Connector action test",
+          "value": "Can send real data; does not prove the trigger",
+          "kind": "note"
+        },
+        {
+          "label": "Final check",
+          "value": "Actual form \u2192 matching campaign lead",
+          "kind": "preview"
+        }
+      ],
+      "actions": [
+        {
+          "target": "Send internal test",
+          "at": 0.22,
+          "result": "Not end-to-end proof",
+          "typing": false
+        },
+        {
+          "target": "Final check",
+          "at": 0.65,
+          "result": "Check the complete route",
+          "typing": false
+        }
+      ],
+      "checkpoint": "Keep private details out of screenshots and shared troubleshooting messages.",
+      "audioId": "b3e2002b84ad",
+      "voiceMs": 26201,
+      "durationMs": 28500,
+      "startMs": 684500
+    },
+    {
+      "key": "troubleshoot",
+      "title": "If the lead is missing",
+      "app": "zapier",
+      "page": "Zap History",
+      "narration": "If no Zap run appears, check that the Zap is on, the Page and Form are correct, and Facebook leads access is still available. If a run appears but the action failed, open that run and read the error. Check the URL, JSON format, and that the name and phone rows use real trigger answers. If Patient Pipeline says Updated lead, look for the existing entry with that phone. Don't keep making new campaigns to force another test row.",
+      "fields": [
+        {
+          "label": "No run",
+          "value": "Check On status, Page, Form, and leads access",
+          "kind": "note"
+        },
+        {
+          "label": "Failed action",
+          "value": "Read error; check URL, JSON, and dynamic values",
+          "kind": "note"
+        },
+        {
+          "label": "Updated lead",
+          "value": "Find the existing same-phone campaign lead",
+          "kind": "note"
+        }
+      ],
+      "actions": [
+        {
+          "target": "No run",
+          "at": 0.15,
+          "result": "Check trigger",
+          "typing": false
+        },
+        {
+          "target": "Failed action",
+          "at": 0.42,
+          "result": "Check sending action",
+          "typing": false
+        },
+        {
+          "target": "Updated lead",
+          "at": 0.71,
+          "result": "Match phone",
+          "typing": false
+        }
+      ],
+      "checkpoint": "Fix the first failing step, then submit the actual form again.",
+      "audioId": "76c0d60cc186",
+      "voiceMs": 29231,
+      "durationMs": 31500,
+      "startMs": 713000
+    },
+    {
+      "key": "finish",
+      "title": "Before you call it ready",
+      "app": "guide",
+      "page": "Set up. Connect. Verify.",
+      "narration": "Before you call this ready, check four things. Your campaign matches the offer. Your connection watches the right form and is turned on. You submitted that actual form after turning it on. And your matching test entry appears in this campaign. Leave the connection active, and make sure your team knows which entry was the test. One successful test confirms that delivery; it isn't a guarantee that every future delivery will work. You now know where to check.",
+      "fields": [
+        {
+          "label": "1",
+          "value": "Campaign matches the actual offer",
+          "kind": "check"
+        },
+        {
+          "label": "2",
+          "value": "Correct form selected; connection is active",
+          "kind": "check"
+        },
+        {
+          "label": "3",
+          "value": "Actual form submitted after activation",
+          "kind": "check"
+        },
+        {
+          "label": "4",
+          "value": "Matching receipt and lead in the correct campaign",
+          "kind": "check"
+        }
+      ],
+      "actions": [
+        {
+          "target": "1",
+          "at": 0.15,
+          "result": "Check your account",
+          "typing": false
+        },
+        {
+          "target": "2",
+          "at": 0.29,
+          "result": "Check your account",
+          "typing": false
+        },
+        {
+          "target": "3",
+          "at": 0.43,
+          "result": "Check your account",
+          "typing": false
+        },
+        {
+          "target": "4",
+          "at": 0.57,
+          "result": "Check your account",
+          "typing": false
+        }
+      ],
+      "checkpoint": "Complete these checks in your own accounts. No live result is asserted here.",
+      "audioId": "9816dd7f1961",
+      "voiceMs": 28682,
+      "durationMs": 31000,
+      "startMs": 744500
+    }
+  ],
+  "durationMs": 775500,
+  "voice": {
+    "voiceId": "EXAVITQu4vr4xnSDxMaL",
+    "name": "Sarah",
+    "modelId": "eleven_v3",
+    "voiceSettings": {
+      "stability": 0.5,
+      "similarity_boost": 0.75,
+      "speed": 0.96
+    }
+  },
+  "sources": [
+    "https://help.gohighlevel.com/support/solutions/articles/155000002550-workflow-trigger-form-submitted",
+    "https://help.gohighlevel.com/support/solutions/articles/155000003299-workflow-action-webhook-outbound-",
+    "https://help.gohighlevel.com/support/solutions/articles/155000004549-how-to-create-a-contact-form-in-highlevel-",
+    "https://help.gohighlevel.com/support/solutions/articles/155000001254",
+    "https://help.gohighlevel.com/support/solutions/articles/48001239875-workflow-settings-overview",
+    "https://help.gohighlevel.com/support/solutions/articles/155000003095-workflow-trigger-facebook-lead-form-submitted",
+    "https://help.gohighlevel.com/support/solutions/articles/48001157632-step-by-step-guide-to-facebook-integration-in-highlevel",
+    "https://help.zapier.com/hc/en-us/articles/8496061306253-How-to-get-started-with-Facebook-Lead-Ads-on-Zapier",
+    "https://help.zapier.com/hc/en-us/articles/8496061345805-Use-the-Facebook-Lead-Ads-testing-tool-to-create-sample-leads",
+    "https://help.zapier.com/hc/en-us/articles/8496326446989-Send-webhooks-in-Zap-workflows",
+    "https://developers.facebook.com/docs/marketing-api/guides/lead-ads/testing-troubleshooting/"
+  ],
+  "illustrated": true
+}

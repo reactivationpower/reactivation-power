@@ -1,0 +1,1317 @@
+{
+  "seconds": 658.5,
+  "audioSeconds": 658.474943,
+  "layoutChecks": [
+    {
+      "time": 0,
+      "scene": "intro",
+      "controls": false,
+      "fields": []
+    },
+    {
+      "time": 13.5,
+      "scene": "intro",
+      "controls": false,
+      "fields": []
+    },
+    {
+      "time": 26.9,
+      "scene": "intro",
+      "controls": false,
+      "fields": []
+    },
+    {
+      "time": 27,
+      "scene": "prepare",
+      "controls": false,
+      "fields": []
+    },
+    {
+      "time": 42.75,
+      "scene": "prepare",
+      "controls": false,
+      "fields": []
+    },
+    {
+      "time": 58.4,
+      "scene": "prepare",
+      "controls": false,
+      "fields": []
+    },
+    {
+      "time": 58.5,
+      "scene": "find-form",
+      "controls": false,
+      "fields": [
+        {
+          "text": "Forms",
+          "bottom": 364.268310546875
+        },
+        {
+          "text": "Back Pain New Patient Form",
+          "bottom": 400.2728271484375
+        },
+        {
+          "text": "Name fieldStandard First Name or Full Name • Required",
+          "bottom": 453.08258056640625
+        },
+        {
+          "text": "Phone fieldStandard Phone • Required",
+          "bottom": 505.8923034667969
+        }
+      ],
+      "shellBottom": 637.08984375
+    },
+    {
+      "time": 73.75,
+      "scene": "find-form",
+      "controls": false,
+      "fields": [
+        {
+          "text": "Forms✓",
+          "bottom": 365.59375
+        },
+        {
+          "text": "Back Pain New Patient Form✓",
+          "bottom": 402.171875
+        },
+        {
+          "text": "Name fieldStandard First Name or Full Name • Required",
+          "bottom": 454.5625
+        },
+        {
+          "text": "Phone fieldStandard Phone • Required",
+          "bottom": 506.953125
+        }
+      ],
+      "shellBottom": 635.390625
+    },
+    {
+      "time": 88.9,
+      "scene": "find-form",
+      "controls": false,
+      "fields": [
+        {
+          "text": "Forms✓",
+          "bottom": 365.59375
+        },
+        {
+          "text": "Back Pain New Patient Form✓",
+          "bottom": 402.171875
+        },
+        {
+          "text": "Name fieldStandard First Name or Full Name • Required",
+          "bottom": 454.5625
+        },
+        {
+          "text": "Phone fieldStandard Phone • Required",
+          "bottom": 506.953125
+        }
+      ],
+      "shellBottom": 635.390625
+    },
+    {
+      "time": 89,
+      "scene": "public-form",
+      "controls": false,
+      "fields": [
+        {
+          "text": "Integrate",
+          "bottom": 364.268310546875
+        },
+        {
+          "text": "Direct form link[Your public form link]",
+          "bottom": 420.30682373046875
+        },
+        {
+          "text": "Copy link",
+          "bottom": 456.3113098144531
+        },
+        {
+          "text": "Browser address barClick here",
+          "bottom": 512.349853515625
+        }
+      ],
+      "shellBottom": 637.08984375
+    },
+    {
+      "time": 102.75,
+      "scene": "public-form",
+      "controls": false,
+      "fields": [
+        {
+          "text": "Integrate✓",
+          "bottom": 365.59375
+        },
+        {
+          "text": "Direct form link[Your public form link]",
+          "bottom": 421.1875
+        },
+        {
+          "text": "Copy link✓",
+          "bottom": 457.765625
+        },
+        {
+          "text": "Browser address barClick here",
+          "bottom": 513.359375
+        }
+      ],
+      "shellBottom": 635.390625
+    },
+    {
+      "time": 116.4,
+      "scene": "public-form",
+      "controls": false,
+      "fields": [
+        {
+          "text": "Integrate✓",
+          "bottom": 365.59375
+        },
+        {
+          "text": "Direct form link[Your public form link]",
+          "bottom": 421.1875
+        },
+        {
+          "text": "Copy link✓",
+          "bottom": 457.765625
+        },
+        {
+          "text": "Browser address bar[Your public form link]",
+          "bottom": 513.359375
+        }
+      ],
+      "shellBottom": 635.390625
+    },
+    {
+      "time": 116.5,
+      "scene": "campaigns",
+      "controls": false,
+      "fields": [],
+      "shellBottom": 637.08984375
+    },
+    {
+      "time": 129.25,
+      "scene": "campaigns",
+      "controls": false,
+      "fields": [],
+      "shellBottom": 635.390625
+    },
+    {
+      "time": 141.9,
+      "scene": "campaigns",
+      "controls": false,
+      "fields": [],
+      "shellBottom": 635.390625
+    },
+    {
+      "time": 142,
+      "scene": "service",
+      "controls": false,
+      "fields": [
+        {
+          "text": "Service typeSelect…⌄",
+          "bottom": 391.05908203125
+        }
+      ],
+      "shellBottom": 637.08984375
+    },
+    {
+      "time": 154.25,
+      "scene": "service",
+      "controls": false,
+      "fields": [
+        {
+          "text": "Service typeChiropractic⌄",
+          "bottom": 391.3125
+        }
+      ],
+      "shellBottom": 635.390625
+    },
+    {
+      "time": 166.4,
+      "scene": "service",
+      "controls": false,
+      "fields": [
+        {
+          "text": "Service typeChiropractic⌄",
+          "bottom": 391.3125
+        }
+      ],
+      "shellBottom": 635.390625
+    },
+    {
+      "time": 166.5,
+      "scene": "name",
+      "controls": false,
+      "fields": [
+        {
+          "text": "Campaign nameClick here",
+          "bottom": 388.22406005859375
+        }
+      ],
+      "shellBottom": 637.08984375
+    },
+    {
+      "time": 177.75,
+      "scene": "name",
+      "controls": false,
+      "fields": [
+        {
+          "text": "Campaign nameBack Pain Relief — $49 New Patient Special",
+          "bottom": 388.5
+        }
+      ],
+      "shellBottom": 635.390625
+    },
+    {
+      "time": 188.9,
+      "scene": "name",
+      "controls": false,
+      "fields": [
+        {
+          "text": "Campaign nameBack Pain Relief — $49 New Patient Special",
+          "bottom": 388.5
+        }
+      ],
+      "shellBottom": 635.390625
+    },
+    {
+      "time": 189,
+      "scene": "included",
+      "controls": false,
+      "fields": [
+        {
+          "text": "Included item 1Click here",
+          "bottom": 388.22406005859375
+        },
+        {
+          "text": "Included item 2Click here",
+          "bottom": 444.2625732421875
+        },
+        {
+          "text": "Included item 3Click here",
+          "bottom": 500.3010559082031
+        },
+        {
+          "text": "Add a line",
+          "bottom": 536.3055419921875
+        }
+      ],
+      "shellBottom": 637.08984375
+    },
+    {
+      "time": 203.25,
+      "scene": "included",
+      "controls": false,
+      "fields": [
+        {
+          "text": "Included item 1Consultation",
+          "bottom": 388.5
+        },
+        {
+          "text": "Included item 2Exami",
+          "bottom": 444.09375
+        },
+        {
+          "text": "Included item 3Click here",
+          "bottom": 499.6875
+        },
+        {
+          "text": "Add a line✓",
+          "bottom": 536.265625
+        }
+      ],
+      "shellBottom": 635.390625
+    },
+    {
+      "time": 217.4,
+      "scene": "included",
+      "controls": false,
+      "fields": [
+        {
+          "text": "Included item 1Consultation",
+          "bottom": 388.5
+        },
+        {
+          "text": "Included item 2Examination",
+          "bottom": 444.09375
+        },
+        {
+          "text": "Included item 3Review of findings",
+          "bottom": 499.6875
+        },
+        {
+          "text": "Add a line✓",
+          "bottom": 536.265625
+        }
+      ],
+      "shellBottom": 635.390625
+    },
+    {
+      "time": 217.5,
+      "scene": "price",
+      "controls": false,
+      "fields": [
+        {
+          "text": "Price style◯ Normally X, now Y◯ Just Y◯ Don’t mention price",
+          "bottom": 401.86358642578125
+        },
+        {
+          "text": "Offer priceClick here",
+          "bottom": 457.9020690917969
+        },
+        {
+          "text": "On the callJust $49",
+          "bottom": 514.0350341796875
+        }
+      ],
+      "shellBottom": 637.08984375
+    },
+    {
+      "time": 233.75,
+      "scene": "price",
+      "controls": false,
+      "fields": [
+        {
+          "text": "Price style◯ Normally X, now Y◯ Just Y◯ Don’t mention price",
+          "bottom": 402.03125
+        },
+        {
+          "text": "Offer price49",
+          "bottom": 457.625
+        },
+        {
+          "text": "On the callJust $49",
+          "bottom": 513.3125
+        }
+      ],
+      "shellBottom": 635.390625
+    },
+    {
+      "time": 249.9,
+      "scene": "price",
+      "controls": false,
+      "fields": [
+        {
+          "text": "Price style◯ Normally X, now Y◯ Just Y◯ Don’t mention price",
+          "bottom": 402.03125
+        },
+        {
+          "text": "Offer price49",
+          "bottom": 457.625
+        },
+        {
+          "text": "On the callJust $49",
+          "bottom": 513.3125
+        }
+      ],
+      "shellBottom": 635.390625
+    },
+    {
+      "time": 250,
+      "scene": "save",
+      "controls": false,
+      "fields": [
+        {
+          "text": "Offer expiration or limited spotsOptional — leave blank",
+          "bottom": 388.22406005859375
+        },
+        {
+          "text": "Save & Connect Leads",
+          "bottom": 424.22857666015625
+        }
+      ],
+      "shellBottom": 637.08984375
+    },
+    {
+      "time": 264,
+      "scene": "save",
+      "controls": false,
+      "fields": [
+        {
+          "text": "Offer expiration or limited spotsOptional — leave blank",
+          "bottom": 388.5
+        },
+        {
+          "text": "Save & Connect Leads✓",
+          "bottom": 425.078125
+        }
+      ],
+      "shellBottom": 635.390625
+    },
+    {
+      "time": 277.9,
+      "scene": "save",
+      "controls": false,
+      "fields": [
+        {
+          "text": "Offer expiration or limited spotsOptional — leave blank",
+          "bottom": 388.5
+        },
+        {
+          "text": "Save & Connect Leads✓",
+          "bottom": 425.078125
+        }
+      ],
+      "shellBottom": 635.390625
+    },
+    {
+      "time": 278,
+      "scene": "copy",
+      "controls": false,
+      "fields": [
+        {
+          "text": "Where is the form?Select…⌄",
+          "bottom": 387.1373291015625
+        },
+        {
+          "text": "This campaign's connection address[Your private campaign connection address]",
+          "bottom": 443.1758117675781
+        },
+        {
+          "text": "Copy",
+          "bottom": 479.1803283691406
+        }
+      ],
+      "shellBottom": 637.08984375
+    },
+    {
+      "time": 290.75,
+      "scene": "copy",
+      "controls": false,
+      "fields": [
+        {
+          "text": "Where is the form?GoHighLevel⌄",
+          "bottom": 387.421875
+        },
+        {
+          "text": "This campaign's connection address[Your private campaign connection address]",
+          "bottom": 443.015625
+        },
+        {
+          "text": "Copy✓",
+          "bottom": 479.59375
+        }
+      ],
+      "shellBottom": 635.390625
+    },
+    {
+      "time": 303.4,
+      "scene": "copy",
+      "controls": false,
+      "fields": [
+        {
+          "text": "Where is the form?GoHighLevel⌄",
+          "bottom": 387.421875
+        },
+        {
+          "text": "This campaign's connection address[Your private campaign connection address]",
+          "bottom": 443.015625
+        },
+        {
+          "text": "Copy✓",
+          "bottom": 479.59375
+        }
+      ],
+      "shellBottom": 635.390625
+    },
+    {
+      "time": 303.5,
+      "scene": "workflow",
+      "controls": false,
+      "fields": [
+        {
+          "text": "Create Workflow",
+          "bottom": 364.268310546875
+        },
+        {
+          "text": "Start from scratch",
+          "bottom": 400.2728271484375
+        },
+        {
+          "text": "Workflow nameClick here",
+          "bottom": 456.3113098144531
+        }
+      ],
+      "shellBottom": 637.08984375
+    },
+    {
+      "time": 318.5,
+      "scene": "workflow",
+      "controls": false,
+      "fields": [
+        {
+          "text": "Create Workflow✓",
+          "bottom": 365.59375
+        },
+        {
+          "text": "Start from scratch✓",
+          "bottom": 402.171875
+        },
+        {
+          "text": "Workflow nameClick here",
+          "bottom": 457.765625
+        }
+      ],
+      "shellBottom": 635.390625
+    },
+    {
+      "time": 333.4,
+      "scene": "workflow",
+      "controls": false,
+      "fields": [
+        {
+          "text": "Create Workflow✓",
+          "bottom": 365.59375
+        },
+        {
+          "text": "Start from scratch✓",
+          "bottom": 402.171875
+        },
+        {
+          "text": "Workflow nameSend Back Pain Form to Patient Pipeline",
+          "bottom": 457.765625
+        }
+      ],
+      "shellBottom": 635.390625
+    },
+    {
+      "time": 333.5,
+      "scene": "trigger",
+      "controls": false,
+      "fields": [
+        {
+          "text": "Add New Trigger",
+          "bottom": 360.5040588378906
+        },
+        {
+          "text": "Search triggersClick here",
+          "bottom": 405.1080627441406
+        },
+        {
+          "text": "Form Submitted",
+          "bottom": 434.529052734375
+        },
+        {
+          "text": "Form IsSelect…⌄",
+          "bottom": 483.40130615234375
+        },
+        {
+          "text": "Save Trigger",
+          "bottom": 512.8223266601562
+        }
+      ],
+      "shellBottom": 637.08984375
+    },
+    {
+      "time": 347.75,
+      "scene": "trigger",
+      "controls": false,
+      "fields": [
+        {
+          "text": "Add New Trigger✓",
+          "bottom": 362.71875
+        },
+        {
+          "text": "Search triggersForm Submitted",
+          "bottom": 406.96875
+        },
+        {
+          "text": "Form Submitted✓",
+          "bottom": 437.875
+        },
+        {
+          "text": "Form IsSelect…⌄Select an optionBack Pain New Patient Form",
+          "bottom": 486.359375
+        },
+        {
+          "text": "Save Trigger",
+          "bottom": 515.546875
+        }
+      ],
+      "shellBottom": 635.390625
+    },
+    {
+      "time": 361.9,
+      "scene": "trigger",
+      "controls": false,
+      "fields": [
+        {
+          "text": "Add New Trigger✓",
+          "bottom": 362.71875
+        },
+        {
+          "text": "Search triggersForm Submitted",
+          "bottom": 406.96875
+        },
+        {
+          "text": "Form Submitted✓",
+          "bottom": 437.875
+        },
+        {
+          "text": "Form IsBack Pain New Patient Form⌄",
+          "bottom": 486.359375
+        },
+        {
+          "text": "Save Trigger✓",
+          "bottom": 517.265625
+        }
+      ],
+      "shellBottom": 635.390625
+    },
+    {
+      "time": 362,
+      "scene": "webhook",
+      "controls": false,
+      "fields": [
+        {
+          "text": "+ Add action",
+          "bottom": 364.268310546875
+        },
+        {
+          "text": "Search actionsClick here",
+          "bottom": 420.30682373046875
+        },
+        {
+          "text": "Webhook",
+          "bottom": 456.3113098144531
+        },
+        {
+          "text": "Custom WebhookNot used in this lesson",
+          "bottom": 509.1210632324219
+        }
+      ],
+      "shellBottom": 637.08984375
+    },
+    {
+      "time": 376.75,
+      "scene": "webhook",
+      "controls": false,
+      "fields": [
+        {
+          "text": "+ Add action✓",
+          "bottom": 365.59375
+        },
+        {
+          "text": "Search actionswebhook",
+          "bottom": 421.1875
+        },
+        {
+          "text": "Webhook✓",
+          "bottom": 457.765625
+        },
+        {
+          "text": "Custom WebhookNot used in this lesson",
+          "bottom": 510.15625
+        }
+      ],
+      "shellBottom": 635.390625
+    },
+    {
+      "time": 391.4,
+      "scene": "webhook",
+      "controls": false,
+      "fields": [
+        {
+          "text": "+ Add action✓",
+          "bottom": 365.59375
+        },
+        {
+          "text": "Search actionswebhook",
+          "bottom": 421.1875
+        },
+        {
+          "text": "Webhook✓",
+          "bottom": 457.765625
+        },
+        {
+          "text": "Custom WebhookNot used in this lesson",
+          "bottom": 510.15625
+        }
+      ],
+      "shellBottom": 635.390625
+    },
+    {
+      "time": 391.5,
+      "scene": "destination",
+      "controls": false,
+      "fields": [
+        {
+          "text": "Action NameClick here",
+          "bottom": 384.30230712890625
+        },
+        {
+          "text": "MethodSelect…⌄",
+          "bottom": 443.1758117675781
+        },
+        {
+          "text": "URLClick here",
+          "bottom": 499.2143249511719
+        }
+      ],
+      "shellBottom": 637.08984375
+    },
+    {
+      "time": 407.5,
+      "scene": "destination",
+      "controls": false,
+      "fields": [
+        {
+          "text": "Action NameSend lead to Patient Pipeline",
+          "bottom": 384.609375
+        },
+        {
+          "text": "MethodPOST⌄",
+          "bottom": 443.015625
+        },
+        {
+          "text": "URL[Your private campaign connection address]",
+          "bottom": 498.609375
+        }
+      ],
+      "shellBottom": 635.390625
+    },
+    {
+      "time": 423.4,
+      "scene": "destination",
+      "controls": false,
+      "fields": [
+        {
+          "text": "Action NameSend lead to Patient Pipeline",
+          "bottom": 384.609375
+        },
+        {
+          "text": "MethodPOST⌄",
+          "bottom": 443.015625
+        },
+        {
+          "text": "URL[Your private campaign connection address]",
+          "bottom": 498.609375
+        }
+      ],
+      "shellBottom": 635.390625
+    },
+    {
+      "time": 423.5,
+      "scene": "save-action",
+      "controls": false,
+      "fields": [
+        {
+          "text": "HeadersLeave empty",
+          "bottom": 381.07354736328125
+        },
+        {
+          "text": "Custom DataLeave empty for this lesson",
+          "bottom": 433.88330078125
+        },
+        {
+          "text": "Save Action",
+          "bottom": 469.8878173828125
+        }
+      ],
+      "shellBottom": 637.08984375
+    },
+    {
+      "time": 436.25,
+      "scene": "save-action",
+      "controls": false,
+      "fields": [
+        {
+          "text": "HeadersLeave empty",
+          "bottom": 381.40625
+        },
+        {
+          "text": "Custom DataLeave empty for this lesson",
+          "bottom": 433.796875
+        },
+        {
+          "text": "Save Action",
+          "bottom": 469.515625
+        }
+      ],
+      "shellBottom": 635.390625
+    },
+    {
+      "time": 448.9,
+      "scene": "save-action",
+      "controls": false,
+      "fields": [
+        {
+          "text": "HeadersLeave empty",
+          "bottom": 381.40625
+        },
+        {
+          "text": "Custom DataLeave empty for this lesson",
+          "bottom": 433.796875
+        },
+        {
+          "text": "Save Action✓",
+          "bottom": 470.375
+        }
+      ],
+      "shellBottom": 635.390625
+    },
+    {
+      "time": 449,
+      "scene": "publish",
+      "controls": false,
+      "fields": [
+        {
+          "text": "Settings",
+          "bottom": 360.5040588378906
+        },
+        {
+          "text": "Allow Re-entryClick here",
+          "bottom": 401.8478088378906
+        },
+        {
+          "text": "Builder",
+          "bottom": 431.268798828125
+        },
+        {
+          "text": "Save",
+          "bottom": 460.6898193359375
+        },
+        {
+          "text": "Draft / PublishClick here",
+          "bottom": 502.0335693359375
+        }
+      ],
+      "shellBottom": 637.08984375
+    },
+    {
+      "time": 463.25,
+      "scene": "publish",
+      "controls": false,
+      "fields": [
+        {
+          "text": "Settings✓",
+          "bottom": 362.71875
+        },
+        {
+          "text": "Allow Re-entryOn",
+          "bottom": 403.734375
+        },
+        {
+          "text": "Builder✓",
+          "bottom": 434.640625
+        },
+        {
+          "text": "Save",
+          "bottom": 463.828125
+        },
+        {
+          "text": "Draft / PublishClick here",
+          "bottom": 504.84375
+        }
+      ],
+      "shellBottom": 635.390625
+    },
+    {
+      "time": 477.4,
+      "scene": "publish",
+      "controls": false,
+      "fields": [
+        {
+          "text": "Settings✓",
+          "bottom": 362.71875
+        },
+        {
+          "text": "Allow Re-entryOn",
+          "bottom": 403.734375
+        },
+        {
+          "text": "Builder✓",
+          "bottom": 434.640625
+        },
+        {
+          "text": "Save✓",
+          "bottom": 465.546875
+        },
+        {
+          "text": "Draft / PublishPublish",
+          "bottom": 506.5625
+        }
+      ],
+      "shellBottom": 635.390625
+    },
+    {
+      "time": 477.5,
+      "scene": "submit",
+      "controls": false,
+      "fields": [
+        {
+          "text": "First NameClick here",
+          "bottom": 375.68707275390625
+        },
+        {
+          "text": "PhoneClick here",
+          "bottom": 420.29107666015625
+        },
+        {
+          "text": "Required consentRead and complete in your own form",
+          "bottom": 462.8790588378906
+        },
+        {
+          "text": "Submit",
+          "bottom": 492.3000793457031
+        },
+        {
+          "text": "Submissions",
+          "bottom": 521.7210693359375
+        }
+      ],
+      "shellBottom": 637.08984375
+    },
+    {
+      "time": 493.75,
+      "scene": "submit",
+      "controls": false,
+      "fields": [
+        {
+          "text": "First NameYour first name",
+          "bottom": 376.0625
+        },
+        {
+          "text": "PhoneYour own phone number",
+          "bottom": 420.3125
+        },
+        {
+          "text": "Required consentRead and complete in your own form",
+          "bottom": 462.5625
+        },
+        {
+          "text": "Submit",
+          "bottom": 491.75
+        },
+        {
+          "text": "Submissions",
+          "bottom": 520.9375
+        }
+      ],
+      "shellBottom": 635.390625
+    },
+    {
+      "time": 509.9,
+      "scene": "submit",
+      "controls": false,
+      "fields": [
+        {
+          "text": "First NameYour first name",
+          "bottom": 376.0625
+        },
+        {
+          "text": "PhoneYour own phone number",
+          "bottom": 420.3125
+        },
+        {
+          "text": "Required consentRead and complete in your own form",
+          "bottom": 462.5625
+        },
+        {
+          "text": "Submit✓",
+          "bottom": 493.46875
+        },
+        {
+          "text": "Submissions✓",
+          "bottom": 524.375
+        }
+      ],
+      "shellBottom": 635.390625
+    },
+    {
+      "time": 510,
+      "scene": "verify",
+      "controls": false,
+      "fields": [
+        {
+          "text": "Latest receiptWaiting for a submission from your form",
+          "bottom": 381.07354736328125
+        },
+        {
+          "text": "Refresh page",
+          "bottom": 417.07806396484375
+        },
+        {
+          "text": "Leads",
+          "bottom": 453.08258056640625
+        },
+        {
+          "text": "Match your testName + phone + correct campaign",
+          "bottom": 505.8923034667969
+        }
+      ],
+      "shellBottom": 637.08984375
+    },
+    {
+      "time": 523.5,
+      "scene": "verify",
+      "controls": false,
+      "fields": [
+        {
+          "text": "Latest receiptWaiting for a submission from your form",
+          "bottom": 381.40625
+        },
+        {
+          "text": "Refresh page✓",
+          "bottom": 417.984375
+        },
+        {
+          "text": "Leads",
+          "bottom": 453.703125
+        },
+        {
+          "text": "Match your testName + phone + correct campaign",
+          "bottom": 506.09375
+        }
+      ],
+      "shellBottom": 635.390625
+    },
+    {
+      "time": 536.9,
+      "scene": "verify",
+      "controls": false,
+      "fields": [
+        {
+          "text": "Latest receiptWaiting for a submission from your form",
+          "bottom": 381.40625
+        },
+        {
+          "text": "Refresh page✓",
+          "bottom": 417.984375
+        },
+        {
+          "text": "Leads✓",
+          "bottom": 454.5625
+        },
+        {
+          "text": "Match your testName + phone + correct campaign",
+          "bottom": 506.953125
+        }
+      ],
+      "shellBottom": 635.390625
+    },
+    {
+      "time": 537,
+      "scene": "duplicates",
+      "controls": false,
+      "fields": [
+        {
+          "text": "Lead sources",
+          "bottom": 364.268310546875
+        },
+        {
+          "text": "New leadA new campaign lead was created",
+          "bottom": 417.07806396484375
+        },
+        {
+          "text": "Updated leadSame campaign + same phone may update the existing lead",
+          "bottom": 469.8878173828125
+        },
+        {
+          "text": "RejectedOpen the receipt and read the reason",
+          "bottom": 522.6975708007812
+        }
+      ],
+      "shellBottom": 637.08984375
+    },
+    {
+      "time": 551.75,
+      "scene": "duplicates",
+      "controls": false,
+      "fields": [
+        {
+          "text": "Lead sources✓",
+          "bottom": 365.59375
+        },
+        {
+          "text": "New leadA new campaign lead was created",
+          "bottom": 417.984375
+        },
+        {
+          "text": "Updated leadSame campaign + same phone may update the existing lead",
+          "bottom": 470.375
+        },
+        {
+          "text": "RejectedOpen the receipt and read the reason",
+          "bottom": 522.765625
+        }
+      ],
+      "shellBottom": 635.390625
+    },
+    {
+      "time": 566.4,
+      "scene": "duplicates",
+      "controls": false,
+      "fields": [
+        {
+          "text": "Lead sources✓",
+          "bottom": 365.59375
+        },
+        {
+          "text": "New leadA new campaign lead was created",
+          "bottom": 417.984375
+        },
+        {
+          "text": "Updated leadSame campaign + same phone may update the existing lead",
+          "bottom": 470.375
+        },
+        {
+          "text": "RejectedOpen the receipt and read the reason",
+          "bottom": 522.765625
+        }
+      ],
+      "shellBottom": 635.390625
+    },
+    {
+      "time": 566.5,
+      "scene": "internal",
+      "controls": false,
+      "fields": [
+        {
+          "text": "Send internal testChecks only Patient Pipeline's side",
+          "bottom": 381.07354736328125
+        },
+        {
+          "text": "Connector action testCan send real data; does not prove the trigger",
+          "bottom": 433.88330078125
+        },
+        {
+          "text": "Final checkActual form → matching campaign lead",
+          "bottom": 490.0163269042969
+        }
+      ],
+      "shellBottom": 637.08984375
+    },
+    {
+      "time": 580.75,
+      "scene": "internal",
+      "controls": false,
+      "fields": [
+        {
+          "text": "Send internal testChecks only Patient Pipeline's side",
+          "bottom": 381.40625
+        },
+        {
+          "text": "Connector action testCan send real data; does not prove the trigger",
+          "bottom": 433.796875
+        },
+        {
+          "text": "Final checkActual form → matching campaign lead",
+          "bottom": 489.484375
+        }
+      ],
+      "shellBottom": 635.390625
+    },
+    {
+      "time": 594.9,
+      "scene": "internal",
+      "controls": false,
+      "fields": [
+        {
+          "text": "Send internal testChecks only Patient Pipeline's side",
+          "bottom": 381.40625
+        },
+        {
+          "text": "Connector action testCan send real data; does not prove the trigger",
+          "bottom": 433.796875
+        },
+        {
+          "text": "Final checkActual form → matching campaign lead",
+          "bottom": 489.484375
+        }
+      ],
+      "shellBottom": 635.390625
+    },
+    {
+      "time": 595,
+      "scene": "troubleshoot",
+      "controls": false,
+      "fields": [
+        {
+          "text": "1 • SubmissionsCorrect form and today's response",
+          "bottom": 381.07354736328125
+        },
+        {
+          "text": "2 • Execution LogsMatch the contact and time",
+          "bottom": 433.88330078125
+        },
+        {
+          "text": "3 • WorkflowForm Is correct; Saved AND Published",
+          "bottom": 486.69305419921875
+        },
+        {
+          "text": "4 • WebhookPOST and the current campaign address",
+          "bottom": 539.5028076171875
+        }
+      ],
+      "shellBottom": 637.08984375
+    },
+    {
+      "time": 611.25,
+      "scene": "troubleshoot",
+      "controls": false,
+      "fields": [
+        {
+          "text": "1 • SubmissionsCorrect form and today's response",
+          "bottom": 381.40625
+        },
+        {
+          "text": "2 • Execution LogsMatch the contact and time",
+          "bottom": 433.796875
+        },
+        {
+          "text": "3 • WorkflowForm Is correct; Saved AND Published",
+          "bottom": 486.1875
+        },
+        {
+          "text": "4 • WebhookPOST and the current campaign address",
+          "bottom": 538.578125
+        }
+      ],
+      "shellBottom": 635.390625
+    },
+    {
+      "time": 627.4,
+      "scene": "troubleshoot",
+      "controls": false,
+      "fields": [
+        {
+          "text": "1 • SubmissionsCorrect form and today's response",
+          "bottom": 381.40625
+        },
+        {
+          "text": "2 • Execution LogsMatch the contact and time",
+          "bottom": 433.796875
+        },
+        {
+          "text": "3 • WorkflowForm Is correct; Saved AND Published",
+          "bottom": 486.1875
+        },
+        {
+          "text": "4 • WebhookPOST and the current campaign address",
+          "bottom": 538.578125
+        }
+      ],
+      "shellBottom": 635.390625
+    },
+    {
+      "time": 627.5,
+      "scene": "finish",
+      "controls": false,
+      "fields": []
+    },
+    {
+      "time": 643,
+      "scene": "finish",
+      "controls": false,
+      "fields": []
+    },
+    {
+      "time": 658.4,
+      "scene": "finish",
+      "controls": false,
+      "fields": []
+    }
+  ]
+}

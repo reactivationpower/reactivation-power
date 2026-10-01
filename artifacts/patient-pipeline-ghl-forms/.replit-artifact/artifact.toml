@@ -1,0 +1,29 @@
+kind = "video"
+videoAspectRatio = "16:9"
+previewPath = "/patient-pipeline-ghl-forms/"
+title = "Patient Pipeline — Connect a GoHighLevel Form"
+description = "Standalone 16:9 beginner lesson with the approved Sarah narration, animated cursor and visible typing. External screens are labeled instructional recreations; no live connection result is claimed."
+version = "1.0.0"
+id = "artifacts/patient-pipeline-ghl-forms"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/patient-pipeline-ghl-forms/" ]
+localPort = 18129
+
+[services.development]
+run = "pnpm --filter @workspace/patient-pipeline-ghl-forms run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/patient-pipeline-ghl-forms", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/patient-pipeline-ghl-forms/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "18129"
+BASE_PATH = "/patient-pipeline-ghl-forms/"

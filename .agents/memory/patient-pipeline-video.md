@@ -17,11 +17,11 @@ For the longer walkthrough, show the complete actual caller viewport, not a cut-
 
 **How to apply:** In future dual-product video work, use branded but privacy-safe seeded examples, preserve enough screen context to show the actual caller workflow, and avoid a full tour of proprietary scripts or patient records. Do not treat the optional landing page as an approved build until the user chooses it.
 
-For tutorial narration, prioritize connected American-English conversation and real sentence pauses over a short runtime. Write explanations with transitions and reasons, not spoken bullet labels. Shorten dead air between chapters without compressing or removing pauses inside the performance.
+For tutorial narration, prioritize connected American-English conversation and real sentence pauses over a short runtime. Write explanations with transitions and reasons, not spoken bullet labels. The performance should sound like someone sitting beside the viewer at a desk, explaining how the completed step leads into the next. This applies to all three connection lessons, not just the native GoHighLevel lesson. Shorten dead air between chapters without compressing or removing pauses inside the performance.
 
-**Why:** The user rejected a first-campaign narration that sounded like disconnected bullet reading, with unnatural rhythm and insufficient punctuation pauses. A shorter timeline did not address that complaint.
+**Why:** The user rejected a first-campaign narration that sounded like disconnected bullet reading, with unnatural rhythm and insufficient punctuation pauses, and raised the same issue after hearing the GoHighLevel tutorial. Warm voice settings and non-bulleted paragraph text alone did not solve it.
 
-**How to apply:** Choose a conversational performance, preserve its full breathing and sentence endings, and retime the existing screen actions to the new narration. Do not claim that waveform checks establish subjective voice quality; offer a short audition alongside the full revised film.
+**How to apply:** Confirm the speaking style with a short actual-setup audition before generating another full series. Preserve the approved voice identity and speaking pace, use connected explanations rather than a chain of commands, and retain breathing and sentence endings. Rebuild each lesson's scene durations and action timings from the new audio: clicks, typing, and screen changes must follow the relevant spoken instructions, not old timings or a uniformly stretched timeline. Do not claim that waveform checks establish subjective voice quality.
 
 For long tutorial delivery, distinguish a working preview from a finished, downloadable MP4. When workspace exports lose progress, an explicitly authorized direct render can provide a project-saved file and a download card.
 
@@ -29,17 +29,23 @@ For long tutorial delivery, distinguish a working preview from a finished, downl
 
 **How to apply:** Do not claim access to platform export history or the user's browser downloads. Verify the actual rendered file's duration, video and audio streams, decoding, and representative frames before presenting it. Preserve the current narration and approved visual corrections during export; do not shorten the tutorial merely to make rendering easier.
 
+Check the actual export capture route, not just the workspace screenshot, before rendering a long film.
+
+**Why:** The public development URL injected a blue preview banner and displaced the film, clipping its footer, while the workspace screenshot looked clean. Successful layout checks alone did not establish clean export pixels.
+
+**How to apply:** Inspect an image captured by the exporter itself and assert that the entire film fits the viewport before committing to a full render. Keep platform development notices out of the rendered artwork.
+
 Beginner campaign-connection teaching uses three standalone walkthroughs with a simple route-selection guide: GoHighLevel forms; Facebook/Instagram forms already feeding GoHighLevel; Facebook/Instagram forms without that connection. Preserve the existing overview separately.
 
 **Why:** The user explicitly approved three complete lessons rather than one branching video. The goal is self-service completion by someone with no technical background, reducing avoidable support requests—not merely explaining the concepts.
 
 **How to apply:** Each lesson must include every external setup step, copying/pasting and tab changes, pause points, expected results, a real authorized form submission into the same campaign, and specific troubleshooting. Do not assume Facebook leads already reach GoHighLevel, invent a successful external test, or require viewers to combine several lessons. Structure approval alone is not authorization to modify external accounts or launch live automations.
 
-The three beginner lessons must match the approved first-campaign video's voice, speaking speed, animated cursor clicks, visible typing, zooms, pauses, and branding. Real external demo-account recordings are source material, not a request to replace that produced style with raw screencasts.
+The three beginner lessons must match the approved first-campaign video's voice, speaking speed, animated cursor clicks, visible typing, zooms, pauses, and branding. The agent is responsible for producing the videos; do not shift that work to the user by asking them to make tutorial recordings.
 
-**Why:** The user selected real external recordings rather than illustrated recreations, then explicitly clarified that all three finished videos should look and sound just like the earlier animated-cursor tutorial.
+**Why:** The user initially selected real-recording footage, but clarified that they have no such recordings and expected the agent to make the videos. Their explicit visual requirement is the earlier animated-cursor tutorial's style, not raw screencasts.
 
-**How to apply:** Reuse the approved production treatment and voice settings. Obtain authentic external screen states without treating a style clarification as permission to fabricate a completed setup or verified delivery.
+**How to apply:** Reuse the approved production treatment and voice settings. When external screens must be recreated from documentation, disclose that clearly in the lesson; never present a recreation as a genuine authenticated recording or verified delivery.
 
 For the native-GoHighLevel-form lesson, teach one dedicated Form Submitted workflow filtered to the exact form, followed by the ordinary outbound Webhook action. Do not mix in a tag-based route, Custom Webhook, or manual JSON entry.
 
