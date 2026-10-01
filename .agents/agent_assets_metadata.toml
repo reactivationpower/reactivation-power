@@ -956,3 +956,31 @@ mtime_ms = 1790811997259
 storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/751f4858-09bc-4630-8a0f-18b79b2ff098/f5965fc8-db3d-4208-bc28-41721d69a066"
 storage_version_token = "1790812101130095"
 content_type = "video/mp4"
+
+[[outputs]]
+id = "HAUnpbmOx191moBHFfIHL"
+uri = "file://exports/Patient-Pipeline-GoHighLevel-Beginner-Lesson-Review.pdf"
+type = "pdf"
+title = "GoHighLevel → Patient Pipeline: Beginner Lesson Draft"
+description = "15-page review copy with 31 narrated steps, on-screen directions, pause points, success checks, and 8 troubleshooting sections. Research-checked; live rehearsal still required."
+logical_id = "e77626fb-3a0f-426a-862b-c95d1fe22df1"
+content_hash = "sha256:a52d9a0fb8573c914aca32d4d333911cddc9bcd069ca8892d14c9c6c50a4405f"
+size = 73939
+mtime_ms = 1790813294168
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/e77626fb-3a0f-426a-862b-c95d1fe22df1/8118460a-a295-411f-8520-16487200de62"
+storage_version_token = "1790813363413459"
+content_type = "application/pdf"
+
+[[outputs]]
+id = "GZ4xCyodPY6BZFloYoh6W"
+uri = "file://exports/Patient-Pipeline-GoHighLevel-Beginner-Lesson-Review.html"
+type = "html"
+title = "Read the lesson draft as a web document"
+description = "The same script in a continuous, readable format, with linked sources and print-friendly styling."
+logical_id = "01627310-5517-4027-8b97-a6a933abad3c"
+content_hash = "sha256:3ffe413b696b82561578a926bf7dcf598a97b98cf299e4aa491f92917261a4e4"
+size = 46774
+mtime_ms = 1790813293884
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/01627310-5517-4027-8b97-a6a933abad3c/2d473975-fa68-40ec-b9b8-29737572d592"
+storage_version_token = "1790813364019755"
+content_type = "text/html"

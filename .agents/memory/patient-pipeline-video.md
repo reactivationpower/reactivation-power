@@ -34,3 +34,9 @@ Beginner campaign-connection teaching uses three standalone walkthroughs with a 
 **Why:** The user explicitly approved three complete lessons rather than one branching video. The goal is self-service completion by someone with no technical background, reducing avoidable support requests—not merely explaining the concepts.
 
 **How to apply:** Each lesson must include every external setup step, copying/pasting and tab changes, pause points, expected results, a real authorized form submission into the same campaign, and specific troubleshooting. Do not assume Facebook leads already reach GoHighLevel, invent a successful external test, or require viewers to combine several lessons. Structure approval alone is not authorization to modify external accounts or launch live automations.
+
+For the native-GoHighLevel-form lesson, teach one dedicated Form Submitted workflow filtered to the exact form, followed by the ordinary outbound Webhook action. Do not mix in a tag-based route, Custom Webhook, or manual JSON entry.
+
+**Why:** A single form-based route minimizes beginner decisions and makes the triggering event match the required end-to-end form test. Documentation/code compatibility is evidence for the draft, not a substitute for an authorized live rehearsal.
+
+**How to apply:** Before filming, verify the actual account's menus, access, charges, outgoing data, and matching form-to-campaign delivery. Resolve any conflicting in-app instructions rather than silently skipping them in the video. Use the same saved campaign throughout; keep the earlier overview and its MP4 separate.
