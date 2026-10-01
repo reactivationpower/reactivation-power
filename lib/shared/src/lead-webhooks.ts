@@ -352,6 +352,6 @@ export const GHL_SAMPLE_PAYLOAD: Record<string, unknown> = {
   contact_source: 'facebook ad',
   contact_type: 'lead',
   location: { name: 'Summit Chiropractic', address: '900 Broadway', city: 'Denver', state: 'CO', country: 'US', id: 'loc_1' },
-  workflow: { id: 'wf_1', name: 'Send new leads to Reactivation Power' },
+  workflow: { id: 'wf_1', name: 'Send new leads to Patient Pipeline' },
   customData: { requested_time: 'Tuesday after 3pm', message: 'Lower back has been bad for two weeks' },
 }

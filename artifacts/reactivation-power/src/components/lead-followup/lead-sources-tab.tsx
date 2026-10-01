@@ -332,11 +332,13 @@ export function GhlGuide({ webhookUrl, campaignName, copy, copied }: { webhookUr
   const tag = campaignName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'new-lead'
   const steps: Array<{ title: string; body: React.ReactNode }> = [
     {
-      title: 'Decide how GoHighLevel knows a contact belongs to this campaign',
+      title: 'Find the exact GoHighLevel form for this offer',
       body: (
         <>
-          The simplest rule is a tag. Have your ad form or funnel add the tag <Chip>{tag}</Chip> to each new contact (Form settings → Actions → Add tag, or in the
-          Facebook lead-ad integration&rsquo;s field mapping). If you already use a pipeline stage or a specific form, that works as the trigger instead.
+          In the correct practice, open <b>Sites → Forms</b> and note the exact name of the form for this offer.
+          Check that it collects a name and phone number. Keep its published page or public form link open in another tab.
+          These steps are for a form created in GoHighLevel, even if it is embedded on your website.
+          For contacts arriving through tags instead, use the separate tag route below.
         </>
       ),
     },
@@ -345,7 +347,7 @@ export function GhlGuide({ webhookUrl, campaignName, copy, copied }: { webhookUr
       body: (
         <>
           In GoHighLevel open <b>Automation → Workflows → Create Workflow → Start from scratch</b>. Name it something like
-          &ldquo;Send {campaignName} leads to Reactivation Power&rdquo;.
+          &ldquo;Send {campaignName} leads to Patient Pipeline&rdquo;. Use a dedicated workflow, not an existing nurturing workflow.
         </>
       ),
     },
@@ -353,8 +355,8 @@ export function GhlGuide({ webhookUrl, campaignName, copy, copied }: { webhookUr
       title: 'Add the trigger',
       body: (
         <>
-          Click <b>Add New Trigger</b> and choose <b>Contact Tag</b>. Under filters pick <b>Tag added</b> and select <Chip>{tag}</Chip>.
-          (Using a form instead? Choose <b>Form Submitted</b> and pick the form.) Save the trigger.
+          Click <b>Add New Trigger</b> and choose <b>Form Submitted</b>. Add the <b>Form Is</b> filter and select the exact
+          form name you noted above. Save the trigger. This keeps unrelated forms out of this campaign.
         </>
       ),
     },
@@ -362,7 +364,8 @@ export function GhlGuide({ webhookUrl, campaignName, copy, copied }: { webhookUr
       title: 'Add the Webhook action',
       body: (
         <>
-          Click the <b>+</b> under the trigger, choose <b>Webhook</b>, set <b>Method</b> to <Chip>POST</Chip> and paste this as the <b>URL</b>:
+          Click the <b>+</b> under the trigger, choose the ordinary <b>Webhook</b> action (not Custom Webhook),
+          set <b>Method</b> to <Chip>POST</Chip> and paste this campaign&rsquo;s private address as the <b>URL</b>:
           <span className="mt-2 flex flex-wrap items-center gap-2">
             <code className="min-w-0 flex-1 truncate rounded-md border border-border bg-muted/40 px-3 py-2 font-mono text-xs" title={webhookUrl}>{webhookUrl}</code>
             <Button type="button" size="sm" variant="outline" className="gap-2" onClick={() => copy(webhookUrl)} data-testid="button-copy-webhook-url-ghl">
@@ -370,7 +373,8 @@ export function GhlGuide({ webhookUrl, campaignName, copy, copied }: { webhookUr
               {copied ? 'Copied' : 'Copy'}
             </Button>
           </span>
-          <span className="mt-2 block">Leave headers and the query empty. Nothing else needs to be filled in.</span>
+          <span className="mt-2 block">Leave Headers, query parameters and Custom Data empty for the basic setup.
+            Standard contact fields, including name and phone, are sent automatically; no manual mapping or JSON is needed. Click <b>Save Action</b>.</span>
         </>
       ),
     },
@@ -384,11 +388,17 @@ export function GhlGuide({ webhookUrl, campaignName, copy, copied }: { webhookUr
       ),
     },
     {
-      title: 'Publish and test',
+      title: 'Publish and submit the actual form',
       body: (
         <>
-          Switch the workflow to <b>Publish</b> and save. Open any test contact in GoHighLevel, add the <Chip>{tag}</Chip> tag, then come back to this tab: the
-          delivery shows up under &ldquo;Last 20 received&rdquo; within a few seconds, marked <b>GoHighLevel</b>, and the lead appears on the Leads tab.
+          Switch the workflow to <b>Publish</b> and save. Open the actual published page or public link for the same form
+          selected in <b>Form Is</b> and submit it once with your own name and a phone number you control, not patient details.
+          Existing emails or texts may fire, so let your office know first. Adding a tag does not test this form trigger.
+          Return to this campaign and refresh. In Connection settings, check &ldquo;Last 20 received&rdquo; for a new successful
+          GoHighLevel delivery at the time of your submission, then open the <b>Leads</b> tab and match the name and phone.
+          Reusing the same phone may update an existing lead rather than add a row.
+          An internal test or an older receipt does not prove this new form submission arrived.
+          If it is missing, check the exact Form Is selection, published workflow and Webhook URL before trying again.
         </>
       ),
     },
@@ -407,6 +417,25 @@ export function GhlGuide({ webhookUrl, campaignName, copy, copied }: { webhookUr
           </li>
         ))}
       </ol>
+
+      <details className="mt-6 text-sm" data-testid="ghl-tag-route">
+        <summary className="cursor-pointer font-medium text-foreground">Separate route: contacts sent by a tag (not a native form trigger)</summary>
+        <p className="mt-2 text-muted-foreground">
+          Use this only if your lead source already adds a specific campaign tag, for example to Facebook leads arriving in GoHighLevel.
+          Confirm that automation applies the intended tag; do not assume it does.
+          In a dedicated workflow, choose <b>Contact Tag</b>, filter <b>Tag added</b>, and select that exact tag
+          (for example <Chip>{tag}</Chip>) instead of Form Submitted.
+          Use the same ordinary <b>Webhook</b> action, <b>POST</b>, private campaign URL and automatic standard fields described above.
+          Save the action, <b>Publish</b> and save the workflow.
+        </p>
+        <p className="mt-2 text-muted-foreground">
+          To test this tag route, use a clean contact with your own name and phone that does not already have the selected tag.
+          Add that exact tag, then refresh this campaign and match a new successful delivery and the lead&rsquo;s name and phone.
+          This tests the tag workflow only, not the original form or the automation that applies the tag.
+          To check the full route, submit the original lead form and confirm it applies the tag and produces a new matching delivery.
+          Existing messages may fire; do not use patient details. An older receipt or internal test is not proof of this test.
+        </p>
+      </details>
 
       <h3 className="mt-8 text-sm font-semibold text-foreground">What GoHighLevel sends, and where it lands</h3>
       <p className="mt-1 text-sm text-muted-foreground">These are the standard fields on a GoHighLevel workflow webhook. They map on their own — no field mapping needed.</p>

@@ -95,10 +95,13 @@ export function buildHandoffText({ campaign, offerLine, webhookUrl, source }: { 
   const steps =
     source === 'ghl'
       ? [
-          'In GoHighLevel: Automation > Workflows > Create Workflow > Start from scratch.',
-          'Trigger: Form Submitted (this ad\'s form) or Contact Tag added.',
-          'Action: Webhook, Method POST, URL = the connection address below. Publish.',
-          'Optional Custom Data: requested_time and message.',
+          'Native GoHighLevel form route: in the correct practice, open Sites > Forms and note the exact form for this offer. Check it collects name and phone; keep its published page or public form link open.',
+          'Automation > Workflows > Create Workflow > Start from scratch. Use a dedicated workflow named for this campaign and Patient Pipeline.',
+          'Trigger: Form Submitted. Add the Form Is filter and select that exact form. Save the trigger.',
+          'Action: ordinary Webhook (not Custom Webhook), Method POST, URL = the private connection address below. Standard name and phone fields are sent automatically; no manual mapping or JSON needed. Leave Headers, query parameters and Custom Data empty for basic setup. Save Action, Publish and save the workflow.',
+          'Optional Custom Data only if collected: requested_time and message.',
+          'Form route test: submit that same actual published form once with your own name and a phone you control, not patient details. Adding a tag does not test Form Submitted. Existing emails/texts may fire; let the office know first.',
+          'Separate tag route (only if your source already applies a campaign tag): instead of Form Submitted, choose Contact Tag > Tag added and select the exact tag. Use the same Webhook POST action and campaign URL, save the action, Publish and save. Test by adding that tag to a clean contact with your own name and phone that does not already have it, then match a new delivery and lead. This tests only the tag workflow, not the original form or tag-adding automation. To check the full route, submit the original form and confirm the tag is applied and a new matching delivery arrives.',
         ]
       : source === 'unsure'
         ? [...stepsFor('facebook').map((s) => `[Facebook form] ${s}`), ...stepsFor('website').map((s) => `[Website form] ${s}`)]
@@ -116,10 +119,10 @@ export function buildHandoffText({ campaign, offerLine, webhookUrl, source }: { 
     'Steps:',
     ...steps.map((s, i) => `${i + 1}. ${s}`),
     '',
-    FIELD_TEXT,
+    source === 'ghl' ? 'Standard GoHighLevel contact fields map automatically. The form must collect a usable name and phone.' : FIELD_TEXT,
     source === 'facebook' || source === 'unsure' ? `\nZapier reference: ${ZAPIER_FB_LINK}` : null,
     '',
-    'To test: submit the real form once with your own name and phone. It shows as received in our campaign page within a minute.',
+    'To verify the full form route: submit the real form once with your own name and phone. Existing emails/texts may fire; do not use patient details. Return to this campaign and refresh. In Connection settings > Last 20 received, match a new successful delivery at the time of your submission, then match the name and phone on the Leads tab. Reusing a phone may update an existing lead. An internal test or an older receipt does not prove this new form submission arrived.',
   ]
     .filter((l) => l !== null)
     .join('\n')
@@ -214,9 +217,9 @@ export function ConnectLeadsPanel({ campaign, webhookUrl, offerLine, connectionS
       <div className="flex items-start gap-3">
         <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-emerald-700" />
         <div>
-          <p className="font-semibold text-foreground">Your lead form is connected</p>
+          <p className="font-semibold text-foreground">An external lead delivery was received</p>
           <p className="text-sm text-muted-foreground" data-testid="text-last-received">
-            Last form submission received {timeAgo(received, nowMs)}. This shows the most recent delivery, not a live check that the connection is still working.
+            Last external delivery received {timeAgo(received, nowMs)}. This is historical, not proof of a new form submission or a live check that the connection is still working.
           </p>
         </div>
       </div>
@@ -362,11 +365,15 @@ export function ConnectLeadsPanel({ campaign, webhookUrl, offerLine, connectionS
               <div>
                 <h2 className="text-base font-semibold text-foreground">3. Test with your real form</h2>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Open your actual ad form (or website form) and submit it once with your own name and phone. This page checks for it automatically.
+                  Open your actual ad form (or website form) and submit it once with your own name and phone, not patient details.
+                  For a native GoHighLevel form, use the exact form selected in Form Is, not a tag change.
+                  Existing emails or texts may fire. Return here and refresh, then check Connection settings → Last 20 received for a new successful delivery
+                  at the time of your submission and match the name and phone on this campaign&rsquo;s Leads tab.
+                  Reusing a phone may update an existing lead. An older receipt or internal test is not proof of this new submission.
                 </p>
                 <div className="mt-3 rounded-md border border-border px-4 py-3 text-sm" role="status" data-testid="text-receipt-status">
                   {received ? (
-                    <span className="flex items-center gap-2 text-emerald-900"><CheckCircle2 className="size-4" /> Form submission received {timeAgo(received, nowMs)}. Your form reached us. (This is the latest delivery, not ongoing monitoring.)</span>
+                    <span className="flex items-center gap-2 text-emerald-900"><CheckCircle2 className="size-4" /> Last external delivery received {timeAgo(received, nowMs)}. Check for a new matching delivery and lead; this older receipt alone does not verify the form you just submitted.</span>
                   ) : (
                     <span className="flex items-center gap-2 text-muted-foreground"><Loader2 className="size-4 animate-spin" /> Waiting for a submission from your form. Nothing received yet.</span>
                   )}

@@ -54,7 +54,7 @@ describe('portal start product doors', () => {
         }
       }
       expect(Boolean(screen.queryByTestId('text-lead-summary'))).toBe(leadFollowUp)
-      expect(Boolean(screen.queryByRole('heading', { name: 'Call next' }))).toBe(leadFollowUp)
+      expect(Boolean(screen.queryByRole('heading', { name: 'Calls Due Now' }))).toBe(leadFollowUp)
     })
   }
 })

@@ -13,3 +13,9 @@ Welcome-screen copy should explicitly tell first-time users where to start and r
 **Why:** The user enthusiastically approved a mockup introducing “Connect Your Campaigns” with step-by-step guidance from adding an offer through connecting and testing a lead form.
 
 **How to apply:** Use plain, supportive language that includes the team. Promise guidance, not instant connections or setup without external tools.
+
+An external receipt is not enough to prove a particular form is connected.
+
+**Why:** GoHighLevel's Test Workflow can also produce an external receipt, and historical receipts can belong to another setup attempt. The research-reviewed beginner lesson requires an actual visitor-facing form submission, a corresponding successful delivery, and the matching lead.
+
+**How to apply:** Keep native Form Submitted and tag-triggered tests distinct. Verify the current attempt's delivery time and matching name/phone in the intended campaign; do not turn an external receipt badge into a claim that a new form test passed.
