@@ -3,6 +3,12 @@ name: Patient Pipeline video positioning
 description: Brand and content boundaries for videos explaining both Reactivation and Lead Follow-Up.
 ---
 
+For the landing film's service list, “Chiro family” means the complete practice-family bundle, not just the public catalog's chiropractic category or representative examples.
+
+**Why:** The user requested every Chiro-family service. The bundle includes services categorized elsewhere in the public catalog; its chiropractic group alone would omit supported weight-loss and body-contouring services.
+
+**How to apply:** Check current Chiro practice-family membership, then use public display names. Keep every label readable rather than heavily dimming unselected services.
+
 Use the official Patient Pipeline logo, not the Reactivation Power logo, when a video presents both Reactivation and Lead Follow-Up together. The short two-product launch film can function as a social ad, but the main explanation should show more of the process and distinguish dynamic, prior-service-specific Reactivation conversations (Chiropractic, ChiroThin, SoftWave/shock wave) from campaign-specific Lead Follow-Up conversations.
 
 Patient Pipeline is also the brand for the actual software, including demo and authenticated screens; Reactivation and Lead Follow-Up remain product names.

@@ -1586,3 +1586,17 @@ mtime_ms = 1790880915863
 storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/40a692d8-503b-49e2-8efd-ec17c3ff8e0b/d61dbd37-258f-4a55-aaa0-dd8d0ea1d760"
 storage_version_token = "1790881012854807"
 content_type = "video/mp4"
+
+[[outputs]]
+id = "9KhjyJxB5CtQuvDOKfhOE"
+uri = "file://exports/Patient-Pipeline-Landing-Video-All-Chiro-Services.mp4"
+type = "video"
+title = "Patient Pipeline — All Chiro-Family Services"
+description = "Updated 2:26 landing video. The niches visual now shows all 12 Chiro-family services in a readable two-column list, with the prior-service-to-caller-script explanation intact. Narration remains at 1.20×; audio and all other scenes are unchanged. Full playback, export and decoding verified."
+logical_id = "a0204a30-5e08-4913-b67f-cdef21198d0e"
+content_hash = "sha256:81884f453381451cec95329f0bab9b8bbeaac4872eb1adfd7fa820bc640bf381"
+size = 9180574
+mtime_ms = 1790881826493
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/a0204a30-5e08-4913-b67f-cdef21198d0e/3150fa7b-b409-43ae-b69f-3b3d15e2da21"
+storage_version_token = "1790881908239317"
+content_type = "video/mp4"
