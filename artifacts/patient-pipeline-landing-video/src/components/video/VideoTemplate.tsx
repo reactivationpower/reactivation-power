@@ -3,6 +3,7 @@ import { AnimatePresence } from 'framer-motion'
 import { VideoCanvas, VideoPausedContext, useVideoPlayer, type VideoAspectRatio } from '@/lib/video'
 import { Opportunity } from './video_scenes/Opportunity'
 import { Introduction } from './video_scenes/Introduction'
+import { Niches } from './video_scenes/Niches'
 import { Reactivation } from './video_scenes/Reactivation'
 import { Lead } from './video_scenes/Lead'
 import { Workflow } from './video_scenes/Workflow'
@@ -11,12 +12,12 @@ import { Invitation } from './video_scenes/Invitation'
 import './LandingFilm.css'
 
 export const SCENE_DURATIONS = {
-  opportunity: 23200, introduction: 15300, reactivation: 25200,
-  lead: 19300, workflow: 14100, revenue: 34300, invitation: 17800,
+  opportunity: 21091, introduction: 13909, niches: 12100, reactivation: 22909,
+  lead: 17545, workflow: 12818, revenue: 31182, invitation: 16182,
 }
 const VIDEO_ASPECT_RATIO: VideoAspectRatio = '16:9'
 const SCENES: Record<string, ComponentType> = {
-  opportunity: Opportunity, introduction: Introduction, reactivation: Reactivation,
+  opportunity: Opportunity, introduction: Introduction, niches: Niches, reactivation: Reactivation,
   lead: Lead, workflow: Workflow, revenue: Revenue, invitation: Invitation,
 }
 const START_SEC = (() => {
@@ -53,7 +54,7 @@ export default function VideoTemplate({ durations = SCENE_DURATIONS, loop = true
     <VideoCanvas className="landing-film" data-audio-blocked={audioBlocked} data-current-scene={baseKey}
       aspectRatio={VIDEO_ASPECT_RATIO} style={{ backgroundColor: '#092a3b' }}>
       <AnimatePresence mode="sync">{SceneComponent && <SceneComponent key={currentSceneKey} />}</AnimatePresence>
-      <audio ref={audioRef} src={`${import.meta.env.BASE_URL}audio/landing-composite-refined.mp3`} preload="auto" muted={muted} />
+      <audio ref={audioRef} src={`${import.meta.env.BASE_URL}audio/landing-composite-niches-faster.mp3`} preload="auto" muted={muted} />
     </VideoCanvas>
   </VideoPausedContext.Provider>
 }

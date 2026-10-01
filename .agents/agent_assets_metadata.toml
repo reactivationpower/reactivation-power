@@ -1542,3 +1542,25 @@ mtime_ms = 1790878308863
 storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/3b6dd2db-771d-4af3-8a09-6ce4a709385c/cbeca893-ae12-4299-b1f0-9bf65bc2417b"
 storage_version_token = "1790878379868614"
 content_type = "video/mp4"
+
+[[outputs]]
+id = "-4DQ-Rfxdnnp3Suma9-Iz"
+uri = "file://artifacts/patient-pipeline-landing-video/public/audio/vo-niches-base.mp3"
+type = "audio"
+title = "Patient Pipeline service-tailored reactivation niches"
+description = "Text-to-speech audio: Reactivation isn’t just for chiropractic. It covers a variety of niches, and your caller sees a script tailored to the specific service your office provided to that patient."
+logical_id = "74d1c2a7-5572-4c8f-8180-fcd592685593"
+
+[[outputs]]
+id = "pFtBxaAMqR-i8yYcIuLm2"
+uri = "file://exports/Patient-Pipeline-Landing-Video-Niches-Faster.mp4"
+type = "video"
+title = "Patient Pipeline — Updated Landing Video"
+description = "About 2:28, landscape MP4 (1280×720). Explains multiple supported niches and patient-service-specific scripts before the chiropractic call example. Narration is 1.10×—10% faster—with the same Matilda voice and preserved pitch; music tempo stays unchanged. Existing privacy masks, eight queue rows and the $10,500 one-month example are retained. Export checked by full decoding and representative-frame review."
+logical_id = "a8b14f6a-7d4a-4372-a23a-4d540b1f7ffb"
+content_hash = "sha256:aa26d81dce9cdfb7e01dfdd19f44871d1fcc5736c865df8ad94a050b3e6d3a32"
+size = 8982409
+mtime_ms = 1790879835067
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/a8b14f6a-7d4a-4372-a23a-4d540b1f7ffb/e95e61ae-5d63-4c35-8bc8-083e63a56b46"
+storage_version_token = "1790879931946628"
+content_type = "video/mp4"

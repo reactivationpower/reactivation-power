@@ -1,6 +1,7 @@
 export const SCENE_DETAILS: Record<string, { title: string; filePath: string }> = {
   opportunity: { title: 'The opportunity', filePath: 'src/components/video/video_scenes/Opportunity.tsx' },
   introduction: { title: 'One Patient Pipeline', filePath: 'src/components/video/video_scenes/Introduction.tsx' },
+  niches: { title: 'Service-specific Reactivation scripts', filePath: 'src/components/video/video_scenes/Niches.tsx' },
   reactivation: { title: 'Reactivation in action', filePath: 'src/components/video/video_scenes/Reactivation.tsx' },
   lead: { title: 'Lead Follow-Up in action', filePath: 'src/components/video/video_scenes/Lead.tsx' },
   workflow: { title: 'A repeatable process', filePath: 'src/components/video/video_scenes/Workflow.tsx' },
@@ -11,6 +12,7 @@ export const SCENE_DETAILS: Record<string, { title: string; filePath: string }> 
 export const NARRATION: Record<string, string> = {
   opportunity: 'Your practice may already have opportunities that aren’t turning into appointments. Some are patients who haven’t been back in a while. Others are people who asked about care, but never booked. The challenge is giving your team a consistent way to follow up—and knowing what to say when someone answers.',
   introduction: 'That’s what Patient Pipeline is designed to help with. It brings Reactivation and Lead Follow-Up together, so your staff can approach each conversation with guidance that fits the person they’re calling.',
+  niches: 'Reactivation isn’t just for chiropractic. It covers a variety of niches, and your caller sees a script tailored to the specific service your office provided to that patient.',
   reactivation: 'With reactivation, the conversation starts with the care that patient received before. As they explain what’s happening now, your team selects their response, and the script follows the conversation. Your staff still makes the call and listens to the patient—they’re simply not having to invent every next question.',
   lead: 'For a new inquiry, the starting point is different. The conversation connects to the campaign or offer that caught their attention. Your team can follow up with that context, respond to their questions, and help them take the next step toward an appointment.',
   workflow: 'And it isn’t just about the script. You and your team have an organized way to see who needs attention, record what happened, and keep follow-up moving instead of relying on memory.',

@@ -2,7 +2,7 @@
 
 ## Locked brief
 
-16:9 landscape for a website, separate from the walkthrough. Approximately 2:20–2:30, with final timing derived from natural narration rather than accelerated speech. Same narrator/voice settings as the demo walkthrough. Primary action: request a conversation. No landing-page changes, publishing, live calls, form submissions, or customer-data changes.
+16:9 landscape for a website, separate from the walkthrough. Approximately 2:20–2:30. Preserve the approved Matilda voice and reading; the owner now requests narration playback at 1.10× (up by 0.1×), with pitch preserved and music unchanged. Derive scene timing from the faster narration. Primary action: request a conversation. No landing-page changes, publishing, live calls, form submissions, or customer-data changes.
 
 Show a virtual cursor for every depicted click and character-by-character entry for any depicted typing. Actual product captures, real response-to-screen transitions, privacy-safe seeded examples. No invented UI or fake successful submission. Do not add the rejected disclaimer overlay. The financial scenario is an incremental, one-month example above the office's current results. Per-patient value is an assumption, not guaranteed cash collected or profit. No annual framing.
 
@@ -15,17 +15,18 @@ Motion: two audience streams assemble into a product reveal; modest camera pushe
 Arc: recognize the opportunity, understand the two workflows, see repeatability, understand the financial example, request a conversation.
 Payoff: quiet ivory brand lockup rather than another dashboard. Voice is continuous explanation; music remains subordinate.
 
-## Final timeline — measured Matilda narration, 2:29.2
+## Final timeline — service-specific introduction, narration at 1.10×, 2:27.736
 
 | Shot | Start–end | Main action | Composition/handoff |
 |---|---|---|---|
-| 1 | 0–23.2s | Two audiences resolve from scattered patient tokens | Navy asymmetric headline, teal/blue audience tracks; circles become brand nodes |
-| 2 | 23.2–38.5s | Two product names assemble beneath the actual logo | Ivory centered mark, two connected rails |
-| 3 | 38.5–63.7s | Real reactivation response clicked, next screen revealed | Full caller viewport with cursor parented to image; push into response, pull back on result |
-| 4 | 63.7–83.0s | Campaign-aware new inquiry response clicked | Alternate blue field; full lead viewport, verified real response/result |
-| 5 | 83.0–97.1s | Queue, outcome area, note field clicked and note typed | Wide actual queue transitions into actual outcome screen; focus on note field |
-| 6 | 97.1–131.4s | Four additional reactivations plus three additional lead submissions booked, above existing efforts; $1,500 per patient yields $10,500 from one month | Oversized patient tokens/numerals, incremental baselines, sequential equation; no chart or disclaimer overlay |
-| 7 | 131.4–149.2s | Return to brand and invitation | Ivory, large official logo, “Let’s talk about your practice.”; quiet final hold |
+| 1 | 0–21.091s | Two audiences resolve from scattered patient tokens | Preserve approved composition; beat gaps follow the faster reading |
+| 2 | 21.091–35.000s | Two product names assemble beneath the actual logo | Preserve ivory mark and connected rails |
+| 2b | 35.000–47.100s | Multiple niches, then the patient’s previous service determines the caller’s script | Editorial service-to-script graphic; no chiropractic software screen yet |
+| 3 | 47.100–70.009s | Connected Reactivation opening, real response clicked, next screen revealed | Preserve full privacy-safe caller viewport and verified transition |
+| 4 | 70.009–87.554s | Campaign-aware new inquiry response clicked | Preserve full lead viewport and verified response/result |
+| 5 | 87.554–100.372s | Eight complete queue rows, notes clicked and typed | Preserve queue framing, identifier masks and actual notes field |
+| 6 | 100.372–131.554s | Four additional reactivations plus three additional lead bookings; $1,500 per patient yields $10,500 from one month | Preserve all assumptions, baselines and financial copy; no disclaimer overlay |
+| 7 | 131.554–147.736s | Brand and invitation | Preserve logo, invitation and readable final CTA |
 
 ## Shot 1 — opportunities
 
@@ -43,9 +44,19 @@ Purpose: connect both products without confusing their functions.
 VO: “That’s what Patient Pipeline is designed to help with. It brings Reactivation and Lead Follow-Up together, so your staff can approach each conversation with guidance that fits the person they’re calling.”
 Exact editorial copy: actual Patient Pipeline logo from start; “Reactivation” (2s); “Lead Follow-Up” (5s); “Guidance that fits the conversation” (9s).
 Composition: centered logo above a two-rail system, teal and blue; generous ivory negative space.
-Choreography: mark settles in .7s; rails draw sequentially; a real caller viewport grows out of the reactivation rail in final 2s.
-Handoff: incoming full reactivation screen shares the viewport object while the heading clears.
+Choreography: preserve the approved mark and rail sequence, with its beat gaps shortened to follow the 1.10× narration.
+Handoff: the reactivation identity continues into the service-specific explanation before the real caller screen is shown.
 Assets: logo and sanitized reactivation capture. Sound: same voice; music unbroken.
+
+## Shot 2b — niches and service-specific scripts (new)
+
+Purpose: establish that the following chiropractic example is one supported service, not the only niche the product covers.
+VO: “Reactivation isn’t just for chiropractic. It covers a variety of niches, and your caller sees a script tailored to the specific service your office provided to that patient.”
+Exact editorial copy: “Reactivation” identity; “Different services. Tailored scripts.”; supported examples from the shared public service catalog (Chiropractic, Weight loss, Skin tightening and Body contouring); “The service that patient received” → “Their caller’s script.”
+Composition: a readable 16:9 explanatory composition consistent with the existing film; this is editorial motion graphics, not a fabricated software screen.
+Choreography: the scope is visible from the opening frame; all four service examples appear by 2.1 source-seconds, connect to the patient’s previous service by 5 source-seconds, and resolve into the service-tailored script relationship by 8 source-seconds; the closing rail expands at 9.5 source-seconds. The beat scheduler divides source-time beats by 1.10. Measured source narration 12.382s, about 11.256s at 1.10×; final scene duration 12.100s includes its .25s voice delay and a short handoff tail.
+Handoff: transition directly to the genuine connected-call opening screen; only then show the chiropractic example and the real response-to-next-screen transition. No premature chiropractic screenshot during this explanation.
+Assets: existing brand styling and ordinary icons only; no new product screenshots, fake controls or invented niches.
 
 ## Shot 3 — reactivation
 
@@ -103,8 +114,8 @@ Alternates dark audience graphic, light brand system, large real product screens
 
 ## Final audio/action reconciliation
 
-Matilda voice identity confirmed in provider search. Original settings were not saved; the new reading uses eleven_multilingual_v2, speed .82, stability .5, similarity .75, style .08, speaker boost enabled. Each complete paragraph begins .25s into its scene; no mid-sentence cuts or artificial speeding. Speech lengths: 22.230, 14.341, 24.189, 18.286, 12.800, 33.280, 16.849 seconds. The revised workflow reading says “You and your team”; all other narration, including the monthly financial example, is preserved.
+Matilda voice identity is preserved. Original walkthrough generation settings were not saved; the approved source takes use eleven_multilingual_v2, speed .82, stability .5, similarity .75, style .08, speaker boost enabled. Only the new niche prelude is generated. All eight narration clips are now mixed through pitch-preserving atempo=1.10, implementing the owner’s requested +0.1× without changing vocal pitch or regenerating the approved wording/intonation. Music stays at its original tempo. Each complete paragraph begins .25s into its scene; none is truncated. TIMING.json is authoritative for source paths, offsets and revised duration. The “you and your team” wording and one-month financial example remain unchanged.
 
-Actions relative to scenes: reactivation cursor starts 8.9s, presses 10.15s, actual result 10.6s; lead cursor starts 12.2s, presses 13.45s, actual result 13.9s; logging view 7.2s, notes cursor 7.55s, press 8.8s, typing 9.25–11.34s. Monthly financial groups reveal 4.3s and 11.1s, per-patient value at 18.5s, total at 22.8s. End invitation appears 12.8s into the final scene. The current source event timings supersede the initial per-shot draft timings above.
+Actions relative to scenes: Reactivation cursor starts 8.091s, presses 9.341s, actual result 9.636s; lead cursor starts 11.091s, presses 12.341s, actual result 12.636s; logging view 6.545s, notes cursor 6.864s, press 8.114s, typing begins 8.409s and remains character-by-character at its human entry pace. Monthly financial groups reveal at 3.909s and 10.091s, per-patient value at 16.818s, total at 20.727s. End CTA appears 11.636s into the final scene. Existing source beat tables are scaled by the central NARRATION_TEMPO=1.10; their reconciled runtime offsets supersede the original draft timings above.
 
 The original walkthrough instrumental is reused for brand continuity, quiet beneath narration; one mixed continuous audio track supplies playback and export. Patient/contact/staff names and contact values are individually blurred in copies only; surrounding script paragraphs and synthetic demo offer/form context remain readable. No app records, original captures, walkthrough video, or landing page are changed. The existing identifier-free notes screenshot is retained because it depicts the actual notes field; a similarly named older walkthrough logging capture does not.

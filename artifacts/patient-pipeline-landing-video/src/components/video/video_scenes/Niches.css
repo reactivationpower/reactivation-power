@@ -1,0 +1,19 @@
+.niches-id { position:absolute; top:6%; left:6%; display:flex; align-items:center; gap:1.2vmin; font-size:2vmin; letter-spacing:.18em; color:#0b8f89; font-weight:600; }
+.niches-id i { width:1.2vmin; height:1.2vmin; border-radius:50%; background:#0b8f89; display:block; }
+.niches-title { position:absolute; top:13%; left:6%; width:88%; }
+.niches-title h1 { font-size:8.6vmin; line-height:1.04; }
+.niches-title h1 span { display:block; }
+.niches-title h1 span+span { color:#0b8f89; }
+.niches-flow { position:absolute; left:6%; right:6%; top:44%; height:40%; }
+.niches-svg { position:absolute; inset:0; width:100%; height:100%; overflow:visible; }
+.niche-chip { position:absolute; left:0; width:30%; height:18%; display:flex; align-items:center; gap:1.4vmin; padding:0 2.2vmin; border-radius:1.6vmin; background:#eaf0f5; border:1px solid #092a3b1c; font-family:'Space Grotesk',sans-serif; font-size:3vmin; font-weight:600; letter-spacing:-.03em; transition:background .5s,color .5s,border-color .5s; }
+.niche-chip i { width:1.1vmin; height:1.1vmin; border-radius:50%; background:#86a6ad; flex:none; transition:background .5s; }
+.niche-chip.on { background:#092a3b; color:#f8f5ed; border-color:#092a3b; }
+.niche-chip.on i { background:#78d6c7; }
+.niche-node { position:absolute; top:50%; transform:translate(-50%,-50%); text-align:center; font-size:2.3vmin; color:#526f79; width:16%; line-height:1.25; }
+.niche-node b { display:block; font-family:'Space Grotesk',sans-serif; font-size:2.9vmin; color:#092a3b; margin-bottom:.4vmin; letter-spacing:-.03em; }
+.niche-script { position:absolute; right:0; top:50%; transform:translateY(-50%); width:30%; padding:3vmin; border-radius:2vmin; background:#092a3b; color:#f8f5ed; }
+.niche-script small { display:block; font-size:2vmin; letter-spacing:.16em; color:#78d6c7; margin-bottom:1.2vmin; }
+.niche-script h2 { font-size:4vmin; line-height:1.1; }
+.niche-script .ln { height:.8vmin; border-radius:1px; background:#ffffff2e; margin-top:1.4vmin; }
+.niches-foot { position:absolute; left:6%; right:6%; bottom:6%; height:.3vh; background:linear-gradient(90deg,#0b8f89,#729bc5); transform-origin:left; }

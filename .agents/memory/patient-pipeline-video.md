@@ -85,9 +85,9 @@ For the landing-video financial example, frame both workstreams as **additional 
 
 **How to apply:** State the month, the incremental baseline for each product, and the assumed per-patient value. Describe the sum as potential additional patient value from that month's patients, not guaranteed cash collected, profit, or a claim that most offices achieve no results.
 
-For the landing film's product shots, start Reactivation at the connected-call opening question, then demonstrate an actual response and branch. Privacy masks should cover individual identifiers, not whole script paragraphs or seeded offer-context banners.
+For the landing film, explain supported niches and patient-service-specific scripts before showing the chiropractic example. The product shot itself starts at the connected-call opening question, then demonstrates an actual response and branch. Privacy masks cover individual identifiers, not whole paragraphs or seeded offer-context banners.
 
-**Why:** The user found the mid-script opening confusing and the large blur blocks visually excessive. They preferred the clearer product-screen presentation in the walkthrough.
+**Why:** The user found the mid-script opening confusing and the large blur blocks visually excessive. They also worried a chiropractic-only screen would make viewers miss the other niches and service-tailored scripts.
 
 **How to apply:** Preserve real UI button wording and surrounding script context. Mask names (including staff names inside call-history text), phones and emails locally. Show several complete queue rows without clipping them. Use synthetic demo captures, not actual patient data.
 
@@ -96,3 +96,15 @@ CDP screencasts emit changed frames, not a constant frame stream; an intentional
 **Why:** A complete playback with a correct final invitation was flagged incomplete solely because the last hold did not repaint.
 
 **How to apply:** Explicitly screenshot review checkpoints during static holds and retain real capture timestamps. For encoding, hold the verified final static frame to the canonical end; do not invent missing motion or claim a held frame was freshly captured later.
+
+Narration pacing changes should preserve the approved voice/takes and vocal pitch, while leaving music tempo unchanged. Retiming must also preserve visible clicks and readable character-by-character typing.
+
+**Why:** The user requested a modest increase in speaking speed, not a different voice or faster music. Regenerating approved paragraphs would unnecessarily change their delivery.
+
+**How to apply:** Apply a pitch-preserving speech tempo adjustment, retime scene beats to it, and generate only newly added wording. Keep source generation settings distinct from playback tempo so later work does not accidentally apply the speed-up twice.
+
+Browser audio can naturally end before the JavaScript player's final timer reports completion; `paused` alone is not evidence of an audio failure.
+
+**Why:** The capture checker rejected a complete soundtrack at its canonical end while waiting for the final recording-stop signal; all final review frames and footage had already been captured.
+
+**How to apply:** Distinguish `ended` at the expected media time from an early pause or playback error. Continue waiting for the recording-stop signal; if recovering saved footage, independently verify the final hold and do not invent an observed stop signal.

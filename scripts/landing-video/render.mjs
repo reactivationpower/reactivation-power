@@ -11,9 +11,12 @@ import { fileURLToPath } from 'node:url'
 const workspaceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const artifactRoot = path.join(workspaceRoot, 'artifacts/patient-pipeline-landing-video')
 const videoSource = path.join(artifactRoot, 'src/components/video/VideoTemplate.tsx')
-const audioPath = path.join(artifactRoot, 'public/audio/landing-composite-refined.mp3')
+const audioPath = path.join(artifactRoot, 'public/audio/landing-composite-niches-faster.mp3')
 const captureRoot = path.join(workspaceRoot, 'exports/.landing-capture')
 const defaultOutput = path.join(workspaceRoot, 'exports/Patient-Pipeline-Landing-Video.mp4')
+const pacingSource = await fs.readFile(path.join(artifactRoot, 'src/components/video/pacing.ts'), 'utf8')
+const narrationTempo = Number(pacingSource.match(/NARRATION_TEMPO\s*=\s*([\d.]+)/)?.[1])
+if (!Number.isFinite(narrationTempo) || narrationTempo <= 0) throw new Error('Invalid narration tempo.')
 const width = 1280
 const height = 720
 
@@ -97,28 +100,28 @@ function buildMilestones(durations, duration) {
   for (const scene of sceneKeys) {
     const sceneDuration = durations[scene] / 1000
     const representative = Math.min(
-      representativeOffsets[scene] ?? sceneDuration * 0.6,
+      representativeOffsets[scene] === undefined ? sceneDuration * 0.6 : representativeOffsets[scene] / narrationTempo,
       Math.max(0.25, sceneDuration - 0.5),
     )
     add(`${scene}-representative`, scene, representative, 'scene representative')
     add(`${scene}-end`, scene, Math.max(0.1, sceneDuration - 0.35), 'scene end')
   }
   if (sceneKeys.includes('reactivation')) {
-    add('reactivation-starting-screen', 'reactivation', 3.8, 'opening script')
-    add('reactivation-cursor', 'reactivation', 9.6, 'cursor')
+    add('reactivation-starting-screen', 'reactivation', 3.8 / narrationTempo, 'opening script')
+    add('reactivation-cursor', 'reactivation', 9.6 / narrationTempo, 'cursor')
   }
-  if (sceneKeys.includes('lead')) add('lead-cursor', 'lead', 13.1, 'cursor')
+  if (sceneKeys.includes('lead')) add('lead-cursor', 'lead', 13.1 / narrationTempo, 'cursor')
   if (sceneKeys.includes('workflow')) {
-    add('workflow-queue', 'workflow', 4.5, 'queue')
-    add('workflow-cursor-note', 'workflow', 8.8, 'cursor')
-    add('workflow-partial-note', 'workflow', 10.2, 'typing')
-    add('workflow-typed-note', 'workflow', 12.2, 'typing')
+    add('workflow-queue', 'workflow', 4.5 / narrationTempo, 'queue')
+    add('workflow-cursor-note', 'workflow', 8.8 / narrationTempo, 'cursor')
+    add('workflow-partial-note', 'workflow', 10.2 / narrationTempo, 'typing')
+    add('workflow-typed-note', 'workflow', 12.2 / narrationTempo, 'typing')
   }
   if (sceneKeys.includes('revenue')) {
-    add('revenue-financial-peak', 'revenue', 24.2, 'financial peak')
-    add('revenue-qualified-close', 'revenue', 31.2, 'financial close')
+    add('revenue-financial-peak', 'revenue', 24.2 / narrationTempo, 'financial peak')
+    add('revenue-qualified-close', 'revenue', 31.2 / narrationTempo, 'financial close')
   }
-  if (sceneKeys.includes('invitation')) add('invitation-call-to-action', 'invitation', 15.3, 'call to action')
+  if (sceneKeys.includes('invitation')) add('invitation-call-to-action', 'invitation', 15.3 / narrationTempo, 'call to action')
 
   milestones.sort((left, right) => left.targetTime - right.targetTime || left.label.localeCompare(right.label))
   return { milestones, sceneStarts }
@@ -455,6 +458,7 @@ async function sampleRuntime(elapsed, force = false) {
       audioDuration: Number.isFinite(audio?.duration) ? audio.duration : null,
       audioReadyState: audio?.readyState ?? null,
       audioPaused: audio?.paused ?? null,
+      audioEnded: audio?.ended ?? null,
       audioError: audio?.error ? { code: audio.error.code, message: audio.error.message } : null,
       audioBlocked: film?.dataset.audioBlocked === 'true',
       cursorVisible: Boolean(film?.querySelector('.virtual-cursor')),
@@ -462,7 +466,10 @@ async function sampleRuntime(elapsed, force = false) {
       financialPeak: film?.querySelector('.revenue-total h2')?.textContent?.trim() ?? '',
     };
   })()`)
-  const completedAudio = stopAtPlayerSignal && endedAt !== null && elapsed >= duration - 1
+  // The soundtrack can naturally finish before the player's final timer fires.
+  // Accept only a genuine media end at the canonical end, never an early pause.
+  const completedAudio = stopAtPlayerSignal && elapsed >= duration - 0.15
+    && sample.audioEnded && sample.audioTime >= duration - 0.15
   if (!sample?.scene || sample.audioReadyState < 2 || (sample.audioPaused && !completedAudio) || sample.audioBlocked || sample.audioError) {
     throw new Error(`Soundtrack or film runtime is unhealthy at ${elapsed.toFixed(1)}s: ${JSON.stringify(sample)}`)
   }

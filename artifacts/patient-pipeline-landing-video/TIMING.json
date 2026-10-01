@@ -1,53 +1,63 @@
 {
-  "totalMs": 149200,
-  "mixFile": "public/audio/landing-composite-refined.mp3",
+  "totalMs": 147736,
+  "mixFile": "public/audio/landing-composite-niches-faster.mp3",
+  "narrationTempo": 1.1,
+  "pitchPreserved": true,
+  "musicTempo": 1,
   "scenes": [
     {
       "key": "opportunity",
       "startMs": 0,
-      "durationMs": 23200,
+      "durationMs": 21091,
       "voiceoverDelayMs": 250,
       "voiceoverFile": "artifacts/patient-pipeline-landing-video/public/audio/vo-opportunity-final.mp3"
     },
     {
       "key": "introduction",
-      "startMs": 23200,
-      "durationMs": 15300,
+      "startMs": 21091,
+      "durationMs": 13909,
       "voiceoverDelayMs": 250,
       "voiceoverFile": "artifacts/patient-pipeline-landing-video/public/audio/vo-introduction-final.mp3"
     },
     {
+      "key": "niches",
+      "durationMs": 12100,
+      "voiceoverDelayMs": 250,
+      "voiceoverFile": "artifacts/patient-pipeline-landing-video/public/audio/vo-niches-base.mp3",
+      "startMs": 35000
+    },
+    {
       "key": "reactivation",
-      "startMs": 38500,
-      "durationMs": 25200,
+      "startMs": 47100,
+      "durationMs": 22909,
       "voiceoverDelayMs": 250,
       "voiceoverFile": "artifacts/patient-pipeline-landing-video/public/audio/vo-reactivation-final.mp3"
     },
     {
       "key": "lead",
-      "startMs": 63700,
-      "durationMs": 19300,
+      "startMs": 70009,
+      "durationMs": 17545,
       "voiceoverDelayMs": 250,
       "voiceoverFile": "artifacts/patient-pipeline-landing-video/public/audio/vo-lead-final.mp3"
     },
     {
       "key": "workflow",
-      "startMs": 83000,
-      "durationMs": 14100,
+      "startMs": 87554,
+      "durationMs": 12818,
       "voiceoverDelayMs": 250,
       "voiceoverFile": "artifacts/patient-pipeline-landing-video/public/audio/vo-workflow-owner-team.mp3"
     },
     {
       "key": "revenue",
-      "startMs": 97100,
-      "durationMs": 34300,
+      "startMs": 100372,
+      "durationMs": 31182,
       "voiceoverDelayMs": 250,
       "voiceoverFile": "artifacts/patient-pipeline-landing-video/public/audio/vo-revenue-monthly.mp3"
     },
     {
       "key": "invitation",
-      "startMs": 131400,
-      "durationMs": 17800,
+      "startMs": 131554,
+      "durationMs": 16182,
       "voiceoverDelayMs": 250,
       "voiceoverFile": "artifacts/patient-pipeline-landing-video/public/audio/vo-invitation-final.mp3"
     }

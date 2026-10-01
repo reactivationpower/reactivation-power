@@ -1,13 +1,14 @@
 import { useState, type ReactNode } from 'react'
 import { motion } from 'framer-motion'
 import { useSceneTimer } from '@/lib/video'
+import { NARRATION_TEMPO } from './pacing'
 
 export const EASE = [0.22, 1, 0.36, 1] as const
 export const image = (file: string) => `${import.meta.env.BASE_URL}images/${file}`
 
 export function useBeats(times: number[]) {
   const [beat, setBeat] = useState(0)
-  useSceneTimer(times.map((time, i) => ({ time, callback: () => setBeat(i + 1) })))
+  useSceneTimer(times.map((time, i) => ({ time: time / NARRATION_TEMPO, callback: () => setBeat(i + 1) })))
   return beat
 }
 
