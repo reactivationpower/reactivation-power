@@ -20,3 +20,9 @@ When moving public marketing to a new domain, preserve the old domain's email de
 **Why:** A successfully published Patient Pipeline site did not prevent older-domain marketing links from showing Replit's “This app isn't live yet” page. Shared templates intentionally retained those older destinations, and imported email templates are independent copies.
 
 **How to apply:** Compare the actual email destination with verified deployment domains. Check both apex and www hosts, restore old-link reachability, and update exported/imported templates separately. Do not infer an unpublished app merely from the error page.
+
+Treat email image addresses as part of a domain-link repair, not just call-button destinations.
+
+**Why:** Updating the booking buttons left the exported emails' logo on the unavailable old domain, so a successfully tested button still produced a visibly broken email.
+
+**How to apply:** Inspect both href and src destinations across the generated package. Check that public image responses contain actual image bytes, then render an exported email and confirm the logo decodes before presenting the replacement ZIP.
