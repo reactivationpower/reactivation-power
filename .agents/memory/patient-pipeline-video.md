@@ -60,3 +60,9 @@ For the native-GoHighLevel-form lesson, teach one dedicated Form Submitted workf
 **Why:** A single form-based route minimizes beginner decisions and makes the triggering event match the required end-to-end form test. Documentation/code compatibility is evidence for the draft, not a substitute for an authorized live rehearsal.
 
 **How to apply:** Before filming, verify the actual account's menus, access, charges, outgoing data, and matching form-to-campaign delivery. Resolve any conflicting in-app instructions rather than silently skipping them in the video. Use the same saved campaign throughout; keep the earlier overview and its MP4 separate.
+
+For the landing-page sales video, use the same voice as the Patient Pipeline demo walkthrough, conversational narration rather than spoken bullet points, a visible virtual cursor for every demonstrated button click, and animated typing whenever text entry is shown.
+
+**Why:** The user explicitly requested this treatment after approving the concept of a modest illustrative revenue-opportunity segment connecting Reactivation and Lead Follow-Up. The goal is to request a conversation; the video explains the example while the homepage calculator lets viewers personalize it.
+
+**How to apply:** Confirm the walkthrough's actual voice identity/settings before generating narration; do not substitute a merely similar voice or the connection lessons' reference without checking. Synchronize cursor movement, clicks, visible typing, and resulting screens with natural narration. Keep revenue assumptions visible and distinguish potential revenue from profit. This is concept approval, not authorization to start production; the user asked to discuss before building.
