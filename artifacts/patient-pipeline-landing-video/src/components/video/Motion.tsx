@@ -31,12 +31,12 @@ export function Cursor({ x, y, fromX = 75, fromY = 25 }: { x: number; y: number;
   return <motion.div className="virtual-cursor" data-cursor-target={`${x},${y}`} aria-hidden="true"
     initial={{ left: `${fromX}%`, top: `${fromY}%`, opacity: 0 }}
     animate={{ left: `${x}%`, top: `${y}%`, opacity: 1 }}
-    transition={{ left: { duration: 1.15, ease: EASE }, top: { duration: 1.15, ease: EASE }, opacity: { duration: .15 } }}>
-    <motion.svg viewBox="0 0 36 42" animate={{ scale: [1, .76, 1] }} transition={{ delay: 1.25, duration: .25 }}>
+    transition={{ left: { duration: 1.15 / NARRATION_TEMPO, ease: EASE }, top: { duration: 1.15 / NARRATION_TEMPO, ease: EASE }, opacity: { duration: .15 } }}>
+    <motion.svg viewBox="0 0 36 42" animate={{ scale: [1, .76, 1] }} transition={{ delay: 1.25 / NARRATION_TEMPO, duration: .25 / NARRATION_TEMPO }}>
       <path d="M3 2v32l8-7 6 12 6-3-6-12 12-1L3 2Z" fill="#092a3b" stroke="#fff" strokeWidth="2.5" strokeLinejoin="round" />
     </motion.svg>
     <motion.span className="click-ring" initial={{ opacity: 0, scale: .3 }}
-      animate={{ opacity: [0, .85, 0], scale: [.3, 1.8, 2.2] }} transition={{ delay: 1.25, duration: .6 }} />
+      animate={{ opacity: [0, .85, 0], scale: [.3, 1.8, 2.2] }} transition={{ delay: 1.25 / NARRATION_TEMPO, duration: .6 / NARRATION_TEMPO }} />
   </motion.div>
 }
 

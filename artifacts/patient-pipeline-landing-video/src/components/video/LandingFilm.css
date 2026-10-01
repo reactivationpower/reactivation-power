@@ -24,6 +24,9 @@
 .track-tokens svg { width:2.5vmin; height:2.5vmin; }
 .track-status { display:flex; align-items:center; gap:.8vmin; font-size:2.1vmin; margin-top:1.8vmin; color:#d8ebe8; }
 .track-status svg { width:2vmin; height:2vmin; }
+.reactivation-benefit { margin-top:1.3vmin; font-size:2.3vmin; font-weight:600; color:#8fdfd2; }
+.reactivation-cost { margin-top:1vmin; font-size:2.05vmin; line-height:1.3; color:#d8ebe8; }
+.reactivation-cost span { display:block; color:#abc5cc; font-size:1.9vmin; }
 .opportunity-conclusion { position:absolute; left:6%; bottom:17%; max-width:42%; font-size:3vmin; color:#c5dddd; }
 .brand-rail { position:absolute; bottom:6%; left:6%; right:6%; height:.3vh; background:linear-gradient(90deg,#0b8f89,#729bc5); transform-origin:left; animation:rail-reveal 20s ease-out both; }
 @keyframes rail-reveal { from { transform:scaleX(.05); } to { transform:scaleX(1); } }

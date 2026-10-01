@@ -97,6 +97,12 @@ CDP screencasts emit changed frames, not a constant frame stream; an intentional
 
 **How to apply:** Explicitly screenshot review checkpoints during static holds and retain real capture timestamps. For encoding, hold the verified final static frame to the canonical end; do not invent missing motion or claim a held frame was freshly captured later.
 
+In landing-video messaging, reactivation means past patients inactive for three months or longer—not someone who merely missed a few visits. Prior trust supports the easier-return explanation; lower acquisition cost is a rule of thumb, not a guarantee.
+
+**Why:** The user explicitly corrected the opener because “haven’t been back in a while” suggested short-term missed visits and omitted the reason this audience is valuable.
+
+**How to apply:** State the three-month threshold in voice and on the same opening visual, explain prior trust, and qualify cost comparisons. This is messaging guidance, not permission to change patient eligibility or scheduling logic.
+
 Narration pacing changes should preserve the approved voice/takes and vocal pitch, while leaving music tempo unchanged. Retiming must also preserve visible clicks and readable character-by-character typing.
 
 **Why:** The user requested a modest increase in speaking speed, not a different voice or faster music. Regenerating approved paragraphs would unnecessarily change their delivery.
@@ -107,4 +113,4 @@ Browser audio can naturally end before the JavaScript player's final timer repor
 
 **Why:** The capture checker rejected a complete soundtrack at its canonical end while waiting for the final recording-stop signal; all final review frames and footage had already been captured.
 
-**How to apply:** Distinguish `ended` at the expected media time from an early pause or playback error. Continue waiting for the recording-stop signal; if recovering saved footage, independently verify the final hold and do not invent an observed stop signal.
+**How to apply:** Distinguish `ended` at the expected media time from an early pause or playback error. Continue waiting for the recording-stop signal; if recovering saved footage, independently verify the final hold and do not invent an observed stop signal. Reload also creates a fresh audio element whose metadata may briefly be unready despite successful preloading; allow only a bounded startup grace without excusing errors or blocked playback.

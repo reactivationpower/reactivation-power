@@ -11,7 +11,7 @@
   },
   "provenance": "Voice identity confirmed by provider search and original walkthrough metadata. Original per-generation settings were not persisted; these are explicit new conversational settings, not claimed recovered settings.",
   "narration": {
-    "opportunity": "Your practice may already have opportunities that aren’t turning into appointments. Some are patients who haven’t been back in a while. Others are people who asked about care, but never booked. The challenge is giving your team a consistent way to follow up—and knowing what to say when someone answers.",
+    "opportunity": "Your practice already has opportunities that aren’t turning into appointments. Some are past patients who haven’t been in for three months or longer. They’ve already trusted you once, so they’re often easier to bring back—and, as a rule of thumb, less expensive to reactivate than acquiring a brand-new lead. Others are people who asked about care, but never booked. The challenge is giving your team a consistent way to follow up—and knowing what to say when someone answers.",
     "introduction": "That’s what Patient Pipeline is designed to help with. It brings Reactivation and Lead Follow-Up together, so your staff can approach each conversation with guidance that fits the person they’re calling.",
     "niches": "Reactivation isn’t just for chiropractic. It covers a variety of niches, and your caller sees a script tailored to the specific service your office provided to that patient.",
     "reactivation": "With reactivation, the conversation starts with the care that patient received before. As they explain what’s happening now, your team selects their response, and the script follows the conversation. Your staff still makes the call and listens to the patient—they’re simply not having to invent every next question.",
@@ -21,9 +21,9 @@
     "invitation": "What could that look like in your practice? Let’s talk about your inactive patients, your incoming inquiries, and how your team handles follow-up today. Request a conversation, and we can explore where Patient Pipeline could fit."
   },
   "postProcessing": {
-    "narrationTempo": 1.1,
+    "narrationTempo": 1.2,
     "method": "FFmpeg atempo; pitch preserved",
     "musicTempo": 1,
-    "notes": "The requested +0.1× applies to narration playback (1.00× to 1.10×). Approved voice identity, source takes and baseline generation settings stay unchanged; only the new niche prelude is generated."
+    "notes": "Another +0.1× from the previous 1.10× playback, now 1.20×. Mix each original baseline source take directly at 1.20×, not a previously accelerated composite. Only the expanded opener is regenerated; other approved narration stays unchanged."
   }
 }

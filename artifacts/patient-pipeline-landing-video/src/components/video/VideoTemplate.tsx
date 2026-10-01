@@ -12,8 +12,8 @@ import { Invitation } from './video_scenes/Invitation'
 import './LandingFilm.css'
 
 export const SCENE_DURATIONS = {
-  opportunity: 21091, introduction: 13909, niches: 12100, reactivation: 22909,
-  lead: 17545, workflow: 12818, revenue: 31182, invitation: 16182,
+  opportunity: 29900, introduction: 12750, niches: 11100, reactivation: 21000,
+  lead: 16083, workflow: 11750, revenue: 28583, invitation: 14833,
 }
 const VIDEO_ASPECT_RATIO: VideoAspectRatio = '16:9'
 const SCENES: Record<string, ComponentType> = {
@@ -54,7 +54,7 @@ export default function VideoTemplate({ durations = SCENE_DURATIONS, loop = true
     <VideoCanvas className="landing-film" data-audio-blocked={audioBlocked} data-current-scene={baseKey}
       aspectRatio={VIDEO_ASPECT_RATIO} style={{ backgroundColor: '#092a3b' }}>
       <AnimatePresence mode="sync">{SceneComponent && <SceneComponent key={currentSceneKey} />}</AnimatePresence>
-      <audio ref={audioRef} src={`${import.meta.env.BASE_URL}audio/landing-composite-niches-faster.mp3`} preload="auto" muted={muted} />
+      <audio ref={audioRef} src={`${import.meta.env.BASE_URL}audio/landing-composite-reactivation-120.mp3`} preload="auto" muted={muted} />
     </VideoCanvas>
   </VideoPausedContext.Provider>
 }

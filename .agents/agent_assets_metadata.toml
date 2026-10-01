@@ -1564,3 +1564,25 @@ mtime_ms = 1790879835067
 storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/a8b14f6a-7d4a-4372-a23a-4d540b1f7ffb/e95e61ae-5d63-4c35-8bc8-083e63a56b46"
 storage_version_token = "1790879931946628"
 content_type = "video/mp4"
+
+[[outputs]]
+id = "r30N2OOFWdYZaiXQYoO09"
+uri = "file://artifacts/patient-pipeline-landing-video/public/audio/vo-opportunity-three-months.mp3"
+type = "audio"
+title = "Patient Pipeline opening — three-month reactivation and prior trust"
+description = "Text-to-speech audio: Your practice already has opportunities that aren’t turning into appointments. Some are past patients who haven’t been in for three months or longer. They’ve already trusted you…"
+logical_id = "6d96f4f3-de16-4fc1-ac74-f8841878a4e1"
+
+[[outputs]]
+id = "mZWD0EmKzFshvzcbGQfS0"
+uri = "file://exports/Patient-Pipeline-Landing-Video-Reactivation-120.mp4"
+type = "video"
+title = "Patient Pipeline — Revised Opener & 1.20× Narration"
+description = "2:26 landscape MP4. Opens with “Your practice already has…” and defines past-patient reactivation as three months or longer, explaining prior trust and the qualified easier/lower-cost comparison on the same visual. Narration is another +0.1× faster, now 1.20×, with preserved Matilda voice and pitch. Niches, real caller screens, privacy masks and monthly financial example retained. Full playback, render and decoding verified."
+logical_id = "40a692d8-503b-49e2-8efd-ec17c3ff8e0b"
+content_hash = "sha256:b28b5f5a69c1d6439bf23517f8d730d9db54ed87371419cedf2616f9323f6ea3"
+size = 9148523
+mtime_ms = 1790880915863
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/40a692d8-503b-49e2-8efd-ec17c3ff8e0b/d61dbd37-258f-4a55-aaa0-dd8d0ea1d760"
+storage_version_token = "1790881012854807"
+content_type = "video/mp4"

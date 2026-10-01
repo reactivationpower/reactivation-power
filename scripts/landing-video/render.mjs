@@ -11,7 +11,7 @@ import { fileURLToPath } from 'node:url'
 const workspaceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const artifactRoot = path.join(workspaceRoot, 'artifacts/patient-pipeline-landing-video')
 const videoSource = path.join(artifactRoot, 'src/components/video/VideoTemplate.tsx')
-const audioPath = path.join(artifactRoot, 'public/audio/landing-composite-niches-faster.mp3')
+const audioPath = path.join(artifactRoot, 'public/audio/landing-composite-reactivation-120.mp3')
 const captureRoot = path.join(workspaceRoot, 'exports/.landing-capture')
 const defaultOutput = path.join(workspaceRoot, 'exports/Patient-Pipeline-Landing-Video.mp4')
 const pacingSource = await fs.readFile(path.join(artifactRoot, 'src/components/video/pacing.ts'), 'utf8')
@@ -97,6 +97,10 @@ function buildMilestones(durations, duration) {
   }
 
   if (sceneKeys.includes('opportunity')) add('early-opening', 'opportunity', 1.5, 'opening')
+  if (sceneKeys.includes('opportunity')) {
+    add('opportunity-three-months', 'opportunity', 6.5 / narrationTempo, 'reactivation threshold')
+    add('opportunity-trust-and-cost', 'opportunity', 17 / narrationTempo, 'prior trust and qualified cost benefit')
+  }
   for (const scene of sceneKeys) {
     const sceneDuration = durations[scene] / 1000
     const representative = Math.min(
@@ -466,6 +470,11 @@ async function sampleRuntime(elapsed, force = false) {
       financialPeak: film?.querySelector('.revenue-total h2')?.textContent?.trim() ?? '',
     };
   })()`)
+  // Reload creates a fresh media element; metadata may arrive just after the
+  // recording signal, even though the soundtrack was successfully preloaded.
+  // Allow that short startup window, but never excuse an error or blocked play.
+  if (elapsed < 0.5 && sample?.scene && sample.audioReadyState < 2
+    && !sample.audioError && !sample.audioBlocked) return
   // The soundtrack can naturally finish before the player's final timer fires.
   // Accept only a genuine media end at the canonical end, never an early pause.
   const completedAudio = stopAtPlayerSignal && elapsed >= duration - 0.15
