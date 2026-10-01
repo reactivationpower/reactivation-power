@@ -66,3 +66,9 @@ For the landing-page sales video, use the same voice as the Patient Pipeline dem
 **Why:** The user explicitly requested this treatment after approving the concept of a modest illustrative revenue-opportunity segment connecting Reactivation and Lead Follow-Up. The goal is to request a conversation; the video explains the example while the homepage calculator lets viewers personalize it.
 
 **How to apply:** Confirm the walkthrough's actual voice identity/settings before generating narration; do not substitute a merely similar voice or the connection lessons' reference without checking. Synchronize cursor movement, clicks, visible typing, and resulting screens with natural narration. Keep revenue assumptions visible and distinguish potential revenue from profit. This is concept approval, not authorization to start production; the user asked to discuss before building.
+
+Leave out the persistent on-screen label “Illustrative example · First-year revenue per patient · Not profit or a forecast” from the landing-page video.
+
+**Why:** The user explicitly rejected that overlay while reviewing the script; they did not approve starting production.
+
+**How to apply:** Show the patient counts, revenue assumption, and combined opportunity without that disclaimer overlay. Keep the remaining narration unchanged unless separately revised; removing the overlay does not authorize presenting hypothetical results as actual results.
