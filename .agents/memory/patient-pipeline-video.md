@@ -65,10 +65,22 @@ For the landing-page sales video, use the same voice as the Patient Pipeline dem
 
 **Why:** The user explicitly requested this treatment after approving the concept of a modest illustrative revenue-opportunity segment connecting Reactivation and Lead Follow-Up. The goal is to request a conversation; the video explains the example while the homepage calculator lets viewers personalize it.
 
-**How to apply:** Confirm the walkthrough's actual voice identity/settings before generating narration; do not substitute a merely similar voice or the connection lessons' reference without checking. Synchronize cursor movement, clicks, visible typing, and resulting screens with natural narration. Keep revenue assumptions visible and distinguish potential revenue from profit. This is concept approval, not authorization to start production; the user asked to discuss before building.
+**How to apply:** Confirm the walkthrough's actual voice identity/settings before generating narration; do not substitute a merely similar voice or the connection lessons' reference without checking. Synchronize cursor movement, clicks, visible typing, and resulting screens with natural narration. Keep revenue assumptions visible and distinguish potential revenue from profit. The user subsequently authorized production of the separate landing-page video; that did not authorize changing the landing page or overwriting the walkthrough.
 
 Leave out the persistent on-screen label “Illustrative example · First-year revenue per patient · Not profit or a forecast” from the landing-page video.
 
-**Why:** The user explicitly rejected that overlay while reviewing the script; they did not approve starting production.
+**Why:** The user explicitly rejected that overlay while reviewing the script.
 
 **How to apply:** Show the patient counts, revenue assumption, and combined opportunity without that disclaimer overlay. Keep the remaining narration unchanged unless separately revised; removing the overlay does not authorize presenting hypothetical results as actual results.
+
+The walkthrough narrator is ElevenLabs' premade **Matilda — Knowledgable, Professional**, voice ID `XrExE9yKIg1WjnnlVkGX`, not Sarah. The original walkthrough's detailed generation settings were never persisted.
+
+**Why:** The landing-video voice match required checking both the original walkthrough metadata and the provider's live voice search; setup tutorials use a different narrator.
+
+**How to apply:** Preserve Matilda's voice identity when the user asks to match the walkthrough. Save explicit generation settings for new work, but do not describe them as recovered original settings. Match timing to the natural reading, rather than creating long gaps after each short paragraph.
+
+For the landing-video financial example, frame both workstreams as **additional results in one month**, above the office's existing reactivation efforts and lead bookings. Do not spread the example over a year.
+
+**Why:** The user corrected annual revenue framing and emphasized that the benefit must be incremental to what the office already does, not all of its patients or bookings.
+
+**How to apply:** State the month, the incremental baseline for each product, and the assumed per-patient value. Describe the sum as potential additional patient value from that month's patients, not guaranteed cash collected, profit, or a claim that most offices achieve no results.

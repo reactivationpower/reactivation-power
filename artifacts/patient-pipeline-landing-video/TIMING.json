@@ -1,0 +1,55 @@
+{
+  "totalMs": 149200,
+  "mixFile": "public/audio/landing-composite-monthly.mp3",
+  "scenes": [
+    {
+      "key": "opportunity",
+      "startMs": 0,
+      "durationMs": 23200,
+      "voiceoverDelayMs": 250,
+      "voiceoverFile": "artifacts/patient-pipeline-landing-video/public/audio/vo-opportunity-final.mp3"
+    },
+    {
+      "key": "introduction",
+      "startMs": 23200,
+      "durationMs": 15300,
+      "voiceoverDelayMs": 250,
+      "voiceoverFile": "artifacts/patient-pipeline-landing-video/public/audio/vo-introduction-final.mp3"
+    },
+    {
+      "key": "reactivation",
+      "startMs": 38500,
+      "durationMs": 25200,
+      "voiceoverDelayMs": 250,
+      "voiceoverFile": "artifacts/patient-pipeline-landing-video/public/audio/vo-reactivation-final.mp3"
+    },
+    {
+      "key": "lead",
+      "startMs": 63700,
+      "durationMs": 19300,
+      "voiceoverDelayMs": 250,
+      "voiceoverFile": "artifacts/patient-pipeline-landing-video/public/audio/vo-lead-final.mp3"
+    },
+    {
+      "key": "workflow",
+      "startMs": 83000,
+      "durationMs": 14100,
+      "voiceoverDelayMs": 250,
+      "voiceoverFile": "artifacts/patient-pipeline-landing-video/public/audio/vo-workflow-final.mp3"
+    },
+    {
+      "key": "revenue",
+      "startMs": 97100,
+      "durationMs": 34300,
+      "voiceoverDelayMs": 250,
+      "voiceoverFile": "artifacts/patient-pipeline-landing-video/public/audio/vo-revenue-monthly.mp3"
+    },
+    {
+      "key": "invitation",
+      "startMs": 131400,
+      "durationMs": 17800,
+      "voiceoverDelayMs": 250,
+      "voiceoverFile": "artifacts/patient-pipeline-landing-video/public/audio/vo-invitation-final.mp3"
+    }
+  ]
+}

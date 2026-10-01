@@ -5,14 +5,14 @@ generated = []
 id = "O5gjU6L4x5fCnhiadR-B0"
 uri = "file://exports/Reactivation-Power-Service-Agreement.pdf"
 type = "pdf"
-title = "Reactivation Power 12-Month Service Agreement (reference copy)"
-description = "Unsigned copy of the standard agreement a new client signs, with the default $475 setup fee and $475/month terms. Client details are blank."
+title = "Current Startup Subscription Agreement — Unsigned Copy"
+description = "Blank reference copy of the current subscription agreement. Default terms: 12 months, $475 setup, $475 per month; customer details and signing dates remain blank. Individual agreements can use custom terms."
 logical_id = "406937ad-a923-4d75-ba97-d94e614f5fb8"
 content_hash = "sha256:06a5d70370039e498a58267b0dcf85044eeef0591a557c184f1cedfe3cad3013"
 size = 6166
 mtime_ms = 1790085160453
-storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/406937ad-a923-4d75-ba97-d94e614f5fb8/64984a94-1d7f-49fe-86b8-ad92b17a7ba6"
-storage_version_token = "1790085167767420"
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/406937ad-a923-4d75-ba97-d94e614f5fb8/57e8e8bb-dcb1-4257-85a2-6f4580b29a19"
+storage_version_token = "1790876413820443"
 content_type = "application/pdf"
 
 [[outputs]]
@@ -1400,3 +1400,123 @@ mtime_ms = 1790819745169
 storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/20d314b9-6a5f-4032-880d-48d119250657/9978b25d-607e-4d17-8ca4-d33ea71868ea"
 storage_version_token = "1790820336647607"
 content_type = "video/mp4"
+
+[[outputs]]
+id = "ZGHecVVFhUqnanC34C_yG"
+uri = "file://artifacts/patient-pipeline-landing-video/public/audio/vo-introduction.mp3"
+type = "audio"
+title = "Patient Pipeline introduction narration"
+description = "Text-to-speech audio: That’s what Patient Pipeline is designed to help with. It brings Reactivation and Lead Follow-Up together, so your staff can approach each conversation with guidance that fits t…"
+logical_id = "3c665622-15e9-490b-a26d-40c94b48702f"
+
+[[outputs]]
+id = "bNCpIGBO7l1F619skSUWb"
+uri = "file://artifacts/patient-pipeline-landing-video/public/audio/vo-workflow.mp3"
+type = "audio"
+title = "Patient Pipeline workflow narration"
+description = "Text-to-speech audio: And it isn’t just about the script. Your team has an organized way to see who needs attention, record what happened, and keep follow-up moving instead of relying on memory."
+logical_id = "50b82a47-fcb4-4c15-92ae-d78c73769fcb"
+
+[[outputs]]
+id = "zqUeEhwItYL5RmQuQmGSk"
+uri = "file://artifacts/patient-pipeline-landing-video/public/audio/vo-lead.mp3"
+type = "audio"
+title = "Patient Pipeline lead narration"
+description = "Text-to-speech audio: For a new inquiry, the starting point is different. The conversation connects to the campaign or offer that caught their attention. Your team can follow up with that context, re…"
+logical_id = "0923ccae-29a0-4fbb-bc3c-751d0e1e4e97"
+
+[[outputs]]
+id = "flI-3b_mTETTaHCpfafJs"
+uri = "file://artifacts/patient-pipeline-landing-video/public/audio/vo-invitation.mp3"
+type = "audio"
+title = "Patient Pipeline invitation narration"
+description = "Text-to-speech audio: What could that look like in your practice? Let’s talk about your inactive patients, your incoming inquiries, and how your team handles follow-up today. Request a conversation, …"
+logical_id = "1be3a6a9-ccec-4af1-b3e3-424b88ae67a1"
+
+[[outputs]]
+id = "INXtfKYRwsCbRkMnoEN4A"
+uri = "file://artifacts/patient-pipeline-landing-video/public/audio/vo-reactivation.mp3"
+type = "audio"
+title = "Patient Pipeline reactivation narration"
+description = "Text-to-speech audio: With reactivation, the conversation starts with the care that patient received before. As they explain what’s happening now, your team selects their response, and the script fol…"
+logical_id = "84538c8f-e17b-4c5f-bab9-bc6963cec46d"
+
+[[outputs]]
+id = "wj5VapDBOjD7DbuMqnQRI"
+uri = "file://artifacts/patient-pipeline-landing-video/public/audio/vo-opportunity.mp3"
+type = "audio"
+title = "Patient Pipeline opportunity narration"
+description = "Text-to-speech audio: Your practice may already have opportunities that aren’t turning into appointments. Some are patients who haven’t been back in a while. Others are people who asked about care, b…"
+logical_id = "cae1aa59-32a8-4a71-9d73-6c813d21fc35"
+
+[[outputs]]
+id = "6yrHgXehhps_ktPfz5J6X"
+uri = "file://artifacts/patient-pipeline-landing-video/public/audio/vo-revenue.mp3"
+type = "audio"
+title = "Patient Pipeline revenue narration"
+description = "Text-to-speech audio: Now think about a small example. Five past patients return, and better follow-up helps three additional new patients get started. If each represents a thousand dollars in first-…"
+logical_id = "3df4a98d-5036-486c-b6f9-e560d22bc21b"
+
+[[outputs]]
+id = "6QV5pdYPz1dsXrfQq1QyO"
+uri = "file://artifacts/patient-pipeline-landing-video/public/audio/vo-workflow-final.mp3"
+type = "audio"
+title = "Final connected workflow narration"
+description = "Text-to-speech audio: And it isn’t just about the script. Your team has an organized way to see who needs attention, record what happened, and keep follow-up moving instead of relying on memory."
+logical_id = "bdac8379-3cb6-4a83-97a6-6b53aa84f7c4"
+
+[[outputs]]
+id = "Ur2X0TIYx1LvlMVs9aYwm"
+uri = "file://artifacts/patient-pipeline-landing-video/public/audio/vo-introduction-final.mp3"
+type = "audio"
+title = "Final connected introduction narration"
+description = "Text-to-speech audio: That’s what Patient Pipeline is designed to help with. It brings Reactivation and Lead Follow-Up together, so your staff can approach each conversation with guidance that fits t…"
+logical_id = "7b1520bc-c684-4dcc-88c8-42c5e16e6dd5"
+
+[[outputs]]
+id = "kw8tsv9AEh0tZcOQaXQgA"
+uri = "file://artifacts/patient-pipeline-landing-video/public/audio/vo-lead-final.mp3"
+type = "audio"
+title = "Final connected lead narration"
+description = "Text-to-speech audio: For a new inquiry, the starting point is different. The conversation connects to the campaign or offer that caught their attention. Your team can follow up with that context, re…"
+logical_id = "b9f30a90-3e66-482c-a4d3-b986da6038c3"
+
+[[outputs]]
+id = "xoCvu76yZp4KUgyweu0Jw"
+uri = "file://artifacts/patient-pipeline-landing-video/public/audio/vo-invitation-final.mp3"
+type = "audio"
+title = "Final connected invitation narration"
+description = "Text-to-speech audio: What could that look like in your practice? Let’s talk about your inactive patients, your incoming inquiries, and how your team handles follow-up today. Request a conversation, …"
+logical_id = "8ff969d0-c877-44f3-9d71-24efc945e728"
+
+[[outputs]]
+id = "GDJdOSZE00MGX0M8n5wZs"
+uri = "file://artifacts/patient-pipeline-landing-video/public/audio/vo-opportunity-final.mp3"
+type = "audio"
+title = "Final connected opportunity narration"
+description = "Text-to-speech audio: Your practice may already have opportunities that aren’t turning into appointments. Some are patients who haven’t been back in a while. Others are people who asked about care, b…"
+logical_id = "bb5e706c-e0b6-42bd-8a69-42a515905b3e"
+
+[[outputs]]
+id = "cJLr-1b48RgTnolz6v1Ms"
+uri = "file://artifacts/patient-pipeline-landing-video/public/audio/vo-reactivation-final.mp3"
+type = "audio"
+title = "Final connected reactivation narration"
+description = "Text-to-speech audio: With reactivation, the conversation starts with the care that patient received before. As they explain what’s happening now, your team selects their response, and the script fol…"
+logical_id = "97238ab9-6766-40d4-9ce3-04e73656ffdf"
+
+[[outputs]]
+id = "v_esQw2zLrDUyUpE5nKhb"
+uri = "file://artifacts/patient-pipeline-landing-video/public/audio/vo-revenue-final.mp3"
+type = "audio"
+title = "Final connected revenue narration"
+description = "Text-to-speech audio: Now think about a small example. Five past patients return, and better follow-up helps three additional new patients get started. If each represents a thousand dollars in first-…"
+logical_id = "710e68e1-50cf-42b1-8bb8-fa56dc01f5fe"
+
+[[outputs]]
+id = "-kRFuVSCOnRuDdHASUmyq"
+uri = "file://artifacts/patient-pipeline-landing-video/public/audio/vo-revenue-monthly.mp3"
+type = "audio"
+title = "Monthly incremental patient value"
+description = "Text-to-speech audio: Imagine a month where Patient Pipeline helps reactivate four additional patients, beyond your current reactivation efforts. Better lead follow-up also gets three additional new …"
+logical_id = "78180c0f-7ebf-45dd-a469-9547d83f4689"

@@ -1,0 +1,29 @@
+kind = "video"
+videoAspectRatio = "16:9"
+previewPath = "/patient-pipeline-landing-video/"
+title = "Patient Pipeline — Landing Page Video"
+description = "Conversational landscape sales video showing real Reactivation and Lead Follow-Up workflows, animated cursor interactions, visible typing, and a combined revenue opportunity. Separate from the existing walkthrough."
+version = "1.0.0"
+id = "artifacts/patient-pipeline-landing-video"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/patient-pipeline-landing-video/" ]
+localPort = 20197
+
+[services.development]
+run = "pnpm --filter @workspace/patient-pipeline-landing-video run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/patient-pipeline-landing-video", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/patient-pipeline-landing-video/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "20197"
+BASE_PATH = "/patient-pipeline-landing-video/"

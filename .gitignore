@@ -47,3 +47,6 @@ Thumbs.db
 # Replit
 .cache/
 .local/
+
+# Resumable video-export frames and temporary browser profiles
+/exports/.landing-capture/
