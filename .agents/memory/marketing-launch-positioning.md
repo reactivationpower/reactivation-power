@@ -13,7 +13,7 @@ Marketing rebranding is not authorization for a domain migration, entitlement ch
 
 **Why:** The approved work concerns public copy and email branding, not contractual or billing changes. Working delivery URLs and sender addresses were intentionally retained.
 
-**How to apply:** Use Patient Pipeline display branding, preserve existing operational addresses and legal/billing data, and treat changes to those as separate work requiring explicit direction.
+**How to apply:** Use Patient Pipeline display branding and preserve legal/billing data. The user subsequently approved moving marketing-email call destinations to the existing Patient Pipeline domain after a one-email test. That approval does not extend to transactional links, sender identities, DNS, or historical agreements.
 
 When moving public marketing to a new domain, preserve the old domain's email destinations through a live domain mapping or path-preserving redirects; updating source templates alone cannot repair links in delivered emails.
 

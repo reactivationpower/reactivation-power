@@ -1,7 +1,7 @@
 import type { MarketingEmailCopy } from './marketing-email-content/types'
 
-// Keep established delivery URLs until a domain migration is approved.
-export const MARKETING_LANDING_URL = 'https://reactivationpower.com/healthcare'
+// All prospect-email call buttons use the approved, verified booking landing page.
+export const MARKETING_LANDING_URL = 'https://patientpipeline.app/schedule-a-call'
 export const MARKETING_LOGO_URL = 'https://reactivationpower.com/images/patient-pipeline-logo.png'
 const FONT = 'Arial,Helvetica,sans-serif'
 const esc = (value: string) => value.replace(/&/g, '&amp;').replace(/</g, '&lt;')

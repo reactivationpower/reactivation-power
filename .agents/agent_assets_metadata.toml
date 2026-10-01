@@ -1600,3 +1600,17 @@ mtime_ms = 1790881826493
 storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/a0204a30-5e08-4913-b67f-cdef21198d0e/ee2691fe-3430-471b-ab3a-07d9907320e9"
 storage_version_token = "1790883072508364"
 content_type = "video/mp4"
+
+[[outputs]]
+id = "BNNRayij-vX2nDvJUlSZh"
+uri = "file://exports/Patient-Pipeline-Emails-Updated-Call-Links.zip"
+type = "unspecified"
+title = "Updated Marketing Emails — All 68 Templates"
+description = "Every call button now opens https://patientpipeline.app/schedule-a-call. Includes email HTML, subject/preview-text CSV, and GoHighLevel import instructions."
+logical_id = "a60b04e9-7868-445b-9fdf-e374547a1461"
+content_hash = "sha256:348fb6f7e8e53ecdf3f0a183fed12c674df09ab8813a3b8f344985ed7946e741"
+size = 202667
+mtime_ms = 1790885634316
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/a60b04e9-7868-445b-9fdf-e374547a1461/b497b316-8fc1-46a1-957e-944bfffc3a39"
+storage_version_token = "1790885695999704"
+content_type = "application/octet-stream"
