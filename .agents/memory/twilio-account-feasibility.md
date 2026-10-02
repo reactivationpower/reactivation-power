@@ -15,6 +15,18 @@ Twilio Connect is not sufficient for the requested existing-number browser-calli
 
 **How to apply:** Verify the precise credential and API permissions before proposing a one-click connection. Any initial customer-owned-account setup must explain its real Twilio-side steps.
 
+For independently owned accounts, the researched baseline is one-time Twilio-side account/payment setup, a dedicated Standard API key for API operations and browser-token signing, an app-created TwiML application, and API-driven existing-number verification. This is a proposed setup, not user authorization to build. Standard keys are broad, not Voice-only; Restricted keys cannot sign Voice SDK access tokens.
+
+**Why:** Twilio explicitly requires Main or Standard keys for SDK Access Tokens. Its verified-caller-ID API supports an automated phone challenge and success callback without requiring an umbrella account.
+
+**How to apply:** Keep onboarding owner-only and explain key permissions. Do not promise an OAuth-only or Restricted-key-only browser integration. Number verification is separate from business verification and does not guarantee carrier reputation or SHAKEN/STIR attestation.
+
+Traditional webhook signatures need the account Auth Token, not the API key secret. The newer Webhooks configuration API supports independent SharedKeys authenticated via API keys, but was public beta when researched on 2026-10-02.
+
+**Why:** A key-only connection is insufficient for the established callback signature validation flow; relying on a beta must be an explicit, tested choice rather than an unnoticed dependency.
+
+**How to apply:** Include callback-authentication provisioning in the connection design. A stable baseline needs the account SID, dedicated Standard key SID/secret, and securely held Auth Token. If evaluating SharedKeys, scope URL rules to Patient Pipeline endpoints only, validate actual Voice callbacks, and never silently bypass signatures or change other integrations' account-wide defaults.
+
 HIPAA is not waived by customer ownership or by leaving recording off. Twilio's published HIPAA page requires a BAA for PHI workflows and says BAA customers need Security or Enterprise Edition.
 
 **Why:** Direct usage billing and health-data compliance are separate responsibilities, and edition/BAA costs can affect feasibility.
@@ -30,4 +42,8 @@ Official sources checked on 2026-10-02:
 - https://www.twilio.com/docs/iam/oauth-apps/account-oauth-apps
 - https://www.twilio.com/docs/iam/oauth-apps/org-oauth-apps
 - https://www.twilio.com/docs/voice/sdks
+- https://www.twilio.com/docs/iam/access-tokens
+- https://www.twilio.com/docs/voice/api/outgoing-caller-ids
+- https://www.twilio.com/docs/usage/webhooks/webhooks-security
+- https://www.twilio.com/docs/usage/webhooks/webhook-configuration
 - https://www.twilio.com/en-us/hipaa
