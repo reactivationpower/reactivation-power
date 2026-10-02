@@ -19,4 +19,10 @@ The user selected “Computers only first (recommended)” for the initial in-po
 
 **Why:** The user explicitly chose a computer-only first version.
 
-**How to apply:** Scope the initial calling experience to computer browsers. Do not add mobile calling to the first release. Recording and any separate feature charge remain undecided; these scope choices are not authorization to implement.
+**How to apply:** Scope the initial calling experience to computer browsers. Do not add mobile calling to the first release. Any separate feature charge remains undecided; these scope choices are not authorization to implement.
+
+The user selected “No recording initially (recommended).”
+
+**Why:** The user explicitly excluded recording from the first version.
+
+**How to apply:** Do not enable recording in the initial calling integration. Future practice-owned recording is a separate decision. Twilio recording must be triggered through call instructions or its API; owning an account does not by itself enable recording for portal calls. See https://www.twilio.com/docs/voice/recording-settings.
