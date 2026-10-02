@@ -24,3 +24,4 @@
 - [Marketing launch positioning](marketing-launch-positioning.md) — approved combined launch offer; do not invent numeric terms or treat rebranding as a billing/domain migration.
 - [Publishing availability diagnostics](publishing-availability-diagnostics.md) — workspace warnings are not build evidence; reproduce artifact builds with their service environment.
 - [Portal calling decisions](portal-calling-decisions.md) — proposed Twilio calling uses practice-owned accounts with direct Twilio billing; other calling choices remain open.
+- [Twilio account feasibility](twilio-account-feasibility.md) — embedded signup/direct billing is not established; Connect has caller-ID limits, and HIPAA edition/BAA costs need confirmation.
