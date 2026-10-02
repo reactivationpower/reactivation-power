@@ -13,4 +13,10 @@ Use the practice's existing phone number as outbound caller ID where supported.
 
 **Why:** The user explicitly selected the existing practice number rather than a separate Twilio number or a choice of both.
 
-**How to apply:** Require ownership verification and confirm Twilio support. Do not assume permission to port the number or automatically substitute a dedicated number. Mobile calling behavior remains undecided.
+**How to apply:** Require ownership verification and confirm Twilio support. Do not assume permission to port the number or automatically substitute a dedicated number.
+
+The user selected “Computers only first (recommended)” for the initial in-portal calling launch. Mobile calling is outside the initial scope.
+
+**Why:** The user explicitly chose a computer-only first version.
+
+**How to apply:** Scope the initial calling experience to computer browsers. Do not add mobile calling to the first release. Recording and any separate feature charge remain undecided; these scope choices are not authorization to implement.
