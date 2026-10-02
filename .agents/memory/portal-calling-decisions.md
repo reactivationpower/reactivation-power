@@ -5,9 +5,11 @@ description: User-selected billing and caller-ID requirements for proposed optio
 
 For the proposed optional portal-calling feature, each practice should connect or create its own Twilio account and pay Twilio directly for calling usage.
 
+The user explicitly rejected an umbrella account: “I dont want an umbrella account. LEts go back to what I was planning before.”
+
 **Why:** The user explicitly selected direct Twilio billing rather than Patient Pipeline-managed usage billing.
 
-**How to apply:** Scope customer-owned account onboarding, not parent-account subaccounts billed to Patient Pipeline. This choice does not authorize implementation, set a separate feature price, or settle recording or mobile calling behavior.
+**How to apply:** Scope independently practice-owned account onboarding. Do not pursue Patient Pipeline umbrella Organizations or parent-account subaccounts, and do not repeatedly ask the user to investigate that architecture. This choice does not authorize implementation or set a separate feature price. Computer-only scope and the exclusion of recording are specified below.
 
 Use the practice's existing phone number as outbound caller ID where supported.
 
