@@ -21,8 +21,8 @@ The user selected “Computers only first (recommended)” for the initial in-po
 
 **How to apply:** Scope the initial calling experience to computer browsers. Do not add mobile calling to the first release. Any separate feature charge remains undecided; these scope choices are not authorization to implement.
 
-The user selected “No recording initially (recommended).”
+The user requires: “Just dont do call recording then.”
 
-**Why:** The user explicitly excluded recording from the first version.
+**Why:** The user explicitly excluded call recording after discussing account ownership, billing, and compliance.
 
-**How to apply:** Do not enable recording in the initial calling integration. Future practice-owned recording is a separate decision. Twilio recording must be triggered through call instructions or its API; owning an account does not by itself enable recording for portal calls. See https://www.twilio.com/docs/voice/recording-settings.
+**How to apply:** Exclude call recording, recording toggles, storage, and playback from the proposed Patient Pipeline calling integration. Do not treat recording as an automatically planned later phase or propose it again unless the user reopens it. This scope choice does not authorize calling implementation or settle the account architecture.
