@@ -7,6 +7,7 @@ export interface AdminIdentity {
   email: string
   name: string | null
   role: AdminRole
+  canManageServices?: boolean
 }
 
 export const adminLogin = action<any>('admin-auth', 'adminLogin')

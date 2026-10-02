@@ -34,7 +34,7 @@ export function isEmailAudienceId(value: string | null | undefined): value is Em
 
 // Retain this export for preview compatibility and previously hosted graphics.
 // Rewritten emails use readable HTML panels rather than old campaign graphics.
-export const EMAIL_ASSET_BASE = 'https://www.reactivationpower.com/images/emails'
+export const EMAIL_ASSET_BASE = 'https://patientpipeline.app/images/emails'
 
 // Preserve all 68 IDs and the original 1.1–14.3, 15–40 editorial ordering.
 // Numbering is not an instruction to send three emails per day.

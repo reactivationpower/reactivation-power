@@ -1,3 +1,4 @@
+import { canonicalEmailLinks } from './links'
 import {
   BRAND,
   button,
@@ -926,7 +927,7 @@ export function listTemplates(): AnyTemplate[] {
 }
 
 export function renderTemplate<K extends TemplateId>(id: K, data: TemplateDataMap[K]): RenderedEmail {
-  return TEMPLATES[id].render(data)
+  return TEMPLATES[id].render(canonicalEmailLinks(data))
 }
 
 /** Card 1 declined, card 2 paid the invoice — access was never interrupted. */

@@ -74,8 +74,8 @@ timeoutMs = 20000
 [userenv.shared]
 SUPABASE_URL = "https://jbdymqqpolkoevyypjxd.supabase.co"
 SUPER_ADMIN_EMAIL = "drstrotheide@gmail.com"
-RESEND_FROM = "Reactivation Power <team@reactivationpower.com>"
-APP_URL = "https://reactivationpower.com"
+RESEND_FROM = "Patient Pipeline <team@patientpipeline.app>"
+APP_URL = "https://patientpipeline.app"
 
 [nix]
 channel = "stable-25_05"

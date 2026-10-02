@@ -1,3 +1,5 @@
+import { PUBLIC_APP_ORIGIN } from '@/lib/app-origin'
+
 /**
  * Branded layout for transactional email. Same visual language as the
  * marketing sequence in lib/email-templates.ts (logo header with the teal
@@ -16,8 +18,8 @@ export const BRAND = {
   muted: '#62748e',
   panel: '#f1f5f9',
   page: '#f8fafc',
-  logoUrl: 'https://reactivationpower.com/images/patient-pipeline-logo.png',
-  siteUrl: 'https://reactivationpower.com',
+  logoUrl: `${PUBLIC_APP_ORIGIN}/images/patient-pipeline-logo.png`,
+  siteUrl: PUBLIC_APP_ORIGIN,
 } as const
 
 const FONT = 'Arial,Helvetica,sans-serif'

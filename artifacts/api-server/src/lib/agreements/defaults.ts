@@ -20,7 +20,7 @@ export const COMPANY = {
   name: 'Reactivation Power',
   legalName: 'Reactivation Power',
   supportEmail: 'support@reactivationpower.com',
-  siteUrl: 'https://reactivationpower.com',
+  siteUrl: 'https://patientpipeline.app',
 } as const
 
 export function agreementTitle(termMonths: number): string {

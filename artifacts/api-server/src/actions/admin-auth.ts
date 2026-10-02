@@ -21,7 +21,7 @@ async function clientIp(): Promise<string> {
 }
 
 function identityOf(user: AdminUser): AdminIdentity {
-  return { userId: user.id, email: user.email, name: user.name, role: user.role }
+  return { userId: user.id, email: user.email, name: user.name, role: user.role, canManageServices: user.canManageServices }
 }
 
 async function issueAdminCookie(user: AdminUser): Promise<void> {
@@ -46,7 +46,9 @@ async function issueAdminCookie(user: AdminUser): Promise<void> {
 /** Only follow same-origin /admin paths, and only ones this role may open. */
 function landingFor(user: AdminUser, next: string): string {
   if (!/^\/admin(\/|\?|$)/.test(next)) return adminHomeFor(user.role)
-  if (user.role !== 'super_admin' && !/^\/admin\/payments(\/|\?|$)/.test(next)) {
+  const permitted = /^\/admin\/payments(\/|\?|$)/.test(next) ||
+    (user.canManageServices && /^\/admin\/participants(\/|\?|$)/.test(next))
+  if (user.role !== 'super_admin' && !permitted) {
     return adminHomeFor(user.role)
   }
   return next
@@ -174,7 +176,7 @@ export async function completeAdminInvite(
 export async function getCurrentAdmin(): Promise<AdminIdentity | null> {
   const session = await getAdminSession()
   if (!session) return null
-  return { userId: session.userId, email: session.email, name: session.name, role: session.role }
+  return { userId: session.userId, email: session.email, name: session.name, role: session.role, canManageServices: session.canManageServices }
 }
 
 export async function adminLogout() {

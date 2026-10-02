@@ -1,8 +1,9 @@
 // @ts-nocheck
 
-import { useState, useTransition } from 'react'
+import { useEffect, useState, useTransition } from 'react'
 import { setProductAccess } from '@/app/actions/admin'
 import { Switch } from '@/components/ui/switch'
+import { refreshPageData } from '@/hooks/use-router'
 
 /** Same pattern as the course toggle: optimistic flip, server call behind it. */
 export function ProductAccessToggle({
@@ -17,6 +18,7 @@ export function ProductAccessToggle({
   const [granted, setGranted] = useState(initialGranted)
   const [error, setError] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
+  useEffect(() => setGranted(initialGranted), [initialGranted])
 
   return (
     <div className="flex flex-col items-end gap-1">
@@ -29,15 +31,18 @@ export function ProductAccessToggle({
           setGranted(next)
           setError(null)
           startTransition(async () => {
-            const res = await setProductAccess(participantId, product, next)
-            if (res?.error) {
+            try {
+              const res = await setProductAccess(participantId, product, next)
+              if (res?.error) throw new Error(res.error)
+              refreshPageData()
+            } catch (err) {
               setGranted(!next)
-              setError(res.error)
+              setError(err instanceof Error ? err.message : 'Could not update product access')
             }
           })
         }}
       />
-      {error ? <p className="text-xs text-destructive">{error}</p> : null}
+      {error ? <p role="alert" className="text-xs text-destructive">{error}</p> : null}
     </div>
   )
 }

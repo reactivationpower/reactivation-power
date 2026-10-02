@@ -23,7 +23,9 @@ export interface AdminPayload {
   issuedAt: number
 }
 
-export type AdminIdentity = Pick<AdminPayload, 'userId' | 'email' | 'name' | 'role'>
+export type AdminIdentity = Pick<AdminPayload, 'userId' | 'email' | 'name' | 'role'> & {
+  canManageServices?: boolean
+}
 
 function secret(): string {
   const s = process.env.SESSION_SECRET || process.env.SUPABASE_JWT_SECRET

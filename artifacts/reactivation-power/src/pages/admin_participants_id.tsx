@@ -58,7 +58,7 @@ export default function ParticipantDetailPage() {
     participant, ownerId, isOwner, staff, aliases, sessions, courses,
     accessIds, accessibleCourses, courseTrees, events, progress, niches,
     nicheAccessSet, nichesBySector, progressByVideo, accessSet, videoTitle,
-    parent, reactivationStats, leadFollowUp,
+    parent, reactivationStats, leadFollowUp, canEditParticipants,
   } = data
 
   return (
@@ -106,13 +106,13 @@ export default function ParticipantDetailPage() {
               ) : null}
             </div>
           </div>
-          <div className="flex items-center gap-4">
+          {canEditParticipants ? <div className="flex items-center gap-4">
             <ViewAsButton participantId={participant.id} name={participant.first_name} />
             <ParticipantActiveToggle
               participantId={participant.id}
               initialActive={participant.is_active}
             />
-          </div>
+          </div> : null}
         </div>
       </div>
 
@@ -203,12 +203,12 @@ export default function ParticipantDetailPage() {
                 Staff members ({staff.filter((s) => s.is_active).length}/
                 {MAX_STAFF} active)
               </CardTitle>
-              <AddStaffForm
+              {canEditParticipants ? <AddStaffForm
                 parentId={participant.id}
                 disabled={
                   staff.filter((s) => s.is_active).length >= MAX_STAFF
                 }
-              />
+              /> : null}
             </CardHeader>
             <CardContent className="flex flex-col gap-3">
               {staff.length === 0 ? (

@@ -118,6 +118,25 @@ describe('live profile cache', () => {
     await mod.setAdminUserActive('boot', false)
     expect((await mod.getLiveAdminProfile('boot'))?.active).toBe(false)
   })
+
+  it('grants and revokes service management without changing the role or commission', async () => {
+    users.push(superAdmin({ id: 'service-rep', app_metadata: { admin_role: 'sales_rep', default_commission_rate: 12 } }))
+    expect((await mod.getLiveAdminProfile('service-rep'))?.canManageServices).toBe(false)
+    await mod.updateAdminUser('service-rep', { canManageServices: true })
+    const granted = await mod.getLiveAdminProfile('service-rep')
+    expect(granted?.canManageServices).toBe(true)
+    expect(granted?.role).toBe('sales_rep')
+    expect(granted?.defaultCommissionRate).toBe(12)
+    await mod.updateAdminUser('service-rep', { canManageServices: false })
+    expect((await mod.getLiveAdminProfile('service-rep'))?.canManageServices).toBe(false)
+  })
+
+  it('ignores client-editable service claims and non-boolean metadata', () => {
+    for (const value of [undefined, 'true', 1, false]) {
+      const user = superAdmin({ app_metadata: { admin_role: 'sales_rep', admin_manage_services: value }, user_metadata: { admin_manage_services: true } })
+      expect(mod.toAdminUser(user as never)?.canManageServices).toBe(false)
+    }
+  })
 })
 
 describe('inviteAdminUser', () => {

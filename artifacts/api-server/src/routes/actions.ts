@@ -70,7 +70,7 @@ const MODULES: Record<string, ActionModule> = {
   agreements,
 };
 
-type Auth = "public" | "portal" | "admin" | "super_admin";
+type Auth = "public" | "portal" | "admin" | "super_admin" | "manage_services";
 
 // hint: Logic changed on both sides. Requires understanding intent of each change.
 /** Allow-list: module -> action -> required auth. Anything else is 404. */
@@ -166,7 +166,7 @@ const ACTIONS: Record<string, Record<string, Auth>> = {
     createVideo: "super_admin", updateVideo: "super_admin", deleteVideo: "super_admin", moveVideo: "super_admin",
     addAttachment: "super_admin", deleteAttachment: "super_admin",
     createParticipant: "super_admin", updateParticipant: "super_admin", deleteParticipant: "super_admin",
-    setCourseAccess: "super_admin", setNicheAccess: "super_admin", setProductAccess: "super_admin",
+    setCourseAccess: "manage_services", setNicheAccess: "manage_services", setProductAccess: "manage_services",
   },
   reactivation: {
     // Global niche / script management (admin area).
@@ -185,9 +185,9 @@ const ACTIONS: Record<string, Record<string, Auth>> = {
 
 async function isAuthorized(req: Request, auth: Auth): Promise<boolean> {
   if (auth === "public") return true;
-  if (auth === "admin" || auth === "super_admin") {
+  if (auth === "admin" || auth === "super_admin" || auth === "manage_services") {
     const session = await getAdminSessionFromRequest(req);
-    return Boolean(session && satisfies(session.role, auth));
+    return Boolean(session && satisfies(session.role, auth, session.canManageServices));
   }
   const token = req.cookies?.[SESSION_COOKIE_NAME] as string | undefined;
   const session = token ? decodeSession(token) : null;

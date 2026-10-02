@@ -7,7 +7,7 @@ const getLiveAdminProfile = vi.fn()
 vi.mock('@/lib/data/admin-users', () => ({ getLiveAdminProfile }))
 
 const { encodeAdminSession, ADMIN_COOKIE_NAME } = await import('@/lib/auth/admin-token')
-const { getAdminSessionFromRequest } = await import('@/lib/auth/admin-session')
+const { getAdminSessionFromRequest, satisfies } = await import('@/lib/auth/admin-session')
 
 const identity = { userId: 'u1', email: 'a@b.co', name: 'A', role: 'super_admin' as const }
 const req = (cookie = encodeAdminSession(identity)) =>
@@ -42,9 +42,34 @@ describe('admin session authorization uses the live profile, not the cookie clai
     expect(await getAdminSessionFromRequest(req())).toBeNull()
   })
 
+  it('uses live service access without granting super-admin access', async () => {
+    getLiveAdminProfile.mockResolvedValue(profile({ role: 'sales_rep', canManageServices: true }))
+    const s = await getAdminSessionFromRequest(req())
+    expect(s?.canManageServices).toBe(true)
+    expect(satisfies(s!.role, 'manage_services', s!.canManageServices)).toBe(true)
+    expect(satisfies(s!.role, 'super_admin', s!.canManageServices)).toBe(false)
+  })
+
+  it('does not retain a revoked capability from a signed cookie', async () => {
+    getLiveAdminProfile.mockResolvedValue(profile({ role: 'sales_rep', canManageServices: false }))
+    const s = await getAdminSessionFromRequest(req(encodeAdminSession({ ...identity, canManageServices: true })))
+    expect(s?.canManageServices).toBe(false)
+    expect(satisfies(s!.role, 'manage_services', s!.canManageServices)).toBe(false)
+  })
+
   it('rejects tampered or missing cookies without touching Supabase', async () => {
     expect(await getAdminSessionFromRequest(req('garbage'))).toBeNull()
     expect(await getAdminSessionFromRequest({ cookies: {} } as unknown as Request)).toBeNull()
     expect(getLiveAdminProfile).not.toHaveBeenCalled()
+  })
+})
+
+describe('service-management permission boundaries', () => {
+  it('keeps ungranted sales reps restricted and existing super admins unchanged', () => {
+    expect(satisfies('sales_rep', 'admin')).toBe(true)
+    expect(satisfies('sales_rep', 'manage_services')).toBe(false)
+    expect(satisfies('sales_rep', 'super_admin', true)).toBe(false)
+    expect(satisfies('super_admin', 'manage_services')).toBe(true)
+    expect(satisfies('super_admin', 'super_admin')).toBe(true)
   })
 })

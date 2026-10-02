@@ -7,3 +7,9 @@ Historically the Supabase project was reachable only with the service-role key (
 **Why:** Admin accounts needed a profile table; instead role/rate/active flags live in the auth user's `app_metadata` and deactivation uses `ban_duration`. Authorization must read the live profile per request (short cache, invalidated on mutation) — the cookie is identity only, never the source of role.
 
 **How to apply:** New tables now go through drizzle migrations (supabase-postgres-access.md); keep admin profiles in app_metadata for consistency. Supabase's built-in mailer is rate-limited (~2/hour) and rejects example.com addresses, so any email-based flow needs a manual fallback; never log one-time links or token hashes.
+
+Granting a sales rep user/service visibility should not promote them to unrestricted super admin. Use an independently granted, live service-management capability and keep unrelated owner permissions separate.
+
+**Why:** The requested access was to view users and toggle their services, not administer the whole business. A role promotion would also unlock staff administration, global configuration and destructive account operations.
+
+**How to apply:** Check both the navigation and backend boundaries. Treat service grants, user creation/deletion, account impersonation and owner settings as distinct permissions, and never trust a capability copied into a cookie over the live Auth profile.

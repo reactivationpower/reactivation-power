@@ -57,7 +57,7 @@ import { listCommissions } from "../actions/commissions";
 const visibleQueueItem = (item: leadStore.CallNextItem) => ({ ...item, lead: withoutLeadLeaseToken(item.lead) });
 
 type Loader = (req: Request) => Promise<Record<string, unknown>>;
-type AuthKind = "portal" | "admin" | "super_admin" | undefined;
+type AuthKind = "portal" | "admin" | "super_admin" | "manage_services" | undefined;
 const router: IRouter = Router();
 
 /**
@@ -87,14 +87,13 @@ function add(path: string, auth: AuthKind, loader: Loader): void {
           if (!token || !decodeSession(token)) {
             redirect(`/login?next=${encodeURIComponent(originalPath(req))}`);
           }
-        } else if (auth === "admin" || auth === "super_admin") {
+        } else if (auth === "admin" || auth === "super_admin" || auth === "manage_services") {
           const session = await getAdminSessionFromRequest(req);
           if (!session) {
             redirect(`/admin-login?next=${encodeURIComponent(originalPath(req))}`);
           }
-          // Sales reps only get the pages marked "admin"; everything else is
-          // super-admin only and sends them to their landing page.
-          if (!satisfies(session.role, auth)) redirect(adminHomeFor(session.role));
+          // Additional service access does not unlock owner-only pages.
+          if (!satisfies(session.role, auth, session.canManageServices)) redirect(adminHomeFor(session.role));
         }
         return loader(req);
       });
@@ -145,7 +144,7 @@ add("/portal/_layout", "portal", async () => {
 add("/admin/_layout", "admin", async (req) => {
   const session = await getAdminSessionFromRequest(req);
   if (!session) redirect("/admin-login");
-  return { admin: { userId: session.userId, email: session.email, name: session.name, role: session.role } };
+  return { admin: { userId: session.userId, email: session.email, name: session.name, role: session.role, canManageServices: session.canManageServices } };
 });
 add("/admin/emails", "super_admin", async (req) => {
   const session = await getAdminSessionFromRequest(req);
@@ -605,7 +604,8 @@ add("/admin/courses/:id", "super_admin", async (req) => {
   return { id, tree, videoIds, attachments };
 });
 
-add("/admin/participants", "super_admin", async (req) => {
+add("/admin/participants", "manage_services", async (req) => {
+  const session = await getAdminSessionFromRequest(req);
   const q = queryString(req, "q") ?? "";
   const openNew = queryString(req, "new");
   const status = queryString(req, "status") ?? "active";
@@ -629,10 +629,11 @@ add("/admin/participants", "super_admin", async (req) => {
   for (const v of viewers.filter((v) => v.role === "staff")) {
     (staffByParent[v.parent_id!] ??= []).push(v);
   }
-  return { q, openNew, status, showDisabled, viewers, videoCount, query, filtered, allOwners, activeCount, disabledCount, owners, staffByParent };
+  return { q, openNew, status, showDisabled, viewers, videoCount, query, filtered, allOwners, activeCount, disabledCount, owners, staffByParent, canEditParticipants: session?.role === "super_admin" };
 });
 
-add("/admin/participants/:id", "super_admin", async (req) => {
+add("/admin/participants/:id", "manage_services", async (req) => {
+  const session = await getAdminSessionFromRequest(req);
   const id = String(req.params.id);
   const participant = await getParticipantById(id);
   if (!participant) notFound();
@@ -666,7 +667,8 @@ add("/admin/participants/:id", "super_admin", async (req) => {
   return { id, participant, ownerId, isOwner, staff, aliases, sessions, courses, accessIds, events,
     progress, niches, nicheAccessIds, nicheAccessSet, nichesBySector, progressByVideo,
     accessSet: accessSetObject, accessibleCourses, courseTrees,
-    videoIds, eventVideos: eventVideos ?? [], videoTitle, parent, reactivationStats, leadFollowUp };
+    videoIds, eventVideos: eventVideos ?? [], videoTitle, parent, reactivationStats, leadFollowUp,
+    canEditParticipants: session?.role === "super_admin" };
 });
 
 add("/admin/reactivation", "super_admin", async () => {

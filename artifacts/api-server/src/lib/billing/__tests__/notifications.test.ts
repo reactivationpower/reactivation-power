@@ -132,7 +132,7 @@ vi.mock('@/lib/stripe', () => ({
     paymentIntents: { retrieve: async () => ({ id: 'pi', payment_method: null, latest_charge: null }) },
   },
 }))
-vi.mock('@/lib/app-origin', () => ({ appOrigin: () => 'https://app.test' }))
+vi.mock('@/lib/app-origin', () => ({ appOrigin: () => 'https://app.test', PUBLIC_APP_ORIGIN: 'https://patientpipeline.app' }))
 vi.mock('@/lib/logger', () => ({ logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() } }))
 
 const { notifyAccessPaused, notifyAccessRestored, notifyBackupCardUsed, notifyPaymentReceived, notifySubscriptionCancelled, retryFailedNotifications } = await import(

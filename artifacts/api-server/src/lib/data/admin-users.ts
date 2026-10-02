@@ -14,6 +14,7 @@ import { sendEmail } from '@/lib/mail/send'
 
 const ROLE_KEY = 'admin_role'
 const ACTIVE_KEY = 'admin_active'
+const SERVICES_KEY = 'admin_manage_services'
 const RATE_KEY = 'default_commission_rate'
 const INVITED_BY_KEY = 'invited_by'
 const PERMANENT_BAN = '876000h' // ~100 years
@@ -26,6 +27,7 @@ export interface AdminUser {
   /** Default commission rate for this rep, as a percentage (0–100). */
   defaultCommissionRate: number
   active: boolean
+  canManageServices: boolean
   invitedBy: string | null
   /** Set once the user has accepted the invite / set a password. */
   confirmedAt: string | null
@@ -51,6 +53,7 @@ export function toAdminUser(user: User): AdminUser | null {
     role,
     defaultCommissionRate: Number.isFinite(rate) ? rate : 0,
     active: meta[ACTIVE_KEY] !== false,
+    canManageServices: meta[SERVICES_KEY] === true,
     invitedBy: typeof meta[INVITED_BY_KEY] === 'string' ? (meta[INVITED_BY_KEY] as string) : null,
     confirmedAt: user.email_confirmed_at ?? null,
     lastSignInAt: user.last_sign_in_at ?? null,
@@ -261,13 +264,14 @@ export async function createInviteLink(userId: string): Promise<string> {
 
 export async function updateAdminUser(
   userId: string,
-  patch: { role?: AdminRole; defaultCommissionRate?: number; name?: string | null },
+  patch: { role?: AdminRole; defaultCommissionRate?: number; name?: string | null; canManageServices?: boolean },
 ): Promise<AdminUser> {
   const supabase = getAdminClient()
   const { data: current, error: readError } = await supabase.auth.admin.getUserById(userId)
   if (readError || !current.user || !toAdminUser(current.user)) throw new Error('Admin user not found.')
   const meta = { ...(current.user.app_metadata ?? {}) } as Record<string, unknown>
   if (patch.role) meta[ROLE_KEY] = patch.role
+  if (patch.canManageServices !== undefined) meta[SERVICES_KEY] = patch.canManageServices
   if (patch.defaultCommissionRate !== undefined) meta[RATE_KEY] = normalizeRate(patch.defaultCommissionRate)
   const attrs: Parameters<typeof supabase.auth.admin.updateUserById>[1] = { app_metadata: meta }
   if (patch.name !== undefined) {

@@ -26,7 +26,7 @@ import { cn } from '@/lib/utils'
  * Sidebar navigation by role. Sales reps only get the sales-facing sections
  * (payments, agreements and their own commissions), super admins get everything.
  */
-const NAV: { group: string; items: { href: string; label: string; icon: any; roles?: AdminRole[] }[] }[] = [
+const NAV: { group: string; items: { href: string; label: string; icon: any; roles?: AdminRole[]; serviceAccess?: boolean }[] }[] = [
   {
     group: 'Dashboard',
     items: [{ href: '/admin', label: 'Dashboard', icon: LayoutGrid, roles: ['super_admin'] }],
@@ -35,7 +35,7 @@ const NAV: { group: string; items: { href: string; label: string; icon: any; rol
     group: 'Operations',
     items: [
       { href: '/admin/courses', label: 'Courses', icon: ClipboardList, roles: ['super_admin'] },
-      { href: '/admin/participants', label: 'Viewers', icon: Users, roles: ['super_admin'] },
+      { href: '/admin/participants', label: 'Viewers', icon: Users, roles: ['super_admin'], serviceAccess: true },
       { href: '/admin/reactivation', label: 'Reactivation', icon: PhoneCall, roles: ['super_admin'] },
       { href: '/admin/emails', label: 'Email Templates', icon: Mail, roles: ['super_admin'] },
       { href: '/admin/payments', label: 'Payments', icon: CreditCard },
@@ -61,7 +61,8 @@ export function AdminSidebar({ admin }: { admin: AdminIdentity | null }) {
   const [pathname] = useLocation();
   const role: AdminRole = admin?.role ?? 'sales_rep'
   const nav = NAV
-    .map((group) => ({ ...group, items: group.items.filter((i) => !i.roles || i.roles.includes(role)) }))
+    .map((group) => ({ ...group, items: group.items.filter((i) =>
+      !i.roles || i.roles.includes(role) || (i.serviceAccess && admin?.canManageServices === true)) }))
     .filter((group) => group.items.length > 0)
 
   return (

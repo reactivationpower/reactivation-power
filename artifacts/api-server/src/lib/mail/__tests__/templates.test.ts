@@ -18,9 +18,10 @@ describe('transactional templates', () => {
     }
   })
 
-  it('keeps the existing website and uses the new shared brand', () => {
+  it('uses Patient Pipeline for website and logo links', () => {
     expect(BRAND.name).toBe('Patient Pipeline')
-    expect(BRAND.siteUrl).toBe('https://reactivationpower.com')
+    expect(BRAND.siteUrl).toBe('https://patientpipeline.app')
+    expect(BRAND.logoUrl).toBe('https://patientpipeline.app/images/patient-pipeline-logo.png')
   })
 
   it('preserves saved agreement titles in signature and signed-copy emails', () => {
@@ -66,7 +67,7 @@ describe('transactional templates', () => {
     })
     expect(r.html).not.toContain('<script>')
     expect(r.html).toContain('&lt;script&gt;')
-    expect(r.html).toContain('https://app.test/login?email=a%40b.co')
+    expect(r.html).toContain('https://patientpipeline.app/login?email=a%40b.co')
   })
 
   it('dunning emails name the cards and point at the billing page', () => {
@@ -83,7 +84,7 @@ describe('transactional templates', () => {
     expect(backup.html).toContain('Visa ending in 0341')
     expect(backup.html).toContain('Mastercard ending in 4444')
     expect(backup.html).toContain('access is not affected')
-    expect(backup.html).toContain('https://x/billing?email=a%40b.co')
+    expect(backup.html).toContain('https://patientpipeline.app/billing?email=a%40b.co')
 
     const both = renderTemplate('access_paused', {
       name: 'Dr. Chen',
@@ -117,7 +118,7 @@ describe('transactional templates', () => {
     })
     expect(restored.subject).toContain('restored')
     expect(restored.html).toContain('October 2, 2026')
-    expect(restored.html).toContain('https://x/portal')
+    expect(restored.html).toContain('https://patientpipeline.app/portal')
   })
 
   it('payment failed changes tone when access is suspended', () => {

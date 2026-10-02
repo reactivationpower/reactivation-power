@@ -19,7 +19,7 @@ export default function ViewersPage() {
   })
   if (loading) return <PageLoading />
   if (error) return <PageError error={error} />
-  const { showDisabled, viewers, videoCount, query, activeCount, disabledCount, owners, staffByParent } = data
+  const { showDisabled, viewers, videoCount, query, activeCount, disabledCount, owners, staffByParent, canEditParticipants } = data
 
   return (
     <div className="mx-auto w-full max-w-7xl">
@@ -36,7 +36,7 @@ export default function ViewersPage() {
           <span className="text-sm text-muted-foreground">
             {owners.length} viewer{owners.length === 1 ? '' : 's'}
           </span>
-          <NewParticipantButton
+          {canEditParticipants ? <NewParticipantButton
             owners={viewers
               .filter((v) => v.role === 'owner')
               .map((v) => ({
@@ -44,7 +44,7 @@ export default function ViewersPage() {
                 name: `${v.first_name} ${v.last_name}`,
               }))}
             defaultOpen={openNew === '1'}
-          />
+          /> : null}
         </div>
       </div>
 

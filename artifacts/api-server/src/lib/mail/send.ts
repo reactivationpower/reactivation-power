@@ -15,10 +15,14 @@ import { renderTemplate, type TemplateDataMap, type TemplateId } from './templat
  * delivered / opened / clicked on the same row (see routes/webhooks-resend).
  */
 
-export const DEFAULT_FROM = 'Patient Pipeline <team@reactivationpower.com>'
+export const DEFAULT_FROM = 'Patient Pipeline <team@patientpipeline.app>'
 
 export function fromAddress(): string {
-  return process.env.RESEND_FROM?.trim() || DEFAULT_FROM
+  const from = process.env.RESEND_FROM?.trim() || DEFAULT_FROM
+  if (/[\r\n]/.test(from) || !/(?:^|<)[^@\s<>]+@patientpipeline\.app>?$/i.test(from)) {
+    throw new Error('RESEND_FROM must use a patientpipeline.app email address')
+  }
+  return from
 }
 
 export interface SendResult {
@@ -65,8 +69,16 @@ export async function sendEmail<K extends TemplateId>(
   options: SendOptions = {},
 ): Promise<SendResult> {
   const recipient = to.trim().toLowerCase()
-  const rendered = renderTemplate(type, data)
   const logId = randomUUID()
+  let rendered: ReturnType<typeof renderTemplate>
+  try {
+    rendered = renderTemplate(type, data)
+  } catch (err) {
+    const error = err instanceof Error ? err.message : 'Email rendering failed'
+    await writeLog({ id: logId, type, recipient, subject: 'Email rendering failed', metadata: options.metadata ?? null, status: 'failed', error })
+    logger.error({ email: { type, recipient, logId } }, 'email rendering failed')
+    return { ok: false, logId, error }
+  }
   const base = { id: logId, type, recipient, subject: rendered.subject, metadata: options.metadata ?? null }
 
   if (!EMAIL_RE.test(recipient)) {

@@ -3,13 +3,14 @@ import { cookies } from 'next/headers'
 import { ADMIN_COOKIE_NAME, decodeAdminSession, type AdminPayload, type AdminRole } from './admin-token'
 import { getLiveAdminProfile } from '@/lib/data/admin-users'
 
-export type AdminSession = AdminPayload
+export type AdminSession = AdminPayload & { canManageServices: boolean }
 
 /** Required auth level for admin routes/actions. `admin` = any active admin. */
-export type AdminRequirement = 'admin' | 'super_admin'
+export type AdminRequirement = 'admin' | 'super_admin' | 'manage_services'
 
-export function satisfies(role: AdminRole, requirement: AdminRequirement): boolean {
-  return requirement === 'admin' || role === 'super_admin'
+export function satisfies(role: AdminRole, requirement: AdminRequirement, canManageServices = false): boolean {
+  return requirement === 'admin' || role === 'super_admin' ||
+    (requirement === 'manage_services' && canManageServices === true)
 }
 
 async function validate(token: string | undefined): Promise<AdminSession | null> {
@@ -20,7 +21,7 @@ async function validate(token: string | undefined): Promise<AdminSession | null>
   // live profile so demotion/deactivation take effect immediately.
   const live = await getLiveAdminProfile(payload.userId)
   if (!live || !live.active) return null
-  return { ...payload, email: live.email, name: live.name, role: live.role }
+  return { ...payload, email: live.email, name: live.name, role: live.role, canManageServices: live.canManageServices === true }
 }
 
 /** Admin identity for an Express request (route handlers), or null. */
@@ -41,7 +42,7 @@ export async function getAdminSession(): Promise<AdminSession | null> {
 export async function requireAdmin(requirement: AdminRequirement = 'admin'): Promise<AdminSession> {
   const session = await getAdminSession()
   if (!session) throw new Error('Unauthorized')
-  if (!satisfies(session.role, requirement)) throw new Error('Forbidden: super admin access required')
+  if (!satisfies(session.role, requirement, session.canManageServices)) throw new Error('Forbidden: required admin permission is missing')
   return session
 }
 

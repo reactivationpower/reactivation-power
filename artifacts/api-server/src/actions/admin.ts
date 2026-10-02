@@ -5,6 +5,7 @@ import { MAX_STAFF } from '@workspace/shared/types'
 import { sendPortalWelcomeEmail } from '@/lib/mail'
 import { accessOwnerId, getParticipantById } from '@/lib/data/participants'
 import { LEAD_FOLLOWUP_PRODUCT, setLeadFollowUpAccess } from '@/lib/lead-followup/access'
+import { requireAdmin } from '@/lib/auth/admin-session'
 
 function slugify(title: string): string {
   return title
@@ -391,20 +392,23 @@ export async function setCourseAccess(
   courseId: string,
   granted: boolean,
 ) {
+  await requireAdmin('manage_services')
   const supabase = getAdminClient()
   if (granted) {
-    await supabase
+    const { error } = await supabase
       .from('course_access')
       .upsert(
         { participant_id: participantId, course_id: courseId },
         { onConflict: 'course_id,participant_id' },
       )
+    if (error) throw new Error(error.message)
   } else {
-    await supabase
+    const { error } = await supabase
       .from('course_access')
       .delete()
       .eq('participant_id', participantId)
       .eq('course_id', courseId)
+    if (error) throw new Error(error.message)
   }
   revalidatePath(`/admin/participants/${participantId}`)
   revalidatePath('/admin/participants')
@@ -422,6 +426,7 @@ export async function setProductAccess(
   product: string,
   granted: boolean,
 ) {
+  await requireAdmin('manage_services')
   if (product !== LEAD_FOLLOWUP_PRODUCT) return { error: 'Unknown product' }
   const target = await getParticipantById(participantId)
   if (!target) return { error: 'Participant not found' }
@@ -439,20 +444,23 @@ export async function setNicheAccess(
   nicheId: string,
   granted: boolean,
 ) {
+  await requireAdmin('manage_services')
   const supabase = getAdminClient()
   if (granted) {
-    await supabase
+    const { error } = await supabase
       .from('niche_access')
       .upsert(
         { participant_id: participantId, niche_id: nicheId },
         { onConflict: 'participant_id,niche_id' },
       )
+    if (error) throw new Error(error.message)
   } else {
-    await supabase
+    const { error } = await supabase
       .from('niche_access')
       .delete()
       .eq('participant_id', participantId)
       .eq('niche_id', nicheId)
+    if (error) throw new Error(error.message)
   }
   revalidatePath(`/admin/participants/${participantId}`)
 }
