@@ -3,6 +3,12 @@ name: Patient Pipeline video positioning
 description: Brand and content boundaries for videos explaining both Reactivation and Lead Follow-Up.
 ---
 
+The user's goal is for prospects to be able to watch the longer walkthrough before a sales call. They are considering having sales staff use it as the generic demo, followed by questions and targeted live demonstrations; this is discussion, not an approved implementation.
+
+**Why:** The user wants the walkthrough available before the call and is evaluating a consistent recorded demonstration with live follow-up for specific functionality questions.
+
+**How to apply:** Keep the short landing-page video distinct from the longer walkthrough. Do not assume the walkthrough should only be available after booking, or that discussing its placement authorizes page changes.
+
 For the landing film's service list, “Chiro family” means the complete practice-family bundle, not just the public catalog's chiropractic category or representative examples.
 
 **Why:** The user requested every Chiro-family service. The bundle includes services categorized elsewhere in the public catalog; its chiropractic group alone would omit supported weight-loss and body-contouring services.
