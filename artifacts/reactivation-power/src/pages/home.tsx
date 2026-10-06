@@ -5,6 +5,9 @@ import {
 } from 'lucide-react'
 import { OpportunityProvider } from '@/components/landing/opportunity-context'
 import { CombinedCalculator } from '@/components/homepage/combined-calculator'
+import { ClickToPlayVideo } from '@/components/video/click-to-play-video'
+import { INTRO_VIDEO } from '@/components/video/video-assets'
+import { WalkthroughSection } from '@/components/video/walkthrough-section'
 import { GuidedScriptDemo } from '@/components/homepage/guided-script-demo'
 import { ServicesWeSupport } from '@/components/site/services-we-support'
 import { SiteFooter } from '@/components/site/site-footer'
@@ -118,7 +121,10 @@ function HomeContent() {
                   {['Real people on the phone, not a robo-dialer', 'Scripts that adapt to each response', 'Every outcome logged and followed up'].map(line => <li key={line} className="flex items-start gap-2"><span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-accent" aria-hidden="true" />{line}</li>)}
                 </ul>
               </div>
-              <GuidedScriptDemo />
+              <div className="flex flex-col gap-3">
+                <ClickToPlayVideo {...INTRO_VIDEO} testId="introduction" />
+                <AnchorLink href="#full-walkthrough" className="inline-flex w-fit items-center gap-2 text-sm font-semibold text-accent underline-offset-4 hover:underline">Watch the full walkthrough <ArrowRight className="size-3.5" aria-hidden="true" /></AnchorLink>
+              </div>
             </div>
           </div>
         </section>
@@ -174,8 +180,10 @@ function HomeContent() {
               <PathCard title="Reactivation" description="Starts from your patient list" steps={REACTIVATION_PATH} />
               <PathCard title="Lead Follow-Up" description="Starts from a campaign" steps={LEAD_PATH} navy />
             </div>
+            <div className="mx-auto mt-12 max-w-4xl"><GuidedScriptDemo /></div>
           </div>
         </section>
+        <WalkthroughSection />
         <section id="reactivation" className="dph-band scroll-mt-24 border-y border-border">
           <div className="mx-auto max-w-6xl px-4 pt-16 md:px-6 md:pt-24">
              <div className="mx-auto max-w-3xl text-center"><p className="dph-eyebrow justify-center">Patient Reactivation</p><h2 className="mt-4 text-balance text-3xl font-bold tracking-tight text-foreground md:text-4xl">Make space to reconnect with past patients</h2><p className="mt-5 text-pretty text-lg leading-relaxed text-muted-foreground">Your team can check in with inactive patients using a guided conversation organized by the service they came in for.</p></div>

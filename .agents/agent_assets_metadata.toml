@@ -1628,3 +1628,17 @@ mtime_ms = 1790886036549
 storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/230fc9cf-e27b-4d68-a4f9-a460d109e9e5/98c8558e-dfc5-4a0d-bbe0-c324079134a9"
 storage_version_token = "1790886102014938"
 content_type = "application/octet-stream"
+
+[[outputs]]
+id = "UBSrHXoIfz6UkXcHwQ6iM"
+uri = "file://docs/Mohammed-GHL-Walkthrough-Setup.html"
+type = "html"
+title = "Mohammed’s GHL Walkthrough Email Setup Guide"
+description = "Shareable instructions with email copy, the existing website triggers, booked/unbooked workflow rules, and a launch test checklist. Open in a browser to print or save as PDF."
+logical_id = "63d12fff-22c5-49ed-ab29-26a058c1b770"
+content_hash = "sha256:9ffdfa7011a94a3f9a63f8d717cd4162a37bcc6f9afd5d9e200a8cdd12602762"
+size = 16622
+mtime_ms = 1791307544701
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/63d12fff-22c5-49ed-ab29-26a058c1b770/8d092bda-bc35-4df8-af69-94463fbbee38"
+storage_version_token = "1791307736557900"
+content_type = "text/html"

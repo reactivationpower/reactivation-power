@@ -9,6 +9,12 @@ The user's goal is for prospects to be able to watch the longer walkthrough befo
 
 **How to apply:** Keep the short landing-page video distinct from the longer walkthrough. Do not assume the walkthrough should only be available after booking, or that discussing its placement authorizes page changes.
 
+The user approved using the short landing video near the top of the landing page, retaining the full walkthrough on the page, and sending the walkthrough with the thank-you email to information submitters whether or not they book. They requested a GHL setup handoff, not live GHL workflow changes.
+
+**Why:** The walkthrough should help unbooked prospects become ready to schedule and help booked prospects prepare for a focused conversation.
+
+**How to apply:** Make viewing available without another form or login. Distinguish the initial information-submission email from appointment confirmation, and avoid asking booked prospects to book again. Treat GHL workflow configuration as unverified until its owner tests it.
+
 For the landing film's service list, “Chiro family” means the complete practice-family bundle, not just the public catalog's chiropractic category or representative examples.
 
 **Why:** The user requested every Chiro-family service. The bundle includes services categorized elsewhere in the public catalog; its chiropractic group alone would omit supported weight-loss and body-contouring services.

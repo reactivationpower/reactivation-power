@@ -62,6 +62,7 @@ import Page_portal_dialer_script from '@/pages/portal_dialer_script';
 import Page_portal_reactivation_rest from '@/pages/portal_reactivation_rest';
 import Page_portal_settings from '@/pages/portal_settings';
 import Page_schedule_a_call from '@/pages/schedule-a-call';
+import Page_walkthrough from '@/pages/walkthrough';
 import Page_training_demo from '@/pages/training-demo';
 import Page_training_demo_video_2 from '@/pages/training-demo_video-2';
 import Page_admin_commissions from '@/pages/admin_commissions';
@@ -462,6 +463,13 @@ function Router() {
         <RoutedErrorBoundary>
           <RootLayout>
             <Page_schedule_a_call />
+          </RootLayout>
+        </RoutedErrorBoundary>
+      </Route>
+      <Route path="/walkthrough">
+        <RoutedErrorBoundary>
+          <RootLayout>
+            <Page_walkthrough />
           </RootLayout>
         </RoutedErrorBoundary>
       </Route>
