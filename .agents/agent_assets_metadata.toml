@@ -1642,3 +1642,31 @@ mtime_ms = 1791307544701
 storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/63d12fff-22c5-49ed-ab29-26a058c1b770/8d092bda-bc35-4df8-af69-94463fbbee38"
 storage_version_token = "1791307736557900"
 content_type = "text/html"
+
+[[outputs]]
+id = "D5HM2ZUpiFiGrJu08PENb"
+uri = "file://docs/Patient-Pipeline-Lawyer-Brief.pdf"
+type = "pdf"
+title = "Patient Pipeline — Lawyer Drafting Brief (PDF)"
+description = "Seven-page brief covering the product, billing and cancellation, patient-data/HIPAA review, outreach rules, electronic signing, and the existing agreement template for counsel to review."
+logical_id = "779770a2-b495-49e4-8fa1-3a6174464f8c"
+content_hash = "sha256:eb72134263f4c7d453a2719461dd117335cbecf1be1f5c4666fa5d08cf3167ce"
+size = 20336
+mtime_ms = 1791311032828
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/779770a2-b495-49e4-8fa1-3a6174464f8c/2ebc0669-1378-4077-9ba5-7c948e386fa5"
+storage_version_token = "1791311050594091"
+content_type = "application/pdf"
+
+[[outputs]]
+id = "IdyELMqCRLtQe-B8PId0g"
+uri = "file://docs/Patient-Pipeline-Lawyer-Brief.docx"
+type = "word_document"
+title = "Patient Pipeline — Lawyer Drafting Brief (Editable Word)"
+description = "Editable version to send to your attorney, with unresolved business decisions clearly identified and the current agreement template included as an appendix."
+logical_id = "27b4da5d-42da-4ca3-95e6-4022b48ba27f"
+content_hash = "sha256:5b4a7a5d9e1b71feb7142375862bbc94bc4d26778545abfac5260ee1ecbc235d"
+size = 9686
+mtime_ms = 1791311032819
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/27b4da5d-42da-4ca3-95e6-4022b48ba27f/66a4e196-1f69-4c48-aabb-28f37bd604b0"
+storage_version_token = "1791311051310023"
+content_type = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
