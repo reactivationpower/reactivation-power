@@ -38,9 +38,9 @@ export type MergeField = (typeof MERGE_FIELDS)[number]
 export type MergeValues = Record<MergeField, string>
 
 export const DEFAULT_AGREEMENT_BODY = `## Parties and Services
-This Service Agreement (the "Agreement") is between {{company_name}} ("Company", "we", "us") and {{business_name}}, located at {{business_address}} ("Customer", "you"), represented by {{full_name}}. The business owner of record is {{owner_name}} ({{owner_phone}}). Notices to Customer may be sent to {{email}} or {{phone}}.
+This Service Agreement (the "Agreement") is between {{company_name}}, the owner and operator of Patient Pipeline ("Company", "we", "us"), and {{business_name}}, located at {{business_address}} ("Customer", "you"), represented by {{full_name}}. The business owner of record is {{owner_name}} ({{owner_phone}}). Notices to Customer may be sent to {{email}} or {{phone}}.
 
-Company will provide Customer with access to the Reactivation Power platform, which includes the reactivation call training courses, the call scripts, the reactivation dialer and contact pipeline, and reporting for Customer's team (the "Services"). Access is granted to the Customer's owner account and up to five staff accounts for use within Customer's own business only.
+Company will provide Customer with access to Patient Pipeline, including Patient Reactivation and Lead Follow-Up, guided call scripts, contact and follow-up queues, call-outcome logging, training content, and reporting for Customer's team (the "Services"). Patient Reactivation supports staff-led outreach to past or inactive patients; Lead Follow-Up supports staff-led outreach to new inquiries about Customer's campaigns or offers. Customer's own staff make the calls. Integrated telephone service, automated calling, and call recording are not promised as part of these Services. Access is granted to the Customer's owner account and up to five staff accounts for use within Customer's own business only.
 
 ## Term of Agreement [initials]
 The initial term of this Agreement is {{term_months}} months (the "Term"). The Term begins on the Start Date, which is {{trial_days}} days after the setup fee is paid, and ends {{term_months}} months later (the "End Date"). Based on today's date, the estimated Start Date is {{start_date}} and the estimated End Date is {{end_date}}; the actual dates are fixed by the date the setup fee is charged.
@@ -58,12 +58,14 @@ Customer authorizes Company to keep two payment cards on file with its payment p
 Card details are entered directly into Stripe and are never stored on Company's systems.
 
 ## Cancellation and Notice [initials]
-This Agreement may not be cancelled before the End Date except by written agreement of both parties. Either party may end this Agreement at the End Date by giving written notice at least {{notice_days}} days before the End Date. If neither party gives notice, this Agreement continues month to month at the then-current monthly fee until either party gives {{notice_days}} days' written notice.
+Customer may schedule cancellation at any time through the billing page in the Patient Pipeline portal. A confirmed portal cancellation counts as notice; no separate advance-notice period or written cancellation letter is required. During the initial Term, cancellation takes effect on the End Date, and scheduled monthly payments remain due through that date. Scheduling cancellation does not end access immediately or waive the remaining payments. Cancellation before the End Date requires written agreement of both parties, except as required by law.
+
+If cancellation has not been scheduled by the End Date, this Agreement continues month to month. During month-to-month renewal, a confirmed portal cancellation takes effect at the end of the current billing period, with access continuing until that date. The monthly fee remains the agreed amount unless changed by an agreement in writing. Either party may give written notice of non-renewal before the applicable Term or billing-period end; Company notices are sent to Customer's contact information above. Customer may contact {{company_email}} for cancellation assistance if unable to use the portal.
 
 Company may end this Agreement immediately if Customer misuses the Services, shares access outside its own business, or fails to pay an amount due within thirty (30) days of a written reminder.
 
 ## Customer Responsibilities
-Customer is responsible for the accuracy of the contact lists it uploads and for complying with all laws that apply to contacting its own past customers or patients, including telemarketing, privacy and health-information rules. Customer will use the Services only to contact people who have an existing relationship with Customer's business.
+Customer is responsible for the accuracy and lawful collection and use of the contact lists it uploads and for complying with the laws that apply to its outreach, including calling, texting, email, do-not-call, privacy, healthcare-marketing, and health-information rules. Customer may use Patient Reactivation for its own past or inactive patients and Lead Follow-Up for new inquiries about its campaigns or offers, only where the proposed contact is lawful. An existing patient relationship or a submitted inquiry is not blanket permission to contact a person through every channel or for every purpose. Customer must obtain and retain any required consent, respect opt-outs and contact restrictions, and ensure that its staff use appropriate scripts. These responsibilities do not remove Company's own obligations under applicable law.
 
 Customer will keep login details confidential, will not share accounts between people, and will let Company know promptly if it believes an account has been compromised.
 

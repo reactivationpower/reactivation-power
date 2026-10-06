@@ -98,14 +98,16 @@ export function buildCertificate(
       ip: agreement.signerIp,
       userAgent: agreement.signerUserAgent,
     },
-    sender: { name: agreement.sentByName, company: COMPANY.legalName, sentAt: agreement.sentAt?.toISOString() ?? null },
+    sender: { name: agreement.sentByName, company: agreement.signedSnapshot?.fields.company_name || COMPANY.legalName, sentAt: agreement.sentAt?.toISOString() ?? null },
     events: events
       .filter((e) => e.type !== 'pdf_generated')
       .map((e) => ({
         type: e.type,
         label: eventLabel(e.type),
         at: e.createdAt.toISOString(),
-        actor: e.actor === 'customer' ? 'Customer' : e.actorName ? `${e.actorName} (${COMPANY.name})` : COMPANY.name,
+        actor: e.actor === 'customer' ? 'Customer' : e.actorName
+          ? `${e.actorName} (${agreement.signedSnapshot?.fields.company_name || COMPANY.legalName})`
+          : agreement.signedSnapshot?.fields.company_name || COMPANY.legalName,
         ip: e.ip,
         userAgent: e.userAgent,
         detail: describe(e),

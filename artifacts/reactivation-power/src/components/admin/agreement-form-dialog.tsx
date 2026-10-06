@@ -184,8 +184,9 @@ export function AgreementFormDialog({
                     <Field label="Term (months)" htmlFor="ag-term">
                       <Input id="ag-term" type="number" min={1} max={60} step={1} value={form.termMonths} onChange={(e) => set('termMonths', e.target.value)} data-testid="ag-term" />
                     </Field>
-                    <Field label="Notice before end of term (days)" htmlFor="ag-notice">
+                    <Field label="Advance notice (days; standard template: 0)" htmlFor="ag-notice">
                       <Input id="ag-notice" type="number" min={0} max={365} step={1} value={form.noticeDays} onChange={(e) => set('noticeDays', e.target.value)} />
+                      <p className="text-xs text-muted-foreground">The standard template accepts portal cancellation without advance notice. Positive values are for legacy or custom terms and are not enforced by the portal.</p>
                     </Field>
                     <Field label="Monthly amount ($)" htmlFor="ag-monthly">
                       <Input id="ag-monthly" type="number" min={0.5} step={0.01} value={form.monthlyDollars} onChange={(e) => set('monthlyDollars', e.target.value)} data-testid="ag-monthly" />

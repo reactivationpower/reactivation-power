@@ -8,8 +8,8 @@ export const AGREEMENT_DEFAULTS = {
   monthlyCents: 47500,
   /** Equal to the first month's payment; editable or waivable ($0) per agreement. */
   setupFeeCents: 47500,
-  /** Written notice required before the end of the term. */
-  noticeDays: 30,
+  /** No separate advance-notice window; cancellation takes effect at term/period end. */
+  noticeDays: 0,
   /** Days between the setup payment and the start of monthly billing. */
   trialDays: 30,
   /** Signing links stop working this long after they are (re)sent. */
@@ -17,8 +17,8 @@ export const AGREEMENT_DEFAULTS = {
 } as const
 
 export const COMPANY = {
-  name: 'Reactivation Power',
-  legalName: 'Reactivation Power',
+  name: 'Patient Pipeline',
+  legalName: 'Beyond Healthcare LLC',
   supportEmail: 'support@reactivationpower.com',
   siteUrl: 'https://patientpipeline.app',
 } as const

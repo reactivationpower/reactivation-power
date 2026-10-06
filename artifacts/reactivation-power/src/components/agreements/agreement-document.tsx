@@ -56,7 +56,9 @@ export function AgreementTermsBox({
     ['Setup fee', amounts.setup_fee_cents > 0 ? `${formatUsd(amounts.setup_fee_cents)} today` : 'Waived'],
     ['Start date', fields.start_date],
     ['End date', fields.end_date],
-    ['Notice to end', `${amounts.notice_days} days before end of term`],
+    ['Cancellation notice', amounts.notice_days > 0
+      ? `${amounts.notice_days} days before end of term`
+      : 'No advance notice; ends at term or billing-period end'],
   ]
   return (
     <dl className="grid grid-cols-2 gap-x-4 gap-y-3 rounded-lg border border-border bg-card p-4 sm:grid-cols-3" data-testid="agreement-terms">

@@ -6,7 +6,7 @@ This is a factual drafting brief and decision checklist, not a customer agreemen
 
 ## 1. What we need from counsel
 
-Please prepare a business-to-business software subscription agreement for Patient Pipeline, purchased by healthcare practices for use by their own staff. Deliver an editable Word master and a final PDF, with a reusable order form for customer-specific commercial terms.
+Please draft a NEW business-to-business software subscription agreement for Patient Pipeline, owned and operated by Beyond Healthcare LLC and purchased by healthcare practices for use by their own staff. This brief is not a proposed contract and does not ask you merely to approve the app's existing template. Deliver an editable Word master and a final PDF, with a reusable order form for customer-specific commercial terms.
 
 Please also advise whether we need a separate Business Associate Agreement (BAA), data-processing/security addendum, privacy policy, acceptable-use policy, and electronic-signature/payment disclosures. Identify any operational changes required before the agreement can truthfully be used.
 
@@ -28,9 +28,65 @@ Optional in-browser Twilio calling has been discussed, but must not be promised 
 
 Confirm what onboarding, script customization, support, implementation, and training we actually commit to provide. Specify seat counts, number of locations, permitted affiliates, integrations, and any exclusions.
 
+## Feature list: Patient Reactivation
+
+Synopsis: a practice's staff work through past/inactive patient contacts using guided, service-specific conversations and a shared follow-up worklist. This is staff-workflow software, not a service that supplies callers or guarantees patients will return.
+
+- Add individual contacts and import CSV patient/contact lists, with field mapping, validation, and duplicate handling.
+- Organize contacts by service/niche and track their contact details, pipeline stage, notes, and call history.
+- Build calling batches and see contacts due for follow-up.
+- Open guided, branching scripts with contact/practice context and service-specific questions and objection handling.
+- Record staff-selected outcomes, appointments and follow-up details; maintain a history of outreach.
+- Schedule subsequent staff follow-up and manage the practice's shared worklist.
+- Practice scripts in a training/practice environment and access video training courses.
+- Review recorded calling activity and outcome reports by caller and service/niche.
+
+The UI may use the word "dialer," but that does not establish an automatic phone dialer or integrated telephony. The workflow guides staff calls; the contract should not promise automatic calling.
+
+## Feature list: Lead Follow-Up
+
+Synopsis: a practice organizes incoming campaign inquiries and gives staff offer-specific scripts, due-call queues, and follow-up/appointment workflows, so inquiries do not depend on an individual's memory.
+
+- Create and manage campaigns, including the service/niche, offer, and associated lead-follow-up script.
+- Add/import leads and accept structured inbound lead submissions through campaign-specific connection/webhook endpoints.
+- Provide connection instructions for GoHighLevel forms/workflows and Facebook/Instagram Instant Form leads routed through GoHighLevel or a connector such as Zapier/Make.
+- Show shared queues for Ready to Call, In Progress, Calls Upcoming, and All Leads, with prior activity and next due times.
+- Guide staff through branching, campaign/offer-specific conversations and objection handling.
+- Log calls and outcomes; schedule retries, requested callbacks, and longer-term follow-up.
+- Support appointment-intent, booking-outcome, and confirmation/reschedule workflows using recorded information. Do not promise universal two-way synchronization with an external scheduling/EHR system.
+- Provide practice mode and lead-follow-up training.
+- Report lead activity, booking outcomes and caller performance; keep confirmation work distinct from new-booking results.
+
+Automatic queue scheduling is not automatic calling. Logged bookings and outcomes are not independent proof of attendance, clinical results, or collected revenue. External connectors require customer setup and may have separate service fees.
+
+## Shared portal and account features
+
+- Separate owner/staff access and administrator management, with product access and staff-seat controls.
+- Customer billing views, payment-card management, payment history, remaining-payment information, and end-of-term/billing-period cancellation scheduling.
+- Administrative customer/payment-link management, agreement preparation/signing records, subscription management, refunds, and payment-retry tools.
+- Electronic signatures, section initials, versioned agreement text, signed snapshots, completion certificates, and signed-copy PDFs.
+- Private video training access, course organization, and training/activity reporting.
+
+Features above describe implemented software surfaces; purchased access, permissions and configuration can vary. They are not uptime, security-certification, integration-compatibility, or performance guarantees. No independent end-to-end audit of every feature was conducted for this brief.
+
+## Technology stack and third-party services
+
+- Frontend: React 19 with TypeScript, Vite, Wouter routing, Tailwind CSS, Base UI/Radix UI component primitives, React Hook Form, Zod validation, Recharts reporting charts, and Framer Motion.
+- Backend: Node.js with TypeScript and Express 5; shared types/API schemas, Zod validation, Pino logging, and application-specific RPC/REST/webhook endpoints.
+- Data/authentication: Supabase authentication and PostgreSQL, accessed through the Supabase JavaScript client and Drizzle ORM. The application uses its existing Supabase database; do not describe it as migrated to a Replit-managed database.
+- Payments: Stripe subscriptions, payment methods and checkout components, with server-side payment processing and webhook handling.
+- Email: Resend for transactional application email. GoHighLevel is separately used for website sales inquiries/appointments and relevant configured lead-intake connections.
+- Media/files: Vercel Blob for existing protected training-media storage/streaming; fixed public marketing videos are served as MP4 assets with the frontend. File-storage architecture must be reviewed by actual data type rather than assumed to contain patient records.
+- Agreement PDFs: PDFKit. Electronic-signature consent, versioning and audit records are implemented by the application; there is no assumed DocuSign contract or certification.
+- Workspace/build/hosting: Replit environment, a pnpm monorepo, TypeScript builds and Vite; test tooling includes Vitest and React Testing Library. Build/test tools are not automatically patient-data processors.
+- Optional connections: GoHighLevel webhooks, Zapier/Make or another compatible customer-configured connector for structured lead intake. These are not guaranteed native integrations with every CRM/EHR.
+- Proposed only: Twilio browser calling. No integrated telephony or AI-provider service is promised in the present agreement scope.
+
+Have the technical team map which vendors receive which categories of data and verify actual production deployment, regions, service plans and contracts. This list does not establish vendor HIPAA eligibility, BAAs, security certifications, data residency or ongoing software-version commitments.
+
 ## 3. Identify the correct contracting parties
 
-Confirm the owner's legal entity name, entity type, state of formation, business address, authorized signatory, and legal-notice contact. Patient Pipeline is the customer-facing brand; the current template identifies the company as Reactivation Power. Neither label should be assumed to establish the legal entity or a registered DBA.
+Confirmed by the owner: Beyond Healthcare LLC owns and operates Patient Pipeline. Patient Pipeline is the product/customer-facing brand; do not substitute Reactivation Power as the legal company. The template's company identity and product branding have been corrected for new agreements. Confirm the LLC's state of formation, business address, authorized signatory, and legal-notice contact. Do not assume Patient Pipeline is a registered DBA.
 
 For the customer, obtain its practice legal name and address, locations covered, authorized signatory, and billing/notice contact. Counsel should decide whether an owner guarantee is desired; collecting the owner's name is not itself a personal guarantee.
 
@@ -44,7 +100,7 @@ The current agreement-generation defaults are:
 - Monthly fee: $475.
 - Setup fee: $475, editable or waivable for a particular agreement.
 - Delay before recurring monthly billing: 30 days from setup-payment activation.
-- Written notice in the template: 30 days.
+- Separate advance cancellation notice in the updated default template: none (0 days); cancellation takes effect at the applicable term/billing-period end.
 - Template account scope: an owner account and up to five staff accounts.
 
 These are SOFTWARE DEFAULTS, not confirmed current pricing, universal customer terms, or proof of live subscriptions. Customer-specific terms can differ. The owner must approve the final commercial schedule.
@@ -57,9 +113,9 @@ If setup is paid at checkout rather than at signature, use that actual charging 
 
 ## 5. Renewals, cancellation, and payment authorization
 
-The current template describes a fixed initial term followed by month-to-month renewal, with written notice. It says no early cancellation without mutual agreement and continued responsibility for term fees. Counsel must assess and approve those provisions, required renewal disclosures/reminders, cancellation methods, and any applicable state subscription rules.
+The updated default template describes a fixed initial term followed by month-to-month renewal. Customer portal cancellation counts as notice, without an additional advance-notice window or required cancellation letter. During the fixed term, cancellation is scheduled for the term end and remaining installments stay due; early termination requires mutual written agreement except as required by law. During month-to-month renewal, cancellation is effective at the current billing-period end. Counsel must draft the new agreement's rules and assess enforceability, required renewal disclosures/reminders, cancellation methods, and applicable state subscription rules.
 
-The customer portal currently allows the owner to request cancellation, acknowledges remaining payments, and schedules it for the contractual term end. After the fixed term, it schedules cancellation at the end of the current billing period. That implementation does not itself establish enforcement of the template's 30-day notice requirement. Reconcile the written policy and the software.
+The portal already uses those effective dates and asks the owner to acknowledge remaining payments. The standard template and zero-day summary have now been aligned with that implementation; prices, initial term lengths and Stripe cancellation behavior were not changed. Previously signed or individually customized agreements were not rewritten and may contain different terms. Counsel should address any transition or legacy obligations explicitly; a software-template change does not amend an existing contract.
 
 Administrative tools can issue full/partial refunds and cancel immediately or at a term/billing-period end. The agreement should distinguish discretionary exceptions, termination for breach, and customer cancellation rights. Define the effect of suspension and cancellation on access, outstanding fees, refunds, and data.
 
@@ -89,7 +145,7 @@ Please review federal/state calling, texting, email, do-not-call, consent, revoc
 
 An existing patient relationship, a purchased lead list, or a submitted inquiry should not be treated as blanket permission for every channel or campaign. Allocate responsibility for lawful collection/use of lists, consent evidence, opt-outs, script approval, suppression, and staff conduct without purporting to eliminate our own obligations.
 
-The old template restricts use to contacts with an existing customer relationship. That would conflict with the new-lead product; revise the service and acceptable-use provisions while retaining lawful-contact requirements.
+The updated standard template now covers both past-patient reactivation and lawful new-inquiry follow-up, rather than restricting all contacts to an existing customer relationship. Counsel should independently draft appropriate consent, permitted-use and responsibility provisions for the new agreement.
 
 The app does not promise appointments, revenue, a particular conversion rate, reimbursement outcomes, or clinical results. Counsel should review sales materials for statements that could contradict that limitation. Do not include or promise call recording in the present scope.
 
@@ -118,7 +174,7 @@ Do not replace historical signed agreements with the new master. Decide separate
 
 - Legal entity/DBA details, business and notice addresses, authorized signer, and chosen counsel/jurisdiction.
 - Approved pricing, setup charges, term/renewal structure, cancellation/refund policy, seats/locations, support scope, and launch offer.
-- Current template (attached as Appendix A), representative blank checkout/signing screens, payment flow, and customer-facing sales promises.
+- Representative blank checkout/signing screens, payment flow, and customer-facing sales promises. The existing internal template can be supplied separately as reference, but is not a proposed contract or included as the lawyer's drafting starting point here.
 - Intended customer types and markets, vendor/service inventory, existing vendor contracts/BAAs if any, and verified security/retention facts.
 - Decisions on PHI acceptance, optional calling availability, insurance, guarantees, and handling existing customers.
 
@@ -130,8 +186,3 @@ Please return: (1) editable master agreement and order form; (2) final approved 
 
 Approve the legal text and any required implementation changes together before sending the new agreement to customers. This brief does not alter any live agreement, billing terms, or customer records.
 
-## Appendix A: Existing template for counsel to review
-
-The following is the current default agreement text from the app, with unresolved merge fields preserved. It is an existing implementation artifact, NOT counsel-approved final language. Individual stored agreements may contain different terms. The text contains legacy branding and scope issues identified above.
-
-[The export generator appends the current template here without modification.]
