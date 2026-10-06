@@ -1,6 +1,10 @@
-# Patient Pipeline: Customer Agreement Drafting Brief
+# Patient Pipeline: Updated Lawyer Synopsis
 
 Prepared October 6, 2026 | For the owner's lawyer
+
+Owner and operator: Beyond Healthcare LLC. Product: Patient Pipeline.
+
+Purpose: Provide a consolidated factual synopsis, feature inventory, technology stack, and business/legal decision checklist for counsel to draft a NEW customer agreement. This updated handoff replaces the earlier briefing materials; it does not replace or amend any customer agreement.
 
 This is a factual drafting brief and decision checklist, not a customer agreement or legal advice. Have qualified counsel confirm the applicable laws and final language. Current software behavior and template defaults are not proof of approved business terms, enforceability, or regulatory compliance.
 
@@ -115,7 +119,7 @@ If setup is paid at checkout rather than at signature, use that actual charging 
 
 The updated default template describes a fixed initial term followed by month-to-month renewal. Customer portal cancellation counts as notice, without an additional advance-notice window or required cancellation letter. During the fixed term, cancellation is scheduled for the term end and remaining installments stay due; early termination requires mutual written agreement except as required by law. During month-to-month renewal, cancellation is effective at the current billing-period end. Counsel must draft the new agreement's rules and assess enforceability, required renewal disclosures/reminders, cancellation methods, and applicable state subscription rules.
 
-The portal already uses those effective dates and asks the owner to acknowledge remaining payments. The standard template and zero-day summary have now been aligned with that implementation; prices, initial term lengths and Stripe cancellation behavior were not changed. Previously signed or individually customized agreements were not rewritten and may contain different terms. Counsel should address any transition or legacy obligations explicitly; a software-template change does not amend an existing contract.
+The portal already uses those effective dates and asks the owner to acknowledge remaining payments. The standard template and zero-day summary have now been aligned with that implementation in the workspace; those application corrections require publishing before they apply to new live agreements. Prices, initial term lengths and Stripe cancellation behavior were not changed. Previously signed or individually customized agreements were not rewritten and may contain different terms. Counsel should address any transition or legacy obligations explicitly; a software-template change does not amend an existing contract.
 
 Administrative tools can issue full/partial refunds and cancel immediately or at a term/billing-period end. The agreement should distinguish discretionary exceptions, termination for breach, and customer cancellation rights. Define the effect of suspension and cancellation on access, outstanding fees, refunds, and data.
 

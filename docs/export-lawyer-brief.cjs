@@ -4,11 +4,15 @@ const { createRequire } = require('node:module');
 const { spawnSync } = require('node:child_process');
 const requireApi = createRequire(require('node:path').resolve('artifacts/api-server/package.json'));
 const PDFDocument = requireApi('pdfkit');
+const outputBase = process.argv[2] || 'docs/Patient-Pipeline-Lawyer-Brief';
 const source = fs.readFileSync('docs/Patient-Pipeline-Lawyer-Brief.md', 'utf8');
 const text = source;
 const blocks = text.split('\n\n').map(s => s.trim()).filter(Boolean);
-const doc = new PDFDocument({ size: 'LETTER', margins: { top: 48, bottom: 52, left: 52, right: 52 }, bufferPages: true });
-const out = fs.createWriteStream('docs/Patient-Pipeline-Lawyer-Brief.pdf');
+const doc = new PDFDocument({
+  size: 'LETTER', margins: { top: 48, bottom: 52, left: 52, right: 52 }, bufferPages: true,
+  info: { Title: 'Patient Pipeline: Updated Lawyer Synopsis', Author: 'Beyond Healthcare LLC' },
+});
+const out = fs.createWriteStream(`${outputBase}.pdf`);
 doc.pipe(out);
 const ansi = s => s.replace(/[‘’]/g, "'").replace(/[“”]/g, '"').replace(/[—–]/g, '-').replace(/\u00a0/g, ' ');
 for (const block of blocks) {
@@ -29,7 +33,7 @@ for (let i = 0; i < pages.count; i++) {
   // Footer lives below the body margin; disable auto-pagination for this write.
   const bottom = doc.page.margins.bottom;
   doc.page.margins.bottom = 0;
-  doc.font('Helvetica').fontSize(8).fillColor('#667580').text(`Patient Pipeline | Counsel drafting brief | ${i + 1} / ${pages.count}`, 52, 749, { width: 508, lineBreak: false });
+  doc.font('Helvetica').fontSize(8).fillColor('#667580').text(`Beyond Healthcare LLC | Patient Pipeline lawyer synopsis | ${i + 1} / ${pages.count}`, 52, 749, { width: 508, lineBreak: false });
   doc.page.margins.bottom = bottom;
 }
 doc.end();
@@ -53,10 +57,10 @@ styles='<?xml version="1.0" encoding="UTF-8"?><w:styles xmlns:w="'+ns+'"><w:docD
 types='<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/></Types>'
 rels='<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>'
 docrels='<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rIdStyles" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>'
-with zipfile.ZipFile('docs/Patient-Pipeline-Lawyer-Brief.docx','w',zipfile.ZIP_DEFLATED) as z:
+with zipfile.ZipFile(sys.argv[1],'w',zipfile.ZIP_DEFLATED) as z:
     for name,data in {'[Content_Types].xml':types,'_rels/.rels':rels,'word/document.xml':document,'word/styles.xml':styles,'word/_rels/document.xml.rels':docrels}.items(): z.writestr(name,data)
 print('Editable Word brief exported')
 `;
-const result = spawnSync('python', ['-c', py], { input: JSON.stringify(blocks), encoding: 'utf8' });
+const result = spawnSync('python', ['-c', py, `${outputBase}.docx`], { input: JSON.stringify(blocks), encoding: 'utf8' });
 if (result.status !== 0) throw new Error(result.stderr);
 console.log(result.stdout.trim());

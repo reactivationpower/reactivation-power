@@ -1670,3 +1670,31 @@ mtime_ms = 1791312518756
 storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/27b4da5d-42da-4ca3-95e6-4022b48ba27f/54bf281f-1a50-49a8-b3dd-4e910caf0e13"
 storage_version_token = "1791312623188673"
 content_type = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+
+[[outputs]]
+id = "ulOKUcq9oAAa_9cvWVRG5"
+uri = "file://docs/Patient-Pipeline-Updated-Lawyer-Synopsis.pdf"
+type = "pdf"
+title = "Updated Lawyer Synopsis — Patient Pipeline (PDF)"
+description = "New consolidated seven-page synopsis identifying Beyond Healthcare LLC, covering both product summaries and feature lists, technology stack, billing and cancellation, patient-data/HIPAA questions, and the information counsel needs to draft a new agreement."
+logical_id = "e3a88b41-e939-4ea6-8c46-352fa023c373"
+content_hash = "sha256:341021484aa852cfa6848bc8088b9514bb139fc651aafecc20234fa4743d8d1a"
+size = 21925
+mtime_ms = 1791314332650
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/e3a88b41-e939-4ea6-8c46-352fa023c373/56478d6d-bf0d-446a-8160-70b1c1006756"
+storage_version_token = "1791314354653855"
+content_type = "application/pdf"
+
+[[outputs]]
+id = "4E-usynkml-p6NJfhGtrW"
+uri = "file://docs/Patient-Pipeline-Updated-Lawyer-Synopsis.docx"
+type = "word_document"
+title = "Updated Lawyer Synopsis — Editable Word"
+description = "Editable copy of the complete updated synopsis for your lawyer. Clearly separates existing features, proposed functionality, software defaults and unresolved business/legal decisions."
+logical_id = "0caa80d2-3476-4fd1-a526-083678c6c76e"
+content_hash = "sha256:a1cfc42711f3192ec53cdc588620ea80b61efcfe24a0385a068abd4f9abf8511"
+size = 10458
+mtime_ms = 1791314332633
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/0caa80d2-3476-4fd1-a526-083678c6c76e/bfd2836f-c4c0-4475-84c9-466dfff6e0c8"
+storage_version_token = "1791314355350380"
+content_type = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
