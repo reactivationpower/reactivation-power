@@ -67,6 +67,7 @@ function haystack(c: ContactWithMeta): string {
       : 'never called',
     c.next_follow_up ? fmtDate(c.next_follow_up.due_at) : '',
     c.service_label ?? '',
+    ...(c.services ?? []).flatMap((sv) => [sv.niche_name ?? '', sv.service_label ?? '', sv.last_visit ?? '', sv.original_complaint ?? '']),
     c.original_complaint ?? '',
     notesToText(c.notes),
   ]
@@ -113,8 +114,12 @@ export function ContactsTable({
       })
       .filter(({ c }) => {
         if (nicheFilter === ALL) return true
-        if (nicheFilter === NO_NICHE) return !c.niche_id
-        return c.niche_id === nicheFilter
+        if (nicheFilter === NO_NICHE)
+          return !c.niche_id && !(c.services ?? []).some((sv) => sv.niche_id)
+        return (
+          c.niche_id === nicheFilter ||
+          (c.services ?? []).some((sv) => sv.niche_id === nicheFilter)
+        )
       })
       .filter(({ hay }) => tokens.every((t) => hay.includes(t)))
       .map(({ c }) => c)
@@ -481,6 +486,18 @@ export function ContactsTable({
                       {c.email ?? '—'}
                     </td>
                     <td className="whitespace-nowrap px-4 py-3">
+                      {(() => {
+                        const extra = Array.from(new Set((c.services ?? []).map((sv) => sv.niche_name).filter((n) => n && n !== c.niche?.name)))
+                        return extra.length > 0 ? (
+                          <div className="mb-1 flex flex-wrap gap-1" data-testid={`text-service-niches-${c.id}`}>
+                            {extra.map((n) => (
+                              <span key={n} className="rounded-full border border-border bg-muted px-1.5 py-0.5 text-[11px] text-muted-foreground">
+                                {nicheDisplayLabel(n)}
+                              </span>
+                            ))}
+                          </div>
+                        ) : null
+                      })()}
                       {c.niche ? (
                         nicheInactive ? (
                           <span

@@ -1,7 +1,8 @@
 // Thin client stubs for the server actions in artifacts/api-server/src/actions/reactivation.ts
 import { action } from '@/lib/api'
+import type { PatientImportRow, PatientImportReview, PatientImportSummary } from '@workspace/shared/csv-patients'
 
-export type ImportRow = any
+export type ImportRow = PatientImportRow
 export type ImportMapping = any
 
 export const createNiche = action<any>('reactivation', 'createNiche')
@@ -18,7 +19,7 @@ export const deleteContact = action<any>('reactivation', 'deleteContact')
 export const bulkDeleteContacts = action<any>('reactivation', 'bulkDeleteContacts')
 export const bulkAssignNiche = action<any>('reactivation', 'bulkAssignNiche')
 export const setDefaultNiche = action<any>('reactivation', 'setDefaultNiche')
-export const importContacts = action<any>('reactivation', 'importContacts')
+export const importContacts = action<Partial<PatientImportSummary> & { error?: string }>('reactivation', 'importContacts')
 export const setCallBatchSize = action<any>('reactivation', 'setCallBatchSize')
 export const addMoreCalls = action<any>('reactivation', 'addMoreCalls')
 export const setSelectedNiche = action<any>('reactivation', 'setSelectedNiche')
@@ -29,3 +30,5 @@ export const setTeamMemberActive = action<any>('reactivation', 'setTeamMemberAct
 export const updateTeamMember = action<any>('reactivation', 'updateTeamMember')
 export const updateMyProfile = action<any>('reactivation', 'updateMyProfile')
 export const logCall = action<any>('reactivation', 'logCall')
+export const listPatientImportReviews = action<{ reviews?: PatientImportReview[]; error?: string }>('reactivation', 'listPatientImportReviews')
+export const resolvePatientImportReview = action<{ resolved?: true; error?: string }>('reactivation', 'resolvePatientImportReview')

@@ -9,3 +9,5 @@ description: How the app and drizzle-kit reach Supabase's Postgres directly, why
 - Tests gated on `SUPABASE_DB_URL` write to the *shared* database. Every DB-backed test must delete everything it creates, including side tables filled indirectly (`billing_notifications`, `commission_entries`, `cron_runs`), and mock `sendEmail` — an unmocked send throws inside the outbox, leaves rows `pending`, and the daily cron then tries to deliver them.
 - If the owner's pasted connection string fails with "password authentication failed", ask for a fresh database password reset rather than debugging the string.
 - `deletePaymentLink` removes the link + terms but leaves the `customers` row and any agreement behind; clean those manually after e2e runs.
+- Review generated migrations against earlier custom SQL and the actual schema before applying them; custom migrations can leave Drizzle snapshots behind the database.
+  **Why:** A custom SQL change can be re-emitted by the next generation even though its columns already exist. Never assume every generated statement is new, and never repair this with schema push.

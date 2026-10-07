@@ -1,5 +1,7 @@
 
 import { getAdminClient } from '@/lib/supabase/admin'
+import { pool } from '@workspace/db'
+import type { PatientService } from '@workspace/shared/csv-patients'
 import { dueWithinEasternToday } from '@workspace/shared/call-time'
 import type {
   Contact,
@@ -171,6 +173,7 @@ export async function getPipelineStages(
 // ---------- Contacts ----------
 
 export interface ContactWithMeta extends Contact {
+  services?: PatientService[]
   niche: Niche | null
   stage: PipelineStage | null
   next_follow_up: FollowUp | null
@@ -187,12 +190,14 @@ export interface ContactWithMeta extends Contact {
 }
 
 export async function getContacts(ownerId: string): Promise<ContactWithMeta[]> {
-  const supabase = getAdminClient()
-  const { data: contacts } = await supabase
-    .from('contacts')
-    .select('*, niche:niches(*), stage:pipeline_stages(*)')
-    .eq('owner_id', ownerId)
-    .order('created_at', { ascending: false })
+  // Direct, tenant-scoped SQL avoids Supabase's default 1,000-row response
+  // cap, which would otherwise hide patients after a large CSV import.
+  const { rows: contacts } = await pool.query(`SELECT c.*, row_to_json(n) AS niche, row_to_json(s) AS stage,
+    (SELECT row_to_json(f) FROM follow_ups f WHERE f.contact_id = c.id AND f.completed_call_id IS NULL ORDER BY f.due_at LIMIT 1) AS next_follow_up,
+    (SELECT row_to_json(rc) FROM reactivation_calls rc WHERE rc.contact_id = c.id ORDER BY rc.created_at DESC LIMIT 1) AS last_call,
+    (SELECT count(*)::integer FROM reactivation_calls rc WHERE rc.contact_id = c.id) AS call_count
+    FROM contacts c LEFT JOIN niches n ON n.id = c.niche_id LEFT JOIN pipeline_stages s ON s.id = c.stage_id
+    WHERE c.owner_id = $1 ORDER BY c.created_at DESC`, [ownerId])
   if (!contacts || contacts.length === 0) return []
 
   // Niche ids currently usable on this account (enabled AND globally active),
@@ -202,42 +207,35 @@ export async function getContacts(ownerId: string): Promise<ContactWithMeta[]> {
     (await getOwnerNiches(ownerId)).map((n) => n.id),
   )
 
-  const ids = contacts.map((c) => c.id)
-  const [{ data: followUps }, { data: calls }] = await Promise.all([
-    supabase
-      .from('follow_ups')
-      .select('*')
-      .in('contact_id', ids)
-      .is('completed_call_id', null)
-      .order('due_at'),
-    supabase
-      .from('reactivation_calls')
-      .select('*')
-      .in('contact_id', ids)
-      .order('created_at', { ascending: false }),
-  ])
-
-  const nextByContact = new Map<string, FollowUp>()
-  for (const f of (followUps ?? []) as FollowUp[]) {
-    if (!nextByContact.has(f.contact_id)) nextByContact.set(f.contact_id, f)
-  }
-  const lastCallByContact = new Map<string, ReactivationCall>()
-  const callCounts = new Map<string, number>()
-  for (const c of (calls ?? []) as ReactivationCall[]) {
-    if (!lastCallByContact.has(c.contact_id))
-      lastCallByContact.set(c.contact_id, c)
-    callCounts.set(c.contact_id, (callCounts.get(c.contact_id) ?? 0) + 1)
+  const servicesByContact = new Map<string, PatientService[]>()
+  for (const service of await getPatientServices(ownerId)) {
+    const list = servicesByContact.get(service.contact_id) ?? []
+    list.push(service)
+    servicesByContact.set(service.contact_id, list)
   }
 
   return contacts.map((c) => ({
     ...(c as Contact),
+    // pg returns top-level timestamptz as Date; preserve the existing DTO.
+    created_at: new Date(c.created_at).toISOString(),
+    first_call_at: c.first_call_at ? new Date(c.first_call_at).toISOString() : null,
+    services: servicesByContact.get(c.id) ?? [],
     niche: (c.niche ?? null) as Niche | null,
     stage: (c.stage ?? null) as PipelineStage | null,
-    next_follow_up: nextByContact.get(c.id) ?? null,
-    last_call: lastCallByContact.get(c.id) ?? null,
-    call_count: callCounts.get(c.id) ?? 0,
+    next_follow_up: c.next_follow_up ?? null,
+    last_call: c.last_call ?? null,
+    call_count: c.call_count ?? 0,
     niche_active: !c.niche_id || activeNicheIds.has(c.niche_id),
   }))
+}
+
+async function getPatientServices(ownerId: string, contactId?: string): Promise<PatientService[]> {
+  const { rows } = await pool.query(`SELECT s.id, s.contact_id, s.niche_id, s.service_label,
+    s.last_visit::text, s.original_complaint, s.source_notes, n.name AS niche_name
+    FROM contact_services s LEFT JOIN niches n ON n.id = s.niche_id
+    WHERE s.owner_id = $1 ${contactId ? 'AND s.contact_id = $2' : ''}
+    ORDER BY s.created_at, s.id`, contactId ? [ownerId, contactId] : [ownerId])
+  return rows as PatientService[]
 }
 
 export async function getContact(id: string): Promise<ContactWithMeta | null> {
@@ -270,6 +268,7 @@ export async function getContact(id: string): Promise<ContactWithMeta | null> {
 
   return {
     ...(c as Contact),
+    services: await getPatientServices((c as Contact).owner_id, id),
     niche: (c.niche ?? null) as Niche | null,
     stage: (c.stage ?? null) as PipelineStage | null,
     next_follow_up: ((followUps ?? [])[0] ?? null) as FollowUp | null,

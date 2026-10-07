@@ -1,5 +1,6 @@
 // Export your models here. Add one export per file.
 export * from "./email-log";
+export * from "./patient-imports";
 export * from "./billing";
 export * from "./agreements";
 export * from "./commissions";

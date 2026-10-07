@@ -35,6 +35,7 @@ const SHARED_MODULES = [
   'analytics-types',
   'call-time',
   'campaign-tokens',
+  'csv-patients',
   'email-templates',
   'format',
   'lazy-time',

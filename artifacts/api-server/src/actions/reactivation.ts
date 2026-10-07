@@ -17,6 +17,10 @@ import type { CallDisposition } from '@workspace/shared/types'
 import { CALL_BATCH_SIZES, RETRY_WINDOW_MONTHS } from '@workspace/shared/types'
 import { sendPortalWelcomeEmail } from '@/lib/mail'
 import { changeCallerSeat } from '@/lib/data/caller-seats'
+import { executePatientImport, listImportReviews, resolveImportReview } from '@/lib/patients/csv-import'
+import type { PatientImportRow } from '@workspace/shared/csv-patients'
+import type { ResolvedImportRow } from '@/lib/patients/import-plan'
+import { logger } from '@/lib/logger'
 
 // ---------- Admin: niches ----------
 
@@ -393,6 +397,9 @@ export interface ImportRow {
    * every caller still gets the right script.
    */
   niche?: string
+  patientId?: string
+  lastVisit?: string
+  doNotCall?: string
 }
 
 export interface ImportMapping {
@@ -404,54 +411,48 @@ export interface ImportMapping {
 
 const MAX_IMPORT_ROWS = 5000
 
-function normalizePhone(phone: string): string {
-  const digits = phone.replace(/\D/g, '')
-  return digits.length === 11 && digits.startsWith('1')
-    ? digits.slice(1)
-    : digits
-}
-
 /**
- * Bulk import contacts from a CSV upload. Each row's niche is resolved:
- * forced file niche -> service mapping -> practice default -> none.
- * Mappings are saved so the next upload from this practice classifies
- * automatically. Duplicate phones (already in the account, or repeated in
- * the file) are skipped.
+ * Resolve each row's service, then match people and apply the complete import
+ * atomically. Repeated uploads preserve outreach; uncertain identities are
+ * held for explicit review instead of silently dropped or merged.
  */
 export async function importContacts(input: {
   rows: ImportRow[]
   mappings: ImportMapping[]
   /** When set, every contact in this upload is tagged with this niche */
   forceNicheId?: string | null
+  sourceSystem?: string
 }) {
   const participant = await getCurrentParticipant()
   if (!participant) return { error: 'Not signed in' }
   const ownerId = accessOwnerId(participant)
 
-  const rows = (input.rows ?? []).slice(0, MAX_IMPORT_ROWS)
+  if (!input || !Array.isArray(input.rows) || input.rows.length > MAX_IMPORT_ROWS)
+    return { error: `Upload at most ${MAX_IMPORT_ROWS} rows at a time.` }
+  const rows = input.rows
   if (rows.length === 0) return { error: 'No rows to import' }
+  const fields = ['name', 'phone', 'email', 'niche', 'service', 'complaint', 'notes', 'patientId', 'lastVisit', 'doNotCall'] as const
+  if (rows.some(r => !r || typeof r !== 'object' || fields.some(k => r[k] !== undefined && (typeof r[k] !== 'string' || r[k]!.length > (k === 'notes' ? 10000 : 500)))))
+    return { error: 'Invalid CSV fields. Check the file and upload again.' }
+  if (input.sourceSystem !== undefined && typeof input.sourceSystem !== 'string')
+    return { error: 'Enter a valid source system label.' }
+  const source = (input.sourceSystem?.trim().toLowerCase().replace(/\s+/g, ' ') || 'csv')
+  if (source.length > 80) return { error: 'Source system must be 80 characters or fewer.' }
 
   const supabase = getAdminClient()
 
   // 1. Save/refresh the service -> niche mappings for this practice
-  const mappings = (input.mappings ?? []).filter((m) => m.service_label)
-  if (mappings.length > 0 && !participant.is_demo) {
-    await supabase.from('service_niche_mappings').upsert(
-      mappings.map((m) => ({
-        owner_id: ownerId,
-        service_label: m.service_label.trim().toLowerCase(),
-        niche_id: m.niche_id,
-        updated_at: new Date().toISOString(),
-      })),
-      { onConflict: 'owner_id,service_label' },
-    )
-  }
+  if (input.mappings !== undefined && (!Array.isArray(input.mappings) || input.mappings.length > MAX_IMPORT_ROWS ||
+    input.mappings.some(m => !m || typeof m.service_label !== 'string' || m.service_label.length > 500 ||
+      (m.niche_id !== null && typeof m.niche_id !== 'string'))))
+    return { error: 'Invalid service mappings.' }
+  const mappings = (input.mappings ?? []).filter((m) => m.service_label.trim())
   const nicheByService = new Map(
     mappings.map((m) => [m.service_label.trim().toLowerCase(), m.niche_id]),
   )
 
   // 2. Practice default niche + default pipeline stage
-  const [{ data: ownerRow }, { data: newStage }] = await Promise.all([
+  const [ownerResult, stageResult, allActiveNiches] = await Promise.all([
     supabase
       .from('participants')
       .select('default_niche_id')
@@ -464,19 +465,21 @@ export async function importContacts(input: {
       .order('sort_order')
       .limit(1)
       .maybeSingle(),
+    getNiches(true),
   ])
+  if (ownerResult.error || stageResult.error) return { error: 'Could not load practice settings. Please try again.' }
+  const ownerRow = ownerResult.data
+  const newStage = stageResult.data
+  const validNicheIds = new Set(allActiveNiches.map(n => n.id))
+  if (mappings.some(m => m.niche_id && !validNicheIds.has(m.niche_id)))
+    return { error: 'A selected service niche is no longer available. Choose its mapping again.' }
   const defaultNicheId = ownerRow?.default_niche_id ?? null
 
   // Validate the forced file-level niche against real, active niches
   let forcedNicheId: string | null = null
   if (input.forceNicheId) {
-    const { data: forced } = await supabase
-      .from('niches')
-      .select('id')
-      .eq('id', input.forceNicheId)
-      .eq('is_active', true)
-      .maybeSingle()
-    forcedNicheId = forced?.id ?? null
+    if (!validNicheIds.has(input.forceNicheId)) return { error: 'The selected niche is no longer available.' }
+    forcedNicheId = input.forceNicheId
   }
 
   // Niches this account can actually use, for resolving a "Niche" column.
@@ -484,39 +487,15 @@ export async function importContacts(input: {
   // niche value we truly don't recognize (a typo) and one that is a real
   // niche the account simply hasn't had enabled yet — the latter needs a
   // "contact the Reactivation Power team" message, not a "check spelling" one.
-  const usesNicheColumn = rows.some((r) => (r.niche ?? '').trim() !== '')
-  const [ownerNiches, allActiveNiches] = usesNicheColumn
-    ? await Promise.all([getOwnerNiches(ownerId), getNiches(true)])
-    : [[], []]
+  const ownerNiches = await getOwnerNiches(ownerId)
+  const enabledNicheIds = new Set(ownerNiches.map(n => n.id))
   const unmatchedNiches = new Set<string>()
   // Canonical names of real niches present in the file but not enabled here
   const notEnabledNiches = new Set<string>()
 
-  // 3. Existing phones for dedupe
-  const { data: existing } = await supabase
-    .from('contacts')
-    .select('phone')
-    .eq('owner_id', ownerId)
-  const seen = new Set((existing ?? []).map((c) => normalizePhone(c.phone)))
-
-  const toInsert: Record<string, unknown>[] = []
-  let skippedInvalid = 0
-  let skippedDuplicate = 0
+  const resolvedRows: ResolvedImportRow[] = []
 
   for (const row of rows) {
-    const name = (row.name ?? '').trim()
-    const phone = (row.phone ?? '').trim()
-    const key = normalizePhone(phone)
-    if (!name || key.length < 7) {
-      skippedInvalid++
-      continue
-    }
-    if (seen.has(key)) {
-      skippedDuplicate++
-      continue
-    }
-    seen.add(key)
-
     const serviceRaw = (row.service ?? '').trim()
     const serviceKey = serviceRaw.replace(/\s+/g, ' ').toLowerCase()
     const mapped = serviceKey ? nicheByService.get(serviceKey) : undefined
@@ -525,7 +504,7 @@ export async function importContacts(input: {
     // forced for the whole upload still wins over everything.
     const nicheRaw = (row.niche ?? '').trim()
     let rowNicheId: string | undefined
-    if (nicheRaw && ownerNiches.length > 0) {
+    if (nicheRaw) {
       const match = matchNicheByName(nicheRaw, ownerNiches)
       if (match) rowNicheId = match.id
       else {
@@ -548,65 +527,54 @@ export async function importContacts(input: {
     }
 
     const nicheId = forcedNicheId ?? rowNicheId ?? mapped ?? defaultNicheId
+    if (nicheId && !enabledNicheIds.has(nicheId)) {
+      const niche = allActiveNiches.find(n => n.id === nicheId)
+      if (niche) notEnabledNiches.add(niche.name)
+    }
 
-    toInsert.push({
-      owner_id: ownerId,
-      created_by: participant.id,
-      name,
-      phone,
-      email: (row.email ?? '').trim() || null,
-      niche_id: nicheId,
-      stage_id: newStage?.id ?? null,
-      notes: (row.notes ?? '').trim() || null,
-      service_label: serviceRaw || null,
-      original_complaint: (row.complaint ?? '').trim() || null,
+    resolvedRows.push({
+      row: { ...row, notes: row.notes ? sanitizeNotes(row.notes) : '' } as PatientImportRow,
+      nicheId,
     })
   }
 
-  // 4. Insert in chunks. We deliberately do NOT create follow-ups here —
-  // imported contacts start in the "reserve" pool with no follow-up. The
-  // dashboard releases them into the live queue a batch at a time
-  // (getCallQueueState), so a bulk upload never dumps everyone into
-  // "Calls Due" at once.
-  let imported = 0
-
-  // DEMO ACCOUNT: run the whole mapping/dedupe/niche-classification pass so
-  // the dialog's preview, progress bar, and warnings are genuine — but never
-  // write. The demo's 100 patients stay exactly as seeded; the reset button
-  // and nightly cron keep them current.
-  if (participant.is_demo) {
+  try {
+    const result = await executePatientImport({
+      ownerId, participantId: participant.id, source, stageId: newStage?.id ?? null,
+      simulated: Boolean(participant.is_demo),
+      mappings,
+    }, resolvedRows)
     revalidatePath('/portal', 'layout')
-    return {
-      imported: toInsert.length,
-      skippedDuplicate,
-      skippedInvalid,
-      unmatchedNiches: Array.from(unmatchedNiches).slice(0, 8),
-      notEnabledNiches: Array.from(notEnabledNiches).slice(0, 12),
-      simulated: true as const,
-    }
+    return { ...result, unmatchedNiches: Array.from(unmatchedNiches).slice(0, 8), notEnabledNiches: Array.from(notEnabledNiches).slice(0, 12) }
+  } catch (error) {
+    logger.error({ code: (error as { code?: string }).code }, 'Patient CSV transaction failed')
+    return { error: 'Import failed. No patients were changed. Please try again.' }
   }
+}
 
-  const CHUNK = 250
-  for (let i = 0; i < toInsert.length; i += CHUNK) {
-    const chunk = toInsert.slice(i, i + CHUNK)
-    const { data: inserted, error } = await supabase
-      .from('contacts')
-      .insert(chunk)
-      .select('id')
-    if (error) return { error: error.message, imported }
-    imported += inserted?.length ?? 0
-  }
+export async function listPatientImportReviews() {
+  const participant = await getCurrentParticipant()
+  if (!participant) return { error: 'Not signed in' }
+  if (participant.is_demo) return { reviews: [] }
+  return { reviews: await listImportReviews(accessOwnerId(participant)) }
+}
 
-  revalidatePath('/portal', 'layout')
-  return {
-    imported,
-    skippedDuplicate,
-    skippedInvalid,
-    // Niche values we could not match at all, so the UI can flag the typo
-    unmatchedNiches: Array.from(unmatchedNiches).slice(0, 8),
-    // Real niches in the file that aren't enabled on this account — the UI
-    // tells the client to contact the Reactivation Power team to enable them
-    notEnabledNiches: Array.from(notEnabledNiches).slice(0, 12),
+export async function resolvePatientImportReview(input: { reviewId: string; decision: 'match' | 'create' | 'ignore'; contactId?: string }) {
+  const participant = await getCurrentParticipant()
+  if (!participant) return { error: 'Not signed in' }
+  if (participant.is_demo) return { error: 'Demo uploads are previews only.' }
+  const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  if (!input || !uuid.test(input.reviewId ?? '') || !['match', 'create', 'ignore'].includes(input.decision) || (input.contactId && !uuid.test(input.contactId)))
+    return { error: 'Invalid review selection.' }
+  const supabase = getAdminClient()
+  const { data: stage } = await supabase.from('pipeline_stages').select('id').is('owner_id', null).order('sort_order').limit(1).maybeSingle()
+  try {
+    await resolveImportReview({ ownerId: accessOwnerId(participant), participantId: participant.id, stageId: stage?.id ?? null }, input)
+    revalidatePath('/portal', 'layout')
+    return { resolved: true as const }
+  } catch (error) {
+    const e = error as Error & { code?: string }
+    return { error: e.code ? 'Could not resolve this row. No patients were changed.' : e.message }
   }
 }
 

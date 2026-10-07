@@ -26,3 +26,4 @@
 - [Portal calling decisions](portal-calling-decisions.md) — independent practice-owned accounts, direct Twilio billing, computer-only calling, no recording; umbrella accounts explicitly rejected.
 - [Twilio account feasibility](twilio-account-feasibility.md) — embedded signup/direct billing is not established; Connect has caller-ID limits, and HIPAA edition/BAA costs need confirmation.
 - [Legal company identity](legal-company-identity.md) — Beyond Healthcare LLC owns Patient Pipeline; counsel is drafting a new agreement, not merely approving the internal template.
+- [CSV patient workflow](csv-patient-workflow.md) — CSV-first matching; uncertain identities need review, and service imports must not silently restart outreach.

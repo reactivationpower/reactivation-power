@@ -177,6 +177,7 @@ const ACTIONS: Record<string, Record<string, Auth>> = {
     createContact: "portal", updateContact: "portal", deleteContact: "portal",
     bulkDeleteContacts: "portal", bulkAssignNiche: "portal", setDefaultNiche: "portal",
     importContacts: "portal", setCallBatchSize: "portal", addMoreCalls: "portal",
+    listPatientImportReviews: "portal", resolvePatientImportReview: "portal",
     setSelectedNiche: "portal", setPracticeName: "portal", setOfficePhone: "portal",
     addTeamMember: "portal", setTeamMemberActive: "portal", updateTeamMember: "portal",
     updateMyProfile: "portal", logCall: "portal",

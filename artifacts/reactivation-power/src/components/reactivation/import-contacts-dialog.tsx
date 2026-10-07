@@ -43,7 +43,10 @@ import type { Niche, ServiceNicheMapping } from '@workspace/shared/types'
 import { cn } from '@/lib/utils'
 import { useRouter } from '@/hooks/use-router'
 import { detectColumnsWith, dropRedundantFullName, parseCsv } from '@/lib/csv-import'
+import { PatientImportReviews } from '@/components/reactivation/patient-import-reviews'
+import { Input } from '@/components/ui/input'
 import { ImportProgress } from '@/components/portal/import-progress'
+import type { PatientImportSummary } from '@workspace/shared/csv-patients'
 
 // ---------- column auto-detection ----------
 
@@ -57,6 +60,9 @@ type Target =
   | 'service'
   | 'complaint'
   | 'notes'
+  | 'patientId'
+  | 'lastVisit'
+  | 'doNotCall'
 
 const TARGET_LABELS: Record<Target, string> = {
   name: 'Full name',
@@ -68,6 +74,9 @@ const TARGET_LABELS: Record<Target, string> = {
   service: 'Service / appointment type',
   complaint: 'Previously treated for',
   notes: 'Notes',
+  patientId: 'Patient ID (EHR / CSV)',
+  lastVisit: 'Last visit (YYYY-MM-DD or M/D/YYYY)',
+  doNotCall: 'Do not call (true / yes / 1)',
 }
 
 /**
@@ -109,6 +118,9 @@ const STRICT_PATTERNS: Array<[Target, RegExp]> = [
     /^(complaint|original[\s_-]?complaint|chief[\s_-]?complaint|condition|treated[\s_-]?for|previously[\s_-]?treated[\s_-]?for|diagnosis|concern)$/i,
   ],
   ['notes', /^(note|notes|comment|comments|memo|remarks)$/i],
+  ['patientId', /^(patient|pt|chart|mrn|ehr|client|external)[\s_-]?(id|number|no|#)$|^id$/i],
+  ['lastVisit', /^(last[\s_-]?(visit|seen|appt|appointment)([\s_-]?date)?|date[\s_-]?of[\s_-]?last[\s_-]?visit|last[\s_-]?service[\s_-]?date)$/i],
+  ['doNotCall', /^(do[\s_-]?not[\s_-]?(call|contact)|dnc|opt[\s_-]?out)$/i],
 ]
 
 // Pass 2 — looser "contains" fallbacks for headings we didn't recognize.
@@ -130,6 +142,8 @@ const LOOSE_PATTERNS: Array<[Target, RegExp]> = [
   ],
   ['complaint', /(complaint|condition|treated[\s_-]?for|diagnosis|concern)/i],
   ['notes', /(note|comment|memo|remark)/i],
+  ['lastVisit', /last[\s_-]?(visit|seen)/i],
+  ['doNotCall', /(do[\s_-]?not[\s_-]?call|\bdnc\b)/i],
 ]
 
 function detectColumns(headers: string[]): Partial<Record<Target, number>> {
@@ -157,6 +171,9 @@ const MAPPING_ORDER: Target[] = [
   'service',
   'complaint',
   'notes',
+  'patientId',
+  'lastVisit',
+  'doNotCall',
 ]
 
 /** How many real values from the file to show beside each mapped field */
@@ -202,13 +219,8 @@ export function ImportContactsDialog({
   const [autoMatched, setAutoMatched] = useState(0)
   const [error, setError] = useState<string | null>(null)
   const [dragActive, setDragActive] = useState(false)
-  const [result, setResult] = useState<{
-    imported: number
-    skippedDuplicate: number
-    skippedInvalid: number
-    unmatchedNiches: string[]
-    notEnabledNiches: string[]
-  } | null>(null)
+  const [sourceSystem, setSourceSystem] = useState('csv')
+  const [result, setResult] = useState<PatientImportSummary | null>(null)
   const [importDone, setImportDone] = useState(false)
   const [pending, startTransition] = useTransition()
   const fileRef = useRef<HTMLInputElement>(null)
@@ -448,6 +460,9 @@ export function ImportContactsDialog({
             ? (r[columns.complaint] ?? '').trim()
             : '',
         notes: columns.notes !== undefined ? (r[columns.notes] ?? '').trim() : '',
+        patientId: columns.patientId !== undefined ? (r[columns.patientId] ?? '').trim() : '',
+        lastVisit: columns.lastVisit !== undefined ? (r[columns.lastVisit] ?? '').trim() : '',
+        doNotCall: columns.doNotCall !== undefined ? (r[columns.doNotCall] ?? '').trim() : '',
       }
     })
   }
@@ -465,11 +480,19 @@ export function ImportContactsDialog({
           service_label,
           niche_id: v === NONE ? null : v,
         }))
-      const res = await importContacts({
-        rows: buildRows(),
-        mappings,
-        forceNicheId: fileNiche !== AUTO ? fileNiche : null,
-      })
+      let res
+      try {
+        res = await importContacts({
+          rows: buildRows(),
+          mappings,
+          forceNicheId: fileNiche !== AUTO ? fileNiche : null,
+          sourceSystem: sourceSystem.trim() || 'csv',
+        })
+      } catch {
+        setError('Could not confirm the upload result. Check your contacts before retrying; repeating the same file is safe.')
+        setStep(returnTo)
+        return
+      }
       if (res?.error) {
         setError(res.error)
         setStep(returnTo)
@@ -481,9 +504,14 @@ export function ImportContactsDialog({
       setImportDone(true)
       await new Promise((r) => setTimeout(r, 450))
       setResult({
+        ...res,
         imported: res.imported ?? 0,
-        skippedDuplicate: res.skippedDuplicate ?? 0,
+        updated: res.updated ?? 0,
+        servicesAdded: res.servicesAdded ?? 0,
+        unchanged: res.unchanged ?? 0,
+        needsReview: res.needsReview ?? 0,
         skippedInvalid: res.skippedInvalid ?? 0,
+        invalidRows: res.invalidRows ?? [],
         unmatchedNiches: res.unmatchedNiches ?? [],
         notEnabledNiches: res.notEnabledNiches ?? [],
       })
@@ -689,6 +717,7 @@ export function ImportContactsDialog({
                     </Button>
                   </div>
                 </div>
+                <PatientImportReviews onChanged={() => router.refresh()} />
                 {error && <p className="text-sm text-destructive">{error}</p>}
               </div>
             </>
@@ -727,6 +756,22 @@ export function ImportContactsDialog({
                     {fileNiche === AUTO
                       ? 'Each contact is tagged from their own Niche column when your file has one, then the service column, then your account default. Or pick a niche to tag every contact in this file with it.'
                       : `Every contact in this file will be tagged ${nicheDisplayLabel(nicheById.get(fileNiche)?.name ?? 'the selected niche')} and get that script when called — this overrides any Niche column on the file.`}
+                  </p>
+                </div>
+                <div className="flex flex-col gap-1.5 rounded-md border border-border bg-muted/40 px-3 py-2.5">
+                  <Label htmlFor="source-system" className="text-xs">
+                    Source system
+                  </Label>
+                  <Input
+                    id="source-system"
+                    value={sourceSystem}
+                    onChange={(e) => setSourceSystem(e.target.value)}
+                    placeholder="csv"
+                    className="h-9"
+                    data-testid="input-source-system"
+                  />
+                  <p className="text-xs leading-relaxed text-muted-foreground">
+                    Use the same source label every time you upload from the same system (for example, the name of your EHR) so Patient IDs match across uploads.
                   </p>
                 </div>
                 <label className="flex items-center gap-2 text-sm text-foreground">
@@ -1087,27 +1132,42 @@ export function ImportContactsDialog({
                 </DialogDescription>
               </DialogHeader>
               <div className="flex flex-col gap-3">
-                <div className="flex items-center gap-3 rounded-md border border-border bg-card px-4 py-3">
-                  <CheckCircle2 className="size-6 shrink-0 text-accent" />
-                  <div>
-                    <p className="text-sm font-semibold text-foreground">
-                      {result.imported} contact
-                      {result.imported === 1 ? '' : 's'} uploaded
-                    </p>
-                    {(result.skippedDuplicate > 0 ||
-                      result.skippedInvalid > 0) && (
-                      <p className="text-xs text-muted-foreground">
-                        {result.skippedDuplicate > 0 &&
-                          `${result.skippedDuplicate} skipped as duplicates (phone already in your list)`}
-                        {result.skippedDuplicate > 0 &&
-                          result.skippedInvalid > 0 &&
-                          ' · '}
-                        {result.skippedInvalid > 0 &&
-                          `${result.skippedInvalid} skipped for missing name or phone`}
+                <div className="flex items-start gap-3 rounded-md border border-border bg-card px-4 py-3">
+                  <CheckCircle2 className="mt-0.5 size-6 shrink-0 text-accent" />
+                  <div className="flex flex-col gap-1.5">
+                    {result.simulated && (
+                      <p className="text-xs font-semibold text-accent" data-testid="text-simulated">
+                        Simulated import: nothing was saved.
                       </p>
                     )}
+                    <ul className="grid grid-cols-1 gap-x-6 gap-y-1 text-sm text-foreground sm:grid-cols-2" data-testid="list-import-summary">
+                      <li data-testid="text-imported"><span className="font-semibold">{result.imported}</span> new {result.imported === 1 ? 'person' : 'people'} added to the reserve pool</li>
+                      <li data-testid="text-updated"><span className="font-semibold">{result.updated}</span> existing {result.updated === 1 ? 'person' : 'people'} updated</li>
+                      <li data-testid="text-services-added"><span className="font-semibold">{result.servicesAdded}</span> service{result.servicesAdded === 1 ? '' : 's'} added to history</li>
+                      <li data-testid="text-unchanged"><span className="font-semibold">{result.unchanged}</span> unchanged</li>
+                      <li data-testid="text-needs-review"><span className="font-semibold">{result.needsReview}</span> need{result.needsReview === 1 ? 's' : ''} your review</li>
+                      <li data-testid="text-skipped-invalid"><span className="font-semibold">{result.skippedInvalid}</span> skipped for missing name or phone</li>
+                    </ul>
+                    <p className="text-xs leading-relaxed text-muted-foreground">
+                      Additional services are saved as history only. A person's current script and call schedule do not change, and nothing extra is queued.
+                    </p>
                   </div>
                 </div>
+                {result.needsReview > 0 && !result.simulated && (
+                  <PatientImportReviews onChanged={() => router.refresh()} />
+                )}
+                {!!result.invalidRows?.length && (
+                  <div className="rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm">
+                    <p className="font-semibold">Rows not imported</p>
+                    <p className="mb-2 text-xs text-muted-foreground">
+                      Correct these rows and upload again. Data row numbers exclude the header.
+                      {result.skippedInvalid > result.invalidRows.length && ' Showing the first 12 invalid rows.'}
+                    </p>
+                    <ul className="space-y-1 text-xs">
+                      {result.invalidRows.map(r => <li key={r.rowNumber}>Data row {r.rowNumber}: {r.reason}</li>)}
+                    </ul>
+                  </div>
+                )}
                 {result.notEnabledNiches.length > 0 && (
                   <div className="flex flex-col gap-2 rounded-md border-2 border-destructive bg-destructive/10 px-4 py-3">
                     <p className="flex items-center gap-2 text-sm font-bold text-destructive">

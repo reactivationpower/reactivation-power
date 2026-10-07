@@ -34,6 +34,9 @@ export default defineConfig({
   // Only tables modelled in src/schema are managed; everything else in
   // Supabase's public schema is left alone.
   tablesFilter: [
+    "patient_sources",
+    "contact_services",
+    "patient_import_reviews",
     "email_log",
     "customers",
     "payment_link_terms",

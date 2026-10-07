@@ -179,6 +179,28 @@ export function ContactEditor({
           />
         </div>
 
+        {(contact.services ?? []).length > 0 && (
+          <div className="rounded-md border border-border bg-muted/30 px-4 py-3" data-testid="panel-services">
+            <p className="text-sm font-medium text-foreground">Service history</p>
+            <p className="mb-2 text-xs text-muted-foreground">
+              Read-only. Your current script above remains primary. Additional services are saved here without starting separate calling sequences.
+            </p>
+            <ul className="flex flex-col gap-1.5">
+              {contact.services.map((sv) => (
+                <li key={sv.id} className="text-sm text-foreground" data-testid={`row-service-${sv.id}`}>
+                  {sv.service_label || 'Service'}
+                  {sv.niche_name ? ` · ${sv.niche_name}` : ''}
+                  <span className="text-xs text-muted-foreground">
+                    {sv.last_visit ? ` · Last visit ${sv.last_visit}` : ''}
+                    {sv.original_complaint ? ` · ${sv.original_complaint}` : ''}
+                  </span>
+                  {sv.source_notes && <div className="text-xs text-muted-foreground" dangerouslySetInnerHTML={{ __html: sv.source_notes }} />}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         <label className="flex items-center justify-between gap-4 rounded-md border border-border px-4 py-3 text-sm">
           <span>
             <span className="block font-medium text-foreground">
