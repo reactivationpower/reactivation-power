@@ -1,5 +1,9 @@
 // Thin client stubs for the server actions in artifacts/api-server/src/actions/reactivation.ts
 import { action } from '@/lib/api'
+export const claimPatientCall = action<any>('reactivation', 'claimPatientCall')
+export const renewPatientCall = action<any>('reactivation', 'renewPatientCall')
+export const releasePatientCall = action<any>('reactivation', 'releasePatientCall')
+export const reopenService = action<any>('reactivation', 'reopenService')
 import type { PatientImportRow, PatientImportReview, PatientImportSummary } from '@workspace/shared/csv-patients'
 
 export type ImportRow = PatientImportRow

@@ -14,13 +14,14 @@ import { matchNicheByName } from '@workspace/niche-catalog'
 import { easternWallClockToUtc } from '@workspace/shared/call-time'
 import { sanitizeNotes } from '@/lib/notes-html'
 import type { CallDisposition } from '@workspace/shared/types'
-import { CALL_BATCH_SIZES, RETRY_WINDOW_MONTHS } from '@workspace/shared/types'
+import { CALL_BATCH_SIZES } from '@workspace/shared/types'
 import { sendPortalWelcomeEmail } from '@/lib/mail'
 import { changeCallerSeat } from '@/lib/data/caller-seats'
 import { executePatientImport, listImportReviews, resolveImportReview } from '@/lib/patients/csv-import'
 import type { PatientImportRow } from '@workspace/shared/csv-patients'
 import type { ResolvedImportRow } from '@/lib/patients/import-plan'
 import { logger } from '@/lib/logger'
+import { claimPatient, renewPatient, releasePatient, reopenPatientService, savePatientCall } from '@/lib/patients/outreach'
 
 // ---------- Admin: niches ----------
 
@@ -875,122 +876,52 @@ export async function logCall(formData: FormData) {
     'spoke_call_back_later',
     'scheduled',
     'do_not_call',
+    'service_declined',
+    'appointment_confirmed',
+    'appointment_cancelled',
   ]
   if (!contactId || !valid.includes(disposition))
     return { error: 'Missing contact or disposition' }
 
-  const supabase = getAdminClient()
-
-  const { data: contact } = await supabase
-    .from('contacts')
-    .select('*')
-    .eq('id', contactId)
-    .eq('owner_id', ownerId)
-    .maybeSingle()
-  if (!contact) return { error: 'Contact not found' }
-
-  // 1. Log the call
-  const { data: call, error: callError } = await supabase
-    .from('reactivation_calls')
-    .insert({
-      contact_id: contactId,
-      caller_id: participant.id,
-      disposition,
-      voicemail_left: voicemailLeft,
-      notes: notes || null,
-      appointment_at: disposition === 'scheduled' ? appointmentAt : null,
+  const token = String(formData.get('leaseToken') ?? '')
+  if (!uuidPattern.test(contactId) || !uuidPattern.test(token)) return { error: 'Open this patient from Calls Due Now before logging a call.' }
+  const pickedCallback = callBackAt && !Number.isNaN(new Date(callBackAt).getTime()) ? new Date(callBackAt).toISOString() : null
+  try {
+    const enabled = new Set((await getOwnerNiches(ownerId)).map(n => n.id))
+    const result = await savePatientCall(ownerId, participant.id, enabled, {
+      contactId, token, disposition, voicemailLeft, notes, callBackAt: pickedCallback, appointmentAt, retryAt: nextScatteredRetry().toISOString(),
     })
-    .select('id')
-    .single()
-  if (callError) return { error: callError.message }
+    revalidatePath('/portal', 'layout')
+    return result
+  } catch (error) { return { error: error instanceof Error ? error.message : 'Unable to save the call.' } }
+}
 
-  // 2. Mark any open follow-ups for this contact as completed by this call
-  await supabase
-    .from('follow_ups')
-    .update({ completed_call_id: call.id })
-    .eq('contact_id', contactId)
-    .is('completed_call_id', null)
-
-  // 3. Contact patch: first_call_at, stage, dnc
-  const contactPatch: Record<string, unknown> = {}
-  if (!contact.first_call_at)
-    contactPatch.first_call_at = new Date().toISOString()
-
-  const { data: stages } = await supabase
-    .from('pipeline_stages')
-    .select('id, name')
-    .or(`owner_id.is.null,owner_id.eq.${ownerId}`)
-  const stageByName = new Map(
-    (stages ?? []).map((s) => [s.name.toLowerCase(), s.id]),
-  )
-
-  // 4. Cadence rules → next follow-up
-  let nextDue: Date | null = null
-  let reason: 'retry' | 'three_month' | 'quarterly' | 'manual' = 'retry'
-
-  switch (disposition) {
-    case 'no_answer':
-    case 'voicemail': {
-      const firstCall = contact.first_call_at
-        ? new Date(contact.first_call_at)
-        : new Date()
-      const retryWindowEnd = new Date(firstCall)
-      retryWindowEnd.setMonth(retryWindowEnd.getMonth() + RETRY_WINDOW_MONTHS)
-      if (new Date() < retryWindowEnd) {
-        nextDue = nextScatteredRetry()
-        reason = 'retry'
-      } else {
-        nextDue = monthsFromNow(3)
-        reason = 'quarterly'
-      }
-      if (stageByName.has('contacting'))
-        contactPatch.stage_id = stageByName.get('contacting')
-      break
-    }
-    case 'spoke_did_not_schedule': {
-      nextDue = monthsFromNow(3)
-      reason = 'three_month'
-      if (stageByName.has('spoke to'))
-        contactPatch.stage_id = stageByName.get('spoke to')
-      break
-    }
-    case 'spoke_call_back_later': {
-      const picked = callBackAt ? new Date(callBackAt) : null
-      nextDue =
-        picked && !Number.isNaN(picked.getTime())
-          ? picked
-          : nextScatteredRetry()
-      reason = 'manual'
-      if (stageByName.has('spoke to'))
-        contactPatch.stage_id = stageByName.get('spoke to')
-      break
-    }
-    case 'scheduled': {
-      nextDue = monthsFromNow(3)
-      reason = 'quarterly'
-      if (stageByName.has('scheduled'))
-        contactPatch.stage_id = stageByName.get('scheduled')
-      break
-    }
-    case 'do_not_call': {
-      contactPatch.do_not_call = true
-      nextDue = null
-      break
-    }
-  }
-
-  if (Object.keys(contactPatch).length > 0) {
-    await supabase.from('contacts').update(contactPatch).eq('id', contactId)
-  }
-
-  if (nextDue) {
-    await supabase.from('follow_ups').insert({
-      contact_id: contactId,
-      due_at: nextDue.toISOString(),
-      reason,
-    })
-  }
-
-  revalidatePath('/portal', 'layout')
-  return { callId: call.id }
+const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+export async function claimPatientCall(contactId: string) {
+  const participant = await getCurrentParticipant()
+  if (!participant) return { error: 'Not signed in' }
+  if (!uuidPattern.test(contactId)) return { error: 'Invalid patient.' }
+  const ownerId = accessOwnerId(participant)
+  try { return await claimPatient(ownerId, participant.id, contactId, new Set((await getOwnerNiches(ownerId)).map(n => n.id))) }
+  catch (error) { return { error: error instanceof Error ? error.message : 'Unable to start this call.' } }
+}
+export async function renewPatientCall(contactId: string, token: string) {
+  const p = await getCurrentParticipant()
+  if (!p || !uuidPattern.test(contactId) || !uuidPattern.test(token)) return { renewed: false }
+  return renewPatient(accessOwnerId(p), p.id, contactId, token)
+}
+export async function releasePatientCall(contactId: string, token: string) {
+  const p = await getCurrentParticipant()
+  if (!p || !uuidPattern.test(contactId) || !uuidPattern.test(token)) return {}
+  return releasePatient(accessOwnerId(p), p.id, contactId, token)
+}
+export async function reopenService(contactId: string, serviceId: string) {
+  const p = await getCurrentParticipant()
+  if (!p) return { error: 'Not signed in' }
+  if (!uuidPattern.test(contactId) || !uuidPattern.test(serviceId)) return { error: 'Invalid patient or service.' }
+  try {
+    const result = await reopenPatientService(accessOwnerId(p), contactId, serviceId)
+    revalidatePath('/portal', 'layout')
+    return result
+  } catch (error) { return { error: error instanceof Error ? error.message : 'Unable to reopen the service.' } }
 }

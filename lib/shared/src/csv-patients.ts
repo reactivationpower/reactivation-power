@@ -21,6 +21,11 @@ export interface PatientService {
   original_complaint: string | null
   source_notes: string | null
   niche_name: string | null
+  outreach_status?: 'ready' | 'active' | 'cooling' | 'declined'
+  cycle_started_at?: string | null
+  last_attempt_at?: string | null
+  last_outcome?: string | null
+  created_at?: string
 }
 
 export interface PatientImportSummary {

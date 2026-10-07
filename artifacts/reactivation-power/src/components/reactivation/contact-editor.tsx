@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { Check } from 'lucide-react'
-import { updateContact } from '@/app/actions/reactivation'
+import { updateContact, reopenService } from '@/app/actions/reactivation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -192,6 +192,15 @@ export function ContactEditor({
                   {sv.niche_name ? ` · ${sv.niche_name}` : ''}
                   <span className="text-xs text-muted-foreground">
                     {sv.last_visit ? ` · Last visit ${sv.last_visit}` : ''}
+                    <span className="ml-2 text-xs text-muted-foreground">{sv.outreach_status ?? 'ready'}</span>
+                    {sv.outreach_status === 'declined' && (
+                      <Button type="button" size="sm" variant="outline" className="ml-2" disabled={pending}
+                        onClick={() => startTransition(async () => {
+                          const result = await reopenService(contact.id, sv.id)
+                          if (result?.error) setError(result.error)
+                          else router.refresh()
+                        })}>Reopen service</Button>
+                    )}
                     {sv.original_complaint ? ` · ${sv.original_complaint}` : ''}
                   </span>
                   {sv.source_notes && <div className="text-xs text-muted-foreground" dangerouslySetInnerHTML={{ __html: sv.source_notes }} />}

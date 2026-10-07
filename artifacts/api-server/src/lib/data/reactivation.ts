@@ -1,6 +1,8 @@
 
 import { getAdminClient } from '@/lib/supabase/admin'
 import { pool } from '@workspace/db'
+import { ensurePrimaryServices } from '@/lib/patients/outreach'
+import { planOutreach } from '@/lib/patients/outreach-policy'
 import type { PatientService } from '@workspace/shared/csv-patients'
 import { dueWithinEasternToday } from '@workspace/shared/call-time'
 import type {
@@ -173,6 +175,9 @@ export async function getPipelineStages(
 // ---------- Contacts ----------
 
 export interface ContactWithMeta extends Contact {
+  outreach_available_at?: string | null
+  outreach_blocked?: string | null
+  call_assigned?: boolean
   services?: PatientService[]
   niche: Niche | null
   stage: PipelineStage | null
@@ -190,10 +195,13 @@ export interface ContactWithMeta extends Contact {
 }
 
 export async function getContacts(ownerId: string): Promise<ContactWithMeta[]> {
+  await ensurePrimaryServices(ownerId)
   // Direct, tenant-scoped SQL avoids Supabase's default 1,000-row response
   // cap, which would otherwise hide patients after a large CSV import.
   const { rows: contacts } = await pool.query(`SELECT c.*, row_to_json(n) AS niche, row_to_json(s) AS stage,
-    (SELECT row_to_json(f) FROM follow_ups f WHERE f.contact_id = c.id AND f.completed_call_id IS NULL ORDER BY f.due_at LIMIT 1) AS next_follow_up,
+    (SELECT row_to_json(f) FROM follow_ups f WHERE f.contact_id = c.id AND f.completed_call_id IS NULL
+      ORDER BY CASE WHEN f.call_context = 'confirmation' OR f.reason = 'manual' THEN 0 WHEN f.reason = 'retry' THEN 1 ELSE 2 END, f.due_at LIMIT 1) AS next_follow_up,
+    EXISTS (SELECT 1 FROM patient_call_leases l WHERE l.contact_id = c.id AND l.expires_at > now()) AS call_assigned,
     (SELECT row_to_json(rc) FROM reactivation_calls rc WHERE rc.contact_id = c.id ORDER BY rc.created_at DESC LIMIT 1) AS last_call,
     (SELECT count(*)::integer FROM reactivation_calls rc WHERE rc.contact_id = c.id) AS call_count
     FROM contacts c LEFT JOIN niches n ON n.id = c.niche_id LEFT JOIN pipeline_stages s ON s.id = c.stage_id
@@ -203,9 +211,8 @@ export async function getContacts(ownerId: string): Promise<ContactWithMeta[]> {
   // Niche ids currently usable on this account (enabled AND globally active),
   // to flag contacts whose niche isn't turned on (e.g. imported before it was
   // purchased/activated).
-  const activeNicheIds = new Set(
-    (await getOwnerNiches(ownerId)).map((n) => n.id),
-  )
+  const ownerNiches = await getOwnerNiches(ownerId)
+  const activeNicheIds = new Set(ownerNiches.map(n => n.id))
 
   const servicesByContact = new Map<string, PatientService[]>()
   for (const service of await getPatientServices(ownerId)) {
@@ -214,7 +221,7 @@ export async function getContacts(ownerId: string): Promise<ContactWithMeta[]> {
     servicesByContact.set(service.contact_id, list)
   }
 
-  return contacts.map((c) => ({
+  return contacts.map((c) => coordinateContact({
     ...(c as Contact),
     // pg returns top-level timestamptz as Date; preserve the existing DTO.
     created_at: new Date(c.created_at).toISOString(),
@@ -226,11 +233,31 @@ export async function getContacts(ownerId: string): Promise<ContactWithMeta[]> {
     last_call: c.last_call ?? null,
     call_count: c.call_count ?? 0,
     niche_active: !c.niche_id || activeNicheIds.has(c.niche_id),
-  }))
+  }, ownerNiches))
+}
+
+function coordinateContact(contact: ContactWithMeta, niches: Niche[]): ContactWithMeta {
+  const plan = planOutreach(contact, new Set(niches.map(n => n.id)))
+  const service = plan.service
+  return {
+    ...contact,
+    outreach_blocked: plan.blocked,
+    outreach_available_at: plan.dueAt,
+    niche_id: service?.niche_id ?? contact.niche_id,
+    niche: service?.niche_id ? niches.find(n => n.id === service.niche_id) ?? contact.niche : contact.niche,
+    service_label: service?.service_label ?? contact.service_label,
+    original_complaint: service ? service.original_complaint : contact.original_complaint,
+    niche_active: !service?.niche_id || niches.some(n => n.id === service.niche_id),
+    next_follow_up: contact.next_follow_up && plan.dueAt ? {
+      ...contact.next_follow_up, due_at: plan.dueAt,
+      call_context: plan.context, service_id: service?.id ?? null,
+    } : contact.next_follow_up,
+  } as ContactWithMeta
 }
 
 async function getPatientServices(ownerId: string, contactId?: string): Promise<PatientService[]> {
-  const { rows } = await pool.query(`SELECT s.id, s.contact_id, s.niche_id, s.service_label,
+  const { rows } = await pool.query(`SELECT s.id, s.contact_id, s.niche_id, s.service_label, s.created_at,
+    s.outreach_status, s.cycle_started_at, s.last_attempt_at, s.last_outcome,
     s.last_visit::text, s.original_complaint, s.source_notes, n.name AS niche_name
     FROM contact_services s LEFT JOIN niches n ON n.id = s.niche_id
     WHERE s.owner_id = $1 ${contactId ? 'AND s.contact_id = $2' : ''}
@@ -246,6 +273,7 @@ export async function getContact(id: string): Promise<ContactWithMeta | null> {
     .eq('id', id)
     .maybeSingle()
   if (!c) return null
+  await ensurePrimaryServices((c as Contact).owner_id)
 
   const [{ data: followUps }, { data: calls }, ownerNiches] =
     await Promise.all([
@@ -254,8 +282,7 @@ export async function getContact(id: string): Promise<ContactWithMeta | null> {
         .select('*')
         .eq('contact_id', id)
         .is('completed_call_id', null)
-        .order('due_at')
-        .limit(1),
+        .order('due_at'),
       supabase
         .from('reactivation_calls')
         .select('*')
@@ -266,18 +293,20 @@ export async function getContact(id: string): Promise<ContactWithMeta | null> {
 
   const activeNicheIds = new Set(ownerNiches.map((n) => n.id))
 
-  return {
+  const priority = (f: any) => f.call_context === 'confirmation' || f.reason === 'manual' ? 0 : f.reason === 'retry' ? 1 : 2
+  const pending = (followUps ?? []).sort((a, b) => priority(a) - priority(b) || new Date(a.due_at).getTime() - new Date(b.due_at).getTime())
+  return coordinateContact({
     ...(c as Contact),
     services: await getPatientServices((c as Contact).owner_id, id),
     niche: (c.niche ?? null) as Niche | null,
     stage: (c.stage ?? null) as PipelineStage | null,
-    next_follow_up: ((followUps ?? [])[0] ?? null) as FollowUp | null,
+    next_follow_up: (pending[0] ?? null) as FollowUp | null,
     last_call: ((calls ?? [])[0] ?? null) as ReactivationCall | null,
     call_count: calls?.length ?? 0,
     niche_active:
       !(c as Contact).niche_id ||
       activeNicheIds.has((c as Contact).niche_id as string),
-  }
+  }, ownerNiches)
 }
 
 export interface CallWithCaller extends ReactivationCall {
@@ -309,7 +338,7 @@ export async function getCallQueue(ownerId: string): Promise<QueueItem[]> {
   const byId = new Map(contacts.map((c) => [c.id, c]))
   const items: QueueItem[] = []
   for (const c of contacts) {
-    if (c.do_not_call) continue
+    if (c.do_not_call || c.outreach_blocked || c.call_assigned) continue
     if (!c.next_follow_up) continue
     if (new Date(c.next_follow_up.due_at) <= new Date()) {
       items.push({ follow_up: c.next_follow_up, contact: byId.get(c.id)! })
@@ -350,7 +379,8 @@ export interface CallQueueState {
 
 /** An uncalled contact is a reserve candidate when it has no open follow-up */
 function isReserveCandidate(c: ContactWithMeta): boolean {
-  return !c.do_not_call && !c.next_follow_up && !c.first_call_at
+  return !c.do_not_call && !c.outreach_blocked && !c.call_assigned && !c.next_follow_up && !c.first_call_at &&
+    (!c.outreach_available_at || new Date(c.outreach_available_at).getTime() <= Date.now())
 }
 
 /**
@@ -449,7 +479,7 @@ export async function getCallQueueState(
   // a "Call afternoon" hint rather than staying hidden until its exact time.
   const queue: QueueItem[] = []
   for (const c of contacts) {
-    if (c.do_not_call || !c.next_follow_up) continue
+    if (c.do_not_call || c.outreach_blocked || c.call_assigned || !c.next_follow_up) continue
     if (dueWithinEasternToday(c.next_follow_up.due_at)) {
       queue.push({ follow_up: c.next_follow_up, contact: byId.get(c.id)! })
     }
@@ -518,6 +548,7 @@ const REACHED_DISPOSITIONS = new Set([
   'spoke_did_not_schedule',
   'spoke_call_back_later',
   'scheduled',
+  'service_declined',
 ])
 
 export async function getTeamStats(
@@ -534,13 +565,14 @@ export async function getTeamStats(
 
   const { data: calls } = await supabase
     .from('reactivation_calls')
-    .select('caller_id, disposition, created_at')
+    .select('caller_id, disposition, created_at, call_context')
     .in('caller_id', memberIds)
 
   return members.map((m) => {
     const mine = (calls ?? []).filter((c) => c.caller_id === m.id)
+    const acquisition = mine.filter(c => c.call_context !== 'confirmation')
     const week = mine.filter((c) => new Date(c.created_at) >= weekAgo)
-    const reached = mine.filter((c) =>
+    const reached = acquisition.filter((c) =>
       REACHED_DISPOSITIONS.has(c.disposition),
     ).length
     const scheduled = mine.filter((c) => c.disposition === 'scheduled').length
@@ -556,7 +588,7 @@ export async function getTeamStats(
       reached_total: reached,
       scheduled_total: scheduled,
       success_rate:
-        mine.length > 0 ? Math.round((scheduled / mine.length) * 100) : 0,
+        acquisition.length > 0 ? Math.round((scheduled / acquisition.length) * 100) : 0,
       conversion_rate:
         reached > 0 ? Math.round((scheduled / reached) * 100) : 0,
     }

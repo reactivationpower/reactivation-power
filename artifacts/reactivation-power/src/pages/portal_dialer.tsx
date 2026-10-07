@@ -8,9 +8,14 @@ import { HowItWorks } from '@/components/reactivation/how-it-works'
 import { usePageData } from '@/hooks/use-page-data'
 import { PageError, PageLoading } from '@/components/page-status'
 import NotFound from '@/pages/not-found'
+import { useEffect } from 'react'
 
 export default function DialerPage() {
-  const { data, loading, error, notFound } = usePageData<any>('/portal/dialer')
+  const { data, loading, error, notFound, reload } = usePageData<any>('/portal/dialer')
+  useEffect(() => {
+    const timer = setInterval(() => void reload(), 30_000)
+    return () => clearInterval(timer)
+  }, [reload])
   if (loading) return <PageLoading />
   if (notFound) return <NotFound />
   if (error) return <PageError error={error} />

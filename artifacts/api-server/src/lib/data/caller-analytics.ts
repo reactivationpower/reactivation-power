@@ -48,9 +48,12 @@ const REACHED = new Set<CallDisposition>([
   'spoke_did_not_schedule',
   'spoke_call_back_later',
   'scheduled',
+  'service_declined',
 ])
 
 interface CallRow {
+  service_id?: string | null
+  call_context?: string | null
   id: string
   caller_id: string
   contact_id: string
@@ -106,6 +109,19 @@ async function nicheNames(nicheIds: string[]): Promise<Map<string, string>> {
     .select('id, name')
     .in('id', nicheIds)
   return new Map((data ?? []).map((n) => [n.id, n.name as string]))
+}
+
+/** Historical service attribution must not change when a patient's primary rotates. */
+async function callNiches(calls: Array<Pick<CallRow, 'id' | 'contact_id' | 'service_id'>>): Promise<Map<string, string | null>> {
+  const fallback = await contactNiches([...new Set(calls.map(c => c.contact_id))])
+  const ids = [...new Set(calls.flatMap(c => c.service_id ? [c.service_id] : []))]
+  const services = new Map<string, string | null>()
+  for (let i = 0; i < ids.length; i += 200) {
+    const { data, error } = await getAdminClient().from('contact_services').select('id,niche_id').in('id', ids.slice(i, i + 200))
+    if (error) throw error
+    for (const s of data ?? []) services.set(s.id, s.niche_id)
+  }
+  return new Map(calls.map(c => [c.id, c.service_id && services.has(c.service_id) ? services.get(c.service_id)! : fallback.get(c.contact_id) ?? null]))
 }
 
 // ---------- Eastern-time helpers ----------
@@ -215,25 +231,25 @@ export async function getCallAnalytics(
   const empty = emptyAnalytics()
   if (callerIds.length === 0) return empty
 
-  const calls = await pageAll<CallRow>((from, to) =>
+  const allCalls = await pageAll<CallRow>((from, to) =>
     supabase
       .from('reactivation_calls')
       .select(
-        'id, caller_id, contact_id, disposition, voicemail_left, created_at, appointment_at',
+        'id, caller_id, contact_id, disposition, voicemail_left, created_at, appointment_at, service_id, call_context',
       )
       .in('caller_id', callerIds)
       .order('created_at', { ascending: true })
       .order('id')
       .range(from, to),
   )
+  const calls = allCalls.filter(c => c.call_context !== 'confirmation')
   if (calls.length === 0) return empty
 
   // Niche per contact (for the niche breakdown)
-  const contactIds = Array.from(new Set(calls.map((c) => c.contact_id)))
-  const nicheByContact = await contactNiches(contactIds)
+  const nicheByCall = await callNiches(calls)
   const nicheIds = Array.from(
     new Set(
-      Array.from(nicheByContact.values()).filter((n): n is string => !!n),
+      Array.from(nicheByCall.values()).filter((n): n is string => !!n),
     ),
   )
   const nicheName = await nicheNames(nicheIds)
@@ -287,7 +303,7 @@ export async function getCallAnalytics(
     bump(mwMap, mw.key, mw.label, c)
 
     // Niche
-    const nid = nicheByContact.get(c.contact_id) ?? null
+    const nid = nicheByCall.get(c.id) ?? null
     const nkey = nid ?? '__none'
     const cur = nicheMap.get(nkey) ?? {
       nicheId: nid,
@@ -460,25 +476,24 @@ export async function getNicheLeaders(
   if (members.length === 0) return empty
 
   const memberIds = members.map((m) => m.id)
-  const calls = await pageAll<
-    Pick<CallRow, 'id' | 'caller_id' | 'contact_id' | 'disposition'>
+  const allCalls = await pageAll<
+    Pick<CallRow, 'id' | 'caller_id' | 'contact_id' | 'disposition' | 'service_id' | 'call_context'>
   >((from, to) =>
     supabase
       .from('reactivation_calls')
-      .select('id, caller_id, contact_id, disposition')
+      .select('id, caller_id, contact_id, disposition, service_id, call_context')
       .in('caller_id', memberIds)
       .order('id')
       .range(from, to),
   )
+  const calls = allCalls.filter(c => c.call_context !== 'confirmation')
   if (calls.length === 0) return empty
 
-  const nicheByContact = await contactNiches(
-    Array.from(new Set(calls.map((c) => c.contact_id))),
-  )
+  const nicheByCall = await callNiches(calls)
   const nicheName = await nicheNames(
     Array.from(
       new Set(
-        Array.from(nicheByContact.values()).filter((n): n is string => !!n),
+        Array.from(nicheByCall.values()).filter((n): n is string => !!n),
       ),
     ),
   )
@@ -495,7 +510,7 @@ export async function getNicheLeaders(
   const activeCallers = new Set<string>()
   for (const c of calls) {
     activeCallers.add(c.caller_id)
-    const nicheId = nicheByContact.get(c.contact_id)
+    const nicheId = nicheByCall.get(c.id)
     // A contact with no niche has no script, so there is nothing to be good at.
     if (!nicheId) continue
     const niche = perNiche.get(nicheId) ?? { team: newTally(), byCaller: new Map() }

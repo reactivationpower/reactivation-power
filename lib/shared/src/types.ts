@@ -241,6 +241,9 @@ export type CallDisposition =
   | 'spoke_call_back_later'
   | 'scheduled'
   | 'do_not_call'
+  | 'service_declined'
+  | 'appointment_confirmed'
+  | 'appointment_cancelled'
 
 export interface ReactivationCall {
   id: string
@@ -250,7 +253,13 @@ export interface ReactivationCall {
   voicemail_left: boolean
   notes: string | null
   created_at: string
+  service_id?: string | null
+  service_label_snapshot?: string | null
+  call_context?: OutreachCallContext | null
+  appointment_at?: string | null
 }
+
+export type OutreachCallContext = 'initial' | 'retry' | 'callback' | 'confirmation' | 'rotation'
 
 export type FollowUpReason =
   | 'retry'
@@ -266,6 +275,8 @@ export interface FollowUp {
   reason: FollowUpReason
   completed_call_id: string | null
   created_at: string
+  service_id?: string | null
+  call_context?: OutreachCallContext | null
 }
 
 export const DISPOSITION_LABELS: Record<CallDisposition, string> = {
@@ -275,6 +286,9 @@ export const DISPOSITION_LABELS: Record<CallDisposition, string> = {
   spoke_call_back_later: 'Spoke, Call Back Later',
   scheduled: 'Scheduled',
   do_not_call: 'Do Not Call',
+  service_declined: 'Declined This Service',
+  appointment_confirmed: 'Appointment Confirmed',
+  appointment_cancelled: 'Appointment Cancelled',
 }
 
 /** Months a contact stays in the weekly retry cycle before dropping to quarterly */

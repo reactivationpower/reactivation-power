@@ -181,6 +181,7 @@ const ACTIONS: Record<string, Record<string, Auth>> = {
     setSelectedNiche: "portal", setPracticeName: "portal", setOfficePhone: "portal",
     addTeamMember: "portal", setTeamMemberActive: "portal", updateTeamMember: "portal",
     updateMyProfile: "portal", logCall: "portal",
+    claimPatientCall: "portal", renewPatientCall: "portal", releasePatientCall: "portal", reopenService: "portal",
   },
 };
 

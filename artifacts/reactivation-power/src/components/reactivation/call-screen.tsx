@@ -61,11 +61,18 @@ const DISPOSITION_LABELS: Record<string, string> = {
   spoke_call_back_later: 'Spoke, call back later',
   scheduled: 'Scheduled',
   do_not_call: 'Do not call',
+  service_declined: 'Declined this service',
+  appointment_confirmed: 'Appointment confirmed',
+  appointment_cancelled: 'Appointment cancelled',
 }
 
 const FONT_SIZES = [16, 18, 20, 24, 28, 32, 36, 40]
 
 interface Props {
+  onCallSaved: () => void
+  leaseToken: string
+  callContext: string
+  serviceLabel: string
   contact: ContactWithMeta
   niches: Niche[]
   scriptBody: string
@@ -94,6 +101,10 @@ function fmtWhen(d: Date) {
 }
 
 export function CallScreen({
+  onCallSaved,
+  leaseToken,
+  callContext,
+  serviceLabel,
   contact,
   niches,
   scriptBody,
@@ -198,7 +209,9 @@ export function CallScreen({
   const firstName = contact.name.split(' ')[0]
   const vmBusiness = practiceName?.trim() || 'our office'
   const vmCallback = officePhone?.trim() || '(your office number)'
-  const voicemailScript = `Hi ${firstName}, this is ${callerName} from ${vmBusiness}. We're updating files for patients we haven't seen in a while, and yours came up. Could you call me back at ${vmCallback} when you have a few minutes? Thanks, and have a great day.`
+  const voicemailScript = callContext === 'confirmation'
+    ? `Hi ${firstName}, this is ${callerName} from ${vmBusiness}. I'm calling to confirm your appointment. Please call us at ${vmCallback}. Thank you.`
+    : `Hi ${firstName}, this is ${callerName} from ${vmBusiness}. We're updating files for patients we haven't seen in a while, and yours came up. Could you call me back at ${vmCallback} when you have a few minutes? Thanks, and have a great day.`
 
   const previousNotes = callHistory.filter((c) => c.notes?.trim())
 
@@ -213,6 +226,7 @@ export function CallScreen({
     startSaving(async () => {
       const formData = new FormData()
       formData.set('contactId', contact.id)
+      formData.set('leaseToken', leaseToken)
       formData.set('disposition', d)
       formData.set('voicemailLeft', String(voicemailLeft))
       formData.set('notes', notes)
@@ -232,7 +246,8 @@ export function CallScreen({
       // Don't silently navigate away — confirm the save and let the caller
       // choose where to go next.
       setSavedDisposition(d)
-      router.refresh()
+      onCallSaved()
+      // Keep the save confirmation visible; saving consumes this lease.
     })
   }
 
@@ -280,7 +295,15 @@ export function CallScreen({
     },
     { d: 'scheduled', label: 'Scheduled', icon: CheckCircle2, tone: 'primary' },
     { d: 'do_not_call', label: 'Do Not Call', icon: PhoneOff, tone: 'danger' },
+    { d: 'service_declined', label: 'Declined This Service', icon: PhoneOff },
   ]
+  const visibleButtons = callContext === 'confirmation' ? [
+    { d: 'no_answer', label: 'No Answer', icon: PhoneMissed },
+    { d: 'spoke_call_back_later', label: 'Call Back Later', icon: CalendarClock },
+    { d: 'appointment_confirmed', label: 'Appointment Confirmed', icon: CheckCircle2, tone: 'primary' },
+    { d: 'appointment_cancelled', label: 'Appointment Cancelled', icon: Calendar },
+    { d: 'do_not_call', label: 'Do Not Call', icon: PhoneOff, tone: 'danger' },
+  ] : dispositionButtons
 
   return (
     <div className="flex flex-col gap-4">
@@ -304,13 +327,9 @@ export function CallScreen({
         </div>
 
         <div className="flex max-w-full flex-wrap items-center gap-2">
-          <NicheSelect
-            value={nicheId}
-            onValueChange={handleNicheChange}
-            items={niches.map((n) => ({ value: n.id, label: n.name }))}
-            className="w-80"
-            aria-label="Select niche"
-          />
+          <div className="text-sm"><p className="font-semibold">{serviceLabel}</p>
+            <p className="text-muted-foreground">{({ initial: 'First outreach', retry: 'Same-service retry', callback: 'Requested callback', confirmation: 'Appointment confirmation', rotation: 'New service cycle' })[callContext]}</p>
+          </div>
           <div
             className="flex items-center rounded-md border border-input"
             role="group"
@@ -344,7 +363,13 @@ export function CallScreen({
       </div>
 
       {/* 2 + 3. Script with its progression buttons */}
-      {flowSteps.length > 0 ? (
+      {callContext === 'confirmation' ? (
+        <article className="rounded-lg border bg-card p-6" aria-label="Appointment confirmation">
+          <h2 className="font-semibold">Confirm the existing {serviceLabel} appointment</h2>
+          <p className="mt-3">Hi {firstName}, this is {callerName} from {vmBusiness}. I’m calling to confirm your appointment. Are you still able to attend?</p>
+          <p className="mt-3 text-sm text-muted-foreground">This is not a new-service sales call. Confirm the appointment details from the shared call history below.</p>
+        </article>
+      ) : flowSteps.length > 0 ? (
         <ScriptFlowPlayer
           key={nicheId}
           steps={flowSteps}
@@ -413,7 +438,7 @@ export function CallScreen({
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2 p-4">
-          {dispositionButtons.map(({ d, label, icon: Icon, tone }) => {
+          {visibleButtons.map(({ d, label, icon: Icon, tone }) => {
             const active = disposition === d
             const when =
               d === 'spoke_call_back_later'
@@ -472,6 +497,8 @@ export function CallScreen({
                 >
                   <span className="font-medium text-foreground">
                     {DISPOSITION_LABELS[call.disposition] ?? call.disposition}
+                    {call.service_label_snapshot ? ` · ${call.service_label_snapshot}` : ''}
+                    {call.call_context ? ` · ${call.call_context}` : ''}
                   </span>
                   <span aria-hidden="true">{'\u00b7'}</span>
                   <span>{who}</span>
@@ -485,6 +512,7 @@ export function CallScreen({
                       minute: '2-digit',
                     })}
                   </time>
+                  {call.appointment_at && <span>Appointment: {fmtWhen(new Date(call.appointment_at))}</span>}
                 </li>
               )
             })}
@@ -613,7 +641,7 @@ export function CallScreen({
           if (!open) {
             // Dismissing the dialog still returns to the dialer so the
             // caller is never left on an already-logged call.
-            setLocation('/portal/dialer')
+            router.push('/portal/dialer')
           }
         }}
       >
@@ -638,7 +666,7 @@ export function CallScreen({
               <Button
                 className="w-full gap-2"
                 onClick={() =>
-                  setLocation(`/portal/dialer/call/${nextContactId}`)
+                  router.push(`/portal/dialer/call/${nextContactId}`)
                 }
               >
                 <Phone className="size-4" />
@@ -648,7 +676,7 @@ export function CallScreen({
             <Button
               variant={nextContactId ? 'outline' : 'default'}
               className="w-full"
-              onClick={() => setLocation('/portal/dialer')}
+              onClick={() => router.push('/portal/dialer')}
             >
               Back to Dialer
             </Button>

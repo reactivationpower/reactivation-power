@@ -2,7 +2,7 @@
 import { useParams } from 'wouter';
 import { Link } from "wouter";
 import { ArrowLeft, Lock } from 'lucide-react'
-import { CallScreen } from '@/components/reactivation/call-screen'
+import { ClaimedPatientCall } from '@/components/reactivation/claimed-patient-call'
 import { nicheDisplayLabel } from '@/components/reactivation/niche-select'
 import { usePageData } from '@/hooks/use-page-data'
 import { PageError, PageLoading } from '@/components/page-status'
@@ -71,24 +71,7 @@ export default function CallPage() {
       </Link>
 
       <div className="mt-4">
-        <CallScreen
-          contact={contact}
-          niches={niches}
-          scriptBody={script?.body ?? ''}
-          sections={sections}
-          initialNicheId={
-            contact.niche_id ?? participant.selected_niche_id ?? null
-          }
-          nextContactId={nextContactId}
-          callerName={participant.first_name}
-          practiceName={owner?.practice_name ?? null}
-          officePhone={owner?.office_phone ?? null}
-          owner={owner ?? null}
-          isProvider={participant.role === 'owner'}
-          callHistory={callHistory}
-          flowSteps={flow.steps}
-          flowChoices={flow.choices}
-        />
+        <ClaimedPatientCall key={contact.id} data={data} />
       </div>
     </div>
   )

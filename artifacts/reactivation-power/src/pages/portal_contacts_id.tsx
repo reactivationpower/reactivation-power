@@ -101,6 +101,8 @@ export default function ContactProfilePage() {
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="font-medium text-foreground">
                       {DISPOSITION_LABELS[call.disposition]}
+                      {call.service_label_snapshot ? ` · ${call.service_label_snapshot}` : ''}
+                      {call.call_context ? ` · ${call.call_context}` : ''}
                     </span>
                     {call.voicemail_left && (
                       <span className="rounded bg-muted px-1.5 py-0.5 text-xs font-medium text-muted-foreground">

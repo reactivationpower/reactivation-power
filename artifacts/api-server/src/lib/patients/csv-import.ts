@@ -39,6 +39,9 @@ async function transaction<T>(ownerId: string, fn: (client: Client) => Promise<T
 
 async function writePlan(client: Client, plan: Plan, context: { ownerId: string; participantId: string; source: string; stageId: string | null; batchId: string }) {
   const { ownerId, participantId, source, stageId, batchId } = context
+  // Serialize treatment/service changes with claims and call outcomes.
+  const patientIds = [...new Set([...plan.updates.map(c => c.id), ...plan.services.map(s => s.contact_id)])].sort()
+  if (patientIds.length) await client.query('SELECT id FROM contacts WHERE owner_id = $1 AND id = ANY($2::uuid[]) ORDER BY id FOR UPDATE', [ownerId, patientIds])
   // Only new people receive the initial stage. No follow-ups are created here.
   if (plan.inserts.length) await client.query(`INSERT INTO contacts
     (id, owner_id, created_by, name, phone, email, niche_id, stage_id, service_label, original_complaint, notes, do_not_call)

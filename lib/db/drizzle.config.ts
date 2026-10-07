@@ -36,6 +36,7 @@ export default defineConfig({
   tablesFilter: [
     "patient_sources",
     "contact_services",
+    "patient_call_leases",
     "patient_import_reviews",
     "email_log",
     "customers",

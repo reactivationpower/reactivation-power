@@ -69,6 +69,7 @@ function QueueRow({ follow_up, contact }: QueueItem) {
         <p className="mt-0.5 text-sm text-muted-foreground">
           {contact.phone}
           {contact.niche && !nicheInactive ? ` · ${nicheDisplayLabel(contact.niche.name)}` : ''}
+          {follow_up.call_context ? ` · ${({ initial: 'First outreach', retry: 'Same-service retry', callback: 'Requested callback', confirmation: 'Appointment confirmation', rotation: 'Service rotation' })[follow_up.call_context] ?? follow_up.call_context}` : ''}
           {contact.call_count > 0
             ? ` · ${contact.call_count} previous call${contact.call_count === 1 ? '' : 's'}`
             : ' · Never called'}

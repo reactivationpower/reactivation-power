@@ -85,6 +85,13 @@
       "when": 1791398106505,
       "tag": "0011_far_ben_urich",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1791406686343,
+      "tag": "0012_wide_quicksilver",
+      "breakpoints": true
     }
   ]
 }

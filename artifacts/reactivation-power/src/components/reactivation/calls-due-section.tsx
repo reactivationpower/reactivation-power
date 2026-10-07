@@ -81,6 +81,13 @@ export function CallsDueSection({
     const startOfToday = new Date()
     startOfToday.setHours(0, 0, 0, 0)
     for (const item of followUps) {
+      // Service-aware schedules have a real not-before instant. In
+      // particular, a quarterly label must not bypass the 90-day quiet gap.
+      if (item.follow_up.call_context) {
+        if (new Date(item.follow_up.due_at).getTime() > Date.now()) laterFollowUps.push(item)
+        else nowFollowUps.push(item)
+        continue
+      }
       const s = suggestedCallTime(item.follow_up.reason, item.follow_up.due_at)
       // No set time (quarterly / 3-month) → always actionable → "now".
       if (!s) {
