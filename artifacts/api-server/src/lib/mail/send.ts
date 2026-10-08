@@ -4,6 +4,7 @@ import { db, emailLogTable } from '@workspace/db'
 import { logger } from '@/lib/logger'
 import { toPlainText } from './layout'
 import { renderTemplate, type TemplateDataMap, type TemplateId } from './templates'
+import { isAuthenticationEmail, safeEmailMetadata } from './diagnostics'
 
 /**
  * Transactional sending through the Resend connector.
@@ -70,16 +71,18 @@ export async function sendEmail<K extends TemplateId>(
 ): Promise<SendResult> {
   const recipient = to.trim().toLowerCase()
   const logId = randomUUID()
+  const authentication = isAuthenticationEmail(type)
+  const metadata = safeEmailMetadata(type, options.metadata)
   let rendered: ReturnType<typeof renderTemplate>
   try {
     rendered = renderTemplate(type, data)
   } catch (err) {
-    const error = err instanceof Error ? err.message : 'Email rendering failed'
-    await writeLog({ id: logId, type, recipient, subject: 'Email rendering failed', metadata: options.metadata ?? null, status: 'failed', error })
+    const error = authentication ? 'Authentication email rendering failed' : err instanceof Error ? err.message : 'Email rendering failed'
+    await writeLog({ id: logId, type, recipient, subject: 'Email rendering failed', metadata, status: 'failed', error })
     logger.error({ email: { type, recipient, logId } }, 'email rendering failed')
     return { ok: false, logId, error }
   }
-  const base = { id: logId, type, recipient, subject: rendered.subject, metadata: options.metadata ?? null }
+  const base = { id: logId, type, recipient, subject: rendered.subject, metadata }
 
   if (!EMAIL_RE.test(recipient)) {
     const error = 'Invalid recipient address'
@@ -114,7 +117,7 @@ export async function sendEmail<K extends TemplateId>(
     })
     const payload = (await response.json().catch(() => ({}))) as ResendSendResponse
     if (!response.ok || !payload.id) {
-      const error = payload.message || `Resend responded ${response.status}`
+      const error = authentication ? `Resend rejected the authentication email (HTTP ${response.status})` : payload.message || `Resend responded ${response.status}`
       await writeLog({ ...base, status: 'failed', error })
       logger.error({ email: { type, recipient, logId, status: response.status } }, `email failed: ${error}`)
       return { ok: false, logId, error }
@@ -123,9 +126,10 @@ export async function sendEmail<K extends TemplateId>(
     logger.info({ email: { type, recipient, logId, providerId: payload.id } }, 'email sent')
     return { ok: true, logId, providerId: payload.id }
   } catch (err) {
-    const error = err instanceof Error ? err.message : String(err)
+    const senderConfigurationError = err instanceof Error && err.message === 'RESEND_FROM must use a patientpipeline.app email address'
+    const error = authentication && !senderConfigurationError ? 'Authentication email send failed; check the registered inbox and email provider' : err instanceof Error ? err.message : String(err)
     await writeLog({ ...base, status: 'failed', error })
-    logger.error({ err, email: { type, recipient, logId } }, `email failed: ${error}`)
+    logger.error({ ...(!authentication ? { err } : {}), email: { type, recipient, logId } }, `email failed: ${error}`)
     return { ok: false, logId, error }
   }
 }

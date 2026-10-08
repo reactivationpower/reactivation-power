@@ -4,6 +4,7 @@ import { requireAdmin } from '@/lib/auth/admin-session'
 import { fromAddress } from '@/lib/mail/send'
 import { sendEmail } from '@/lib/mail/send'
 import { isTemplateId, listTemplates, type TemplateId } from '@/lib/mail/templates'
+import { deliveryFailureMessage, isAuthenticationEmail } from '@/lib/mail/diagnostics'
 
 /**
  * Super-admin tooling around transactional email: previews for the admin
@@ -22,10 +23,12 @@ export interface TransactionalTemplatePreview {
 export async function listTransactionalTemplates(): Promise<{
   from: string
   templates: TransactionalTemplatePreview[]
+  deliveryTrackingConfigured: boolean
 }> {
   await requireAdmin('super_admin')
   return {
     from: fromAddress(),
+    deliveryTrackingConfigured: !!process.env.RESEND_WEBHOOK_SECRET?.trim(),
     templates: listTemplates().map((t) => {
       // Each template renders its own sample; the union makes the call site
       // untyped, so go through the generic entry point per id.
@@ -84,12 +87,12 @@ function toRow(r: EmailLog): EmailLogRow {
     recipient: r.recipient,
     subject: r.subject,
     status: r.status,
-    error: r.error,
+    error: deliveryFailureMessage(r.status) ?? (isAuthenticationEmail(r.type) ? null : r.error),
     createdAt: r.createdAt.toISOString(),
     deliveredAt: r.deliveredAt?.toISOString() ?? null,
     openedAt: r.openedAt?.toISOString() ?? null,
     clickedAt: r.clickedAt?.toISOString() ?? null,
-    lastClickedUrl: r.lastClickedUrl,
+    lastClickedUrl: null,
     lastEvent: r.lastEvent,
     lastEventAt: r.lastEventAt?.toISOString() ?? null,
     test: r.metadata?.test === true,

@@ -39,11 +39,13 @@ export function TransactionalEmails({ adminEmail }: { adminEmail?: string | null
   const [sending, startSend] = useTransition()
   const [log, setLog] = useState<{ rows: EmailLogRow[]; total: number } | null>(null)
   const [logLoading, setLogLoading] = useState(false)
+  const [deliveryTrackingConfigured, setDeliveryTrackingConfigured] = useState<boolean | null>(null)
 
   useEffect(() => {
     listTransactionalTemplates()
       .then((r) => {
         setFrom(r.from)
+        setDeliveryTrackingConfigured(r.deliveryTrackingConfigured)
         setTemplates(r.templates)
         setSelectedId((id) => id || r.templates[0]?.id || '')
       })
@@ -62,6 +64,8 @@ export function TransactionalEmails({ adminEmail }: { adminEmail?: string | null
   }
   useEffect(() => {
     void refreshLog()
+    const timer = window.setInterval(() => { void refreshLog() }, 30_000)
+    return () => window.clearInterval(timer)
   }, [])
 
   const template = templates.find((t) => t.id === selectedId) ?? templates[0] ?? null
@@ -96,6 +100,13 @@ export function TransactionalEmails({ adminEmail }: { adminEmail?: string | null
           via Resend. Open and click tracking are per-domain switches in the Resend dashboard; events land in the log below through the webhook.
         </span>
       </div>
+      {deliveryTrackingConfigured === false && (
+        <p role="alert" className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+          Delivery tracking is not configured. “Accepted” only means Resend accepted the send, not that it reached the inbox.
+          Configure /api/webhooks/resend in Resend for delivery, bounce, failure, suppression, and complaint events,
+          then save its signing secret as RESEND_WEBHOOK_SECRET in the server’s secrets.
+        </p>
+      )}
 
       {/* Template picker */}
       <div className="rounded-lg border border-border bg-card">
@@ -242,6 +253,7 @@ export function TransactionalEmails({ adminEmail }: { adminEmail?: string | null
                   <th className="px-4 py-2 font-medium">Type</th>
                   <th className="px-4 py-2 font-medium">Recipient</th>
                   <th className="px-4 py-2 font-medium">Status</th>
+                  <th className="px-4 py-2 font-medium">Delivery details</th>
                   <th className="px-4 py-2 font-medium">Opened</th>
                   <th className="px-4 py-2 font-medium">Clicked</th>
                 </tr>
@@ -257,6 +269,16 @@ export function TransactionalEmails({ adminEmail }: { adminEmail?: string | null
                     <td className="px-4 py-2 text-foreground">{r.recipient}</td>
                     <td className="px-4 py-2">
                       <StatusBadge status={r.status} error={r.error} />
+                    </td>
+                    <td className="min-w-[240px] px-4 py-2 text-muted-foreground">
+                      {r.error || (r.status === 'sent' ? 'Accepted by Resend; inbox delivery not confirmed.' : '—')}
+                      {r.lastEventAt && <div className="text-xs">Last event: {r.lastEvent} · {fmt(r.lastEventAt)}</div>}
+                      {['failed', 'bounced', 'suppressed', 'complained'].includes(r.status) &&
+                        ['portal_login_code', 'portal_password_setup', 'portal_welcome', 'admin_invite'].includes(r.type) && (
+                          <div className="mt-1 text-xs text-destructive">
+                            Check this registered email in account or caller settings, confirm inbox access, and resolve any Resend suppression before requesting a fresh code.
+                          </div>
+                        )}
                     </td>
                     <td className="whitespace-nowrap px-4 py-2 text-muted-foreground">{r.openedAt ? fmt(r.openedAt) : '—'}</td>
                     <td className="max-w-[220px] truncate px-4 py-2 text-muted-foreground" title={r.lastClickedUrl ?? undefined}>
@@ -290,7 +312,7 @@ function fmt(iso: string) {
 }
 
 function StatusBadge({ status, error }: { status: string; error: string | null }) {
-  const failed = status === 'failed' || status === 'bounced' || status === 'complained'
+  const failed = ['failed', 'bounced', 'suppressed', 'complained'].includes(status)
   return (
     <span
       title={error ?? undefined}
@@ -300,7 +322,7 @@ function StatusBadge({ status, error }: { status: string; error: string | null }
       )}
     >
       {failed ? <XCircle className="size-3" /> : <CheckCircle2 className="size-3" />}
-      {status}
+      {status === 'sent' ? 'accepted' : status}
     </span>
   )
 }

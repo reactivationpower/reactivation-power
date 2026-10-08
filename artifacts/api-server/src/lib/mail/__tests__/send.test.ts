@@ -65,4 +65,35 @@ describe('Patient Pipeline outgoing sender and links', () => {
     expect(mocks.proxy).not.toHaveBeenCalled()
     expect(mocks.values).toHaveBeenCalledWith(expect.objectContaining({ status: 'failed' }))
   })
+
+  it('logs failed sign-in delivery without storing the code, password or reset link', async () => {
+    mocks.proxy.mockResolvedValue({ ok: false, status: 403, json: async () => ({
+      message: 'Rejected code 092814 password=private-password https://x.test/reset?token=private-token',
+    }) })
+    const result = await sendEmail('portal_login_code', 'registered@example.test', { code: '092814' }, {
+      metadata: { code: '092814', password: 'private-password', setupUrl: 'https://x.test/reset?token=private-token', test: true },
+    })
+    expect(result.ok).toBe(false)
+    expect(mocks.values).toHaveBeenCalledWith(expect.objectContaining({
+      type: 'portal_login_code', recipient: 'registered@example.test', status: 'failed',
+      metadata: { test: true }, error: 'Resend rejected the authentication email (HTTP 403)',
+    }))
+    const diagnostic = JSON.stringify({ result, logs: mocks.values.mock.calls })
+    for (const secret of ['092814', 'private-password', 'private-token']) expect(diagnostic).not.toContain(secret)
+    expect(mocks.proxy.mock.calls[0]![2].body.html).toContain('092814')
+  })
+
+  it('does not leak thrown provider errors into authentication diagnostics', async () => {
+    mocks.proxy.mockRejectedValue(new Error('request contained code 092814 reset-token'))
+    const result = await sendEmail('portal_password_setup', 'registered@example.test', TEMPLATES.portal_password_setup.sample)
+    expect(result.ok).toBe(false)
+    expect(JSON.stringify({ result, logs: mocks.values.mock.calls })).not.toMatch(/092814|reset-token|sample-token/)
+  })
+
+  it('records provider acceptance separately from inbox delivery', async () => {
+    const result = await sendEmail('portal_login_code', 'registered@example.test', { code: '092814' })
+    expect(result).toMatchObject({ ok: true, providerId: 'test-email' })
+    expect(mocks.values).toHaveBeenCalledWith(expect.objectContaining({ status: 'sent', providerId: 'test-email', metadata: null }))
+    expect(JSON.stringify(mocks.values.mock.calls)).not.toContain('092814')
+  })
 })

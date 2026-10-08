@@ -13,7 +13,7 @@ export const emailLogTable = pgTable(
     type: text("type").notNull(),
     recipient: text("recipient").notNull(),
     subject: text("subject").notNull(),
-    status: text("status").notNull(), // sent | failed | delivered | bounced | complained
+    status: text("status").notNull(), // sent (provider accepted) | failed | delivered | bounced | suppressed | complained
     providerId: text("provider_id"),
     error: text("error"),
     metadata: jsonb("metadata").$type<Record<string, unknown>>(),
@@ -21,7 +21,7 @@ export const emailLogTable = pgTable(
     deliveredAt: timestamp("delivered_at", { withTimezone: true }),
     openedAt: timestamp("opened_at", { withTimezone: true }),
     clickedAt: timestamp("clicked_at", { withTimezone: true }),
-    lastClickedUrl: text("last_clicked_url"),
+    lastClickedUrl: text("last_clicked_url"), // Legacy only: never save webhook links (may carry authentication secrets).
     lastEvent: text("last_event"),
     lastEventAt: timestamp("last_event_at", { withTimezone: true }),
   },

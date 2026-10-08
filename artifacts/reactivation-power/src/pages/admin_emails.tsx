@@ -52,6 +52,13 @@ export default function AdminEmailsPage() {
           </a>
         </div>
         <TabsContent value="transactional" className="mt-2 min-h-0 w-full">
+          <p className="mb-4 rounded-lg border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
+            Sign-in codes go only to the owner’s or caller’s registered email.
+            If delivery fails, confirm that address in the practice’s account or caller settings,
+            ask the person to check spam and mailbox capacity, and check Resend for a bounce or suppression.
+            Correct the registered address or resolve the provider block before asking them to request a fresh code.
+            Codes, passwords, and password-reset links are never shown in this log.
+          </p>
           <TransactionalEmails adminEmail={data?.adminEmail} />
         </TabsContent>
         <TabsContent value="marketing" className="mt-2 min-h-0 w-full">

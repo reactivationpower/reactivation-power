@@ -27,7 +27,7 @@ export interface EmailLogRow {
   test: boolean
 }
 
-export const listTransactionalTemplates = action<{ from: string; templates: TransactionalTemplatePreview[] }>(
+export const listTransactionalTemplates = action<{ from: string; templates: TransactionalTemplatePreview[]; deliveryTrackingConfigured: boolean }>(
   'mail',
   'listTransactionalTemplates',
 )
