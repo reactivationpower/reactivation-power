@@ -20,6 +20,22 @@ afterEach(() => {
 const settle = async () => { await act(async () => { await Promise.resolve(); await Promise.resolve() }) }
 
 describe('authenticated content visibility and human-only activity', () => {
+  it('keeps a server-verified demo visible beyond five idle minutes and on tab return', async () => {
+    fetchMock.mockImplementation(async () => new Response(JSON.stringify({
+      sessionId: 'demo-session', deadline: Date.now() + 30 * 86400_000,
+      serverNow: Date.now(), inactivityExempt: true,
+    }), { headers: { 'content-type': 'application/json' } }))
+    render(<AuthenticatedSession kind="portal"><div>Demo content</div></AuthenticatedSession>)
+    await settle()
+    await act(async () => { await vi.advanceTimersByTimeAsync(6 * 60_000) })
+    act(() => {
+      window.dispatchEvent(new Event('pagehide'))
+      window.dispatchEvent(new Event('pageshow'))
+      window.dispatchEvent(new Event('focus'))
+    })
+    expect(screen.getByText('Demo content')).toBeTruthy()
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+  })
   it('does not render protected children until the server validates the session', async () => {
     let resolve!: (response: Response) => void
     fetchMock.mockImplementationOnce(() => new Promise<Response>(r => { resolve = r }))

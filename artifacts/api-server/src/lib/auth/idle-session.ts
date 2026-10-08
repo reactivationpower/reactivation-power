@@ -6,6 +6,7 @@ export interface IdleState {
   sessionId: string
   deadline: number
   serverNow: number
+  inactivityExempt?: boolean
 }
 
 /** No upsert: a revoked/expired id must never become live again. */

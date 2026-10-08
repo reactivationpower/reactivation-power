@@ -3,6 +3,7 @@ import { decodeSession, SESSION_COOKIE_NAME } from '@/lib/auth/token'
 import { decodeAdminSession, ADMIN_COOKIE_NAME } from '@/lib/auth/admin-token'
 import { readIdleSession, revokeIdleSession, type SessionKind } from '@/lib/auth/idle-session'
 import { portalCredentialIsCurrent } from '@/lib/auth/session'
+import { readDemoSession } from '@/lib/auth/demo-session'
 
 const router = Router()
 router.all('/session/:kind', async (req, res): Promise<void> => {
@@ -37,7 +38,8 @@ router.all('/session/:kind', async (req, res): Promise<void> => {
   if (req.method === 'POST' && (!expected || !Number.isFinite(age) || age < 0 || age >= 300000)) {
     res.status(400).json({ error: 'Invalid activity' }); return
   }
-  const state = await readIdleSession(payload.sessionId, kind, subject, req.method === 'POST' ? age : undefined)
+  const state = ('participantId' in payload && !payload.credentialVersion ? await readDemoSession(payload) : null)
+    ?? await readIdleSession(payload.sessionId, kind, subject, req.method === 'POST' ? age : undefined)
   if (!state) {
     res.status(401).json({ error: 'Session expired' }); return
   }

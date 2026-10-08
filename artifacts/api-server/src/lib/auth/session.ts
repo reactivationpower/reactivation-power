@@ -3,6 +3,7 @@ import { cookies, headers } from 'next/headers'
 import type { Request } from 'express'
 import { pool } from '@workspace/db'
 import { createIdleSession, readIdleSession, revokeIdleSession } from './idle-session'
+import { isDemoSessionParticipant, readDemoSession } from './demo-session'
 import {
   SESSION_COOKIE_NAME,
   SESSION_MAX_AGE,
@@ -30,7 +31,8 @@ export async function setSessionCookie(payload: SessionPayload, preserveDeadline
   const old = decodeSession((await cookies()).get(SESSION_COOKIE_NAME)?.value ?? '')
   if (preserveDeadline && !old) throw new Error('Session expired')
   await createIdleSession(payload.sessionId, 'portal', payload.participantId,
-    payload.issuedAt + SESSION_MAX_AGE * 1000, preserveDeadline ? old?.sessionId : undefined)
+    payload.issuedAt + SESSION_MAX_AGE * 1000,
+    preserveDeadline && !await isDemoSessionParticipant(payload.participantId) ? old?.sessionId : undefined)
   // Replacing a browser's session retires its previous cookie, not other devices.
   if (old) await revokeIdleSession(old.sessionId, 'portal')
   const store = await cookies()
@@ -67,6 +69,7 @@ export async function validatePortalToken(token: string): Promise<SessionPayload
   const payload = decodeSession(token)
   if (!payload) return null
   if (!await portalCredentialIsCurrent(payload)) return null
+  if (!payload.credentialVersion && await readDemoSession(payload)) return payload
   return await readIdleSession(payload.sessionId, 'portal', payload.participantId) ? payload : null
 }
 

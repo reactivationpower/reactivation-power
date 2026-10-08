@@ -14,3 +14,9 @@ Email codes must be single-use, expire after five minutes, permit at most six in
 **Why:** These were explicit user requirements. Passive playback and automatic requests must not postpone inactivity logout.
 
 **How to apply:** Preserve the five-minute rules when changing authentication or adding protected routes. Inactivity logout affects the browser session and its tabs, not other independently authenticated devices.
+
+The two sales demo accounts must keep their existing demo access behavior, without inactivity logout or the customer password-and-email-code requirements. This includes switching between owner and caller views within either demo.
+
+**Why:** The user explicitly said, “I dont want the demo accounts to have the inactivity logouts, etc. I want the 2 demo accounts to stay like they currently are.”
+
+**How to apply:** Scope the exemption to the two configured demo practice families. Preserve their shared demo-password entry and normal cookie lifetime; do not exempt real customers or administrators.

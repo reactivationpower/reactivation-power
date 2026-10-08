@@ -5,7 +5,7 @@ import { queryClient } from '@/lib/query-client'
 import { clearManagedUploads } from '@/lib/upload-manager'
 
 type Kind = 'portal' | 'admin'
-type State = { sessionId: string; deadline: number; serverNow: number }
+type State = { sessionId: string; deadline: number; serverNow: number; inactivityExempt?: boolean }
 type Shared = { sessionId: string; deadline: number; revoked?: boolean; inactivity?: boolean }
 const PREFIX = 'patient-pipeline-session:'
 const THROTTLE_MS = 10_000
@@ -23,12 +23,13 @@ export function AuthenticatedSession({ kind, children }: { kind: Kind; children:
     let lastSent = 0
     let lastHuman = 0
     let sentHuman = 0
+    let inactivityExempt = false
     let activityTimer: ReturnType<typeof setTimeout> | undefined
     const controller = new AbortController()
     const channel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel(`${PREFIX}${kind}`) : null
     const url = apiUrl(`/session/${kind}`)
     const storageKey = () => `${PREFIX}${kind}:${state?.sessionId}`
-    const login = kind === 'admin' ? '/admin-login' : '/login'
+    let login = kind === 'admin' ? '/admin-login' : '/login'
     const hide = () => {
       if (!disposed) flushSync(() => setVisible(false))
     }
@@ -81,6 +82,8 @@ export function AuthenticatedSession({ kind, children }: { kind: Kind; children:
       // Translate relative to request start, conservatively including transit
       // and suspension time rather than relative to response receipt.
       const deadline = requestedAt + body.deadline - body.serverNow
+      inactivityExempt = kind === 'portal' && body.inactivityExempt === true
+      login = kind === 'admin' ? '/admin-login' : inactivityExempt ? '/demo' : '/login'
       state = { sessionId: body.sessionId, deadline: state?.sessionId === body.sessionId ? Math.max(state.deadline, deadline) : deadline }
       publish(state)
       return Date.now() < state.deadline
@@ -132,6 +135,7 @@ export function AuthenticatedSession({ kind, children }: { kind: Kind; children:
       } catch { /* never extend the acknowledged deadline on network failure */ }
     }
     const interact = (event: Event) => {
+      if (inactivityExempt) return
       if (!event.isTrusted || !state || ended || disposed || document.visibilityState === 'hidden') return
       // Browsers also emit trusted scroll events for script-driven scrolling.
       if (event.type === 'scroll' && Date.now() - lastHuman > 1000) return
@@ -145,6 +149,7 @@ export function AuthenticatedSession({ kind, children }: { kind: Kind; children:
       }
     }
     const resume = () => {
+      if (inactivityExempt) return
       hide()
       if (document.visibilityState !== 'hidden') void check()
     }
@@ -158,6 +163,7 @@ export function AuthenticatedSession({ kind, children }: { kind: Kind; children:
       else if (Number.isFinite(value.deadline)) state.deadline = Math.max(state.deadline, value.deadline)
     }
     const onExpiredResponse = () => finish()
+    const onPageHide = () => { if (!inactivityExempt) hide() }
     // Covers raw upload/progress/polling callers as well as the RPC client.
     window.fetch = async (...args) => {
       if (ended) throw new Error('Session ended')
@@ -194,7 +200,7 @@ export function AuthenticatedSession({ kind, children }: { kind: Kind; children:
     events.forEach(e => window.addEventListener(e, interact, { passive: true, capture: true }))
     window.addEventListener('storage', onStorage)
     window.addEventListener('pageshow', resume)
-    window.addEventListener('pagehide', hide)
+    window.addEventListener('pagehide', onPageHide)
     window.addEventListener('focus', resume)
     window.addEventListener('session-expired', onExpiredResponse)
     document.addEventListener('visibilitychange', resume)
@@ -214,7 +220,7 @@ export function AuthenticatedSession({ kind, children }: { kind: Kind; children:
       events.forEach(e => window.removeEventListener(e, interact, true))
       window.removeEventListener('storage', onStorage)
       window.removeEventListener('pageshow', resume)
-      window.removeEventListener('pagehide', hide)
+      window.removeEventListener('pagehide', onPageHide)
       window.removeEventListener('focus', resume)
       window.removeEventListener('session-expired', onExpiredResponse)
       document.removeEventListener('visibilitychange', resume)

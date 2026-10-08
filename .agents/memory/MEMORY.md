@@ -27,4 +27,4 @@
 - [Twilio account feasibility](twilio-account-feasibility.md) — embedded signup/direct billing is not established; Connect has caller-ID limits, and HIPAA edition/BAA costs need confirmation.
 - [Legal company identity](legal-company-identity.md) — Beyond Healthcare LLC owns Patient Pipeline; counsel is drafting a new agreement, not merely approving the internal template.
 - [CSV patient workflow](csv-patient-workflow.md) — CSV-first matching; uncertain identities need review, and service imports must not silently restart outreach.
-- [Portal authentication policy](portal-authentication-policy.md) — owners and callers use individual email/password plus a fresh code, including after five-minute inactivity logout.
+- [Portal authentication policy](portal-authentication-policy.md) — real owners/callers need email/password/code and five-minute idle logout; both sales demo families are exempt.
