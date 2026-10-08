@@ -35,6 +35,8 @@ export default function AdminLoginPage() {
   const { token, hashError } = useMemo(() => readInviteToken(search), [search])
   const { data, loading, error } = usePageData<any>('/admin-login', {
     next: requestedNext,
+    reason: searchParams.get('reason') ?? undefined,
+    session: searchParams.get('session') ?? undefined,
     token_hash: token?.tokenHash,
   })
   if (loading) return <PageLoading />
@@ -53,6 +55,9 @@ export default function AdminLoginPage() {
           />
         </div>
         <div className="rounded-lg border border-border bg-card p-6 shadow-sm">
+          {searchParams.get('reason') === 'inactivity' && (
+            <p role="status" className="mb-4 text-sm text-muted-foreground">You were signed out after five minutes of inactivity. Please sign in again.</p>
+          )}
           {token ? (
             <>
               <h1 className="mb-1 text-lg font-semibold text-foreground">

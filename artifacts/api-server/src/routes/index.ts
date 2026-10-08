@@ -12,8 +12,10 @@ import configRouter from "./config";
 import webhooksResendRouter from "./webhooks-resend";
 import webhooksStripeRouter from "./webhooks-stripe";
 import agreementsRouter from "./agreements";
+import sessionRouter from './session';
 
 const router: IRouter = Router();
+router.use(sessionRouter);
 
 router.use(healthRouter);
 router.use(actionsRouter);

@@ -1,5 +1,8 @@
 
 import { cookies, headers } from 'next/headers'
+import { randomUUID } from 'node:crypto'
+import { createIdleSession, revokeIdleSession } from '@/lib/auth/idle-session'
+import { decodeAdminSession } from '@/lib/auth/admin-token'
 import { redirect } from 'next/navigation'
 import { getAdminClient } from '@/lib/supabase/admin'
 import {
@@ -26,12 +29,16 @@ function identityOf(user: AdminUser): AdminIdentity {
 
 async function issueAdminCookie(user: AdminUser): Promise<void> {
   const cookieStore = await cookies()
+  const sessionId = randomUUID()
+  await createIdleSession(sessionId, 'admin', user.id, Date.now() + ADMIN_SESSION_MAX_AGE * 1000)
+  const old = decodeAdminSession(cookieStore.get(ADMIN_COOKIE_NAME)?.value ?? '')
+  if (old) await revokeIdleSession(old.sessionId, 'admin')
   const h = await headers()
   const proto = h.get('x-forwarded-proto')
   const secure = proto
     ? proto.split(',')[0].trim() === 'https'
     : process.env.NODE_ENV === 'production'
-  cookieStore.set(ADMIN_COOKIE_NAME, encodeAdminSession(identityOf(user)), {
+  cookieStore.set(ADMIN_COOKIE_NAME, encodeAdminSession(identityOf(user), sessionId), {
     httpOnly: true,
     // The preview runs in a cross-origin iframe: cookies must be
     // SameSite=None + Secure + Partitioned to survive navigation there.
@@ -181,6 +188,8 @@ export async function getCurrentAdmin(): Promise<AdminIdentity | null> {
 
 export async function adminLogout() {
   const cookieStore = await cookies()
+  const old = decodeAdminSession(cookieStore.get(ADMIN_COOKIE_NAME)?.value ?? '')
+  if (old) await revokeIdleSession(old.sessionId, 'admin')
   cookieStore.delete(ADMIN_COOKIE_NAME)
   redirect('/admin-login')
 }

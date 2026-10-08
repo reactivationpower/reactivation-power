@@ -16,6 +16,7 @@ export function isAdminRole(value: unknown): value is AdminRole {
  */
 export interface AdminPayload {
   v: 2
+  sessionId: string
   userId: string
   email: string
   name: string | null
@@ -39,8 +40,8 @@ function sign(data: string): string {
     .digest('base64url')
 }
 
-export function encodeAdminSession(identity: AdminIdentity): string {
-  const payload: AdminPayload = { v: 2, ...identity, issuedAt: Date.now() }
+export function encodeAdminSession(identity: AdminIdentity, sessionId = ''): string {
+  const payload: AdminPayload = { v: 2, ...identity, sessionId, issuedAt: Date.now() }
   const data = Buffer.from(JSON.stringify(payload)).toString('base64url')
   return `${data}.${sign(data)}`
 }
@@ -63,19 +64,21 @@ export function decodeAdminSession(token: string): AdminPayload | null {
       Buffer.from(data, 'base64url').toString(),
     ) as Partial<AdminPayload>
     if (payload.v !== 2) return null
+    if (typeof payload.sessionId !== 'string' || !payload.sessionId) return null
     if (typeof payload.userId !== 'string' || !payload.userId) return null
     if (typeof payload.email !== 'string') return null
     if (!isAdminRole(payload.role)) return null
-    if (typeof payload.issuedAt !== 'number') return null
-    if (Date.now() - payload.issuedAt > ADMIN_SESSION_MAX_AGE * 1000)
+    if (!Number.isFinite(payload.issuedAt) || payload.issuedAt! > Date.now()) return null
+    if (Date.now() - payload.issuedAt! >= ADMIN_SESSION_MAX_AGE * 1000)
       return null
     return {
       v: 2,
+      sessionId: payload.sessionId,
       userId: payload.userId,
       email: payload.email,
       name: typeof payload.name === 'string' ? payload.name : null,
       role: payload.role,
-      issuedAt: payload.issuedAt,
+      issuedAt: payload.issuedAt!,
     }
   } catch {
     return null

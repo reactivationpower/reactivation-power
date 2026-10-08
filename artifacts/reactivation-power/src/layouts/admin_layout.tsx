@@ -5,10 +5,15 @@ import { UploadTray } from '@/components/admin/upload-tray'
 import { Toaster } from '@/components/ui/sonner'
 import { usePageData } from '@/hooks/use-page-data'
 import { PageError, PageLoading } from '@/components/page-status'
+import { AuthenticatedSession } from '@/components/authenticated-session'
 
 const ROLE_LABEL = { super_admin: 'Super Admin', sales_rep: 'Sales Rep' } as const
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  return <AuthenticatedSession kind="admin"><AdminContent>{children}</AdminContent></AuthenticatedSession>
+}
+
+function AdminContent({ children }: { children: React.ReactNode }) {
   const { data, loading, error } = usePageData<{ admin: AdminIdentity }>('/admin/_layout')
   if (loading) return <PageLoading />
   if (error) return <PageError error={error} />

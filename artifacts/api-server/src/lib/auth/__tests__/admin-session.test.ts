@@ -5,12 +5,13 @@ process.env.SESSION_SECRET = 'test-secret'
 
 const getLiveAdminProfile = vi.fn()
 vi.mock('@/lib/data/admin-users', () => ({ getLiveAdminProfile }))
+vi.mock('@/lib/auth/idle-session', () => ({ readIdleSession: vi.fn(async () => ({ sessionId: 's1' })) }))
 
 const { encodeAdminSession, ADMIN_COOKIE_NAME } = await import('@/lib/auth/admin-token')
 const { getAdminSessionFromRequest, satisfies } = await import('@/lib/auth/admin-session')
 
 const identity = { userId: 'u1', email: 'a@b.co', name: 'A', role: 'super_admin' as const }
-const req = (cookie = encodeAdminSession(identity)) =>
+const req = (cookie = encodeAdminSession(identity, 's1')) =>
   ({ cookies: { [ADMIN_COOKIE_NAME]: cookie } }) as unknown as Request
 const profile = (over: Partial<Record<string, unknown>> = {}) => ({
   id: 'u1', email: 'a@b.co', name: 'A', role: 'super_admin', active: true, ...over,
@@ -52,7 +53,7 @@ describe('admin session authorization uses the live profile, not the cookie clai
 
   it('does not retain a revoked capability from a signed cookie', async () => {
     getLiveAdminProfile.mockResolvedValue(profile({ role: 'sales_rep', canManageServices: false }))
-    const s = await getAdminSessionFromRequest(req(encodeAdminSession({ ...identity, canManageServices: true })))
+    const s = await getAdminSessionFromRequest(req(encodeAdminSession({ ...identity, canManageServices: true }, 's1')))
     expect(s?.canManageServices).toBe(false)
     expect(satisfies(s!.role, 'manage_services', s!.canManageServices)).toBe(false)
   })

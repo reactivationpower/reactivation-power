@@ -2,6 +2,7 @@ import type { Request } from 'express'
 import { cookies } from 'next/headers'
 import { ADMIN_COOKIE_NAME, decodeAdminSession, type AdminPayload, type AdminRole } from './admin-token'
 import { getLiveAdminProfile } from '@/lib/data/admin-users'
+import { readIdleSession } from './idle-session'
 
 export type AdminSession = AdminPayload & { canManageServices: boolean }
 
@@ -17,6 +18,7 @@ async function validate(token: string | undefined): Promise<AdminSession | null>
   if (!token) return null
   const payload = decodeAdminSession(token)
   if (!payload) return null
+  if (!await readIdleSession(payload.sessionId, 'admin', payload.userId)) return null
   // The cookie only proves who signed in. Role and active flag come from the
   // live profile so demotion/deactivation take effect immediately.
   const live = await getLiveAdminProfile(payload.userId)

@@ -19,6 +19,7 @@ import * as reactivation from "../actions/reactivation";
 import * as subscriptions from "../actions/subscriptions";
 import { getAdminSessionFromRequest, satisfies } from "../lib/auth/admin-session";
 import { SESSION_COOKIE_NAME, decodeSession } from "../lib/auth/token";
+import { getSessionFromRequest } from "../lib/auth/session";
 import * as agreements from "../actions/agreements";
 import * as commissions from "../actions/commissions";
 import * as customerBilling from "../actions/customer-billing";
@@ -87,7 +88,11 @@ const ACTIONS: Record<string, Record<string, Auth>> = {
   mail: { listTransactionalTemplates: "super_admin", sendTestEmail: "super_admin", listEmailLog: "super_admin" },
   "admin-view-as": { viewAsParticipant: "super_admin" },
   cron: { listCronJobs: "super_admin", runCronJobNow: "super_admin" },
-  auth: { login: "public", logout: "public" },
+  auth: {
+    login: "public", logout: "public",
+    verifyLoginCode: "public", resendLoginCode: "public",
+    requestPasswordSetup: "public", setPortalPassword: "public",
+  },
   billing: {
     // Admin billing actions on a customer record (each stamps the acting admin).
     refundPayment: "admin", cancelSubscription: "admin", resumeSubscription: "admin",
@@ -191,8 +196,7 @@ async function isAuthorized(req: Request, auth: Auth): Promise<boolean> {
     const session = await getAdminSessionFromRequest(req);
     return Boolean(session && satisfies(session.role, auth, session.canManageServices));
   }
-  const token = req.cookies?.[SESSION_COOKIE_NAME] as string | undefined;
-  const session = token ? decodeSession(token) : null;
+  const session = await getSessionFromRequest(req);
   if (!session) return false;
   // Portal RPC is also closed to accounts shut off for billing.
   const participant = await participantIfBillingAllows(session);

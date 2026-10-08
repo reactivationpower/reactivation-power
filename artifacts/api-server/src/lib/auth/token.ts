@@ -7,6 +7,8 @@ export interface SessionPayload {
   participantId: string
   sessionId: string
   issuedAt: number
+  /** Real owner/staff logins are bound to the verified password revision. */
+  credentialVersion?: string
   /** Set when a super admin opened this portal account via "View as client". */
   impersonatedBy?: { userId: string; email: string }
 }
@@ -40,7 +42,8 @@ export function decodeSession(token: string): SessionPayload | null {
       Buffer.from(data, 'base64url').toString(),
     ) as SessionPayload
     if (!payload.participantId || !payload.sessionId) return null
-    if (Date.now() - payload.issuedAt > SESSION_MAX_AGE * 1000) return null
+    if (!Number.isFinite(payload.issuedAt) || payload.issuedAt > Date.now()) return null
+    if (Date.now() - payload.issuedAt >= SESSION_MAX_AGE * 1000) return null
     return payload
   } catch {
     return null

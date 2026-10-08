@@ -106,8 +106,9 @@ export function AddCallerDialog({
             </div>
           </div>
           <div className="flex flex-col gap-2">
-            <Label htmlFor="ac-email">Email address</Label>
+            <Label htmlFor="ac-email">Caller’s individual email address</Label>
             <Input id="ac-email" name="email" type="email" required />
+            <p className="text-xs text-muted-foreground">Use the caller’s own inbox, not a shared office email. They will set a password and receive sign-in codes here.</p>
           </div>
           <div className="flex flex-col gap-2">
             <Label htmlFor="ac-phone">

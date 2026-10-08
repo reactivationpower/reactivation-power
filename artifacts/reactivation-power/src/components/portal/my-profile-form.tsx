@@ -65,7 +65,7 @@ export function MyProfileForm({ participant }: { participant: Participant }) {
             required
           />
           <p className="text-xs text-muted-foreground">
-            This is the email you type to sign in.
+            Use your own email, not a shared office inbox. Changing it requires setting a password again through your new email.
           </p>
         </div>
         <div className="flex flex-col gap-2">

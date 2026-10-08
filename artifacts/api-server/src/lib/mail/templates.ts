@@ -130,6 +130,8 @@ export interface CronFailedData {
   dashboardUrl: string
 }
 export interface TemplateDataMap {
+  portal_login_code: { code: string }
+  portal_password_setup: { setupUrl: string }
   new_leads: { count: number; portalUrl: string }
   portal_welcome: PortalWelcomeData
   cron_failed: CronFailedData
@@ -205,8 +207,9 @@ const portalWelcome: TemplateDefinition<'portal_welcome'> = {
             'Inside you\'ll find your training videos, the call scripts, and the reactivation dialer your team uses to bring past patients back in.',
           ),
           panel([
-            `<strong>Signing in is simple:</strong> enter your first name, last name and this email address — no password to remember.`,
+            `<strong>First sign-in:</strong> open the portal and choose “Set up or reset password” to create your password. Then sign in with your email, password, and the six-digit code we send you.`,
             `Email on file: <strong>${esc(d.email)}</strong>`,
+            `Each owner and caller needs their own email and password. Do not use a shared office inbox or share sign-in codes.`,
           ]),
           button('Sign in to the portal', d.loginUrl),
           fallbackLink(d.loginUrl),
@@ -887,6 +890,41 @@ export interface AccessRestoredData {
 
 type AnyTemplate = { [K in TemplateId]: TemplateDefinition<K> }[TemplateId]
 export const TEMPLATES: { [K in TemplateId]: TemplateDefinition<K> } = {
+  portal_login_code: {
+    id: 'portal_login_code',
+    name: 'Portal sign-in code',
+    description: 'Single-use sign-in code for business owners and callers, sent after password verification.',
+    sample: { code: '123456' },
+    render: d => ({
+      subject: 'Your Patient Pipeline sign-in code',
+      previewText: 'Your code expires in five minutes.',
+      html: layout([
+        h1('Your sign-in code'),
+        p('Enter this code to finish signing in to Patient Pipeline:'),
+        panel([`<p style="font-size:32px;font-weight:700;letter-spacing:6px">${esc(d.code)}</p>`]),
+        p('This code expires in five minutes and can only be used once. Never share it with anyone.'),
+        small('If you did not try to sign in, you can ignore this message.'),
+      ], { previewText: 'Your code expires in five minutes.' }),
+    }),
+  },
+  portal_password_setup: {
+    id: 'portal_password_setup',
+    name: 'Portal password setup / reset',
+    description: 'One-time password link sent only to the registered owner or caller email.',
+    sample: { setupUrl: `${BRAND.siteUrl}/login?setup=sample-token` },
+    render: d => ({
+      subject: 'Set your Patient Pipeline password',
+      previewText: 'Set up or reset your password. This link expires in 30 minutes.',
+      html: layout([
+        h1('Set your password'),
+        p('Use the link below to set up or reset the password for your individual Patient Pipeline account.'),
+        button('Set your password', d.setupUrl),
+        fallbackLink(d.setupUrl),
+        p('This link expires in 30 minutes and can only be used once. If you did not request it, ignore this message.'),
+        small('Use your own email address, not a shared office inbox. After setting your password, sign in with your email, password, and a fresh email code.'),
+      ], { previewText: 'Set up or reset your password. This link expires in 30 minutes.' }),
+    }),
+  },
   new_leads: {
     id: 'new_leads',
     name: 'New office leads',

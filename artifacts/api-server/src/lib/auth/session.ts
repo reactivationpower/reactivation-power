@@ -1,5 +1,8 @@
 
 import { cookies, headers } from 'next/headers'
+import type { Request } from 'express'
+import { pool } from '@workspace/db'
+import { createIdleSession, readIdleSession, revokeIdleSession } from './idle-session'
 import {
   SESSION_COOKIE_NAME,
   SESSION_MAX_AGE,
@@ -23,7 +26,13 @@ async function isSecureRequest(): Promise<boolean> {
   return process.env.NODE_ENV === 'production'
 }
 
-export async function setSessionCookie(payload: SessionPayload) {
+export async function setSessionCookie(payload: SessionPayload, preserveDeadline = false) {
+  const old = decodeSession((await cookies()).get(SESSION_COOKIE_NAME)?.value ?? '')
+  if (preserveDeadline && !old) throw new Error('Session expired')
+  await createIdleSession(payload.sessionId, 'portal', payload.participantId,
+    payload.issuedAt + SESSION_MAX_AGE * 1000, preserveDeadline ? old?.sessionId : undefined)
+  // Replacing a browser's session retires its previous cookie, not other devices.
+  if (old) await revokeIdleSession(old.sessionId, 'portal')
   const store = await cookies()
   const secure = await isSecureRequest()
   store.set(SESSION_COOKIE_NAME, encodeSession(payload), {
@@ -40,6 +49,8 @@ export async function setSessionCookie(payload: SessionPayload) {
 
 export async function clearSessionCookie() {
   const store = await cookies()
+  const old = decodeSession(store.get(SESSION_COOKIE_NAME)?.value ?? '')
+  if (old) await revokeIdleSession(old.sessionId, 'portal')
   store.delete(SESSION_COOKIE_NAME)
 }
 
@@ -47,7 +58,36 @@ export async function getSession(): Promise<SessionPayload | null> {
   const store = await cookies()
   const token = store.get(SESSION_COOKIE_NAME)?.value
   if (!token) return null
-  return decodeSession(token)
+  const session = await validatePortalToken(token)
+  if (!session) store.delete(SESSION_COOKIE_NAME)
+  return session
+}
+
+export async function validatePortalToken(token: string): Promise<SessionPayload | null> {
+  const payload = decodeSession(token)
+  if (!payload) return null
+  if (!await portalCredentialIsCurrent(payload)) return null
+  return await readIdleSession(payload.sessionId, 'portal', payload.participantId) ? payload : null
+}
+
+export async function portalCredentialIsCurrent(payload: SessionPayload): Promise<boolean> {
+  // Retire pre-MFA logins. Only the intentionally separate demo and privileged
+  // impersonation flows can issue portal cookies without a password revision.
+  if (!payload.credentialVersion) {
+    if (payload.impersonatedBy) return true
+    const demo = await pool.query('SELECT 1 FROM participants WHERE id = $1 AND is_demo = true AND is_active = true',
+      [payload.participantId])
+    return demo.rowCount === 1
+  }
+  const result = await pool.query(`SELECT 1 FROM portal_auth_credentials c
+    JOIN participants p ON p.id = c.participant_id
+    WHERE c.participant_id = $1 AND c.version = $2 AND c.email = lower(p.email) AND p.is_active = true`,
+  [payload.participantId, payload.credentialVersion])
+  return result.rowCount === 1
+}
+
+export async function getSessionFromRequest(req: Request) {
+  return validatePortalToken(req.cookies?.[SESSION_COOKIE_NAME] ?? '')
 }
 
 /** Best-effort client IP from request headers */

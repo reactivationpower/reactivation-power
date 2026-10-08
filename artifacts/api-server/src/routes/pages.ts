@@ -1,10 +1,13 @@
 import { Router, type IRouter, type Request, type Response } from "express";
+import { cookies } from 'next/headers';
 import { runWithRequestContext } from "../lib/request-context";
 import { isNotFoundSignal, isRedirectSignal, notFound, redirect } from "../shims/next-navigation";
 import { logger } from "../lib/logger";
 import { adminHomeFor, getAdminSessionFromRequest, satisfies } from "../lib/auth/admin-session";
 import { listAdminUsers } from "../lib/data/admin-users";
 import { SESSION_COOKIE_NAME, decodeSession } from "../lib/auth/token";
+import { ADMIN_COOKIE_NAME, decodeAdminSession } from "../lib/auth/admin-token";
+import { revokeIdleSession } from "../lib/auth/idle-session";
 import { clearSessionCookie, getSession } from "../lib/auth/session";
 import { resolveLoginDestination } from "../lib/auth/login-destination";
 import { billingBlockForOwner } from "../lib/billing/dunning";
@@ -53,6 +56,7 @@ import {
   agreementTokenForLink, getAgreementDetail, getAgreementForLink, getAgreementPublic, listAgreements,
 } from "../actions/agreements";
 import { listCommissions } from "../actions/commissions";
+import { getPortalLoginState } from '../actions/auth';
 
 const visibleQueueItem = (item: leadStore.CallNextItem) => ({ ...item, lead: withoutLeadLeaseToken(item.lead) });
 
@@ -81,16 +85,17 @@ function queryString(req: Request, key: string): string | undefined {
 function add(path: string, auth: AuthKind, loader: Loader): void {
   router.get(`/pages${path}`, async (req, res) => {
     try {
+      res.setHeader('Cache-Control', 'no-store');
       const result = await runWithRequestContext(req, res, async () => {
         if (auth === "portal") {
           const token = req.cookies?.[SESSION_COOKIE_NAME] as string | undefined;
-          if (!token || !decodeSession(token)) {
-            redirect(`/login?next=${encodeURIComponent(originalPath(req))}`);
+          if (!token || !await getSession()) {
+            redirect(`/login?${token ? 'reason=inactivity&' : ''}next=${encodeURIComponent(originalPath(req))}`);
           }
         } else if (auth === "admin" || auth === "super_admin" || auth === "manage_services") {
           const session = await getAdminSessionFromRequest(req);
           if (!session) {
-            redirect(`/admin-login?next=${encodeURIComponent(originalPath(req))}`);
+            redirect(`/admin-login?${req.cookies?.[ADMIN_COOKIE_NAME] ? 'reason=inactivity&' : ''}next=${encodeURIComponent(originalPath(req))}`);
           }
           // Additional service access does not unlock owner-only pages.
           if (!satisfies(session.role, auth, session.canManageServices)) redirect(adminHomeFor(session.role));
@@ -104,7 +109,7 @@ function add(path: string, auth: AuthKind, loader: Loader): void {
       } else if (isNotFoundSignal(err)) {
         res.status(404).json({ notFound: true });
       } else {
-        logger.error({ err, page: originalPath(req) }, "page loader failed");
+        logger.error({ err, page: originalPath(req).split('?')[0] }, "page loader failed");
         res.status(500).json({ error: err instanceof Error ? err.message : "Page loader failed" });
       }
     }
@@ -157,6 +162,12 @@ add("/admin/team", "super_admin", async (req) => {
 });
 
 add("/login", undefined, async (req) => {
+  if (queryString(req, 'setup')) return { next: queryString(req, 'next'), billing: null, pendingLogin: null };
+  const raw = decodeSession(req.cookies?.[SESSION_COOKIE_NAME] ?? '');
+  if (raw && queryString(req, 'reason') === 'inactivity' && raw.sessionId === queryString(req, 'session')) {
+    await clearSessionCookie();
+    return { next: queryString(req, "next"), billing: null };
+  }
   const session = await getSession();
   if (session) {
     // A signed-in account that is shut off for billing lands here from the
@@ -167,9 +178,15 @@ add("/login", undefined, async (req) => {
     await clearSessionCookie();
     return { next: queryString(req, "next"), billing: { reason: block.reason, status: block.status, email: block.email } };
   }
-  return { next: queryString(req, "next"), billing: null };
+  return { next: queryString(req, "next"), billing: null, pendingLogin: await getPortalLoginState() };
 });
 add("/admin-login", undefined, async (req) => {
+  const raw = decodeAdminSession(req.cookies?.[ADMIN_COOKIE_NAME] ?? '');
+  if (raw && queryString(req, 'reason') === 'inactivity' && raw.sessionId === queryString(req, 'session')) {
+    await revokeIdleSession(raw.sessionId, 'admin');
+    (await cookies()).delete(ADMIN_COOKIE_NAME);
+    return { next: queryString(req, "next") };
+  }
   const session = await getAdminSessionFromRequest(req);
   if (session && !queryString(req, "token_hash")) redirect(adminHomeFor(session.role));
   return { next: queryString(req, "next") };

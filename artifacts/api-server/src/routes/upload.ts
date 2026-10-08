@@ -5,6 +5,7 @@ import { Router, type IRouter, type Request, type Response } from "express";
 import { logger } from "@/lib/logger";
 import { runWithRequestContext } from "@/lib/request-context";
 import { getAdminSessionFromRequest } from "@/lib/auth/admin-session";
+import { readIdleSession } from '@/lib/auth/idle-session';
 
 /** Uploads (course media) are only performed by super admins from the admin UI. */
 async function isAdmin(req: Request): Promise<boolean> {
@@ -104,6 +105,9 @@ router.post("/upload/token", async (req: Request, res: Response) => {
         request: req,
         body: req.body as HandleUploadBody,
         onBeforeGenerateToken: async (pathname) => {
+          const session = await getAdminSessionFromRequest(req);
+          const idle = session && await readIdleSession(session.sessionId, 'admin', session.userId);
+          if (!idle || session?.role !== 'super_admin') throw new Error('Session expired');
           const allowedPrefixes = ["videos/", "attachments/", "thumbnails/"];
           if (!allowedPrefixes.some((prefix) => pathname.startsWith(prefix))) {
             throw new Error("Invalid upload folder");
@@ -111,6 +115,9 @@ router.post("/upload/token", async (req: Request, res: Response) => {
           return {
             addRandomSuffix: true,
             maximumSizeInBytes: 5 * 1024 * 1024 * 1024,
+            // A retained direct-upload token must not outlive the issuing
+            // session's acknowledged idle or absolute deadline.
+            validUntil: idle.deadline,
           };
         },
       });
@@ -140,6 +147,7 @@ router.post("/upload", async (req: Request, res: Response) => {
           return;
         }
         const safeName = file.fileName.replace(/[^a-zA-Z0-9._-]/g, "_");
+        if (!await isAdmin(req)) { res.status(401).json({ error: 'Session expired' }); return; }
         const blob = await put(`${file.kind ?? queryKind}s/${safeName}`, file.bytes, {
           access: "private",
           addRandomSuffix: true,
@@ -163,6 +171,7 @@ router.post("/upload", async (req: Request, res: Response) => {
         return;
       }
       const safeName = queryName.replace(/[^a-zA-Z0-9._-]/g, "_");
+      if (!await isAdmin(req)) { res.status(401).json({ error: 'Session expired' }); return; }
       const blob = await put(`${queryKind}s/${safeName}`, body, {
         access: "private",
         addRandomSuffix: true,

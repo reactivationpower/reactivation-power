@@ -56,7 +56,6 @@ router.post("/progress", async (req: Request, res: Response) => {
       res.status(500).json({ error: "Failed to save" });
       return;
     }
-    await supabase.from("sessions").update({ last_active_at: new Date().toISOString() }).eq("id", session.sessionId);
     if (event === "start" && !existing) {
       await logEvent({
         participantId: session.participantId, sessionId: session.sessionId,

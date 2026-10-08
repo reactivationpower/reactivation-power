@@ -34,6 +34,10 @@ export default defineConfig({
   // Only tables modelled in src/schema are managed; everything else in
   // Supabase's public schema is left alone.
   tablesFilter: [
+    "auth_idle_sessions",
+    "portal_auth_credentials",
+    "portal_auth_challenges",
+    "portal_auth_limits",
     "patient_sources",
     "contact_services",
     "patient_call_leases",

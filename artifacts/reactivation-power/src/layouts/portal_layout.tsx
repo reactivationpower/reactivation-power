@@ -7,9 +7,14 @@ import { BillingNavLink, PortalHomeLink, PortalNav, SettingsNavLink } from '@/co
 import { PORTAL_WIDTH } from '@/lib/portal-layout'
 import { DemoBarServer } from '@/components/demo/demo-bar-server'
 import { ViewAsBanner } from '@/components/portal/view-as-banner'
+import { AuthenticatedSession } from '@/components/authenticated-session'
 
 
 export default function PortalLayout({ children }: { children: React.ReactNode }) {
+  return <AuthenticatedSession kind="portal"><PortalContent>{children}</PortalContent></AuthenticatedSession>
+}
+
+function PortalContent({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col">
       <ViewAsBanner />

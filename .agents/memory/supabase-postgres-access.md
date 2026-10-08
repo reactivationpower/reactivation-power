@@ -11,3 +11,6 @@ description: How the app and drizzle-kit reach Supabase's Postgres directly, why
 - `deletePaymentLink` removes the link + terms but leaves the `customers` row and any agreement behind; clean those manually after e2e runs.
 - Review generated migrations against earlier custom SQL and the actual schema before applying them; custom migrations can leave Drizzle snapshots behind the database.
   **Why:** A custom SQL change can be re-emitted by the next generation even though its columns already exist. Never assume every generated statement is new, and never repair this with schema push.
+- The shared Supabase session pool has a 15-client ceiling; parallel regression suites can exceed it while the app is running.
+  **Why:** Provider connection-limit failures occurred in otherwise passing database tests, including tests unrelated to the changes being checked.
+  **How to apply:** Bound test-worker concurrency when diagnosing this error, keep disposable test pools small and release them, and do not mistake resource exhaustion for a functional failure or silently skip database tests.

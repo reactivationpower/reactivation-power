@@ -92,6 +92,20 @@
       "when": 1791406686343,
       "tag": "0012_wide_quicksilver",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1791409198013,
+      "tag": "0013_high_white_tiger",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1791409764739,
+      "tag": "0014_tan_falcon",
+      "breakpoints": true
     }
   ]
 }

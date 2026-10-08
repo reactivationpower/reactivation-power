@@ -152,6 +152,12 @@ export function dismissUpload(id: string) {
   removeUpload(id)
 }
 
+/** Forget protected upload state before sign-out; requests are aborted by the session guard. */
+export function clearManagedUploads() {
+  uploads = {}
+  emit()
+}
+
 export function isUploadActive(id: string) {
   const u = uploads[id]
   return u ? u.phase === 'uploading' || u.phase === 'saving' : false

@@ -55,7 +55,7 @@ export async function enterDemo(formData: FormData) {
   redirect(landingPathFor({ reactivation: true, leadFollowUp: await hasLeadFollowUp(ownerId) }))
 }
 
-async function startSessionAs(participantId: string) {
+async function startSessionAs(participantId: string, preserveDeadline = false) {
   const supabase = getAdminClient()
   const ip = await getClientIp()
   const h = await headers()
@@ -75,7 +75,7 @@ async function startSessionAs(participantId: string) {
     participantId,
     sessionId: session.id,
     issuedAt: Date.now(),
-  })
+  }, preserveDeadline)
 }
 
 type DemoParticipant = {
@@ -106,7 +106,7 @@ async function requireDemoParticipant(): Promise<
  */
 async function reSignIn(p: DemoParticipant) {
   const ownerId = p.parent_id ?? p.id
-  await startSessionAs(p.role === 'owner' ? ownerId : p.id)
+  await startSessionAs(p.role === 'owner' ? ownerId : p.id, true)
   revalidatePath('/portal', 'layout')
 }
 
@@ -180,7 +180,7 @@ export async function switchDemoView(targetId: string) {
     .or(`id.eq.${ownerId},parent_id.eq.${ownerId}`) // ...of this practice
     .maybeSingle()
   if (!target || !target.is_active) return { error: 'Not a demo identity.' }
-  await startSessionAs(target.id)
+  await startSessionAs(target.id, true)
   revalidatePath('/portal', 'layout')
   redirect('/portal')
 }
