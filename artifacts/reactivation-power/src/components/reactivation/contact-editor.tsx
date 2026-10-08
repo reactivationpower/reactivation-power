@@ -38,6 +38,25 @@ export function ContactEditor({
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
+  const [reopeningId, setReopeningId] = useState<string | null>(null)
+  const [reopenReason, setReopenReason] = useState('')
+  const [reopening, setReopening] = useState(false)
+
+  async function confirmReopen(serviceId: string) {
+    setError(null)
+    setReopening(true)
+    try {
+      const result = await reopenService(contact.id, serviceId, reopenReason.trim())
+      if (result?.error) setError(result.error)
+      else {
+        setReopeningId(null)
+        setReopenReason('')
+        router.refresh()
+      }
+    } catch {
+      setError('Unable to reopen the service. Please try again.')
+    } finally { setReopening(false) }
+  }
 
   const nicheItems = [
     { value: 'none', label: 'No niche' },
@@ -194,15 +213,32 @@ export function ContactEditor({
                     {sv.last_visit ? ` · Last visit ${sv.last_visit}` : ''}
                     <span className="ml-2 text-xs text-muted-foreground">{sv.outreach_status ?? 'ready'}</span>
                     {sv.outreach_status === 'declined' && (
-                      <Button type="button" size="sm" variant="outline" className="ml-2" disabled={pending}
-                        onClick={() => startTransition(async () => {
-                          const result = await reopenService(contact.id, sv.id)
-                          if (result?.error) setError(result.error)
-                          else router.refresh()
-                        })}>Reopen service</Button>
+                      <Button type="button" size="sm" variant="outline" className="ml-2" disabled={pending || reopening}
+                        onClick={() => {
+                          setError(null)
+                          setReopeningId(sv.id)
+                          setReopenReason('')
+                        }}>Reopen service</Button>
                     )}
                     {sv.original_complaint ? ` · ${sv.original_complaint}` : ''}
                   </span>
+                  {reopeningId === sv.id && sv.outreach_status === 'declined' && (
+                    <div className="my-2 space-y-2 rounded-md border border-border p-3">
+                      <Label htmlFor={`reopen-reason-${sv.id}`}>Reason for reopening</Label>
+                      <Input id={`reopen-reason-${sv.id}`} value={reopenReason} maxLength={1000}
+                        disabled={reopening} placeholder="Why is this service being reopened?"
+                        onChange={e => setReopenReason(e.target.value)} />
+                      <p className="text-xs text-muted-foreground">
+                        Saved in patient history with your name. This is not a call attempt and does not reset the 90-day wait or clear Do Not Call.
+                      </p>
+                      <div className="flex gap-2">
+                        <Button type="button" size="sm" disabled={pending || reopening || !reopenReason.trim()}
+                          onClick={() => void confirmReopen(sv.id)}>{reopening ? 'Reopening…' : 'Confirm reopening'}</Button>
+                        <Button type="button" size="sm" variant="outline" disabled={reopening}
+                          onClick={() => { setReopeningId(null); setReopenReason('') }}>Cancel</Button>
+                      </div>
+                    </div>
+                  )}
                   {sv.source_notes && <div className="text-xs text-muted-foreground" dangerouslySetInnerHTML={{ __html: sv.source_notes }} />}
                 </li>
               ))}

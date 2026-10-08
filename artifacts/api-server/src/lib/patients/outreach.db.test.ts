@@ -4,6 +4,7 @@ import { pool } from '@workspace/db'
 import { claimPatient, renewPatient, releasePatient, reopenPatientService, savePatientCall } from './outreach'
 import { executePatientImport } from './csv-import'
 import { DAY } from './outreach-policy'
+import { getPatientServiceHistory } from '@/lib/data/reactivation'
 
 describe.skipIf(!process.env.SUPABASE_DB_URL)('service-aware calling transactions', () => {
   let ownerId: string, callerId: string, contactId: string, a: string, b: string
@@ -106,7 +107,7 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('service-aware calling transaction
     await upload(a, '2026-01-01')
     expect((await pool.query('SELECT outreach_status FROM contact_services WHERE id=$1', [first.service.id])).rows[0].outreach_status).toBe('declined')
     await expect(claimPatient(ownerId, ownerId, contactId, enabled())).rejects.toThrow('No eligible')
-    await reopenPatientService(ownerId, contactId, first.service.id)
+    await reopenPatientService(ownerId, contactId, first.service.id, ownerId, 'Patient asked to discuss the service again')
     await expect(claimPatient(ownerId, ownerId, contactId, enabled())).rejects.toThrow('not due')
     await pool.query("UPDATE reactivation_calls SET created_at=now()-interval '91 days' WHERE contact_id=$1", [contactId])
     const reopened = await claimPatient(ownerId, ownerId, contactId, enabled())
@@ -144,5 +145,63 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('service-aware calling transaction
     await log(first.token, 'do_not_call')
     await upload(b)
     await expect(claimPatient(ownerId, ownerId, contactId, enabled())).rejects.toThrow('opted out')
+  })
+  it('audits a reopening once with staff and reason, preserving calls, clock, notes and opt-out', async () => {
+    await pool.query('UPDATE participants SET parent_id=$2 WHERE id=$1', [callerId, ownerId])
+    const first = await claimPatient(ownerId, ownerId, contactId, enabled())
+    await log(first.token, 'service_declined')
+    await pool.query("UPDATE contacts SET do_not_call=true,notes='Keep staff notes' WHERE id=$1", [contactId])
+    const beforeContact = (await pool.query('SELECT * FROM contacts WHERE id=$1', [contactId])).rows[0]
+    const beforeService = (await pool.query('SELECT * FROM contact_services WHERE id=$1', [first.service.id])).rows[0]
+    const beforeCalls = (await pool.query('SELECT * FROM reactivation_calls WHERE contact_id=$1', [contactId])).rows
+    const beforeFollowUps = (await pool.query('SELECT * FROM follow_ups WHERE contact_id=$1 ORDER BY id', [contactId])).rows
+    const results = await Promise.allSettled([
+      reopenPatientService(ownerId, contactId, first.service.id, callerId, '  Patient requested another discussion  '),
+      reopenPatientService(ownerId, contactId, first.service.id, callerId, 'Patient requested another discussion'),
+    ])
+    expect(results.filter(r => r.status === 'fulfilled')).toHaveLength(1)
+    const events = await getPatientServiceHistory(ownerId, contactId)
+    expect(events).toHaveLength(1)
+    expect(events[0]).toMatchObject({
+      owner_id: ownerId, contact_id: contactId, service_id: first.service.id, actor_id: callerId,
+      actor_name_snapshot: 'Outreach Caller', event_type: 'service_reopened',
+      previous_status: 'declined', new_status: 'cooling',
+      reason: 'Patient requested another discussion',
+    })
+    expect(events[0].service_label_snapshot).toBeTruthy()
+    expect(events[0].created_at).toBeInstanceOf(Date)
+    expect(await getPatientServiceHistory(callerId, contactId)).toEqual([])
+    expect((await pool.query('SELECT * FROM contacts WHERE id=$1', [contactId])).rows[0]).toEqual(beforeContact)
+    const afterService = (await pool.query('SELECT * FROM contact_services WHERE id=$1', [first.service.id])).rows[0]
+    expect(afterService).toMatchObject({
+      outreach_status: 'cooling', cycle_started_at: beforeService.cycle_started_at,
+      last_attempt_at: beforeService.last_attempt_at, last_outcome: beforeService.last_outcome,
+    })
+    expect((await pool.query('SELECT * FROM reactivation_calls WHERE contact_id=$1', [contactId])).rows).toEqual(beforeCalls)
+    expect((await pool.query('SELECT * FROM follow_ups WHERE contact_id=$1 ORDER BY id', [contactId])).rows).toEqual(beforeFollowUps)
+    await expect(claimPatient(ownerId, ownerId, contactId, enabled())).rejects.toThrow('opted out')
+    await pool.query("UPDATE participants SET first_name='Renamed' WHERE id=$1", [callerId])
+    await pool.query('DELETE FROM participants WHERE id=$1', [callerId])
+    expect((await getPatientServiceHistory(ownerId, contactId))[0]).toMatchObject({
+      actor_id: null, actor_name_snapshot: 'Outreach Caller',
+    })
+  })
+  it('rejects invalid reasons, cross-practice identities and active calls without audit or status changes', async () => {
+    const service = (await pool.query('SELECT id FROM contact_services WHERE contact_id=$1', [contactId])).rows[0]
+    const lease = await claimPatient(ownerId, ownerId, contactId, enabled())
+    await pool.query("UPDATE contact_services SET outreach_status='declined' WHERE id=$1", [service.id])
+    for (const reason of ['', '   ', 'x'.repeat(1001), null]) {
+      await expect(reopenPatientService(ownerId, contactId, service.id, ownerId, reason as string)).rejects.toThrow('reason')
+    }
+    await expect(reopenPatientService(callerId, contactId, service.id, callerId, 'Wrong practice')).rejects.toThrow('not found')
+    await expect(reopenPatientService(ownerId, contactId, service.id, callerId, 'Foreign staff')).rejects.toThrow('Staff member')
+    await expect(reopenPatientService(ownerId, contactId, service.id, ownerId, 'Live call')).rejects.toThrow('active call')
+    expect(await getPatientServiceHistory(ownerId, contactId)).toEqual([])
+    expect((await pool.query('SELECT outreach_status FROM contact_services WHERE id=$1', [service.id])).rows[0].outreach_status).toBe('declined')
+    await releasePatient(ownerId, ownerId, contactId, lease.token)
+    // A failed audit insert must roll the status change back as well.
+    await expect(reopenPatientService(ownerId, contactId, service.id, ownerId, 'Invalid\0reason')).rejects.toThrow()
+    expect(await getPatientServiceHistory(ownerId, contactId)).toEqual([])
+    expect((await pool.query('SELECT outreach_status FROM contact_services WHERE id=$1', [service.id])).rows[0].outreach_status).toBe('declined')
   })
 })

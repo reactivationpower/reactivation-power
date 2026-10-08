@@ -33,7 +33,7 @@ import {
   extractSlots, getAccessibleNicheIds, getAccountReactivationStats, getCallHistory,
   getCallQueue, getCallQueueState, getContact, getContacts, getMasterScript,
   getNiches, getOwnerNiches, getPipelineStages, getScriptFlow, getScriptSections,
-  getServiceMappings, getTeamStats,
+  getServiceMappings, getTeamStats, getPatientServiceHistory,
 } from "../lib/data/reactivation";
 import { getAdminClient } from "../lib/supabase/admin";
 import { getStripeMode } from "../lib/stripe";
@@ -472,7 +472,8 @@ add("/portal/contacts/:id", "portal", async (req) => {
   const [history, stages, niches] = await Promise.all([
     getCallHistory(id), getPipelineStages(ownerId), getOwnerNiches(ownerId),
   ]);
-  return { id, participant, ownerId, contact, history, stages, niches };
+  const serviceHistory = await getPatientServiceHistory(ownerId, id);
+  return { id, participant, ownerId, contact, history, serviceHistory, stages, niches };
 });
 
 add("/portal/dialer", "portal", async () => {

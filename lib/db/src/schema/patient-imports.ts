@@ -51,6 +51,25 @@ export const insertPatientSourceSchema = createInsertSchema(patientSources)
 export const insertContactServiceSchema = createInsertSchema(contactServices)
 export const insertPatientImportReviewSchema = createInsertSchema(patientImportReviews)
 
+/** Administrative changes, deliberately separate from actual call attempts. */
+export const patientServiceEvents = pgTable('patient_service_events', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  ownerId: uuid('owner_id').notNull(),
+  contactId: uuid('contact_id').notNull(),
+  serviceId: uuid('service_id').notNull(),
+  actorId: uuid('actor_id'),
+  actorNameSnapshot: text('actor_name_snapshot').notNull(),
+  serviceLabelSnapshot: text('service_label_snapshot').notNull(),
+  eventType: text('event_type').notNull(),
+  previousStatus: text('previous_status').notNull(),
+  newStatus: text('new_status').notNull(),
+  reason: text('reason').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [index('patient_service_events_history_idx').on(t.ownerId, t.contactId, t.createdAt)])
+
+export const insertPatientServiceEventSchema = createInsertSchema(patientServiceEvents)
+export type PatientServiceEvent = typeof patientServiceEvents.$inferSelect
+
 export const patientCallLeases = pgTable('patient_call_leases', {
   contactId: uuid('contact_id').primaryKey(),
   ownerId: uuid('owner_id').notNull(),

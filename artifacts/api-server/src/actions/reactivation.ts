@@ -915,12 +915,12 @@ export async function releasePatientCall(contactId: string, token: string) {
   if (!p || !uuidPattern.test(contactId) || !uuidPattern.test(token)) return {}
   return releasePatient(accessOwnerId(p), p.id, contactId, token)
 }
-export async function reopenService(contactId: string, serviceId: string) {
+export async function reopenService(contactId: string, serviceId: string, reason: string) {
   const p = await getCurrentParticipant()
   if (!p) return { error: 'Not signed in' }
   if (!uuidPattern.test(contactId) || !uuidPattern.test(serviceId)) return { error: 'Invalid patient or service.' }
   try {
-    const result = await reopenPatientService(accessOwnerId(p), contactId, serviceId)
+    const result = await reopenPatientService(accessOwnerId(p), contactId, serviceId, p.id, reason)
     revalidatePath('/portal', 'layout')
     return result
   } catch (error) { return { error: error instanceof Error ? error.message : 'Unable to reopen the service.' } }

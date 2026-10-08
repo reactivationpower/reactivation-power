@@ -18,7 +18,11 @@ export default function ContactProfilePage() {
   if (loading) return <PageLoading />
   if (notFound) return <NotFound />
   if (error) return <PageError error={error} />
-  const { contact, history, stages, niches } = data
+  const { contact, history, serviceHistory, stages, niches } = data
+  const timeline = [
+    ...history.map(call => ({ ...call, kind: 'call' })),
+    ...serviceHistory.map(event => ({ ...event, kind: 'service' })),
+  ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime() || b.id.localeCompare(a.id))
 
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-8">
@@ -84,15 +88,30 @@ export default function ContactProfilePage() {
 
       <section className="mt-10">
         <h2 className="text-xl font-semibold text-foreground">
-          Call History ({history.length})
+          Patient History
         </h2>
-        {history.length === 0 ? (
+        <p className="mt-1 text-sm text-muted-foreground">{history.length} call attempts · {serviceHistory.length} service status changes</p>
+        {timeline.length === 0 ? (
           <p className="mt-4 text-muted-foreground">
-            No calls logged yet.
+            No patient history yet.
           </p>
         ) : (
           <ul className="mt-4 flex flex-col gap-3">
-            {history.map((call) => (
+            {timeline.map((call) => call.kind === 'service' ? (
+              <li key={`service-${call.id}`} className="rounded-lg border border-border bg-muted/30 p-4"
+                data-testid="history-service-reopened">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="font-medium text-foreground">Service reopened · {call.service_label_snapshot}</span>
+                  <span className="text-sm text-muted-foreground">
+                    {call.actor_name_snapshot} · {new Date(call.created_at).toLocaleString(undefined, {
+                      month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit',
+                    })}
+                  </span>
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">Declined → Reopened (cooling) · Service status change, not a call attempt</p>
+                <p className="mt-2 whitespace-pre-wrap break-words text-sm text-muted-foreground">Reason: {call.reason}</p>
+              </li>
+            ) : (
               <li
                 key={call.id}
                 className="rounded-lg border border-border bg-card p-4"

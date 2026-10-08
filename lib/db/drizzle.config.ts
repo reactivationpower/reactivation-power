@@ -41,6 +41,7 @@ export default defineConfig({
     "patient_sources",
     "contact_services",
     "patient_call_leases",
+    "patient_service_events",
     "patient_import_reviews",
     "email_log",
     "customers",

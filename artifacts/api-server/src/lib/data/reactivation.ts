@@ -371,8 +371,11 @@ export async function getCallHistory(
   return (data ?? []) as CallWithCaller[]
 }
 
-// ---------- Call queue ----------
-
+export async function getPatientServiceHistory(ownerId: string, contactId: string) {
+  const { rows } = await pool.query(`SELECT * FROM patient_service_events
+    WHERE owner_id = $1 AND contact_id = $2 ORDER BY created_at DESC, id DESC`, [ownerId, contactId])
+  return rows
+}
 export interface QueueItem {
   follow_up: FollowUp
   contact: ContactWithMeta

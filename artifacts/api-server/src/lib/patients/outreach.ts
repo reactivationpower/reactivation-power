@@ -154,12 +154,24 @@ export async function savePatientCall(ownerId: string, callerId: string, enabled
   })
 }
 
-export async function reopenPatientService(ownerId: string, contactId: string, serviceId: string) {
+export async function reopenPatientService(ownerId: string, contactId: string, serviceId: string, actorId: string, reason: string) {
+  if (typeof reason !== 'string' || !reason.trim() || reason.trim().length > 1000) {
+    throw new Error('Enter a reason for reopening (up to 1,000 characters).')
+  }
   return patientTransaction(ownerId, contactId, async client => {
+    const actor = (await client.query(`SELECT first_name, last_name FROM participants
+      WHERE id = $1 AND (id = $2 OR parent_id = $2)`, [actorId, ownerId])).rows[0]
+    if (!actor) throw new Error('Staff member not found for this practice.')
     if ((await client.query('SELECT 1 FROM patient_call_leases WHERE contact_id = $1 AND expires_at > now()', [contactId])).rowCount) throw new Error('Finish the active call before reopening a service.')
-    const result = await client.query(`UPDATE contact_services SET outreach_status = 'cooling', cycle_started_at = NULL
-      WHERE id = $1 AND contact_id = $2 AND owner_id = $3 AND outreach_status = 'declined' RETURNING id`, [serviceId, contactId, ownerId])
+    const result = await client.query(`UPDATE contact_services SET outreach_status = 'cooling', updated_at = now()
+      WHERE id = $1 AND contact_id = $2 AND owner_id = $3 AND outreach_status = 'declined' RETURNING *`, [serviceId, contactId, ownerId])
     if (!result.rowCount) throw new Error('This declined service is no longer available.')
+    await client.query(`INSERT INTO patient_service_events(owner_id, contact_id, service_id, actor_id,
+      actor_name_snapshot, service_label_snapshot, event_type, previous_status, new_status, reason)
+      VALUES ($1,$2,$3,$4,$5,COALESCE(NULLIF($6,''), (SELECT name FROM niches WHERE id = $7), 'Service'),
+        'service_reopened','declined','cooling',$8)`,
+      [ownerId, contactId, serviceId, actorId, `${actor.first_name ?? ''} ${actor.last_name ?? ''}`.trim() || 'Staff member',
+        result.rows[0].service_label, result.rows[0].niche_id, reason.trim()])
     // Reopening never clears the shared opt-out or bypasses the 90-day gap.
     await client.query(`INSERT INTO follow_ups(contact_id, due_at, reason, service_id, call_context)
       SELECT $1, now(), 'quarterly', $2, 'rotation' WHERE NOT EXISTS
