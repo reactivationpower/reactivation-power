@@ -3,6 +3,7 @@ import { getAdminClient } from '@/lib/supabase/admin'
 import { pool } from '@workspace/db'
 import { ensurePrimaryServices } from '@/lib/patients/outreach'
 import { planOutreach } from '@/lib/patients/outreach-policy'
+import { readQueuePatients, isQueueReserve, type QueuePatient } from '@/lib/patients/queue-read'
 import type { PatientService } from '@workspace/shared/csv-patients'
 import { dueWithinEasternToday } from '@workspace/shared/call-time'
 import type {
@@ -238,7 +239,7 @@ export async function getContacts(ownerId: string): Promise<ContactWithMeta[]> {
 
 function coordinateContact(contact: ContactWithMeta, niches: Niche[]): ContactWithMeta {
   const plan = planOutreach(contact, new Set(niches.map(n => n.id)))
-  const service = plan.service
+  const service = contact.services?.find(s => s.id === plan.service?.id) ?? null
   return {
     ...contact,
     outreach_blocked: plan.blocked,
@@ -255,14 +256,59 @@ function coordinateContact(contact: ContactWithMeta, niches: Niche[]): ContactWi
   } as ContactWithMeta
 }
 
-async function getPatientServices(ownerId: string, contactId?: string): Promise<PatientService[]> {
+async function getPatientServices(ownerId: string, contactId?: string | string[]): Promise<PatientService[]> {
   const { rows } = await pool.query(`SELECT s.id, s.contact_id, s.niche_id, s.service_label, s.created_at,
     s.outreach_status, s.cycle_started_at, s.last_attempt_at, s.last_outcome,
     s.last_visit::text, s.original_complaint, s.source_notes, n.name AS niche_name
     FROM contact_services s LEFT JOIN niches n ON n.id = s.niche_id
-    WHERE s.owner_id = $1 ${contactId ? 'AND s.contact_id = $2' : ''}
+    WHERE s.owner_id = $1 ${contactId ? Array.isArray(contactId) ? 'AND s.contact_id = ANY($2::uuid[])' : 'AND s.contact_id = $2' : ''}
     ORDER BY s.created_at, s.id`, contactId ? [ownerId, contactId] : [ownerId])
   return rows as PatientService[]
+}
+
+/** Hydrate only patients that will be displayed or released, never the reserve. */
+async function hydrateQueuePatients(ownerId: string, patients: QueuePatient[], niches: Niche[]): Promise<ContactWithMeta[]> {
+  if (!patients.length) return []
+  const ids = patients.map(p => p.id)
+  const [{ rows }, services] = await Promise.all([
+    pool.query(`SELECT c.*, row_to_json(n) AS niche, row_to_json(s) AS stage,
+      (SELECT row_to_json(r) FROM reactivation_calls r WHERE r.contact_id = c.id
+        ORDER BY r.created_at DESC, r.id DESC LIMIT 1) AS last_call,
+      (SELECT count(*)::integer FROM reactivation_calls r WHERE r.contact_id = c.id) AS call_count
+      FROM contacts c LEFT JOIN niches n ON n.id = c.niche_id LEFT JOIN pipeline_stages s ON s.id = c.stage_id
+      WHERE c.owner_id = $1 AND c.id = ANY($2::uuid[])`, [ownerId, ids]),
+    getPatientServices(ownerId, ids),
+  ])
+  const byId = new Map(rows.map(c => [c.id, c]))
+  const byContact = new Map<string, PatientService[]>()
+  for (const s of services) {
+    const group = byContact.get(s.contact_id) ?? []
+    group.push(s)
+    byContact.set(s.contact_id, group)
+  }
+  const nicheById = new Map(niches.map(n => [n.id, n]))
+  return patients.flatMap(p => {
+    const c = byId.get(p.id)
+    if (!c) return []
+    const fullServices = byContact.get(p.id) ?? []
+    const service = fullServices.find(s => s.id === p.plan.service?.id)
+    const nicheId = p.plan.service?.niche_id ?? c.niche_id
+    return [{
+      ...c, created_at: new Date(c.created_at).toISOString(),
+      first_call_at: c.first_call_at ? new Date(c.first_call_at).toISOString() : null,
+      services: fullServices, niche_id: nicheId,
+      niche: nicheById.get(nicheId) ?? c.niche,
+      service_label: service?.service_label ?? c.service_label,
+      original_complaint: service ? service.original_complaint : c.original_complaint,
+      niche_active: !p.plan.service?.niche_id || nicheById.has(p.plan.service.niche_id),
+      outreach_blocked: p.plan.blocked, outreach_available_at: p.plan.dueAt,
+      call_assigned: false,
+      next_follow_up: p.next_follow_up && p.plan.dueAt ? {
+        ...p.next_follow_up, due_at: p.plan.dueAt,
+        call_context: p.plan.context, service_id: service?.id ?? null,
+      } : p.next_follow_up,
+    } as ContactWithMeta]
+  })
 }
 
 export async function getContact(id: string): Promise<ContactWithMeta | null> {
@@ -273,7 +319,7 @@ export async function getContact(id: string): Promise<ContactWithMeta | null> {
     .eq('id', id)
     .maybeSingle()
   if (!c) return null
-  await ensurePrimaryServices((c as Contact).owner_id)
+  await ensurePrimaryServices((c as Contact).owner_id, pool, id)
 
   const [{ data: followUps }, { data: calls }, ownerNiches] =
     await Promise.all([
@@ -334,7 +380,11 @@ export interface QueueItem {
 
 /** Contacts with a follow-up due now or overdue, for the owner's account */
 export async function getCallQueue(ownerId: string): Promise<QueueItem[]> {
-  const contacts = await getContacts(ownerId)
+  const niches = await getOwnerNiches(ownerId)
+  const now = Date.now()
+  const snapshot = await readQueuePatients(ownerId, new Set(niches.map(n => n.id)), now)
+  const contacts = await hydrateQueuePatients(ownerId, snapshot.filter(p =>
+    !p.plan.blocked && p.next_follow_up && p.plan.dueAt && new Date(p.plan.dueAt).getTime() <= now), niches)
   const byId = new Map(contacts.map((c) => [c.id, c]))
   const items: QueueItem[] = []
   for (const c of contacts) {
@@ -416,13 +466,14 @@ export async function releaseReserveContacts(
   count: number,
 ): Promise<number> {
   if (count <= 0) return 0
-  const contacts = await getContacts(ownerId)
-  const reserve = contacts
-    .filter(isReserveCandidate)
-    // getContacts returns newest-first; reverse so we release oldest imports first
+  const niches = await getOwnerNiches(ownerId)
+  const now = Date.now()
+  const patients = await readQueuePatients(ownerId, new Set(niches.map(n => n.id)), now)
+  const reserve = patients
+    .filter(p => isQueueReserve(p, now))
     .reverse()
     .slice(0, count)
-  const released = await insertInitialFollowUps(reserve)
+  const released = await insertInitialFollowUps(await hydrateQueuePatients(ownerId, reserve, niches))
   return released.length
 }
 
@@ -458,27 +509,33 @@ function syntheticQueueItem(contact: ContactWithMeta): QueueItem {
  *    for a fast worker — see releaseReserveContacts.)
  *  - No cadence/time gate: purely demand-driven.
  *
- * Implementation note: this reads contacts exactly once and computes the
- * release from that single snapshot, appending freshly-released contacts to
- * the queue in memory. It deliberately does NOT re-read after inserting —
- * Next.js memoizes identical fetches within a render, so a re-read returns
- * the stale pre-insert data. That stale read previously made every load
- * think the queue was empty and release another batch (a runaway).
- * Release-from-one-snapshot makes it idempotent per request.
+ * Policy decisions use one compact snapshot; only visible patients and the
+ * next reserve batch are hydrated. Newly released items are appended without
+ * a second practice-wide read. Claims still recheck policy under patient lock.
  */
 export async function getCallQueueState(
   ownerId: string,
   batchSize: number,
 ): Promise<CallQueueState> {
   const target = Math.max(1, batchSize)
-  const contacts = await getContacts(ownerId)
-  const byId = new Map(contacts.map((c) => [c.id, c]))
+  const niches = await getOwnerNiches(ownerId)
+  const now = Date.now()
+  const patients = await readQueuePatients(ownerId, new Set(niches.map(n => n.id)), now)
+  const due = patients.filter(p => !p.plan.blocked && p.next_follow_up && p.plan.dueAt &&
+    dueWithinEasternToday(p.plan.dueAt))
+  const reserve = patients.filter(p => isQueueReserve(p, now)).reverse()
+  const hasInitial = due.some(p => p.next_follow_up!.reason === 'initial')
+  const toRelease = hasInitial ? [] : reserve.slice(0, target)
+  const contacts = await hydrateQueuePatients(ownerId, [...due, ...toRelease], niches)
+  const byId = new Map(contacts.map(c => [c.id, c]))
 
   // Base queue: every contact whose follow-up is overdue or due sometime
   // today (Eastern). A contact scattered to the afternoon shows all day with
   // a "Call afternoon" hint rather than staying hidden until its exact time.
   const queue: QueueItem[] = []
-  for (const c of contacts) {
+  for (const p of due) {
+    const c = byId.get(p.id)
+    if (!c) continue
     if (c.do_not_call || c.outreach_blocked || c.call_assigned || !c.next_follow_up) continue
     if (dueWithinEasternToday(c.next_follow_up.due_at)) {
       queue.push({ follow_up: c.next_follow_up, contact: byId.get(c.id)! })
@@ -488,16 +545,12 @@ export async function getCallQueueState(
     (q) => q.follow_up.reason === 'initial',
   ).length
 
-  // Reserve candidates from this same snapshot (oldest import first).
-  const reserve = contacts.filter(isReserveCandidate).reverse()
-
   // Only refill when the live cold-call queue is empty — then release a full
   // batch. Append synthetic items so they appear in THIS render without a
   // stale re-fetch.
   const releasedIds = new Set<string>()
   if (releasedInitial === 0 && reserve.length > 0) {
-    const toRelease = reserve.slice(0, target)
-    const released = await insertInitialFollowUps(toRelease)
+    const released = await insertInitialFollowUps(toRelease.flatMap(p => byId.has(p.id) ? [byId.get(p.id)!] : []))
     for (const c of released) {
       queue.push(syntheticQueueItem(c))
       releasedIds.add(c.id)

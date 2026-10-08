@@ -13,8 +13,16 @@ import { useEffect } from 'react'
 export default function DialerPage() {
   const { data, loading, error, notFound, reload } = usePageData<any>('/portal/dialer')
   useEffect(() => {
-    const timer = setInterval(() => void reload(), 30_000)
-    return () => clearInterval(timer)
+    // Keep live leases fresh without overlapping requests on large practices
+    // or repeatedly polling a background browser tab.
+    let stopped = false
+    let timer: ReturnType<typeof setTimeout>
+    const refresh = async () => {
+      if (!stopped && document.visibilityState === 'visible') await reload()
+      if (!stopped) timer = setTimeout(refresh, 30_000)
+    }
+    timer = setTimeout(refresh, 30_000)
+    return () => { stopped = true; clearTimeout(timer) }
   }, [reload])
   if (loading) return <PageLoading />
   if (notFound) return <NotFound />

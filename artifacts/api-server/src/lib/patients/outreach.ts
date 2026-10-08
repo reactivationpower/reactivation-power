@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import { pool, type PoolClient } from '@workspace/db'
-import { planOutreach, DAY, ROTATION_DAYS, type OutreachPatient, type CallContext, type PendingFollowUp } from './outreach-policy'
+import { planOutreach, DAY, ROTATION_DAYS, type OutreachPatient, type CallContext, type Service } from './outreach-policy'
 
 /** All claims, outcomes, reopenings and imports lock the same patient row. */
 export async function patientTransaction<T>(ownerId: string, contactId: string, fn: (client: PoolClient, patient: any) => Promise<T>): Promise<T> {
@@ -19,17 +19,17 @@ export async function patientTransaction<T>(ownerId: string, contactId: string, 
 }
 
 /** Covers manually added contacts and demo fixtures created after migration. */
-export async function ensurePrimaryServices(ownerId: string, client: Pick<PoolClient, 'query'> = pool) {
+export async function ensurePrimaryServices(ownerId: string, client: Pick<PoolClient, 'query'> = pool, contactId?: string) {
   await client.query(`INSERT INTO contact_services(owner_id, contact_id, service_key, niche_id, service_label, original_complaint)
     SELECT owner_id, id, CASE WHEN niche_id IS NOT NULL THEN 'niche:' || niche_id::text
       WHEN NULLIF(btrim(service_label), '') IS NOT NULL THEN 'service:' || lower(regexp_replace(btrim(service_label), '\\s+', ' ', 'g'))
       ELSE 'unclassified' END, niche_id, service_label, original_complaint
-    FROM contacts c WHERE owner_id = $1 AND NOT EXISTS
+    FROM contacts c WHERE owner_id = $1 ${contactId ? 'AND c.id = $2' : ''} AND NOT EXISTS
       (SELECT 1 FROM contact_services s WHERE s.contact_id = c.id AND s.niche_id IS NOT DISTINCT FROM c.niche_id)
-    ON CONFLICT (contact_id, service_key) DO NOTHING`, [ownerId])
+    ON CONFLICT (contact_id, service_key) DO NOTHING`, contactId ? [ownerId, contactId] : [ownerId])
 }
 
-export async function loadOutreachPatient(client: Pick<PoolClient, 'query'>, patient: any): Promise<OutreachPatient> {
+export async function loadOutreachPatient(client: Pick<PoolClient, 'query'>, patient: any): Promise<Omit<OutreachPatient, 'services'> & { services: Service[] }> {
   const services = await client.query(`SELECT s.*, s.last_visit::text, n.name AS niche_name
     FROM contact_services s LEFT JOIN niches n ON n.id = s.niche_id WHERE s.contact_id = $1 ORDER BY s.created_at, s.id`, [patient.id])
   const followUps = await client.query(`SELECT * FROM follow_ups WHERE contact_id = $1 AND completed_call_id IS NULL
@@ -40,7 +40,7 @@ export async function loadOutreachPatient(client: Pick<PoolClient, 'query'>, pat
 
 export async function claimPatient(ownerId: string, callerId: string, contactId: string, enabled: Set<string>) {
   return patientTransaction(ownerId, contactId, async (client, patient) => {
-    await ensurePrimaryServices(ownerId, client)
+    await ensurePrimaryServices(ownerId, client, contactId)
     const state = await loadOutreachPatient(client, patient)
     const plan = planOutreach(state, enabled)
     if (plan.blocked || !plan.service) throw new Error(plan.blocked ?? 'No service is available.')
@@ -54,10 +54,11 @@ export async function claimPatient(ownerId: string, callerId: string, contactId:
       WHERE patient_call_leases.expires_at <= now() RETURNING token`,
       [contactId, ownerId, callerId, token, plan.service.id, state.next_follow_up?.id ?? null, plan.context])
     if (!result.rowCount) throw new Error('Another caller already has this patient open. Try again after they finish.')
-    const niche = plan.service.niche_id ? (await client.query('SELECT * FROM niches WHERE id = $1', [plan.service.niche_id])).rows[0] : null
-    return { token, service: plan.service, context: plan.context, contact: {
-      ...patient, services: state.services, niche_id: plan.service.niche_id, niche,
-      original_complaint: plan.service.original_complaint, service_label: plan.service.service_label,
+    const service = state.services.find(s => s.id === plan.service!.id)!
+    const niche = service.niche_id ? (await client.query('SELECT * FROM niches WHERE id = $1', [service.niche_id])).rows[0] : null
+    return { token, service, context: plan.context, contact: {
+      ...patient, services: state.services, niche_id: service.niche_id, niche,
+      original_complaint: service.original_complaint, service_label: service.service_label,
     } }
   })
 }
@@ -88,7 +89,7 @@ export async function savePatientCall(ownerId: string, callerId: string, enabled
     if (!lease) throw new Error('Call session expired or already saved. Return to Calls Due Now to reopen it.')
     const state = await loadOutreachPatient(client, patient)
     if (state.do_not_call) throw new Error('This patient has opted out. No additional call can be logged.')
-    const service = state.services!.find(s => s.id === lease.service_id)!
+    const service = state.services.find(s => s.id === lease.service_id)!
     if (!service || service.outreach_status === 'declined' || (service.niche_id && !enabled.has(service.niche_id))) throw new Error('This service is no longer available for calling.')
     // The lease freezes the service for a call already underway. A new CSV
     // service or treatment date must not discard the caller's actual outcome.

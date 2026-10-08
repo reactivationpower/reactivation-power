@@ -5,6 +5,8 @@ export const DAY = 86_400_000
 export const ROTATION_DAYS = 90
 export type CallContext = OutreachCallContext
 export type Service = PatientService & { outreach_status: 'ready' | 'active' | 'cooling' | 'declined' }
+/** Queue reads need policy facts, not service notes or script content. */
+export type PolicyService = Pick<PatientService, 'id' | 'niche_id' | 'last_visit' | 'outreach_status' | 'created_at' | 'cycle_started_at' | 'last_attempt_at'>
 export type PendingFollowUp = FollowUp & { service_id?: string | null; call_context?: CallContext | null }
 export interface OutreachPatient {
   niche_id: string | null
@@ -12,10 +14,10 @@ export interface OutreachPatient {
   first_call_at: string | null
   last_call: { created_at: string; disposition: string; appointment_at?: string | null } | null
   next_follow_up: PendingFollowUp | null
-  services?: PatientService[]
+  services?: PolicyService[]
 }
 export interface OutreachPlan {
-  service: Service | null
+  service: PolicyService | null
   context: CallContext
   dueAt: string | null
   blocked: string | null
@@ -31,7 +33,7 @@ export function treatmentEligibleAt(date: string): number {
 }
 
 export function planOutreach(patient: OutreachPatient, enabled: Set<string>, now = Date.now()): OutreachPlan {
-  const services = (patient.services ?? []) as Service[]
+  const services = patient.services ?? []
   const f = patient.next_follow_up
   const primary = services.find(s => s.niche_id === patient.niche_id) ?? services[0] ?? null
   const base = { service: primary, context: 'initial' as CallContext, dueAt: f?.due_at ?? null, blocked: null as string | null }
