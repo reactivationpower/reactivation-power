@@ -82,6 +82,8 @@ import Page_strategy_call_schedule from '@/pages/strategy-call_schedule';
 import Page_strategy_call_providers_only from '@/pages/strategy-call_providers-only';
 import Page_schedule_a_call_confirmation from '@/pages/schedule-a-call_confirmation';
 import PageAdminLeads from '@/pages/admin_leads';
+import PageAdminCustomers from '@/pages/admin_customers';
+import PageAdminCustomerId from '@/pages/admin_customers_id';
 import PageAdminLeadId from '@/pages/admin_leads_id';
 import PageAdminLeadsSettings from '@/pages/admin_leads_settings';
 import PageAdminLeadsImport from '@/pages/admin_leads_import';
@@ -218,6 +220,12 @@ function Router() {
             <Page_admin_reactivation />
           </AdminLayout>
         </RoutedErrorBoundary>
+      </Route>
+      <Route path="/admin/customers">
+        <RoutedErrorBoundary><AdminLayout><PageAdminCustomers /></AdminLayout></RoutedErrorBoundary>
+      </Route>
+      <Route path="/admin/customers/:id">
+        <RoutedErrorBoundary><AdminLayout><PageAdminCustomerId /></AdminLayout></RoutedErrorBoundary>
       </Route>
       <Route path="/admin/leads">
         <RoutedErrorBoundary><AdminLayout><PageAdminLeads /></AdminLayout></RoutedErrorBoundary>

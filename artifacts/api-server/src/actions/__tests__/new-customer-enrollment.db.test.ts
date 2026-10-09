@@ -50,6 +50,7 @@ vi.mock('@/lib/supabase/admin', () => ({
 
 const actual = await vi.importActual<typeof import('@workspace/db')>('@workspace/db')
 const { createPaymentLink, retryCustomerEnrollment } = await import('../payments')
+const { listCustomers, getCustomerRecord, getEnrollmentSetup } = await import('@/lib/data/customers')
 const { resendAgreement, getAgreementSendForm, updateAgreement, previewEnrollmentEmail } = await import('../agreements')
 const { retryPendingEnrollmentInvitations } = await import('@/lib/agreements/enrollment-invitation')
 const schema = `invitation_test_${randomUUID().replaceAll('-', '')}`
@@ -64,13 +65,13 @@ const input = (offer: any) => ({
 const rows = async (table: string) => (await scopedPool.query(`SELECT * FROM ${table}`)).rows
 const tables = ['payment_links', 'customers', 'payment_link_terms', 'agreements', 'agreement_versions',
   'agreement_events', 'agreement_initials', 'agreement_deliveries', 'email_log', 'enrollment_invitations',
-  'sales_leads','sales_jobs','sales_activities','affiliates','affiliate_attributions','affiliate_activity']
+  'sales_leads','sales_jobs','sales_activities','affiliates','affiliate_attributions','affiliate_activity','participants','payment_history']
 
-describe.skipIf(!process.env.SUPABASE_DB_URL)('New Customer → agreement → mocked Resend (isolated Postgres)', () => {
+describe.skipIf(!process.env.SUPABASE_DB_URL)('New Customer → agreement → mocked Resend (isolated Postgres)', { timeout: 20000 }, () => {
   beforeAll(async () => {
-    actual.pool.options.max = 2
+    actual.pool.options.max = 1
     await actual.pool.query(`CREATE SCHEMA "${schema}"`)
-    scopedPool = new (actual.pool.constructor as any)({ ...actual.pool.options, max: 3 })
+    scopedPool = new (actual.pool.constructor as any)({ ...actual.pool.options, max: 2 })
     scopedPool.on('connect', (client: any) => { void client.query(`SET search_path TO "${schema}"`) })
     state.db = drizzle(scopedPool)
     state.pool = scopedPool
@@ -165,6 +166,109 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('New Customer → agreement → mo
     expect(await rows('agreements')).toHaveLength(1)
     expect(await rows('agreement_versions')).toHaveLength(1)
     expect(state.proxy).toHaveBeenCalledTimes(1)
+  }, 20_000)
+
+  it('keeps one directory identity across multiple offers, deleted offers and no-offer records', async () => {
+    const first = await createPaymentLink(input({ type: 'one_time', amountDollars: 1250 }))
+    const second = await createPaymentLink({ ...input({ type: 'subscription', monthlyDollars: 250, setupFeeDollars: 0 }), existingCustomerId: first.link!.customer_id! })
+    expect(second.link!.customer_id).toBe(first.link!.customer_id)
+    const directory = await listCustomers('Isolated practice')
+    expect(directory.customers).toHaveLength(1)
+    expect(directory.customers[0]).toMatchObject({ offer_count: 2, billing_status: 'none', enrollment_status: 'pending', agreement_status: 'unsigned' })
+    const detail = await getCustomerRecord(first.link!.customer_id!)
+    expect(detail!.offers.map(o => o.id)).toEqual(expect.arrayContaining([first.link!.id, second.link!.id]))
+    expect(detail!.accounts).toEqual([])
+    await scopedPool.query('DELETE FROM payment_link_terms')
+    await scopedPool.query('DELETE FROM payment_links')
+    const orphan = await getCustomerRecord(first.link!.customer_id!)
+    expect(orphan!.customer.id).toBe(first.link!.customer_id)
+    expect(orphan!.offers).toHaveLength(0)
+    expect(orphan!.agreements).toHaveLength(2)
+    expect((await listCustomers(customer.email)).customers[0].offer_count).toBe(0)
+    expect(await getCustomerRecord('missing-customer')).toBeNull()
+    expect((await listCustomers('does-not-match')).customers).toEqual([])
+    expect((await listCustomers('', '-10')).page).toBe(1)
+  }, 20_000)
+
+  it('prefills existing customer fields without converting or overwriting from a sparse lead', async () => {
+    const first = await createPaymentLink(input({ type: 'one_time', amountDollars: 1250 }))
+    await scopedPool.query("INSERT INTO sales_leads(id,email,first_name,source) VALUES('prefill-lead',$1,'Sparse','website')", [customer.email])
+    const setup = await getEnrollmentSetup('prefill-lead')
+    expect(setup).toMatchObject({ existingCustomerId: first.link!.customer_id, customer })
+    expect((await rows('sales_leads'))[0]).toMatchObject({ customer_id: null, stage: 'New' })
+    expect(await rows('sales_activities')).toHaveLength(0)
+    expect(await rows('payment_links')).toHaveLength(1)
+    const bad = await createPaymentLink({ ...input({ type: 'one_time', amountDollars: 900 }), existingCustomerId: 'wrong-customer' })
+    expect(bad.ok).toBe(false)
+    expect(await rows('payment_links')).toHaveLength(1)
+  }, 20_000)
+
+  it('withholds unsigned signing credentials and signed PDF credentials from another rep', async () => {
+    const saved = await createPaymentLink(input({ type: 'one_time', amountDollars: 100 }))
+    const { getAgreementForLink, canViewLinkAgreement } = await import('../agreements')
+    expect(await getAgreementForLink(saved.link!.id)).not.toBeNull()
+    await scopedPool.query("UPDATE customers SET created_by_id='other-rep'")
+    await scopedPool.query("UPDATE payment_link_terms SET rep_id='other-rep'")
+    for (const signed of [false, true]) {
+      if (signed) await scopedPool.query("UPDATE agreements SET signed_at=now(),status='signed'")
+      expect(await getAgreementForLink(saved.link!.id)).toBeNull()
+      expect(await canViewLinkAgreement(saved.link!.id)).toBe(false)
+      const detail = await getCustomerRecord(saved.link!.customer_id!)
+      expect(detail!.offers[0].agreement).toBeNull()
+      expect(detail!.offers[0].agreement_access).toBe(false)
+      expect(detail!.agreements[0].can_view).toBe(false)
+      expect(JSON.stringify(detail)).not.toContain('public_url')
+      expect(JSON.stringify(detail)).not.toContain('pdf_url')
+    }
+  }, 20000)
+
+  it('collects a missing lead email at save and retries without another conversion activity', async () => {
+    await scopedPool.query("INSERT INTO sales_leads(id,first_name,source) VALUES('missing-email','New','website')")
+    expect((await getEnrollmentSetup('missing-email')).customer?.email).toBe('')
+    const request = { ...input({ type: 'one_time', amountDollars: 900 }), salesLeadId: 'missing-email' }
+    const saved = await createPaymentLink(request)
+    expect(saved.ok).toBe(true)
+    const [lead] = await rows('sales_leads')
+    expect(lead).toMatchObject({ email: customer.email, customer_id: saved.link!.customer_id, stage: 'Won' })
+    const duplicate = await createPaymentLink(request)
+    expect(duplicate.link?.id).toBe(saved.link!.id)
+    expect((await rows('sales_leads'))[0].revision).toBe(lead.revision)
+    expect(await rows('sales_activities')).toHaveLength(1)
+    expect(await rows('customers')).toHaveLength(1)
+    expect(await rows('payment_links')).toHaveLength(1)
+  }, 20_000)
+
+  it('rejects mismatched lead identity before saving or sending, and serializes different request keys for one lead', async () => {
+    await scopedPool.query("INSERT INTO sales_leads(id,email,first_name,source) VALUES('race-lead',$1,'Test','website')", [customer.email])
+    const bad = await createPaymentLink({ ...input({ type: 'one_time', amountDollars: 900 }), customer: { ...customer, email: 'wrong@example.test' }, salesLeadId: 'race-lead' })
+    expect(bad).toMatchObject({ ok: false })
+    expect(await rows('customers')).toHaveLength(0)
+    expect(state.proxy).not.toHaveBeenCalled()
+    const results = await Promise.all([1, 2].map(() => createPaymentLink({ ...input({ type: 'one_time', amountDollars: 900 }), salesLeadId: 'race-lead' })))
+    expect(results.filter(r => r.ok)).toHaveLength(1)
+    expect(await rows('customers')).toHaveLength(1)
+    expect(await rows('payment_links')).toHaveLength(1)
+    expect(await rows('sales_activities')).toHaveLength(1)
+    expect(await getEnrollmentSetup('race-lead')).toEqual({ continueCustomerId: results.find(r => r.ok)!.link!.customer_id })
+    expect(state.stripeCreate).not.toHaveBeenCalled()
+  }, 20_000)
+
+  it('shows actual owner and staff IDs independently of customer and offer IDs, and separates signed from billing completion', async () => {
+    const saved = await createPaymentLink(input({ type: 'one_time', amountDollars: 1250 }))
+    const owner = randomUUID(), staff = randomUUID()
+    await scopedPool.query(`INSERT INTO participants(id,first_name,last_name,email,role) VALUES($1,'Actual','Owner','actual-owner@example.test','owner')`, [owner])
+    await scopedPool.query(`INSERT INTO participants(id,first_name,last_name,email,role,parent_id) VALUES($1,'Actual','Staff','actual-staff@example.test','staff',$2)`, [staff, owner])
+    await scopedPool.query('UPDATE customers SET participant_id=$1 WHERE id=$2', [owner, saved.link!.customer_id])
+    await scopedPool.query("UPDATE agreements SET signed_at=now(),status='payment_pending'")
+    const detail = await getCustomerRecord(saved.link!.customer_id!)
+    expect(detail!.accounts.map(a => a.id).sort()).toEqual([owner, staff].sort())
+    expect(detail!.customer.id).not.toBe(owner)
+    expect(detail!.offers[0].id).not.toBe(owner)
+    expect((await listCustomers()).customers[0]).toMatchObject({ agreement_status: 'signed', enrollment_status: 'pending', billing_status: 'none' })
+    await scopedPool.query("UPDATE enrollment_invitations SET status='failed'")
+    expect((await listCustomers()).customers[0].enrollment_status).toBe('invitation_failed')
+    await scopedPool.query('UPDATE payment_link_terms SET completed_at=now()')
+    expect((await listCustomers()).customers[0]).toMatchObject({ enrollment_status: 'completed', billing_status: 'none' })
   }, 20_000)
   it('sales lead enrollment preserves affiliate attribution and authenticated actor while retrying the same saved customer and offer', async () => {
     await scopedPool.query("INSERT INTO affiliates(id,business_name,email,status,referral_code) VALUES('affiliate-fixture','Fixture partner','partner@example.test','approved','fixture-code')")

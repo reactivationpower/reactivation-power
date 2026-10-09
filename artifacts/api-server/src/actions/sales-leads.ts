@@ -1,13 +1,12 @@
 import { pool } from '@workspace/db'
 import { requireAdmin } from '@/lib/auth/admin-session'
 import { listAdminUsers, getAdminUserById } from '@/lib/data/admin-users'
-import { resolveQualifiedReferral, attachCustomerReferral } from '@/lib/affiliates/attribution'
+import { resolveQualifiedReferral } from '@/lib/affiliates/attribution'
 import { SALES_STAGES, SALES_DISPOSITIONS, type SalesDisposition, type SalesStage } from '@workspace/shared/sales-leads'
 import { activity, emailKey, enqueue, id, intake, phoneKey, settings, stop, transaction, type Intake } from '@/lib/sales-leads/store'
 import { allowed, cadence, suggestedFollowup, validTimezone } from '@/lib/sales-leads/cadence'
 import { contactPage, contactUrl, verifyCapabilities } from '@/lib/sales-leads/provider'
 import { runSalesWorker } from '@/lib/sales-leads/worker'
-import { linkSalesCustomer } from '@/lib/sales-leads/conversion'
 import { schedulerHealthy } from '@/lib/sales-leads/wake'
 const safeText = (s: unknown, max = 200) => typeof s === 'string' ? s.trim().slice(0, max) : ''
 function email(s: unknown) {
@@ -221,19 +220,12 @@ export async function resolveSalesMerge(reviewId: string, leadId: string | null)
   await pool.query("UPDATE sales_merge_reviews SET state='resolved',resolved_at=now() WHERE id=$1", [reviewId])
 }
 export async function convertSalesLead(leadId: string) {
-  const admin = await requireAdmin()
+  await requireAdmin()
   const lead = (await pool.query('SELECT * FROM sales_leads WHERE id=$1', [leadId])).rows[0]
   if (!lead) throw new Error('Lead not found')
-  if (!lead.email) throw new Error('Add a verified email before enrollment')
-  const customer = (await pool.query('SELECT id FROM customers WHERE lower(email)=$1', [lead.email])).rows
-  if (customer.length > 1) throw new Error('Multiple customer records match; resolve the customer identity before conversion')
-  if (customer[0]) {
-    await attachCustomerReferral(customer[0].id, lead.email, lead.phone)
-    await linkSalesCustomer(leadId, customer[0].id, lead.email, admin)
-  }
-  // The existing enrollment form collects the remaining mandatory address/offer
-  // fields. It links the lead only when customer creation succeeds.
-  return { customerId: customer[0]?.id ?? '', enrollmentUrl: `/admin/payments?lead=${encodeURIComponent(leadId)}` }
+  if (lead.customer_id) return { customerId: lead.customer_id, enrollmentUrl: `/admin/customers/${encodeURIComponent(lead.customer_id)}` }
+  if (lead.stage === 'Lost/Do Not Contact') throw new Error('This lead is closed to enrollment')
+  return { customerId: '', enrollmentUrl: `/admin/payments?lead=${encodeURIComponent(leadId)}` }
 }
 export async function retrySalesSync(leadId: string) {
   await requireAdmin()

@@ -23,7 +23,10 @@ import {
 } from '@workspace/db'
 import { createHash, randomBytes } from 'crypto'
 import { inviteEnrollment, type InvitationOutcome } from '@/lib/agreements/enrollment-invitation'
-import { linkSalesCustomer } from '@/lib/sales-leads/conversion'
+import { linkSalesCustomerInTransaction } from '@/lib/sales-leads/conversion'
+import { transaction } from '@/lib/sales-leads/store'
+import { drizzle } from 'drizzle-orm/node-postgres'
+import { logger } from '@/lib/logger'
 import { and, desc, eq, inArray, sql } from 'drizzle-orm'
 
 export const PRODUCT_NAME = 'Reactivation Power Access'
@@ -432,6 +435,7 @@ export async function createPaymentLink(input: {
   offer: OfferInput
   requestId?: string
   salesLeadId?: string
+  existingCustomerId?: string
 }): Promise<{ ok: boolean; error?: string; link?: PaymentLink; invitation?: InvitationOutcome }> {
   const rep = await requireAdmin()
   if (input.requestId != null && !/^[0-9a-f-]{36}$/i.test(input.requestId))
@@ -476,11 +480,32 @@ export async function createPaymentLink(input: {
     : randomBytes(32).toString('base64url')
   let data: Record<string, unknown>
   try {
-    data = await db.transaction(async tx => {
+    data = await transaction(async client => {
+      const tx = drizzle(client)
+      let lead: Record<string, any> | undefined
+      if (input.salesLeadId) {
+        await client.query("SELECT pg_advisory_xact_lock(hashtextextended($1,0))", [`sales-send:${input.salesLeadId}`])
+        lead = (await client.query('SELECT * FROM sales_leads WHERE id=$1 FOR UPDATE', [input.salesLeadId])).rows[0]
+        if (!lead) throw new Error('Lead not found')
+        if (lead.email && lead.email.trim().toLowerCase() !== customerInput.email) throw new Error('Enrollment email must match the selected lead. Update the lead first.')
+      }
       await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${`new-customer-${token}`}))`)
       const existing = await tx.execute(sql`SELECT * FROM payment_links WHERE token = ${token}`)
-      if (existing.rows[0]) return existing.rows[0] as Record<string, unknown>
+      if (existing.rows[0]) {
+        const row = existing.rows[0] as Record<string, unknown>
+        if (row.email !== customerInput.email) throw new Error('This request already belongs to a different email')
+        const [terms] = await tx.select().from(paymentLinkTermsTable).where(eq(paymentLinkTermsTable.linkId, String(row.id)))
+        if (!terms || (input.existingCustomerId && terms.customerId !== input.existingCustomerId)) throw new Error('Saved customer identity does not match')
+        if (lead) await linkSalesCustomerInTransaction(client, input.salesLeadId!, terms.customerId, customerInput.email, rep)
+        return row
+      }
+      if (lead?.customer_id) throw new Error('This lead is already linked. Open its customer record to continue enrollment or explicitly create another offer.')
+      if (lead?.stage === 'Lost/Do Not Contact') throw new Error('This lead is closed to enrollment')
       await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${`customer-email-${customerInput.email}`}))`)
+      if (input.existingCustomerId) {
+        const [expected] = await tx.select().from(customersTable).where(eq(customersTable.id, input.existingCustomerId))
+        if (!expected || expected.email.trim().toLowerCase() !== customerInput.email) throw new Error('Customer identity changed. Reopen setup from the customer record.')
+      }
       const customer = await upsertCustomer(customerInput, rep, tx)
       const inserted = await tx.execute(sql`INSERT INTO payment_links
         (token, name, email, phone, staff, amount_cents)
@@ -499,18 +524,28 @@ export async function createPaymentLink(input: {
       await tx.insert(enrollmentInvitationsTable).values({
         linkId: String(row.id), recipient: customer.email,
       })
+      if (lead) {
+        if (!lead.email) await client.query('UPDATE sales_leads SET email=$2 WHERE id=$1', [input.salesLeadId, customerInput.email])
+        await linkSalesCustomerInTransaction(client, input.salesLeadId!, customer.id, customerInput.email, rep)
+      }
       return row
     })
-  } catch {
-    return { ok: false, error: 'Could not save the customer and offer. No enrollment email was sent.' }
+  } catch (error) {
+    // Only explicit validation messages are surfaced; database details stay private.
+    const cause = (error as { cause?: unknown })?.cause ?? error
+    logger.warn({ code: (cause as { code?: string })?.code ?? 'validation' }, 'Customer enrollment transaction rejected')
+    const message = error instanceof Error && /^(Lead not found|Enrollment email|This request|Saved customer|This lead|Customer identity|Multiple customers)/.test(error.message)
+      ? error.message : 'Could not save the customer and offer. No enrollment email was sent.'
+    return { ok: false, error: message }
   }
 
   revalidatePath('/admin/payments')
+  revalidatePath('/admin/customers')
+  revalidatePath('/admin/leads')
   const [link] = await mergeLinks([data])
   // Attribution owns a separate transaction and must see the committed
   // customer. Creation retries recover it too without duplicating attribution.
   if (link.customer_id) await attachCustomerReferral(link.customer_id, customerInput.email, customerInput.phone)
-  if (input.salesLeadId && link.customer_id) await linkSalesCustomer(input.salesLeadId,link.customer_id,customerInput.email,rep)
   const invitation = await retryCustomerEnrollment(String(data.id))
   return { ok: true, link, invitation: invitation.invitation }
 }

@@ -69,10 +69,16 @@ function CardChips({ cards }: { cards: any[] }) {
   )
 }
 
-function CustomerLink({ row, children }: { row: { link_id: string | null }; children: React.ReactNode }) {
-  if (!row.link_id) return <span className="text-sm font-medium">{children}</span>
+/** Failed/upcoming rows carry customer_id; customer rows (customers/pastDue) use id. */
+export function customerIdFor(row: { customer_id?: string | null; id?: string | null }, kind: 'ledger' | 'customer'): string | null {
+  return (kind === 'ledger' ? row.customer_id : row.id) ?? null
+}
+
+function CustomerLink({ row, kind, children }: { row: any; kind: 'ledger' | 'customer'; children: React.ReactNode }) {
+  const cid = customerIdFor(row, kind)
+  if (!cid) return <span className="text-sm font-medium">{children}</span>
   return (
-    <Link href={`/admin/payments/${row.link_id}`} className="text-sm font-medium text-primary hover:underline">
+    <Link href={`/admin/customers/${cid}`} className="text-sm font-medium text-primary hover:underline">
       {children}
     </Link>
   )
@@ -215,7 +221,7 @@ export default function BillingDashboardPage() {
                       <TableRow key={u.link_id}>
                         <TableCell className="whitespace-nowrap text-sm">{formatDay(u.due_at)}</TableCell>
                         <TableCell>
-                          <CustomerLink row={u}>{u.customer_name}</CustomerLink>
+                          <CustomerLink row={u} kind="ledger">{u.customer_name}</CustomerLink>
                           <p className="text-xs text-muted-foreground">{u.business_name}</p>
                         </TableCell>
                         <TableCell className="text-xs text-muted-foreground">
@@ -262,7 +268,7 @@ export default function BillingDashboardPage() {
                     {pastDue.map((c) => (
                       <TableRow key={c.id}>
                         <TableCell>
-                          <CustomerLink row={c}>{c.full_name}</CustomerLink>
+                          <CustomerLink row={c} kind="customer">{c.full_name}</CustomerLink>
                           <p className="text-xs text-muted-foreground">{c.business_name}</p>
                         </TableCell>
                         <TableCell><BillingStatusBadge status={c.billing_status} /></TableCell>
@@ -310,7 +316,7 @@ export default function BillingDashboardPage() {
                     <TableRow key={f.id}>
                       <TableCell className="whitespace-nowrap text-xs text-muted-foreground">{formatWhen(f.occurred_at)}</TableCell>
                       <TableCell>
-                        <CustomerLink row={f}>{f.customer_name}</CustomerLink>
+                        <CustomerLink row={f} kind="ledger">{f.customer_name}</CustomerLink>
                         <p className="text-xs text-muted-foreground">{f.business_name}</p>
                       </TableCell>
                       <TableCell className="text-xs capitalize text-muted-foreground">
@@ -358,7 +364,7 @@ export default function BillingDashboardPage() {
                   {customers.map((c) => (
                     <TableRow key={c.id}>
                       <TableCell>
-                        <CustomerLink row={c}>{c.full_name}</CustomerLink>
+                        <CustomerLink row={c} kind="customer">{c.full_name}</CustomerLink>
                         <p className="text-xs text-muted-foreground">{c.business_name || c.email}</p>
                       </TableCell>
                       <TableCell><BillingStatusBadge status={c.billing_status} /></TableCell>

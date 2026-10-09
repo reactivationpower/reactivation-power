@@ -607,9 +607,19 @@ export async function getAgreementDetail(id: string): Promise<AgreementDetail | 
 
 /** Agreement state for the customer record (payment detail page). */
 export async function getAgreementForLink(linkId: string): Promise<AgreementSummary | null> {
-  await requireAdmin()
+  const admin = await requireAdmin()
   const loaded = await loadAgreementByLink(linkId)
+  if (loaded && !await canAccessNotificationAgreement(admin, loaded.agreement.id)) return null
   return loaded ? (await toDetail(loaded)).agreement : null
+}
+
+export async function canViewLinkAgreement(linkId: string): Promise<boolean> {
+  const admin = await requireAdmin()
+  const loaded = await loadAgreementByLink(linkId)
+  if (loaded) return canAccessNotificationAgreement(admin, loaded.agreement.id)
+  const found = await customerAndTermsForLink(linkId)
+  return admin.role === 'super_admin' || Boolean(found &&
+    (found.customer.createdById === admin.userId || found.terms.repId === admin.userId))
 }
 
 /**

@@ -56,10 +56,11 @@ import {
   confirmPayment, getPaymentDetail, getPaymentLinkPublic, listPaymentLinks,
 } from "../actions/payments";
 import {
-  agreementTokenForLink, getAgreementDetail, getAgreementForLink, getAgreementPublic, listAgreements,
+  agreementTokenForLink, getAgreementDetail, getAgreementForLink, canViewLinkAgreement, getAgreementPublic, listAgreements,
 } from "../actions/agreements";
 import { listCommissions } from "../actions/commissions";
 import { getPortalLoginState } from '../actions/auth';
+import { listCustomers, getCustomerRecord, getEnrollmentSetup } from '../lib/data/customers';
 
 const visibleQueueItem = (item: leadStore.CallNextItem) => ({ ...item, lead: withoutLeadLeaseToken(item.lead) });
 
@@ -699,6 +700,15 @@ add("/admin/reactivation", "super_admin", async () => {
   return { niches, script, sections, slots };
 });
 
+add("/admin/customers", "admin", async (req) => listCustomers(queryString(req, "q"), queryString(req, "page")));
+add("/admin/customers/:id", "admin", async (req) => {
+  const detail = await getCustomerRecord(String(req.params.id));
+  if (!detail) notFound();
+  const session = await getAdminSessionFromRequest(req);
+  return { ...detail, canManageViewers: session?.role === "super_admin" || session?.canManageServices === true };
+});
+add("/admin/enrollment-setup", "admin", async (req) => getEnrollmentSetup(queryString(req, "lead"), queryString(req, "customer")));
+
 add("/admin/payments", "admin", async (req) => {
   // The Scheduled jobs card (global card-charging controls) is super-admin only.
   const session = await getAdminSessionFromRequest(req);
@@ -715,7 +725,8 @@ add("/admin/payments/:id", "admin", async (req) => {
   const owner = accounts.find((a) => a.role === "owner");
   const staffAccounts = accounts.filter((a) => a.role === "staff");
   const agreement = await getAgreementForLink(id);
-  return { id, detail, link, accounts, customer, cards, history, isPaid, owner: owner ?? null, staffAccounts, agreement };
+  const agreementAccess = await canViewLinkAgreement(id);
+  return { id, detail, link, accounts, customer, cards, history, isPaid, owner: owner ?? null, staffAccounts, agreement, agreementAccess };
 });
 
 add("/admin/agreements", "admin", async (req) => ({

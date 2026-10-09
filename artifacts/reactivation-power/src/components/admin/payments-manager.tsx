@@ -1,7 +1,7 @@
 // @ts-nocheck
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useLocation } from 'wouter'
+import { useLocation, useSearch } from 'wouter'
 import {
   EmbeddedCheckout,
   EmbeddedCheckoutProvider,
@@ -153,7 +153,15 @@ export function PaymentsManager({
   const [sortKey, setSortKey] = useState<SortKey>('created_at')
   const [sortDir, setSortDir] = useState<SortDir>('desc')
 
-  const [createOpen, setCreateOpen] = useState(() => Boolean(new URLSearchParams(window.location.search).get('lead')))
+  const search = useSearch()
+  const [createOpen, setCreateOpen] = useState(() => {
+    const p = new URLSearchParams(window.location.search)
+    return Boolean(p.get('lead') || p.get('customer'))
+  })
+  useEffect(() => {
+    const p = new URLSearchParams(search)
+    if (p.get('lead') || p.get('customer')) setCreateOpen(true)
+  }, [search])
 
   // Per-link UI state
   const [qrFor, setQrFor] = useState<PaymentLink | null>(null)
@@ -639,6 +647,7 @@ export function PaymentsManager({
       ) : null}
 
       <NewCustomerLinkDialog
+        key={search}
         open={createOpen}
         onOpenChange={setCreateOpen}
         onCreated={(link) => setLinks((prev) => [link, ...prev.filter(p => p.id !== link.id)])}

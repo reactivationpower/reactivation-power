@@ -148,6 +148,14 @@ export default function PaymentDetailPage() {
           <ArrowLeft className="size-4" />
           Payments
         </Link>
+        {customer?.id ? (
+          <Link
+            href={`/admin/customers/${customer.id}`}
+            className="mb-3 ml-4 inline-flex items-center gap-1 text-sm text-primary hover:underline"
+          >
+            View customer
+          </Link>
+        ) : null}
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-3">
@@ -195,7 +203,7 @@ export default function PaymentDetailPage() {
       <div className="grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         {/* ── Left column: record ─────────────────────────────── */}
         <div className="flex flex-col gap-6">
-          <AgreementCard linkId={link.id} agreement={agreement ?? null} offerType={link.type} enrollmentFlow={link.enrollment_flow} />
+          {data.agreementAccess ? <AgreementCard linkId={link.id} agreement={agreement ?? null} offerType={link.type} enrollmentFlow={link.enrollment_flow} /> : <p className="text-sm text-muted-foreground">Agreement access is restricted to its assigned representative and administrators.</p>}
           <Card>
             <CardHeader>
               <CardTitle className="text-base">Contact</CardTitle>

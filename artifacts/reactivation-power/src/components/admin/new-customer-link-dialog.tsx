@@ -16,7 +16,10 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { notifyDone, notifyError } from '@/lib/notify'
-import { getSalesLead } from '@/app/actions/sales-leads'
+import { loadPage } from '@/lib/api'
+import { Link } from 'wouter'
+import { useQueryClient } from '@tanstack/react-query'
+import { useRouter } from '@/hooks/use-router'
 
 const MAX_STAFF = 5
 
@@ -70,18 +73,28 @@ export function NewCustomerLinkDialog({
   const requestId = useRef<string | null>(null)
   const inFlight = useRef(false)
   const [saved, setSaved] = useState<any>(null)
+  const [prefilling, setPrefilling] = useState(false)
+  const [prefillError, setPrefillError] = useState<string | null>(null)
+  const [existingCustomerId, setExistingCustomerId] = useState<string | null>(null)
+  const [continueCustomerId, setContinueCustomerId] = useState<string | null>(null)
+  const qc = useQueryClient()
+  const router = useRouter()
   const salesLeadId = new URLSearchParams(window.location.search).get('lead')
+  const selectedCustomerId = new URLSearchParams(window.location.search).get('customer')
   useEffect(() => {
-    if (!open || !salesLeadId || saved || creating) return
+    if (!open || (!salesLeadId && !selectedCustomerId) || saved || creating || requestId.current) return
     let cancelled = false
-    getSalesLead(salesLeadId).then(({ lead }) => {
+    setPrefilling(true)
+    setPrefillError(null)
+    loadPage<any>('/admin/enrollment-setup', { lead: salesLeadId || undefined, customer: selectedCustomerId || undefined }).then((res) => {
       if (cancelled) return
-      const fullName = `${lead.first_name} ${lead.last_name}`.trim()
-      const phone = lead.phone.startsWith('+1') ? lead.phone.slice(2) : lead.phone
-      setCustomer({ ...emptyCustomer, fullName, ownerName: fullName, businessName: lead.practice_name, phone, ownerPhone: phone, email: lead.email })
-    }).catch(error => { if (!cancelled) setFormError(error.message) })
+      setContinueCustomerId(res.continueCustomerId || null)
+      setExistingCustomerId(res.existingCustomerId || null)
+      if (res.customer) setCustomer(res.customer)
+    }).catch(error => { if (!cancelled) setPrefillError(error.message) })
+      .finally(() => { if (!cancelled) setPrefilling(false) })
     return () => { cancelled = true }
-  }, [open, salesLeadId])
+  }, [open, salesLeadId, selectedCustomerId])
 
   const set = (key: keyof typeof emptyCustomer) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setCustomer((c) => ({ ...c, [key]: e.target.value }))
@@ -104,12 +117,14 @@ export function NewCustomerLinkDialog({
     setStaff([])
     setFormError(null)
     setSaved(null)
+    setExistingCustomerId(null)
+    setContinueCustomerId(null)
     requestId.current = null
   }
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault()
-    if (inFlight.current) return
+    if (inFlight.current || prefilling || prefillError || continueCustomerId) return
     inFlight.current = true
     setFormError(null)
     setCreating(true)
@@ -119,7 +134,7 @@ export function NewCustomerLinkDialog({
         ? { type: 'subscription', monthlyDollars: Number(monthly), setupFeeDollars: chargeSetupFee ? Number(setupFee) : 0 }
         : { type: 'one_time', amountDollars: Number(amount) }
     try {
-    const res = await createPaymentLink({ customer, staff, offer, requestId: requestId.current, ...(salesLeadId ? { salesLeadId } : {}) })
+    const res = await createPaymentLink({ customer, staff, offer, requestId: requestId.current, ...(salesLeadId ? { salesLeadId } : {}), ...(existingCustomerId ? { existingCustomerId } : {}) })
     if (!res.ok || !res.link) {
       setFormError(res.error ?? 'Something went wrong.')
       notifyError('Could not create the link', res.error)
@@ -127,6 +142,8 @@ export function NewCustomerLinkDialog({
     }
     onCreated(res.link)
     setSaved({ link: res.link, invitation: res.invitation ?? { status: 'pending' } })
+    void qc.invalidateQueries({ queryKey: ['sales-leads'] })
+    router.refresh()
     notifyDone(
       'Enrollment record created — no payment collected',
       offerType === 'subscription'
@@ -168,12 +185,17 @@ export function NewCustomerLinkDialog({
     }}>
       <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>New customer</DialogTitle>
+          <DialogTitle>{existingCustomerId ? 'Create another offer' : salesLeadId ? 'Start enrollment' : 'New customer'}</DialogTitle>
           <DialogDescription>
             Create the customer and offer, then automatically email their enrollment agreement. No payment is collected.
           </DialogDescription>
         </DialogHeader>
-        {saved ? (
+        {prefilling ? <p role="status">Loading customer details…</p> : prefillError ? <p role="alert" className="text-destructive">{prefillError} Close and reopen setup to retry.</p> : continueCustomerId ? (
+          <div className="space-y-3">
+            <p>This lead already has a customer record. Continue the saved enrollment there. No new offer has been created.</p>
+            <Link href={`/admin/customers/${continueCustomerId}`} className="text-primary underline">View customer / continue enrollment</Link>
+          </div>
+        ) : saved ? (
           <div className="space-y-4" data-testid="new-customer-enrollment-result">
             <p className="font-medium">Customer and offer saved — no payment collected.</p>
             <p className="text-sm" role="status">
@@ -191,9 +213,14 @@ export function NewCustomerLinkDialog({
               </Button>
             )}
             <p className="text-xs text-muted-foreground">Edit terms, preview the agreement, choose copy recipients, or explicitly resend from the saved offer’s agreement controls. Staff accounts are not email-copy recipients.</p>
+            <div className="flex gap-4">
+              <Link href={`/admin/customers/${saved.link.customer_id}`} className="text-primary underline">View customer</Link>
+              <Link href={`/admin/payments/${saved.link.id}`} className="text-primary underline">Continue saved enrollment</Link>
+            </div>
             <Button variant="outline" disabled={creating} onClick={() => { reset(); onOpenChange(false) }}>Done</Button>
           </div>
         ) : <form onSubmit={handleCreate} className="flex flex-col gap-6">
+          {existingCustomerId && <p className="rounded-md bg-muted p-3 text-sm">An existing customer matches this identity. This explicitly creates an additional offer, not another customer. <Link href={`/admin/customers/${existingCustomerId}`} className="text-primary underline">Open existing offers instead</Link>.</p>}
           {/* ── Customer ─────────────────────────────────────── */}
           <fieldset className="flex flex-col gap-3">
             <legend className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">

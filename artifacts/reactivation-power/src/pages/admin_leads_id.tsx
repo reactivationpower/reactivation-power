@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useParams } from 'wouter'
+import { Link, useParams, useLocation } from 'wouter'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { addSalesNote, convertSalesLead, getSalesLead, getSalesMedia, logSalesCall, retrySalesSync, updateSalesLead } from '@/app/actions/sales-leads'
@@ -21,7 +21,7 @@ export default function AdminLeadDetailPage() {
   const [disp, setDisp] = useState<SalesDisposition | null>(null)
   const [callNotes, setCallNotes] = useState(''); const [fu, setFu] = useState(''); const [useSlot, setUseSlot] = useState(false)
   const [nextFu, setNextFu] = useState<string | null>(null)
-  const [conv, setConv] = useState<{ customerId: string; enrollmentUrl: string } | null>(null)
+  const [, navigate] = useLocation()
 
   const save = useMutation({
     mutationFn: (p: Parameters<typeof updateSalesLead>[1]) => updateSalesLead(id, p),
@@ -34,7 +34,7 @@ export default function AdminLeadDetailPage() {
     onSuccess: () => { toast.success('Call logged'); setDisp(null); setCallNotes(''); setFu(''); setUseSlot(false); refresh() },
     onError: (e) => toast.error(errMsg(e)),
   })
-  const convert = useMutation({ mutationFn: () => convertSalesLead(id), onSuccess: (r) => { setConv(r); toast.success('Converted to customer'); refresh() }, onError: (e) => toast.error(errMsg(e)) })
+  const convert = useMutation({ mutationFn: () => convertSalesLead(id), onSuccess: (r) => navigate(r.enrollmentUrl), onError: (e) => toast.error(errMsg(e)) })
   const retry = useMutation({ mutationFn: () => retrySalesSync(id), onSuccess: () => { toast.success('Sync retry queued'); refresh() }, onError: (e) => toast.error(errMsg(e)) })
   const media = useMutation({
     mutationFn: (aid: string) => getSalesMedia(id, aid),
@@ -79,13 +79,12 @@ export default function AdminLeadDetailPage() {
           ) : (
             <button className={btn} disabled title="No GoHighLevel contact is linked yet" data-testid="button-ghl-call-disabled">Open in GoHighLevel to call</button>
           )}
-          {lead.customer_id ? <Link href={`/admin/participants/${lead.customer_id}`} className={btn2} data-testid="link-customer">View customer</Link> : (
-            <button className={btn2} disabled={convert.isPending || lead.stage === 'Lost/Do Not Contact'} onClick={() => { if (window.confirm('Convert this lead to a customer?')) convert.mutate() }} data-testid="button-convert">{convert.isPending ? 'Converting...' : 'Convert to customer'}</button>
+          {lead.customer_id ? <Link href={`/admin/customers/${lead.customer_id}`} className={btn2} data-testid="link-customer">View customer / continue enrollment</Link> : (
+            <button className={btn2} disabled={convert.isPending || lead.stage === 'Lost/Do Not Contact'} onClick={() => convert.mutate()} data-testid="button-convert">{convert.isPending ? 'Opening...' : 'Start enrollment'}</button>
           )}
         </div>
       </header>
       {!contact_url && <Banner kind="info">No GoHighLevel contact link yet. Calls are placed in GoHighLevel in a new tab, never from this browser.</Banner>}
-      {conv && <Banner kind="ok">Converted. <a className="font-medium underline" href={conv.enrollmentUrl} data-testid="link-enrollment">Continue to enrollment</a></Banner>}
       {(lead.sync_state !== 'synced' || lead.sync_error) && (
         <Banner kind={lead.sync_error ? 'error' : 'info'}>
           <div className="flex flex-wrap items-center justify-between gap-2"><span>Sync: {lead.sync_state}{lead.sync_error ? ` - ${lead.sync_error}` : ''}</span>
