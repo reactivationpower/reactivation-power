@@ -1,5 +1,6 @@
 import { logger } from '@/lib/logger'
 import { deliverLeadEmails } from '@/lib/lead-followup/notifications'
+import { retryPendingEnrollmentInvitations } from '@/lib/agreements/enrollment-invitation'
 import { CRON_JOBS, CRON_JOB_NAMES, runCronJob, type CronJobName } from './jobs'
 import { dueKeyFor } from './slots'
 
@@ -42,6 +43,7 @@ const inFlight = new Set<CronJobName>()
 /** One pass over every job. Exported for tests and the boot-time first tick. */
 export async function tick(now: Date = new Date()): Promise<void> {
   await deliverLeadEmails()
+  await retryPendingEnrollmentInvitations()
   for (const name of CRON_JOB_NAMES) {
     if (inFlight.has(name)) continue
     const dueKey = dueKeyFor(CRON_JOBS[name].hourEt, now)

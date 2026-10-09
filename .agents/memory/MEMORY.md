@@ -32,3 +32,4 @@
 - [Affiliate business policy](affiliate-business-policy.md) — referral protection, no setup commissions, collected-money earnings, durable clawbacks, and monthly external wire payouts.
 - [Internal sales lead policy](internal-sales-lead-policy.md) — provider-sales CRM uses GoHighLevel, separate from patient queues; consented cadence, call logging, and timezone boundaries.
 - [Enrollment notification policy](enrollment-notification-policy.md) — recover alerts without retrying billing; historical card replacements are not new milestones; shared-link views do not prove identity.
+- [Structural merge integrity](merge-integrity.md) — clean syncs can mispair sibling tests; validate the merged tree and regenerate colliding migration metadata.

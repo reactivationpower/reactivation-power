@@ -195,7 +195,7 @@ export default function PaymentDetailPage() {
       <div className="grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         {/* ── Left column: record ─────────────────────────────── */}
         <div className="flex flex-col gap-6">
-          <AgreementCard linkId={link.id} agreement={agreement ?? null} offerType={link.type} />
+          <AgreementCard linkId={link.id} agreement={agreement ?? null} offerType={link.type} enrollmentFlow={link.enrollment_flow} />
           <Card>
             <CardHeader>
               <CardTitle className="text-base">Contact</CardTitle>

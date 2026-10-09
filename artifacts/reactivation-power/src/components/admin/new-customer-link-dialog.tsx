@@ -1,9 +1,9 @@
 // @ts-nocheck
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Loader2, Plus, X } from 'lucide-react'
 
-import { createPaymentLink, type PaymentLink, type StaffMember } from '@/app/actions/payments'
+import { createPaymentLink, retryCustomerEnrollment, type PaymentLink, type StaffMember } from '@/app/actions/payments'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -66,6 +66,9 @@ export function NewCustomerLinkDialog({
   const [staff, setStaff] = useState<StaffMember[]>([])
   const [creating, setCreating] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
+  const requestId = useRef<string | null>(null)
+  const inFlight = useRef(false)
+  const [saved, setSaved] = useState<any>(null)
 
   const set = (key: keyof typeof emptyCustomer) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setCustomer((c) => ({ ...c, [key]: e.target.value }))
@@ -87,26 +90,30 @@ export function NewCustomerLinkDialog({
     setSetupTouched(false)
     setStaff([])
     setFormError(null)
+    setSaved(null)
+    requestId.current = null
   }
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault()
+    if (inFlight.current) return
+    inFlight.current = true
     setFormError(null)
     setCreating(true)
+    requestId.current ??= crypto.randomUUID()
     const offer =
       offerType === 'subscription'
         ? { type: 'subscription', monthlyDollars: Number(monthly), setupFeeDollars: chargeSetupFee ? Number(setupFee) : 0 }
         : { type: 'one_time', amountDollars: Number(amount) }
-    const res = await createPaymentLink({ customer, staff, offer })
-    setCreating(false)
+    try {
+    const res = await createPaymentLink({ customer, staff, offer, requestId: requestId.current })
     if (!res.ok || !res.link) {
       setFormError(res.error ?? 'Something went wrong.')
       notifyError('Could not create the link', res.error)
       return
     }
     onCreated(res.link)
-    reset()
-    onOpenChange(false)
+    setSaved({ link: res.link, invitation: res.invitation ?? { status: 'pending' } })
     notifyDone(
       'Enrollment record created — no payment collected',
       offerType === 'subscription'
@@ -115,20 +122,65 @@ export function NewCustomerLinkDialog({
           }`
         : `${res.link.name} — ${formatUsd(res.link.amount_cents)}`,
     )
+    } catch {
+      setFormError('Response unavailable. Submit again to recover the same enrollment record safely; do not start another customer.')
+    } finally {
+      setCreating(false)
+      inFlight.current = false
+    }
+  }
+
+  async function retryEmail() {
+    if (inFlight.current || !saved) return
+    inFlight.current = true
+    setCreating(true)
+    try {
+      const res = await retryCustomerEnrollment(saved.link.id)
+      setSaved((s: any) => ({ ...s, invitation: res.invitation }))
+    } catch {
+      setSaved((s: any) => ({ ...s, invitation: { status: 'pending', error: 'Response unavailable. Check status again on this saved record.' } }))
+    } finally {
+      setCreating(false)
+      inFlight.current = false
+    }
   }
 
   const staffCanAdd = staff.length < MAX_STAFF
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={(value) => {
+      if (creating) return
+      if (!value && saved) reset()
+      onOpenChange(value)
+    }}>
       <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>New customer</DialogTitle>
           <DialogDescription>
-            Create the customer record, then choose the offer. The link is attributed to you.
+            Create the customer and offer, then automatically email their enrollment agreement. No payment is collected.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleCreate} className="flex flex-col gap-6">
+        {saved ? (
+          <div className="space-y-4" data-testid="new-customer-enrollment-result">
+            <p className="font-medium">Customer and offer saved — no payment collected.</p>
+            <p className="text-sm" role="status">
+              {saved.invitation.status === 'provider_accepted'
+                ? 'Email provider accepted the enrollment invitation. Inbox delivery is not yet confirmed.'
+                : saved.invitation.status === 'failed'
+                  ? 'Enrollment email failed. Your saved record is safe; do not create another customer.'
+                  : 'Enrollment email is sending or pending. Check again on this saved record.'}
+            </p>
+            {saved.invitation.error && <p className="text-sm text-destructive">{saved.invitation.error}</p>}
+            {saved.invitation.status !== 'provider_accepted' && (
+              <Button disabled={creating} onClick={retryEmail} data-testid="retry-enrollment-email">
+                {creating && <Loader2 className="size-4 animate-spin" />}
+                {saved.invitation.status === 'failed' ? 'Retry enrollment email' : 'Check / retry email'}
+              </Button>
+            )}
+            <p className="text-xs text-muted-foreground">Edit terms, preview the agreement, choose copy recipients, or explicitly resend from the saved offer’s agreement controls. Staff accounts are not email-copy recipients.</p>
+            <Button variant="outline" disabled={creating} onClick={() => { reset(); onOpenChange(false) }}>Done</Button>
+          </div>
+        ) : <form onSubmit={handleCreate} className="flex flex-col gap-6">
           {/* ── Customer ─────────────────────────────────────── */}
           <fieldset className="flex flex-col gap-3">
             <legend className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
@@ -346,15 +398,15 @@ export function NewCustomerLinkDialog({
             {creating ? (
               <>
                 <Loader2 className="size-4 animate-spin" />
-                Creating…
+                Saving and requesting enrollment email…
               </>
             ) : offerType === 'subscription' ? (
-              'Create subscription link'
+              'Create subscription & email agreement'
             ) : (
-              'Create payment link'
+              'Create full-payment offer & email agreement'
             )}
           </Button>
-        </form>
+        </form>}
       </DialogContent>
     </Dialog>
   )

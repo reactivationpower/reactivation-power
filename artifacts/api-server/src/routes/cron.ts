@@ -3,6 +3,7 @@ import { runWithRequestContext } from "@/lib/request-context";
 import { currentDueKey, runCronJob, type CronJobName } from "@/lib/cron/jobs";
 import { retryFailedNotifications } from "@/lib/billing/notifications";
 import { deliverLeadEmails } from "@/lib/lead-followup/notifications";
+import { retryPendingEnrollmentInvitations } from "@/lib/agreements/enrollment-invitation";
 
 const router: IRouter = Router();
 
@@ -49,6 +50,7 @@ router.get("/cron/lead-emails", async (req, res) => {
     return;
   }
   await deliverLeadEmails();
+  await retryPendingEnrollmentInvitations();
   res.json({ ok: true });
 });
 

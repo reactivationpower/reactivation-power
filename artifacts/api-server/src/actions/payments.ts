@@ -1,5 +1,3 @@
-
-import { randomBytes } from 'crypto'
 import { attachCustomerReferral } from '@/lib/affiliates/attribution'
 import { queueAffiliateHistory } from '@/lib/affiliates/ledger'
 import { revalidatePath } from 'next/cache'
@@ -17,12 +15,15 @@ import {
   db,
   paymentHistoryTable,
   paymentLinkTermsTable,
+  enrollmentInvitationsTable,
   type Customer,
   type CustomerCard,
   type PaymentHistory,
   type PaymentLinkTerms,
 } from '@workspace/db'
-import { and, desc, eq, inArray } from 'drizzle-orm'
+import { createHash, randomBytes } from 'crypto'
+import { inviteEnrollment, type InvitationOutcome } from '@/lib/agreements/enrollment-invitation'
+import { and, desc, eq, inArray, sql } from 'drizzle-orm'
 
 export const PRODUCT_NAME = 'Reactivation Power Access'
 
@@ -385,6 +386,7 @@ function toCents(dollars: unknown): number {
 async function upsertCustomer(
   c: CustomerInput,
   rep: { userId: string; name: string | null; email: string },
+  connection: Pick<typeof db, 'select' | 'update' | 'insert'> = db,
 ): Promise<Customer> {
   const fields = {
     fullName: c.fullName,
@@ -396,16 +398,16 @@ async function upsertCustomer(
     email: c.email,
     updatedAt: new Date(),
   }
-  const [existing] = await db.select().from(customersTable).where(eq(customersTable.email, c.email)).limit(1)
+  const [existing] = await connection.select().from(customersTable).where(eq(customersTable.email, c.email)).limit(1)
   if (existing) {
-    const [updated] = await db
+    const [updated] = await connection
       .update(customersTable)
       .set(fields)
       .where(eq(customersTable.id, existing.id))
       .returning()
     return updated
   }
-  const [created] = await db
+  const [created] = await connection
     .insert(customersTable)
     .values({
       id: randomBytes(16).toString('hex'),
@@ -425,8 +427,11 @@ export async function createPaymentLink(input: {
   customer: CustomerInput
   staff?: StaffMember[]
   offer: OfferInput
-}): Promise<{ ok: boolean; error?: string; link?: PaymentLink }> {
+  requestId?: string
+}): Promise<{ ok: boolean; error?: string; link?: PaymentLink; invitation?: InvitationOutcome }> {
   const rep = await requireAdmin()
+  if (input.requestId != null && !/^[0-9a-f-]{36}$/i.test(input.requestId))
+    return { ok: false, error: 'Invalid creation request. Reopen New Customer.' }
 
   const cleaned = cleanCustomer(input.customer)
   if (!cleaned.ok) return { ok: false, error: cleaned.error }
@@ -460,54 +465,69 @@ export async function createPaymentLink(input: {
     return { ok: false, error: 'Choose full price or subscription.' }
   }
 
-  const customer = await upsertCustomer(customerInput, rep)
-  await attachCustomerReferral(customer.id, customerInput.email, customerInput.phone)
-
-  const token = randomBytes(16).toString('base64url')
-  const supabase = getAdminClient()
-  const { data, error } = await supabase
-    .from('payment_links')
-    .insert({
-      token,
-      name: customerInput.fullName,
-      email: customerInput.email,
-      phone: customerInput.phone || null,
-      staff: sanitizeStaff(input.staff),
-      amount_cents: amountCents,
-    })
-    .select(LINK_COLUMNS)
-    .single()
-  if (error || !data) {
-    console.error('[v0] createPaymentLink failed:', error?.message)
-    return { ok: false, error: 'Could not create the payment link.' }
-  }
-
+  // A request key survives lost responses. Atomic creation and a database lock
+  // prevent duplicate links across workers, without deduplicating genuine new offers.
+  const token = input.requestId
+    ? createHash('sha256').update(`${rep.userId}:${input.requestId}`).digest('base64url')
+    : randomBytes(32).toString('base64url')
+  let data: Record<string, unknown>
   try {
-    await db.insert(paymentLinkTermsTable).values({
-      linkId: String(data.id),
-      token,
-      customerId: customer.id,
-      type: offer.type,
-      repId: rep.userId,
-      repName: rep.name || rep.email,
-      setupFeeCents,
-      monthlyCents,
-      billingAnchor: offer.type === 'subscription' ? 'calendar_month' : 'thirty_days',
-      enrollmentFlow: true,
-      enrollmentStripeMode: getStripeMode(),
-      stripeCustomerId: customer.stripeCustomerId,
+    data = await db.transaction(async tx => {
+      await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${`new-customer-${token}`}))`)
+      const existing = await tx.execute(sql`SELECT * FROM payment_links WHERE token = ${token}`)
+      if (existing.rows[0]) return existing.rows[0] as Record<string, unknown>
+      await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${`customer-email-${customerInput.email}`}))`)
+      const customer = await upsertCustomer(customerInput, rep, tx)
+      const inserted = await tx.execute(sql`INSERT INTO payment_links
+        (token, name, email, phone, staff, amount_cents)
+        VALUES (${token}, ${customerInput.fullName}, ${customerInput.email},
+          ${customerInput.phone || null}, ${JSON.stringify(sanitizeStaff(input.staff))}::jsonb, ${amountCents})
+        RETURNING *`)
+      const row = inserted.rows[0] as Record<string, unknown>
+      await tx.insert(paymentLinkTermsTable).values({
+        linkId: String(row.id), token, customerId: customer.id, type: offer.type,
+        repId: rep.userId, repName: rep.name || rep.email, setupFeeCents, monthlyCents,
+        billingAnchor: offer.type === 'subscription' ? 'calendar_month' : 'thirty_days',
+        enrollmentFlow: true, enrollmentStripeMode: getStripeMode(), stripeCustomerId: customer.stripeCustomerId,
+      })
+      // Commit the delivery intent WITH the offer. A crash before agreement
+      // creation must still leave a recoverable queue entry, not a lost email.
+      await tx.insert(enrollmentInvitationsTable).values({
+        linkId: String(row.id), recipient: customer.email,
+      })
+      return row
     })
-  } catch (err) {
-    console.error('[v0] createPaymentLink terms failed:', err)
-    await supabase.from('payment_links').delete().eq('id', data.id)
-    return { ok: false, error: 'Could not save the offer terms.' }
+  } catch {
+    return { ok: false, error: 'Could not save the customer and offer. No enrollment email was sent.' }
   }
 
   revalidatePath('/admin/payments')
-  const [link] = await mergeLinks([data as Record<string, unknown>])
-  return { ok: true, link }
+  const [link] = await mergeLinks([data])
+  // Attribution owns a separate transaction and must see the committed
+  // customer. Creation retries recover it too without duplicating attribution.
+  if (link.customer_id) await attachCustomerReferral(link.customer_id, customerInput.email, customerInput.phone)
+  const invitation = await retryCustomerEnrollment(String(data.id))
+  return { ok: true, link, invitation: invitation.invitation }
 }
 
+/** Safe initial-send retry: no customer creation, charge, or explicit resend. */
+export async function retryCustomerEnrollment(linkId: string): Promise<{ ok: boolean; invitation: InvitationOutcome }> {
+  const rep = await requireAdmin()
+  try {
+  const [terms] = await db.select().from(paymentLinkTermsTable).where(eq(paymentLinkTermsTable.linkId, linkId)).limit(1)
+  if (!terms?.enrollmentFlow) return { ok: false, invitation: { status: 'failed', error: 'Enrollment offer not found.' } }
+  const [customer] = await db.select().from(customersTable).where(eq(customersTable.id, terms.customerId)).limit(1)
+  const { data: link } = await getAdminClient().from('payment_links').select('amount_cents').eq('id', linkId).maybeSingle()
+  if (!customer || !link) return { ok: false, invitation: { status: 'failed', error: 'Saved customer or offer not found.' } }
+  const invitation = await inviteEnrollment({ customer, terms, amountCents: Number(link.amount_cents),
+    sender: { id: rep.userId, name: rep.name || rep.email } })
+  revalidatePath(`/admin/payments/${linkId}`)
+  revalidatePath('/admin/agreements')
+  return { ok: true, invitation }
+  } catch {
+    return { ok: true, invitation: { status: 'failed', error: 'Customer and offer saved. Retry the enrollment email on this record.' } }
+  }
+}
 /** List all payment links, newest first. */
 export async function listPaymentLinks(): Promise<PaymentLink[]> {
   await requireAdmin()

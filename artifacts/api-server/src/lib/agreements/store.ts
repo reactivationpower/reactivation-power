@@ -263,7 +263,8 @@ export async function createAgreement(input: {
   const id = newId()
   const now = new Date()
   const expiresAt = new Date(now.getTime() + AGREEMENT_DEFAULTS.linkValidDays * 86400000)
-  const [agreement] = await db
+  const agreement = await db.transaction(async tx => {
+    const [agreement] = await tx
     .insert(agreementsTable)
     .values({
       id,
@@ -287,12 +288,8 @@ export async function createAgreement(input: {
     // (legacy-link view racing an admin send) yields to the existing row.
     .onConflictDoNothing({ target: agreementsTable.linkId })
     .returning()
-  if (!agreement) {
-    const existing = await loadAgreementByLink(input.linkId)
-    if (!existing) throw new Error('Agreement insert conflicted but no agreement exists for the link')
-    return existing
-  }
-  await db.insert(agreementVersionsTable).values({
+    if (!agreement) return null
+    await tx.insert(agreementVersionsTable).values({
     id: newId(),
     agreementId: id,
     version: 1,
@@ -305,7 +302,14 @@ export async function createAgreement(input: {
     changedById: input.sender.id,
     changedByName: input.sender.name,
     changeSummary: 'Initial version',
+    })
+    return agreement
   })
+  if (!agreement) {
+    const existing = await loadAgreementByLink(input.linkId)
+    if (!existing) throw new Error('Agreement insert conflicted but no agreement exists for the link')
+    return existing
+  }
   await syncTermsFromAgreement(agreement)
   await logAgreementEvent(id, 'created', { version: 1, actor: 'admin', actorName: input.sender.name })
   const loaded = await loadAgreementById(id)

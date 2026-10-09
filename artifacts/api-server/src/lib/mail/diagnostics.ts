@@ -16,6 +16,10 @@ export function deliveryFailureMessage(status: string): string | null {
 }
 
 export function safeEmailMetadata(type: string, metadata?: Record<string, unknown>): Record<string, unknown> | null {
+  if (type === 'agreement_sent') {
+    return Object.fromEntries(Object.entries(metadata ?? {}).filter(([key]) =>
+      ['agreementId', 'customerId', 'resend', 'initialInvitation', 'test'].includes(key)))
+  }
   if (!isAuthenticationEmail(type)) return metadata ?? null
   // Even callers accidentally passing template data must not persist a code,
   // password, or reset link. Only the non-sensitive sample marker is needed.

@@ -6,6 +6,7 @@ export type PaymentLink = any
 export type ProvisionedAccount = any
 
 export const createPaymentLink = action<any>('payments', 'createPaymentLink')
+export const retryCustomerEnrollment = action<any>('payments', 'retryCustomerEnrollment')
 export const listPaymentLinks = action<any>('payments', 'listPaymentLinks')
 export const getPaymentDetail = action<any>('payments', 'getPaymentDetail')
 export const deletePaymentLink = action<any>('payments', 'deletePaymentLink')

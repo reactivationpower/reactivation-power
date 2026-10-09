@@ -150,6 +150,7 @@ const ACTIONS: Record<string, Record<string, Auth>> = {
     getPaymentLinkPublic: "public",
     // Admin management (these also call requireAdmin() internally).
     createPaymentLink: "admin",
+    retryCustomerEnrollment: "admin",
     listPaymentLinks: "admin",
     getPaymentDetail: "admin",
     deletePaymentLink: "admin",

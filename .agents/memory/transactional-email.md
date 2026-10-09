@@ -12,3 +12,6 @@ description: Constraints learned wiring Resend sends, sender domains, and email 
 - Treat a delivery failure as terminal for that individual email attempt; requesting a fresh email creates a separate attempt, not a repaired historical send.
   **Why:** webhook arrival order is not guaranteed, and a delayed delivery/open event must not hide a bounce or suppression that prevents sign-in.
   **How to apply:** Preserve failures across later activity events, and do not infer that provider acceptance proves inbox delivery. Never use raw provider failure text or tracked URLs as diagnostic details: they can echo authentication secrets.
+- Ambiguous Resend sends must stop automatic replay before the provider's 24-hour idempotency retention expires; a deliberate resend is a separate staff decision.
+  **Why:** A lost response may hide an accepted email. Replaying its key after retention can send a duplicate, and changed content with the same key can be rejected.
+  **How to apply:** Snapshot retry content, use bounded leases and a conservative retry window, and do not let an old queued invitation follow a deliberate resend or changed agreement.

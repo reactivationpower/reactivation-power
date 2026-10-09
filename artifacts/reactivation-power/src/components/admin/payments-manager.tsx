@@ -641,7 +641,7 @@ export function PaymentsManager({
       <NewCustomerLinkDialog
         open={createOpen}
         onOpenChange={setCreateOpen}
-        onCreated={(link) => setLinks((prev) => [link, ...prev])}
+        onCreated={(link) => setLinks((prev) => [link, ...prev.filter(p => p.id !== link.id)])}
       />
 
       {/* ── QR dialog ───────────────────────────────────────── */}

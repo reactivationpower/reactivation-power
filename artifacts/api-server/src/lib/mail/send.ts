@@ -74,12 +74,13 @@ export async function sendEmail<K extends TemplateId>(
   const recipient = to.trim().toLowerCase()
   const logId = randomUUID()
   const authentication = isAuthenticationEmail(type)
+  const sensitiveDelivery = authentication || type === 'agreement_sent'
   const metadata = safeEmailMetadata(type, options.metadata)
   let rendered: ReturnType<typeof renderTemplate>
   try {
     rendered = renderTemplate(type, data)
   } catch (err) {
-    const error = authentication ? 'Authentication email rendering failed' : err instanceof Error ? err.message : 'Email rendering failed'
+    const error = authentication ? 'Authentication email rendering failed' : sensitiveDelivery ? 'Email rendering failed' : err instanceof Error ? err.message : 'Email rendering failed'
     await writeLog({ id: logId, type, recipient, subject: 'Email rendering failed', metadata, status: 'failed', error })
     logger.error({ email: { type, recipient, logId } }, 'email rendering failed')
     return { ok: false, logId, error }
@@ -119,7 +120,7 @@ export async function sendEmail<K extends TemplateId>(
     })
     const payload = (await response.json().catch(() => ({}))) as ResendSendResponse
     if (!response.ok || !payload.id) {
-      const error = authentication ? `Resend rejected the authentication email (HTTP ${response.status})` : payload.message || `Resend responded ${response.status}`
+      const error = authentication ? `Resend rejected the authentication email (HTTP ${response.status})` : sensitiveDelivery ? `Resend rejected the email (HTTP ${response.status})` : payload.message || `Resend responded ${response.status}`
       await writeLog({ ...base, status: 'failed', error })
       logger.error({ email: { type, recipient, logId, status: response.status } }, `email failed: ${error}`)
       return { ok: false, logId, error }
@@ -129,10 +130,11 @@ export async function sendEmail<K extends TemplateId>(
     return { ok: true, logId, providerId: payload.id }
   } catch (err) {
     const senderConfigurationError = err instanceof Error && err.message === 'RESEND_FROM must use a patientpipeline.app email address'
-    const error = authentication && !senderConfigurationError ? 'Authentication email send failed; check the registered inbox and email provider' : err instanceof Error ? err.message : String(err)
-    await writeLog({ ...base, status: 'failed', error })
-    logger.error({ ...(!authentication ? { err } : {}), email: { type, recipient, logId } }, `email failed: ${error}`)
-    return { ok: false, logId, error, uncertain: !senderConfigurationError }
+    const uncertain = !senderConfigurationError
+    const error = sensitiveDelivery && !senderConfigurationError ? (authentication ? 'Authentication email send failed; check the registered inbox and email provider' : 'Email send failed; check the recipient and email provider') : err instanceof Error ? err.message : String(err)
+    await writeLog({ ...base, status: uncertain && type === 'agreement_sent' ? 'pending' : 'failed', error })
+    logger.error({ ...(!sensitiveDelivery ? { err } : {}), email: { type, recipient, logId } }, `email failed: ${error}`)
+    return { ok: false, logId, error, ...(uncertain ? { uncertain: true } : {}) }
   }
 }
 
@@ -141,7 +143,7 @@ async function writeLog(row: {
   type: string
   recipient: string
   subject: string
-  status: 'sent' | 'failed'
+  status: 'sent' | 'failed' | 'pending'
   providerId?: string
   error?: string
   metadata: Record<string, unknown> | null

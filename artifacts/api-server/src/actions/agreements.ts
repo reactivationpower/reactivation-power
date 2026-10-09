@@ -7,6 +7,7 @@ import {
   customersTable,
   db,
   paymentLinkTermsTable,
+  enrollmentInvitationsTable,
   type Agreement,
   type AgreementEvent,
   type AgreementStatus,
@@ -17,6 +18,7 @@ import {
 } from '@workspace/db'
 
 import { requireAdmin } from '@/lib/auth/admin-session'
+import { supersedeInitialInvitation } from '@/lib/agreements/enrollment-invitation'
 import { getAdminSession } from '@/lib/auth/admin-session'
 import { canAccessNotificationAgreement, notificationScope } from '@/lib/enrollment-notifications'
 import { getStripeMode } from '@/lib/stripe'
@@ -98,6 +100,7 @@ export interface AgreementSummary {
   pdf_ready: boolean
   delivery_status: Array<{ recipient: string; status: string; error?: string | null }>
   initial_delivery_status: Array<{ recipient: string; status: string; error?: string | null }>
+  initial_invitation_status: string | null
   rep_name: string | null
   status: AgreementStatus
   term_months: number
@@ -205,6 +208,7 @@ function toSummary(a: Agreement, c: Customer, repName: string | null): Agreement
     pdf_ready: Boolean(a.pdfPath),
     delivery_status: [],
     initial_delivery_status: [],
+    initial_invitation_status: null,
     rep_name: repName ?? a.sentByName,
     status: effectiveStatus(a),
     term_months: a.termMonths,
@@ -278,12 +282,19 @@ async function toDetail(loaded: LoadedAgreement): Promise<AgreementDetail> {
     recipients.add(row.recipient)
     return true
   }).map(row => ({ ...row, status: row.status === 'sent' ? 'provider_accepted' : row.status }))
+  const [invitation] = await db.select().from(enrollmentInvitationsTable)
+    .where(eq(enrollmentInvitationsTable.linkId, agreement.linkId)).limit(1)
+  if (invitation && !['provider_accepted'].includes(invitation.status)) {
+    const current = initialDelivery.find(row => row.recipient === invitation.recipient)
+    if (!current) initialDelivery.push({ recipient: invitation.recipient, status: invitation.status, error: null })
+  }
   const signed = isSigned(agreement)
   return {
     agreement: {
       ...toSummary(agreement, customer, terms?.repName ?? null),
       delivery_status: await completionDeliveryStatus(loaded),
       initial_delivery_status: initialDelivery,
+      initial_invitation_status: invitation?.status ?? null,
     },
     document: signed && agreement.signedSnapshot ? { ...doc, ...agreement.signedSnapshot } : doc,
     body: version.body,
@@ -503,6 +514,7 @@ export async function sendAgreement(
   })
   const fresh = await loadAgreementById(loaded.agreement.id)
   if (!fresh) return { ok: false, error: 'Agreement not found after send.' }
+  await supersedeInitialInvitation(linkId)
   const sent = await emailSignRequest(fresh, !first)
   revalidatePath('/admin/agreements')
   revalidatePath(`/admin/payments/${linkId}`)
@@ -527,6 +539,8 @@ export async function updateAgreement(
     if (err instanceof AgreementConflictError) return { ok: false, error: err.message }
     throw err
   }
+  if (next.agreement.currentVersion !== loaded.agreement.currentVersion)
+    await supersedeInitialInvitation(loaded.agreement.linkId)
   revalidatePath('/admin/agreements')
   revalidatePath(`/admin/agreements/${id}`)
   revalidatePath(`/admin/payments/${loaded.agreement.linkId}`)
@@ -542,6 +556,7 @@ export async function resendAgreement(id: string, delivery?: { signerEmail?: str
   let addresses: ReturnType<typeof deliveryAddresses>
   try { addresses = deliveryAddresses(delivery, loaded.agreement.signerDeliveryEmail ?? loaded.customer.email) }
   catch (e) { return { ok: false, error: e instanceof Error ? e.message : 'Invalid email addresses.' } }
+  await supersedeInitialInvitation(loaded.agreement.linkId)
   const now = new Date()
   await db
     .update(agreementsTable)

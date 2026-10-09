@@ -4,6 +4,7 @@ import QRCode from 'qrcode'
 import { Copy, Download, ExternalLink, Loader2, MessageSquare, Pencil, QrCode, RefreshCw, Send } from 'lucide-react'
 
 import { resendAgreement, retryAgreementCompletion } from '@/app/actions/agreements'
+import { retryCustomerEnrollment } from '@/app/actions/payments'
 import { AgreementFormDialog } from '@/components/admin/agreement-form-dialog'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -28,6 +29,23 @@ export function AgreementActions({ agreement, size = 'sm' }: { agreement: any; s
   const url: string = agreement.public_url
   const smsHref = `sms:?body=${encodeURIComponent(url)}`
   const pdf = apiUrl(`/agreements/${agreement.token}/pdf`)
+  const initialNeedsRetry = ['failed', 'pending', 'sending'].includes(agreement.initial_invitation_status)
+
+  async function retryInitial() {
+    setRetrying(true)
+    try {
+      const res = await retryCustomerEnrollment(agreement.link_id)
+      const status = res.invitation?.status
+      if (status === 'provider_accepted') notifyDone('Provider accepted email', 'Inbox delivery is not yet confirmed.')
+      else if (status === 'failed') notifyError(res.invitation.error ?? 'Retry failed. The saved record is safe.')
+      else notifyDone('Enrollment email sending or pending', 'Check the saved record again.')
+      router.refresh()
+    } catch {
+      notifyError('Could not check the email. Retry on this saved record.')
+    } finally {
+      setRetrying(false)
+    }
+  }
 
   async function copy() {
     try {
@@ -105,6 +123,9 @@ export function AgreementActions({ agreement, size = 'sm' }: { agreement: any; s
         ) : null}
         {!agreement.locked ? (
           <>
+            {initialNeedsRetry && <Button variant="outline" size={size} onClick={retryInitial} disabled={retrying}>
+              {retrying ? <Loader2 className="size-3.5 animate-spin" /> : <RefreshCw className="size-3.5" />} Retry initial email
+            </Button>}
             <Button variant="outline" size={size} className="bg-transparent" onClick={() => { setResendResult(null); setConfirmOpen(true) }} data-testid="ag-resend">
               <Send className="size-3.5" /> Resend Email
             </Button>
