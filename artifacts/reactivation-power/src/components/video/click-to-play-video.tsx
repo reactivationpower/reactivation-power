@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { flushSync } from 'react-dom'
 import { Play } from 'lucide-react'
 import { observeMarketingVideo } from '@/lib/marketing-video'
 
@@ -26,9 +27,11 @@ export function ClickToPlayVideo({ src, poster, title, durationSeconds, testId =
     return undefined
   }, [active, failed, durationSeconds, testId])
 
-  useEffect(() => {
-    if (active && !failed) void ref.current?.play?.()?.catch?.(() => {})
-  }, [active, failed])
+  function startPlayback() {
+    flushSync(() => { setFailed(false); setActive(true) })
+    ref.current?.load()
+    void ref.current?.play()?.catch(() => { /* Native controls remain available. */ })
+  }
 
   return (
     <figure className="m-0 flex flex-col gap-2" data-testid={`figure-${testId}`}>
@@ -51,7 +54,7 @@ export function ClickToPlayVideo({ src, poster, title, durationSeconds, testId =
             <p className="text-sm font-semibold">This video could not be loaded.</p>
             <button
               type="button"
-              onClick={() => { setFailed(false); setActive(true) }}
+              onClick={startPlayback}
               className="min-h-11 rounded-md bg-accent px-5 py-2 text-sm font-semibold text-accent-foreground hover:bg-accent/90"
               data-testid={`button-retry-${testId}`}
             >
@@ -61,7 +64,7 @@ export function ClickToPlayVideo({ src, poster, title, durationSeconds, testId =
         ) : (
           <button
             type="button"
-            onClick={() => setActive(true)}
+            onClick={startPlayback}
             className="group absolute inset-0 size-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
             aria-label={`Play video: ${title} (${duration})`}
             data-testid={`button-play-${testId}`}

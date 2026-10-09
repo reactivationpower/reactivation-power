@@ -1,8 +1,13 @@
-import { describe, expect, it } from 'vitest'
+import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { ClickToPlayVideo, formatDuration } from './click-to-play-video'
 
 const props = { src: '/v.mp4', poster: '/p.jpg', title: 'Intro', durationSeconds: 146 }
+beforeEach(() => {
+  vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue()
+  vi.spyOn(HTMLMediaElement.prototype, 'load').mockImplementation(() => {})
+})
+afterEach(() => vi.restoreAllMocks())
 
 describe('ClickToPlayVideo', () => {
   it('formats duration', () => {
@@ -21,9 +26,13 @@ describe('ClickToPlayVideo', () => {
   it('shows error with retry', () => {
     render(<ClickToPlayVideo {...props} />)
     fireEvent.click(screen.getByRole('button', { name: /play video/i }))
-    fireEvent.error(document.querySelector('video')!)
+    const first = document.querySelector('video')!
+    fireEvent.error(first)
     expect(screen.getByRole('alert')).toBeTruthy()
     fireEvent.click(screen.getByText('Try again'))
     expect(document.querySelector('video')).not.toBeNull()
+    expect(document.querySelector('video')).not.toBe(first)
+    expect(HTMLMediaElement.prototype.load).toHaveBeenCalledTimes(2)
+    expect(HTMLMediaElement.prototype.play).toHaveBeenCalledTimes(2)
   })
 })

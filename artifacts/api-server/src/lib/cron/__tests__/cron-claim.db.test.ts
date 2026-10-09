@@ -24,12 +24,10 @@ const DUE_KEY = '2999-01-01'
 const hasDb = Boolean(process.env.SUPABASE_DB_URL)
 
 let started = 0
+let holdRetry: Promise<void> | null = null
 const retry = vi.fn(async () => {
   started += 1
-  // Hold the slot long enough for the other claimants to collide. The claim
-  // transactions serialise on an advisory lock, so this must outlast several
-  // round trips to the remote pooler (~100ms+ each), not just a local one.
-  await new Promise((r) => setTimeout(r, 1500))
+  if (holdRetry) await holdRetry
   return { customers: 0, invoices: 0, paid: 0, failed: 0, details: [] }
 })
 vi.mock('@/lib/billing/dunning', () => ({ retryPastDueInvoices: retry }))
@@ -56,7 +54,7 @@ const cleanup = async () => {
   await db.delete(cronRunsTable).where(and(eq(cronRunsTable.job, 'auth-cleanup'), eq(cronRunsTable.dueKey, DUE_KEY)))
 }
 
-describe.skipIf(!hasDb)('cron slot claim (Postgres)', () => {
+describe.skipIf(!hasDb)('cron slot claim (Postgres)', { timeout: 25000 }, () => {
   beforeAll(async () => {
     await pool.query(`CREATE SCHEMA "${isolated.schema}"`)
     await pool.query('CREATE TABLE cron_runs (LIKE public.cron_runs INCLUDING ALL)')
@@ -103,12 +101,25 @@ describe.skipIf(!hasDb)('cron slot claim (Postgres)', () => {
   it('manual, forced and scheduled triggers never run the same job at the same time', async () => {
     await cleanup()
     const before = started
-    const outcomes = await Promise.all([
+    let release!: () => void
+    holdRetry = new Promise<void>(resolve => { release = resolve })
+    let settled = 0
+    const attempts = [
       runCronJob('billing-retry', { trigger: 'admin', actor: MARK }),
       runCronJob('billing-retry', { trigger: 'admin', actor: MARK }),
       runCronJob('billing-retry', { trigger: 'http', actor: MARK }), // ?force=1
       runCronJob('billing-retry', { trigger: 'scheduler', dueKey: DUE_KEY, actor: MARK }),
-    ])
+    ].map(attempt => attempt.finally(() => { settled += 1 }))
+    try {
+      // Do not guess how quickly the remote pool can process four claims.
+      // Keep the winner running until every competing claim has returned.
+      await vi.waitFor(() => expect(settled).toBe(3), { timeout: 15000, interval: 20 })
+    } finally {
+      release()
+      holdRetry = null
+      await Promise.allSettled(attempts)
+    }
+    const outcomes = await Promise.all(attempts)
     expect(started - before).toBe(1)
     expect(outcomes.filter((o) => !('skipped' in o))).toHaveLength(1)
     for (const o of outcomes.filter((o) => 'skipped' in o)) expect(o).toMatchObject({ reason: 'a run is already in progress' })

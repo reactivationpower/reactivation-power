@@ -6,46 +6,10 @@ import { getAllowedSession } from "@/lib/data/participants";
 import { getAdminSessionFromRequest } from "@/lib/auth/admin-session";
 import { logger } from "@/lib/logger";
 import { runWithRequestContext } from "@/lib/request-context";
+import { MAX_MEDIA_RANGE_BYTES, matchesIfRange, parseMediaRange, type ByteRange } from "@/lib/media-range";
+export { MAX_MEDIA_RANGE_BYTES, parseMediaRange } from "@/lib/media-range";
 
 const router: IRouter = Router();
-
-type ByteRange = { start: number; end: number };
-
-// The published Replit proxy returns HTTP 500 before delivering a 32 MiB
-// Content-Length response (and for Safari's open-ended bytes=0- request
-// against a 150–200 MB video). 8 MiB 206 responses cross the same proxy
-// successfully. Serve bounded partial responses so the browser can request
-// the next slice instead of making an unbounded request that never starts.
-export const MAX_MEDIA_RANGE_BYTES = 8 * 1024 * 1024;
-
-/** Only single byte ranges are supported by the private Blob proxy. A bad or
- * unsatisfiable range gets a 416, rather than accidentally downloading a whole
- * video or returning a partial body with a full-response header. */
-export function parseMediaRange(header: string, size: number): ByteRange | null {
-  if (!Number.isSafeInteger(size) || size <= 0) return null;
-  const match = /^bytes=(\d*)-(\d*)$/.exec(header);
-  if (!match || (!match[1] && !match[2])) return null;
-  const startPart = match[1] ? Number(match[1]) : null;
-  const endPart = match[2] ? Number(match[2]) : null;
-  if ((startPart !== null && !Number.isSafeInteger(startPart)) ||
-      (endPart !== null && !Number.isSafeInteger(endPart))) return null;
-  if (startPart === null) {
-    if (!endPart) return null;
-    const end = size - 1;
-    return { start: Math.max(0, size - Math.min(endPart, MAX_MEDIA_RANGE_BYTES)), end };
-  }
-  if (startPart >= size || (endPart !== null && endPart < startPart)) return null;
-  return { start: startPart, end: Math.min(endPart ?? size - 1, size - 1, startPart + MAX_MEDIA_RANGE_BYTES - 1) };
-}
-
-function matchesIfRange(value: string | undefined, etag: string, uploadedAt: Date): boolean {
-  if (!value) return true;
-  // Weak ETags must never match If-Range.
-  if (value.startsWith('W/')) return false;
-  if (value.startsWith('"')) return value === etag;
-  const date = new Date(value);
-  return !Number.isNaN(date.getTime()) && uploadedAt.getTime() <= date.getTime() + 999;
-}
 
 /** Vercel's private GET can report /2 (the chunk length) instead of /150MB
  * (the file length) on Safari's bytes=0-1 probe. Validate the *actual*
@@ -82,12 +46,21 @@ router.get("/media", async (req: Request, res: Response) => {
     res.once("close", onClose);
     try {
       let requested: ByteRange | null = null;
-      let metadata: Awaited<ReturnType<typeof head>> | null = null;
+      const metadata = await head(pathname, { abortSignal: abort.signal });
+      if (!Number.isSafeInteger(metadata.size) || metadata.size < 0) {
+        throw new Error("Blob returned an invalid file size");
+      }
+      if (req.method === "HEAD") {
+        res.set({
+          "Content-Type": metadata.contentType || "application/octet-stream",
+          "Content-Length": String(metadata.size),
+          "Accept-Ranges": "bytes",
+          "Cache-Control": "private, no-cache",
+          ETag: metadata.etag,
+        }).end();
+        return;
+      }
       if (rawRange) {
-        metadata = await head(pathname, { abortSignal: abort.signal });
-        if (!Number.isSafeInteger(metadata.size) || metadata.size < 0) {
-          throw new Error("Blob returned an invalid file size");
-        }
         if (matchesIfRange(req.get("if-range"), metadata.etag, metadata.uploadedAt)) {
           requested = parseMediaRange(rawRange, metadata.size);
           if (!requested) {
@@ -99,6 +72,17 @@ router.get("/media", async (req: Request, res: Response) => {
             return;
           }
         }
+      }
+      const isVideo = metadata.contentType?.startsWith("video/") || /\.(mp4|mov|webm|m4v)$/i.test(pathname);
+      if (!requested && isVideo && metadata.size > MAX_MEDIA_RANGE_BYTES) {
+        res.status(400).set({
+          "Accept-Ranges": "bytes",
+          "Cache-Control": "private, no-store",
+        }).json({
+          error: "This file requires byte-range playback. Retry with Range: bytes=0- and without If-Range.",
+          code: "MEDIA_RANGE_REQUIRED",
+        });
+        return;
       }
 
       let result: Awaited<ReturnType<typeof get>> = null;
@@ -137,7 +121,7 @@ router.get("/media", async (req: Request, res: Response) => {
 
       const contentLength = requested
         ? requested.end - requested.start + 1
-        : result.blob.size;
+        : metadata.size;
       const responseHeaders: Record<string, string> = {
         "Content-Type": metadata?.contentType || result.blob.contentType || "application/octet-stream",
         ETag: metadata?.etag || result.blob.etag,

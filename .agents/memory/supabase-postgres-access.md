@@ -3,6 +3,23 @@ name: Supabase Postgres access & migrations
 description: How the app and drizzle-kit reach Supabase's Postgres directly, why drizzle-kit push is forbidden, and what DB-backed tests must clean up.
 ---
 
+
+## Isolated transaction tests
+
+Give each database-test invocation its own schema, not just a shared future date
+or actor marker. Hold concurrent test work with a releasable promise until
+competing claims finish rather than estimating remote database latency.
+
+**Why:** Concurrent suites can delete shared fixtures, and a fixed-duration mock
+can finish before delayed claimants arrive, making a valid sequential run look
+like a concurrency failure.
+
+**How to apply:** Copy only required tables into an invocation-owned schema and
+drop that schema in cleanup. Mock unrelated job side effects. If wrapping a pg
+Pool for schema isolation, preserve Pool identity: Drizzle uses it to decide
+whether transactions need a dedicated connection. Apply search_path with
+SET LOCAL inside the transaction to remain safe across pooler modes.
+
 ## Protected native HTTP wakeups
 
 Hosted `pg_net` request/response tables can be owned by `supabase_admin` with PUBLIC access; `postgres` cannot revoke those grants. Never assume successful REVOKE statements actually protected the queue.

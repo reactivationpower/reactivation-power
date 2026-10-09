@@ -15,3 +15,15 @@ Published Autoscale responses cannot carry unbounded large video bodies through 
 **How to apply:** Keep video range responses bounded below the platform limit and verify complete consecutive chunks, not only headers or the first few bytes. Include published-endpoint checks when testing streaming changes: localhost bypasses this limit. Real-device playback remains a separate verification step.
 
 On 2026-09-29, the user confirmed both affected Module 1 videos played on their actual iPad after the bounded-response change. This confirms the approach for playback on that device; it does not establish that seeking or every lesson was tested.
+
+Large media full-response requests cannot be "fixed" by returning the first chunk as 200, or inventing a 206 when the client sent no Range. Fail explicitly if the deployment cannot transport the complete representation; a stale If-Range must not receive partial bytes from a new representation.
+
+**Why:** The proxy limit applies to public MP4s as well as private Blob streams. Bounded native range playback is supported, but a generic full-file download is a different capability and requires a delivery design that bypasses the limit.
+
+**How to apply:** Keep no-range and stale-validator behavior in the verification matrix, preserve full 200 responses for small resources, and verify browser recovery separately from byte-level checks. Do not broaden video-specific restrictions to ordinary attachments.
+
+When automated Chromium reports `DEMUXER_ERROR_NO_SUPPORTED_STREAMS`, check `canPlayType` and the same small MP4 on an independent static path before diagnosing the range handler.
+
+**Why:** The available Chromium runtime returned no H.264/AAC capability and failed identically on original static files and the bounded API. Repeated player retries cannot repair a missing browser codec.
+
+**How to apply:** Report actual decoding/seek/end checks as blocked in that environment; do not treat emulated Android or iPad user-agent strings as a different browser engine.

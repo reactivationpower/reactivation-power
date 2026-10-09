@@ -171,6 +171,7 @@ describe('GET /api/media private video streaming', () => {
   })
 
   it('ignores Range if its If-Range ETag is stale and retains full-file 200 semantics', async () => {
+    blob.head.mockResolvedValue({ size: 3, contentType: 'video/mp4', etag: '"a"', uploadedAt: new Date() })
     blob.get.mockResolvedValue({
       ...upstream(0, 2), headers: new Headers({ 'content-length': '3' }),
     })
@@ -179,6 +180,24 @@ describe('GET /api/media private video streaming', () => {
     expect(response.headers.get('content-range')).toBeNull()
     expect(new Uint8Array(await response.arrayBuffer())).toHaveLength(3)
     expect(blob.get.mock.calls[0][1].headers).toBeUndefined()
+  })
+
+  it('never downloads an oversized full response for missing Range or stale If-Range', async () => {
+    for (const headers of [{}, { Range: 'bytes=0-', 'If-Range': '"stale"' }] as Record<string, string>[]) {
+      const response = await request(headers)
+      expect(response.status).toBe(400)
+      expect(await response.json()).toMatchObject({ code: 'MEDIA_RANGE_REQUIRED' })
+      expect(response.headers.get('content-range')).toBeNull()
+    }
+    expect(blob.get).not.toHaveBeenCalled()
+  })
+
+  it('HEAD is authenticated and uses only authoritative metadata', async () => {
+    const response = await fetch(`${baseUrl}${URL}`, { method: 'HEAD' })
+    expect(response.status).toBe(200)
+    expect(response.headers.get('content-length')).toBe(String(SIZE))
+    expect(await response.text()).toBe('')
+    expect(blob.get).not.toHaveBeenCalled()
   })
 
   it('permits an admin session even when the portal session is not allowed', async () => {
@@ -199,7 +218,7 @@ describe('parseMediaRange', () => {
     expect(parseMediaRange(`bytes=4096-${SIZE - 1}`, SIZE))
       .toEqual({ start: 4096, end: 4096 + MAX_MEDIA_RANGE_BYTES - 1 })
     expect(parseMediaRange('bytes=-99999999', SIZE))
-      .toEqual({ start: SIZE - MAX_MEDIA_RANGE_BYTES, end: SIZE - 1 })
+      .toEqual({ start: SIZE - 99999999, end: SIZE - 99999999 + MAX_MEDIA_RANGE_BYTES - 1 })
     // Short ranges (including the small Safari metadata probe) stay exact.
     expect(parseMediaRange('bytes=0-1', SIZE)).toEqual({ start: 0, end: 1 })
     expect(parseMediaRange(`bytes=${SIZE - 2}-`, SIZE))
