@@ -10,8 +10,8 @@ import { US_TIMEZONES } from '@workspace/shared/us-timezones'
 import { isProductInterest, PRODUCT_INTEREST_LABELS } from '@workspace/shared/lead-validation'
 import { validatedBookingFunnel } from '@workspace/shared/booking-funnel'
 import { assertBookingConfirmationConfigured, createBookingConfirmation } from '@/lib/booking-confirmation'
-import { activity, stop, transaction } from '@/lib/sales-leads/store'
-import { bookingOutcome } from '@/lib/marketing/outcomes'
+import { withBookingHandoff, withLegacyBooking } from '@/lib/booking-handoff'
+export { requestSavedInquiryHelp, checkSavedBooking } from '@/lib/booking-handoff'
 const BOOKING_WINDOW_DAYS = 45
 
 export interface AvailabilityResult {
@@ -57,6 +57,10 @@ export interface BookResult {
   ok: boolean
   error?: string
   confirmationToken?: string
+  bookedSlot?: string
+  bookedTimezone?: string
+  retrySafe?: boolean
+  appointmentId?: string
 }
 
 const TZ_ABBREV: Record<string, string> = {
@@ -107,11 +111,33 @@ function formatAppointmentField(slot: string, timezone: string): string {
  * and drop a submission note on the contact.
  */
 export async function bookStrategyCall(params: {
-  contactId: string
+  contactId?: string
+  bookingRef?: string
   slot: string
   timezone: string
   productInterest?: string
   funnelSource?: string
+}): Promise<BookResult> {
+  if (params.bookingRef) {
+    if (!params.slot || !Number.isFinite(Date.parse(params.slot)) || Date.parse(params.slot) < Date.now())
+      return { ok: false, error: 'That time is no longer available. Pick another.' }
+    if (!ghlConfigured()) return { ok: false, error: 'Your inquiry is saved. Scheduling is temporarily unavailable. Please retry shortly.' }
+    return withBookingHandoff(params.bookingRef, params.slot, VALID_TZ.has(params.timezone) ? params.timezone : 'America/New_York',
+      async (contactId, carried) => bookResolvedCall({ ...params, contactId, productInterest: carried.interest, funnelSource: carried.funnelSource }))
+  }
+  if (!params.contactId) return { ok: false, error: 'Open the scheduling link provided with your saved inquiry, or contact us through the website for help.' }
+  if (params.productInterest && !isProductInterest(params.productInterest))
+    return { ok: false, error: 'Select a valid product interest.' }
+  if (!ghlConfigured()) return { ok: false, error: 'Scheduling is temporarily unavailable. Your inquiry remains saved. Please retry shortly.' }
+  if (!params.slot || !Number.isFinite(Date.parse(params.slot)) || Date.parse(params.slot) < Date.now())
+    return { ok: false, error: 'That time is no longer available. Pick another.' }
+  return withLegacyBooking(params.contactId, params.slot, VALID_TZ.has(params.timezone) ? params.timezone : 'America/New_York',
+    { interest: params.productInterest ?? '', funnelSource: validatedBookingFunnel(params.funnelSource) ?? '' },
+    (contactId, carried) => bookResolvedCall({ ...params, contactId, productInterest: carried.interest || undefined, funnelSource: carried.funnelSource }))
+}
+
+async function bookResolvedCall(params: {
+  contactId?: string; slot: string; timezone: string; productInterest?: string; funnelSource?: string
 }): Promise<BookResult> {
   const contactId = params.contactId?.trim().slice(0, 64)
   const slot = params.slot?.trim()
@@ -157,18 +183,8 @@ export async function bookStrategyCall(params: {
       startTime: slot,
       title,
     })
-    await transaction(async c => {
-      const lead = (await c.query('SELECT id FROM sales_leads WHERE ghl_contact_id=$1', [contactId])).rows[0]
-      if (!lead) return
-      await c.query("SELECT pg_advisory_xact_lock(hashtextextended($1,0))", [`sales-send:${lead.id}`])
-      await c.query("UPDATE sales_leads SET stage='Strategy Call Booked',appointment_status='confirmed',revision=revision+1 WHERE id=$1", [lead.id])
-      await stop(c, lead.id, 'appointment_received')
-      await activity(c, lead.id, { kind: 'appointment', body: `${title} — ${slot}`, status: 'confirmed', providerId: appointmentId || undefined, dedupeKey: `booking:${appointmentId || contactId + slot}` })
-    }).catch(() => console.error('Appointment saved in GoHighLevel; local timeline awaits reconciliation'))
-    const marketingLead = (await import('@workspace/db')).pool
-    void marketingLead.query('SELECT id FROM sales_leads WHERE ghl_contact_id=$1', [contactId])
-      .then(result => result.rows.length === 1 ? bookingOutcome(result.rows[0].id, appointmentId || contactId + slot) : undefined)
-      .catch(() => {})
+    // The handoff owner commits the local booking and cancels follow-ups using
+    // its existing connection before persisting success.
 
     // Fill the "Appointment Date And Time" custom field on the contact,
     // e.g. "Wednesday, Aug. 21st, 2026 at 11:00 AM ET" — used in GHL
@@ -206,14 +222,16 @@ export async function bookStrategyCall(params: {
 
     return {
       ok: true,
+      appointmentId,
       ...(funnelSource ? { confirmationToken: createBookingConfirmation(slot, timezone) } : {}),
     }
   } catch (err) {
     console.error('GoHighLevel booking unavailable; check calendar event permission and provider availability')
     return {
       ok: false,
+      ...(err && typeof err === 'object' && 'bookingRejected' in err && err.bookingRejected ? { retrySafe: true } : {}),
       error:
-        'That time may have just been taken. Pick another time and try again.',
+        'We could not confirm that appointment. Your inquiry remains saved. Please retry to check its status, or contact us through the website for help.',
     }
   }
 }

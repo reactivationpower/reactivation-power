@@ -26,6 +26,11 @@ vi.mock('@/lib/ghl', () => ({
   addGhlContactNote: note,
 }))
 import { submitHealthcareLead } from '../leads'
+import { intake } from '@/lib/sales-leads/store'
+vi.mock('@/lib/marketing/outcomes', () => ({
+  requestVisitorId: async () => null, leadOutcome: async () => undefined,
+}))
+const carried = () => vi.mocked(intake).mock.calls[0][0].context.bookingHandoff as { carried: Record<string, string> }
 
 function form(interest?: string, inactive = ''): FormData {
   const data = new FormData()
@@ -61,7 +66,8 @@ describe('schedule lead validation and submission', () => {
       inactive_patients_estimate: inactive,
     }))
     expect(note.mock.calls.some(([, text]) => text.includes(`Interested in: ${label}`))).toBe(true)
-    expect(redirect).toHaveBeenCalledWith(expect.stringContaining(`interest=${interest}`))
+    expect(redirect).toHaveBeenCalledWith(expect.stringMatching(/^\/healthcare\/book-a-call\?bookingRef=[A-Za-z0-9_-]{32}$/))
+    expect(carried().carried.interest).toBe(interest)
     if (interest === 'lead-follow-up') {
       expect(redirect.mock.calls[0][0]).not.toContain('inactive=')
       expect(note.mock.calls.some(([, text]) => text.includes('Revenue estimate shown to lead:'))).toBe(false)
@@ -105,7 +111,8 @@ describe('schedule lead validation and submission', () => {
     expect(insert).toHaveBeenCalledWith(expect.objectContaining({
       source_path: '/schedule-a-call?interest=both&funnelSource=main-website',
     }))
-    expect(redirect.mock.calls[0][0]).toContain('funnelSource=main-website')
+    expect(carried().carried.funnelSource).toBe('main-website')
+    expect(redirect.mock.calls[0][0]).not.toContain('funnelSource=')
   })
 
   it.each(['strategy-call', 'https://evil.example', '/schedule-a-call/confirmation'])(
@@ -114,6 +121,7 @@ describe('schedule lead validation and submission', () => {
       data.set('funnelSource', marker)
       await expect(submitHealthcareLead({}, data)).rejects.toThrow('REDIRECT:')
       expect(redirect.mock.calls[0][0]).not.toContain('funnelSource')
+      expect(carried().carried.funnelSource).toBeUndefined()
     },
   )
 
@@ -123,6 +131,7 @@ describe('schedule lead validation and submission', () => {
     data.set('funnelSource', 'main-website')
     await expect(submitHealthcareLead({}, data)).rejects.toThrow('REDIRECT:')
     expect(redirect.mock.calls[0][0]).not.toContain('funnelSource')
+    expect(carried().carried.funnelSource).toBeUndefined()
   })
 
   it('saves both components of the combined estimate and carries inputs to booking', async () => {
@@ -148,7 +157,8 @@ describe('schedule lead validation and submission', () => {
       text.includes('New patient first-year cohort value estimate: $144,000') &&
       text.includes('Combined illustrative opportunity: $744,000'),
     )).toBe(true)
-    expect(redirect.mock.calls[0][0]).toContain('newMonthly=4&newValue=3000')
+    expect(carried().carried).toMatchObject({ newMonthly: '4', newValue: '3000' })
+    expect(redirect.mock.calls[0][0]).not.toContain('newMonthly=')
   })
 
   it.each([

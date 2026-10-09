@@ -23,6 +23,7 @@ async function ghlFetch(path: string, init?: RequestInit) {
   if (!token) throw new Error('GHL_API_TOKEN is not set')
   const res = await fetch(`${GHL_BASE}${path}`, {
     ...init,
+    signal: init?.signal ?? AbortSignal.timeout(15_000),
     headers: {
       Authorization: `Bearer ${token}`,
       Version: GHL_VERSION,
@@ -41,11 +42,13 @@ async function ghlFetch(path: string, init?: RequestInit) {
   if (!res.ok) {
     const message =
       (json as { message?: string | string[] } | null)?.message ?? text
-    throw new Error(
+    const error = new Error(
       `GHL ${init?.method ?? 'GET'} ${path} failed (${res.status}): ${
         Array.isArray(message) ? message.join('; ') : message
       }`,
     )
+    Object.assign(error, { status: res.status })
+    throw error
   }
   return json
 }
@@ -238,6 +241,14 @@ export async function bookGhlAppointment(params: {
       title: params.title ?? 'Reactivation Power Strategy Call',
       ignoreFreeSlotValidation: false,
     }),
+  }).catch(error => {
+    // Definite validation/permission rejection is safe to retry; a timeout or
+    // server error may have committed an appointment and must be reconciled.
+    if (error?.status >= 400 && error.status < 500 && error.status !== 408)
+      Object.assign(error, { bookingRejected: true })
+    throw error
   })) as { id?: string; event?: { id?: string } }
-  return json?.id ?? json?.event?.id ?? ''
+  const id = json?.id ?? json?.event?.id
+  if (!id) throw new Error('Provider booking response did not contain an appointment ID')
+  return id
 }

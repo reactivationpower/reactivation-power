@@ -6,3 +6,5 @@ export type BookResult = any
 
 export const getAvailability = action<any>('booking', 'getAvailability')
 export const bookStrategyCall = action<any>('booking', 'bookStrategyCall')
+export const requestSavedInquiryHelp = action<any>('booking', 'requestSavedInquiryHelp')
+export const checkSavedBooking = action<any>('booking', 'checkSavedBooking')

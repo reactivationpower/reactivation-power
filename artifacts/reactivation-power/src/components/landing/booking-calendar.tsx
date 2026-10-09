@@ -147,11 +147,13 @@ function fullDateLabel(key: string, tz: string): string {
 
 export function BookingCalendar({
   contactId,
+  bookingRef,
   thankYouHref,
   productInterest,
   funnelSource,
 }: {
-  contactId: string
+  contactId?: string
+  bookingRef?: string
   /** Thank-you page URL with the lead's details; slot + tz are appended */
   thankYouHref: string
   productInterest?: string
@@ -165,7 +167,7 @@ export function BookingCalendar({
   const [booking, setBooking] = useState(false)
   const [bookError, setBookError] = useState<string | null>(null)
 
-  const { data, isLoading } = useSWR<AvailabilityResult>(
+  const { data, isLoading, error: availabilityError, mutate } = useSWR<AvailabilityResult>(
     ['ghl-availability', timezone],
     () => getAvailability(timezone),
     { revalidateOnFocus: false, keepPreviousData: true },
@@ -210,6 +212,7 @@ export function BookingCalendar({
     try {
       res = await bookStrategyCall({
         contactId,
+        bookingRef,
         slot: selectedSlot,
         timezone,
         productInterest,
@@ -225,7 +228,7 @@ export function BookingCalendar({
       // Leave the button in its "Booking…" state while the thank-you page loads
       setLocation(bookingDestination({
         funnelSource, confirmationToken: res.confirmationToken,
-        thankYouHref, slot: selectedSlot, timezone,
+        thankYouHref, slot: res.bookedSlot ?? selectedSlot, timezone: res.bookedTimezone ?? timezone,
       }))
       return
     }
@@ -242,12 +245,13 @@ export function BookingCalendar({
           <CalendarClock className="size-7 text-accent" aria-hidden="true" />
         </span>
         <p className="text-lg font-semibold text-foreground">
-          Scheduling is being set up
+          Scheduling is temporarily unavailable
         </p>
         <p className="max-w-md text-sm leading-relaxed text-muted-foreground">
-          We&apos;ve received your information and will reach out within one
-          business day to set up your call.
+          Your inquiry remains saved. Please retry shortly, or return to the
+          website for help scheduling your call.
         </p>
+        <Button onClick={() => void mutate()}>Retry availability</Button>
       </div>
     )
   }
@@ -413,6 +417,12 @@ export function BookingCalendar({
 
   return (
     <div className="flex w-full flex-col gap-5">
+      {(data?.error || availabilityError) && (
+        <div role="alert" className="rounded-xl border border-border bg-card p-4 text-center">
+          <p>Your inquiry is saved. We could not load available times.</p>
+          <Button className="mt-3" onClick={() => void mutate()}>Retry availability</Button>
+        </div>
+      )}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-muted-foreground">
           All times shown in{' '}

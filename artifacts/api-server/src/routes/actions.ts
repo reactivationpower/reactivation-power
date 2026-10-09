@@ -132,7 +132,7 @@ const ACTIONS: Record<string, Record<string, Auth>> = {
     refundPayment: "admin", cancelSubscription: "admin", resumeSubscription: "admin",
     changeBillingDate: "admin", retryCustomerPayment: "admin",
   },
-  booking: { getAvailability: "public", bookStrategyCall: "public" },
+  booking: { getAvailability: "public", bookStrategyCall: "public", requestSavedInquiryHelp: "public", checkSavedBooking: "public" },
   "customer-billing": {
     // Public, emailed-token billing page (works while access is paused).
     requestBillingLink: "public", getBillingByToken: "public",

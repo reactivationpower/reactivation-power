@@ -19,6 +19,7 @@ import { intake, transaction } from '@/lib/sales-leads/store'
 import { validTimezone } from '@/lib/sales-leads/cadence'
 import { safeSalesUpsert } from '@/lib/sales-leads/provider'
 import { requestVisitorId, leadOutcome } from '@/lib/marketing/outcomes'
+import { newBookingHandoff } from '@/lib/booking-handoff'
 
 export interface LeadState {
   error?: string
@@ -179,6 +180,20 @@ export async function submitHealthcareLead(
   } catch { /* no UTM evidence supplied */ }
   const zone = formData.get('deviceTimezone')
   const timezone = validTimezone(zone) ? zone : null
+  const carried: Record<string, string> = { name: firstName }
+  if (funnelSource) carried.funnelSource = funnelSource
+  if (hasReactivation && inactiveCount !== null) {
+    carried.inactive = String(inactiveCount)
+    carried.value = String(patientValue)
+  }
+  if (scenario) {
+    carried.newMonthly = String(scenario.additionalPatientsPerMonth)
+    carried.newValue = String(scenario.newPatientValue)
+  }
+  if (scheduleSource || productInterest) carried.interest = interest
+  if (services.length) carried.services = services.join('|')
+  // Generate before any save; persist atomically inside intake's submission.
+  const handoff = newBookingHandoff(carried)
   const supabase = getAdminClient()
   const { error, data: submittedLead } = await supabase.from('landing_leads').insert({
     sector: 'healthcare', first_name: firstName, last_name: lastName, email,
@@ -202,6 +217,7 @@ export async function submitHealthcareLead(
       disclosureVersion: 'patient-pipeline-sms-v1',
     },
     context: {
+      bookingHandoff: handoff.context,
       marketingVisitorId: await requestVisitorId(),
       firstName, lastName, email, phone, practiceName, zip, city, state, yearsInPractice, services, productInterest: interest,
       inactivePatients: inactiveCount, patientValue, revenueShown, scenario, estimates,
@@ -217,7 +233,11 @@ export async function submitHealthcareLead(
   let ghlContactId = ''
   if (ghlConfigured() && !salesLead.review) {
     try {
-      ghlContactId = await safeSalesUpsert({
+      ghlContactId = await transaction(async c => {
+        await c.query('SELECT pg_advisory_xact_lock(hashtextextended($1,0))', [`sales-send:${salesLead.id}`])
+        const current = (await c.query('SELECT ghl_contact_id FROM sales_leads WHERE id=$1 FOR UPDATE', [salesLead.id])).rows[0]
+        if (current?.ghl_contact_id) return current.ghl_contact_id as string
+        const contactId = await safeSalesUpsert({
         firstName,
         lastName,
         email,
@@ -233,6 +253,9 @@ export async function submitHealthcareLead(
           ...(scheduleSource ? [`interest-${interest}`] : []),
         ],
         source: `Reactivation Power ${scheduleSource ? '/schedule-a-call' : '/healthcare'} landing page`,
+        })
+        await c.query("UPDATE sales_leads SET ghl_contact_id=$2,sync_state='synced',sync_error=NULL WHERE id=$1", [salesLead.id, contactId])
+        return contactId
       })
 
       const submissionNote = [
@@ -281,27 +304,15 @@ export async function submitHealthcareLead(
   }
 
   if (ghlContactId && !salesLead.review) {
-    await supabase.from('landing_leads').update({ ghl_contact_id: ghlContactId }).eq('id', submittedLead.id)
-    await transaction(async c => {
-      await c.query('UPDATE sales_leads SET ghl_contact_id=COALESCE(ghl_contact_id,$2) WHERE id=$1', [salesLead.id, ghlContactId])
-    })
+    // The authoritative contact link was committed under the synchronization
+    // lock above. A failed legacy annotation must not strand a saved inquiry.
+    try {
+      await supabase.from('landing_leads').update({ ghl_contact_id: ghlContactId }).eq('id', submittedLead.id)
+    } catch {
+      console.error('Legacy inquiry annotation unavailable; saved scheduling handoff remains valid')
+    }
   }
 
-  const params = new URLSearchParams({
-    name: firstName,
-  })
-  if (funnelSource) params.set('funnelSource', funnelSource)
-  if (hasReactivation && inactiveCount !== null) {
-    params.set('inactive', String(inactiveCount))
-    params.set('value', String(patientValue))
-  }
-  if (scenario) {
-    params.set('newMonthly', String(scenario.additionalPatientsPerMonth))
-    params.set('newValue', String(scenario.newPatientValue))
-  }
-  if (scheduleSource || productInterest) params.set('interest', interest)
-  if (services.length > 0) params.set('services', services.join('|'))
-  if (ghlContactId) params.set('cid', ghlContactId)
   // Straight to the calendar; the calculator now lives on the thank-you page
-  redirect(`/healthcare/book-a-call?${params.toString()}`)
+  redirect(`/healthcare/book-a-call?bookingRef=${handoff.ref}`)
 }

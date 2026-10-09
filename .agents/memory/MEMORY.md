@@ -37,3 +37,4 @@
 - [Structural merge integrity](merge-integrity.md) — clean syncs can mispair sibling tests; validate the merged tree and regenerate colliding migration metadata.
 - [Shared connection budget](connection-budget.md) — 15 sessions are shared across hosts, overlap and tests; nested pool borrowing can starve small pools.
 - [Customer enrollment boundaries](customer-enrollment-policy.md) — commercial identities, access records, and offers stay distinct; opening setup is not conversion.
+- [Saved inquiry booking](booking-handoff-policy.md) — preserve calendar design and identity protection; reconcile uncertain writes; no analytics consent popup or floating controls.

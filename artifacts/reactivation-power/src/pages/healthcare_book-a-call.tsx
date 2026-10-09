@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import { useSearch } from 'wouter'
 import { CalendarClock, CheckCircle2 } from 'lucide-react'
 import { BookingCalendar } from '@/components/landing/booking-calendar'
+import { BookingHelp } from '@/components/landing/booking-help'
 import { usePageData } from '@/hooks/use-page-data'
 import { PageError, PageLoading } from '@/components/page-status'
 
@@ -11,7 +12,7 @@ import { PageError, PageLoading } from '@/components/page-status'
 export default function BookACallPage() {
   const search = new URLSearchParams(useSearch())
   const query = Object.fromEntries(
-    ['cid', 'name', 'inactive', 'value', 'newMonthly', 'newValue', 'services', 'interest', 'funnelSource'].map((key) => [
+    ['bookingRef', 'cid', 'name', 'inactive', 'value', 'newMonthly', 'newValue', 'services', 'interest', 'funnelSource'].map((key) => [
       key,
       search.get(key) ?? undefined,
     ]),
@@ -22,7 +23,7 @@ export default function BookACallPage() {
   )
   if (loading) return <PageLoading />
   if (error) return <PageError error={error} />
-   const { contactId, firstName, thankYouHref, funnelSource } = data
+   const { contactId, bookingRef, handoffError, firstName, thankYouHref, funnelSource, productInterest } = data
 
   return (
     <main className="flex min-h-screen flex-col bg-background">
@@ -33,7 +34,7 @@ export default function BookACallPage() {
             alt="Patient Pipeline"
             width={2172}
             height={724}
-            priority
+            fetchPriority="high"
             className="h-16 w-auto md:h-20"
           />
         </div>
@@ -43,7 +44,7 @@ export default function BookACallPage() {
         <div className="flex items-center gap-2 rounded-full border border-success/40 bg-success/10 px-4 py-1.5">
           <CheckCircle2 className="size-4 text-success" aria-hidden="true" />
           <span className="text-sm font-semibold text-success">
-            You&apos;re in — one last step
+            {handoffError ? 'Scheduling assistance' : "You're in — one last step"}
           </span>
         </div>
 
@@ -60,12 +61,13 @@ export default function BookACallPage() {
         </p>
 
         <div className="mt-10 w-full">
-          {contactId ? (
+          {!handoffError && (bookingRef || contactId) ? (
             <BookingCalendar
               contactId={contactId}
+              bookingRef={bookingRef}
               thankYouHref={thankYouHref}
                funnelSource={funnelSource}
-              productInterest={search.get('interest') ?? undefined}
+              productInterest={productInterest ?? search.get('interest') ?? undefined}
             />
           ) : (
             <div className="flex flex-col items-center gap-4 rounded-xl border border-dashed border-border bg-card px-6 py-16 text-center">
@@ -76,21 +78,21 @@ export default function BookACallPage() {
                 />
               </span>
               <p className="text-lg font-semibold text-foreground">
-                Let&apos;s get your info first
+                Scheduling help
               </p>
               <p className="max-w-md text-sm leading-relaxed text-muted-foreground">
-                To book your call, start with the 30-second form so we know
-                who the call is for.
+                {handoffError}
               </p>
               <Link
-                href="/healthcare"
+                href="/"
                 className="rounded-md bg-accent px-6 py-3 text-sm font-semibold text-accent-foreground transition-colors hover:bg-accent/90"
               >
-                Go to the form
+                Return to website for help
               </Link>
             </div>
           )}
         </div>
+        <BookingHelp bookingRef={bookingRef} funnelSource={funnelSource} thankYouHref={thankYouHref} />
       </section>
 
       <footer className="border-t border-border bg-card">

@@ -1,4 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+vi.mock('@/lib/booking-handoff', () => ({
+  withLegacyBooking: async (id: string, _slot: string, _tz: string, carried: any, book: any) => book(id, carried),
+}))
+vi.mock('@/lib/sales-leads/store', () => ({ transaction: async () => undefined }))
+vi.mock('@workspace/db', () => ({ pool: { query: async () => ({ rows: [] }) } }))
 const ghl = vi.hoisted(() => ({
   book: vi.fn(), note: vi.fn(), field: vi.fn(), name: vi.fn(),
 }))
@@ -23,7 +28,7 @@ describe('website-only booking confirmation', () => {
     vi.setSystemTime(new Date('2026-10-09T12:00:00Z'))
     vi.stubEnv('SESSION_SECRET', 'booking-test-secret')
     vi.clearAllMocks()
-    ghl.book.mockResolvedValue({})
+    ghl.book.mockResolvedValue('mock-appointment')
     ghl.note.mockResolvedValue(undefined)
     ghl.field.mockResolvedValue(undefined)
     ghl.name.mockResolvedValue('Mock Person')
@@ -49,7 +54,7 @@ describe('website-only booking confirmation', () => {
 
   it.each([undefined, 'strategy-call', 'https://evil.example'])('keeps legacy destination for %s', async funnelSource => {
     const result = await bookStrategyCall({ ...params, funnelSource })
-    expect(result).toEqual({ ok: true })
+    expect(result).toEqual({ ok: true, appointmentId: 'mock-appointment' })
     const url = bookingThankYouHref(funnelSource, 'name=Mock&interest=both')
     expect(url).toBe('/healthcare/thank-you?name=Mock&interest=both')
   })

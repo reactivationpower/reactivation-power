@@ -1,5 +1,6 @@
 import { respondDatabaseUnavailable } from "../lib/database-unavailable";
 import { Router, type IRouter, type Request, type Response } from "express";
+import { readBookingHandoff, INVALID_HANDOFF, SAVED_HELP } from "../lib/booking-handoff";
 import { cookies } from 'next/headers';
 import { runWithRequestContext } from "../lib/request-context";
 import { isNotFoundSignal, isRedirectSignal, notFound, redirect } from "../shims/next-navigation";
@@ -849,6 +850,16 @@ add("/pay/:token/thank-you", undefined, async (req) => {
 });
 
 add("/healthcare/book-a-call", undefined, async (req) => {
+  const bookingRef = queryString(req, "bookingRef");
+  if (bookingRef) {
+    const saved = await readBookingHandoff(bookingRef);
+    if (!saved) return { handoffError: INVALID_HANDOFF };
+    const carried = saved.context.bookingHandoff.carried;
+    const funnelSource = validatedBookingFunnel(carried.funnelSource);
+    return { bookingRef, firstName: carried.name, productInterest: carried.interest, funnelSource,
+      thankYouHref: bookingThankYouHref(funnelSource, new URLSearchParams({ bookingRef }).toString()),
+      ...(saved.review ? { handoffError: SAVED_HELP } : {}) };
+  }
   const funnelSource = validatedBookingFunnel(queryString(req, "funnelSource"));
   const contactId = (queryString(req, "cid") ?? "").slice(0, 64);
   const firstName = (queryString(req, "name") ?? "").slice(0, 40);
@@ -858,7 +869,10 @@ add("/healthcare/book-a-call", undefined, async (req) => {
     if (value) carried.set(key, value.slice(0, 600));
   }
   const thankYouHref = bookingThankYouHref(funnelSource, carried.toString());
-  return { params: req.query, contactId, firstName, carried: Object.fromEntries(carried), thankYouHref, funnelSource };
+  return { params: req.query, contactId, firstName, carried: Object.fromEntries(carried), thankYouHref, funnelSource,
+    ...(!contactId ? { handoffError: firstName
+      ? "Your inquiry may already be saved, but this older link does not include a secure booking reference. Please contact us through the website so we can help schedule your call. You do not need to re-enter your information."
+      : "Open the scheduling link provided after your inquiry. If you already submitted, contact us through the website for help." } : {}) };
 });
 
 add(WEBSITE_CONFIRMATION_PATH, undefined, async (req) => {
@@ -866,7 +880,14 @@ add(WEBSITE_CONFIRMATION_PATH, undefined, async (req) => {
 });
 
 add("/healthcare/thank-you", undefined, async (req) => {
-  const str = (key: string, max: number) => (queryString(req, key) ?? "").slice(0, max);
+  const ref = queryString(req, "bookingRef");
+  const saved = ref ? await readBookingHandoff(ref) : null;
+  if (ref && !saved) throw new Error(INVALID_HANDOFF);
+  const handoff = saved?.context.bookingHandoff;
+  if (ref && !handoff?.result?.ok) redirect(`/healthcare/book-a-call?bookingRef=${encodeURIComponent(ref)}`);
+  const str = (key: string, max: number) => (handoff
+    ? (key === "slot" ? handoff.slot : key === "tz" ? handoff.timezone : handoff.carried[key]) ?? ""
+    : queryString(req, key) ?? "").slice(0, max);
   const firstName = str("name", 40);
   const services = str("services", 600).split("|").filter(Boolean).slice(0, 30).map(publicServiceName);
   const inactiveCount = parseInactiveCount(str("inactive", 12) || undefined);
@@ -887,7 +908,7 @@ add("/healthcare/thank-you", undefined, async (req) => {
   }).format(new Date(slotMs));
   const serviceLabel = services.length === 0 ? "" : services.length === 1 ? services[0]
     : services.length === 2 ? `${services[0]} and ${services[1]}` : `${services[0]}, ${services[1]}, and more`;
-  return { params: req.query, firstName, services, inactiveCount, patientValue, scenario,
+  return { params: req.query, firstName, services, inactiveCount, patientValue, scenario, productInterest: str("interest", 30),
     scenarioSupplied: Boolean(newMonthly || newValue),
     estimates: scenario ? scenarioEstimates(scenario) : null, tzParam, timezone,
     timezoneLabel: timezoneLabel(timezone), slotMs: Number.isNaN(slotMs) ? null : slotMs, bookedFor, servicesLabel: serviceLabel };

@@ -8,7 +8,7 @@ import { PageError, PageLoading } from '@/components/page-status'
 export default function ThankYouPage() {
   const search = new URLSearchParams(useSearch())
   const query = Object.fromEntries(
-    ['name', 'services', 'inactive', 'value', 'newMonthly', 'newValue', 'tz', 'slot', 'interest'].map((key) => [
+    ['bookingRef', 'name', 'services', 'inactive', 'value', 'newMonthly', 'newValue', 'tz', 'slot', 'interest'].map((key) => [
       key,
       search.get(key) ?? undefined,
     ]),
@@ -23,7 +23,7 @@ export default function ThankYouPage() {
     firstName, inactiveCount, patientValue, timezone, timezoneLabel, bookedFor,
     servicesLabel, scenario, estimates, scenarioSupplied,
   } = data
-  const leadOnly = search.get('interest') === 'lead-follow-up'
+  const leadOnly = (data.productInterest ?? search.get('interest')) === 'lead-follow-up'
 
   return (
     <main className="flex min-h-screen flex-col bg-background">

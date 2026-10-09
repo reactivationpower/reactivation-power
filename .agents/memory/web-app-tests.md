@@ -19,3 +19,15 @@ Limit jsdom worker fan-out before increasing individual test deadlines when simp
 **Why:** Concurrent typechecking, API tests, and unrestricted jsdom startup can overload the workspace and cause false timeouts in unrelated, otherwise passing UI tests.
 
 **How to apply:** Diagnose timing-only failures against the validation workload; keep worker concurrency bounded instead of masking contention with longer deadlines.
+
+Prefer static imports for mocked external-service dependencies in concurrent integration tests, and reject unexpected network requests in the fixture.
+
+**Why:** Concurrent dynamic imports in the booking test bypassed the availability mock for one caller; making the dependency static eliminated the unexpected provider read.
+
+**How to apply:** When a mocked concurrent test unexpectedly returns real availability or other external data, check import/mocking consistency rather than assuming a business-rule failure.
+
+Database fixtures must be unique per test invocation, not just per test file.
+
+**Why:** Parallel workspaces share Supabase. Fixed owner IDs let one suite's cleanup delete another suite's in-flight campaigns; scheduler tests also see global running-job rows despite distinct due keys.
+
+**How to apply:** Use random fixture owners for owner-scoped data and isolated schemas for global queries such as scheduled-job claims. Keep cleanup confined to the invocation's fixtures.
