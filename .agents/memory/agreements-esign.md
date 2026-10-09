@@ -13,6 +13,9 @@ description: Durable rules for the owned e-sign flow — edit/sign linearization
 - **Agreement recipient roles:** Additional email recipients are carbon-copy recipients, not additional signers.
   **Why:** The user explicitly distinguished people receiving a copy from the signing individual.
   **How to apply:** Keep recipient delivery controls separate from signer identity and signing authority.
+- **Initials interaction:** The user wants recipients to type initials in the top section once, then click each subsequent section to reuse them rather than type repeatedly.
+  **Why:** The user requested this after walking through a sent agreement.
+  **How to apply:** Reuse explicitly entered initials but retain a deliberate acknowledgment action and confirmed save for every section; never initial all sections automatically.
 - **Negotiated agreement prices:** Automatically fill the offer-specific agreement with the amounts entered in New Customer: the full purchase amount for one-time offers, and separate setup and monthly amounts for subscriptions. Do not require manually edited text or a separate template for every negotiated price.
   **Why:** The user wants salespeople's negotiated amounts to flow into the customer's agreement automatically.
   **How to apply:** Select the template by offer type and merge the entered amounts, not standard list prices.
