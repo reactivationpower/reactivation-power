@@ -29,3 +29,5 @@
 - [CSV patient workflow](csv-patient-workflow.md) — CSV-first matching; uncertain identities need review, and service imports must not silently restart outreach.
 - [Portal authentication policy](portal-authentication-policy.md) — real owners/callers need email/password/code and five-minute idle logout; both sales demo families are exempt.
 - [Strategy-call marketing funnel](strategy-call-marketing.md) — marketing-only pages avoid site navigation; patients get a providers-only rejection, not a booking form.
+- [Affiliate business policy](affiliate-business-policy.md) — referral protection, no setup commissions, collected-money earnings, durable clawbacks, and monthly external wire payouts.
+- [Internal sales lead policy](internal-sales-lead-policy.md) — provider-sales CRM uses GoHighLevel, separate from patient queues; consented cadence, call logging, and timezone boundaries.
