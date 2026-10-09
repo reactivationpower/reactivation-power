@@ -1,0 +1,13 @@
+I think what I want to do, because I have other businesses that are wanting to market a patient pipeline for me, is basically have an affiliate dashboard. Part of that affiliate dashboard is going to be the generation of an affiliate link so that, for example, if another company refers somebody to me, I want to be able to track what that person is.
+There are scenarios where they will be compensated for closed deals that come my way so I'm going to need to be able to enter whatever their commission is. You could set it by affiliate and you could have the ability to have a manual override per affiliate.
+You could have pay periods where you have a page for that affiliate where they can see:
+- who's active
+- who's inactive
+- who's paid
+- who hasn't paid
+You're only going to pay on people, obviously, that are active. You could send an email to the person when you mark it as paid on your end when you send the payment to them. We're just going to send the payment to them via wire transfer, right?
+They could see when the payments come in, what the estimated future payments are, stuff like that. This could be a setting for affiliate but it would be inclusive of, potentially, the setup fee if there's a setup fee charged, and any monthly subscriptions thereafter or one-time payments.
+I'm also going to need a lead dashboard in the admin for us internally as a team to be able to see who submitted their information across the website. We're already sending this data over to Go High Level but we want to build our own internal tool where we can view all the context and submit their info, view the affiliate sources, and lead follow-ups and lead follow-up stage.
+I think we have the contact and Go High Level so maybe we could get an API key and we could do all of the texting through the lead dashboard for all of the lead follow-up. We could autonomously do it maybe based upon their answers and stuff like that. If they submit their info and they don't request an appointment, we could have the text, I guess, through the Go High Level API, maybe do polling every 20 seconds or something like that.
+From the location I could get you all those values as well and then we could have a button that says "Call." If we hit "Call" then it would open up Go High Level in a browser so that we could actually make a call because we can't make a call through this directly in a new tab.
+I don't want you to prompt me with questions. Just ask me 20 questions and I'll give you the answer in the chat here. That way we can make this perfect.
