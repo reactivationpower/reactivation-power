@@ -3,6 +3,7 @@ import { middleEmails } from './marketing-email-content/middle'
 import { lateEmails } from './marketing-email-content/late'
 import type { MarketingEmailCopy } from './marketing-email-content/types'
 import { renderMarketingEmail } from './marketing-email-renderer'
+export { MARKETING_LANDING_URL } from './marketing-email-renderer'
 
 /** Prospect marketing, not patient outreach or automatic account notifications. */
 export const EMAIL_AUDIENCES = [

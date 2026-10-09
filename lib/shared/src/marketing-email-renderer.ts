@@ -1,7 +1,7 @@
 import type { MarketingEmailCopy } from './marketing-email-content/types'
 
-// All prospect-email call buttons use the approved, verified booking landing page.
-export const MARKETING_LANDING_URL = 'https://patientpipeline.app/schedule-a-call'
+// All prospect-email call buttons and linked logos use the user-approved destination.
+export const MARKETING_LANDING_URL = 'https://patientpipeline.app/api/m/pHEhLNyjVo37AFcd'
 export const MARKETING_LOGO_URL = 'https://patientpipeline.app/images/patient-pipeline-logo.png'
 const FONT = 'Arial,Helvetica,sans-serif'
 const esc = (value: string) => value.replace(/&/g, '&amp;').replace(/</g, '&lt;')

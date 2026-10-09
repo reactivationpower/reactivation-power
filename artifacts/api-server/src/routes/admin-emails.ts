@@ -3,6 +3,7 @@ import { strToU8, zipSync } from "fflate";
 import { getAdminSessionFromRequest } from "@/lib/auth/admin-session";
 import {
   EMAIL_AUDIENCES,
+  MARKETING_LANDING_URL,
   isEmailAudienceId,
   templatesForAudience,
   type EmailAudience,
@@ -91,7 +92,7 @@ td.subj { width: 30%; } td.pre { width: 34%; color: #52606d; font-size: 13px; }
 <li>Name the template with the audience plus the email's own number and name from the <strong>Email</strong> column. Use the email's own number, not the <strong>#</strong> column: the # is only the editorial order, not a sending schedule.</li>
 <li>These files replace the earlier reactivation-only copy. Previously imported GHL templates will not update automatically; replace their HTML, subjects, and preview text before using the revised sequence.</li>
 <li>Publish the updated landing pages before sending, verify the logo and call-booking link, and send yourself a test from GHL. Check personalization, mobile layout, sender details, your business mailing address, permission to contact the list, and the working unsubscribe link.</li>
-</ol><p style="margin:12px 0 0;font-size:13px;color:#52606d">Merge tags are already in GHL format — <code>{{contact.first_name}}</code> and <code>{{unsubscribe_link}}</code> — so leave them exactly as they are. Every call button links to <a href="https://patientpipeline.app/schedule-a-call">https://patientpipeline.app/schedule-a-call</a>. Replace previously imported templates to update their links; emails already sent are unchanged. Both products are included in the launch offer; no numeric price or expiry has been supplied. Choose your own sending cadence in GHL; downloading this set does not schedule or send any email.</p></div>
+</ol><p style="margin:12px 0 0;font-size:13px;color:#52606d">Merge tags are already in GHL format — <code>{{contact.first_name}}</code> and <code>{{unsubscribe_link}}</code> — so leave them exactly as they are. Every call button and linked logo uses <a href="${MARKETING_LANDING_URL}">${MARKETING_LANDING_URL}</a>. Replace previously imported templates to update their links; emails already sent are unchanged. Both products are included in the launch offer; no numeric price or expiry has been supplied. Choose your own sending cadence in GHL; downloading this set does not schedule or send any email.</p></div>
 ${sets.map(buildSection).join("\n")}
 <p class="foot">A spreadsheet version of these tables is in <code>emails.csv</code>.</p>
 </div></body></html>`;

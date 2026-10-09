@@ -5,6 +5,7 @@ import { Check, Copy, Download, Monitor, Smartphone } from 'lucide-react'
 import {
   EMAIL_ASSET_BASE,
   EMAIL_AUDIENCES,
+  MARKETING_LANDING_URL,
   templatesForAudience,
   type EmailAudienceId,
 } from '@workspace/shared/email-templates'
@@ -199,12 +200,12 @@ export function EmailPreviewer() {
                   Placeholders
                 </dt>
                 <dd className="text-muted-foreground">
-                  None to swap — the Schedule a Call button links to{' '}
+                  None to swap — every call button and linked logo uses{' '}
                   <code className="rounded bg-muted px-1.5 py-0.5 text-xs">
-                    reactivationpower.com/healthcare
+                    {MARKETING_LANDING_URL}
                   </code>{' '}
-                  (the landing page, where the intake form flows into the
-                  booking calendar).{' '}
+                  . Replace previously imported GHL templates to update their links;
+                  emails already sent are unchanged.{' '}
                   <code className="rounded bg-muted px-1.5 py-0.5 text-xs">
                     {'{{contact.first_name}}'}
                   </code>{' '}

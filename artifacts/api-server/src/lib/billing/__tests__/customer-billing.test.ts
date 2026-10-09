@@ -8,6 +8,7 @@
  */
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 import { eq } from 'drizzle-orm'
+import { randomUUID } from 'node:crypto'
 import {
   billingLinksTable,
   billingNotificationsTable,
@@ -60,7 +61,8 @@ import { remainingObligation } from '@/lib/billing/rules'
 import { cancelMyAgreement } from '@/actions/customer-billing'
 
 const DAY = 86_400_000
-const PREFIX = 'vt-cb-'
+// Concurrent runs must never delete or overwrite each other's billing fixtures.
+const PREFIX = `vt-cb-${randomUUID()}-`
 
 describe('billing link request throttle', () => {
   it('allows a few requests per email, then blocks silently until the window passes', () => {

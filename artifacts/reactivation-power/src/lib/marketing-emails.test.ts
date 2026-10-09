@@ -33,8 +33,13 @@ describe('Patient Pipeline launch marketing', () => {
     expect(text).toContain('The Patient Pipeline Team')
     expect(text).toContain('{{contact.first_name}}')
     expect(doc.querySelector('a[href="{{unsubscribe_link}}"]')).not.toBeNull()
-    expect(doc.querySelector('.btn a')?.getAttribute('href')).toBe('https://patientpipeline.app/schedule-a-call')
-    expect(doc.querySelector('a:has(img)')?.getAttribute('href')).toBe('https://patientpipeline.app/schedule-a-call')
+    const callLinks = doc.querySelectorAll('.btn a, a:has(img)')
+    expect(callLinks).toHaveLength(2)
+    for (const link of callLinks) {
+      expect(link.getAttribute('href')).toBe('https://patientpipeline.app/api/m/pHEhLNyjVo37AFcd')
+    }
+    expect(doc.querySelectorAll('a')).toHaveLength(3)
+    expect(template.html).not.toContain('https://patientpipeline.app/schedule-a-call')
     expect(doc.querySelectorAll('a[href*="reactivationpower.com"]')).toHaveLength(0)
     expect(doc.querySelector('img')?.getAttribute('src')).toBe('https://patientpipeline.app/images/patient-pipeline-logo.png')
     expect(doc.querySelectorAll('[src*="reactivationpower.com"]')).toHaveLength(0)

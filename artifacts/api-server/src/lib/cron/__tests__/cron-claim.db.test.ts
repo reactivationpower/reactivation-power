@@ -1,4 +1,5 @@
 import { and, eq } from 'drizzle-orm'
+import { randomUUID } from 'node:crypto'
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 
 /**
@@ -11,6 +12,21 @@ import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 
 const DUE_KEY = '2999-01-01'
 const hasDb = Boolean(process.env.SUPABASE_DB_URL)
+const fixture = vi.hoisted(() => ({ schema: '' }))
+// Job-wide locks intentionally ignore the due key. A private table is required
+// to test these locks without colliding with another validation or a real job.
+vi.mock('@workspace/db', async original => {
+  const actual = await original<typeof import('@workspace/db')>()
+  if (!process.env.SUPABASE_DB_URL) return actual
+  fixture.schema = `cron_test_${randomUUID().replaceAll('-', '')}`
+  await actual.pool.query(`CREATE SCHEMA "${fixture.schema}"`)
+  await actual.pool.query(`CREATE TABLE "${fixture.schema}".cron_runs (LIKE public.cron_runs INCLUDING ALL)`)
+  const isolatedPool = new (actual.pool.constructor as typeof import('pg').Pool)({
+    ...actual.pool.options, options: `-c search_path=${fixture.schema}`, max: 2,
+  })
+  const { drizzle } = await import('drizzle-orm/node-postgres')
+  return { ...actual, pool: isolatedPool, db: drizzle(isolatedPool) }
+})
 
 let started = 0
 const retry = vi.fn(async () => {
@@ -30,6 +46,10 @@ vi.mock('@/lib/auth/retention', () => ({ cleanupAuthRecords: authCleanup }))
 // This suite exercises shared-DB slot claims, not live affiliate retention or financial work.
 vi.mock('@/lib/affiliates/retention', () => ({ cleanupAffiliateTelemetry: vi.fn(async () => ({})) }))
 vi.mock('@/lib/affiliates/ledger', () => ({ retryAffiliateHistory: vi.fn(async () => ({})) }))
+vi.mock('@/lib/marketing/reconcile', () => ({
+  reconcileMarketing: vi.fn(async () => ({ recorded: 0 })),
+  cleanupMarketing: vi.fn(async () => ({})),
+}))
 
 const { cronRunsTable, db, pool } = await import('@workspace/db')
 const { runCronJob, CRON_RUN_STALE_MS } = await import('@/lib/cron/jobs')
@@ -46,6 +66,8 @@ describe.skipIf(!hasDb)('cron slot claim (Postgres)', () => {
   afterAll(async () => {
     await cleanup()
     await pool.end()
+    const actual = await vi.importActual<typeof import('@workspace/db')>('@workspace/db')
+    if (fixture.schema) await actual.pool.query(`DROP SCHEMA "${fixture.schema}" CASCADE`)
   })
 
   it('claims the authentication cleanup slot only once across concurrent triggers', async () => {

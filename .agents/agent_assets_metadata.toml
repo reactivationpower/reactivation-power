@@ -1698,3 +1698,17 @@ mtime_ms = 1791314332633
 storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/0caa80d2-3476-4fd1-a526-083678c6c76e/bfd2836f-c4c0-4475-84c9-466dfff6e0c8"
 storage_version_token = "1791314355350380"
 content_type = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+
+[[outputs]]
+id = "qW3XiGRXqYkgzVims31df"
+uri = "file://generated-artifacts/Patient-Pipeline-Emails-Replacement-pHEhLNyjVo37AFcd.zip"
+type = "unspecified"
+title = "Replacement marketing emails — all 68 templates"
+description = "Fresh GoHighLevel import ZIP. Every call button and linked logo uses https://patientpipeline.app/api/m/pHEhLNyjVo37AFcd. Includes subjects, preview text, and import instructions."
+logical_id = "1cb6b004-d5e1-491b-821e-ee972a6f9ab0"
+content_hash = "sha256:d8bc6a08ca671efafef87de7cb1cfd1a35a03b8c4ea8cd5c0d8cadcf0fcfd261"
+size = 202955
+mtime_ms = 1791577198876
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/1cb6b004-d5e1-491b-821e-ee972a6f9ab0/fe56f024-af73-4b9c-af4f-199425ce469e"
+storage_version_token = "1791577254935551"
+content_type = "application/octet-stream"

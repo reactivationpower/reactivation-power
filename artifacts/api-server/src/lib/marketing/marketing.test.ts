@@ -183,12 +183,24 @@ describe('marketing persistence in isolated schema',()=>{
       ('pending','customer-fixture','invoice_failed','failed',10000,'usd',null,'pending','pending','pending',now()),
       ('refund','customer-fixture','refund','refunded',2000,'usd','refund-one','charge','intent',null,now())`)
     await fixture.pool.query("INSERT INTO affiliate_disputes VALUES('d','charge',1000,'lost',now(),now(),true)")
-    await reconcileMarketing();await reconcileMarketing()
+    // The reconciliation lock is database-wide, even for private test schemas.
+    // A concurrent scheduler may legitimately return busy rather than process.
+    await vi.waitFor(async () => {
+      expect(await reconcileMarketing()).not.toHaveProperty('busy')
+    }, { timeout: 10000, interval: 100 })
+    await vi.waitFor(async () => {
+      expect(await reconcileMarketing()).not.toHaveProperty('busy')
+    }, { timeout: 10000, interval: 100 })
     const result=await marketingReport({role:'super_admin',userId:'root'},{includeExcluded:true})
     expect(result.totals.bookings).toBe(1);expect(result.totals.customers).toBe(1)
     expect(result.revenue[0]).toMatchObject({gross:10000,refunded:2000,disputed:1000,net:7000})
     await fixture.pool.query("UPDATE affiliate_disputes SET status='won',updated_event_at=now()")
-    await reconcileMarketing();await reconcileMarketing()
+    await vi.waitFor(async () => {
+      expect(await reconcileMarketing()).not.toHaveProperty('busy')
+    }, { timeout: 10000, interval: 100 })
+    await vi.waitFor(async () => {
+      expect(await reconcileMarketing()).not.toHaveProperty('busy')
+    }, { timeout: 10000, interval: 100 })
     expect((await marketingReport({role:'super_admin',userId:'root'},{includeExcluded:true})).revenue[0].net).toBe(8000)
   })
 })

@@ -1,4 +1,5 @@
 import { eq } from 'drizzle-orm'
+import { randomUUID } from 'node:crypto'
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 
 /**
@@ -10,7 +11,7 @@ import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
  */
 
 const hasDb = Boolean(process.env.SUPABASE_DB_URL)
-const OWNER = 'vt-lead-call-owner'
+const OWNER = `vt-lead-call-${randomUUID()}`
 
 const { campaignLeadsTable, leadCampaignsTable, db, pool } = await import('@workspace/db')
 const store = await import('@/lib/lead-followup/store')
