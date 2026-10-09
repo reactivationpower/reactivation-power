@@ -11,7 +11,7 @@ import { PageError, PageLoading } from '@/components/page-status'
 export default function BookACallPage() {
   const search = new URLSearchParams(useSearch())
   const query = Object.fromEntries(
-    ['cid', 'name', 'inactive', 'value', 'newMonthly', 'newValue', 'services', 'interest'].map((key) => [
+    ['cid', 'name', 'inactive', 'value', 'newMonthly', 'newValue', 'services', 'interest', 'funnelSource'].map((key) => [
       key,
       search.get(key) ?? undefined,
     ]),
@@ -22,7 +22,7 @@ export default function BookACallPage() {
   )
   if (loading) return <PageLoading />
   if (error) return <PageError error={error} />
-  const { contactId, firstName, thankYouHref } = data
+   const { contactId, firstName, thankYouHref, funnelSource } = data
 
   return (
     <main className="flex min-h-screen flex-col bg-background">
@@ -64,6 +64,7 @@ export default function BookACallPage() {
             <BookingCalendar
               contactId={contactId}
               thankYouHref={thankYouHref}
+               funnelSource={funnelSource}
               productInterest={search.get('interest') ?? undefined}
             />
           ) : (

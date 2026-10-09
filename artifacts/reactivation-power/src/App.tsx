@@ -80,6 +80,7 @@ import Page_portal_billing from '@/pages/portal_billing';
 import Page_strategy_call from '@/pages/strategy-call';
 import Page_strategy_call_schedule from '@/pages/strategy-call_schedule';
 import Page_strategy_call_providers_only from '@/pages/strategy-call_providers-only';
+import Page_schedule_a_call_confirmation from '@/pages/schedule-a-call_confirmation';
 
 function Router() {
   return (
@@ -500,6 +501,13 @@ function Router() {
         <RoutedErrorBoundary>
           <RootLayout>
             <Page_strategy_call_providers_only />
+          </RootLayout>
+        </RoutedErrorBoundary>
+      </Route>
+      <Route path="/schedule-a-call/confirmation">
+        <RoutedErrorBoundary>
+          <RootLayout>
+            <Page_schedule_a_call_confirmation />
           </RootLayout>
         </RoutedErrorBoundary>
       </Route>

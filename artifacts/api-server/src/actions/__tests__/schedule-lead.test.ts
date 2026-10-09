@@ -93,6 +93,33 @@ describe('schedule lead validation and submission', () => {
     }))
   })
 
+  it('carries the explicit website marker through persistence and calendar navigation', async () => {
+    const data = form('both', '50')
+    data.set('funnelSource', 'main-website')
+    await expect(submitHealthcareLead({}, data)).rejects.toThrow('REDIRECT:')
+    expect(insert).toHaveBeenCalledWith(expect.objectContaining({
+      source_path: '/schedule-a-call?interest=both&funnelSource=main-website',
+    }))
+    expect(redirect.mock.calls[0][0]).toContain('funnelSource=main-website')
+  })
+
+  it.each(['strategy-call', 'https://evil.example', '/schedule-a-call/confirmation'])(
+    'does not accept an arbitrary funnel marker %s', async (marker) => {
+      const data = form('both', '50')
+      data.set('funnelSource', marker)
+      await expect(submitHealthcareLead({}, data)).rejects.toThrow('REDIRECT:')
+      expect(redirect.mock.calls[0][0]).not.toContain('funnelSource')
+    },
+  )
+
+  it('does not opt a calculator/contact form in from the marker alone', async () => {
+    const data = form('both', '50')
+    data.delete('leadSource')
+    data.set('funnelSource', 'main-website')
+    await expect(submitHealthcareLead({}, data)).rejects.toThrow('REDIRECT:')
+    expect(redirect.mock.calls[0][0]).not.toContain('funnelSource')
+  })
+
   it('saves both components of the combined estimate and carries inputs to booking', async () => {
     const data = form('both', '1,200')
     data.delete('leadSource')

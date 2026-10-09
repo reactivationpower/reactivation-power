@@ -9,6 +9,8 @@ import {
 } from '@/lib/ghl'
 import { US_TIMEZONES } from '@workspace/shared/us-timezones'
 import { isProductInterest, PRODUCT_INTEREST_LABELS } from '@workspace/shared/lead-validation'
+import { validatedBookingFunnel } from '@workspace/shared/booking-funnel'
+import { assertBookingConfirmationConfigured, createBookingConfirmation } from '@/lib/booking-confirmation'
 
 const BOOKING_WINDOW_DAYS = 45
 
@@ -54,6 +56,7 @@ export async function getAvailability(
 export interface BookResult {
   ok: boolean
   error?: string
+  confirmationToken?: string
 }
 
 const TZ_ABBREV: Record<string, string> = {
@@ -108,6 +111,7 @@ export async function bookStrategyCall(params: {
   slot: string
   timezone: string
   productInterest?: string
+  funnelSource?: string
 }): Promise<BookResult> {
   const contactId = params.contactId?.trim().slice(0, 64)
   const slot = params.slot?.trim()
@@ -138,6 +142,8 @@ export async function bookStrategyCall(params: {
   }
 
   try {
+    const funnelSource = validatedBookingFunnel(params.funnelSource)
+    if (funnelSource) assertBookingConfirmationConfigured()
     // Pull the contact's real name from GHL so the calendar event reads
     // "Patient Pipeline Strategy Call w/ First Last". If the lookup
     // fails, fall back to the plain title — never block the booking.
@@ -186,7 +192,10 @@ export async function bookStrategyCall(params: {
       console.error('[v0] GHL booking note failed:', err)
     })
 
-    return { ok: true }
+    return {
+      ok: true,
+      ...(funnelSource ? { confirmationToken: createBookingConfirmation(slot, timezone) } : {}),
+    }
   } catch (err) {
     console.error('[v0] GHL booking failed:', err)
     return {

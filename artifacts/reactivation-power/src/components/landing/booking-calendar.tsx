@@ -16,6 +16,8 @@ import {
   timezoneLabel,
 } from '@workspace/shared/us-timezones'
 import { CalendarClock, ChevronLeft, Globe, Loader2 } from 'lucide-react'
+import { validatedBookingFunnel } from '@workspace/shared/booking-funnel'
+import { bookingDestination } from '@/lib/booking-destination'
 
 const PAST_DAYS_SHOWN = 3
 const WINDOW_DAYS = 45
@@ -146,11 +148,13 @@ export function BookingCalendar({
   contactId,
   thankYouHref,
   productInterest,
+  funnelSource,
 }: {
   contactId: string
   /** Thank-you page URL with the lead's details; slot + tz are appended */
   thankYouHref: string
   productInterest?: string
+  funnelSource?: string
 }) {
   const [, setLocation] = useLocation();
   const [timezone, setTimezone] = useState<string>(() => detectTimezone())
@@ -199,18 +203,26 @@ export function BookingCalendar({
     if (!selectedSlot) return
     setBooking(true)
     setBookError(null)
-    const res = await bookStrategyCall({
-      contactId,
-      slot: selectedSlot,
-      timezone,
-      productInterest,
-    })
+    let res
+    try {
+      res = await bookStrategyCall({
+        contactId,
+        slot: selectedSlot,
+        timezone,
+        productInterest,
+        funnelSource: validatedBookingFunnel(funnelSource),
+      })
+    } catch {
+      setBooking(false)
+      setBookError('We could not confirm the booking. Please try again.')
+      return
+    }
     if (res.ok) {
       // Leave the button in its "Booking…" state while the thank-you page loads
-      const url = new URL(thankYouHref, window.location.origin)
-      url.searchParams.set('slot', selectedSlot)
-      url.searchParams.set('tz', timezone)
-      setLocation(`${url.pathname}${url.search}`)
+      setLocation(bookingDestination({
+        funnelSource, confirmationToken: res.confirmationToken,
+        thankYouHref, slot: selectedSlot, timezone,
+      }))
       return
     }
     setBooking(false)

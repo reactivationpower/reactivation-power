@@ -9,6 +9,7 @@
     "./call-time": "./src/call-time.ts",
     "./csv-patients": "./src/csv-patients.ts",
     "./campaign-tokens": "./src/campaign-tokens.ts",
+    "./booking-funnel": "./src/booking-funnel.ts",
     "./email-templates": "./src/email-templates.ts",
     "./format": "./src/format.ts",
     "./lazy-time": "./src/lazy-time.ts",

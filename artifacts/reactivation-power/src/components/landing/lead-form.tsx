@@ -11,6 +11,7 @@ import { ServicesMultiSelect } from '@/components/landing/services-multi-select'
 import { Button } from '@/components/ui/button'
 import { readLeadFields, validateLeadFields } from '@workspace/shared/lead-validation'
 import type { CalculatorScenario } from '@workspace/shared/opportunity'
+import { validatedBookingFunnel } from '@workspace/shared/booking-funnel'
 
 const initialState: LeadState = {}
 
@@ -45,9 +46,10 @@ function inputClass(hasError: boolean): string {
   return `${inputBase} ${hasError ? 'border-destructive ring-2 ring-destructive/20' : 'border-input'}`
 }
 
-export function LeadForm({ scheduleMode = false, calculatorScenario }: {
+export function LeadForm({ scheduleMode = false, calculatorScenario, funnelSource }: {
   scheduleMode?: boolean
   calculatorScenario?: CalculatorScenario
+  funnelSource?: 'main-website'
 }) {
   const [state, formAction, pending] = useActionState(
     submitHealthcareLead,
@@ -176,6 +178,9 @@ export function LeadForm({ scheduleMode = false, calculatorScenario }: {
       )}
       {scheduleMode && (
         <>
+          {validatedBookingFunnel(funnelSource) && (
+            <input type="hidden" name="funnelSource" value={funnelSource} />
+          )}
           <input type="hidden" name="leadSource" value="schedule-a-call" />
           <div className="flex flex-col gap-1.5">
             <label htmlFor={`${uid}-interest`} className="text-sm font-medium text-foreground">

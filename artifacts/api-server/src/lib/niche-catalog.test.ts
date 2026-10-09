@@ -33,6 +33,7 @@ const NICHE_CATALOG_MODULES = [
  */
 const SHARED_MODULES = [
   'analytics-types',
+  'booking-funnel',
   'call-time',
   'campaign-tokens',
   'csv-patients',

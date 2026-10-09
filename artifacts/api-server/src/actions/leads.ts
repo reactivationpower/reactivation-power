@@ -9,6 +9,7 @@ import {
   upsertGhlContact,
 } from '@/lib/ghl'
 import { isProductInterest, PRODUCT_INTEREST_LABELS, readLeadFields, validateLeadFields, validatedCalculatorScenario } from '@workspace/shared/lead-validation'
+import { validatedBookingFunnel } from '@workspace/shared/booking-funnel'
 import {
   parseInactiveCount,
   parsePatientValue,
@@ -77,6 +78,7 @@ export async function submitHealthcareLead(
   } = fields
   const practiceName = String(formData.get('practiceName') ?? '').trim()
   const scheduleSource = formData.get('leadSource') === 'schedule-a-call'
+  const funnelSource = scheduleSource ? validatedBookingFunnel(formData.get('funnelSource')) : undefined
   const interest = productInterest && isProductInterest(productInterest) ? productInterest : 'reactivation'
   const hasReactivation = interest !== 'lead-follow-up'
   // source_path already stores landing attribution; use its query to retain
@@ -111,6 +113,7 @@ export async function submitHealthcareLead(
   const scenario = validatedCalculatorScenario(fields)
   const estimates = scenario ? scenarioEstimates(scenario) : null
   const sourceParams = new URLSearchParams(baseSourcePath.split('?')[1] ?? '')
+  if (funnelSource) sourceParams.set('funnelSource', funnelSource)
   if (scenario) {
     sourceParams.set('inactive', String(scenario.inactivePatients))
     sourceParams.set('value', String(scenario.patientValue))
@@ -261,6 +264,7 @@ export async function submitHealthcareLead(
   const params = new URLSearchParams({
     name: firstName,
   })
+  if (funnelSource) params.set('funnelSource', funnelSource)
   if (hasReactivation && inactiveCount !== null) {
     params.set('inactive', String(inactiveCount))
     params.set('value', String(patientValue))

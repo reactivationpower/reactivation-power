@@ -49,6 +49,8 @@ import { leadWebhookUrl } from "../lib/lead-followup/webhook-url";
 import { parseInactiveCount, parsePatientValue, parseCalculatorScenario, scenarioEstimates } from '@workspace/shared/opportunity';
 import { publicServiceName } from "@workspace/niche-catalog";
 import { DEFAULT_TIMEZONE, isUsTimezone, timezoneLabel } from '@workspace/shared/us-timezones';
+import { bookingThankYouHref, validatedBookingFunnel, WEBSITE_CONFIRMATION_PATH } from '@workspace/shared/booking-funnel';
+import { readBookingConfirmation } from '../lib/booking-confirmation';
 import {
   confirmPayment, getPaymentDetail, getPaymentLinkPublic, listPaymentLinks,
 } from "../actions/payments";
@@ -834,6 +836,7 @@ add("/pay/:token/thank-you", undefined, async (req) => {
 });
 
 add("/healthcare/book-a-call", undefined, async (req) => {
+  const funnelSource = validatedBookingFunnel(queryString(req, "funnelSource"));
   const contactId = (queryString(req, "cid") ?? "").slice(0, 64);
   const firstName = (queryString(req, "name") ?? "").slice(0, 40);
   const carried = new URLSearchParams();
@@ -841,8 +844,12 @@ add("/healthcare/book-a-call", undefined, async (req) => {
     const value = queryString(req, key);
     if (value) carried.set(key, value.slice(0, 600));
   }
-  const thankYouHref = `/healthcare/thank-you?${carried.toString()}`;
-  return { params: req.query, contactId, firstName, carried: Object.fromEntries(carried), thankYouHref };
+  const thankYouHref = bookingThankYouHref(funnelSource, carried.toString());
+  return { params: req.query, contactId, firstName, carried: Object.fromEntries(carried), thankYouHref, funnelSource };
+});
+
+add(WEBSITE_CONFIRMATION_PATH, undefined, async (req) => {
+  return readBookingConfirmation(queryString(req, "booking"));
 });
 
 add("/healthcare/thank-you", undefined, async (req) => {
