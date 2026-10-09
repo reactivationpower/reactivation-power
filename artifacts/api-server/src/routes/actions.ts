@@ -13,6 +13,7 @@ import * as booking from "../actions/booking";
 import * as demo from "../actions/demo";
 import * as leads from "../actions/leads";
 import * as salesLeads from "../actions/sales-leads";
+import * as marketing from "../actions/marketing";
 import * as leadFollowUp from "../actions/lead-followup";
 import * as mail from "../actions/mail";
 import * as payments from "../actions/payments";
@@ -54,6 +55,7 @@ type ActionFn = (...args: unknown[]) => Promise<unknown>;
 type ActionModule = Record<string, unknown>;
 
 const MODULES: Record<string, ActionModule> = {
+  marketing,
   "sales-leads": salesLeads,
   affiliates,
   "enrollment-notifications": enrollmentNotifications,
@@ -83,6 +85,11 @@ type Auth = "public" | "portal" | "affiliate" | "admin" | "super_admin" | "manag
 // hint: Logic changed on both sides. Requires understanding intent of each change.
 /** Allow-list: module -> action -> required auth. Anything else is 404. */
 const ACTIONS: Record<string, Record<string, Auth>> = {
+  marketing: {
+    getMarketingSetup: "admin", getMarketingReport: "admin", getMarketingActivity: "admin", getMarketingEvents: "admin",
+    saveMarketingSource: "super_admin", saveMarketingLink: "super_admin", saveMarketingPage: "super_admin",
+    saveMarketingSettings: "super_admin", getMarketingAudit: "super_admin", removeMarketingHistory: "super_admin",
+  },
   "sales-leads": {
     listSalesLeads: "admin", getSalesLead: "admin", createSalesLead: "admin",
     updateSalesLead: "admin", addSalesNote: "admin", logSalesCall: "admin",

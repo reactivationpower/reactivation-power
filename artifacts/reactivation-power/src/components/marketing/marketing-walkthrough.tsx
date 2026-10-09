@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Pause, Play } from 'lucide-react'
 import { WALKTHROUGH_VIDEO } from '@/components/video/video-assets'
+import { observeMarketingVideo } from '@/lib/marketing-video'
 
 const PREVIEW = `${import.meta.env.BASE_URL}videos/patient-pipeline-walkthrough-preview.mp4`
 
@@ -11,6 +12,11 @@ export function MarketingWalkthrough() {
   const [reduced, setReduced] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches)
   const [failed, setFailed] = useState(false)
   const prev = useRef<HTMLVideoElement>(null)
+  const full = useRef<HTMLVideoElement>(null)
+  useEffect(() => {
+    if (playing && !failed && full.current) return observeMarketingVideo(full.current, 'strategy-walkthrough')
+    return undefined
+  }, [playing, failed])
   const box = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -45,7 +51,7 @@ export function MarketingWalkthrough() {
           <button type="button" onClick={() => setFailed(false)} className="rounded-md bg-accent px-5 py-3 font-semibold text-accent-foreground">Retry video</button>
         </div>
       ) : playing ? (
-        <video src={WALKTHROUGH_VIDEO.src} poster={WALKTHROUGH_VIDEO.poster} controls autoPlay playsInline preload="auto" onError={() => setFailed(true)}
+        <video ref={full} src={WALKTHROUGH_VIDEO.src} poster={WALKTHROUGH_VIDEO.poster} controls autoPlay playsInline preload="auto" onError={() => setFailed(true)}
           aria-label={WALKTHROUGH_VIDEO.title} className="absolute inset-0 size-full bg-slate-900 object-contain" data-testid="video-walkthrough-full" />
       ) : (
         <>

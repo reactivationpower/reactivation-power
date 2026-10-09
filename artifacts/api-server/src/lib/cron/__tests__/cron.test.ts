@@ -9,6 +9,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 type Row = Record<string, unknown> & { id: string; job: string; dueKey: string | null; status: string; startedAt: Date }
 const rows: Row[] = []
+vi.mock('@/lib/marketing/reconcile',()=>({
+  cleanupMarketing:vi.fn(async()=>({aggregateGroups:0})),
+  reconcileMarketing:vi.fn(async()=>({recorded:0})),
+}))
 
 vi.mock('@workspace/db', () => {
   const db = {

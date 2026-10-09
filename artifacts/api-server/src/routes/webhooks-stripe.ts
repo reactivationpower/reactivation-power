@@ -6,6 +6,7 @@ import { processAffiliateDispute, processAffiliateHistory, recordAffiliateEligib
 import { logger } from "@/lib/logger";
 import { getStripeWebhookSecret, stripe } from "@/lib/stripe";
 import { getAdminClient } from "@/lib/supabase/admin";
+import { reconcileMarketing } from "@/lib/marketing/reconcile";
 import { reconcile } from "@/actions/enrollment";
 import {
   handleChargeRefunded,
@@ -149,6 +150,7 @@ router.post("/webhooks/stripe", async (req: Request, res: Response) => {
     // Retry even when the billing handler already recorded history before a prior attempt failed.
     const history = await db.select().from(paymentHistoryTable).where(eq(paymentHistoryTable.stripeEventId, event.id));
     for (const row of history) await processAffiliateHistory(row);
+    await reconcileMarketing().catch(() => logger.warn("Marketing payment outcome awaits reconciliation"));
     await db
       .update(stripeEventsTable)
       .set({ status: result.handled ? "processed" : "ignored", error: result.note ?? null, processedAt: new Date() })

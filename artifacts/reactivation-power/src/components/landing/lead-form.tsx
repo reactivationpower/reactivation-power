@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button'
 import { readLeadFields, validateLeadFields } from '@workspace/shared/lead-validation'
 import type { CalculatorScenario } from '@workspace/shared/opportunity'
 import { validatedBookingFunnel } from '@workspace/shared/booking-funnel'
+import { track, flush } from '@/lib/marketing-tracker'
 
 const initialState: LeadState = {}
 
@@ -58,6 +59,11 @@ export function LeadForm({ scheduleMode = false, calculatorScenario, funnelSourc
   // Unique per instance — this form renders twice on the page (popup + inline)
   const uid = useId()
   const formRef = useRef<HTMLFormElement>(null)
+  const started = useRef(false)
+  useEffect(() => {
+    if (state.fieldErrors) track('form_validation', { category: 'validation', control: 'lead-form' })
+    if (state.error) track('request_error', { category: 'unavailable', control: 'lead-form' })
+  }, [state])
 
   const [phone, setPhone] = useState('')
   const [zip, setZip] = useState('')
@@ -131,12 +137,15 @@ export function LeadForm({ scheduleMode = false, calculatorScenario, funnelSourc
     if (scheduleMode && !productInterest)
       found.productInterest = 'Select how we can help your practice.'
     if (Object.keys(found).length > 0) {
+      track('form_validation', { category: 'validation', control: 'lead-form' })
       e.preventDefault()
       setErrors(found)
       setErrorRound((n) => n + 1)
       return
     }
     setErrors({})
+    track('form_attempt', { control: 'lead-form' })
+    void flush()
   }
 
   // Drop a field's error as soon as the visitor starts fixing it
@@ -168,6 +177,7 @@ export function LeadForm({ scheduleMode = false, calculatorScenario, funnelSourc
   return (
     <form
       ref={formRef}
+      onFocus={() => { if (!started.current) { started.current = true; track('form_start', { control: 'lead-form' }) } }}
       action={formAction}
       onSubmit={handleSubmit}
       onInput={(e) => clearError((e.target as HTMLInputElement).name)}

@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { addSalesNote, convertSalesLead, getSalesLead, getSalesMedia, logSalesCall, retrySalesSync, updateSalesLead } from '@/app/actions/sales-leads'
 import { SALES_DISPOSITIONS, SALES_STAGES, type SalesDisposition, type SalesStage } from '@workspace/shared/sales-leads'
+import { MarketingActivityPanel } from '@/components/marketing/activity-panel'
 import { Banner, ErrorBox, Field, Pill, REFRESH_MS, Skeleton, btn, btn2, card, errMsg, fmt, inp, localToIso, useDashboard, viewerTz } from '@/components/leads/ui'
 
 const TERMINAL: SalesDisposition[] = ['Booked', 'Wrong Number', 'Do Not Contact']
@@ -93,7 +94,7 @@ export default function AdminLeadDetailPage() {
       )}
 
       <div className="grid gap-6 lg:grid-cols-3">
-        <div className="space-y-6 lg:col-span-2">
+        <div className="min-w-0 space-y-6 break-words lg:col-span-2">
           <section className={card + ' space-y-3'} data-testid="section-context">
             <h2 className="font-semibold">Context before you contact</h2>
             <dl className="grid gap-2 text-sm sm:grid-cols-2">
@@ -174,7 +175,8 @@ export default function AdminLeadDetailPage() {
           </section>
         </div>
 
-        <aside className="space-y-6">
+        <aside className="min-w-0 space-y-6 break-words">
+          <MarketingActivityPanel leadId={id} tz={tz} />
           <section className={card + ' space-y-3'}>
             <h2 className="font-semibold">Assignment and stage</h2>
             <Field label="Assignee"><select className={inp} value={lead.assignee_id ?? ''} disabled={save.isPending} onChange={(e) => save.mutate({ revision: lead.revision, assigneeId: e.target.value || null })} data-testid="select-assignee">

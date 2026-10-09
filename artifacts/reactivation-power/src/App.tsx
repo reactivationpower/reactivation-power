@@ -85,6 +85,10 @@ import PageAdminLeads from '@/pages/admin_leads';
 import PageAdminLeadId from '@/pages/admin_leads_id';
 import PageAdminLeadsSettings from '@/pages/admin_leads_settings';
 import PageAdminLeadsImport from '@/pages/admin_leads_import';
+import PageAdminLeadSources from '@/pages/admin_lead_sources';
+import PageAdminMarketingAnalytics from '@/pages/admin_marketing_analytics';
+import PageAnalyticsTest from '@/pages/analytics-test';
+import { MarketingAnalytics } from '@/components/marketing/analytics-consent';
 
 function Router() {
   return (
@@ -223,6 +227,15 @@ function Router() {
       </Route>
       <Route path="/admin/leads/import">
         <RoutedErrorBoundary><AdminLayout><PageAdminLeadsImport /></AdminLayout></RoutedErrorBoundary>
+      </Route>
+      <Route path="/admin/lead-sources">
+        <RoutedErrorBoundary><AdminLayout><PageAdminLeadSources /></AdminLayout></RoutedErrorBoundary>
+      </Route>
+      <Route path="/admin/marketing-analytics">
+        <RoutedErrorBoundary><AdminLayout><PageAdminMarketingAnalytics /></AdminLayout></RoutedErrorBoundary>
+      </Route>
+      <Route path="/analytics-test">
+        <RoutedErrorBoundary><RootLayout><PageAnalyticsTest /></RootLayout></RoutedErrorBoundary>
       </Route>
       <Route path="/admin/leads/:id">
         <RoutedErrorBoundary><AdminLayout><PageAdminLeadId /></AdminLayout></RoutedErrorBoundary>
@@ -574,6 +587,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
           <ReferralCapture />
+          <MarketingAnalytics />
           <Router />
         </WouterRouter>
         <Toaster />

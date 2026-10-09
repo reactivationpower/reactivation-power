@@ -32,6 +32,7 @@ const NICHE_CATALOG_MODULES = [
  * package must be listed here so a re-copied file fails the suite.
  */
 const SHARED_MODULES = [
+  'marketing-analytics',
   'sales-leads',
   'analytics-types',
   'booking-funnel',

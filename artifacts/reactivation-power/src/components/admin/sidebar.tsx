@@ -19,6 +19,8 @@ import {
   ShieldCheck,
   Users,
   Handshake,
+  Link2,
+  LineChart,
 } from 'lucide-react'
 import { adminLogout, type AdminIdentity, type AdminRole } from '@/app/actions/admin-auth'
 import { cn } from '@/lib/utils'
@@ -50,6 +52,8 @@ const NAV: { group: string; items: { href: string; label: string; icon: any; rol
   {
     group: 'Insights',
     items: [
+      { href: '/admin/marketing-analytics', label: 'Marketing Analytics', icon: LineChart, roles: ['super_admin', 'sales_rep'] },
+      { href: '/admin/lead-sources', label: 'Lead Sources', icon: Link2, roles: ['super_admin'] },
       { href: '/admin/analytics', label: 'Analytics', icon: BarChart3, roles: ['super_admin'] },
       { href: '/admin/billing', label: 'Billing', icon: Banknote, roles: ['super_admin'] },
     ],

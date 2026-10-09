@@ -9,6 +9,8 @@ import { isSameCard } from '@/lib/billing/rules'
 import { activateSubscription } from './subscriptions'
 import { PRODUCT_NAME, provisionAccounts, recordIntentPayment } from './payments'
 import { recordAffiliateConversion } from '@/lib/affiliates/attribution'
+import { reconcileMarketing } from '@/lib/marketing/reconcile'
+import { logger } from '@/lib/logger'
 
 type Rank = 'primary' | 'secondary'
 
@@ -319,6 +321,7 @@ async function finish(linkId: string, intent: Stripe.PaymentIntent | null, selec
     const [current] = await db.select().from(paymentLinkTermsTable).where(eq(paymentLinkTermsTable.linkId, linkId))
     if (current?.completedAt) {
       await recordAffiliateConversion(current.customerId, current.completedAt)
+      await reconcileMarketing().catch(() => logger.warn('Marketing conversion awaits reconciliation'))
       await provisionAccounts(linkId)
       await onSubscriptionStarted(linkId, { monthlyCents: current.monthlyCents, firstChargeAt: current.nextPaymentAt })
       return
@@ -382,6 +385,7 @@ async function finish(linkId: string, intent: Stripe.PaymentIntent | null, selec
     }
     // Waived setup fees are still a conversion; do not wait for a first monthly invoice to lock the lead.
     await recordAffiliateConversion(terms.customerId, now)
+    await reconcileMarketing().catch(() => logger.warn('Marketing conversion awaits reconciliation'))
   } finally {
     await db.update(paymentLinkTermsTable).set({ enrollmentFinalizingAt: null })
       .where(and(eq(paymentLinkTermsTable.linkId, linkId), eq(paymentLinkTermsTable.enrollmentFinalizingAt, lease)))

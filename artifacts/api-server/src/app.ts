@@ -3,6 +3,7 @@ import cookieParser from "cookie-parser";
 import pinoHttp from "pino-http";
 import router from "./routes";
 import webhooksLeadsRouter from "./routes/webhooks-leads";
+import marketingRouter from "./routes/marketing";
 import { logger } from "./lib/logger";
 import { redactSecretPath } from "./lib/redact-path";
 
@@ -35,6 +36,7 @@ app.use(cookieParser());
 // bytes: mounted ahead of the global parsers so a malformed or oversized body
 // is still attributed to its campaign and shown on the Lead sources tab.
 app.use("/api", webhooksLeadsRouter);
+app.use("/api", marketingRouter);
 app.use(
   express.json({
     limit: "10mb",

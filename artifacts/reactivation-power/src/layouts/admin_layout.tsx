@@ -24,8 +24,12 @@ function AdminContent({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-screen">
-      <AdminSidebar admin={admin} />
+      <div className="hidden md:block"><AdminSidebar admin={admin} /></div>
       <div className="flex min-w-0 flex-1 flex-col">
+        <details className="border-b border-border bg-card md:hidden">
+          <summary className="cursor-pointer px-4 py-3 text-sm font-semibold">Admin navigation</summary>
+          <AdminSidebar admin={admin} />
+        </details>
         <header className="flex h-16 items-center justify-between border-b border-border bg-card px-6">
           <p className="text-sm text-muted-foreground">Training Admin</p>
           <div className="flex items-center gap-3">
@@ -43,7 +47,7 @@ function AdminContent({ children }: { children: React.ReactNode }) {
             </div>
           </div>
         </header>
-        <main className="flex-1 overflow-y-auto p-6 lg:p-8">{children}</main>
+        <main className="min-w-0 flex-1 overflow-y-auto p-3 sm:p-6 lg:p-8">{children}</main>
       </div>
       <UploadTray />
       <Toaster id="admin-enrollment" position="top-right" richColors closeButton />

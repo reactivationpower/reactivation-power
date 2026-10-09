@@ -11,6 +11,7 @@ import { isProductInterest, PRODUCT_INTEREST_LABELS } from '@workspace/shared/le
 import { validatedBookingFunnel } from '@workspace/shared/booking-funnel'
 import { assertBookingConfirmationConfigured, createBookingConfirmation } from '@/lib/booking-confirmation'
 import { activity, stop, transaction } from '@/lib/sales-leads/store'
+import { bookingOutcome } from '@/lib/marketing/outcomes'
 const BOOKING_WINDOW_DAYS = 45
 
 export interface AvailabilityResult {
@@ -164,6 +165,10 @@ export async function bookStrategyCall(params: {
       await stop(c, lead.id, 'appointment_received')
       await activity(c, lead.id, { kind: 'appointment', body: `${title} — ${slot}`, status: 'confirmed', providerId: appointmentId || undefined, dedupeKey: `booking:${appointmentId || contactId + slot}` })
     }).catch(() => console.error('Appointment saved in GoHighLevel; local timeline awaits reconciliation'))
+    const marketingLead = (await import('@workspace/db')).pool
+    void marketingLead.query('SELECT id FROM sales_leads WHERE ghl_contact_id=$1', [contactId])
+      .then(result => result.rows.length === 1 ? bookingOutcome(result.rows[0].id, appointmentId || contactId + slot) : undefined)
+      .catch(() => {})
 
     // Fill the "Appointment Date And Time" custom field on the contact,
     // e.g. "Wednesday, Aug. 21st, 2026 at 11:00 AM ET" — used in GHL

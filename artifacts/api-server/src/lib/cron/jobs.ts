@@ -12,6 +12,7 @@ import { cleanupAuthRecords } from '@/lib/auth/retention'
 import { cleanupAffiliateTelemetry } from '@/lib/affiliates/retention'
 import { retryAffiliateHistory } from '@/lib/affiliates/ledger'
 import { reconcilePendingEnrollments } from '@/actions/enrollment'
+import { cleanupMarketing, reconcileMarketing } from '@/lib/marketing/reconcile'
 
 /**
  * The scheduled jobs and the single entry point that runs one of them.
@@ -41,7 +42,7 @@ export const CRON_JOBS: Record<CronJobName, CronJobDefinition> = {
     label: 'Authentication record cleanup',
     description: 'Removes retired sign-in codes, obsolete rate-limit counters, and inactive security sessions after one day; preserves analytics history.',
     hourEt: 4,
-    run: async () => ({ ...await cleanupAuthRecords(), affiliates: await cleanupAffiliateTelemetry() }),
+    run: async () => ({ ...await cleanupAuthRecords(), affiliates: await cleanupAffiliateTelemetry(), marketing: await cleanupMarketing() }),
   },
   'billing-retry': {
     name: 'billing-retry',
@@ -52,8 +53,9 @@ export const CRON_JOBS: Record<CronJobName, CronJobDefinition> = {
       const summary = await retryPastDueInvoices('cron')
       const enrollments = await reconcilePendingEnrollments()
       const affiliates = await retryAffiliateHistory()
+      const marketing = await reconcileMarketing()
       // Keep per-invoice detail in the log but cap it so the row stays small.
-      return { ...summary, enrollments, affiliates, details: summary.details.slice(0, 50) }
+      return { ...summary, enrollments, affiliates, marketing, details: summary.details.slice(0, 50) }
     },
   },
   'demo-reset': {

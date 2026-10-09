@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Play } from 'lucide-react'
+import { observeMarketingVideo } from '@/lib/marketing-video'
 
 export function formatDuration(totalSeconds: number): string {
   const m = Math.floor(totalSeconds / 60)
@@ -20,6 +21,10 @@ export function ClickToPlayVideo({ src, poster, title, durationSeconds, testId =
   const [failed, setFailed] = useState(false)
   const ref = useRef<HTMLVideoElement>(null)
   const duration = formatDuration(durationSeconds)
+  useEffect(() => {
+    if (ref.current && active && !failed && durationSeconds === 240) return observeMarketingVideo(ref.current, testId)
+    return undefined
+  }, [active, failed, durationSeconds, testId])
 
   useEffect(() => {
     if (active && !failed) void ref.current?.play?.()?.catch?.(() => {})

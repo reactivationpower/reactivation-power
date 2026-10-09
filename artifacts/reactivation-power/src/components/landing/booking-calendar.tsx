@@ -18,6 +18,7 @@ import {
 import { CalendarClock, ChevronLeft, Globe, Loader2 } from 'lucide-react'
 import { validatedBookingFunnel } from '@workspace/shared/booking-funnel'
 import { bookingDestination } from '@/lib/booking-destination'
+import { track, flush } from '@/lib/marketing-tracker'
 
 const PAST_DAYS_SHOWN = 3
 const WINDOW_DAYS = 45
@@ -201,6 +202,8 @@ export function BookingCalendar({
 
   async function confirmBooking() {
     if (!selectedSlot) return
+    track('booking_attempt', { control: 'confirm-booking' })
+    void flush()
     setBooking(true)
     setBookError(null)
     let res
@@ -213,6 +216,7 @@ export function BookingCalendar({
         funnelSource: validatedBookingFunnel(funnelSource),
       })
     } catch {
+      track('booking_failure', { category: 'network', control: 'confirm-booking' })
       setBooking(false)
       setBookError('We could not confirm the booking. Please try again.')
       return
@@ -226,6 +230,7 @@ export function BookingCalendar({
       return
     }
     setBooking(false)
+    track('booking_failure', { category: 'unavailable', control: 'confirm-booking' })
     setBookError(res.error ?? 'Something went wrong. Please try again.')
   }
 
@@ -358,6 +363,7 @@ export function BookingCalendar({
                 type="button"
                 onClick={() => {
                   setSelectedSlot(iso)
+                  track('slot_selected', { control: 'calendar-slot' })
                   setBookError(null)
                 }}
                 aria-pressed={isPicked}

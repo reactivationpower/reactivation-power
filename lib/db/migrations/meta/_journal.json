@@ -225,6 +225,13 @@
       "when": 1791568166073,
       "tag": "0031_secure_sales_wake",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1791569667848,
+      "tag": "0032_marketing_analytics",
+      "breakpoints": true
     }
   ]
 }

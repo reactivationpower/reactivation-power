@@ -18,6 +18,7 @@ import {
 import { intake, transaction } from '@/lib/sales-leads/store'
 import { validTimezone } from '@/lib/sales-leads/cadence'
 import { safeSalesUpsert } from '@/lib/sales-leads/provider'
+import { requestVisitorId, leadOutcome } from '@/lib/marketing/outcomes'
 
 export interface LeadState {
   error?: string
@@ -201,6 +202,7 @@ export async function submitHealthcareLead(
       disclosureVersion: 'patient-pipeline-sms-v1',
     },
     context: {
+      marketingVisitorId: await requestVisitorId(),
       firstName, lastName, email, phone, practiceName, zip, city, state, yearsInPractice, services, productInterest: interest,
       inactivePatients: inactiveCount, patientValue, revenueShown, scenario, estimates,
       inactiveAdjusted: formData.get('inactiveAdjusted'), valueAdjusted: valueAdjusted ?? 'assumed',
@@ -210,6 +212,7 @@ export async function submitHealthcareLead(
   })
 
   // The funnel still carries the provider id when available. Local sync jobs
+  if (!salesLead.review) await leadOutcome(salesLead.id, String(submittedLead.id))
   // recover outages; ambiguous identity never updates an arbitrary contact.
   let ghlContactId = ''
   if (ghlConfigured() && !salesLead.review) {
