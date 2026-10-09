@@ -32,6 +32,7 @@ export default function AdminAffiliatesPage() {
           </div>
           <RulesEditor prefix="new" value={rules} onChange={setRules} />
           <Field label="Reason (audited)"><input required className={inputCls} value={reason} onChange={(e) => setReason(e.target.value)} data-testid="input-new-reason" /></Field>
+          <p className="text-sm text-muted-foreground" data-testid="text-invitation-notice">Creating an approved partner queues a payment onboarding invitation to this inbox. Delivery status appears on the partner profile.</p>
           {err && <p role="alert" className="text-sm text-destructive">{err}</p>}
           <button className={btnCls} disabled={m.isPending} data-testid="button-create-affiliate">Create approved partner</button>
         </form>

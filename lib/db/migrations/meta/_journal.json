@@ -232,6 +232,13 @@
       "when": 1791569667848,
       "tag": "0032_marketing_analytics",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1791578665407,
+      "tag": "0033_affiliate_secure_intake",
+      "breakpoints": true
     }
   ]
 }

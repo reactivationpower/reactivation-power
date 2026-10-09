@@ -63,6 +63,7 @@ export async function callAction<T = unknown>(
 ): Promise<T> {
   const res = await fetch(apiUrl(`/actions/${module}/${fn}`), {
     method: 'POST',
+    ...(module === 'affiliate-onboarding' ? { cache: 'no-store' as const } : {}),
     credentials: 'include',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ args: args.map(encodeArg) }),

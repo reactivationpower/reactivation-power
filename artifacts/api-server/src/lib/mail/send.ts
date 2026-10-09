@@ -38,6 +38,8 @@ export interface SendResult {
 }
 
 export interface SendOptions {
+  /** Durable outboxes freeze the exact content and sender on their first attempt. Never log this. */
+  deliverySnapshot?: ReturnType<typeof renderTemplate> & { from: string }
   /** Provider-level deduplication for durable outbox retries (24-hour retention). */
   idempotencyKey?: string
   /** Free-form context stored with the log row (ids, amounts). Never secrets or links. */
@@ -74,11 +76,11 @@ export async function sendEmail<K extends TemplateId>(
   const recipient = to.trim().toLowerCase()
   const logId = randomUUID()
   const authentication = isAuthenticationEmail(type)
-  const sensitiveDelivery = authentication || type === 'agreement_sent'
+  const sensitiveDelivery = authentication || type === 'agreement_sent' || type === 'affiliate_onboarding_v1'
   const metadata = safeEmailMetadata(type, options.metadata)
   let rendered: ReturnType<typeof renderTemplate>
   try {
-    rendered = renderTemplate(type, data)
+    rendered = options.deliverySnapshot ?? renderTemplate(type, data)
   } catch (err) {
     const error = authentication ? 'Authentication email rendering failed' : sensitiveDelivery ? 'Email rendering failed' : err instanceof Error ? err.message : 'Email rendering failed'
     await writeLog({ id: logId, type, recipient, subject: 'Email rendering failed', metadata, status: 'failed', error })
@@ -99,7 +101,7 @@ export async function sendEmail<K extends TemplateId>(
       method: 'POST',
       ...(options.idempotencyKey ? { headers: { 'Idempotency-Key': options.idempotencyKey } } : {}),
       body: {
-        from: fromAddress(),
+        from: options.deliverySnapshot?.from ?? fromAddress(),
         to: [recipient],
         subject: rendered.subject,
         html: rendered.html,

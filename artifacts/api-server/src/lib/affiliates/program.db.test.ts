@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises'
 import type { PoolClient } from '@workspace/db'
 import type { Request, Response } from 'express'
 import { beforeAll, afterAll, beforeEach, describe, expect, it, vi } from 'vitest'
+import { PDFDocument } from 'pdf-lib'
 
 const isolated = vi.hoisted(() => ({ acquire: null as null | (() => Promise<PoolClient>), schema: '' }))
 vi.mock('@workspace/db', async original => {
@@ -17,7 +18,7 @@ vi.mock('@workspace/db', async original => {
   const { drizzle } = await import('drizzle-orm/node-postgres')
   return { ...actual, pool: facade, db: drizzle(facade as never) }
 })
-vi.mock('@/lib/mail/send', () => ({ sendEmail: vi.fn().mockResolvedValue({ ok: true, logId: 'mock-mail' }) }))
+vi.mock('@/lib/mail/send', () => ({ sendEmail: vi.fn().mockResolvedValue({ ok: true, logId: 'mock-mail' }), fromAddress: () => 'Patient Pipeline <team@patientpipeline.app>' }))
 vi.mock('@/lib/stripe', () => ({ stripe: { charges: { retrieve: vi.fn() } } }))
 vi.mock('@/lib/auth/admin-session', () => ({ requireAdmin: vi.fn().mockResolvedValue({ userId: 'fixture-admin', role: 'super_admin' }) }))
 
@@ -32,6 +33,8 @@ const { recordWire, deliverPayout } = await import('./payouts')
 const { sendAccess, verifyAccess, affiliateSession, revokeAccess, trustedAffiliateIp } = await import('./access')
 const { cleanupAffiliateTelemetry } = await import('./retention')
 const actions = await import('@/actions/affiliates')
+const onboarding = await import('@/actions/affiliate-onboarding')
+const invitations = await import('./onboarding-invitations')
 const { authDigest } = await import('@/lib/auth/portal-password')
 const { sendEmail } = await import('@/lib/mail/send')
 const { stripe } = await import('@/lib/stripe')
@@ -40,7 +43,7 @@ const partnerA = randomUUID(), partnerB = randomUUID(), customerId = randomUUID(
 const email = `fixture-${randomUUID()}@example.invalid`
 const at = new Date('2026-02-15T15:00:00Z')
 const req = (cookies = {}): Request => ({ cookies, secure: false, socket: { remoteAddress: '127.0.0.1' }, header: () => undefined } as unknown as Request)
-const res = () => ({ cookie: vi.fn(), clearCookie: vi.fn() }) as unknown as Response
+const res = () => ({ cookie: vi.fn(), clearCookie: vi.fn(), setHeader: vi.fn() }) as unknown as Response
 const context = <T>(fn: () => Promise<T>, request = req(), response = res()) => runWithRequestContext(request, response, fn)
 
 describe.skipIf(!process.env.SUPABASE_DB_URL)('affiliate program isolated Postgres fixtures', { timeout: 20000 }, () => {
@@ -59,6 +62,7 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('affiliate program isolated Postgr
     const migration = await readFile(new URL('../../../../../lib/db/migrations/0026_affiliate_program.sql', import.meta.url), 'utf8')
     await pool.query(migration)
     await pool.query(await readFile(new URL('../../../../../lib/db/migrations/0027_affiliate_cash_evidence.sql', import.meta.url), 'utf8'))
+    await pool.query(await readFile(new URL('../../../../../lib/db/migrations/0033_affiliate_secure_intake.sql', import.meta.url), 'utf8'))
   }, 30000)
   afterAll(async () => {
     if (isolated.schema) await actual.pool.query(`DROP SCHEMA IF EXISTS "${isolated.schema}" CASCADE`)
@@ -83,6 +87,113 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('affiliate program isolated Postgr
       VALUES($1,$2,$3,'subscription',10000)`, [linkId, randomUUID(), customerId])
     await pool.query(`INSERT INTO affiliate_attributions(id,customer_id,affiliate_id,effective_at,actor,reason)
       VALUES($1,$2,$3,'2026-01-01','fixture','fixture')`, [randomUUID(), customerId, partnerA])
+  })
+  it('queues only first approval; email failures keep partner, retries claim once and freeze payload', async () => {
+    const input = { businessName: 'Fixture onboarding', email: `onboarding-${randomUUID()}@example.invalid`,
+      status: 'pending', rules: { monthly: { kind: 'flat' as const, value: 100 }, one_time: { kind: 'flat' as const, value: 0 } }, reason: 'Synthetic test' }
+    const created = await actions.saveAffiliate(input)
+    expect(vi.mocked(sendEmail)).not.toHaveBeenCalled()
+    vi.mocked(sendEmail).mockResolvedValueOnce({ ok: false, logId: 'fixture-failure', uncertain: true })
+    await actions.saveAffiliate({ ...input, id: created.id, status: 'approved' })
+    expect((await pool.query('SELECT status FROM affiliates WHERE id=$1', [created.id])).rows[0].status).toBe('approved')
+    const job = (await pool.query('SELECT * FROM affiliate_onboarding_invitations WHERE affiliate_id=$1', [created.id])).rows[0]
+    expect(job.status).toBe('failed')
+    await actions.saveAffiliate({ ...input, id: created.id, status: 'approved', businessName: 'Edited name' })
+    expect(vi.mocked(sendEmail)).toHaveBeenCalledTimes(1)
+    await pool.query("UPDATE affiliate_onboarding_invitations SET next_attempt_at=now()-interval '1 minute' WHERE id=$1", [job.id])
+    await Promise.all([invitations.deliverOnboarding(job.id), invitations.deliverOnboarding(job.id)])
+    expect(vi.mocked(sendEmail)).toHaveBeenCalledTimes(2)
+    expect(vi.mocked(sendEmail).mock.calls[1]).toEqual(vi.mocked(sendEmail).mock.calls[0])
+    await context(() => onboarding.resendOnboardingInvitation(created.id))
+    expect(vi.mocked(sendEmail)).toHaveBeenCalledTimes(3)
+    expect((await pool.query('SELECT count(*)::int n FROM affiliate_onboarding_invitations WHERE affiliate_id=$1', [created.id])).rows[0].n).toBe(2)
+    const approved = await actions.saveAffiliate({ ...input, email: `approved-${randomUUID()}@example.invalid`, status: 'approved' })
+    expect((await pool.query('SELECT status FROM affiliate_onboarding_invitations WHERE affiliate_id=$1', [approved.id])).rows[0].status).toBe('accepted')
+  })
+  it('cancels obsolete invitations on email/status/access changes and refuses beyond provider dedupe window', async () => {
+    const input = { businessName: 'Fixture', email: `expiry-${randomUUID()}@example.invalid`, status: 'approved',
+      rules: { monthly: { kind: 'flat' as const, value: 100 }, one_time: { kind: 'flat' as const, value: 0 } }, reason: 'Synthetic test' }
+    vi.mocked(sendEmail).mockResolvedValue({ ok: false, uncertain: true, logId: 'fixture' })
+    const p = await actions.saveAffiliate(input)
+    await pool.query("UPDATE affiliate_onboarding_invitations SET first_attempt_at=now()-interval '25 hours',next_attempt_at=now() WHERE affiliate_id=$1", [p.id])
+    await invitations.retryOnboardingInvitations()
+    expect(vi.mocked(sendEmail)).toHaveBeenCalledTimes(1)
+    expect((await pool.query('SELECT status FROM affiliate_onboarding_invitations WHERE affiliate_id=$1', [p.id])).rows[0].status).toBe('uncertain')
+    await actions.saveAffiliate({ ...input, id: p.id, email: `changed-${randomUUID()}@example.invalid` })
+    expect((await pool.query('SELECT status FROM affiliate_onboarding_invitations WHERE affiliate_id=$1', [p.id])).rows[0].status).toBe('cancelled')
+    await context(() => onboarding.resendOnboardingInvitation(p.id))
+    await revokeAccess(p.id, 'fixture', 'Fixture revocation')
+    expect((await pool.query("SELECT id FROM affiliate_onboarding_invitations WHERE affiliate_id=$1 AND status<>'cancelled'", [p.id])).rows).toHaveLength(0)
+    await actions.saveAffiliate({ ...input, id: p.id, status: 'inactive' })
+    await expect(context(() => onboarding.resendOnboardingInvitation(p.id))).rejects.toThrow('approved')
+  })
+  it('recovers provider acceptance and stops a crashed final delivery attempt without duplicate sends', async () => {
+    const p = (await pool.query('SELECT * FROM affiliates WHERE id=$1', [partnerA])).rows[0]
+    const { transaction } = await import('./store')
+    const job = await transaction(c => invitations.enqueueOnboarding(c, p, true))
+    await pool.query(`UPDATE affiliate_onboarding_invitations SET status='sending',attempts=5,
+      first_attempt_at=now()-interval '1 hour',lease_until=now()-interval '1 minute' WHERE id=$1`, [job])
+    await invitations.retryOnboardingInvitations()
+    expect((await pool.query('SELECT status FROM affiliate_onboarding_invitations WHERE id=$1', [job])).rows[0].status).toBe('uncertain')
+    expect(vi.mocked(sendEmail)).not.toHaveBeenCalled()
+    await pool.query("UPDATE affiliate_onboarding_invitations SET status='sending' WHERE id=$1", [job])
+    await pool.query(`INSERT INTO email_log(id,type,recipient,subject,status,provider_id,metadata)
+      VALUES($1,'affiliate_onboarding_v1',$2,'Fixture','delivered','fixture-provider',$3)`,
+      [randomUUID(), email, JSON.stringify({ invitationId: job })])
+    await invitations.retryOnboardingInvitations()
+    expect((await context(() => onboarding.getAdminOnboarding(partnerA))).invitations[0]).toMatchObject({
+      status: 'accepted', delivery_status: 'delivered',
+    })
+    expect(vi.mocked(sendEmail)).not.toHaveBeenCalled()
+  })
+  it('encrypts intake, scopes identities, handles stale writes and requires recent inbox verification for replacements', async () => {
+    vi.stubEnv('AFFILIATE_DATA_KEY_V1', 'ab'.repeat(32))
+    try {
+      const doc = await PDFDocument.create(); doc.addPage()
+      const address = { line1: '123 Test Street', line2: '', city: 'Test City', state: 'NY', zip: '10001', country: 'US' as const }
+      const input = { version: 0, contact: { contactName: 'Test Contact', phone: '2025550198', legalName: 'Test Payee', dba: '', address },
+        wire: { bankName: 'Synthetic Bank', bankAddress: address, accountHolder: 'Test Payee', accountType: 'checking' as const,
+          routingNumber: '021000021', accountNumber: '123456789012', accountConfirmation: '123456789012', instructions: '' },
+        w9Base64: Buffer.from(await doc.save()).toString('base64') }
+      const p = (await pool.query('SELECT * FROM affiliates WHERE id=$1', [partnerA])).rows[0]
+      await sendAccess(p, true)
+      const mail = vi.mocked(sendEmail).mock.calls.at(-1)![2] as { loginUrl: string }
+      expect(mail.loginUrl).toContain('?next=onboarding#token=')
+      const response = res()
+      await context(() => verifyAccess(email, mail.loginUrl.split('#token=')[1]!), req(), response)
+      const cookie = vi.mocked(response.cookie).mock.calls[0]![1]
+      const request = req({ pp_affiliate: cookie })
+      const invoke = <T>(f: () => Promise<T>) => context(f, request)
+      expect(await invoke(() => onboarding.saveMyOnboarding(input))).toEqual({ ok: true, version: 1 })
+      const raw = JSON.stringify((await pool.query('SELECT * FROM affiliate_onboarding WHERE affiliate_id=$1', [partnerA])).rows)
+      for (const secret of ['Test Contact','123456789012','021000021','%PDF']) expect(raw).not.toContain(secret)
+      const normal = await invoke(() => onboarding.getMyOnboarding())
+      expect(normal.bank?.last4).toBe('9012')
+      expect(JSON.stringify(normal)).not.toContain(input.wire.accountNumber)
+      expect(JSON.stringify(await actions.getAffiliateProfile(partnerA))).not.toContain(input.wire.accountNumber)
+      await expect(invoke(() => onboarding.saveMyOnboarding({ ...input, affiliateId: partnerB }))).rejects.toThrow()
+      await expect(invoke(() => onboarding.saveMyOnboarding(input))).rejects.toThrow('Stale')
+      await context(() => onboarding.reviewOnboarding({ affiliateId: partnerA, version: 1 }))
+      expect((await invoke(() => onboarding.getMyOnboarding())).status).toBe('reviewed')
+      expect((await context(() => onboarding.revealOnboardingWire({ affiliateId: partnerA, version: 1 }))).accountNumber).toBe(input.wire.accountNumber)
+      expect((await context(() => onboarding.downloadOnboardingW9({ affiliateId: partnerA, version: 1 }))).base64).toBe(input.w9Base64)
+      await pool.query("UPDATE affiliate_sessions SET created_at=now()-interval '30 minutes' WHERE affiliate_id=$1", [partnerA])
+      await expect(invoke(() => onboarding.saveMyOnboarding({ ...input, version: 1 }))).rejects.toThrow('Fresh inbox')
+      await invoke(() => onboarding.saveMyOnboarding({ version: 1, contact: input.contact }))
+      expect((await invoke(() => onboarding.getMyOnboarding())).status).toBe('submitted')
+      expect((await invoke(() => onboarding.getMyOnboarding())).bank?.last4).toBe('9012')
+      expect((await pool.query('SELECT affiliate_id FROM affiliate_onboarding')).rows).toEqual([{ affiliate_id: partnerA }])
+      const logs = JSON.stringify((await pool.query('SELECT * FROM affiliate_activity')).rows)
+      expect(logs).not.toContain(input.wire.accountNumber)
+      expect(logs).not.toContain(input.w9Base64)
+      vi.mocked(requireAdmin).mockRejectedValueOnce(new Error('Unauthorized'))
+      await expect(context(() => onboarding.revealOnboardingWire({ affiliateId: partnerA, version: 2 }))).rejects.toThrow('Unauthorized')
+      vi.stubEnv('AFFILIATE_DATA_KEY_V1', '')
+      await expect(invoke(() => onboarding.saveMyOnboarding({ version: 2, contact: input.contact }))).rejects.toThrow('unavailable')
+      expect((await pool.query('SELECT version FROM affiliate_onboarding WHERE affiliate_id=$1', [partnerA])).rows[0].version).toBe(2)
+      await revokeAccess(partnerA, 'fixture', 'Fixture')
+      await expect(invoke(() => onboarding.getMyOnboarding())).rejects.toThrow('sign-in')
+    } finally { vi.unstubAllEnvs() }
   })
   async function payment(overrides: Partial<typeof paymentHistoryTable.$inferInsert> = {}) {
     const [row] = await db.insert(paymentHistoryTable).values({

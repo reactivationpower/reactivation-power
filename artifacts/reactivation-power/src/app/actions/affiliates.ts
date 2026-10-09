@@ -51,7 +51,7 @@ export interface Profile extends Report {
   partner: Affiliate; activity: Activity[]; summary: { visits: number; practice_views: number }
 }
 export const applyAffiliate = (input: { businessName: string; email: string }) => action<{ ok: boolean }>('affiliates', 'applyAffiliate', input)
-export const requestAffiliateAccess = (input: { email: string; accessId?: string }) => action<{ ok: boolean }>('affiliates', 'requestAffiliateAccess', input)
+export const requestAffiliateAccess = (input: { email: string; accessId?: string; next?: 'onboarding' }) => action<{ ok: boolean }>('affiliates', 'requestAffiliateAccess', input)
 export const verifyAffiliateAccess = (input: { email: string; token: string }) => action<{ ok: boolean; error?: string }>('affiliates', 'verifyAffiliateAccess', input)
 export const affiliateLogout = () => action<{ ok: boolean }>('affiliates', 'affiliateLogout')
 export const getAffiliateDashboard = () => action<Report>('affiliates', 'getAffiliateDashboard')

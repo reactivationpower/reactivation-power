@@ -4,6 +4,7 @@ import { currentDueKey, runCronJob, type CronJobName } from "@/lib/cron/jobs";
 import { retryFailedNotifications } from "@/lib/billing/notifications";
 import { deliverLeadEmails } from "@/lib/lead-followup/notifications";
 import { retryPendingEnrollmentInvitations } from "@/lib/agreements/enrollment-invitation";
+import { retryOnboardingInvitations } from "@/lib/affiliates/onboarding-invitations";
 import { runSalesWorker } from "@/lib/sales-leads/worker";
 import { reconcileMarketing } from "@/lib/marketing/reconcile";
 import { logger } from "@/lib/logger";
@@ -55,6 +56,7 @@ router.get("/cron/lead-emails", async (req, res) => {
   }
   await deliverLeadEmails();
   await retryPendingEnrollmentInvitations();
+  await retryOnboardingInvitations();
   await runSalesWorker();
   await reconcileMarketing().catch(() => logger.warn("Marketing reconciliation deferred"));
   res.json({ ok: true });
@@ -69,6 +71,7 @@ router.get("/cron/sales-leads", async (req,res) => {
   }
   await runWithRequestContext(req,res,async () => {
     await runSalesWorker();
+    await retryOnboardingInvitations();
     await reconcileMarketing().catch(() => logger.warn("Marketing reconciliation deferred"));
     if (req.get(NATIVE_WAKE_HEADER) === NATIVE_WAKE_MARKER) await recordNativeWake();
     res.json({ok:true});

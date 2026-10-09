@@ -14,6 +14,8 @@ export default function AffiliatesAccessPage() {
     return {
       token: h.get('token') ?? (window.location.hash.length > 1 && !window.location.hash.includes('=') ? window.location.hash.slice(1) : ''),
       accessId: new URLSearchParams(window.location.search).get('accessId') ?? '',
+      // Only one destination is ever preserved; anything else is ignored.
+      next: new URLSearchParams(window.location.search).get('next') === 'onboarding' ? 'onboarding' as const : undefined,
     }
   })
   const token = useRef(entry.token)
@@ -30,11 +32,11 @@ export default function AffiliatesAccessPage() {
     try {
       if (hasToken) {
         const r = await verifyAffiliateAccess({ email: email.trim(), token: token.current })
-        if (r.ok) { token.current = ''; qc.removeQueries({ predicate: (q) => String(q.queryKey[0]).startsWith('affiliate') }); nav('/affiliates'); return }
+        if (r.ok) { token.current = ''; qc.removeQueries({ predicate: (q) => String(q.queryKey[0]).startsWith('affiliate') }); nav(entry.next === 'onboarding' ? '/affiliates/onboarding' : '/affiliates'); return }
         // A typo must not discard still-valid inbox proof; the server decides single-use/expiry.
         setErr(r.error ?? 'This link is invalid or expired. Request a new one.')
       } else {
-        await requestAffiliateAccess({ email: email.trim(), ...(accessId.current ? { accessId: accessId.current } : {}) })
+        await requestAffiliateAccess({ email: email.trim(), ...(accessId.current ? { accessId: accessId.current } : {}), ...(entry.next ? { next: entry.next } : {}) })
         setSent(true)
       }
     } catch (x) { setErr((x as Error).message) } finally { setBusy(false) }

@@ -91,6 +91,7 @@ vi.mock('@/lib/auth/retention', () => ({ cleanupAuthRecords: cleanup }))
 vi.mock('@/lib/affiliates/retention', () => ({ cleanupAffiliateTelemetry: vi.fn(async () => ({ ipStripped: 0, telemetryDeleted: 0, sessionsDeleted: 0, challengesDeleted: 0 })) }))
 vi.mock('@/lib/affiliates/ledger', () => ({ retryAffiliateHistory: vi.fn(async () => ({ examined: 0, completed: 0 })) }))
 vi.mock('@/lib/agreements/enrollment-invitation', () => ({ retryPendingEnrollmentInvitations: vi.fn(async () => {}) }))
+vi.mock('@/lib/affiliates/onboarding-invitations', () => ({ retryOnboardingInvitations: vi.fn(async () => ({ examined: 0, accepted: 0 })) }))
 
 const { tick } = await import('@/lib/cron/scheduler')
 const { dueKeyFor, hoursSinceSlot } = await import('@/lib/cron/slots')

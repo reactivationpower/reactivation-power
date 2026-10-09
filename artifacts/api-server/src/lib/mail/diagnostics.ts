@@ -16,6 +16,9 @@ export function deliveryFailureMessage(status: string): string | null {
 }
 
 export function safeEmailMetadata(type: string, metadata?: Record<string, unknown>): Record<string, unknown> | null {
+  if (type === 'affiliate_onboarding_v1') {
+    return typeof metadata?.invitationId === 'string' ? { invitationId: metadata.invitationId } : null
+  }
   if (type === 'agreement_sent') {
     return Object.fromEntries(Object.entries(metadata ?? {}).filter(([key]) =>
       ['agreementId', 'customerId', 'resend', 'initialInvitation', 'test'].includes(key)))

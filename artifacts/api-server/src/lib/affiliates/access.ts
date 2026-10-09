@@ -36,19 +36,20 @@ export async function accessLimit(scope: string, value: string, max = 10): Promi
 export function accessId(p: Partner): string {
   return `${p.id}.${p.access_version}.${authDigest(`affiliate-entry:${p.id}:${p.access_version}`)}`
 }
-export async function sendAccess(p: Partner) {
+export async function sendAccess(p: Partner, onboarding = false) {
   if (p.status !== 'approved') throw new Error('Only approved affiliates can receive access')
   const token = authToken()
   const key = authDigest(`affiliate-challenge:${token}`)
   await transaction(async client => {
-    await client.query('SELECT id FROM affiliates WHERE id=$1 FOR UPDATE', [p.id])
+    const current = (await client.query('SELECT email,status,access_version FROM affiliates WHERE id=$1 FOR UPDATE', [p.id])).rows[0]
+    if (!current || current.email !== p.email || current.status !== 'approved' || current.access_version !== p.access_version) throw new Error('Affiliate access changed. Request a new link.')
     await client.query('UPDATE affiliate_challenges SET consumed_at=now() WHERE affiliate_id=$1 AND consumed_at IS NULL', [p.id])
     await client.query(`INSERT INTO affiliate_challenges(id,affiliate_id,email,access_version,expires_at)
       VALUES($1,$2,$3,$4,now()+interval '15 minutes')`, [key, p.id, p.email, p.access_version])
     await audit(client, p.id, 'access_email_issued', 'system')
   })
   const result = await sendEmail('affiliate_access', p.email, {
-    businessName: p.business_name, loginUrl: `https://patientpipeline.app/affiliates/access#token=${token}`,
+    businessName: p.business_name, loginUrl: `https://patientpipeline.app/affiliates/access${onboarding ? '?next=onboarding' : ''}#token=${token}`,
   })
   if (!result.ok) {
     await pool.query('UPDATE affiliate_challenges SET consumed_at=now() WHERE id=$1', [key])
@@ -107,6 +108,8 @@ export async function revokeAccess(affiliateId: string, actor: string, reason: s
     await client.query('UPDATE affiliates SET access_version=access_version+1 WHERE id=$1', [affiliateId])
     await client.query('UPDATE affiliate_sessions SET revoked_at=now() WHERE affiliate_id=$1 AND revoked_at IS NULL', [affiliateId])
     await client.query('UPDATE affiliate_challenges SET consumed_at=now() WHERE affiliate_id=$1 AND consumed_at IS NULL', [affiliateId])
+    await client.query(`UPDATE affiliate_onboarding_invitations SET status='cancelled'
+      WHERE affiliate_id=$1 AND status IN ('pending','sending','failed','uncertain')`, [affiliateId])
     await audit(client, affiliateId, 'access_revoked', actor, reason)
   })
 }

@@ -30,6 +30,7 @@ import * as cron from "../actions/cron";
 import * as leadNotifications from "../actions/lead-notifications";
 import * as enrollmentNotifications from "../actions/enrollment-notifications";
 import * as affiliates from "../actions/affiliates";
+import * as affiliateOnboarding from "../actions/affiliate-onboarding";
 import { affiliateSession, assertSameOrigin } from "../lib/affiliates/access";
 
 /**
@@ -59,6 +60,7 @@ const MODULES: Record<string, ActionModule> = {
   marketing,
   "sales-leads": salesLeads,
   affiliates,
+  "affiliate-onboarding": affiliateOnboarding,
   "enrollment-notifications": enrollmentNotifications,
   "lead-notifications": leadNotifications,
   "admin-auth": adminAuth,
@@ -86,6 +88,12 @@ type Auth = "public" | "portal" | "affiliate" | "admin" | "super_admin" | "manag
 // hint: Logic changed on both sides. Requires understanding intent of each change.
 /** Allow-list: module -> action -> required auth. Anything else is 404. */
 const ACTIONS: Record<string, Record<string, Auth>> = {
+  "affiliate-onboarding": {
+    getMyOnboarding: "affiliate", saveMyOnboarding: "affiliate",
+    getAdminOnboarding: "super_admin", reviewOnboarding: "super_admin",
+    revealOnboardingWire: "super_admin", downloadOnboardingW9: "super_admin",
+    resendOnboardingInvitation: "super_admin",
+  },
   marketing: {
     getMarketingSetup: "admin", getMarketingReport: "admin", getMarketingActivity: "admin", getMarketingEvents: "admin",
     saveMarketingSource: "super_admin", saveMarketingLink: "super_admin", saveMarketingPage: "super_admin",
@@ -278,7 +286,7 @@ router.post("/actions/:module/:fn", async (req: Request, res: Response) => {
   const rawArgs = Array.isArray(req.body?.args) ? (req.body.args as unknown[]) : [];
   const args = rawArgs.map(decodeArg);
     const result = await runWithRequestContext(req, res, () => {
-      if (moduleName === 'affiliates') assertSameOrigin();
+      if (moduleName === 'affiliates' || moduleName === 'affiliate-onboarding') assertSameOrigin();
       return (fn as ActionFn)(...args);
     });
     res.json({ ok: true, result: result === undefined ? null : result });
@@ -292,7 +300,12 @@ router.post("/actions/:module/:fn", async (req: Request, res: Response) => {
       res.status(404).json({ ok: false, error: "Not found" });
       return;
     }
-    logger.error({ err, module: req.params.module, fn: req.params.fn }, "action failed");
+    // Database/validation exceptions can contain sensitive parameters. Never log them for intake.
+    if (moduleName !== 'affiliate-onboarding') logger.error({ err, module: req.params.module, fn: req.params.fn }, "action failed");
+    if (moduleName === 'affiliate-onboarding' && !(err instanceof Error && !('code' in err))) {
+      res.status(500).json({ ok: false, error: 'Secure onboarding request failed. Please try again.' });
+      return;
+    }
     res.status(500).json({ ok: false, error: err instanceof Error ? err.message : "Action failed" });
   }
 });

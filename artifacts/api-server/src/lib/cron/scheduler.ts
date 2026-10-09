@@ -6,6 +6,7 @@ import { dueKeyFor } from './slots'
 
 export { dueKeyFor } from './slots'
 import { runSalesWorker } from '@/lib/sales-leads/worker'
+import { retryOnboardingInvitations } from '@/lib/affiliates/onboarding-invitations'
 
 /**
  * In-process daily scheduler.
@@ -46,6 +47,7 @@ export async function tick(now: Date = new Date()): Promise<void> {
   await runSalesWorker().catch(err => logger.error({ err }, 'internal sales worker failed'))
   await deliverLeadEmails()
   await retryPendingEnrollmentInvitations()
+  await retryOnboardingInvitations().catch(() => logger.error('Affiliate onboarding invitation worker failed'))
   for (const name of CRON_JOB_NAMES) {
     if (inFlight.has(name)) continue
     const dueKey = dueKeyFor(CRON_JOBS[name].hourEt, now)

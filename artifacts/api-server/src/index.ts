@@ -4,6 +4,7 @@ import { seedSuperAdmin } from "./lib/data/admin-users";
 import { initStripe } from "./lib/stripe";
 import { startCronScheduler, stopCronScheduler } from "./lib/cron/scheduler";
 import { pool } from "@workspace/db";
+import { seal, unseal } from "./lib/affiliates/onboarding-crypto";
 
 const rawPort = process.env["PORT"];
 
@@ -29,6 +30,17 @@ initStripe()
       }
 
       logger.info({ port }, "Server listening");
+      // Exercise the effective server configuration without exposing the key,
+      // ciphertext, or any affiliate data in logs.
+      try {
+        const probe = Buffer.from("onboarding configuration check");
+        if (!unseal(seal(probe, "configuration-check", "probe"), "configuration-check", "probe").equals(probe)) {
+          throw new Error("Encryption round trip failed");
+        }
+        logger.info("Affiliate onboarding encryption ready");
+      } catch {
+        logger.warn("Affiliate onboarding encryption unavailable; secure submissions remain blocked");
+      }
       seedSuperAdmin(logger).catch((err) => logger.error({ err }, "super admin seed failed"));
       startCronScheduler();
     });

@@ -91,6 +91,7 @@ import PageAdminLeadSources from '@/pages/admin_lead_sources';
 import PageAdminMarketingAnalytics from '@/pages/admin_marketing_analytics';
 import PageAnalyticsTest from '@/pages/analytics-test';
 import { MarketingAnalytics } from '@/components/marketing/analytics-consent';
+import PageAffOnboarding from '@/pages/affiliates_onboarding';
 
 function Router() {
   return (
@@ -253,6 +254,9 @@ function Router() {
       </Route>
       <Route path="/affiliates/access">
         <RoutedErrorBoundary><PageAffAccess /></RoutedErrorBoundary>
+      </Route>
+      <Route path="/affiliates/onboarding">
+        <RoutedErrorBoundary><PageAffOnboarding /></RoutedErrorBoundary>
       </Route>
       <Route path="/affiliates">
         <RoutedErrorBoundary><PageAffPortal /></RoutedErrorBoundary>

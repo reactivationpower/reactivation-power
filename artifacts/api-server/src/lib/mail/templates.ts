@@ -133,6 +133,7 @@ export interface CronFailedData {
 export interface TemplateDataMap {
   sales_lead_reply: { name: string; leadName: string; leadUrl: string }
   affiliate_access: { businessName: string; loginUrl: string }
+  affiliate_onboarding_v1: { businessName: string; onboardingUrl: string }
   affiliate_payout: { businessName: string; period: string; amountCents: number; paymentDate: string; portalUrl: string }
   portal_login_code: { code: string }
   portal_password_setup: { setupUrl: string }
@@ -958,6 +959,21 @@ export const TEMPLATES: { [K in TemplateId]: TemplateDefinition<K> } = {
     },
   },
   portal_welcome: portalWelcome,
+  affiliate_onboarding_v1: {
+    id: 'affiliate_onboarding_v1', name: 'Affiliate payment onboarding', description: 'Approved partner invitation to secure U.S. payment onboarding.',
+    sample: { businessName: 'Practice Partners', onboardingUrl: `${BRAND.siteUrl}/affiliates/access?next=onboarding` },
+    render: (d) => ({
+      subject: 'Set up your Patient Pipeline affiliate payment information',
+      previewText: 'Prepare your contact details, domestic wire instructions and signed W-9.',
+      html: layout([h1('Welcome to Patient Pipeline'), p(`For ${esc(d.businessName)}.`),
+        p('Please prepare your U.S. contact and legal payee details, U.S. mailing address, domestic wire instructions from your bank, and a completed signed Form W-9 PDF.'),
+        p('Your wire ABA routing number may differ from your ACH routing number. Confirm your wire instructions with your bank.'),
+        button('Begin secure onboarding', d.onboardingUrl),
+        p('You will verify your registered inbox before entering information. If access expires, request a fresh sign-in link.'),
+        p('Never email bank account details or tax documents. Submit them only through the secure portal. Information is received for review, not bank-verified or IRS-validated. Monthly wires are performed separately outside Patient Pipeline.'),
+        signoff()], { previewText: 'Prepare your contact details, domestic wire instructions and signed W-9.' }),
+    }),
+  },
   affiliate_access: {
     id: 'affiliate_access', name: 'Affiliate inbox verification', description: 'Single-use, 15-minute affiliate inbox sign-in.',
     sample: { businessName: 'Practice Partners', loginUrl: `${BRAND.siteUrl}/affiliates/access#token=sample-token` },

@@ -12,6 +12,7 @@ import { calculateHistory } from '@/lib/affiliates/ledger'
 import { deliverPayout, recordWire, type WireInput } from '@/lib/affiliates/payouts'
 import { periodAt, validateRules, ZERO_RULES, type Rules } from '@/lib/affiliates/rules'
 import { audit, id, partner, requireReason, transaction } from '@/lib/affiliates/store'
+import { enqueueOnboarding, deliverOnboarding } from '@/lib/affiliates/onboarding-invitations'
 
 const cleanEmail = (email: string) => {
   if (typeof email !== 'string' || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) throw new Error('Enter a valid email address')
@@ -36,14 +37,14 @@ export async function applyAffiliate(input: { businessName: string; email: strin
   })
   return { ok: true }
 }
-export async function requestAffiliateAccess(input: { email: string; accessId?: string }) {
+export async function requestAffiliateAccess(input: { email: string; accessId?: string; next?: 'onboarding' }) {
   assertSameOrigin()
   // Same response for unregistered, pending, inactive, bad entry link, and rate limited.
   let email: string
   try { email = cleanEmail(input.email) } catch { return { ok: true } }
   if (!await accessLimit('request', email, 5)) return { ok: true }
   const p = (await pool.query("SELECT * FROM affiliates WHERE email=$1 AND status='approved'", [email])).rows[0]
-  if (p && (!input.accessId || input.accessId === accessId(p))) await sendAccess(p)
+  if (p && (!input.accessId || input.accessId === accessId(p))) await sendAccess(p, input.next === 'onboarding')
   return { ok: true }
 }
 export async function verifyAffiliateAccess(input: { email: string; token: string }) {
@@ -113,7 +114,7 @@ export async function saveAffiliate(input: { id?: string; businessName: string; 
   const admin = await requireAdmin('super_admin')
   const reason = requireReason(input.reason), email = cleanEmail(input.email), name = cleanName(input.businessName), rules = validateRules(input.rules)
   if (!['pending', 'approved', 'inactive', 'rejected'].includes(input.status)) throw new Error('Invalid affiliate status')
-  const affiliateId = await transaction(async client => {
+  const saved = await transaction(async client => {
     const affiliateId = input.id ?? id()
     let previous = null
     if (input.id) {
@@ -131,9 +132,20 @@ export async function saveAffiliate(input: { id?: string; businessName: string; 
     await audit(client, affiliateId, previous ? 'partner_updated' : 'partner_invited', admin.userId, reason,
       null, { previousStatus: previous?.status ?? null, status: input.status, rules,
         previousBusinessName: previous?.business_name ?? null, businessName: name, emailChanged: Boolean(previous && previous.email !== email) })
-    return affiliateId
+    if (previous && (previous.email !== email || previous.status !== input.status)) {
+      await client.query(`UPDATE affiliate_onboarding_invitations SET status='cancelled'
+        WHERE affiliate_id=$1 AND status IN ('pending','sending','failed','uncertain')`, [affiliateId])
+    }
+    let invitationId: string | undefined
+    if (input.status === 'approved' && (!previous || previous.status === 'pending')) {
+      const current = (await client.query('SELECT * FROM affiliates WHERE id=$1', [affiliateId])).rows[0]
+      invitationId = await enqueueOnboarding(client, current, true)
+    }
+    return { affiliateId, invitationId }
   })
-  return { ok: true, id: affiliateId }
+  // The durable event is already committed; provider/worker failure cannot lose the partner.
+  if (saved.invitationId) await deliverOnboarding(saved.invitationId).catch(() => false)
+  return { ok: true, id: saved.affiliateId }
 }
 export async function getAffiliateAccessLink(affiliateId: string) {
   const admin = await requireAdmin('super_admin')

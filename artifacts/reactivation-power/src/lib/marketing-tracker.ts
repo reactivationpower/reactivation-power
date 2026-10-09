@@ -26,6 +26,8 @@ function routePath(){
   const base=import.meta.env.BASE_URL.replace(/\/$/,'')
   return window.location.pathname.slice(base.length)||'/'
 }
+/** Never collect affiliate/admin onboarding activity, even if a registry entry is added accidentally. */
+function protectedRoute() { return /^\/(?:affiliates|admin)(?:\/|$)/.test(routePath()) }
 function context(){
   const params=new URLSearchParams(window.location.search)
   let referrer:string|undefined
@@ -43,7 +45,8 @@ export async function loadRegistry(){
 export function currentPage(){return page?.id}
 export async function arrive(){
   if(initializing)await initializing
-  ready=false;page=registry.find(p=>p.path===routePath())
+  ready=false;page=protectedRoute()?undefined:registry.find(p=>p.path===routePath())
+  if(protectedRoute()){queue=[];return}
   if(consent()!=='granted'||!page)return
   initializing=(async()=>{
     try {
@@ -65,6 +68,7 @@ export async function arrive(){
   await initializing;initializing=null
 }
 export function track(type:EventType,detail:Partial<Omit<MarketingEvent,'id'|'version'|'at'|'page'|'type'>>={}){
+  if(protectedRoute())return
   if(consent()!=='granted'||!page)return
   if(!ready)return
   if(Date.now()-lastActivity>sessionMinutes*60000){void arrive();return}
@@ -74,6 +78,7 @@ export function track(type:EventType,detail:Partial<Omit<MarketingEvent,'id'|'ve
   if(queue.length>=30)void flush()
 }
 export async function flush(exit=false){
+  if(protectedRoute()){queue=[];ready=false;return}
   if(sending||!ready||consent()!=='granted'||!queue.length)return
   const batch=queue.slice(0,40);sending=true
   try{

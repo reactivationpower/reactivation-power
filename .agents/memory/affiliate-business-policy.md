@@ -26,6 +26,18 @@ Affiliates see practice names and billing status, not customer contact details. 
 
 **How to apply:** Enforce restricted fields and affiliate scope server-side; keep passwordless affiliate access separate from the owner/caller password policy and require actual inbox verification.
 
+Affiliate payment onboarding is U.S.-only. The user now explicitly requests secure storage of wire instructions and signed W-9 PDFs, superseding the earlier exclusion of bank-detail storage. Do not collect SSNs/EINs separately in contact fields.
+
+**Why:** The user selected U.S. recipients and requested secure payment onboarding while preserving externally executed monthly wires.
+
+**How to apply:** Require independent server-side encryption secrets, inbox-verified access, masked ordinary responses, and audited super-admin access to sensitive data. Receipt is not IRS validation or bank verification; onboarding must not change earnings or imply a transfer occurred.
+
+Keep bounded W-9 content encrypted alongside the versioned payment submission rather than introducing an independently updated document link.
+
+**Why:** Atomic receipt of the contact, wire and tax-document bundle was prioritized over storage scaling, so a failed update cannot leave the profile referring to an absent or mismatched document.
+
+**How to apply:** If document volume later warrants object storage, preserve authenticated encryption and atomic version association, with private storage, orphan cleanup and no public document URLs. See `docs/affiliate-onboarding-security.md` for key rotation and retention operations.
+
 No affiliate commissions on setup fees. Monthly and one-time/full payments can earn commissions configured as percentages or flat amounts. Affiliate defaults are editable and customer/deal overrides are allowed. Recurring commissions continue as long as the customer keeps paying; commissions are earned only on dollars collected for eligible active customers.
 
 **Why:** The user explicitly selected these compensation terms.

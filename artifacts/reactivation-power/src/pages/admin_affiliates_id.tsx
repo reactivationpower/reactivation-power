@@ -3,6 +3,7 @@ import { Link, useParams, useSearch } from 'wouter'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import * as A from '@/app/actions/affiliates'
+import { AdminOnboardingPanel } from '@/components/affiliates/admin-onboarding-panel'
 import { AttributionPicker } from '@/components/affiliates/attribution-picker'
 import { Field, ReportView, RulesEditor, Section, Stat, Table, btn2Cls, btnCls, dollarsToCents, draftsToRules, fmtDate, inputCls, money, newKey, rulesToDrafts } from '@/components/affiliates/shared'
 
@@ -93,6 +94,8 @@ export default function AdminAffiliateProfilePage() {
             </Form>
           </div>
         </Section>
+
+        <AdminOnboardingPanel affiliateId={id} />
 
         <Section title="Lead / customer attribution" desc="Attach this partner to a lead or customer, or clear the attribution.">
           <AttributionPicker affiliateId={id} onSaved={() => Promise.all([qc.invalidateQueries({ queryKey: ['affiliate-profile', id] }), qc.invalidateQueries({ queryKey: ['affiliates'] }), qc.invalidateQueries({ queryKey: ['affiliate-dashboard'] })])} />

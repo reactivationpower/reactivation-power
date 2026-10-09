@@ -33,7 +33,8 @@ export default function AffiliatePortalPage() {
             <img src="/images/patient-pipeline-logo.png" alt="Patient Pipeline" className="h-8 w-auto rounded bg-white" />
             <div><p className="text-sm font-semibold" data-testid="text-partner">{r.affiliate.business_name}</p><p className="text-xs text-muted-foreground">Referral code <span className="font-mono">{r.affiliate.referral_code}</span></p></div>
           </div>
-          <button data-testid="button-logout" className={btn2Cls} onClick={() => out.mutate()} disabled={out.isPending}>Sign out</button>
+          <div className="flex items-center gap-2"><Link href="/affiliates/onboarding" className={btn2Cls} data-testid="link-onboarding">Payment details</Link>
+          <button data-testid="button-logout" className={btn2Cls} onClick={() => out.mutate()} disabled={out.isPending}>Sign out</button></div>
         </div>
       </header>
       <main className="mx-auto max-w-5xl space-y-6 px-6 py-8">

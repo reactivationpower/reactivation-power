@@ -38,6 +38,8 @@ app.use(cookieParser());
 // is still attributed to its campaign and shown on the Lead sources tab.
 app.use("/api", webhooksLeadsRouter);
 app.use("/api", marketingRouter);
+// Parse sensitive intake separately: bounded body, no retained raw-body copy.
+app.use("/api/actions/affiliate-onboarding", express.json({ limit: "3mb" }));
 app.use(
   express.json({
     limit: "10mb",
@@ -55,6 +57,12 @@ const errorHandler: ErrorRequestHandler = (err, req, res, _next) => {
   if (res.headersSent) {
     res.end();
     return;
+  }
+  if (req.path.startsWith('/api/actions/affiliate-onboarding/')) {
+    const status = typeof err?.status === 'number' && err.status >= 400 && err.status < 500 ? err.status : 500;
+    res.setHeader('Cache-Control', 'no-store, private');
+    res.status(status).json({ ok: false, error: status === 413 ? 'Upload a PDF no larger than 2 MB.' : 'Secure onboarding request could not be processed.' });
+    return; // Parser errors can quote the original body; never log or echo them.
   }
   // body-parser rejections (malformed JSON, oversized body) carry a 4xx status:
   if (respondDatabaseUnavailable(err, res)) return;
