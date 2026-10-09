@@ -1,6 +1,7 @@
 import { pool } from '@workspace/db'
 import { sendEmail } from '@/lib/mail/send'
 import { audit, id, transaction } from './store'
+import { wireableCents } from './finance'
 
 export interface WireInput { affiliateId: string; period: string; amountCents: number; paymentDate: string; reference: string; key: string }
 function validateWire(input: WireInput) {
@@ -28,7 +29,7 @@ export async function recordWire(input: WireInput, actor: string) {
       COALESCE((SELECT sum(cents) FROM affiliate_ledger WHERE affiliate_id=$1 AND period<=$2),0)::bigint through_period,
       COALESCE((SELECT sum(amount_cents) FROM affiliate_payouts WHERE affiliate_id=$1),0)::bigint paid`,
     [input.affiliateId, input.period])).rows[0]
-    const payable = Math.min(Number(totals.earned), Number(totals.through_period)) - Number(totals.paid)
+    const payable = wireableCents(Number(totals.earned), Number(totals.through_period), Number(totals.paid))
     if (input.amountCents > payable) throw new Error('Wire exceeds the remaining payable balance after corrections and prior payments')
     const payoutId = id()
     await client.query(`INSERT INTO affiliate_payouts(id,affiliate_id,period,amount_cents,payment_date,reference,request_key,actor,notification_recipient,notification_business_name)

@@ -6,6 +6,7 @@ import { authDigest } from '@/lib/auth/portal-password'
 import { AFFILIATE_COOKIE, accessId, accessLimit, assertSameOrigin, requireAffiliate, revokeAccess, sendAccess, telemetry, verifyAccess } from '@/lib/affiliates/access'
 import { captureReferral } from '@/lib/affiliates/attribution'
 import { affiliateReport } from '@/lib/affiliates/reports'
+import { monthlyPayoutWorklist } from '@/lib/affiliates/worklist'
 import { calculateHistory } from '@/lib/affiliates/ledger'
 import { deliverPayout, recordWire, type WireInput } from '@/lib/affiliates/payouts'
 import { periodAt, validateRules, ZERO_RULES, type Rules } from '@/lib/affiliates/rules'
@@ -85,6 +86,10 @@ export async function captureAffiliateReferral(code: string) {
 export async function listAffiliates() {
   await requireAdmin('super_admin')
   return (await pool.query('SELECT * FROM affiliates ORDER BY created_at DESC')).rows
+}
+export async function getAffiliatePayoutWorklist(period: string) {
+  await requireAdmin('super_admin')
+  return monthlyPayoutWorklist(period)
 }
 export async function getAffiliateAttributionCandidates(search = '') {
   await requireAdmin('super_admin')

@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react'
-import { Link, useParams } from 'wouter'
+import { Link, useParams, useSearch } from 'wouter'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import * as A from '@/app/actions/affiliates'
@@ -21,12 +21,14 @@ const T = (p: { l: string; v: string; set: (s: string) => void; t?: string; h?: 
 
 export default function AdminAffiliateProfilePage() {
   const { id = '' } = useParams<{ id: string }>()
+  const query = useSearch()
+  const requestedPeriod = new URLSearchParams(query).get('wirePeriod') ?? ''
   const qc = useQueryClient()
   const [search, setSearch] = useState(''); const [applied, setApplied] = useState('')
   const q = useQuery({ queryKey: ['affiliate-profile', id, applied], queryFn: () => A.getAffiliateProfile(id, applied), placeholderData: (p) => p, staleTime: 0, refetchOnMount: 'always', refetchInterval: 60000 })
   const refresh = async (msg: string) => {
     toast.success(msg)
-    await Promise.all([qc.invalidateQueries({ queryKey: ['affiliate-profile', id] }), qc.invalidateQueries({ queryKey: ['affiliates'] }), qc.invalidateQueries({ queryKey: ['affiliate-dashboard'] })])
+    await Promise.all([qc.invalidateQueries({ queryKey: ['affiliate-profile', id] }), qc.invalidateQueries({ queryKey: ['affiliates'] }), qc.invalidateQueries({ queryKey: ['affiliate-dashboard'] }), qc.invalidateQueries({ queryKey: ['affiliate-payout-worklist'] })])
   }
   const p = q.data
   const [f, setF] = useState({ name: '', email: '', status: 'approved' as A.Affiliate['status'], reason: '' })
@@ -37,7 +39,10 @@ export default function AdminAffiliateProfilePage() {
   const [ov, setOv] = useState({ customer: '', reason: '' }); const [ovRules, setOvRules] = useState<ReturnType<typeof rulesToDrafts> | null>(null)
   const [hist, setHist] = useState({ customer: '', from: '', reason: '' })
   const [led, setLed] = useState({ amount: '', reason: '', key: newKey() })
-  const [wire, setWire] = useState({ period: '', amount: '', date: '', ref: '', key: newKey() })
+  const [wire, setWire] = useState({ period: /^\d{4}-(0[1-9]|1[0-2])$/.test(requestedPeriod) ? requestedPeriod : '', amount: '', date: '', ref: '', key: newKey() })
+  useEffect(() => {
+    if (p && wire.period && !p.periods.some(x => x.period === wire.period)) setWire(w => ({ ...w, period: '' }))
+  }, [p, wire.period])
   const [link, setLink] = useState('')
   const [cs, setCs] = useState(''); const [csA, setCsA] = useState('')
   const cand = useQuery({ queryKey: ['affiliate-candidates', csA], queryFn: () => A.getAffiliateAttributionCandidates(csA) })
@@ -148,9 +153,9 @@ export default function AdminAffiliateProfilePage() {
           </Form>
         </Section>
 
-        <Section title="Record monthly wire" desc="Record a wire you sent outside this system. Partial payments leave the remainder open.">
+        <Section id="record-wire" title="Record monthly wire" desc="Record a wire you sent outside this system. Partial payments leave the remainder open.">
           <Form testid="button-wire" submit="Record wire" onSubmit={async () => { const r = await A.recordAffiliateWire({ affiliateId: id, period: wire.period.trim(), amountCents: dollarsToCents(wire.amount), paymentDate: wire.date, reference: wire.ref.trim(), key: wire.key }); setWire({ period: '', amount: '', date: '', ref: '', key: newKey() }); await refresh(r.emailSent ? 'Wire recorded and partner emailed' : 'Wire recorded; email not sent, retry from payments') }}>
-            <Field label="Period"><select required className={inputCls} value={wire.period} onChange={(e) => setWire({ ...wire, period: e.target.value })} data-testid="select-wire-period"><option value="">Select period</option>{p.periods.map((x) => <option key={x.period} value={x.period}>{x.period} - remaining {money(x.remaining_cents)} ({x.state})</option>)}</select></Field>
+            <Field label="Period"><select required className={inputCls} value={wire.period} onChange={(e) => setWire({ ...wire, period: e.target.value })} data-testid="select-wire-period"><option value="">Select period</option>{p.periods.map((x) => <option key={x.period} value={x.period}>{x.period} - remaining {money(x.remaining_cents)} ({x.state}), available to wire {money(x.wireable_cents ?? 0)}</option>)}</select></Field>
             <T l="Actual amount sent (USD)" v={wire.amount} set={(v) => setWire({ ...wire, amount: v })} id="input-wire-amount" />
             <T l="Actual payment date" t="date" v={wire.date} set={(v) => setWire({ ...wire, date: v })} id="input-wire-date" />
             <T l="Bank reference" v={wire.ref} set={(v) => setWire({ ...wire, ref: v })} id="input-wire-ref" />

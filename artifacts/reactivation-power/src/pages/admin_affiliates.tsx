@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useLocation } from 'wouter'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { listAffiliates, saveAffiliate } from '@/app/actions/affiliates'
+import { PayoutWorklist } from '@/components/affiliates/payout-worklist'
 import { Field, RulesEditor, StatusPill, Table, btnCls, btn2Cls, defaultDrafts, draftsToRules, inputCls } from '@/components/affiliates/shared'
 
 export default function AdminAffiliatesPage() {
@@ -35,6 +36,7 @@ export default function AdminAffiliatesPage() {
           <button className={btnCls} disabled={m.isPending} data-testid="button-create-affiliate">Create approved partner</button>
         </form>
       )}
+      <PayoutWorklist />
       <input data-testid="input-filter" placeholder="Filter by name, email or code" className={inputCls + ' max-w-sm'} value={filter} onChange={(e) => setFilter(e.target.value)} />
       {q.isLoading ? <div className="h-40 animate-pulse rounded-xl bg-muted" /> : q.isError ? (
         <div className="space-y-2"><p className="text-sm text-destructive">{(q.error as Error).message}</p><button className={btn2Cls} onClick={() => q.refetch()}>Retry</button></div>

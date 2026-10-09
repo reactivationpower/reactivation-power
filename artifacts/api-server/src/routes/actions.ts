@@ -84,7 +84,7 @@ const ACTIONS: Record<string, Record<string, Auth>> = {
   affiliates: {
     applyAffiliate: "public", requestAffiliateAccess: "public", verifyAffiliateAccess: "public", captureAffiliateReferral: "public",
     affiliateLogout: "affiliate", getAffiliateDashboard: "affiliate", logAffiliateNavigation: "affiliate",
-    listAffiliates: "super_admin", getAffiliateProfile: "super_admin", getAffiliateAttributionCandidates: "super_admin", saveAffiliate: "super_admin",
+    listAffiliates: "super_admin", getAffiliatePayoutWorklist: "super_admin", getAffiliateProfile: "super_admin", getAffiliateAttributionCandidates: "super_admin", saveAffiliate: "super_admin",
     getAffiliateAccessLink: "super_admin", resendAffiliateAccess: "super_admin", revokeAffiliateAccess: "super_admin",
     assignAffiliate: "super_admin", setAffiliateCustomerRules: "super_admin", adjustAffiliateLedger: "super_admin",
     calculateAffiliateHistory: "super_admin", recordAffiliateWire: "super_admin", retryAffiliatePayoutEmail: "super_admin",

@@ -22,8 +22,20 @@ export interface Payout {
 export interface Period {
   period: string; gross_cents: number; corrections_cents: number; net_cents: number
   paid_cents: number; remaining_cents: number; state: string
-  opening_balance_cents?: number; payable_cents?: number
+  opening_balance_cents?: number; payable_cents?: number; wireable_cents?: number
 }
+export interface PayoutWorklistRow {
+  affiliate: Pick<Affiliate, 'id' | 'business_name' | 'status'>
+  gross_cents: number; corrections_cents: number; net_cents: number
+  opening_balance_cents: number; paid_cents: number; remaining_cents: number
+  earned_cents: number; total_paid_cents: number; balance_cents: number; wireable_cents: number
+  notifications: { pending: number; sending: number; failed: number; uncertain: number }
+}
+export interface PayoutWorklist {
+  period: string; rows: PayoutWorklistRow[]
+  totals: { gross_cents: number; corrections_cents: number; paid_cents: number; balance_cents: number; wireable_cents: number }
+}
+export const getAffiliatePayoutWorklist = (period: string) => action<PayoutWorklist>('affiliates', 'getAffiliatePayoutWorklist', period)
 export interface Report {
   affiliate: { id: string; business_name: string; referral_code: string }
   rules: AffiliateRules; practices: Practice[]; entries: Earning[]; payouts: Payout[]; periods: Period[]

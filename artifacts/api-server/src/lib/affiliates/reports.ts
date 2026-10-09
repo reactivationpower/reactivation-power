@@ -1,5 +1,6 @@
 import { pool } from '@workspace/db'
-import { earnedCents, periodAt } from './rules'
+import { earnedCents } from './rules'
+import { financialReport } from './finance'
 import { partner, rulesAt } from './store'
 
 /** Explicit minimum-field projection. Never return a customer/contact or payment_history object. */
@@ -30,34 +31,7 @@ export async function affiliateReport(affiliateId: string) {
   ])
   const entries = ledger.rows
   const payouts = wires.rows
-  const earned = entries.reduce((s, r) => s + r.cents, 0)
-  const paid = payouts.reduce((s, r) => s + r.amount_cents, 0)
-  const knownPeriods = [...new Set<string>([...entries.map(r => r.period), ...payouts.map(r => r.period)])].sort()
-  const periods: string[] = []
-  if (knownPeriods.length) {
-    let [year, month] = knownPeriods[0]!.split('-').map(Number)
-    const end = [periodAt(new Date()), knownPeriods.at(-1)!].sort().at(-1)!
-    for (let count = 0; count < 1200; count++) {
-      const period = `${year}-${String(month).padStart(2, '0')}`
-      if (period > end) break
-      periods.push(period)
-      if (++month > 12) { month = 1; year++ }
-    }
-  }
-  let carry = 0
-  const periodRows = periods.map(period => {
-    const rows = entries.filter(e => e.period === period)
-    const gross = rows.filter(e => e.kind === 'earning').reduce((s, e) => s + e.cents, 0)
-    const corrections = rows.filter(e => e.kind !== 'earning').reduce((s, e) => s + e.cents, 0)
-    const paidCents = payouts.filter(e => e.period === period).reduce((s, e) => s + e.amount_cents, 0)
-    const opening = carry
-    const payable = Math.max(0, opening + gross + corrections)
-    carry += gross + corrections - paidCents
-    return { period, gross_cents: gross, corrections_cents: corrections, net_cents: gross + corrections,
-      opening_balance_cents: opening, paid_cents: paidCents, remaining_cents: carry,
-      state: carry <= 0 ? paidCents > 0 ? 'paid' : 'carry_forward' : paidCents > 0 ? 'partially_paid' : 'unpaid',
-      payable_cents: payable }
-  })
+  const finances = financialReport(entries, payouts)
   const restrictedPractices = await Promise.all(practices.rows.map(async r => {
     const effectiveRules = await rulesAt(pool, affiliateId, r.id, new Date())
     const active = ['active', 'trialing', 'paid'].includes(r.billing_status)
@@ -66,5 +40,5 @@ export async function affiliateReport(affiliateId: string) {
       estimated_next_commission_cents: active && r.type === 'subscription' ? earnedCents(r.monthly_cents, effectiveRules.monthly) : 0 }
   }))
   return { affiliate: { id: p.id, business_name: p.business_name, referral_code: p.referral_code }, rules,
-    practices: restrictedPractices, entries, payments: collected.rows, payouts, periods: periodRows, earned_cents: earned, paid_cents: paid, balance_cents: earned - paid }
+    practices: restrictedPractices, entries, payments: collected.rows, payouts, ...finances }
 }

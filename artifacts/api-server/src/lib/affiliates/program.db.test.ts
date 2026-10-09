@@ -26,6 +26,8 @@ const { pool, db, paymentHistoryTable } = await import('@workspace/db')
 const { processAffiliateHistory, processAffiliateDispute, recordAffiliateEligibility } = await import('./ledger')
 const { resolveQualifiedReferral, attachCustomerReferral, referralFromRequest, captureReferral, recordAffiliateConversion } = await import('./attribution')
 const { affiliateReport } = await import('./reports')
+const { monthlyPayoutWorklist } = await import('./worklist')
+const { requireAdmin } = await import('@/lib/auth/admin-session')
 const { recordWire, deliverPayout } = await import('./payouts')
 const { sendAccess, verifyAccess, affiliateSession, revokeAccess, trustedAffiliateIp } = await import('./access')
 const { cleanupAffiliateTelemetry } = await import('./retention')
@@ -63,6 +65,7 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('affiliate program isolated Postgr
     await actual.pool.end()
   })
   beforeEach(async () => {
+    vi.mocked(requireAdmin).mockResolvedValue({ userId: 'fixture-admin', role: 'super_admin' } as never)
     vi.mocked(sendEmail).mockClear().mockResolvedValue({ ok: true, logId: 'mock-mail' })
     await pool.query(`TRUNCATE affiliates,affiliate_rules,affiliate_leads,affiliate_attributions,affiliate_sessions,affiliate_challenges,
       affiliate_activity,affiliate_ledger,affiliate_reversals,affiliate_disputes,affiliate_payouts,affiliate_payout_allocations,
@@ -175,6 +178,42 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('affiliate program isolated Postgr
     await processAffiliateHistory(await payment({ occurredAt: new Date('2026-10-15'), amountCents: 20000 }))
     expect((await affiliateReport(partnerA)).balance_cents).toBe(1000)
     await expect(pool.query('UPDATE affiliate_ledger SET cents=0')).rejects.toThrow('immutable')
+  })
+  it('matches central totals to profiles and preserves inactive debt and outstanding notifications across months', async () => {
+    const paymentRow = await payment()
+    await processAffiliateHistory(paymentRow)
+    vi.mocked(sendEmail).mockResolvedValueOnce({ ok: false, logId: 'failed', error: 'Delivery failed' })
+    const wire = await recordWire({ affiliateId: partnerA, period: '2026-02', amountCents: 400,
+      paymentDate: '2026-03-03', reference: 'Fixture partial wire', key: randomUUID() }, 'fixture')
+    const partial = await monthlyPayoutWorklist('2026-02')
+    expect(partial.rows.find(r => r.affiliate.id === partnerA)).toMatchObject({ paid_cents: 400, wireable_cents: 600, notifications: { failed: 1 } })
+    await processAffiliateHistory(await payment({ kind: 'refund', status: 'refunded', amountCents: 10000,
+      stripeChargeId: paymentRow.stripeChargeId, stripeInvoiceId: null, stripeRefundId: `re_${randomUUID()}`, occurredAt: new Date('2026-04-15') }))
+    await pool.query("UPDATE affiliates SET status='inactive' WHERE id=$1", [partnerA])
+    for (const period of ['2026-02', '2026-03', '2026-04', '2026-05']) {
+      const central = await actions.getAffiliatePayoutWorklist(period)
+      for (const row of central.rows) {
+        const profile = await actions.getAffiliateProfile(row.affiliate.id)
+        expect(row.balance_cents).toBe(profile.balance_cents)
+        expect(row.earned_cents).toBe(profile.earned_cents)
+        expect(row.total_paid_cents).toBe(profile.paid_cents)
+        const month = profile.periods.find(p => p.period === period)
+        if (month) for (const key of ['gross_cents', 'corrections_cents', 'net_cents', 'paid_cents', 'remaining_cents', 'opening_balance_cents', 'wireable_cents'] as const) expect(row[key]).toBe(month[key])
+      }
+      expect(central.rows.find(r => r.affiliate.id === partnerA)).toMatchObject({ affiliate: { status: 'inactive' }, balance_cents: -400, wireable_cents: 0 })
+      expect(central.rows.find(r => r.affiliate.id === partnerB)).toMatchObject({ balance_cents: 0 })
+      for (const key of ['gross_cents', 'corrections_cents', 'paid_cents', 'balance_cents', 'wireable_cents'] as const) expect(central.totals[key]).toBe(central.rows.reduce((s, r) => s + r[key], 0))
+    }
+    for (const status of ['pending', 'sending', 'uncertain', 'sent']) {
+      await pool.query('UPDATE affiliate_payouts SET notification_status=$2 WHERE id=$1', [wire.payoutId, status])
+      const row = (await monthlyPayoutWorklist('2026-05')).rows.find(r => r.affiliate.id === partnerA)!
+      expect(Object.values(row.notifications).reduce((s, n) => s + n, 0)).toBe(status === 'sent' ? 0 : 1)
+      expect(row.balance_cents).toBe(-400)
+    }
+    await expect(monthlyPayoutWorklist('2026-13')).rejects.toThrow('valid earning month')
+    vi.mocked(requireAdmin).mockRejectedValueOnce(new Error('Unauthorized'))
+    await expect(actions.getAffiliatePayoutWorklist('2026-05')).rejects.toThrow('Unauthorized')
+    expect(vi.mocked(requireAdmin).mock.calls.at(-1)).toEqual(['super_admin'])
   })
   it('protects qualified submission for five elapsed days, switches only on resubmission, then locks conversion', async () => {
     const input = { email: 'fresh-lead@example.invalid', phone: '2025550197', practiceName: 'Fresh Practice' }
