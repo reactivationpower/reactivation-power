@@ -5,6 +5,7 @@ import { getRequestContext } from '@/lib/request-context'
 import { authDigest } from '@/lib/auth/portal-password'
 import { AFFILIATE_COOKIE, accessId, accessLimit, assertSameOrigin, requireAffiliate, revokeAccess, sendAccess, telemetry, verifyAccess } from '@/lib/affiliates/access'
 import { captureReferral } from '@/lib/affiliates/attribution'
+import { attributionCandidates } from '@/lib/affiliates/candidates'
 import { affiliateReport } from '@/lib/affiliates/reports'
 import { monthlyPayoutWorklist } from '@/lib/affiliates/worklist'
 import { calculateHistory } from '@/lib/affiliates/ledger'
@@ -91,15 +92,9 @@ export async function getAffiliatePayoutWorklist(period: string) {
   await requireAdmin('super_admin')
   return monthlyPayoutWorklist(period)
 }
-export async function getAffiliateAttributionCandidates(search = '') {
+export async function getAffiliateAttributionCandidates(search = '', kind?: 'lead' | 'customer') {
   await requireAdmin('super_admin')
-  const pattern = `%${String(search).slice(0, 100)}%`
-  const leads = await pool.query(`SELECT id,practice_name,affiliate_id,protected_until,converted_customer_id,converted_at
-      FROM affiliate_leads WHERE practice_name ILIKE $1 ORDER BY submitted_at DESC LIMIT 100`, [pattern])
-  const customers = await pool.query(`SELECT c.id,c.business_name,a.affiliate_id FROM customers c LEFT JOIN LATERAL
-      (SELECT affiliate_id FROM affiliate_attributions WHERE customer_id=c.id ORDER BY effective_at DESC,id DESC LIMIT 1) a ON true
-      WHERE c.business_name ILIKE $1 ORDER BY c.created_at DESC LIMIT 100`, [pattern])
-  return { leads: leads.rows, customers: customers.rows }
+  return attributionCandidates(search, kind)
 }
 export async function getAffiliateProfile(affiliateId: string, search = '') {
   await requireAdmin('super_admin')

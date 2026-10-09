@@ -57,10 +57,18 @@ export const affiliateLogout = () => action<{ ok: boolean }>('affiliates', 'affi
 export const getAffiliateDashboard = () => action<Report>('affiliates', 'getAffiliateDashboard')
 export const logAffiliateNavigation = (input: { view: 'dashboard' | 'payments' | 'payouts' | 'practices'; customerId?: string }) => action<{ ok: boolean }>('affiliates', 'logAffiliateNavigation', input)
 export const listAffiliates = () => action<Affiliate[]>('affiliates', 'listAffiliates')
-export const getAffiliateAttributionCandidates = (search = '') => action<{
-  leads: { id: string; practice_name: string; affiliate_id: string | null; protected_until: string | null; converted_customer_id: string | null; converted_at: string | null }[]
-  customers: { id: string; business_name: string; affiliate_id: string | null }[]
-}>('affiliates', 'getAffiliateAttributionCandidates', search)
+interface AttributionContact {
+  id: string; full_name: string | null; email: string | null
+  affiliate_id: string | null; affiliate_name: string | null
+}
+export interface AttributionLead extends AttributionContact {
+  practice_name: string; protected_until: string | null
+  converted_customer_id: string | null; converted_at: string | null
+}
+export interface AttributionCustomer extends AttributionContact { business_name: string }
+export const getAffiliateAttributionCandidates = (search = '', kind?: 'lead' | 'customer') => action<{
+  leads: AttributionLead[]; customers: AttributionCustomer[]
+}>('affiliates', 'getAffiliateAttributionCandidates', search, kind)
 export const getAffiliateProfile = (id: string, search = '') => action<Profile>('affiliates', 'getAffiliateProfile', id, search)
 export const saveAffiliate = (input: { id?: string; businessName: string; email: string; status: Affiliate['status']; rules: AffiliateRules; reason: string }) => action<{ ok: boolean; id: string }>('affiliates', 'saveAffiliate', input)
 export const getAffiliateAccessLink = (id: string) => action<{ url: string }>('affiliates', 'getAffiliateAccessLink', id)

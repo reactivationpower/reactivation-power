@@ -3,6 +3,7 @@ import { Link, useParams, useSearch } from 'wouter'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import * as A from '@/app/actions/affiliates'
+import { AttributionPicker } from '@/components/affiliates/attribution-picker'
 import { Field, ReportView, RulesEditor, Section, Stat, Table, btn2Cls, btnCls, dollarsToCents, draftsToRules, fmtDate, inputCls, money, newKey, rulesToDrafts } from '@/components/affiliates/shared'
 
 function Form({ onSubmit, children, submit, testid }: { onSubmit: () => Promise<unknown>; children: ReactNode; submit: string; testid: string }) {
@@ -35,7 +36,7 @@ export default function AdminAffiliateProfilePage() {
   const [rules, setRules] = useState<ReturnType<typeof rulesToDrafts> | null>(null)
   const [init, setInit] = useState('')
   useEffect(() => { if (p && init !== p.partner.id) { setInit(p.partner.id); setF({ name: p.partner.business_name, email: p.partner.email, status: p.partner.status, reason: '' }); setRules(rulesToDrafts(p.rules)) } }, [p, init])
-  const [rev, setRev] = useState(''); const [attr, setAttr] = useState({ kind: 'customer', target: '', reason: '' })
+  const [rev, setRev] = useState('')
   const [ov, setOv] = useState({ customer: '', reason: '' }); const [ovRules, setOvRules] = useState<ReturnType<typeof rulesToDrafts> | null>(null)
   const [hist, setHist] = useState({ customer: '', from: '', reason: '' })
   const [led, setLed] = useState({ amount: '', reason: '', key: newKey() })
@@ -44,14 +45,6 @@ export default function AdminAffiliateProfilePage() {
     if (p && wire.period && !p.periods.some(x => x.period === wire.period)) setWire(w => ({ ...w, period: '' }))
   }, [p, wire.period])
   const [link, setLink] = useState('')
-  const [cs, setCs] = useState(''); const [csA, setCsA] = useState('')
-  const [candidatesRequested, setCandidatesRequested] = useState(false)
-  const cand = useQuery({ queryKey: ['affiliate-candidates', id, csA], queryFn: () => A.getAffiliateAttributionCandidates(csA), enabled: candidatesRequested && !!p, retry: false })
-  const searchCandidates = () => {
-    setCandidatesRequested(true)
-    if (candidatesRequested && cs.trim() === csA) void cand.refetch()
-    else setCsA(cs.trim())
-  }
 
   if (q.isLoading) return <div className="h-64 animate-pulse rounded-xl bg-muted" />
   if (q.isError || !p || !rules) return <div className="space-y-2"><p className="text-sm text-destructive">{(q.error as Error)?.message ?? 'Unable to load'}</p><button disabled={q.isFetching} className={btn2Cls} onClick={() => q.refetch()}>{q.isFetching ? 'Retrying...' : 'Retry'}</button></div>
@@ -77,7 +70,7 @@ export default function AdminAffiliateProfilePage() {
       )} />
       <div className="grid gap-3 sm:grid-cols-2"><Stat label="Authenticated session visits" value={String(p.summary.visits)} /><Stat label="Practice views" value={String(p.summary.practice_views)} /></div>
 
-      <div className="grid gap-6 xl:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2 [&>section]:min-w-0">
         <Section title="Partner defaults and status" desc="Percent in basis points under the hood (1000 = 10%); flat amounts in cents.">
           <Form testid="button-save-partner" submit="Save partner" onSubmit={async () => { await A.saveAffiliate({ id, businessName: f.name.trim(), email: f.email.trim(), status: f.status, rules: draftsToRules(rules), reason: f.reason.trim() }); setF({ ...f, reason: '' }); await refresh('Partner saved') }}>
             <T l="Business name" v={f.name} set={(v) => setF({ ...f, name: v })} id="input-name" />
@@ -102,37 +95,7 @@ export default function AdminAffiliateProfilePage() {
         </Section>
 
         <Section title="Lead / customer attribution" desc="Attach this partner to a lead or customer, or clear the attribution.">
-          <Form testid="button-assign" submit="Assign to this partner" onSubmit={async () => { await A.assignAffiliate({ affiliateId: id, [attr.kind === 'lead' ? 'leadId' : 'customerId']: attr.target.trim(), reason: attr.reason.trim() }); setAttr({ ...attr, reason: '' }); await refresh('Attribution saved') }}>
-            <Field label="Target type"><select className={inputCls} value={attr.kind} onChange={(e) => setAttr({ ...attr, kind: e.target.value })} data-testid="select-attr-kind"><option value="customer">Customer</option><option value="lead">Lead</option></select></Field>
-            <div className="rounded-lg border border-border p-3 space-y-2">
-              <div className="flex gap-2">
-                <input data-testid="input-candidate-search" className={inputCls} placeholder="Search leads and customers by name" value={cs} onChange={(e) => setCs(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); searchCandidates() } }} />
-                <button type="button" disabled={cand.isFetching} className={btn2Cls} data-testid="button-candidate-search" onClick={searchCandidates}>Search</button>
-              </div>
-              <div className="max-h-52 space-y-1 overflow-y-auto">
-                {!candidatesRequested ? <p className="text-xs text-muted-foreground">Search to load leads and customers.</p> : cand.isFetching ? <p className="text-xs text-muted-foreground">Searching...</p> : cand.isError ? <p className="text-xs text-destructive">{(cand.error as Error).message} Use Search to retry.</p> : (
-                  <>
-                    {(cand.data?.leads ?? []).map((l) => (
-                      <button type="button" key={`l${l.id}`} data-testid={`candidate-lead-${l.id}`} onClick={() => setAttr({ ...attr, kind: 'lead', target: l.id })} className="block w-full rounded-md border border-border px-2 py-1.5 text-left text-xs hover:bg-muted">
-                        <span className="font-medium">Lead: {l.practice_name}</span> <span className="font-mono text-muted-foreground">{l.id}</span><br />
-                        <span className="text-muted-foreground">{l.affiliate_id ? `Attributed to ${l.affiliate_id}` : 'Unattributed'}{l.protected_until ? ` | protected until ${new Date(l.protected_until).toLocaleDateString()}` : ''}{l.converted_customer_id ? ` | converted to ${l.converted_customer_id}${l.converted_at ? ' on ' + new Date(l.converted_at).toLocaleDateString() : ''}` : ' | not converted'}</span>
-                      </button>
-                    ))}
-                    {(cand.data?.customers ?? []).map((c) => (
-                      <button type="button" key={`c${c.id}`} data-testid={`candidate-customer-${c.id}`} onClick={() => setAttr({ ...attr, kind: 'customer', target: c.id })} className="block w-full rounded-md border border-border px-2 py-1.5 text-left text-xs hover:bg-muted">
-                        <span className="font-medium">Customer: {c.business_name}</span> <span className="font-mono text-muted-foreground">{c.id}</span><br />
-                        <span className="text-muted-foreground">{c.affiliate_id ? `Attributed to ${c.affiliate_id}` : 'Unattributed'}</span>
-                      </button>
-                    ))}
-                    {!(cand.data?.leads.length || cand.data?.customers.length) && <p className="text-xs text-muted-foreground">No matching leads or customers.</p>}
-                  </>
-                )}
-              </div>
-            </div>
-            {attr.kind === 'customer' ? practiceSel(attr.target, (v) => setAttr({ ...attr, target: v }), 'input-attr-target') : <T l="Lead ID" v={attr.target} set={(v) => setAttr({ ...attr, target: v })} id="input-attr-target" />}
-            <T l="Reason" v={attr.reason} set={(v) => setAttr({ ...attr, reason: v })} id="input-attr-reason" />
-            <button type="button" className={btn2Cls} data-testid="button-unassign" onClick={async () => { try { await A.assignAffiliate({ affiliateId: null, [attr.kind === 'lead' ? 'leadId' : 'customerId']: attr.target.trim(), reason: attr.reason.trim() }); await refresh('Attribution cleared') } catch (e) { toast.error((e as Error).message) } }}>Clear attribution instead</button>
-          </Form>
+          <AttributionPicker affiliateId={id} onSaved={() => Promise.all([qc.invalidateQueries({ queryKey: ['affiliate-profile', id] }), qc.invalidateQueries({ queryKey: ['affiliates'] }), qc.invalidateQueries({ queryKey: ['affiliate-dashboard'] })])} />
         </Section>
 
         <Section title="Customer rule override" desc="Override this partner's defaults for one customer.">

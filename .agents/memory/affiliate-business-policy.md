@@ -14,6 +14,12 @@ Automatic identity matching must use an exact normalized email, never a shared p
 
 **How to apply:** Keep the same identity boundary at submission, enrollment attachment, and conversion locking. Do not reintroduce a single-phone-candidate fallback.
 
+Admin attribution contact names are a read-only convenience, not a new identity policy. Treat multiple sales records sharing a normalized email as ambiguous; missing legacy names should remain explicitly missing rather than being invented or mass-backfilled.
+
+**Why:** The user requested clearer contact selection without changing referral matching or attribution policy. A plausible name from a shared practice is not reliable identity evidence.
+
+**How to apply:** Keep contact enrichment confined to super-admin candidate responses and use existing exact-email evidence; do not leak enriched identity into affiliate reports.
+
 Affiliates see practice names and billing status, not customer contact details. Affiliate access should be passwordless and branded access emails should use Resend.
 
 **Why:** The user explicitly limited affiliate visibility and requested simple emailed access.

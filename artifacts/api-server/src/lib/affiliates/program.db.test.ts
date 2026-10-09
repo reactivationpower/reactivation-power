@@ -53,7 +53,7 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('affiliate program isolated Postgr
       await c.query(`SET search_path TO "${isolated.schema}"`)
       return c
     }
-    for (const table of ['customers', 'payment_link_terms', 'payment_history', 'email_log', 'portal_auth_limits']) {
+    for (const table of ['customers', 'payment_link_terms', 'payment_history', 'email_log', 'portal_auth_limits', 'sales_leads']) {
       await pool.query(`CREATE TABLE ${table} (LIKE public.${table} INCLUDING ALL)`)
     }
     const migration = await readFile(new URL('../../../../../lib/db/migrations/0026_affiliate_program.sql', import.meta.url), 'utf8')
@@ -69,7 +69,7 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('affiliate program isolated Postgr
     vi.mocked(sendEmail).mockClear().mockResolvedValue({ ok: true, logId: 'mock-mail' })
     await pool.query(`TRUNCATE affiliates,affiliate_rules,affiliate_leads,affiliate_attributions,affiliate_sessions,affiliate_challenges,
       affiliate_activity,affiliate_ledger,affiliate_reversals,affiliate_disputes,affiliate_payouts,affiliate_payout_allocations,
-      affiliate_customer_states,affiliate_history_work,customers,payment_history,payment_link_terms,email_log,portal_auth_limits CASCADE`)
+      affiliate_customer_states,affiliate_history_work,customers,payment_history,payment_link_terms,email_log,portal_auth_limits,sales_leads CASCADE`)
     await pool.query(`INSERT INTO affiliates(id,business_name,email,status,referral_code) VALUES
       ($1,'Partner A',$3,'approved',$4),($2,'Partner B','partner-b@example.invalid','approved',$5)`,
     [partnerA, partnerB, email, 'A'.repeat(32), 'B'.repeat(32)])
@@ -92,6 +92,52 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('affiliate program isolated Postgr
     }).returning()
     return row!
   }
+  it('returns admin contact names and named attribution; searches fields and exact IDs within each type', async () => {
+    const other = randomUUID()
+    await pool.query(`INSERT INTO customers(id,email,full_name,business_name) VALUES
+      ($1,'other@example.invalid','Fixture Owner','Second Practice')`, [other])
+    for (const term of ['Fixture Owner', 'practice@example.invalid', 'Fixture Practice', customerId]) {
+      const result = await actions.getAffiliateAttributionCandidates(term, 'customer')
+      expect(result.leads).toEqual([])
+      expect(result.customers.find(c => c.id === customerId)).toMatchObject({
+        full_name: 'Fixture Owner', email: 'practice@example.invalid', affiliate_name: 'Partner A',
+      })
+    }
+    expect((await actions.getAffiliateAttributionCandidates('Fixture Owner', 'customer')).customers).toHaveLength(2)
+    expect((await actions.getAffiliateAttributionCandidates(customerId.slice(0, 12), 'customer')).customers).toHaveLength(0)
+    expect((await actions.getAffiliateAttributionCandidates('%', 'customer')).customers).toHaveLength(0)
+    await actions.assignAffiliate({ customerId, affiliateId: partnerB, reason: 'Fixture correction' })
+    expect((await actions.getAffiliateAttributionCandidates(customerId, 'customer')).customers[0].affiliate_name).toBe('Partner B')
+    await actions.assignAffiliate({ customerId, affiliateId: null, reason: 'Fixture clearing' })
+    expect((await actions.getAffiliateAttributionCandidates(customerId, 'customer')).customers[0].affiliate_name).toBeNull()
+    await pool.query("UPDATE customers SET full_name='' WHERE id=$1", [other])
+    expect((await actions.getAffiliateAttributionCandidates(other, 'customer')).customers[0].full_name).toBeNull()
+    vi.mocked(requireAdmin).mockRejectedValueOnce(new Error('Unauthorized'))
+    await expect(actions.getAffiliateAttributionCandidates()).rejects.toThrow('Unauthorized')
+    expect(vi.mocked(requireAdmin).mock.calls.at(-1)).toEqual(['super_admin'])
+    expect(JSON.stringify(await affiliateReport(partnerA))).not.toMatch(/full_name|Fixture Owner|practice@example/)
+  })
+  it('matches lead contact identity only by unique normalized email and filters before limiting', async () => {
+    const qualified = await resolveQualifiedReferral({ email: 'unique@example.invalid', phone: '2025550198', practiceName: 'Shared Practice', affiliateId: partnerA })
+    const legacy = await resolveQualifiedReferral({ email: 'legacy@example.invalid', phone: '2025550198', practiceName: 'Shared Practice', affiliateId: null })
+    await pool.query(`INSERT INTO sales_leads(id,first_name,last_name,email,phone,practice_name,source) VALUES
+      ($1,'Alexandra Catherine','Long Family Name',' UNIQUE@example.invalid ','2025550198','Shared Practice','fixture'),
+      ($2,'Wrong','Person','different@example.invalid','2025550198','Shared Practice','fixture')`, [randomUUID(), randomUUID()])
+    for (const term of ['Alexandra Catherine Long Family Name', 'unique@example.invalid', qualified.leadId]) {
+      const result = await actions.getAffiliateAttributionCandidates(term, 'lead')
+      expect(result.customers).toEqual([])
+      expect(result.leads).toHaveLength(1)
+      expect(result.leads[0]).toMatchObject({ id: qualified.leadId, full_name: 'Alexandra Catherine Long Family Name', affiliate_name: 'Partner A' })
+    }
+    expect((await actions.getAffiliateAttributionCandidates(legacy.leadId, 'lead')).leads[0]).toMatchObject({ full_name: null, email: null })
+    await pool.query(`INSERT INTO sales_leads(id,first_name,email,source) VALUES($1,'Ambiguous','unique@example.invalid','fixture')`, [randomUUID()])
+    expect((await actions.getAffiliateAttributionCandidates(qualified.leadId, 'lead')).leads[0]).toMatchObject({ full_name: null, email: null })
+    await pool.query(`INSERT INTO customers(id,email,full_name,business_name)
+      SELECT 'bulk-'||n,'bulk-'||n||'@example.invalid','Bulk Name','Shared Practice' FROM generate_series(1,105) n`)
+    expect((await actions.getAffiliateAttributionCandidates('Shared Practice', 'lead')).leads).toHaveLength(2)
+    expect((await actions.getAffiliateAttributionCandidates('Shared Practice', 'customer')).customers).toHaveLength(100)
+    await expect(actions.getAffiliateAttributionCandidates('', 'bad' as never)).rejects.toThrow('Choose lead or customer')
+  })
   it('snapshots defaults and overrides prospectively; excludes setup and preserves rep ledger separation', async () => {
     const first = await payment()
     await Promise.all([processAffiliateHistory(first), processAffiliateHistory(first)])
