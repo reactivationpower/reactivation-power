@@ -50,3 +50,4 @@ Thumbs.db
 
 # Resumable video-export frames and temporary browser profiles
 /exports/.landing-capture/
+/generated-artifacts/
