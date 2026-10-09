@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useRouter } from '@/hooks/use-router'
 
 /** Service agreement status + controls on the customer record. */
-export function AgreementCard({ linkId, agreement }: { linkId: string; agreement: any | null }) {
+export function AgreementCard({ linkId, agreement, offerType = 'subscription' }: { linkId: string; agreement: any | null; offerType?: 'subscription' | 'one_time' }) {
   const router = useRouter()
   const [sending, setSending] = useState(false)
   return (
@@ -26,9 +26,11 @@ export function AgreementCard({ linkId, agreement }: { linkId: string; agreement
         {agreement ? (
           <>
             <dl className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
-              <Item label="Term" value={`${agreement.term_months} months`} />
-              <Item label="Monthly" value={formatUsd(agreement.monthly_cents)} />
-              <Item label="Setup fee" value={agreement.setup_fee_cents > 0 ? formatUsd(agreement.setup_fee_cents) : 'Waived'} />
+               {offerType === 'subscription' ? <>
+                 <Item label="Term" value={`${agreement.term_months} months`} />
+                 <Item label="Monthly" value={formatUsd(agreement.monthly_cents)} />
+                 <Item label="Setup payment" value={agreement.setup_fee_cents > 0 ? formatUsd(agreement.setup_fee_cents) : 'Waived'} />
+               </> : <Item label="Purchase price" value={formatUsd(agreement.setup_fee_cents)} />}
               <Item label="Version" value={`v${agreement.current_version}`} />
               <Item label="Sent" value={formatWhen(agreement.sent_at)} />
               <Item label="Viewed" value={formatWhen(agreement.viewed_at)} />
@@ -43,11 +45,11 @@ export function AgreementCard({ linkId, agreement }: { linkId: string; agreement
         ) : (
           <>
             <p className="text-sm text-muted-foreground">
-              No agreement yet. The subscription cannot start until the customer signs the service agreement.
+               No agreement yet. Send the enrollment agreement before the customer confirms payment.
             </p>
             <div>
               <Button onClick={() => setSending(true)} data-testid="send-agreement">
-                <Send className="size-4" /> Send agreement
+                 <Send className="size-4" /> Send Enrollment Email
               </Button>
             </div>
           </>

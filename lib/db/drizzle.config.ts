@@ -54,6 +54,7 @@ export default defineConfig({
     "agreement_versions",
     "agreement_initials",
     "agreement_events",
+    "agreement_deliveries",
     "commission_entries",
     "cron_runs",
     "billing_notifications",

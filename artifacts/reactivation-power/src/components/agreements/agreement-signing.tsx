@@ -30,6 +30,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { apiUrl } from '@/lib/api'
 import { stripePromise } from '@/lib/stripe-client'
+import { EnrollmentSigning } from './enrollment-signing'
 
 const APPEARANCE = {
   theme: 'stripe',
@@ -62,6 +63,12 @@ function initialsFromName(name: string): string {
 }
 
 export function AgreementSigning({ token, initial }: { token: string; initial: any }) {
+  return initial.enrollment_flow
+    ? <EnrollmentSigning token={token} initial={initial} />
+    : <LegacyAgreementSigning token={token} initial={initial} />
+}
+
+function LegacyAgreementSigning({ token, initial }: { token: string; initial: any }) {
   const [agreement, setAgreement] = useState<any>(initial)
   const [initials, setInitials] = useState<Record<string, string>>(initial.initials ?? {})
   const [changedSections, setChangedSections] = useState<Set<string>>(new Set())

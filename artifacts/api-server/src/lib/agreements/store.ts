@@ -1,11 +1,13 @@
 import { randomBytes, randomUUID } from 'node:crypto'
 import { get, put } from '@vercel/blob'
-import { and, asc, desc, eq, inArray, isNull } from 'drizzle-orm'
+import { and, asc, desc, eq, inArray, isNull, lt, or, sql } from 'drizzle-orm'
 import {
   agreementEventsTable,
   agreementInitialsTable,
   agreementVersionsTable,
   agreementsTable,
+  agreementDeliveriesTable,
+  emailLogTable,
   customerCardsTable,
   customersTable,
   db,
@@ -163,6 +165,8 @@ export function renderCurrent(loaded: LoadedAgreement, asOf = new Date()): Rende
     setupFeeCents: version.setupFeeCents,
     noticeDays: version.noticeDays,
     setupPaidAt: agreement.setupPaidAt,
+    billingAnchor: loaded.terms?.billingAnchor,
+    offerType: loaded.terms?.type,
     asOf,
   })
 }
@@ -216,7 +220,12 @@ export interface AgreementTermsInput {
   body?: string
 }
 
-export function validateTerms(t: AgreementTermsInput): string | null {
+export function validateTerms(t: AgreementTermsInput, offerType: 'subscription' | 'one_time' = 'subscription'): string | null {
+  if (offerType === 'one_time') {
+    if (t.termMonths !== 0 || t.monthlyCents !== 0) return 'Full-payment agreements must not include recurring fees or a subscription term.'
+    if (!Number.isInteger(t.setupFeeCents) || t.setupFeeCents < 50 || t.setupFeeCents > 99999999) return 'Purchase price must be at least $0.50.'
+    return null
+  }
   if (!Number.isInteger(t.termMonths) || t.termMonths < 1 || t.termMonths > 60) return 'Term must be between 1 and 60 months.'
   if (!Number.isFinite(t.monthlyCents) || t.monthlyCents < 50) return 'Monthly amount must be at least $0.50.'
   if (!Number.isFinite(t.setupFeeCents) || t.setupFeeCents < 0) return 'Setup fee cannot be negative.'
@@ -443,9 +452,23 @@ export async function onSubscriptionStarted(
   detail: { monthlyCents: number; firstChargeAt: Date | null },
 ): Promise<void> {
   const loaded = await loadAgreementByLink(linkId)
-  if (!loaded || loaded.agreement.status === 'completed') return
+  if (!loaded) return
+  if (loaded.agreement.status === 'completed') {
+    if (loaded.terms?.enrollmentFlow) await retryCompletionDelivery(loaded.agreement.id)
+    return
+  }
   const id = loaded.agreement.id
-  await logAgreementEvent(id, 'subscription_started', {
+  const completedAt = new Date()
+  const [completed] = await db
+    .update(agreementsTable)
+    .set({ status: 'completed', completedAt, updatedAt: completedAt })
+    .where(and(eq(agreementsTable.id, id), isNull(agreementsTable.completedAt)))
+    .returning({ id: agreementsTable.id })
+  if (!completed) {
+    if (loaded.terms?.enrollmentFlow) await retryCompletionDelivery(id)
+    return
+  }
+  await logAgreementEvent(id, loaded.terms?.type === 'one_time' ? 'one_time_enrollment_completed' : 'subscription_started', {
     version: loaded.agreement.currentVersion,
     detail: {
       monthly: formatMoney(detail.monthlyCents),
@@ -454,17 +477,15 @@ export async function onSubscriptionStarted(
         : null,
     },
   })
-  const completedAt = new Date()
-  await db
-    .update(agreementsTable)
-    .set({ status: 'completed', completedAt, updatedAt: completedAt })
-    .where(eq(agreementsTable.id, id))
   await logAgreementEvent(id, 'completed', { version: loaded.agreement.currentVersion, actor: 'system' })
   try {
     const fresh = await loadAgreementById(id)
     if (fresh) {
-      const pdf = await generateAndStorePdf(fresh)
-      await sendSignedCopies(fresh, pdf)
+      if (fresh.terms?.enrollmentFlow) await retryCompletionDelivery(id)
+      else {
+        const pdf = await generateAndStorePdf(fresh)
+        await sendSignedCopies(fresh, pdf)
+      }
     }
   } catch (err) {
     logger.error({ err, agreementId: id }, 'agreement completion follow-up failed')
@@ -580,6 +601,67 @@ export async function sendSignedCopies(loaded: LoadedAgreement, pdf: Buffer): Pr
       { metadata: { agreementId: a.id, customerId: loaded.customer.id, adminCopy: true }, attachments },
     )
   }
+}
+
+export async function completionDeliveryStatus(loaded: LoadedAgreement) {
+  const rows = await db.select({
+    recipient: agreementDeliveriesTable.recipient,
+    status: agreementDeliveriesTable.status,
+    mailStatus: emailLogTable.status,
+    error: emailLogTable.error,
+  }).from(agreementDeliveriesTable)
+    .leftJoin(emailLogTable, eq(emailLogTable.id, agreementDeliveriesTable.emailLogId))
+    .where(eq(agreementDeliveriesTable.agreementId, loaded.agreement.id))
+  return rows.map(r => ({
+    recipient: r.recipient,
+    status: r.mailStatus === 'delivered' || r.mailStatus === 'opened' || r.mailStatus === 'clicked'
+      ? 'delivered' : r.status === 'accepted' ? 'provider_accepted' : r.status,
+    error: r.error,
+  }))
+}
+
+/** Paid enrollment and document/mail delivery are separate durable states. */
+export async function retryCompletionDelivery(id: string): Promise<void> {
+  return db.transaction(async tx => {
+  await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${'agreement-delivery-' + id}))`)
+  const loaded = await loadAgreementById(id)
+  if (!loaded || loaded.agreement.status !== 'completed') throw new Error('Enrollment is not complete.')
+  const a = loaded.agreement
+  if (!a.signedAt || !a.signedSnapshot) throw new Error('Signed snapshot is missing.')
+  const pdf = await getOrCreatePdf(loaded)
+  const fresh = await loadAgreementById(id)
+  if (!fresh?.agreement.pdfPath) throw new Error('Private document storage failed. Enrollment is complete, but PDF delivery must be retried.')
+  const signer = (a.signerDeliveryEmail ?? loaded.customer.email).toLowerCase()
+  // Unlike legacy agreements, enrollment copies go only to the signer and
+  // addresses the sender explicitly requested. Never add internal admins.
+  const recipients = [...new Set([signer, ...a.copyEmails])]
+  for (const recipient of recipients) {
+    const deliveryId = newId()
+    await db.insert(agreementDeliveriesTable).values({ id: deliveryId, agreementId: id, recipient }).onConflictDoNothing()
+    const [claimed] = await db.update(agreementDeliveriesTable)
+      .set({ status: 'sending', attempts: sql`${agreementDeliveriesTable.attempts} + 1`, updatedAt: new Date() })
+      .where(and(eq(agreementDeliveriesTable.agreementId, id), eq(agreementDeliveriesTable.recipient, recipient),
+        or(eq(agreementDeliveriesTable.status, 'pending'), eq(agreementDeliveriesTable.status, 'failed'),
+          and(eq(agreementDeliveriesTable.status, 'sending'), lt(agreementDeliveriesTable.updatedAt, new Date(Date.now() - 5 * 60000))))))
+      .returning()
+    if (!claimed) continue
+    const result = await sendAgreementSignedEmail(recipient, {
+      name: recipient === signer ? loaded.customer.fullName : 'Copy recipient',
+      signerName: a.signerName ?? loaded.customer.fullName,
+      businessName: loaded.customer.businessName || loaded.customer.fullName,
+      agreementTitle: a.signedSnapshot.title,
+      termMonths: a.termMonths, monthlyCents: a.monthlyCents, setupFeeCents: a.setupFeeCents,
+      signedAt: a.signedAt.toISOString(), agreementUrl: agreementUrl(a.token), adminCopy: recipient !== signer,
+    }, {
+      idempotencyKey: `agreement-completion-${claimed.id}`,
+      metadata: { agreementId: id, customerId: loaded.customer.id, deliveryId: claimed.id },
+      attachments: [{ filename: pdfFileName(loaded), content: pdf, contentType: 'application/pdf' }],
+    })
+    await db.update(agreementDeliveriesTable).set({
+      status: result.ok ? 'accepted' : 'failed', emailLogId: result.logId, updatedAt: new Date(),
+    }).where(eq(agreementDeliveriesTable.id, claimed.id))
+  }
+  })
 }
 
 // ── Cards on file (for admin detail) ───────────────────────────────

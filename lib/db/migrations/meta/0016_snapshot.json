@@ -1,5 +1,5 @@
 {
-  "id": "e208fc60-c3b5-4a43-9d3a-ea68420eb996",
+  "id": "2e559a8b-2c8c-454e-b26d-d03d9c4bfa4e",
   "prevId": "2eb5bd6c-b8b5-4118-ab41-4d2bce370fe3",
   "version": "7",
   "dialect": "postgresql",
@@ -70,12 +70,6 @@
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
-        },
-        "window_seconds": {
-          "name": "window_seconds",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
         },
         "attempts": {
           "name": "attempts",
@@ -1550,6 +1544,13 @@
           "primaryKey": false,
           "notNull": true,
           "default": 12
+        },
+        "billing_anchor": {
+          "name": "billing_anchor",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'thirty_days'"
         },
         "stripe_customer_id": {
           "name": "stripe_customer_id",

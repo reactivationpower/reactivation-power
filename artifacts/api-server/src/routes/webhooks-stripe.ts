@@ -4,6 +4,8 @@ import { eq } from "drizzle-orm";
 import { db, stripeEventsTable } from "@workspace/db";
 import { logger } from "@/lib/logger";
 import { getStripeWebhookSecret, stripe } from "@/lib/stripe";
+import { getAdminClient } from "@/lib/supabase/admin";
+import { reconcile } from "@/actions/enrollment";
 import {
   handleChargeRefunded,
   handleInvoicePaid,
@@ -22,7 +24,7 @@ import {
  *
  *   invoice.paid, invoice.payment_failed,
  *   customer.subscription.updated, customer.subscription.deleted,
- *   charge.refunded
+ *   charge.refunded, payment_intent.succeeded
  *
  * The signature is checked over the exact bytes received (app.ts keeps them
  * on req.rawBody). Every event id is claimed in `stripe_events` before any
@@ -38,6 +40,7 @@ export const HANDLED_EVENTS = new Set([
   "customer.subscription.updated",
   "customer.subscription.deleted",
   "charge.refunded",
+  "payment_intent.succeeded",
 ]);
 
 /** Claim an event id. Returns false when we have seen it before. */
@@ -52,6 +55,16 @@ export async function claimEvent(event: Stripe.Event): Promise<boolean> {
 
 export async function dispatchEvent(event: Stripe.Event): Promise<HandleResult> {
   switch (event.type) {
+    case "payment_intent.succeeded": {
+      const intent = event.data.object as Stripe.PaymentIntent;
+      const linkId = intent.metadata?.rp_link_id;
+      if (!linkId || !intent.metadata?.agreement_id) return { handled: false, note: "Not an enrollment payment." };
+      const { data } = await getAdminClient().from("agreements").select("token").eq("id", intent.metadata.agreement_id).eq("link_id", linkId).maybeSingle();
+      if (!data?.token) throw new Error("Enrollment payment link no longer exists.");
+      const outcome = await reconcile(data.token);
+      if (!outcome.ok || !outcome.completed) throw new Error(outcome.error ?? "Enrollment reconciliation did not complete.");
+      return { handled: true };
+    }
     case "invoice.paid":
       return handleInvoicePaid(event.data.object as Stripe.Invoice, event.id);
     case "invoice.payment_failed":

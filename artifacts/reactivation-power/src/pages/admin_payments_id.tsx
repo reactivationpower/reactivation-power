@@ -188,14 +188,14 @@ export default function PaymentDetailPage() {
           </div>
         </div>
         <div className="mt-4">
-          <PaymentDetailActions link={link} hasAccounts={accounts.length > 0} />
+          <PaymentDetailActions link={link} hasAccounts={accounts.length > 0} hasAgreement={Boolean(agreement)} />
         </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         {/* ── Left column: record ─────────────────────────────── */}
         <div className="flex flex-col gap-6">
-          {isSubscription ? <AgreementCard linkId={link.id} agreement={agreement ?? null} /> : null}
+          <AgreementCard linkId={link.id} agreement={agreement ?? null} offerType={link.type} />
           <Card>
             <CardHeader>
               <CardTitle className="text-base">Contact</CardTitle>

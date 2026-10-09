@@ -1,4 +1,4 @@
-import { and, desc, eq, isNull } from 'drizzle-orm'
+import { and, desc, eq, isNull, sql } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import {
   agreementInitialsTable,
@@ -18,6 +18,8 @@ import {
 import { requireAdmin } from '@/lib/auth/admin-session'
 import { getStripeMode } from '@/lib/stripe'
 import { sendAgreementSentEmail } from '@/lib/mail'
+import { renderTemplate } from '@/lib/mail/templates'
+import { emailLogTable } from '@workspace/db'
 import { getAdminClient } from '@/lib/supabase/admin'
 import { AGREEMENT_DEFAULTS, COMPANY, agreementTitle } from '@/lib/agreements/defaults'
 import type { Certificate } from '@/lib/agreements/certificate'
@@ -27,6 +29,7 @@ import {
   agreementUrl,
   buildCertificateFor,
   createAgreement,
+  completionDeliveryStatus,
   effectiveStatus,
   isExpired,
   isSigned,
@@ -39,6 +42,7 @@ import {
   newId,
   onPaymentFailed,
   renderCurrent,
+  retryCompletionDelivery,
   requestFingerprint,
   snapshotFrom,
   validInitials,
@@ -47,6 +51,8 @@ import {
   type LoadedAgreement,
 } from '@/lib/agreements/store'
 import {
+  CALENDAR_AGREEMENT_BODY,
+  DEFAULT_ONE_TIME_AGREEMENT_BODY,
   DEFAULT_AGREEMENT_BODY,
   MERGE_FIELDS,
   renderDocument,
@@ -59,6 +65,7 @@ import {
   recordSecondaryCard,
   type TwoCardCheckoutState,
 } from './subscriptions'
+import { checkout as enrollmentCheckout, saveCard as saveEnrollmentCard, replaceCard as replaceEnrollmentPaymentCard, confirm as confirmEnrollmentPayment, reconcile as reconcileEnrollmentPayment } from './enrollment'
 
 /**
  * Service agreements: admin send/edit/list and the public signing page.
@@ -83,6 +90,11 @@ export interface AgreementSummary {
   customer_name: string
   business_name: string
   email: string
+  delivery_email: string
+  copy_emails: string[]
+  pdf_ready: boolean
+  delivery_status: Array<{ recipient: string; status: string; error?: string | null }>
+  initial_delivery_status: Array<{ recipient: string; status: string; error?: string | null }>
   rep_name: string | null
   status: AgreementStatus
   term_months: number
@@ -152,6 +164,10 @@ export interface SignatureView {
 export interface PublicAgreement {
   token: string
   status: AgreementStatus
+  offer_type: 'one_time' | 'subscription'
+  enrollment_flow: boolean
+  pdf_ready: boolean
+  delivery_status: Array<{ recipient: string; status: string; error?: string | null }>
   version: number
   title: string
   customer: { full_name: string; business_name: string; email: string }
@@ -181,6 +197,11 @@ function toSummary(a: Agreement, c: Customer, repName: string | null): Agreement
     customer_name: c.fullName,
     business_name: c.businessName,
     email: c.email,
+    delivery_email: a.signerDeliveryEmail ?? c.email,
+    copy_emails: a.copyEmails,
+    pdf_ready: Boolean(a.pdfPath),
+    delivery_status: [],
+    initial_delivery_status: [],
     rep_name: repName ?? a.sentByName,
     status: effectiveStatus(a),
     term_months: a.termMonths,
@@ -214,7 +235,7 @@ function signatureView(a: Agreement): SignatureView | null {
   }
 }
 
-function termsFromForm(form: AgreementTermsForm): { ok: true; value: AgreementTermsInput } | { ok: false; error: string } {
+function termsFromForm(form: AgreementTermsForm, offerType: 'subscription' | 'one_time' = 'subscription'): { ok: true; value: AgreementTermsInput } | { ok: false; error: string } {
   const value: AgreementTermsInput = {
     termMonths: Math.round(Number(form.termMonths)),
     monthlyCents: toCents(form.monthlyDollars),
@@ -222,7 +243,7 @@ function termsFromForm(form: AgreementTermsForm): { ok: true; value: AgreementTe
     noticeDays: form.noticeDays == null ? undefined : Math.round(Number(form.noticeDays)),
     body: typeof form.body === 'string' ? form.body : undefined,
   }
-  const err = validateTerms(value)
+  const err = validateTerms(value, offerType)
   if (err) return { ok: false, error: err }
   if (value.body != null) {
     const tErr = validateTemplate(value.body)
@@ -233,7 +254,7 @@ function termsFromForm(form: AgreementTermsForm): { ok: true; value: AgreementTe
 
 async function customerAndTermsForLink(linkId: string): Promise<{ customer: Customer; terms: typeof paymentLinkTermsTable.$inferSelect } | null> {
   const [terms] = await db.select().from(paymentLinkTermsTable).where(eq(paymentLinkTermsTable.linkId, linkId)).limit(1)
-  if (!terms || terms.type !== 'subscription') return null
+  if (!terms) return null
   const [customer] = await db.select().from(customersTable).where(eq(customersTable.id, terms.customerId)).limit(1)
   if (!customer) return null
   return { customer, terms }
@@ -243,9 +264,24 @@ async function toDetail(loaded: LoadedAgreement): Promise<AgreementDetail> {
   const { agreement, customer, terms, version } = loaded
   const doc = renderCurrent(loaded)
   const [versions, events] = await Promise.all([listVersions(agreement.id), listEvents(agreement.id)])
+  const sentLogs = await db.select({ recipient: emailLogTable.recipient, status: emailLogTable.status, error: emailLogTable.error })
+    .from(emailLogTable).where(and(
+      eq(emailLogTable.type, 'agreement_sent'),
+      sql`${emailLogTable.metadata}->>'agreementId' = ${agreement.id}`,
+    )).orderBy(desc(emailLogTable.createdAt))
+  const recipients = new Set<string>()
+  const initialDelivery = sentLogs.filter(row => {
+    if (recipients.has(row.recipient)) return false
+    recipients.add(row.recipient)
+    return true
+  }).map(row => ({ ...row, status: row.status === 'sent' ? 'provider_accepted' : row.status }))
   const signed = isSigned(agreement)
   return {
-    agreement: toSummary(agreement, customer, terms?.repName ?? null),
+    agreement: {
+      ...toSummary(agreement, customer, terms?.repName ?? null),
+      delivery_status: await completionDeliveryStatus(loaded),
+      initial_delivery_status: initialDelivery,
+    },
     document: signed && agreement.signedSnapshot ? { ...doc, ...agreement.signedSnapshot } : doc,
     body: version.body,
     notice_days: version.noticeDays,
@@ -290,6 +326,8 @@ export async function getAgreementSendForm(linkId: string): Promise<{
   defaults?: { termMonths: number; monthlyDollars: number; setupFeeDollars: number; noticeDays: number }
   mergeFields?: readonly string[]
   existing?: AgreementSummary | null
+  customerEmail?: string
+  customerName?: string
 }> {
   await requireAdmin()
   const found = await customerAndTermsForLink(linkId)
@@ -297,6 +335,10 @@ export async function getAgreementSendForm(linkId: string): Promise<{
   const existing = await loadAgreementByLink(linkId)
   const d = AGREEMENT_DEFAULTS
   const useLink = found.terms.monthlyCents > 0
+  const oneTime = found.terms.type === 'one_time'
+  const { data: link } = oneTime
+    ? await getAdminClient().from('payment_links').select('amount_cents').eq('id', linkId).maybeSingle()
+    : { data: null }
   return {
     ok: true,
     form: existing
@@ -308,11 +350,11 @@ export async function getAgreementSendForm(linkId: string): Promise<{
           body: existing.version.body,
         }
       : {
-          termMonths: d.termMonths,
-          monthlyDollars: (useLink ? found.terms.monthlyCents : d.monthlyCents) / 100,
-          setupFeeDollars: (useLink ? found.terms.setupFeeCents : d.setupFeeCents) / 100,
+          termMonths: oneTime ? 0 : d.termMonths,
+          monthlyDollars: oneTime ? 0 : (useLink ? found.terms.monthlyCents : d.monthlyCents) / 100,
+          setupFeeDollars: oneTime ? Number(link?.amount_cents ?? 0) / 100 : (useLink ? found.terms.setupFeeCents : d.setupFeeCents) / 100,
           noticeDays: d.noticeDays,
-          body: DEFAULT_AGREEMENT_BODY,
+          body: oneTime ? DEFAULT_ONE_TIME_AGREEMENT_BODY : found.terms.billingAnchor === 'calendar_month' ? CALENDAR_AGREEMENT_BODY : DEFAULT_AGREEMENT_BODY,
         },
     defaults: {
       termMonths: d.termMonths,
@@ -321,6 +363,8 @@ export async function getAgreementSendForm(linkId: string): Promise<{
       noticeDays: d.noticeDays,
     },
     mergeFields: MERGE_FIELDS,
+    customerEmail: found.customer.email,
+    customerName: found.customer.fullName,
     existing: existing ? toSummary(existing.agreement, existing.customer, existing.terms?.repName ?? null) : null,
   }
 }
@@ -333,38 +377,71 @@ export async function previewAgreement(
   await requireAdmin()
   const found = await customerAndTermsForLink(linkId)
   if (!found) return { ok: false, error: 'Customer not found.' }
-  const parsed = termsFromForm(form)
+  const parsed = termsFromForm(form, found.terms.type)
   if (!parsed.ok) return { ok: false, error: parsed.error }
   const t = parsed.value
   return {
     ok: true,
-    document: renderDocument(t.body ?? DEFAULT_AGREEMENT_BODY, {
+    document: renderDocument(t.body ?? (found.terms.type === 'one_time' ? DEFAULT_ONE_TIME_AGREEMENT_BODY : found.terms.billingAnchor === 'calendar_month' ? CALENDAR_AGREEMENT_BODY : DEFAULT_AGREEMENT_BODY), {
       customer: found.customer,
       termMonths: t.termMonths,
       monthlyCents: t.monthlyCents,
       setupFeeCents: t.setupFeeCents,
       noticeDays: t.noticeDays ?? AGREEMENT_DEFAULTS.noticeDays,
+      billingAnchor: found.terms.billingAnchor,
+      offerType: found.terms.type,
     }),
   }
 }
 
-async function emailSignRequest(loaded: LoadedAgreement, resend: boolean): Promise<boolean> {
+function deliveryAddresses(input: { signerEmail?: string; copyEmails?: string[] } | undefined, customerEmail: string) {
+  const valid = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+  const signerEmail = (input?.signerEmail ?? customerEmail).trim().toLowerCase()
+  const copyEmails = [...new Set((input?.copyEmails ?? []).map(e => e.trim().toLowerCase()).filter(Boolean))]
+  if (!valid(signerEmail) || copyEmails.length > 5 || copyEmails.some(e => !valid(e)))
+    throw new Error('Enter a valid delivery email and up to five valid copy addresses.')
+  return { signerEmail, copyEmails: copyEmails.filter(e => e !== signerEmail) }
+}
+
+async function emailSignRequest(loaded: LoadedAgreement, resend: boolean): Promise<{ accepted: boolean; logIds: string[] }> {
   const { agreement, customer } = loaded
-  const res = await sendAgreementSentEmail(
-    customer.email,
-    {
+  const data = {
       name: customer.fullName,
-      agreementTitle: agreementTitle(agreement.termMonths),
+      agreementTitle: loaded.terms?.type === 'one_time' ? `${COMPANY.name} Full-Payment Service Agreement` : agreementTitle(agreement.termMonths),
       termMonths: agreement.termMonths,
       monthlyCents: agreement.monthlyCents,
       setupFeeCents: agreement.setupFeeCents,
       signUrl: agreementUrl(agreement.token),
       expiresAt: agreement.expiresAt?.toISOString() ?? null,
       resend,
-    },
-    { metadata: { agreementId: agreement.id, customerId: customer.id, resend } },
-  )
-  return res.ok
+    }
+  const recipients = [agreement.signerDeliveryEmail ?? customer.email, ...(agreement.copyEmails ?? [])]
+  const results = await Promise.all(recipients.map((to, index) => sendAgreementSentEmail(to, { ...data, copyOnly: index > 0 },
+    { metadata: { agreementId: agreement.id, customerId: customer.id, resend } })))
+  return { accepted: results.every(r => r.ok), logIds: results.map(r => r.logId) }
+}
+
+export async function previewEnrollmentEmail(linkId: string, form: AgreementTermsForm) {
+  await requireAdmin()
+  const found = await customerAndTermsForLink(linkId)
+  if (!found) return { ok: false, error: 'Customer not found.' }
+  const parsed = termsFromForm(form, found.terms.type)
+  if (!parsed.ok) return parsed
+  const { data: link } = await getAdminClient().from('payment_links').select('token').eq('id', linkId).single()
+  if (!link) return { ok: false, error: 'Link not found.' }
+  const data = {
+    name: found.customer.fullName,
+    agreementTitle: found.terms.type === 'one_time' ? `${COMPANY.name} Full-Payment Service Agreement` : agreementTitle(parsed.value.termMonths),
+    termMonths: parsed.value.termMonths,
+    monthlyCents: parsed.value.monthlyCents,
+    setupFeeCents: parsed.value.setupFeeCents,
+    signUrl: agreementUrl((await loadAgreementByLink(linkId))?.agreement.token ?? 'link-created-when-sent'),
+    expiresAt: null, resend: false,
+  }
+  const rendered = renderTemplate('agreement_sent', data)
+  const copy = renderTemplate('agreement_sent', { ...data, copyOnly: true })
+  return { ok: true, subject: rendered.subject, html: rendered.html, previewText: rendered.previewText,
+    copySubject: copy.subject, copyHtml: copy.html }
 }
 
 /**
@@ -375,12 +452,16 @@ async function emailSignRequest(loaded: LoadedAgreement, resend: boolean): Promi
 export async function sendAgreement(
   linkId: string,
   form: AgreementTermsForm,
-): Promise<{ ok: boolean; error?: string; emailed?: boolean; detail?: AgreementDetail }> {
+  delivery?: { signerEmail?: string; copyEmails?: string[] },
+): Promise<{ ok: boolean; error?: string; emailed?: boolean; deliveryStatus?: 'failed' | 'provider_accepted'; detail?: AgreementDetail }> {
   const admin = await requireAdmin()
   const found = await customerAndTermsForLink(linkId)
-  if (!found) return { ok: false, error: 'Agreements are only sent for subscription links.' }
-  const parsed = termsFromForm(form)
+  if (!found) return { ok: false, error: 'Customer not found.' }
+  const parsed = termsFromForm(form, found.terms.type)
   if (!parsed.ok) return { ok: false, error: parsed.error }
+  let addresses: ReturnType<typeof deliveryAddresses>
+  try { addresses = deliveryAddresses(delivery, found.customer.email) }
+  catch (e) { return { ok: false, error: e instanceof Error ? e.message : 'Invalid email addresses.' } }
 
   let loaded = await loadAgreementByLink(linkId)
   if (loaded && isSigned(loaded.agreement)) return { ok: false, error: 'This agreement is already signed.' }
@@ -403,6 +484,8 @@ export async function sendAgreement(
       status: loaded.agreement.status === 'draft' ? 'sent' : loaded.agreement.status,
       sentById: loaded.agreement.sentById ?? sender.id,
       sentByName: loaded.agreement.sentByName ?? sender.name,
+      signerDeliveryEmail: addresses.signerEmail,
+      copyEmails: addresses.copyEmails,
       sentAt: loaded.agreement.sentAt ?? now,
       lastSentAt: now,
       expiresAt: new Date(now.getTime() + AGREEMENT_DEFAULTS.linkValidDays * 86400000),
@@ -417,10 +500,10 @@ export async function sendAgreement(
   })
   const fresh = await loadAgreementById(loaded.agreement.id)
   if (!fresh) return { ok: false, error: 'Agreement not found after send.' }
-  const emailed = await emailSignRequest(fresh, !first)
+  const sent = await emailSignRequest(fresh, !first)
   revalidatePath('/admin/agreements')
   revalidatePath(`/admin/payments/${linkId}`)
-  return { ok: true, emailed, detail: await toDetail(fresh) }
+  return { ok: true, emailed: sent.accepted, deliveryStatus: sent.accepted ? 'provider_accepted' : 'failed', detail: await toDetail(fresh) }
 }
 
 /** Edit term, amounts or text on an unsigned agreement: new version, customer page updates live. */
@@ -432,7 +515,7 @@ export async function updateAgreement(
   const loaded = await loadAgreementById(id)
   if (!loaded) return { ok: false, error: 'Agreement not found.' }
   if (isSigned(loaded.agreement)) return { ok: false, error: 'This agreement is signed and can no longer be edited.' }
-  const parsed = termsFromForm(form)
+  const parsed = termsFromForm(form, loaded.terms?.type)
   if (!parsed.ok) return { ok: false, error: parsed.error }
   let next: LoadedAgreement
   try {
@@ -448,11 +531,14 @@ export async function updateAgreement(
 }
 
 /** Re-send the signing link (extends the expiry). */
-export async function resendAgreement(id: string): Promise<{ ok: boolean; error?: string; emailed?: boolean }> {
+export async function resendAgreement(id: string, delivery?: { signerEmail?: string; copyEmails?: string[] }): Promise<{ ok: boolean; error?: string; emailed?: boolean; deliveryStatus?: 'failed' | 'provider_accepted' }> {
   const admin = await requireAdmin()
   const loaded = await loadAgreementById(id)
   if (!loaded) return { ok: false, error: 'Agreement not found.' }
   if (isSigned(loaded.agreement)) return { ok: false, error: 'This agreement is already signed.' }
+  let addresses: ReturnType<typeof deliveryAddresses>
+  try { addresses = deliveryAddresses(delivery, loaded.agreement.signerDeliveryEmail ?? loaded.customer.email) }
+  catch (e) { return { ok: false, error: e instanceof Error ? e.message : 'Invalid email addresses.' } }
   const now = new Date()
   await db
     .update(agreementsTable)
@@ -462,6 +548,8 @@ export async function resendAgreement(id: string): Promise<{ ok: boolean; error?
       sentById: loaded.agreement.sentById ?? admin.userId,
       sentByName: loaded.agreement.sentByName ?? (admin.name || admin.email),
       lastSentAt: now,
+      signerDeliveryEmail: addresses.signerEmail,
+      copyEmails: delivery?.copyEmails ? addresses.copyEmails : loaded.agreement.copyEmails,
       expiresAt: new Date(now.getTime() + AGREEMENT_DEFAULTS.linkValidDays * 86400000),
       updatedAt: now,
     })
@@ -473,9 +561,9 @@ export async function resendAgreement(id: string): Promise<{ ok: boolean; error?
     detail: { to: loaded.customer.email },
   })
   const fresh = await loadAgreementById(id)
-  const emailed = fresh ? await emailSignRequest(fresh, Boolean(loaded.agreement.sentAt)) : false
+  const result = fresh ? await emailSignRequest(fresh, Boolean(loaded.agreement.sentAt)) : null
   revalidatePath(`/admin/agreements/${id}`)
-  return { ok: true, emailed }
+  return { ok: true, emailed: result?.accepted ?? false, deliveryStatus: result?.accepted ? 'provider_accepted' : 'failed' }
 }
 
 // ── Admin: hub & detail ────────────────────────────────────────────
@@ -501,7 +589,7 @@ export async function getAgreementDetail(id: string): Promise<AgreementDetail | 
 export async function getAgreementForLink(linkId: string): Promise<AgreementSummary | null> {
   await requireAdmin()
   const loaded = await loadAgreementByLink(linkId)
-  return loaded ? toSummary(loaded.agreement, loaded.customer, loaded.terms?.repName ?? null) : null
+  return loaded ? (await toDetail(loaded)).agreement : null
 }
 
 /**
@@ -517,11 +605,12 @@ export async function agreementTokenForLink(linkToken: string): Promise<string |
   const existing = await loadAgreementByLink(linkId)
   if (existing) return existing.agreement.token
   const found = await customerAndTermsForLink(linkId)
-  if (!found) return null
+  if (!found || found.terms.type !== 'subscription') return null
   const terms: AgreementTermsInput = {
     termMonths: found.terms.termMonths || AGREEMENT_DEFAULTS.termMonths,
     monthlyCents: found.terms.monthlyCents || AGREEMENT_DEFAULTS.monthlyCents,
     setupFeeCents: found.terms.monthlyCents > 0 ? found.terms.setupFeeCents : AGREEMENT_DEFAULTS.setupFeeCents,
+    body: found.terms.enrollmentFlow ? CALENDAR_AGREEMENT_BODY : DEFAULT_AGREEMENT_BODY,
   }
   const created = await createAgreement({
     customer: found.customer,
@@ -546,6 +635,10 @@ async function toPublic(loaded: LoadedAgreement): Promise<PublicAgreement> {
   const doc = renderCurrent(loaded)
   return {
     token: a.token,
+    offer_type: loaded.terms?.type ?? 'subscription',
+    enrollment_flow: loaded.terms?.enrollmentFlow ?? false,
+    pdf_ready: Boolean(a.pdfPath),
+    delivery_status: a.status === 'completed' ? await completionDeliveryStatus(loaded) : [],
     status: effectiveStatus(a),
     version: a.currentVersion,
     title: signed && a.signedSnapshot ? a.signedSnapshot.title : doc.title,
@@ -737,6 +830,7 @@ export async function signAgreement(
 export async function getAgreementCheckout(token: string): Promise<{ ok: boolean; error?: string; checkout?: TwoCardCheckoutState }> {
   const loaded = await loadAgreementByToken(token)
   if (!loaded || !loaded.terms) return { ok: false, error: 'This agreement link is not valid.' }
+  if (loaded.terms.enrollmentFlow) return { ok: false, error: 'Use the enrollment card flow for this agreement.' }
   if (!isSigned(loaded.agreement) && isExpired(loaded.agreement)) return { ok: false, error: 'This signing link has expired.' }
   const checkout = await getTwoCardCheckoutState(loaded.terms.token)
   if (!checkout) return { ok: false, error: 'The subscription link for this agreement is no longer active.' }
@@ -746,6 +840,7 @@ export async function getAgreementCheckout(token: string): Promise<{ ok: boolean
 export async function recordAgreementPrimaryCard(token: string) {
   const loaded = await loadAgreementByToken(token)
   if (!loaded || !loaded.terms) return { ok: false, error: 'This agreement link is not valid.' }
+  if (loaded.terms.enrollmentFlow) return { ok: false, error: 'Use the enrollment card flow for this agreement.' }
   const res = await recordPrimaryCard(loaded.terms.token)
   if (!res.ok && res.error) await onPaymentFailed(loaded.agreement.linkId, res.error)
   return res
@@ -754,6 +849,7 @@ export async function recordAgreementPrimaryCard(token: string) {
 export async function recordAgreementSecondaryCard(token: string) {
   const loaded = await loadAgreementByToken(token)
   if (!loaded || !loaded.terms) return { ok: false, error: 'This agreement link is not valid.' }
+  if (loaded.terms.enrollmentFlow) return { ok: false, error: 'Use the enrollment card flow for this agreement.' }
   const res = await recordSecondaryCard(loaded.terms.token)
   if (!res.ok && res.error && !res.duplicate) await onPaymentFailed(loaded.agreement.linkId, res.error)
   return res
@@ -768,3 +864,31 @@ export async function recordAgreementPaymentFailure(token: string, message: stri
 }
 
 export type { AgreementVersion }
+
+export const getEnrollmentCheckout = enrollmentCheckout
+export const recordEnrollmentCard = saveEnrollmentCard
+export const replaceEnrollmentCard = replaceEnrollmentPaymentCard
+export const confirmEnrollment = confirmEnrollmentPayment
+export const reconcileEnrollment = reconcileEnrollmentPayment
+
+export async function retryAgreementCompletion(id: string) {
+  await requireAdmin()
+  try {
+    await retryCompletionDelivery(id)
+    return { ok: true }
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : 'Could not retry document delivery.' }
+  }
+}
+
+export async function retryEnrollmentDelivery(token: string) {
+  const loaded = await loadAgreementByToken(token)
+  if (!loaded?.terms?.enrollmentFlow || loaded.agreement.status !== 'completed')
+    return { ok: false, error: 'Enrollment is not complete.' }
+  try {
+    await retryCompletionDelivery(loaded.agreement.id)
+    return { ok: true }
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : 'Could not retry document delivery.' }
+  }
+}

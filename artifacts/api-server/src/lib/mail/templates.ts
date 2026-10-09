@@ -84,6 +84,7 @@ export interface AgreementSentData {
   expiresAt?: string | null
   /** Set when the link is re-sent or the agreement was edited. */
   resend?: boolean
+  copyOnly?: boolean
 }
 
 export interface BillingLinkData {
@@ -412,32 +413,36 @@ const agreementSent: TemplateDefinition<'agreement_sent'> = {
     expiresAt: new Date(Date.now() + 7 * 86400000).toISOString(),
   },
   render: (d) => {
-    const rows: Array<[string, string]> = [['Term', `${d.termMonths} months`]]
-    if (d.monthlyCents != null) rows.push(['Monthly amount', money(d.monthlyCents)])
-    if (d.setupFeeCents != null) rows.push(['Setup fee', d.setupFeeCents > 0 ? money(d.setupFeeCents) : 'Waived'])
-    const subject = d.resend
+    const oneTime = d.termMonths === 0
+    const rows: Array<[string, string]> = oneTime
+      ? [['One-time purchase price', money(d.setupFeeCents ?? 0)]]
+      : [['Term', `${d.termMonths} months`]]
+    if (!oneTime && d.monthlyCents != null) rows.push(['Monthly amount', money(d.monthlyCents)])
+    if (!oneTime && d.setupFeeCents != null) rows.push(['Initial payment', d.setupFeeCents > 0 ? money(d.setupFeeCents) : 'Waived'])
+    const subject = d.copyOnly
+      ? `Copy: enrollment agreement for ${d.name}`
+      : d.resend
       ? `Reminder — please review and sign: ${d.agreementTitle}`
       : `Please review and sign: ${d.agreementTitle}`
-    const preview = `Your ${d.termMonths}-month service agreement is ready for signature.`
+    const preview = d.copyOnly ? 'Informational copy only; the signer receives a separate personal link.' : oneTime ? 'Your full-payment agreement is ready for signature.' : `Your ${d.termMonths}-month service agreement is ready for signature.`
     return {
       subject,
       previewText: preview,
       html: layout(
         [
-          h1(d.resend ? 'Your service agreement is still waiting for your signature' : 'Your service agreement is ready to sign'),
+          h1(d.copyOnly ? 'Enrollment agreement — informational copy' : d.resend ? 'Your service agreement is still waiting for your signature' : 'Your service agreement is ready to sign'),
           p(`Hi ${esc(greetingName(d.name))},`),
-          p(
-            `Your <strong>${esc(d.agreementTitle)}</strong> is ready on the link below. It covers the ${d.termMonths}-month term, what's included, billing, and how either side can end the agreement. Please read it through, initial each highlighted section and sign electronically — it takes about two minutes. You can do it on your phone or computer.`,
-          ),
+          p(d.copyOnly
+            ? `This is an informational copy about <strong>${esc(d.name)}</strong>'s ${esc(d.agreementTitle)}. You are not a signer and this message does not include a signing link. The signer receives a separate personal email. No payment has been collected.`
+            : `Your <strong>${esc(d.agreementTitle)}</strong> is ready on the link below. It covers ${oneTime ? 'your one-time purchase' : `the ${d.termMonths}-month term`}, what's included, billing, and cancellation. Please read it through, initial each highlighted section and sign electronically. No initial payment is collected until you save the required card${oneTime ? '' : 's'} and explicitly confirm enrollment. You can do it on your phone or computer.`),
           details(rows),
-          button('Review and sign the agreement', d.signUrl),
-          fallbackLink(d.signUrl),
+          ...(d.copyOnly ? [] : [button('Review and sign the agreement', d.signUrl), fallbackLink(d.signUrl)]),
           panel([
             d.expiresAt
               ? `This signing link expires on <strong>${longDate(d.expiresAt)}</strong>. Need more time or have questions about a clause? Just reply to this email.`
               : `Have questions about a clause? Just reply to this email before you sign.`,
           ]),
-          small(`Once you have signed and your enrollment is complete, we'll email you a signed copy with the certificate of completion.`),
+          small(d.copyOnly ? 'The signer must review and accept the agreement personally.' : `Once you have signed and your enrollment is complete, we'll email you a signed copy with the certificate of completion.`),
           signoff(),
         ],
         { previewText: preview, footerNote: SUPPORT_NOTE },
@@ -519,13 +524,14 @@ const agreementSigned: TemplateDefinition<'agreement_signed'> = {
       ['Business', esc(d.businessName)],
       ['Signed by', esc(d.signerName)],
       ['Signed on', longDate(d.signedAt)],
-      ['Term', `${d.termMonths} months`],
-      ['Monthly amount', money(d.monthlyCents)],
-      ['Setup fee', d.setupFeeCents > 0 ? money(d.setupFeeCents) : 'Waived'],
+      ...(d.termMonths === 0 ? [['One-time purchase price', money(d.setupFeeCents)]] : [
+        ['Term', `${d.termMonths} months`], ['Monthly amount', money(d.monthlyCents)],
+        ['Initial payment', d.setupFeeCents > 0 ? money(d.setupFeeCents) : 'Waived'],
+      ]) as Array<[string, string]>,
     ]
     const preview = d.adminCopy
-      ? `${d.signerName} (${d.businessName}) signed the ${d.termMonths}-month service agreement.`
-      : `Your signed ${d.termMonths}-month service agreement and certificate of completion.`
+      ? `${d.signerName} (${d.businessName}) completed their agreement.`
+      : 'Your signed agreement and certificate of completion.'
     return {
       subject: d.adminCopy
         ? `Signed: ${d.businessName} — ${d.agreementTitle}`

@@ -24,7 +24,7 @@ export default function PayPage() {
   if (loading) return <PageLoading />
   if (notFound) return <NotFound />
   if (error) return <PageError error={error} />
-  const { link, stripeMode } = data
+  const { link, stripeMode, awaitingAgreement } = data
   const isSubscription = link.type === 'subscription'
 
   return (
@@ -91,7 +91,12 @@ export default function PayPage() {
           )}
         </header>
 
-        {isSubscription ? <SubscriptionCheckout token={token} /> : <PayCheckout token={token} />}
+        {awaitingAgreement ? (
+          <p role="status" className="rounded-lg border p-6 text-center text-sm">
+            Your enrollment agreement is being prepared. Please use the signing link in your enrollment email,
+            or contact our team if you have not received it. No payment has been collected.
+          </p>
+        ) : isSubscription ? <SubscriptionCheckout token={token} /> : <PayCheckout token={token} />}
 
         <p className="text-center text-xs text-muted-foreground">
           Payments are processed securely by Stripe. Your card details never

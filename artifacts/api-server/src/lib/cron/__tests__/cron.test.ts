@@ -74,6 +74,7 @@ vi.mock('@workspace/db', () => {
 
 const retry = vi.fn(async () => ({ customers: 1, invoices: 2, paid: 1, failed: 1, details: [] }))
 vi.mock('@/lib/billing/dunning', () => ({ retryPastDueInvoices: retry }))
+vi.mock('@/actions/enrollment', () => ({ reconcilePendingEnrollments: vi.fn(async () => ({ examined: 0, completed: 0 })) }))
 const seed = vi.fn(async () => ({
   chiro: { status: 'seeded', summary: { patients: 12 } },
   aesthetics: { status: 'seeded', summary: { patients: 12 } },
@@ -183,7 +184,7 @@ describe('runCronJob / tick', () => {
 
   it('records a thrown job as failed and emails the super admin', async () => {
     retry.mockRejectedValueOnce(new Error('Stripe is down'))
-    const outcome = await runCronJob('billing-retry', { trigger: 'http' })
+    const outcome = await runCronJob('billing-retry', { trigger: 'admin', actor: 'Dr. S' })
     expect(outcome).toMatchObject({ ok: false, error: 'Stripe is down' })
     expect(rows[0]).toMatchObject({ status: 'failed', error: 'Stripe is down' })
     expect(sendEmail).toHaveBeenCalledTimes(1)

@@ -49,6 +49,7 @@ const LABELS: Record<AgreementEventType, string> = {
   setup_fee_paid: 'Setup fee paid',
   payment_failed: 'Payment attempt failed',
   subscription_started: 'Subscription started',
+  one_time_enrollment_completed: 'One-time enrollment completed',
   completed: 'Agreement completed',
   pdf_generated: 'Signed PDF generated',
   expired: 'Signing link expired',

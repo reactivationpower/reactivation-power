@@ -21,9 +21,17 @@ export const getAgreementCheckout = action<any>('agreements', 'getAgreementCheck
 export const recordAgreementPrimaryCard = action<any>('agreements', 'recordAgreementPrimaryCard')
 export const recordAgreementSecondaryCard = action<any>('agreements', 'recordAgreementSecondaryCard')
 export const recordAgreementPaymentFailure = action<any>('agreements', 'recordAgreementPaymentFailure')
+export const getEnrollmentCheckout = action<any>('agreements', 'getEnrollmentCheckout')
+export const recordEnrollmentCard = action<any>('agreements', 'recordEnrollmentCard')
+export const replaceEnrollmentCard = action<any>('agreements', 'replaceEnrollmentCard')
+export const confirmEnrollment = action<any>('agreements', 'confirmEnrollment')
+export const reconcileEnrollment = action<any>('agreements', 'reconcileEnrollment')
 
 // Admin
 export const getAgreementSendForm = action<any>('agreements', 'getAgreementSendForm')
+export const previewEnrollmentEmail = action<any>('agreements', 'previewEnrollmentEmail')
+export const retryAgreementCompletion = action<any>('agreements', 'retryAgreementCompletion')
+export const retryEnrollmentDelivery = action<any>('agreements', 'retryEnrollmentDelivery')
 export const previewAgreement = action<any>('agreements', 'previewAgreement')
 export const sendAgreement = action<any>('agreements', 'sendAgreement')
 export const updateAgreement = action<any>('agreements', 'updateAgreement')

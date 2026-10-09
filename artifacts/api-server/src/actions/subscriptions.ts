@@ -77,7 +77,10 @@ export async function loadLink(token: string): Promise<{
     .from(paymentLinkTermsTable)
     .where(eq(paymentLinkTermsTable.linkId, String(data.id)))
     .limit(1)
-  if (!terms || terms.type !== 'subscription') return null
+  // Every legacy public checkout/record action enters through this resolver.
+  // New enrollment must use the agreement-scoped card-save/final-confirmation
+  // flow, even when someone calls an old endpoint directly with its pay token.
+  if (!terms || terms.type !== 'subscription' || terms.enrollmentFlow) return null
   const [customer] = await db
     .select()
     .from(customersTable)
@@ -482,7 +485,7 @@ export async function recordSecondaryCard(token: string): Promise<{
 }
 
 /** Create the Stripe subscription (30-day trial), stamp the agreement dates, provision access. */
-async function activateSubscription(
+export async function activateSubscription(
   link: LinkRow,
   terms: PaymentLinkTerms,
   customer: Customer,
@@ -490,13 +493,18 @@ async function activateSubscription(
 ): Promise<void> {
   const stripeCustomerId = await ensureStripeCustomer(customer, link)
   const setupPaidAt = terms.setupPaidAt ?? new Date()
-  const { agreementStart, agreementEnd } = agreementWindow(setupPaidAt, terms.termMonths)
+  const { agreementStart, agreementEnd } = agreementWindow(setupPaidAt, terms.termMonths, terms.billingAnchor)
 
   let subscription: Stripe.Subscription
   if (terms.stripeSubscriptionId) {
     subscription = await stripe.subscriptions.retrieve(terms.stripeSubscriptionId)
   } else {
-    subscription = await stripe.subscriptions.create(
+    // Stripe idempotency keys expire. Recover a subscription created before
+    // the DB update rather than creating a second subscription on a late retry.
+    const existing = await stripe.subscriptions.list({ customer: stripeCustomerId, status: 'all', limit: 100 })
+    const matching = existing.data.find(item => item.metadata?.rp_link_id === link.id)
+    if (!matching && existing.has_more) throw new Error('Could not verify prior subscriptions for this customer.')
+    subscription = matching ?? await stripe.subscriptions.create(
       {
         customer: stripeCustomerId,
         items: [
@@ -510,6 +518,14 @@ async function activateSubscription(
           },
         ],
         trial_end: Math.floor(agreementStart.getTime() / 1000),
+        ...(terms.billingAnchor === 'calendar_month' ? {
+          billing_cycle_anchor_config: {
+            day_of_month: setupPaidAt.getUTCDate(),
+            hour: setupPaidAt.getUTCHours(),
+            minute: setupPaidAt.getUTCMinutes(),
+            second: setupPaidAt.getUTCSeconds(),
+          },
+        } : {}),
         default_payment_method: primaryPaymentMethodId,
         payment_settings: { payment_method_types: ['card'], save_default_payment_method: 'on_subscription' },
         trial_settings: { end_behavior: { missing_payment_method: 'cancel' } },
@@ -529,6 +545,7 @@ async function activateSubscription(
   await db
     .update(paymentLinkTermsTable)
     .set({
+      setupPaidAt,
       stripeSubscriptionId: subscription.id,
       subscriptionStatus: subscription.status,
       nextPaymentAt,

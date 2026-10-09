@@ -47,9 +47,11 @@ function formatUsd(cents: number): string {
 export function PaymentDetailActions({
   link,
   hasAccounts,
+  hasAgreement,
 }: {
   link: PaymentLink
   hasAccounts: boolean
+  hasAgreement?: boolean
 }) {
   const [, setLocation] = useLocation();
   const router = useRouter()
@@ -119,7 +121,7 @@ export function PaymentDetailActions({
   return (
     <>
       <div className="flex flex-wrap items-center gap-2">
-        {!isPaid && link.type !== 'subscription' ? (
+        {!isPaid && link.type !== 'subscription' && !link.enrollment_flow ? (
           <Button size="sm" onClick={() => setCharging(true)}>
             <CreditCard className="size-3.5" />
             Charge card now
@@ -135,7 +137,7 @@ export function PaymentDetailActions({
             Create accounts now
           </Button>
         ) : null}
-        <Button
+        {!link.enrollment_flow && <Button
           variant="outline"
           size="sm"
           className="bg-transparent"
@@ -143,8 +145,8 @@ export function PaymentDetailActions({
         >
           <Copy className="size-3.5" />
           Copy link
-        </Button>
-        {!isPaid ? (
+        </Button>}
+        {!isPaid && !link.enrollment_flow ? (
           <>
             <Button
               variant="outline"
@@ -164,7 +166,7 @@ export function PaymentDetailActions({
               <QrCode className="size-3.5" />
               QR code
             </Button>
-            {!link.setup_paid_at ? (
+            {!link.setup_paid_at && !hasAgreement ? (
               <Button
                 variant="ghost"
                 size="sm"

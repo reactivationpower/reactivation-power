@@ -52,11 +52,23 @@ export const paymentLinkTermsTable = pgTable(
     monthlyCents: integer("monthly_cents").notNull().default(0),
     /** Agreement term; the subscription's agreement window is this many months after the trial. */
     termMonths: integer("term_months").notNull().default(12),
+    /** Existing links keep their 30-day anchor; newly created subscriptions use a calendar month. */
+    billingAnchor: text("billing_anchor").$type<"thirty_days" | "calendar_month">().notNull().default("thirty_days"),
+    /** New agreement-first offers; legacy links retain their original checkout. */
+    enrollmentFlow: boolean("enrollment_flow").notNull().default(false),
+    /** Prevent a sandbox enrollment from being finalized by the live scheduler on the shared database. */
+    enrollmentStripeMode: text("enrollment_stripe_mode").$type<"test" | "live">(),
     stripeCustomerId: text("stripe_customer_id"),
     /** PaymentIntent (setup fee > 0) or SetupIntent (waived) for the primary card. */
     primaryIntentId: text("primary_intent_id"),
     /** Most recent SetupIntent for the secondary card. */
     secondaryIntentId: text("secondary_intent_id"),
+    /** Initial payment is created only after explicit final confirmation. */
+    enrollmentPaymentIntentId: text("enrollment_payment_intent_id"),
+    /** Recoverable lease: serialize cross-process completion without holding a DB transaction during network calls. */
+    enrollmentFinalizingAt: timestamp("enrollment_finalizing_at", { withTimezone: true }),
+    /** Durable explicit confirmation for waived enrollment (there is no PaymentIntent). */
+    enrollmentSelectedMethodId: text("enrollment_selected_method_id"),
     setupPaidAt: timestamp("setup_paid_at", { withTimezone: true }),
     stripeSubscriptionId: text("stripe_subscription_id"),
     subscriptionStatus: text("subscription_status"),

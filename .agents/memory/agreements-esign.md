@@ -13,3 +13,12 @@ description: Durable rules for the owned e-sign flow — edit/sign linearization
 - **Agreement recipient roles:** Additional email recipients are carbon-copy recipients, not additional signers.
   **Why:** The user explicitly distinguished people receiving a copy from the signing individual.
   **How to apply:** Keep recipient delivery controls separate from signer identity and signing authority.
+- **Negotiated agreement prices:** Automatically fill the offer-specific agreement with the amounts entered in New Customer: the full purchase amount for one-time offers, and separate setup and monthly amounts for subscriptions. Do not require manually edited text or a separate template for every negotiated price.
+  **Why:** The user wants salespeople's negotiated amounts to flow into the customer's agreement automatically.
+  **How to apply:** Select the template by offer type and merge the entered amounts, not standard list prices.
+- **Subscription commercial term:** The setup payment covers the initial month; the first recurring payment and the 12-month agreement start one calendar month after the setup payment, on the same day of the month, followed by 12 consecutive monthly payments.
+  **Why:** The user explicitly described the initial month as separate from the subsequent 12-month agreement.
+  **How to apply:** Do not count the setup payment as one of the 12 recurring payments. Use the user's confirmed calendar-month timing for new enrollment, not the existing 30-day interval; preserve existing subscriptions.
+- **Enrollment completion must not hold row locks across account provisioning.**
+  **Why:** Provisioning uses a separate database connection to update the same customer, so awaiting it while holding that customer's row lock deadlocks completion.
+  **How to apply:** Commit durable payment identifiers before confirming a charge, use a recoverable claim for finalization, and run network-dependent provisioning and document delivery without customer row locks.

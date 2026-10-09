@@ -8,4 +8,7 @@ description: How to run a throwaway TypeScript script against api-server libs (p
 - One-off ESM bundles must bundle workspace packages, not use blanket `packages: external`; a bundled CommonJS dependency may need a `createRequire(import.meta.url)` banner.
   **Why:** Node cannot resolve workspace TypeScript directory imports directly, and an external dependency may not be installed in the script's own package under pnpm.
   **How to apply:** Bundle workspace code and use a Node `createRequire` banner for bundled CommonJS dependencies; keep only transport-sensitive dependencies external.
+- **Resolve external dependencies from the owning package, and avoid banner identifier collisions.**
+  **Why:** ESM resolves external imports relative to the generated bundle; injected names can conflict with names imported by bundled dependencies.
+  **How to apply:** Keep temporary bundles within the owning package's dependency tree and alias injected imports.
 - `tsc --noEmit -p artifacts/api-server/tsconfig.json` reads `lib/db/dist/*.d.ts` through project references; if that build is stale every `@workspace/db` export "does not exist". Run `npx tsc -b lib/db` first (or `tsc -b` from the api-server). Not a code problem.

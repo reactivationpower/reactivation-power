@@ -9,6 +9,7 @@ import { logger } from '@/lib/logger'
 import { sendEmail } from '@/lib/mail'
 import { dueKeyFor, hoursSinceSlot } from './slots'
 import { cleanupAuthRecords } from '@/lib/auth/retention'
+import { reconcilePendingEnrollments } from '@/actions/enrollment'
 
 /**
  * The scheduled jobs and the single entry point that runs one of them.
@@ -47,8 +48,9 @@ export const CRON_JOBS: Record<CronJobName, CronJobDefinition> = {
     hourEt: 6,
     run: async () => {
       const summary = await retryPastDueInvoices('cron')
+      const enrollments = await reconcilePendingEnrollments()
       // Keep per-invoice detail in the log but cap it so the row stays small.
-      return { ...summary, details: summary.details.slice(0, 50) }
+      return { ...summary, enrollments, details: summary.details.slice(0, 50) }
     },
   },
   'demo-reset': {

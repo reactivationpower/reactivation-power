@@ -22,6 +22,7 @@ const retry = vi.fn(async () => {
   return { customers: 0, invoices: 0, paid: 0, failed: 0, details: [] }
 })
 vi.mock('@/lib/billing/dunning', () => ({ retryPastDueInvoices: retry }))
+vi.mock('@/actions/enrollment', () => ({ reconcilePendingEnrollments: vi.fn(async () => ({ examined: 0, completed: 0 })) }))
 vi.mock('@/lib/demo/seed', () => ({ ensureDemoSeeded: vi.fn(async () => ({ status: 'fresh' })) }))
 vi.mock('@/lib/mail', () => ({ sendEmail: vi.fn(async (..._args: unknown[]) => ({ ok: true, logId: 'log' })) }))
 const authCleanup = vi.fn(async () => ({ challengesDeleted: 0, rateLimitsDeleted: 0, idleSessionsDeleted: 0 }))

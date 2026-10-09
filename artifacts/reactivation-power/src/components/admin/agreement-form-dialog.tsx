@@ -6,6 +6,7 @@ import { Copy, Eye, Loader2, RotateCcw, Send } from 'lucide-react'
 import {
   getAgreementSendForm,
   previewAgreement,
+  previewEnrollmentEmail,
   sendAgreement,
   updateAgreement,
   type AgreementTermsForm,
@@ -48,12 +49,17 @@ export function AgreementFormDialog({
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [sent, setSent] = useState<{ url: string; qr: string; emailed: boolean } | null>(null)
+  const [confirming, setConfirming] = useState(false)
+  const [signerEmail, setSignerEmail] = useState('')
+  const [copyEmails, setCopyEmails] = useState('')
+  const [emailPreview, setEmailPreview] = useState<any>(null)
 
   useEffect(() => {
     if (!open) return
     setLoading(true)
     setError(null)
     setSent(null)
+    setConfirming(false)
     setTab('terms')
     getAgreementSendForm(linkId)
       .then((res) => {
@@ -62,7 +68,9 @@ export function AgreementFormDialog({
           return
         }
         setForm(res.form)
-        setDefaults(res.defaults)
+        setSignerEmail(res.existing?.delivery_email ?? res.customerEmail ?? '')
+        setCopyEmails((res.existing?.copy_emails ?? []).join(', '))
+        setDefaults({ ...res.defaults, customerName: res.customerName })
         setMergeFields(res.mergeFields ?? [])
       })
       .catch((err) => setError(err instanceof Error ? err.message : 'Could not load the agreement form.'))
@@ -92,7 +100,8 @@ export function AgreementFormDialog({
     setSaving(true)
     setError(null)
     try {
-      const res = mode === 'edit' && agreementId ? await updateAgreement(agreementId, form) : await sendAgreement(linkId, form)
+      const res = mode === 'edit' && agreementId ? await updateAgreement(agreementId, form)
+        : await sendAgreement(linkId, form, { signerEmail, copyEmails: copyEmails.split(/[,\n;]/).map(s => s.trim()).filter(Boolean) })
       if (!res.ok) {
         setError(res.error ?? 'Could not save the agreement.')
         return
@@ -101,8 +110,8 @@ export function AgreementFormDialog({
       if (mode === 'send') {
         const url = res.detail.agreement.public_url
         const qr = await QRCode.toDataURL(url, { width: 320, margin: 2, color: { dark: '#1d3d47', light: '#ffffff' } })
-        setSent({ url, qr, emailed: res.emailed !== false })
-        notifyDone(res.emailed === false ? 'Agreement created (email failed — copy the link)' : 'Agreement sent', res.detail.agreement.email)
+        setSent({ url, qr, emailed: res.deliveryStatus === 'provider_accepted' })
+        notifyDone(res.emailed === false ? 'Agreement created (email failed — copy the link)' : 'Email accepted by provider (delivery not yet confirmed)', res.detail.agreement.delivery_email)
       } else {
         notifyDone('Agreement updated', 'The customer page refreshes within a few seconds')
         onOpenChange(false)
@@ -127,7 +136,7 @@ export function AgreementFormDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex max-h-[92vh] max-w-3xl flex-col overflow-hidden p-0" data-testid="agreement-form-dialog">
         <DialogHeader className="border-b border-border px-6 pt-6 pb-4">
-          <DialogTitle>{sent ? 'Agreement sent' : mode === 'edit' ? 'Edit agreement' : 'Send service agreement'}</DialogTitle>
+          <DialogTitle>{sent ? 'Enrollment email requested' : mode === 'edit' ? 'Edit agreement' : 'Send Enrollment Email'}</DialogTitle>
           <DialogDescription>
             {sent
               ? 'The customer can sign on any device. Show them the QR code if they are on the phone with you.'
@@ -160,7 +169,28 @@ export function AgreementFormDialog({
                 <p className="text-sm text-destructive">The email could not be sent. Share the link directly or re-send later.</p>
               ) : null}
             </div>
-          ) : form ? (
+           ) : confirming && form ? (
+             <div className="space-y-4">
+               <p className="text-sm">The signer is still <strong>{defaults?.customerName}</strong>. This delivery address will not change their account or signing identity.</p>
+               <Field label="Send signing link to" htmlFor="delivery-email">
+                 <Input id="delivery-email" type="email" value={signerEmail} onChange={e => setSignerEmail(e.target.value)} required />
+               </Field>
+               <Field label="Copy-only addresses (comma-separated)" htmlFor="copy-emails">
+                 <Input id="copy-emails" value={copyEmails} onChange={e => setCopyEmails(e.target.value)} placeholder="owner@example.com, manager@example.com" />
+               </Field>
+               <p className="text-xs text-muted-foreground">Copies are not additional signers. Provider acceptance does not guarantee delivery.</p>
+               <h3 className="text-sm font-semibold">Actual enrollment email preview</h3>
+               {emailPreview ? <div className="space-y-2"><strong>{emailPreview.subject}</strong>
+                 <p className="text-xs text-muted-foreground">The personal signing URL is generated on send; before then the preview shows a placeholder.</p>
+                 <iframe title="Enrollment email preview" sandbox="" srcDoc={emailPreview.html} className="h-64 w-full rounded border" />
+                 {copyEmails.trim() && <><strong>{emailPreview.copySubject}</strong>
+                   <p className="text-xs text-muted-foreground">Copy recipients receive this informational version, without a signing link.</p>
+                   <iframe title="Copy-only email preview" sandbox="" srcDoc={emailPreview.copyHtml} className="h-36 w-full rounded border" />
+                 </>}
+               </div>
+                 : <p className="text-sm text-muted-foreground">Loading email template…</p>}
+             </div>
+           ) : form ? (
             <div className="flex flex-col gap-4">
               <div className="flex gap-1 rounded-lg bg-muted p-1 text-sm" role="tablist">
                 {(['terms', 'text', 'preview'] as const).map((t) => (
@@ -180,7 +210,13 @@ export function AgreementFormDialog({
 
               {tab === 'terms' ? (
                 <div className="flex flex-col gap-4">
-                  <div className="grid gap-4 sm:grid-cols-2">
+                   <div className="grid gap-4 sm:grid-cols-2">
+                    {Number(form.termMonths) === 0 ? (
+                      <Field label="One-time purchase price ($)" htmlFor="ag-setup">
+                        <Input id="ag-setup" type="number" min={0.5} step={0.01} value={form.setupFeeDollars} onChange={e => set('setupFeeDollars', e.target.value)} />
+                        <p className="text-xs text-muted-foreground">Automatically filled from the negotiated amount in New Customer.</p>
+                      </Field>
+                    ) : (<>
                     <Field label="Term (months)" htmlFor="ag-term">
                       <Input id="ag-term" type="number" min={1} max={60} step={1} value={form.termMonths} onChange={(e) => set('termMonths', e.target.value)} data-testid="ag-term" />
                     </Field>
@@ -194,8 +230,9 @@ export function AgreementFormDialog({
                     <Field label="Setup fee ($) — 0 to waive" htmlFor="ag-setup">
                       <Input id="ag-setup" type="number" min={0} step={0.01} value={form.setupFeeDollars} onChange={(e) => set('setupFeeDollars', e.target.value)} data-testid="ag-setup" />
                     </Field>
+                    </>)}
                   </div>
-                  {defaults ? (
+                   {defaults && Number(form.termMonths) !== 0 ? (
                     <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-dashed border-border px-3 py-2 text-xs text-muted-foreground">
                       <span>
                         Defaults: {defaults.termMonths} months · {formatUsd(defaults.monthlyDollars * 100)}/mo · {formatUsd(defaults.setupFeeDollars * 100)} setup
@@ -210,7 +247,7 @@ export function AgreementFormDialog({
                       </Button>
                     </div>
                   ) : null}
-                  {amounts && preview ? <AgreementTermsBox amounts={amounts} fields={preview.fields} /> : null}
+                   {amounts && preview && Number(form.termMonths) !== 0 ? <AgreementTermsBox amounts={amounts} fields={preview.fields} /> : null}
                 </div>
               ) : null}
 
@@ -252,8 +289,15 @@ export function AgreementFormDialog({
         </div>
 
         <DialogFooter className="border-t border-border px-6 py-4">
-          {sent ? (
+           {sent ? (
             <Button onClick={() => onOpenChange(false)}>Done</Button>
+           ) : confirming ? (
+             <>
+               <Button variant="outline" onClick={() => setConfirming(false)} disabled={saving}>Back</Button>
+               <Button onClick={handleSave} disabled={saving || !emailPreview || !signerEmail} data-testid="agreement-send-confirm">
+                 {saving ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />} Send Enrollment Email
+               </Button>
+             </>
           ) : (
             <>
               <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>
@@ -264,9 +308,14 @@ export function AgreementFormDialog({
                   <Eye className="size-4" /> Preview
                 </Button>
               ) : null}
-              <Button onClick={handleSave} disabled={saving || !form || Boolean(previewError)} data-testid="agreement-save">
+               <Button onClick={() => {
+                 if (mode === 'edit') { void handleSave(); return }
+                 setEmailPreview(null)
+                 setConfirming(true)
+                 void previewEnrollmentEmail(linkId, form).then(res => res.ok ? setEmailPreview(res) : setError(res.error ?? 'Email preview failed'))
+               }} disabled={saving || !form || Boolean(previewError)} data-testid="agreement-save">
                 {saving ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
-                {mode === 'edit' ? 'Save new version' : 'Send agreement'}
+                 {mode === 'edit' ? 'Save new version' : 'Review delivery'}
               </Button>
             </>
           )}

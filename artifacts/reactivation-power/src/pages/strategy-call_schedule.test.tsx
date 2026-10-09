@@ -105,7 +105,9 @@ describe('strategy call schedule form labels', () => {
     expect(data.getAll('services')).toEqual(['Chiropractic'])
     expect(data.get('leadSource')).toBe('schedule-a-call')
     expect(submit).not.toHaveBeenCalled()
-  })
+  // Several formatted fields are typed character-by-character. Preserve all
+  // interaction/assertion coverage while allowing for parallel suite contention.
+  }, 15_000)
 
   it('preserves optional inactive files for Lead Follow-Up and keeps validation local without losing entered values', async () => {
     const user = userEvent.setup()

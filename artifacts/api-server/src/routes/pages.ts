@@ -710,7 +710,7 @@ add("/admin/payments/:id", "admin", async (req) => {
   const isPaid = link.status === "paid";
   const owner = accounts.find((a) => a.role === "owner");
   const staffAccounts = accounts.filter((a) => a.role === "staff");
-  const agreement = link.type === "subscription" ? await getAgreementForLink(id) : null;
+  const agreement = await getAgreementForLink(id);
   return { id, detail, link, accounts, customer, cards, history, isPaid, owner: owner ?? null, staffAccounts, agreement };
 });
 
@@ -791,9 +791,10 @@ add("/pay/:token", undefined, async (req) => {
   if (!link) notFound();
   if (link.status === "paid") redirect(`/pay/${token}/thank-you`);
   // Subscriptions start with the service agreement; the old link routes there.
-  if (link.type === "subscription") {
+  if (link.type === "subscription" || link.enrollmentFlow) {
     const agreementToken = await agreementTokenForLink(token);
     if (agreementToken) redirect(`/agreements/${agreementToken}`);
+    if (link.enrollmentFlow) return { token, link, stripeMode: getStripeMode(), awaitingAgreement: true };
   }
   return { token, link, stripeMode: getStripeMode() };
 });

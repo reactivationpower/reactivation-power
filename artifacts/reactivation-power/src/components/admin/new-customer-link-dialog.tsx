@@ -61,6 +61,7 @@ export function NewCustomerLinkDialog({
   const [amount, setAmount] = useState('')
   const [monthly, setMonthly] = useState('')
   const [setupFee, setSetupFee] = useState('')
+  const [chargeSetupFee, setChargeSetupFee] = useState(true)
   const [setupTouched, setSetupTouched] = useState(false)
   const [staff, setStaff] = useState<StaffMember[]>([])
   const [creating, setCreating] = useState(false)
@@ -74,7 +75,7 @@ export function NewCustomerLinkDialog({
     if (!setupTouched) setSetupFee(monthly)
   }, [monthly, setupTouched])
 
-  const waived = offerType === 'subscription' && setupFee !== '' && Number(setupFee) === 0
+  const waived = offerType === 'subscription' && !chargeSetupFee
 
   function reset() {
     setCustomer(emptyCustomer)
@@ -82,6 +83,7 @@ export function NewCustomerLinkDialog({
     setAmount('')
     setMonthly('')
     setSetupFee('')
+    setChargeSetupFee(true)
     setSetupTouched(false)
     setStaff([])
     setFormError(null)
@@ -93,7 +95,7 @@ export function NewCustomerLinkDialog({
     setCreating(true)
     const offer =
       offerType === 'subscription'
-        ? { type: 'subscription', monthlyDollars: Number(monthly), setupFeeDollars: Number(setupFee || 0) }
+        ? { type: 'subscription', monthlyDollars: Number(monthly), setupFeeDollars: chargeSetupFee ? Number(setupFee) : 0 }
         : { type: 'one_time', amountDollars: Number(amount) }
     const res = await createPaymentLink({ customer, staff, offer })
     setCreating(false)
@@ -106,7 +108,7 @@ export function NewCustomerLinkDialog({
     reset()
     onOpenChange(false)
     notifyDone(
-      offerType === 'subscription' ? 'Subscription link created' : 'Payment link created',
+      'Enrollment record created — no payment collected',
       offerType === 'subscription'
         ? `${res.link.name} — ${formatUsd(res.link.monthly_cents)}/mo · ${
             res.link.setup_fee_cents > 0 ? `${formatUsd(res.link.setup_fee_cents)} setup` : 'setup fee waived'
@@ -196,7 +198,7 @@ export function NewCustomerLinkDialog({
               {(
                 [
                   ['one_time', 'Full price', 'One payment, access for life.'],
-                  ['subscription', 'Subscription', 'Setup fee today, monthly billing starts in 30 days.'],
+                  ['subscription', 'Subscription', 'Initial payment at enrollment; monthly billing starts one calendar month later.'],
                 ] as [OfferType, string, string][]
               ).map(([value, label, hint]) => (
                 <button
@@ -247,41 +249,34 @@ export function NewCustomerLinkDialog({
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="pay-setup">Setup fee (USD)</Label>
-                    <button
-                      type="button"
-                      className="text-xs font-medium text-primary hover:underline"
-                      onClick={() => {
-                        setSetupTouched(true)
-                        setSetupFee(waived ? monthly : '0')
-                      }}
-                    >
-                      {waived ? 'Match monthly' : 'Waive'}
-                    </button>
-                  </div>
+                  <label htmlFor="charge-setup" className="flex items-center gap-2 text-sm font-medium">
+                    <input id="charge-setup" type="checkbox" checked={chargeSetupFee} onChange={(e) => setChargeSetupFee(e.target.checked)} />
+                    Charge an initial setup payment
+                  </label>
+                  <Label htmlFor="pay-setup">Setup payment (USD)</Label>
                   <Input
                     id="pay-setup"
                     type="number"
-                    min="0"
+                    min="0.5"
                     step="0.01"
-                    value={setupFee}
+                    value={waived ? '0' : setupFee}
                     onChange={(e) => {
                       setSetupTouched(true)
                       setSetupFee(e.target.value)
                     }}
+                    disabled={waived}
                     placeholder="497.00"
-                    required
+                    required={!waived}
                   />
                   <p className="text-xs text-muted-foreground">
                     {waived
-                      ? 'Waived — the primary card is saved today, first charge in 30 days.'
-                      : 'Charged today. Defaults to the monthly amount.'}
+                      ? 'Waived — $0.00. The full-payment purchase price is not affected.'
+                      : 'The initial payment covers the first month. Defaults to the monthly amount.'}
                   </p>
                 </div>
                 <p className="text-xs text-muted-foreground sm:col-span-2">
-                  The customer adds two cards at checkout (primary + backup). Access opens immediately; the
-                  12-month agreement starts 30 days after the setup payment.
+                  The customer adds two different cards. The 12 monthly payments begin one calendar month after enrollment.
+                  Creating this profile does not charge the customer.
                 </p>
               </div>
             )}

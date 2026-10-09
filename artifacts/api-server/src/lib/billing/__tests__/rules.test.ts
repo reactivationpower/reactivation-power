@@ -72,6 +72,17 @@ describe('agreement window', () => {
     expect(agreementStart.toISOString()).toBe('2027-01-14T00:00:00.000Z')
     expect(agreementEnd.toISOString()).toBe('2028-01-14T00:00:00.000Z')
   })
+
+  it('anchors new enrollments one calendar month later while old links retain thirty days', () => {
+    const paid = new Date('2026-09-18T18:27:51Z')
+    const next = agreementWindow(paid, 12, 'calendar_month')
+    expect(next.agreementStart.toISOString()).toBe('2026-10-18T18:27:51.000Z')
+    expect(next.agreementEnd.toISOString()).toBe('2027-10-18T18:27:51.000Z')
+    expect(agreementWindow(paid).agreementStart.toISOString()).toBe('2026-10-18T18:27:51.000Z')
+    const feb = new Date('2027-01-31T12:00:00Z')
+    expect(agreementWindow(feb, 12, 'calendar_month').agreementStart.toISOString()).toBe('2027-02-28T12:00:00.000Z')
+    expect(agreementWindow(feb).agreementStart.toISOString()).toBe('2027-03-02T12:00:00.000Z')
+  })
 })
 
 describe('customer validation', () => {

@@ -5,7 +5,7 @@ import { canDeleteLink, cleanCustomer, type CustomerInput } from '@/lib/billing/
 
 import { requireAdmin } from '@/lib/auth/admin-session'
 import { getAdminClient } from '@/lib/supabase/admin'
-import { stripe } from '@/lib/stripe'
+import { getStripeMode, stripe } from '@/lib/stripe'
 import { cardFromIntent, recordHistory } from '@/lib/billing/dunning'
 import { MAX_STAFF } from '@workspace/shared/types'
 import { sendPaymentReceivedEmail, sendPortalWelcomeEmail } from '@/lib/mail'
@@ -62,6 +62,7 @@ export interface PaymentLink {
   /** Where a subscription link is in its checkout. */
   stage: 'primary' | 'secondary' | 'done'
   business_name: string | null
+  enrollment_flow: boolean
 }
 
 export type { CustomerInput } from '@/lib/billing/rules'
@@ -241,6 +242,7 @@ async function mergeLinks(rows: Record<string, unknown>[]): Promise<PaymentLink[
       canceled_at: iso(t?.canceledAt),
       stage: stageOf(t),
       business_name: c?.businessName || null,
+      enrollment_flow: t?.enrollmentFlow ?? false,
     }
   })
 }
@@ -487,6 +489,9 @@ export async function createPaymentLink(input: {
       repName: rep.name || rep.email,
       setupFeeCents,
       monthlyCents,
+      billingAnchor: offer.type === 'subscription' ? 'calendar_month' : 'thirty_days',
+      enrollmentFlow: true,
+      enrollmentStripeMode: getStripeMode(),
       stripeCustomerId: customer.stripeCustomerId,
     })
   } catch (err) {
@@ -620,12 +625,12 @@ export async function startPaymentCheckout(
 
   if (!link || link.status === 'paid') return null
   const [terms] = await db
-    .select({ type: paymentLinkTermsTable.type })
+    .select({ type: paymentLinkTermsTable.type, enrollmentFlow: paymentLinkTermsTable.enrollmentFlow })
     .from(paymentLinkTermsTable)
     .where(eq(paymentLinkTermsTable.linkId, String(link.id)))
     .limit(1)
   // Subscription links go through the two-card flow in actions/subscriptions.ts
-  if (terms?.type === 'subscription') return null
+  if (terms?.type === 'subscription' || terms?.enrollmentFlow) return null
 
   const session = await stripe.checkout.sessions.create(
     {
@@ -831,6 +836,7 @@ export async function getPaymentLinkPublic(token: string): Promise<{
   nextPaymentAt: string | null
   agreementStart: string | null
   agreementEnd: string | null
+  enrollmentFlow: boolean
 } | null> {
   const supabase = getAdminClient()
   const { data } = await supabase
@@ -852,5 +858,6 @@ export async function getPaymentLinkPublic(token: string): Promise<{
     nextPaymentAt: link.next_payment_at,
     agreementStart: link.agreement_start,
     agreementEnd: link.agreement_end,
+    enrollmentFlow: link.enrollment_flow,
   }
 }

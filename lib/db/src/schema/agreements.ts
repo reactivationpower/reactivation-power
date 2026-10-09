@@ -57,6 +57,9 @@ export const agreementsTable = pgTable(
     currentHash: text("current_hash").notNull(),
     sentById: text("sent_by_id"),
     sentByName: text("sent_by_name"),
+    /** Email delivery is not the signer/account identity. */
+    signerDeliveryEmail: text("signer_delivery_email"),
+    copyEmails: jsonb("copy_emails").$type<string[]>().notNull().default([]),
     sentAt: timestamp("sent_at", { withTimezone: true }),
     lastSentAt: timestamp("last_sent_at", { withTimezone: true }),
     viewedAt: timestamp("viewed_at", { withTimezone: true }),
@@ -141,6 +144,7 @@ export type AgreementEventType =
   | "setup_fee_paid"
   | "payment_failed"
   | "subscription_started"
+  | "one_time_enrollment_completed"
   | "completed"
   | "pdf_generated"
   | "expired";
@@ -167,3 +171,14 @@ export type Agreement = typeof agreementsTable.$inferSelect;
 export type AgreementVersion = typeof agreementVersionsTable.$inferSelect;
 export type AgreementInitial = typeof agreementInitialsTable.$inferSelect;
 export type AgreementEvent = typeof agreementEventsTable.$inferSelect;
+
+/** Durable, unique completion-copy delivery for each intended recipient. */
+export const agreementDeliveriesTable = pgTable("agreement_deliveries", {
+  id: text("id").primaryKey(),
+  agreementId: text("agreement_id").notNull(),
+  recipient: text("recipient").notNull(),
+  status: text("status").$type<"pending" | "sending" | "accepted" | "failed">().notNull().default("pending"),
+  attempts: integer("attempts").notNull().default(0),
+  emailLogId: text("email_log_id"),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [uniqueIndex("agreement_deliveries_recipient_idx").on(t.agreementId, t.recipient)]).enableRLS();

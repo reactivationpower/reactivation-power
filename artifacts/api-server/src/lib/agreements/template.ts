@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto'
 import { AGREEMENT_DEFAULTS, COMPANY, agreementTitle } from './defaults'
+import { addCalendarMonths } from '@/lib/billing/rules'
 
 /**
  * Agreement text as a small template language so the owner can edit it in
@@ -25,6 +26,7 @@ export const MERGE_FIELDS = [
   'term_months',
   'monthly_amount',
   'setup_fee',
+  'purchase_price',
   'start_date',
   'end_date',
   'notice_days',
@@ -77,6 +79,44 @@ Company provides training and tools; results depend on how Customer's team uses 
 
 ## Electronic Signature and Entire Agreement
 Customer agrees that signing this Agreement electronically, including by typing or drawing a signature and initialing sections, has the same effect as a handwritten signature, and that Company may keep this Agreement and its record of completion electronically. This Agreement, together with the amounts shown above, is the entire agreement between the parties about the Services and replaces any earlier discussions. It may only be changed in writing signed by both parties. Signed on {{agreement_date}}.`
+
+/** New enrollments only. Historical signed versions retain their original wording. */
+export const CALENDAR_AGREEMENT_BODY = DEFAULT_AGREEMENT_BODY
+  .replace(
+    'which is {{trial_days}} days after the setup fee is paid',
+    'which is one calendar month after enrollment is confirmed',
+  )
+  .replace(
+    'the actual dates are fixed by the date the setup fee is charged',
+    'the actual dates are fixed when enrollment is confirmed',
+  )
+  .replace(
+    'Access to the Services begins as soon as the setup fee has been paid and this Agreement has been signed, so the {{trial_days}} days before the Start Date are included at no additional charge.',
+    'Access to the Services begins when enrollment is confirmed. The initial setup payment covers the first month before the Start Date. If the setup payment is waived, no initial payment is collected.',
+  )
+  .replace(
+    'charged when this Agreement is signed',
+    'charged only when Customer explicitly confirms enrollment after signing and saving both cards',
+  )
+  .replace(
+    'Fees are not refundable except as required by law.',
+    'Payments are non-refundable except where required by law. Customer agrees to contact Company about billing concerns before seeking a payment reversal, without waiving rights under applicable law or card-network rules.',
+  )
+
+/** Draft for counsel review. Do not reuse subscription-specific payment, renewal or cancellation promises. */
+export const DEFAULT_ONE_TIME_AGREEMENT_BODY = [
+  DEFAULT_AGREEMENT_BODY.split('## Term of Agreement')[0].trim(),
+  `## Full-Payment Purchase [initials]
+Customer agrees to pay {{purchase_price}} as a single payment for access to the Services. The price shown is the negotiated price for this Customer. No recurring monthly subscription is included in this purchase. Payment is collected only after Customer signs this Agreement, saves a card, and explicitly confirms enrollment. Access begins after successful payment.
+
+## Cancellation, Refunds and Billing Concerns [initials]
+This pay-in-full purchase cannot be voluntarily canceled after enrollment is completed. Payments are non-refundable except where required by law. Customer agrees to contact Company at {{company_email}} about billing concerns before seeking a payment reversal, without waiving any right under applicable law or card-network rules to dispute an unauthorized or incorrect charge.
+
+## Payment Authorization [initials]
+Customer authorizes Company to charge the card selected at final enrollment confirmation for {{purchase_price}}. Card details are entered directly into Stripe and are never stored on Company's systems.`,
+  DEFAULT_AGREEMENT_BODY.slice(DEFAULT_AGREEMENT_BODY.indexOf('## Customer Responsibilities')).trim()
+    .replace('during the Term', 'while access is provided'),
+].join('\n\n')
 
 export interface TemplateSection {
   /** Stable id used to bind initials: position + title slug. */
@@ -190,6 +230,8 @@ export interface MergeInput {
   monthlyCents: number
   setupFeeCents: number
   noticeDays: number
+  billingAnchor?: 'thirty_days' | 'calendar_month'
+  offerType?: 'one_time' | 'subscription'
   /** Setup-fee payment date; the start date is trialDays after it. Falls back to `asOf`. */
   setupPaidAt?: Date | null
   /** "Today" for the merge (signing date, or now for previews). */
@@ -201,17 +243,20 @@ export function agreementDates(input: {
   termMonths: number
   setupPaidAt?: Date | null
   asOf?: Date
+  billingAnchor?: 'thirty_days' | 'calendar_month'
 }): { start: Date; end: Date } {
   const anchor = input.setupPaidAt ?? input.asOf ?? new Date()
-  const start = new Date(anchor.getTime() + AGREEMENT_DEFAULTS.trialDays * 86400000)
-  const end = new Date(start)
-  end.setUTCMonth(end.getUTCMonth() + input.termMonths)
+  const start = input.billingAnchor === 'calendar_month'
+    ? addCalendarMonths(anchor, 1)
+    : new Date(anchor.getTime() + AGREEMENT_DEFAULTS.trialDays * 86400000)
+  const end = input.billingAnchor === 'calendar_month' ? addCalendarMonths(start, input.termMonths) : new Date(start)
+  if (input.billingAnchor !== 'calendar_month') end.setUTCMonth(end.getUTCMonth() + input.termMonths)
   return { start, end }
 }
 
 export function mergeValues(input: MergeInput): MergeValues {
   const asOf = input.asOf ?? new Date()
-  const { start, end } = agreementDates({ termMonths: input.termMonths, setupPaidAt: input.setupPaidAt, asOf })
+  const { start, end } = agreementDates({ termMonths: input.termMonths, setupPaidAt: input.setupPaidAt, asOf, billingAnchor: input.billingAnchor })
   return {
     full_name: input.customer.fullName,
     business_name: input.customer.businessName,
@@ -223,6 +268,7 @@ export function mergeValues(input: MergeInput): MergeValues {
     term_months: String(input.termMonths),
     monthly_amount: formatMoney(input.monthlyCents),
     setup_fee: input.setupFeeCents > 0 ? formatMoney(input.setupFeeCents) : '$0.00 (waived)',
+    purchase_price: formatMoney(input.setupFeeCents),
     start_date: formatLongDate(start),
     end_date: formatLongDate(end),
     notice_days: String(input.noticeDays),
@@ -247,7 +293,7 @@ export function renderDocument(body: string, input: MergeInput): RenderedDocumen
     const paragraphs = s.paragraphs.map((p) => fillFields(p, fields))
     return { ...s, title, paragraphs, hash: sha256(`${title}\n${paragraphs.join('\n')}`) }
   })
-  const title = agreementTitle(input.termMonths)
+  const title = input.offerType === 'one_time' ? `${COMPANY.name} Full-Payment Service Agreement` : agreementTitle(input.termMonths)
   const hash = sha256([title, ...sections.map((s) => `${s.id}:${s.hash}`)].join('\n'))
   return { title, sections, fields, hash }
 }

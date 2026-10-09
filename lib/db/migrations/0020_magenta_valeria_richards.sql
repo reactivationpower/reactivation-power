@@ -1,0 +1,1 @@
+ALTER TABLE "payment_link_terms" ADD COLUMN "enrollment_finalizing_at" timestamp with time zone;

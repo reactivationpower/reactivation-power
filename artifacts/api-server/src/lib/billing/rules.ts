@@ -45,11 +45,25 @@ export function isSameCard(primary: CardIdentity, candidate: CardIdentity): bool
 export function agreementWindow(
   setupPaidAt: Date,
   termMonths: number = AGREEMENT_MONTHS,
+  anchor: 'thirty_days' | 'calendar_month' = 'thirty_days',
 ): { agreementStart: Date; agreementEnd: Date } {
-  const agreementStart = new Date(setupPaidAt.getTime() + TRIAL_DAYS * DAY_MS)
-  const agreementEnd = new Date(agreementStart)
-  agreementEnd.setUTCMonth(agreementEnd.getUTCMonth() + (termMonths > 0 ? termMonths : AGREEMENT_MONTHS))
+  const agreementStart = anchor === 'calendar_month'
+    ? addCalendarMonths(setupPaidAt, 1)
+    : new Date(setupPaidAt.getTime() + TRIAL_DAYS * DAY_MS)
+  const agreementEnd = anchor === 'calendar_month'
+    ? addCalendarMonths(agreementStart, termMonths > 0 ? termMonths : AGREEMENT_MONTHS)
+    : new Date(agreementStart)
+  if (anchor === 'thirty_days') agreementEnd.setUTCMonth(agreementEnd.getUTCMonth() + (termMonths > 0 ? termMonths : AGREEMENT_MONTHS))
   return { agreementStart, agreementEnd }
+}
+
+/** Retain the day where possible; a 29th–31st anchor uses the month's last day. */
+export function addCalendarMonths(date: Date, months: number): Date {
+  const target = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + months, 1))
+  const lastDay = new Date(Date.UTC(target.getUTCFullYear(), target.getUTCMonth() + 1, 0)).getUTCDate()
+  target.setUTCDate(Math.min(date.getUTCDate(), lastDay))
+  target.setUTCHours(date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds(), date.getUTCMilliseconds())
+  return target
 }
 
 export interface CustomerInput {

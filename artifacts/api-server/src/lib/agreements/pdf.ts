@@ -104,12 +104,16 @@ export async function renderAgreementPdf(input: PdfInput): Promise<Buffer> {
     ['Address', f.business_address],
     ['Contact', `${f.email} · ${f.phone}`],
     ['Owner', `${f.owner_name} · ${f.owner_phone}`],
-    ['Term', `${input.amounts.termMonths} months (${f.start_date} – ${f.end_date})`],
-    ['Monthly amount', money(input.amounts.monthlyCents)],
-    ['Setup fee', input.amounts.setupFeeCents > 0 ? money(input.amounts.setupFeeCents) : 'Waived'],
-    ['Cancellation notice', Number(f.notice_days) > 0
-      ? `${f.notice_days} days before the end of the term`
-      : 'No advance notice; effective at term or billing-period end'],
+    ...(input.amounts.termMonths === 0
+      ? [['Full purchase price', money(input.amounts.setupFeeCents)], ['Billing', 'One-time payment; no recurring subscription']] as [string, string][]
+      : [
+          ['Term', `${input.amounts.termMonths} months (${f.start_date} – ${f.end_date})`],
+          ['Monthly amount', money(input.amounts.monthlyCents)],
+          ['Setup fee', input.amounts.setupFeeCents > 0 ? money(input.amounts.setupFeeCents) : 'Waived'],
+          ['Cancellation notice', Number(f.notice_days) > 0
+            ? `${f.notice_days} days before the end of the term`
+            : 'No advance notice; effective at term or billing-period end'],
+        ] as [string, string][]),
   ]
   const boxTop = doc.y
   let y = boxTop + 10
