@@ -62,6 +62,12 @@ export async function tick(now: Date = new Date()): Promise<void> {
 }
 
 let timer: NodeJS.Timeout | null = null
+let startupTimer: NodeJS.Timeout | null = null
+let running: Promise<void> | null = null
+function runTick() {
+  if (running) return
+  running = tick().catch(err => logger.error({ err }, 'cron tick failed')).finally(() => { running = null })
+}
 
 export function startCronScheduler(): boolean {
   if (!schedulerEnabled()) {
@@ -72,13 +78,17 @@ export function startCronScheduler(): boolean {
   const schedule = CRON_JOB_NAMES.map((n) => `${n}@${pad(CRON_JOBS[n].hourEt)}:00 ET`).join(', ')
   logger.info({ tickMs: CRON_TICK_MS, schedule }, 'cron scheduler started')
   // First tick shortly after boot so a slot missed overnight runs promptly.
-  setTimeout(() => void tick(), 15_000).unref()
-  timer = setInterval(() => void tick(), CRON_TICK_MS)
+  startupTimer = setTimeout(runTick, 15_000)
+  startupTimer.unref()
+  timer = setInterval(runTick, CRON_TICK_MS)
   timer.unref()
   return true
 }
 
-export function stopCronScheduler(): void {
+export async function stopCronScheduler(): Promise<void> {
   if (timer) clearInterval(timer)
+  if (startupTimer) clearTimeout(startupTimer)
   timer = null
+  startupTimer = null
+  await running
 }

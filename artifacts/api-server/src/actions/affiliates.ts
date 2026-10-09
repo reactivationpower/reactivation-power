@@ -65,7 +65,7 @@ export async function affiliateLogout() {
 }
 export async function getAffiliateDashboard() {
   const { partner: p } = await requireAffiliate()
-  return affiliateReport(p.id)
+  return affiliateReport(p.id, p)
 }
 export async function logAffiliateNavigation(input: { view: string; customerId?: string }) {
   const { partner: p, sessionId } = await requireAffiliate()
@@ -94,28 +94,24 @@ export async function getAffiliatePayoutWorklist(period: string) {
 export async function getAffiliateAttributionCandidates(search = '') {
   await requireAdmin('super_admin')
   const pattern = `%${String(search).slice(0, 100)}%`
-  const [leads, customers] = await Promise.all([
-    pool.query(`SELECT id,practice_name,affiliate_id,protected_until,converted_customer_id,converted_at
-      FROM affiliate_leads WHERE practice_name ILIKE $1 ORDER BY submitted_at DESC LIMIT 100`, [pattern]),
-    pool.query(`SELECT c.id,c.business_name,a.affiliate_id FROM customers c LEFT JOIN LATERAL
+  const leads = await pool.query(`SELECT id,practice_name,affiliate_id,protected_until,converted_customer_id,converted_at
+      FROM affiliate_leads WHERE practice_name ILIKE $1 ORDER BY submitted_at DESC LIMIT 100`, [pattern])
+  const customers = await pool.query(`SELECT c.id,c.business_name,a.affiliate_id FROM customers c LEFT JOIN LATERAL
       (SELECT affiliate_id FROM affiliate_attributions WHERE customer_id=c.id ORDER BY effective_at DESC,id DESC LIMIT 1) a ON true
-      WHERE c.business_name ILIKE $1 ORDER BY c.created_at DESC LIMIT 100`, [pattern]),
-  ])
+      WHERE c.business_name ILIKE $1 ORDER BY c.created_at DESC LIMIT 100`, [pattern])
   return { leads: leads.rows, customers: customers.rows }
 }
 export async function getAffiliateProfile(affiliateId: string, search = '') {
   await requireAdmin('super_admin')
   const p = await partner(affiliateId)
   if (!p) throw new Error('Affiliate not found')
-  const [report, activity, summary] = await Promise.all([
-    affiliateReport(affiliateId),
-    pool.query(`SELECT id,action,actor,customer_id,reason,occurred_at,ip::text,country,region,details
+  const report = await affiliateReport(affiliateId, p)
+  const activity = await pool.query(`SELECT id,action,actor,customer_id,reason,occurred_at,ip::text,country,region,details
       FROM affiliate_activity WHERE affiliate_id=$1 AND
       concat_ws(' ',action,actor,reason,customer_id,details::text,ip::text,country,region) ILIKE $2
-      ORDER BY occurred_at DESC LIMIT 500`, [affiliateId, `%${String(search).slice(0, 100)}%`]),
-    pool.query(`SELECT count(*) FILTER(WHERE action='session_visit')::int visits,
-      count(*) FILTER(WHERE action='practice_view')::int practice_views FROM affiliate_activity WHERE affiliate_id=$1`, [affiliateId]),
-  ])
+       ORDER BY occurred_at DESC LIMIT 500`, [affiliateId, `%${String(search).slice(0, 100)}%`])
+  const summary = await pool.query(`SELECT count(*) FILTER(WHERE action='session_visit')::int visits,
+      count(*) FILTER(WHERE action='practice_view')::int practice_views FROM affiliate_activity WHERE affiliate_id=$1`, [affiliateId])
   return { ...report, partner: p, activity: activity.rows, summary: summary.rows[0] }
 }
 export async function saveAffiliate(input: { id?: string; businessName: string; email: string; status: string; rules: Rules; reason: string }) {

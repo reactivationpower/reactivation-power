@@ -626,8 +626,8 @@ export async function completionDeliveryStatus(loaded: LoadedAgreement) {
 
 /** Paid enrollment and document/mail delivery are separate durable states. */
 export async function retryCompletionDelivery(id: string): Promise<void> {
-  return db.transaction(async tx => {
-  await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${'agreement-delivery-' + id}))`)
+  // The per-recipient conditional UPDATE below is the cross-process claim.
+  // Do not hold a spare connection while PDF/email helpers use the pool.
   const loaded = await loadAgreementById(id)
   if (!loaded || loaded.agreement.status !== 'completed') throw new Error('Enrollment is not complete.')
   const a = loaded.agreement
@@ -665,7 +665,6 @@ export async function retryCompletionDelivery(id: string): Promise<void> {
       status: result.ok ? 'accepted' : 'failed', emailLogId: result.logId, updatedAt: new Date(),
     }).where(eq(agreementDeliveriesTable.id, claimed.id))
   }
-  })
 }
 
 // ── Cards on file (for admin detail) ───────────────────────────────

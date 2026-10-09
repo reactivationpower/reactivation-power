@@ -1,4 +1,5 @@
 import { Router, type IRouter, type Request, type Response } from "express";
+import { respondDatabaseUnavailable } from "../lib/database-unavailable";
 import { runWithRequestContext } from "../lib/request-context";
 import { isNotFoundSignal, isRedirectSignal } from "../shims/next-navigation";
 import { participantIfBillingAllows } from "../lib/data/participants";
@@ -269,19 +270,20 @@ router.post("/actions/:module/:fn", async (req: Request, res: Response) => {
     res.status(404).json({ ok: false, error: "Unknown action" });
     return;
   }
+  try {
   if (!(await isAuthorized(req, auth))) {
     res.status(401).json({ ok: false, error: "Unauthorized" });
     return;
   }
   const rawArgs = Array.isArray(req.body?.args) ? (req.body.args as unknown[]) : [];
   const args = rawArgs.map(decodeArg);
-  try {
     const result = await runWithRequestContext(req, res, () => {
       if (moduleName === 'affiliates') assertSameOrigin();
       return (fn as ActionFn)(...args);
     });
     res.json({ ok: true, result: result === undefined ? null : result });
   } catch (err) {
+    if (respondDatabaseUnavailable(err, res)) return;
     if (isRedirectSignal(err)) {
       res.json({ ok: true, result: null, redirect: err.location });
       return;

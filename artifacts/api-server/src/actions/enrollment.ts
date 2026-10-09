@@ -24,22 +24,22 @@ async function context(token: string) {
   return { loaded, terms: loaded.terms, customer: loaded.customer, link }
 }
 
-async function savedCards(customerId: string, linkId: string) {
-  return db.select().from(customerCardsTable).where(and(
+async function savedCards(customerId: string, linkId: string, connection: Pick<typeof db, 'select'> = db) {
+  return connection.select().from(customerCardsTable).where(and(
     eq(customerCardsTable.customerId, customerId),
     eq(customerCardsTable.linkId, linkId),
     eq(customerCardsTable.active, true),
   ))
 }
 
-async function stripeCustomer(customer: NonNullable<Awaited<ReturnType<typeof context>>>['customer'], linkId: string) {
+async function stripeCustomer(customer: NonNullable<Awaited<ReturnType<typeof context>>>['customer'], linkId: string, connection: Pick<typeof db, 'update'> = db) {
   if (customer.stripeCustomerId) return customer.stripeCustomerId
   const created = await stripe.customers.create(
     { email: customer.email, name: customer.fullName, metadata: { rp_customer_id: customer.id } },
     { idempotencyKey: `enroll-customer-${customer.id}` },
   )
-  await db.update(customersTable).set({ stripeCustomerId: created.id }).where(eq(customersTable.id, customer.id))
-  await db.update(paymentLinkTermsTable).set({ stripeCustomerId: created.id }).where(eq(paymentLinkTermsTable.linkId, linkId))
+  await connection.update(customersTable).set({ stripeCustomerId: created.id }).where(eq(customersTable.id, customer.id))
+  await connection.update(paymentLinkTermsTable).set({ stripeCustomerId: created.id }).where(eq(paymentLinkTermsTable.linkId, linkId))
   return created.id
 }
 
@@ -115,7 +115,7 @@ export async function saveCard(token: string) {
   }
   await db.transaction(async tx => {
     await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${c.link.id}))`)
-    const current = await savedCards(c.customer.id, c.link.id)
+    const current = await savedCards(c.customer.id, c.link.id, tx)
     if (current.some(card => card.stripePaymentMethodId === pm.id)) return
     if (current.some(card => isSameCard(card, { stripePaymentMethodId: pm.id, fingerprint: pm.card!.fingerprint ?? null })))
       throw new Error('That physical card is already saved. Please choose another.')
@@ -262,7 +262,7 @@ export async function confirm(token: string, cardId: string) {
     await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${c.link.id}))`)
     const [fresh] = await tx.select().from(paymentLinkTermsTable).where(eq(paymentLinkTermsTable.linkId, c.link.id))
     if (fresh.completedAt) throw new Error('Enrollment is already complete.')
-    const currentCards = await savedCards(c.customer.id, c.link.id)
+    const currentCards = await savedCards(c.customer.id, c.link.id, tx)
     if (!currentCards.some(card => card.id === cardId && card.stripePaymentMethodId === selected.stripePaymentMethodId))
       throw new Error('That card was replaced. Refresh and choose an active card.')
     const prior = fresh.enrollmentPaymentIntentId ? await stripe.paymentIntents.retrieve(fresh.enrollmentPaymentIntentId) : null
@@ -275,7 +275,7 @@ export async function confirm(token: string, cardId: string) {
       return prior
     }
     const created = await stripe.paymentIntents.create({
-      amount: due, currency: 'usd', customer: await stripeCustomer(c.customer, c.link.id),
+      amount: due, currency: 'usd', customer: await stripeCustomer(c.customer, c.link.id, tx),
       payment_method_types: ['card'], payment_method: selected.stripePaymentMethodId,
       description: `${PRODUCT_NAME} — ${c.terms.type === 'subscription' ? 'initial payment' : 'full payment'}`,
       receipt_email: c.link.email,

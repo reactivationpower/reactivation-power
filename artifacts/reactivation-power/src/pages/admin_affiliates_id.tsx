@@ -28,7 +28,7 @@ export default function AdminAffiliateProfilePage() {
   const q = useQuery({ queryKey: ['affiliate-profile', id, applied], queryFn: () => A.getAffiliateProfile(id, applied), placeholderData: (p) => p, staleTime: 0, refetchOnMount: 'always', refetchInterval: 60000 })
   const refresh = async (msg: string) => {
     toast.success(msg)
-    await Promise.all([qc.invalidateQueries({ queryKey: ['affiliate-profile', id] }), qc.invalidateQueries({ queryKey: ['affiliates'] }), qc.invalidateQueries({ queryKey: ['affiliate-dashboard'] }), qc.invalidateQueries({ queryKey: ['affiliate-payout-worklist'] })])
+    await Promise.all([qc.invalidateQueries({ queryKey: ['affiliate-profile', id] }), qc.invalidateQueries({ queryKey: ['affiliate-candidates'] }), qc.invalidateQueries({ queryKey: ['affiliates'] }), qc.invalidateQueries({ queryKey: ['affiliate-dashboard'] }), qc.invalidateQueries({ queryKey: ['affiliate-payout-worklist'] })])
   }
   const p = q.data
   const [f, setF] = useState({ name: '', email: '', status: 'approved' as A.Affiliate['status'], reason: '' })
@@ -45,10 +45,16 @@ export default function AdminAffiliateProfilePage() {
   }, [p, wire.period])
   const [link, setLink] = useState('')
   const [cs, setCs] = useState(''); const [csA, setCsA] = useState('')
-  const cand = useQuery({ queryKey: ['affiliate-candidates', csA], queryFn: () => A.getAffiliateAttributionCandidates(csA) })
+  const [candidatesRequested, setCandidatesRequested] = useState(false)
+  const cand = useQuery({ queryKey: ['affiliate-candidates', id, csA], queryFn: () => A.getAffiliateAttributionCandidates(csA), enabled: candidatesRequested && !!p, retry: false })
+  const searchCandidates = () => {
+    setCandidatesRequested(true)
+    if (candidatesRequested && cs.trim() === csA) void cand.refetch()
+    else setCsA(cs.trim())
+  }
 
   if (q.isLoading) return <div className="h-64 animate-pulse rounded-xl bg-muted" />
-  if (q.isError || !p || !rules) return <div className="space-y-2"><p className="text-sm text-destructive">{(q.error as Error)?.message ?? 'Unable to load'}</p><button className={btn2Cls} onClick={() => q.refetch()}>Retry</button></div>
+  if (q.isError || !p || !rules) return <div className="space-y-2"><p className="text-sm text-destructive">{(q.error as Error)?.message ?? 'Unable to load'}</p><button disabled={q.isFetching} className={btn2Cls} onClick={() => q.refetch()}>{q.isFetching ? 'Retrying...' : 'Retry'}</button></div>
   const ovR = ovRules ?? rules
   const practiceSel = (v: string, set: (s: string) => void, tid: string) => (
     <div className="flex gap-2">
@@ -100,11 +106,11 @@ export default function AdminAffiliateProfilePage() {
             <Field label="Target type"><select className={inputCls} value={attr.kind} onChange={(e) => setAttr({ ...attr, kind: e.target.value })} data-testid="select-attr-kind"><option value="customer">Customer</option><option value="lead">Lead</option></select></Field>
             <div className="rounded-lg border border-border p-3 space-y-2">
               <div className="flex gap-2">
-                <input data-testid="input-candidate-search" className={inputCls} placeholder="Search leads and customers by name or ID" value={cs} onChange={(e) => setCs(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); setCsA(cs.trim()) } }} />
-                <button type="button" className={btn2Cls} data-testid="button-candidate-search" onClick={() => setCsA(cs.trim())}>Search</button>
+                <input data-testid="input-candidate-search" className={inputCls} placeholder="Search leads and customers by name" value={cs} onChange={(e) => setCs(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); searchCandidates() } }} />
+                <button type="button" disabled={cand.isFetching} className={btn2Cls} data-testid="button-candidate-search" onClick={searchCandidates}>Search</button>
               </div>
               <div className="max-h-52 space-y-1 overflow-y-auto">
-                {cand.isLoading ? <p className="text-xs text-muted-foreground">Searching...</p> : cand.isError ? <p className="text-xs text-destructive">{(cand.error as Error).message}</p> : (
+                {!candidatesRequested ? <p className="text-xs text-muted-foreground">Search to load leads and customers.</p> : cand.isFetching ? <p className="text-xs text-muted-foreground">Searching...</p> : cand.isError ? <p className="text-xs text-destructive">{(cand.error as Error).message} Use Search to retry.</p> : (
                   <>
                     {(cand.data?.leads ?? []).map((l) => (
                       <button type="button" key={`l${l.id}`} data-testid={`candidate-lead-${l.id}`} onClick={() => setAttr({ ...attr, kind: 'lead', target: l.id })} className="block w-full rounded-md border border-border px-2 py-1.5 text-left text-xs hover:bg-muted">

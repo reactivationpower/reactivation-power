@@ -6,6 +6,7 @@ import webhooksLeadsRouter from "./routes/webhooks-leads";
 import marketingRouter from "./routes/marketing";
 import { logger } from "./lib/logger";
 import { redactSecretPath } from "./lib/redact-path";
+import { respondDatabaseUnavailable } from "./lib/database-unavailable";
 
 const app: Express = express();
 
@@ -56,6 +57,7 @@ const errorHandler: ErrorRequestHandler = (err, req, res, _next) => {
     return;
   }
   // body-parser rejections (malformed JSON, oversized body) carry a 4xx status:
+  if (respondDatabaseUnavailable(err, res)) return;
   // the sender's fault, not ours.
   const status = (err as { status?: unknown })?.status;
   if (typeof status === "number" && status >= 400 && status < 500) {

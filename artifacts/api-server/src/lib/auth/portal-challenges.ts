@@ -14,15 +14,16 @@ const digestEqual = (a: string, b: string) => {
 }
 export async function authTransaction<T>(fn: (client: PoolClient) => Promise<T>): Promise<T> {
   const client = await pool.connect()
+  let discard = false
   try {
     await client.query('BEGIN')
     const result = await fn(client)
     await client.query('COMMIT')
     return result
   } catch (error) {
-    await client.query('ROLLBACK')
+    try { await client.query('ROLLBACK') } catch { discard = true }
     throw error
-  } finally { client.release() }
+  } finally { client.release(discard) }
 }
 
 /** Durable counters: concurrent requests / multiple servers share the limit. */

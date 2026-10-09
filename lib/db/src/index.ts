@@ -2,6 +2,9 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import pg from "pg";
 export type { PoolClient } from "pg";
 import * as schema from "./schema";
+import { runtimePoolSettings } from "./pool-settings";
+export { runtimePoolSettings } from "./pool-settings";
+export { isDatabaseUnavailable, DATABASE_UNAVAILABLE_MESSAGE } from "./capacity";
 
 const { Pool } = pg;
 
@@ -33,12 +36,19 @@ export function poolConfig(url = supabaseDbUrl()): pg.PoolConfig {
   const sslmode = parsed.searchParams.get("sslmode");
   parsed.searchParams.delete("sslmode");
   return {
+    ...runtimePoolSettings(),
     connectionString: parsed.toString(),
     ssl: sslmode === "disable" ? false : { rejectUnauthorized: false },
   };
 }
 
 export const pool = new Pool(poolConfig());
+// pg removes broken idle clients before emitting; a listener prevents a process crash.
+// Never log the driver message/connection object, which may contain credentials or SQL.
+pool.on("error", (error: Error & { code?: string }) => {
+  console.error(JSON.stringify({ event: "database_idle_client_error", code: error.code,
+    total: pool.totalCount, idle: pool.idleCount, waiting: pool.waitingCount }));
+});
 export const db = drizzle(pool, { schema });
 
 export * from "./schema";

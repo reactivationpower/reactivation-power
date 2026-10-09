@@ -1,3 +1,4 @@
+import { respondDatabaseUnavailable } from "../lib/database-unavailable";
 import { Router, type IRouter, type Request, type Response } from "express";
 import { cookies } from 'next/headers';
 import { runWithRequestContext } from "../lib/request-context";
@@ -106,6 +107,7 @@ function add(path: string, auth: AuthKind, loader: Loader): void {
       });
       res.json({ data: result });
     } catch (err) {
+      if (respondDatabaseUnavailable(err, res)) return;
       if (isRedirectSignal(err)) {
         res.json({ redirect: err.location });
       } else if (isNotFoundSignal(err)) {

@@ -2,7 +2,8 @@ import app from "./app";
 import { logger } from "./lib/logger";
 import { seedSuperAdmin } from "./lib/data/admin-users";
 import { initStripe } from "./lib/stripe";
-import { startCronScheduler } from "./lib/cron/scheduler";
+import { startCronScheduler, stopCronScheduler } from "./lib/cron/scheduler";
+import { pool } from "@workspace/db";
 
 const rawPort = process.env["PORT"];
 
@@ -21,7 +22,7 @@ if (Number.isNaN(port) || port <= 0) {
 initStripe()
   .then((stripeMode) => {
     logger.info({ stripeMode }, "Stripe ready");
-    app.listen(port, (err) => {
+    const server = app.listen(port, (err) => {
       if (err) {
         logger.error({ err }, "Error listening on port");
         process.exit(1);
@@ -31,6 +32,26 @@ initStripe()
       seedSuperAdmin(logger).catch((err) => logger.error({ err }, "super admin seed failed"));
       startCronScheduler();
     });
+    let stopping = false;
+    const shutdown = async () => {
+      if (stopping) return;
+      stopping = true;
+      const deadline = setTimeout(() => process.exit(1), 25000);
+      deadline.unref();
+      try {
+        await Promise.all([
+          new Promise<void>((resolve, reject) => server.close(err => err ? reject(err) : resolve())),
+          stopCronScheduler(),
+        ]);
+        await pool.end();
+        clearTimeout(deadline);
+        process.exit(0);
+      } catch {
+        process.exit(1);
+      }
+    };
+    process.once("SIGTERM", shutdown);
+    process.once("SIGINT", shutdown);
   })
   .catch((err) => {
     logger.error({ err }, "Stripe initialisation failed");
