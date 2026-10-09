@@ -6,9 +6,9 @@ import { SiteHeader } from '@/components/site/site-header'
 
 
 const EXPECT = [
-  'Talk through your inactive patient list and incoming campaign leads',
-  'See how both included calling workflows fit your practice',
-  'Choose a time on the calendar after sending the form',
+  'Find opportunities in your inactive patient list',
+  'See how your team can follow up with campaign leads',
+  'Build a practical next step for your practice',
 ]
 
 const STEPS = [
@@ -35,34 +35,33 @@ export default function ScheduleACallPage() {
     <div className="flex min-h-svh flex-col bg-background">
       <SiteHeader />
       <main className="flex-1">
-        <section className="mx-auto w-full max-w-4xl px-4 pb-16 pt-14 md:px-6 md:pt-20">
+        <section className="mx-auto w-full max-w-5xl px-4 pb-16 pt-14 md:px-6 md:pt-20">
           <div className="text-center">
             <h1 className="text-balance text-4xl font-bold leading-tight tracking-tight text-foreground md:text-5xl">
-              Schedule your free strategy call
+              Schedule your strategy call
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-pretty text-lg leading-relaxed text-muted-foreground">
-               The call takes about 20 minutes. We&apos;ll discuss
-               staff-led Reactivation for inactive patients and campaign-specific
-               Lead Follow-Up for incoming inquiries. Both are included together
-               in one Patient Pipeline launch offer for one launch price.
+               We&apos;ll walk through staff-led Reactivation for inactive
+               patients and campaign-specific Lead Follow-Up for new inquiries.
+               Both are offered together in Patient Pipeline.
             </p>
           </div>
 
-          <ul className="mx-auto mt-8 flex max-w-md flex-col gap-3">
+          <ul className="mx-auto mt-8 grid max-w-4xl gap-4 md:grid-cols-3">
             {EXPECT.map((item) => (
-              <li key={item} className="flex items-start gap-3">
+              <li key={item} className="flex items-start gap-3 rounded-xl border border-border bg-secondary/40 p-5">
                 <CheckCircle2
                   className="mt-0.5 size-5 shrink-0 text-accent"
                   aria-hidden="true"
                 />
-                <span className="text-base leading-relaxed text-foreground">
+                <span className="text-sm font-medium leading-relaxed text-foreground">
                   {item}
                 </span>
               </li>
             ))}
           </ul>
 
-          <div className="mx-auto mt-12 max-w-xl rounded-xl border border-border bg-card p-6 shadow-sm md:p-8">
+          <div className="mx-auto mt-12 max-w-3xl rounded-xl border border-border bg-card p-6 shadow-sm md:p-8">
             <ol
               aria-label="Booking steps"
               className="mb-6 grid grid-cols-2 gap-3 border-b border-border pb-6"

@@ -71,7 +71,9 @@ import Page_admin_billing from '@/pages/admin_billing';
 import Page_billing from '@/pages/billing';
 import Page_billing_token from '@/pages/billing_token';
 import Page_portal_billing from '@/pages/portal_billing';
-
+import Page_strategy_call from '@/pages/strategy-call';
+import Page_strategy_call_schedule from '@/pages/strategy-call_schedule';
+import Page_strategy_call_providers_only from '@/pages/strategy-call_providers-only';
 
 function Router() {
   return (
@@ -457,6 +459,27 @@ function Router() {
           <PortalLayout>
             <Page_portal_settings />
           </PortalLayout>
+        </RoutedErrorBoundary>
+      </Route>
+      <Route path="/strategy-call">
+        <RoutedErrorBoundary>
+          <RootLayout>
+            <Page_strategy_call />
+          </RootLayout>
+        </RoutedErrorBoundary>
+      </Route>
+      <Route path="/strategy-call/schedule">
+        <RoutedErrorBoundary>
+          <RootLayout>
+            <Page_strategy_call_schedule />
+          </RootLayout>
+        </RoutedErrorBoundary>
+      </Route>
+      <Route path="/strategy-call/providers-only">
+        <RoutedErrorBoundary>
+          <RootLayout>
+            <Page_strategy_call_providers_only />
+          </RootLayout>
         </RoutedErrorBoundary>
       </Route>
       <Route path="/schedule-a-call">

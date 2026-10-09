@@ -28,3 +28,4 @@
 - [Legal company identity](legal-company-identity.md) — Beyond Healthcare LLC owns Patient Pipeline; counsel is drafting a new agreement, not merely approving the internal template.
 - [CSV patient workflow](csv-patient-workflow.md) — CSV-first matching; uncertain identities need review, and service imports must not silently restart outreach.
 - [Portal authentication policy](portal-authentication-policy.md) — real owners/callers need email/password/code and five-minute idle logout; both sales demo families are exempt.
+- [Strategy-call marketing funnel](strategy-call-marketing.md) — marketing-only pages avoid site navigation; patients get a providers-only rejection, not a booking form.
