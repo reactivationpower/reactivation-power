@@ -1,6 +1,5 @@
 import { createContext, useContext, useState, type ReactNode } from 'react'
 import { useLocation } from 'wouter'
-import { Stethoscope, UserRound } from 'lucide-react'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 
 const Ctx = createContext<() => void>(() => {})
@@ -12,7 +11,7 @@ export function StrategyCallProvider({ children }: { children: ReactNode }) {
     setOpen(false)
     navigate(to)
   }
-  const opt = 'flex w-full items-center gap-3 rounded-lg border border-border bg-card p-4 text-left transition-colors hover:border-accent hover:bg-secondary focus-visible:outline-2 focus-visible:outline-ring'
+  const opt = 'w-full rounded-md border px-4 py-3 text-center font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring'
   return (
     <Ctx.Provider value={() => setOpen(true)}>
       {children}
@@ -23,13 +22,11 @@ export function StrategyCallProvider({ children }: { children: ReactNode }) {
             <DialogDescription>Strategy calls are held with healthcare providers and practice staff.</DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-3">
-            <button type="button" className={opt} onClick={() => go('/strategy-call/schedule')} data-testid="button-modal-provider">
-              <Stethoscope className="size-6 shrink-0 text-accent" aria-hidden="true" />
-              <span><span className="block font-semibold text-foreground">I am a provider</span><span className="block text-sm text-muted-foreground">Healthcare provider or practice staff</span></span>
+            <button type="button" className={`${opt} border-accent bg-accent text-accent-foreground hover:bg-accent/90`} onClick={() => go('/strategy-call/schedule')} data-testid="button-modal-provider">
+              I'm a provider
             </button>
-            <button type="button" className={opt} onClick={() => go('/strategy-call/providers-only')} data-testid="button-modal-patient">
-              <UserRound className="size-6 shrink-0 text-accent" aria-hidden="true" />
-              <span><span className="block font-semibold text-foreground">I am a patient</span><span className="block text-sm text-muted-foreground">Looking for care or an appointment</span></span>
+            <button type="button" className={`${opt} border-accent bg-card text-accent hover:bg-accent/10`} onClick={() => go('/strategy-call/providers-only')} data-testid="button-modal-patient">
+              I'm a patient
             </button>
           </div>
         </DialogContent>

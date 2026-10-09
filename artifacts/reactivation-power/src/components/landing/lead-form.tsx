@@ -217,6 +217,7 @@ export function LeadForm({ scheduleMode = false, calculatorScenario }: {
             name="firstName"
             required
             autoComplete="given-name"
+            placeholder={scheduleMode ? 'First name' : undefined}
             defaultValue={v.firstName ?? ''}
             aria-invalid={errors.firstName ? 'true' : undefined}
             className={inputClass(Boolean(errors.firstName))}
@@ -240,6 +241,7 @@ export function LeadForm({ scheduleMode = false, calculatorScenario }: {
             name="lastName"
             required
             autoComplete="family-name"
+            placeholder={scheduleMode ? 'Last name' : undefined}
             defaultValue={v.lastName ?? ''}
             aria-invalid={errors.lastName ? 'true' : undefined}
             className={inputClass(Boolean(errors.lastName))}
@@ -266,6 +268,7 @@ export function LeadForm({ scheduleMode = false, calculatorScenario }: {
           type="email"
           required
           autoComplete="email"
+          placeholder={scheduleMode ? 'you@example.com' : undefined}
           defaultValue={v.email ?? ''}
           aria-invalid={errors.email ? 'true' : undefined}
           className={inputClass(Boolean(errors.email))}
@@ -352,6 +355,7 @@ export function LeadForm({ scheduleMode = false, calculatorScenario }: {
           id={`${uid}-practice`}
           name="practiceName"
           autoComplete="organization"
+          placeholder={scheduleMode ? 'Practice name' : undefined}
           defaultValue={v.practiceName ?? ''}
           className={inputClass(false)}
         />

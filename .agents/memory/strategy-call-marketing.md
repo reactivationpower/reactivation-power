@@ -14,3 +14,9 @@ The patient/provider selection must send providers to the existing practice book
 **Why:** The user said, “Say that it's only for providers and just send them to a rejection page.”
 
 **How to apply:** Do not offer patients the strategy-call form or create a patient-care scheduling flow within this funnel.
+
+On the strategy-call schedule form, the user expects gray example text inside the first name, last name, email, and practice name inputs, matching the phone, ZIP, and inactive-files inputs. Keep the separate visible labels above those fields as well.
+
+**Why:** The user pointed to a screenshot and clarified that the blank input interiors were the missing guidance; checking only the labels above the fields missed their concern.
+
+**How to apply:** When revising this form, check both persistent external labels and the in-field examples on desktop and mobile.
