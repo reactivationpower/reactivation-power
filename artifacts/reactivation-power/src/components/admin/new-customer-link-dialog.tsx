@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { notifyDone, notifyError } from '@/lib/notify'
+import { getSalesLead } from '@/app/actions/sales-leads'
 
 const MAX_STAFF = 5
 
@@ -69,6 +70,18 @@ export function NewCustomerLinkDialog({
   const requestId = useRef<string | null>(null)
   const inFlight = useRef(false)
   const [saved, setSaved] = useState<any>(null)
+  const salesLeadId = new URLSearchParams(window.location.search).get('lead')
+  useEffect(() => {
+    if (!open || !salesLeadId || saved || creating) return
+    let cancelled = false
+    getSalesLead(salesLeadId).then(({ lead }) => {
+      if (cancelled) return
+      const fullName = `${lead.first_name} ${lead.last_name}`.trim()
+      const phone = lead.phone.startsWith('+1') ? lead.phone.slice(2) : lead.phone
+      setCustomer({ ...emptyCustomer, fullName, ownerName: fullName, businessName: lead.practice_name, phone, ownerPhone: phone, email: lead.email })
+    }).catch(error => { if (!cancelled) setFormError(error.message) })
+    return () => { cancelled = true }
+  }, [open, salesLeadId])
 
   const set = (key: keyof typeof emptyCustomer) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setCustomer((c) => ({ ...c, [key]: e.target.value }))
@@ -106,7 +119,7 @@ export function NewCustomerLinkDialog({
         ? { type: 'subscription', monthlyDollars: Number(monthly), setupFeeDollars: chargeSetupFee ? Number(setupFee) : 0 }
         : { type: 'one_time', amountDollars: Number(amount) }
     try {
-    const res = await createPaymentLink({ customer, staff, offer, requestId: requestId.current })
+    const res = await createPaymentLink({ customer, staff, offer, requestId: requestId.current, ...(salesLeadId ? { salesLeadId } : {}) })
     if (!res.ok || !res.link) {
       setFormError(res.error ?? 'Something went wrong.')
       notifyError('Could not create the link', res.error)

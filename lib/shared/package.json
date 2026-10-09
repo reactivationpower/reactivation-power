@@ -20,6 +20,7 @@
     "./notes-text": "./src/notes-text.ts",
     "./opportunity": "./src/opportunity.ts",
     "./phone": "./src/phone.ts",
+    "./sales-leads": "./src/sales-leads.ts",
     "./script-merge": "./src/script-merge.ts",
     "./types": "./src/types.ts",
     "./us-timezones": "./src/us-timezones.ts"

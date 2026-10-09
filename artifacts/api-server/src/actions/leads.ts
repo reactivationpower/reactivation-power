@@ -1,4 +1,3 @@
-
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { getAdminClient } from '@/lib/supabase/admin'
@@ -16,6 +15,9 @@ import {
   reactivatedPatients,
   scenarioEstimates,
 } from '@workspace/shared/opportunity'
+import { intake, transaction } from '@/lib/sales-leads/store'
+import { validTimezone } from '@/lib/sales-leads/cadence'
+import { safeSalesUpsert } from '@/lib/sales-leads/provider'
 
 export interface LeadState {
   error?: string
@@ -164,11 +166,55 @@ export async function submitHealthcareLead(
     h.get('x-real-ip') ??
     'unknown'
 
-  // Create/update the GoHighLevel contact first so the funnel carries its id
+  // Save both the full-context submission and legacy funnel row before any
+  // GoHighLevel write. Provider availability must never be the intake gate.
+  const submittedAt = new Date().toISOString()
+  const actualPathRaw = String(formData.get('actualSourcePath') ?? '')
+  const actualPath = /^\/[a-zA-Z0-9/_-]*$/.test(actualPathRaw) ? actualPathRaw.slice(0, 200) : baseSourcePath.split('?')[0]!
+  let utm: Record<string, string> = {}
+  try {
+    const parsed = JSON.parse(String(formData.get('utmContext') ?? '{}'))
+    for (const key of ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content']) if (typeof parsed[key] === 'string') utm[key] = parsed[key].slice(0, 300)
+  } catch { /* no UTM evidence supplied */ }
+  const zone = formData.get('deviceTimezone')
+  const timezone = validTimezone(zone) ? zone : null
+  const supabase = getAdminClient()
+  const { error, data: submittedLead } = await supabase.from('landing_leads').insert({
+    sector: 'healthcare', first_name: firstName, last_name: lastName, email,
+    phone: `(${phoneDigits.slice(0, 3)}) ${phoneDigits.slice(3, 6)}-${phoneDigits.slice(6)}`,
+    practice_name: practiceName, zip, city, state, consent, consent_ip: ip,
+    years_in_practice: yearsInPractice, inactive_patients_estimate: inactiveCount === null ? '' : String(inactiveCount),
+    services, source_path: sourcePath,
+  }).select('id').single()
+  if (error) return { error: 'Something went wrong. Please try again.', values, services }
+  const attribution = await resolveQualifiedReferral({
+    email, phone: phoneDigits, practiceName, affiliateId: await referralFromRequest(email),
+    sourceLeadId: String(submittedLead.id),
+  })
+  const salesLead = await intake({
+    firstName, lastName, email, phone: `+1${phoneDigits}`, practiceName,
+    source: attribution.affiliateId ? 'affiliate' : 'website', sourcePath: actualPath, submittedAt,
+    consent, timezone, affiliateId: attribution.affiliateId, dedupeKey: `landing:${submittedLead.id}`,
+    consentEvidence: {
+      checked: consent, submittedAt, sourcePath: actualPath, ip,
+      disclosure: 'I consent to being contacted by text message and phone call for marketing related to Patient Pipeline. Message and data rates may apply. Reply STOP to opt out at any time.',
+      disclosureVersion: 'patient-pipeline-sms-v1',
+    },
+    context: {
+      firstName, lastName, email, phone, practiceName, zip, city, state, yearsInPractice, services, productInterest: interest,
+      inactivePatients: inactiveCount, patientValue, revenueShown, scenario, estimates,
+      inactiveAdjusted: formData.get('inactiveAdjusted'), valueAdjusted: valueAdjusted ?? 'assumed',
+      additionalPatientsAdjusted: formData.get('additionalPatientsAdjusted'), newValueAdjusted: formData.get('newValueAdjusted'),
+      utm, affiliateId: attribution.affiliateId, deviceTimezone: timezone, legacySourcePath: sourcePath,
+    },
+  })
+
+  // The funnel still carries the provider id when available. Local sync jobs
+  // recover outages; ambiguous identity never updates an arbitrary contact.
   let ghlContactId = ''
-  if (ghlConfigured()) {
+  if (ghlConfigured() && !salesLead.review) {
     try {
-      ghlContactId = await upsertGhlContact({
+      ghlContactId = await safeSalesUpsert({
         firstName,
         lastName,
         email,
@@ -177,6 +223,7 @@ export async function submitHealthcareLead(
         postalCode: zip,
         city: city || undefined,
         state: state || undefined,
+        timezone: timezone || undefined,
         tags: [
           'reactivation-power-lead',
           'healthcare-funnel',
@@ -226,40 +273,16 @@ export async function submitHealthcareLead(
       ])
     } catch (err) {
       // Never lose the lead because CRM sync failed — log and continue
-      console.error('[v0] GHL contact sync failed:', err)
+      console.error('GoHighLevel lead sync unavailable; local inquiry saved for retry')
     }
   }
 
-  const supabase = getAdminClient()
-  const { error, data: submittedLead } = await supabase.from('landing_leads').insert({
-    sector: 'healthcare',
-    first_name: firstName,
-    last_name: lastName,
-    email,
-    phone: `(${phoneDigits.slice(0, 3)}) ${phoneDigits.slice(3, 6)}-${phoneDigits.slice(6)}`,
-    practice_name: practiceName,
-    zip,
-    city,
-    state,
-    consent,
-    consent_ip: ip,
-    ghl_contact_id: ghlContactId || null,
-    years_in_practice: yearsInPractice,
-    inactive_patients_estimate: inactiveCount === null ? '' : String(inactiveCount),
-    services,
-    source_path: sourcePath,
-  }).select('id').single()
-
-  if (error) {
-    console.error('[v0] landing lead insert failed:', error.message)
-    return { error: 'Something went wrong. Please try again.', values, services }
+  if (ghlContactId && !salesLead.review) {
+    await supabase.from('landing_leads').update({ ghl_contact_id: ghlContactId }).eq('id', submittedLead.id)
+    await transaction(async c => {
+      await c.query('UPDATE sales_leads SET ghl_contact_id=COALESCE(ghl_contact_id,$2) WHERE id=$1', [salesLead.id, ghlContactId])
+    })
   }
-
-  await resolveQualifiedReferral({
-    email, phone: phoneDigits, practiceName,
-    affiliateId: await referralFromRequest(email),
-    sourceLeadId: submittedLead?.id ? String(submittedLead.id) : undefined,
-  })
 
   const params = new URLSearchParams({
     name: firstName,

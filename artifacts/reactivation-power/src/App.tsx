@@ -81,6 +81,10 @@ import Page_strategy_call from '@/pages/strategy-call';
 import Page_strategy_call_schedule from '@/pages/strategy-call_schedule';
 import Page_strategy_call_providers_only from '@/pages/strategy-call_providers-only';
 import Page_schedule_a_call_confirmation from '@/pages/schedule-a-call_confirmation';
+import PageAdminLeads from '@/pages/admin_leads';
+import PageAdminLeadId from '@/pages/admin_leads_id';
+import PageAdminLeadsSettings from '@/pages/admin_leads_settings';
+import PageAdminLeadsImport from '@/pages/admin_leads_import';
 
 function Router() {
   return (
@@ -210,6 +214,18 @@ function Router() {
             <Page_admin_reactivation />
           </AdminLayout>
         </RoutedErrorBoundary>
+      </Route>
+      <Route path="/admin/leads">
+        <RoutedErrorBoundary><AdminLayout><PageAdminLeads /></AdminLayout></RoutedErrorBoundary>
+      </Route>
+      <Route path="/admin/leads/settings">
+        <RoutedErrorBoundary><AdminLayout><PageAdminLeadsSettings /></AdminLayout></RoutedErrorBoundary>
+      </Route>
+      <Route path="/admin/leads/import">
+        <RoutedErrorBoundary><AdminLayout><PageAdminLeadsImport /></AdminLayout></RoutedErrorBoundary>
+      </Route>
+      <Route path="/admin/leads/:id">
+        <RoutedErrorBoundary><AdminLayout><PageAdminLeadId /></AdminLayout></RoutedErrorBoundary>
       </Route>
       <Route path="/affiliates/apply">
         <RoutedErrorBoundary><PageAffApply /></RoutedErrorBoundary>

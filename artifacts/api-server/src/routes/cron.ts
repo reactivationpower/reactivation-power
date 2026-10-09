@@ -4,9 +4,10 @@ import { currentDueKey, runCronJob, type CronJobName } from "@/lib/cron/jobs";
 import { retryFailedNotifications } from "@/lib/billing/notifications";
 import { deliverLeadEmails } from "@/lib/lead-followup/notifications";
 import { retryPendingEnrollmentInvitations } from "@/lib/agreements/enrollment-invitation";
+import { runSalesWorker } from "@/lib/sales-leads/worker";
+import { NATIVE_WAKE_HEADER,NATIVE_WAKE_MARKER,recordNativeWake } from "@/lib/sales-leads/wake";
 
 const router: IRouter = Router();
-
 /**
  * External triggers for the scheduled jobs (`Authorization: Bearer
  * $CRON_SECRET`), meant to be hit by an external cron at the slot time.
@@ -34,7 +35,8 @@ function cronRoute(job: CronJobName) {
         res.status(500).json({ error: outcome.error, runId: outcome.run.id });
         return;
       }
-      res.json({ ok: true, runId: outcome.run.id, ...outcome.summary });
+      const notifications = job === "billing-retry" ? await retryFailedNotifications() : undefined;
+      res.json({ ok: true, runId: outcome.run.id, ...outcome.summary, ...(notifications ? {notifications} : {}) });
     });
   };
 }
@@ -51,9 +53,21 @@ router.get("/cron/lead-emails", async (req, res) => {
   }
   await deliverLeadEmails();
   await retryPendingEnrollmentInvitations();
+  await runSalesWorker();
   res.json({ ok: true });
 });
 
+// Dedicated five-minute wakeup; durable worker claims make overlaps safe.
+router.get("/cron/sales-leads", async (req,res) => {
+  const expected = process.env.CRON_SECRET;
+  if (!expected || req.get("authorization") !== `Bearer ${expected}`) {
+    res.status(401).json({error:"Unauthorized"});
+    return;
+  }
+  await runWithRequestContext(req,res,async () => {
+    await runSalesWorker();
+    if (req.get(NATIVE_WAKE_HEADER) === NATIVE_WAKE_MARKER) await recordNativeWake();
+    res.json({ok:true});
+  });
+});
 export default router;
-
-      const notifications = await retryFailedNotifications();

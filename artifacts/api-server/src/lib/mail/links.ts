@@ -3,7 +3,7 @@ import { PUBLIC_APP_ORIGIN } from '@/lib/app-origin'
 // App-owned links only. Stripe receipt URLs must keep their external origin.
 const APP_LINK_FIELDS = new Set([
   'loginUrl', 'inviteUrl', 'portalUrl', 'billingUrl', 'updatePaymentUrl',
-  'reactivateUrl', 'signUrl', 'agreementUrl', 'dashboardUrl', 'adminUrl', 'setupUrl',
+  'reactivateUrl', 'signUrl', 'agreementUrl', 'dashboardUrl', 'adminUrl', 'setupUrl', 'leadUrl',
 ])
 
 /**

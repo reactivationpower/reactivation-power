@@ -121,6 +121,12 @@ export function LeadForm({ scheduleMode = false, calculatorScenario, funnelSourc
   // Check every rule before the request leaves the browser. Returning early
   // with preventDefault stops React from running the server action.
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    const form = e.currentTarget
+    form.elements.namedItem('deviceTimezone').value = Intl.DateTimeFormat().resolvedOptions().timeZone ?? ''
+    form.elements.namedItem('actualSourcePath').value = window.location.pathname
+    form.elements.namedItem('utmContext').value = JSON.stringify(Object.fromEntries(
+      [...new URLSearchParams(window.location.search)].filter(([key]) => /^utm_(source|medium|campaign|term|content)$/.test(key)),
+    ))
     const found = validateLeadFields(readLeadFields(new FormData(e.currentTarget)))
     if (scheduleMode && !productInterest)
       found.productInterest = 'Select how we can help your practice.'
@@ -168,6 +174,9 @@ export function LeadForm({ scheduleMode = false, calculatorScenario, funnelSourc
       noValidate
       className="flex flex-col gap-4"
     >
+      <input type="hidden" name="deviceTimezone" defaultValue="" />
+      <input type="hidden" name="actualSourcePath" defaultValue="" />
+      <input type="hidden" name="utmContext" defaultValue="" />
       {calculatorScenario && !scheduleMode && (
         <>
           <input type="hidden" name="calculatorScenario" value="combined" />
@@ -443,15 +452,16 @@ export function LeadForm({ scheduleMode = false, calculatorScenario, funnelSourc
           <input
             type="hidden"
             name="inactiveAdjusted"
-            value={calculatorScenario ? 'yes' : calc?.inactiveTouched || inactiveEdited ? 'yes' : 'no'}
+            value={calculatorScenario ? inactiveEdited ? 'yes' : 'unknown' : calc?.inactiveTouched || inactiveEdited ? 'yes' : 'no'}
           />
           <input
             type="hidden"
             name="valueAdjusted"
-            value={calculatorScenario ? 'yes' : calc?.valueTouched ? 'yes' : 'no'}
+            value={calculatorScenario ? 'unknown' : calc?.valueTouched ? 'yes' : 'no'}
           />
         </>
       ) : null}
+      {calculatorScenario && <><input type="hidden" name="additionalPatientsAdjusted" value="unknown" /><input type="hidden" name="newValueAdjusted" value="unknown" /></>}
 
       <ServicesMultiSelect
         defaultSelected={state.services ?? []}

@@ -1,4 +1,3 @@
-
 import {
   addGhlContactNote,
   bookGhlAppointment,
@@ -11,7 +10,7 @@ import { US_TIMEZONES } from '@workspace/shared/us-timezones'
 import { isProductInterest, PRODUCT_INTEREST_LABELS } from '@workspace/shared/lead-validation'
 import { validatedBookingFunnel } from '@workspace/shared/booking-funnel'
 import { assertBookingConfirmationConfigured, createBookingConfirmation } from '@/lib/booking-confirmation'
-
+import { activity, stop, transaction } from '@/lib/sales-leads/store'
 const BOOKING_WINDOW_DAYS = 45
 
 export interface AvailabilityResult {
@@ -44,7 +43,7 @@ export async function getAvailability(
     })
     return { slots, configured: true }
   } catch (err) {
-    console.error('[v0] GHL availability fetch failed:', err)
+    console.error('GoHighLevel availability unavailable; check calendar read permission')
     return {
       slots: {},
       configured: true,
@@ -152,11 +151,19 @@ export async function bookStrategyCall(params: {
       ? `Patient Pipeline Strategy Call w/ ${contactName}`
       : 'Patient Pipeline Strategy Call'
 
-    await bookGhlAppointment({
+    const appointmentId = await bookGhlAppointment({
       contactId,
       startTime: slot,
       title,
     })
+    await transaction(async c => {
+      const lead = (await c.query('SELECT id FROM sales_leads WHERE ghl_contact_id=$1', [contactId])).rows[0]
+      if (!lead) return
+      await c.query("SELECT pg_advisory_xact_lock(hashtextextended($1,0))", [`sales-send:${lead.id}`])
+      await c.query("UPDATE sales_leads SET stage='Strategy Call Booked',appointment_status='confirmed',revision=revision+1 WHERE id=$1", [lead.id])
+      await stop(c, lead.id, 'appointment_received')
+      await activity(c, lead.id, { kind: 'appointment', body: `${title} — ${slot}`, status: 'confirmed', providerId: appointmentId || undefined, dedupeKey: `booking:${appointmentId || contactId + slot}` })
+    }).catch(() => console.error('Appointment saved in GoHighLevel; local timeline awaits reconciliation'))
 
     // Fill the "Appointment Date And Time" custom field on the contact,
     // e.g. "Wednesday, Aug. 21st, 2026 at 11:00 AM ET" — used in GHL
@@ -167,7 +174,7 @@ export async function bookStrategyCall(params: {
       formatAppointmentField(slot, timezone),
     ).catch((err) => {
       // The appointment is booked — a failed field write should not fail the flow
-      console.error('[v0] GHL custom field update failed:', err)
+      console.error('GoHighLevel booking context update unavailable; provider appointment remains saved')
     })
 
     const pretty = new Intl.DateTimeFormat('en-US', {
@@ -189,7 +196,7 @@ export async function bookStrategyCall(params: {
       ].join('\n'),
     ).catch((err) => {
       // The appointment is booked — a failed note should not fail the flow
-      console.error('[v0] GHL booking note failed:', err)
+      console.error('GoHighLevel booking note unavailable; provider appointment remains saved')
     })
 
     return {
@@ -197,7 +204,7 @@ export async function bookStrategyCall(params: {
       ...(funnelSource ? { confirmationToken: createBookingConfirmation(slot, timezone) } : {}),
     }
   } catch (err) {
-    console.error('[v0] GHL booking failed:', err)
+    console.error('GoHighLevel booking unavailable; check calendar event permission and provider availability')
     return {
       ok: false,
       error:

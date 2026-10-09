@@ -39,6 +39,7 @@ const NAV: { group: string; items: { href: string; label: string; icon: any; rol
       { href: '/admin/participants', label: 'Viewers', icon: Users, roles: ['super_admin'], serviceAccess: true },
       { href: '/admin/reactivation', label: 'Reactivation', icon: PhoneCall, roles: ['super_admin'] },
       { href: '/admin/emails', label: 'Email Templates', icon: Mail, roles: ['super_admin'] },
+      { href: '/admin/leads', label: 'Leads', icon: Users, roles: ['super_admin', 'sales_rep'] },
       { href: '/admin/payments', label: 'Payments', icon: CreditCard },
       { href: '/admin/agreements', label: 'Agreements', icon: FilePenLine },
       { href: '/admin/commissions', label: 'Commissions', icon: BadgeDollarSign },

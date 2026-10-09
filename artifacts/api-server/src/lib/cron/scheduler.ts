@@ -5,6 +5,7 @@ import { CRON_JOBS, CRON_JOB_NAMES, runCronJob, type CronJobName } from './jobs'
 import { dueKeyFor } from './slots'
 
 export { dueKeyFor } from './slots'
+import { runSalesWorker } from '@/lib/sales-leads/worker'
 
 /**
  * In-process daily scheduler.
@@ -42,6 +43,7 @@ const inFlight = new Set<CronJobName>()
 
 /** One pass over every job. Exported for tests and the boot-time first tick. */
 export async function tick(now: Date = new Date()): Promise<void> {
+  await runSalesWorker().catch(err => logger.error({ err }, 'internal sales worker failed'))
   await deliverLeadEmails()
   await retryPendingEnrollmentInvitations()
   for (const name of CRON_JOB_NAMES) {

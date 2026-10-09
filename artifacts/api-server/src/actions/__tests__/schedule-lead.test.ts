@@ -10,7 +10,12 @@ const { insert, upsert, note, redirect } = vi.hoisted(() => ({
 
 vi.mock('next/headers', () => ({ headers: async () => new Headers() }))
 vi.mock('next/navigation', () => ({ redirect }))
-vi.mock('@/lib/supabase/admin', () => ({ getAdminClient: () => ({ from: () => ({ insert }) }) }))
+vi.mock('@/lib/supabase/admin', () => ({ getAdminClient: () => ({ from: () => ({ insert, update: () => ({ eq: async () => ({ error: null }) }) }) }) }))
+vi.mock('@/lib/sales-leads/store', () => ({
+  intake: vi.fn(async () => ({ id: 'sales-fixture' })),
+  transaction: vi.fn(async (fn: any) => fn({ query: vi.fn(async () => ({ rows: [] })) })),
+}))
+vi.mock('@/lib/sales-leads/provider', () => ({ safeSalesUpsert: upsert }))
 vi.mock('@/lib/affiliates/attribution', () => ({
   referralFromRequest: vi.fn(async () => null),
   resolveQualifiedReferral: vi.fn(async () => ({ leadId: 'qualified-fixture', affiliateId: null })),

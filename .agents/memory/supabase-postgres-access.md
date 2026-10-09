@@ -2,6 +2,14 @@
 name: Supabase Postgres access & migrations
 description: How the app and drizzle-kit reach Supabase's Postgres directly, why drizzle-kit push is forbidden, and what DB-backed tests must clean up.
 ---
+
+## Protected native HTTP wakeups
+
+Hosted `pg_net` request/response tables can be owned by `supabase_admin` with PUBLIC access; `postgres` cannot revoke those grants. Never assume successful REVOKE statements actually protected the queue.
+
+**Why:** Effective privilege checks showed anonymous/authenticated roles could read queued headers despite REVOKE statements; PostgreSQL emitted notices rather than failing the migration.
+
+**How to apply:** Verify permissions before queuing sensitive headers. Use synchronous `http` for protected native wakeups, resolving authentication from Vault at execution time with bounded timeouts and status-only output. Do not put the cron bearer into this hosted queue.
 - All drizzle tables live in the Supabase project; dev and prod share it. The app and drizzle-kit use `SUPABASE_DB_URL` (Session pooler URI). There is no Replit database any more.
   **Why:** the owner wanted one database; the Replit DB only existed because Supabase DDL was unavailable at the time.
 - The pooler's TLS cert is signed by Supabase's own CA: `pg` needs `ssl: { rejectUnauthorized: false }`. The direct `db.<ref>.supabase.co` host is IPv6-only and unreachable from the workspace.
@@ -28,4 +36,4 @@ description: How the app and drizzle-kit reach Supabase's Postgres directly, why
   **How to apply:** Bound test-worker concurrency when diagnosing this error, keep disposable test pools small and release them, and do not mistake resource exhaustion for a functional failure or silently skip database tests.
 - A successful migration command can silently skip pending SQL when another task has already applied a newer journal timestamp to the shared database.
   **Why:** Parallel task databases are not isolated: a new custom migration was older than the live migration high-water mark, so the command reported success without creating its tables.
-  **How to apply:** Compare pending journal timestamps with the database high-water mark before applying; preserve applied entries, order genuinely pending migrations after it, and verify the required tables/columns afterward.
+  **How to apply:** Compare pending journal timestamps with the database high-water mark before applying; preserve applied entries, order genuinely pending migrations after it, and verify the required tables/columns afterward. For a parallel-task filename collision, accept the incoming snapshot and regenerate the next snapshot. If that task's identical SQL was already applied to the shared database, preserve its original applied timestamp after verifying SQL equivalence; a new timestamp would attempt duplicate table creation.

@@ -153,7 +153,7 @@ export function PaymentsManager({
   const [sortKey, setSortKey] = useState<SortKey>('created_at')
   const [sortDir, setSortDir] = useState<SortDir>('desc')
 
-  const [createOpen, setCreateOpen] = useState(false)
+  const [createOpen, setCreateOpen] = useState(() => Boolean(new URLSearchParams(window.location.search).get('lead')))
 
   // Per-link UI state
   const [qrFor, setQrFor] = useState<PaymentLink | null>(null)

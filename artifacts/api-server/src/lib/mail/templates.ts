@@ -131,6 +131,7 @@ export interface CronFailedData {
   dashboardUrl: string
 }
 export interface TemplateDataMap {
+  sales_lead_reply: { name: string; leadName: string; leadUrl: string }
   affiliate_access: { businessName: string; loginUrl: string }
   affiliate_payout: { businessName: string; period: string; amountCents: number; paymentDate: string; portalUrl: string }
   portal_login_code: { code: string }
@@ -898,6 +899,15 @@ export interface AccessRestoredData {
 
 type AnyTemplate = { [K in TemplateId]: TemplateDefinition<K> }[TemplateId]
 export const TEMPLATES: { [K in TemplateId]: TemplateDefinition<K> } = {
+  sales_lead_reply: {
+    id: 'sales_lead_reply', name: 'Internal sales lead reply', description: 'A provider-sales prospect replied; delivered once to the assigned salesperson.',
+    sample: { name: 'Team', leadName: 'Dr. Sample', leadUrl: `${BRAND.siteUrl}/admin/leads/sample` },
+    render: d => ({
+      subject: `Sales lead reply: ${d.leadName}`, previewText: 'A prospect replied. Automated outreach is paused.',
+      html: layout([h1('A sales lead replied'), p(`Hi ${esc(d.name)},`), p(`${esc(d.leadName)} replied. Automated outreach is paused. Open the lead to review the conversation before responding.`),
+        button('Review lead', d.leadUrl), signoff()], { previewText: 'A prospect replied. Automated outreach is paused.' }),
+    }),
+  },
   portal_login_code: {
     id: 'portal_login_code',
     name: 'Portal sign-in code',

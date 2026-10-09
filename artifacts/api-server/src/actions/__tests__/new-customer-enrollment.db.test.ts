@@ -5,7 +5,7 @@ import { sql } from 'drizzle-orm'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const state = vi.hoisted(() => ({
-  db: null as any, proxy: vi.fn(),
+  db: null as any, pool:null as any, proxy: vi.fn(),
   stripeCreate: vi.fn(), welcome: vi.fn(), receipt: vi.fn(),
   attachReferral: vi.fn(async (..._args: unknown[]) => {}),
 }))
@@ -13,6 +13,7 @@ vi.mock('@/lib/affiliates/attribution', () => ({ attachCustomerReferral: state.a
 vi.mock('@/lib/affiliates/ledger', () => ({ queueAffiliateHistory: vi.fn(async () => {}) }))
 vi.mock('@workspace/db', async original => ({
   ...await original<any>(),
+  pool: { query: (...args:any[]) => state.pool.query(...args), connect: () => state.pool.connect() },
   db: new Proxy({}, { get: (_, key) => typeof state.db[key] === 'function' ? state.db[key].bind(state.db) : state.db[key] }),
 }))
 vi.mock('@replit/connectors-sdk', () => ({
@@ -62,7 +63,8 @@ const input = (offer: any) => ({
 })
 const rows = async (table: string) => (await scopedPool.query(`SELECT * FROM ${table}`)).rows
 const tables = ['payment_links', 'customers', 'payment_link_terms', 'agreements', 'agreement_versions',
-  'agreement_events', 'agreement_initials', 'agreement_deliveries', 'email_log', 'enrollment_invitations']
+  'agreement_events', 'agreement_initials', 'agreement_deliveries', 'email_log', 'enrollment_invitations',
+  'sales_leads','sales_jobs','sales_activities','affiliates','affiliate_attributions','affiliate_activity']
 
 describe.skipIf(!process.env.SUPABASE_DB_URL)('New Customer → agreement → mocked Resend (isolated Postgres)', () => {
   beforeAll(async () => {
@@ -71,6 +73,7 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('New Customer → agreement → mo
     scopedPool = new (actual.pool.constructor as any)({ ...actual.pool.options, max: 3 })
     scopedPool.on('connect', (client: any) => { void client.query(`SET search_path TO "${schema}"`) })
     state.db = drizzle(scopedPool)
+    state.pool = scopedPool
     for (const table of tables.filter(t => t !== 'enrollment_invitations')) {
       await scopedPool.query(`CREATE TABLE ${table} (LIKE public.${table} INCLUDING ALL)`)
     }
@@ -163,6 +166,21 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('New Customer → agreement → mo
     expect(await rows('agreement_versions')).toHaveLength(1)
     expect(state.proxy).toHaveBeenCalledTimes(1)
   }, 20_000)
+  it('sales lead enrollment preserves affiliate attribution and authenticated actor while retrying the same saved customer and offer', async () => {
+    await scopedPool.query("INSERT INTO affiliates(id,business_name,email,status,referral_code) VALUES('affiliate-fixture','Fixture partner','partner@example.test','approved','fixture-code')")
+    await scopedPool.query("INSERT INTO sales_leads(id,email,first_name,last_name,source,affiliate_id) VALUES('sales-fixture',$1,'Test','Buyer','website','affiliate-fixture')",[customer.email])
+    const request={...input({type:'one_time',amountDollars:1500}),salesLeadId:'sales-fixture'}
+    const first=await createPaymentLink(request)
+    expect(first).toMatchObject({ok:true,invitation:{status:'provider_accepted'}})
+    expect((await rows('sales_leads'))[0]).toMatchObject({stage:'Won',customer_id:first.link!.customer_id,affiliate_id:'affiliate-fixture',automation_state:'converted'})
+    expect((await rows('affiliate_activity'))[0]).toMatchObject({actor:'test-rep',customer_id:first.link!.customer_id})
+    expect((await rows('sales_activities'))[0]).toMatchObject({kind:'conversion',author_id:'test-rep',author_name:'Test rep'})
+    const retried=await createPaymentLink(request)
+    expect(retried.link!.id).toBe(first.link!.id)
+    for(const table of ['customers','payment_links','affiliate_attributions','affiliate_activity','sales_activities']) expect(await rows(table)).toHaveLength(1)
+    expect(state.proxy).toHaveBeenCalledTimes(1)
+    expect(state.stripeCreate).not.toHaveBeenCalled()
+  },20000)
 
   it('keeps customer/link when agreement persistence fails and retries atomically', async () => {
     await scopedPool.query('ALTER TABLE agreement_versions ADD CONSTRAINT test_reject CHECK (setup_fee_cents = 0)')

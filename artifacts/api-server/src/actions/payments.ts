@@ -23,6 +23,7 @@ import {
 } from '@workspace/db'
 import { createHash, randomBytes } from 'crypto'
 import { inviteEnrollment, type InvitationOutcome } from '@/lib/agreements/enrollment-invitation'
+import { linkSalesCustomer } from '@/lib/sales-leads/conversion'
 import { and, desc, eq, inArray, sql } from 'drizzle-orm'
 
 export const PRODUCT_NAME = 'Reactivation Power Access'
@@ -398,7 +399,9 @@ async function upsertCustomer(
     email: c.email,
     updatedAt: new Date(),
   }
-  const [existing] = await connection.select().from(customersTable).where(eq(customersTable.email, c.email)).limit(1)
+  const matches = await connection.select().from(customersTable).where(sql`lower(trim(${customersTable.email}))=${c.email}`).limit(2)
+  if (matches.length > 1) throw new Error('Multiple customers match this email. Resolve the duplicate records before enrollment.')
+  const [existing] = matches
   if (existing) {
     const [updated] = await connection
       .update(customersTable)
@@ -428,6 +431,7 @@ export async function createPaymentLink(input: {
   staff?: StaffMember[]
   offer: OfferInput
   requestId?: string
+  salesLeadId?: string
 }): Promise<{ ok: boolean; error?: string; link?: PaymentLink; invitation?: InvitationOutcome }> {
   const rep = await requireAdmin()
   if (input.requestId != null && !/^[0-9a-f-]{36}$/i.test(input.requestId))
@@ -506,6 +510,7 @@ export async function createPaymentLink(input: {
   // Attribution owns a separate transaction and must see the committed
   // customer. Creation retries recover it too without duplicating attribution.
   if (link.customer_id) await attachCustomerReferral(link.customer_id, customerInput.email, customerInput.phone)
+  if (input.salesLeadId && link.customer_id) await linkSalesCustomer(input.salesLeadId,link.customer_id,customerInput.email,rep)
   const invitation = await retryCustomerEnrollment(String(data.id))
   return { ok: true, link, invitation: invitation.invitation }
 }

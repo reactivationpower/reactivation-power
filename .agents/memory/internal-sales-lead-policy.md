@@ -25,3 +25,15 @@ Call opens the lead's GoHighLevel contact in a new tab. The user wants inbound t
 **Why:** This is a distinct internal sales-location integration, not permission to change the customer-practice Twilio no-recording policy.
 
 **How to apply:** Retrieve existing available GoHighLevel media with appropriate permissions; do not silently enable new recording.
+
+Read-only private-integration probes cannot prove SMS sending permission, sender/A2P readiness, or recording/transcription access. Distinguish API-verified reads from an administrator's provider-configuration confirmation.
+
+**Why:** Contact/calendar writes in the existing helper do not establish every proposed capability; an unapproved real-contact send is not an acceptable permission test.
+
+**How to apply:** Keep automation disabled until configuration and consent scope are deliberately reviewed. Use protected/authenticated provider media access rather than private signed URLs when direct retrieval is unverified.
+
+The user selected Supabase's native scheduler for five-minute internal-sales wakeups and approved enabling its scheduling extensions, without publishing or enabling SMS.
+
+**Why:** The user chose the existing database rather than another external scheduler.
+
+**How to apply:** Keep the independent database wakeup, secure its bearer in Vault, and require a healthy published-worker wake before activating automation. Do not replace it with an in-process-only timer or another provider without approval.
