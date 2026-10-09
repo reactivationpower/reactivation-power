@@ -16,9 +16,9 @@ export const modules: ModuleMap = {
   "./components/mockups/dual-product-home/Shell.tsx": () => import("../components/mockups/dual-product-home/Shell.tsx"),
   "./components/mockups/guided-campaign-setup/Proposed.tsx": () => import("../components/mockups/guided-campaign-setup/Proposed.tsx"),
   "./components/mockups/header-proposal/Proposed.tsx": () => import("../components/mockups/header-proposal/Proposed.tsx"),
-  "./components/mockups/landing-home/WarmAdvisory.tsx": () => import("../components/mockups/landing-home/WarmAdvisory.tsx"),
   "./components/mockups/patient-pipeline-home/PatientPipelineLogo.tsx": () => import("../components/mockups/patient-pipeline-home/PatientPipelineLogo.tsx"),
   "./components/mockups/reactivation-home/Current.tsx": () => import("../components/mockups/reactivation-home/Current.tsx"),
   "./components/mockups/reactivation-home/LeadWelcome.tsx": () => import("../components/mockups/reactivation-home/LeadWelcome.tsx"),
-  "./components/mockups/reactivation-home/Welcome.tsx": () => import("../components/mockups/reactivation-home/Welcome.tsx")
+  "./components/mockups/reactivation-home/Welcome.tsx": () => import("../components/mockups/reactivation-home/Welcome.tsx"),
+  "./components/mockups/landing-home/WarmAdvisory.tsx": () => import("../components/mockups/landing-home/WarmAdvisory.tsx")
 };
