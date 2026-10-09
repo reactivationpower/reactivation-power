@@ -11,6 +11,10 @@ const { insert, upsert, note, redirect } = vi.hoisted(() => ({
 vi.mock('next/headers', () => ({ headers: async () => new Headers() }))
 vi.mock('next/navigation', () => ({ redirect }))
 vi.mock('@/lib/supabase/admin', () => ({ getAdminClient: () => ({ from: () => ({ insert }) }) }))
+vi.mock('@/lib/affiliates/attribution', () => ({
+  referralFromRequest: vi.fn(async () => null),
+  resolveQualifiedReferral: vi.fn(async () => ({ leadId: 'qualified-fixture', affiliateId: null })),
+}))
 vi.mock('@/lib/ghl', () => ({
   ghlConfigured: () => true,
   upsertGhlContact: upsert,
@@ -34,7 +38,7 @@ describe('schedule lead validation and submission', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false }))
-    insert.mockResolvedValue({ error: null })
+    insert.mockReturnValue({ select: () => ({ single: async () => ({ data: { id: 'lead-fixture' }, error: null }) }) })
     upsert.mockResolvedValue('crm-1')
     note.mockResolvedValue(undefined)
   })

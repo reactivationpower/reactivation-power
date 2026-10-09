@@ -26,3 +26,6 @@ description: How the app and drizzle-kit reach Supabase's Postgres directly, why
 - The shared Supabase session pool has a 15-client ceiling; parallel regression suites can exceed it while the app is running.
   **Why:** Isolated workers each create their own pool; provider connection-limit failures occurred in otherwise passing database tests, including tests unrelated to the changes being checked.
   **How to apply:** Bound test-worker concurrency when diagnosing this error, keep disposable test pools small and release them, and do not mistake resource exhaustion for a functional failure or silently skip database tests.
+- A successful migration command can silently skip pending SQL when another task has already applied a newer journal timestamp to the shared database.
+  **Why:** Parallel task databases are not isolated: a new custom migration was older than the live migration high-water mark, so the command reported success without creating its tables.
+  **How to apply:** Compare pending journal timestamps with the database high-water mark before applying; preserve applied entries, order genuinely pending migrations after it, and verify the required tables/columns afterward.

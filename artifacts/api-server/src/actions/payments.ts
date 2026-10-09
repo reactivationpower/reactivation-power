@@ -1,5 +1,7 @@
 
 import { randomBytes } from 'crypto'
+import { attachCustomerReferral } from '@/lib/affiliates/attribution'
+import { queueAffiliateHistory } from '@/lib/affiliates/ledger'
 import { revalidatePath } from 'next/cache'
 import { canDeleteLink, cleanCustomer, type CustomerInput } from '@/lib/billing/rules'
 
@@ -459,6 +461,7 @@ export async function createPaymentLink(input: {
   }
 
   const customer = await upsertCustomer(customerInput, rep)
+  await attachCustomerReferral(customer.id, customerInput.email, customerInput.phone)
 
   const token = randomBytes(16).toString('base64url')
   const supabase = getAdminClient()
@@ -766,11 +769,11 @@ export async function recordIntentPayment(input: {
     const intent = await stripe.paymentIntents.retrieve(id, { expand: ['latest_charge', 'payment_method'] })
     const used = cardFromIntent(intent)
     const [dupe] = await db
-      .select({ id: paymentHistoryTable.id })
+      .select()
       .from(paymentHistoryTable)
       .where(and(eq(paymentHistoryTable.stripePaymentIntentId, intent.id), eq(paymentHistoryTable.status, 'succeeded')))
       .limit(1)
-    if (dupe) return
+    if (dupe) { await queueAffiliateHistory(dupe); return }
     await recordHistory({
       customerId: input.customerId,
       linkId: input.linkId,
@@ -786,7 +789,8 @@ export async function recordIntentPayment(input: {
       stripePaymentIntentId: intent.id,
       stripeChargeId: used.chargeId,
       source: 'webhook',
-      occurredAt: input.occurredAt,
+      occurredAt: typeof intent.latest_charge === 'object' && intent.latest_charge?.created
+        ? new Date(intent.latest_charge.created * 1000) : input.occurredAt,
     })
   } catch (err) {
     console.error('[v0] recordIntentPayment failed:', err)

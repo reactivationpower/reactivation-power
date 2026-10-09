@@ -131,6 +131,8 @@ export interface CronFailedData {
   dashboardUrl: string
 }
 export interface TemplateDataMap {
+  affiliate_access: { businessName: string; loginUrl: string }
+  affiliate_payout: { businessName: string; period: string; amountCents: number; paymentDate: string; portalUrl: string }
   portal_login_code: { code: string }
   portal_password_setup: { setupUrl: string }
   new_leads: { count: number; portalUrl: string }
@@ -946,6 +948,29 @@ export const TEMPLATES: { [K in TemplateId]: TemplateDefinition<K> } = {
     },
   },
   portal_welcome: portalWelcome,
+  affiliate_access: {
+    id: 'affiliate_access', name: 'Affiliate inbox verification', description: 'Single-use, 15-minute affiliate inbox sign-in.',
+    sample: { businessName: 'Practice Partners', loginUrl: `${BRAND.siteUrl}/affiliates/access#token=sample-token` },
+    render: d => ({
+      subject: 'Sign in to your Patient Pipeline affiliate portal', previewText: 'Verify your registered inbox to continue.',
+      html: layout([h1('Your affiliate portal access'), p(`For ${esc(d.businessName)}.`),
+        p('Enter your registered email after opening this link. It expires in 15 minutes and works once.'),
+        button('Verify inbox and sign in', d.loginUrl), fallbackLink(d.loginUrl),
+        small('Do not forward this email or share this link. This verifies access to the affiliate inbox, not the identity of a person using a shared inbox.'),
+        signoff()], { previewText: 'Verify your registered inbox to continue.' }),
+    }),
+  },
+  affiliate_payout: {
+    id: 'affiliate_payout', name: 'Affiliate wire recorded', description: 'Confirms a wire already sent outside Patient Pipeline.',
+    sample: { businessName: 'Practice Partners', period: '2026-10', amountCents: 15000, paymentDate: '2026-11-03', portalUrl: `${BRAND.siteUrl}/affiliates/access` },
+    render: d => ({
+      subject: `Affiliate payment recorded: ${money(d.amountCents)}`, previewText: `Payment for ${d.period}.`,
+      html: layout([h1('Your affiliate payment has been recorded'), p(`For ${esc(d.businessName)}.`),
+        details([['Earning period (Eastern time)', esc(d.period)], ['Amount', money(d.amountCents)], ['Payment date', esc(d.paymentDate)]]),
+        p('This records a wire sent outside the app. Patient Pipeline does not send wires.'),
+        button('Open affiliate portal', d.portalUrl), signoff()], { previewText: `Payment for ${d.period}.` }),
+    }),
+  },
   admin_invite: adminInvite,
   payment_received: paymentReceived,
   payment_failed: paymentFailed,

@@ -28,6 +28,8 @@ export function fromAddress(): string {
 
 export interface SendResult {
   ok: boolean
+  /** Transport failed after a request may have reached the provider; do not blindly retry beyond its dedupe window. */
+  uncertain?: boolean
   /** Our email_log row id. */
   logId: string
   /** Resend's email id when accepted. */
@@ -130,7 +132,7 @@ export async function sendEmail<K extends TemplateId>(
     const error = authentication && !senderConfigurationError ? 'Authentication email send failed; check the registered inbox and email provider' : err instanceof Error ? err.message : String(err)
     await writeLog({ ...base, status: 'failed', error })
     logger.error({ ...(!authentication ? { err } : {}), email: { type, recipient, logId } }, `email failed: ${error}`)
-    return { ok: false, logId, error }
+    return { ok: false, logId, error, uncertain: !senderConfigurationError }
   }
 }
 

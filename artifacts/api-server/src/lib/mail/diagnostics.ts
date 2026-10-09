@@ -1,6 +1,6 @@
 /** Never retain authentication payloads or free-form provider errors in diagnostics. */
 export function isAuthenticationEmail(type: string): boolean {
-  return ['portal_login_code', 'portal_password_setup', 'portal_welcome', 'admin_invite'].includes(type)
+  return ['portal_login_code', 'portal_password_setup', 'portal_welcome', 'admin_invite', 'affiliate_access'].includes(type)
 }
 
 export const DELIVERY_FAILURES = ['failed', 'bounced', 'suppressed', 'complained'] as const

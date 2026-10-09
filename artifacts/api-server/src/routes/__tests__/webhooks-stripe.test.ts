@@ -19,8 +19,13 @@ vi.mock('@/lib/stripe', () => ({
 const seen = new Set<string>()
 const statuses = new Map<string, string>()
 vi.mock('@workspace/db', () => ({
-  stripeEventsTable: { id: 'id' },
+  stripeEventsTable: { id: 'id', status: 'status', receivedAt: 'received' },
+  paymentHistoryTable: { stripeEventId: 'event' },
+  paymentLinkTermsTable: { stripeSubscriptionId: 'subscription' },
   db: {
+    select: () => ({ from: (table: { id?: string }) => ({ where: () => Object.assign(Promise.resolve([]), {
+      limit: async () => table.id === 'id' ? [{ status: [...statuses.values()].includes('processing') ? 'processing' : 'processed' }] : [],
+    }) }) }),
     insert: () => ({
       values: (row: { id: string }) => ({
         onConflictDoNothing: () => ({
@@ -35,9 +40,9 @@ vi.mock('@workspace/db', () => ({
     }),
     update: () => ({
       set: (patch: { status: string }) => ({
-        where: async () => {
+        where: () => Object.assign((async () => {
           for (const id of seen) if (statuses.get(id) === 'processing') statuses.set(id, patch.status)
-        },
+        })(), { returning: async () => [] }),
       }),
     }),
     delete: () => ({ where: async () => undefined }),
@@ -52,6 +57,12 @@ const handlers = {
   handleChargeRefunded: vi.fn(async () => ({ handled: true })),
 }
 vi.mock('@/lib/billing/dunning', () => handlers)
+const affiliateHandlers = {
+  processAffiliateDispute: vi.fn(async () => undefined),
+  processAffiliateHistory: vi.fn(async () => undefined),
+  recordAffiliateEligibility: vi.fn(async () => undefined),
+}
+vi.mock('@/lib/affiliates/ledger', () => affiliateHandlers)
 
 const { default: router } = await import('@/routes/webhooks-stripe')
 
@@ -152,6 +163,8 @@ describe('POST /api/webhooks/stripe', () => {
     await post(event('evt_ref', 'charge.refunded'))
     expect(handlers.handleSubscriptionDeleted).toHaveBeenCalledTimes(1)
     expect(handlers.handleChargeRefunded).toHaveBeenCalledTimes(1)
+    await post(event('evt_dispute', 'charge.dispute.closed', { status: 'won' }))
+    expect(affiliateHandlers.processAffiliateDispute).toHaveBeenCalledTimes(1)
   })
 
   it('is idempotent: a redelivered event id is acknowledged but not re-run', async () => {
@@ -161,5 +174,11 @@ describe('POST /api/webhooks/stripe', () => {
     expect(res.status).toBe(200)
     expect(res.body.duplicate).toBe(true)
     expect(handlers.handleInvoicePaid).toHaveBeenCalledTimes(calls)
+  })
+  it('asks Stripe to retry an unfinished receipt instead of permanently acknowledging lost work', async () => {
+    seen.add('evt_busy'); statuses.set('evt_busy', 'processing')
+    const response = await post(event('evt_busy', 'invoice.paid'))
+    expect(response.status).toBe(503)
+    statuses.set('evt_busy', 'processed')
   })
 })

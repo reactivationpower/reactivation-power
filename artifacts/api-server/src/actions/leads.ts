@@ -2,6 +2,7 @@
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { getAdminClient } from '@/lib/supabase/admin'
+import { referralFromRequest, resolveQualifiedReferral } from '@/lib/affiliates/attribution'
 import {
   addGhlContactNote,
   ghlConfigured,
@@ -227,7 +228,7 @@ export async function submitHealthcareLead(
   }
 
   const supabase = getAdminClient()
-  const { error } = await supabase.from('landing_leads').insert({
+  const { error, data: submittedLead } = await supabase.from('landing_leads').insert({
     sector: 'healthcare',
     first_name: firstName,
     last_name: lastName,
@@ -244,12 +245,18 @@ export async function submitHealthcareLead(
     inactive_patients_estimate: inactiveCount === null ? '' : String(inactiveCount),
     services,
     source_path: sourcePath,
-  })
+  }).select('id').single()
 
   if (error) {
     console.error('[v0] landing lead insert failed:', error.message)
     return { error: 'Something went wrong. Please try again.', values, services }
   }
+
+  await resolveQualifiedReferral({
+    email, phone: phoneDigits, practiceName,
+    affiliateId: await referralFromRequest(email),
+    sourceLeadId: submittedLead?.id ? String(submittedLead.id) : undefined,
+  })
 
   const params = new URLSearchParams({
     name: firstName,

@@ -26,6 +26,8 @@ import * as customerBilling from "../actions/customer-billing";
 import * as cron from "../actions/cron";
 import * as leadNotifications from "../actions/lead-notifications";
 import * as enrollmentNotifications from "../actions/enrollment-notifications";
+import * as affiliates from "../actions/affiliates";
+import { affiliateSession, assertSameOrigin } from "../lib/affiliates/access";
 
 /**
  * RPC bridge for the former Next.js server actions.
@@ -51,6 +53,7 @@ type ActionFn = (...args: unknown[]) => Promise<unknown>;
 type ActionModule = Record<string, unknown>;
 
 const MODULES: Record<string, ActionModule> = {
+  affiliates,
   "enrollment-notifications": enrollmentNotifications,
   "lead-notifications": leadNotifications,
   "admin-auth": adminAuth,
@@ -73,11 +76,19 @@ const MODULES: Record<string, ActionModule> = {
   agreements,
 };
 
-type Auth = "public" | "portal" | "admin" | "super_admin" | "manage_services";
+type Auth = "public" | "portal" | "affiliate" | "admin" | "super_admin" | "manage_services";
 
 // hint: Logic changed on both sides. Requires understanding intent of each change.
 /** Allow-list: module -> action -> required auth. Anything else is 404. */
 const ACTIONS: Record<string, Record<string, Auth>> = {
+  affiliates: {
+    applyAffiliate: "public", requestAffiliateAccess: "public", verifyAffiliateAccess: "public", captureAffiliateReferral: "public",
+    affiliateLogout: "affiliate", getAffiliateDashboard: "affiliate", logAffiliateNavigation: "affiliate",
+    listAffiliates: "super_admin", getAffiliateProfile: "super_admin", getAffiliateAttributionCandidates: "super_admin", saveAffiliate: "super_admin",
+    getAffiliateAccessLink: "super_admin", resendAffiliateAccess: "super_admin", revokeAffiliateAccess: "super_admin",
+    assignAffiliate: "super_admin", setAffiliateCustomerRules: "super_admin", adjustAffiliateLedger: "super_admin",
+    calculateAffiliateHistory: "super_admin", recordAffiliateWire: "super_admin", retryAffiliatePayoutEmail: "super_admin",
+  },
   "enrollment-notifications": {
     listNotifications: "admin", markRead: "admin", claimDelivery: "admin", savePreferences: "admin",
   },
@@ -206,6 +217,7 @@ const ACTIONS: Record<string, Record<string, Auth>> = {
 
 async function isAuthorized(req: Request, auth: Auth): Promise<boolean> {
   if (auth === "public") return true;
+  if (auth === "affiliate") return Boolean(await affiliateSession(req));
   if (auth === "admin" || auth === "super_admin" || auth === "manage_services") {
     const session = await getAdminSessionFromRequest(req);
     return Boolean(session && satisfies(session.role, auth, session.canManageServices));
@@ -246,7 +258,10 @@ router.post("/actions/:module/:fn", async (req: Request, res: Response) => {
   const rawArgs = Array.isArray(req.body?.args) ? (req.body.args as unknown[]) : [];
   const args = rawArgs.map(decodeArg);
   try {
-    const result = await runWithRequestContext(req, res, () => (fn as ActionFn)(...args));
+    const result = await runWithRequestContext(req, res, () => {
+      if (moduleName === 'affiliates') assertSameOrigin();
+      return (fn as ActionFn)(...args);
+    });
     res.json({ ok: true, result: result === undefined ? null : result });
   } catch (err) {
     if (isRedirectSignal(err)) {

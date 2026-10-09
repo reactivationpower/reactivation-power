@@ -27,6 +27,9 @@ vi.mock('@/lib/demo/seed', () => ({ ensureDemoSeeded: vi.fn(async () => ({ statu
 vi.mock('@/lib/mail', () => ({ sendEmail: vi.fn(async (..._args: unknown[]) => ({ ok: true, logId: 'log' })) }))
 const authCleanup = vi.fn(async () => ({ challengesDeleted: 0, rateLimitsDeleted: 0, idleSessionsDeleted: 0 }))
 vi.mock('@/lib/auth/retention', () => ({ cleanupAuthRecords: authCleanup }))
+// This suite exercises shared-DB slot claims, not live affiliate retention or financial work.
+vi.mock('@/lib/affiliates/retention', () => ({ cleanupAffiliateTelemetry: vi.fn(async () => ({})) }))
+vi.mock('@/lib/affiliates/ledger', () => ({ retryAffiliateHistory: vi.fn(async () => ({})) }))
 
 const { cronRunsTable, db, pool } = await import('@workspace/db')
 const { runCronJob, CRON_RUN_STALE_MS } = await import('@/lib/cron/jobs')

@@ -18,6 +18,7 @@ import { logger } from '@/lib/logger'
 import { getAdminClient } from '@/lib/supabase/admin'
 import { billingStatusAfterPayment, cardToRetry, isAccessBlocked, reconcileAccess, subscriptionNextPaymentAt } from './rules'
 import { generateCommissionForHistory, isCommissionable } from './commissions'
+import { queueAffiliateHistory } from '@/lib/affiliates/ledger'
 import { cardSummary, notifyAccessPaused, notifyAccessRestored, notifyBackupCardUsed, notifyPaymentReceived, notifySubscriptionCancelled } from './notifications'
 
 /**
@@ -164,6 +165,7 @@ function rankOf(cards: CustomerCard[], paymentMethodId: string | null): Customer
 export async function recordHistory(row: Omit<NewPaymentHistory, 'id'>): Promise<void> {
   const [inserted] = await db.insert(paymentHistoryTable).values({ id: newId(), ...row }).onConflictDoNothing().returning()
   if (inserted && isCommissionable(inserted)) await generateCommissionForHistory(inserted)
+  if (inserted) await queueAffiliateHistory(inserted)
 }
 
 /** Payment method ids that have a recorded decline on this invoice. */

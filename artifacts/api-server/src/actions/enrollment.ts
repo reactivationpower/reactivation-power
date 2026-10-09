@@ -8,6 +8,7 @@ import { agreementAllowsPayment, loadAgreementByLink, loadAgreementByToken, onSe
 import { isSameCard } from '@/lib/billing/rules'
 import { activateSubscription } from './subscriptions'
 import { PRODUCT_NAME, provisionAccounts, recordIntentPayment } from './payments'
+import { recordAffiliateConversion } from '@/lib/affiliates/attribution'
 
 type Rank = 'primary' | 'secondary'
 
@@ -317,6 +318,7 @@ async function finish(linkId: string, intent: Stripe.PaymentIntent | null, selec
   if (!terms) {
     const [current] = await db.select().from(paymentLinkTermsTable).where(eq(paymentLinkTermsTable.linkId, linkId))
     if (current?.completedAt) {
+      await recordAffiliateConversion(current.customerId, current.completedAt)
       await provisionAccounts(linkId)
       await onSubscriptionStarted(linkId, { monthlyCents: current.monthlyCents, firstChargeAt: current.nextPaymentAt })
       return
@@ -378,6 +380,8 @@ async function finish(linkId: string, intent: Stripe.PaymentIntent | null, selec
       await provisionAccounts(linkId)
       await onSubscriptionStarted(linkId, { monthlyCents: 0, firstChargeAt: null })
     }
+    // Waived setup fees are still a conversion; do not wait for a first monthly invoice to lock the lead.
+    await recordAffiliateConversion(terms.customerId, now)
   } finally {
     await db.update(paymentLinkTermsTable).set({ enrollmentFinalizingAt: null })
       .where(and(eq(paymentLinkTermsTable.linkId, linkId), eq(paymentLinkTermsTable.enrollmentFinalizingAt, lease)))

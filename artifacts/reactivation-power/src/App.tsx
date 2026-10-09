@@ -4,6 +4,12 @@ import { queryClient } from '@/lib/query-client';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/sonner';
 import NotFound from '@/pages/not-found';
+import { ReferralCapture } from '@/components/affiliates/referral-capture';
+import PageAffApply from '@/pages/affiliates_apply';
+import PageAffAccess from '@/pages/affiliates_access';
+import PageAffPortal from '@/pages/affiliates';
+import PageAdminAff from '@/pages/admin_affiliates';
+import PageAdminAffId from '@/pages/admin_affiliates_id';
 import { Route, Switch, useLocation, Router as WouterRouter } from 'wouter';
 
 import RootLayout from '@/layouts/root_layout';
@@ -203,6 +209,21 @@ function Router() {
             <Page_admin_reactivation />
           </AdminLayout>
         </RoutedErrorBoundary>
+      </Route>
+      <Route path="/affiliates/apply">
+        <RoutedErrorBoundary><PageAffApply /></RoutedErrorBoundary>
+      </Route>
+      <Route path="/affiliates/access">
+        <RoutedErrorBoundary><PageAffAccess /></RoutedErrorBoundary>
+      </Route>
+      <Route path="/affiliates">
+        <RoutedErrorBoundary><PageAffPortal /></RoutedErrorBoundary>
+      </Route>
+      <Route path="/admin/affiliates">
+        <RoutedErrorBoundary><AdminLayout><PageAdminAff /></AdminLayout></RoutedErrorBoundary>
+      </Route>
+      <Route path="/admin/affiliates/:id">
+        <RoutedErrorBoundary><AdminLayout><PageAdminAffId /></AdminLayout></RoutedErrorBoundary>
       </Route>
       <Route path="/demo">
         <RoutedErrorBoundary>
@@ -528,6 +549,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
+          <ReferralCapture />
           <Router />
         </WouterRouter>
         <Toaster />

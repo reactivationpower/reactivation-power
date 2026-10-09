@@ -33,6 +33,8 @@ vi.mock('drizzle-orm', () => ({
 }))
 
 const tables: Record<string, Row[]> = { customers: [], payment_link_terms: [], customer_cards: [], payment_history: [] }
+// Affiliate finance has its own real-Postgres integration suite; this suite isolates rep/dunning behaviour.
+vi.mock('@/lib/affiliates/ledger', () => ({ queueAffiliateHistory: vi.fn(async () => undefined) }))
 /** Columns that must be unique when non-null (mirrors the real schema's unique indexes). */
 const uniqueColumns: Record<string, string[]> = { payment_history: ['id', 'stripeRefundId'] }
 

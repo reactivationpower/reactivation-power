@@ -9,7 +9,7 @@ export default defineConfig({
     environment: 'node',
     // Each isolated worker owns a pool against the shared Supabase session
     // pooler. Unbounded workers can exhaust its connection limit.
-    ...(process.env.SUPABASE_DB_URL ? { maxWorkers: 2 } : {}),
+    ...(process.env.SUPABASE_DB_URL ? { maxWorkers: 2, hookTimeout: 30000 } : {}),
   },
   resolve: {
     alias: [

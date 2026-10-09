@@ -18,6 +18,7 @@ import {
   Plus,
   ShieldCheck,
   Users,
+  Handshake,
 } from 'lucide-react'
 import { adminLogout, type AdminIdentity, type AdminRole } from '@/app/actions/admin-auth'
 import { cn } from '@/lib/utils'
@@ -41,6 +42,7 @@ const NAV: { group: string; items: { href: string; label: string; icon: any; rol
       { href: '/admin/payments', label: 'Payments', icon: CreditCard },
       { href: '/admin/agreements', label: 'Agreements', icon: FilePenLine },
       { href: '/admin/commissions', label: 'Commissions', icon: BadgeDollarSign },
+      { href: '/admin/affiliates', label: 'Affiliates', icon: Handshake, roles: ['super_admin'] },
       { href: '/admin/landing', label: 'Landing Pages', icon: Globe, roles: ['super_admin'] },
     ],
   },

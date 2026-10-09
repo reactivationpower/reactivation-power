@@ -2,11 +2,17 @@
 name: Affiliate business policy
 description: User-selected referral, commission, payout, and affiliate-visibility rules.
 ---
-Affiliates may join by invitation or application with approval. Referral links go to the strategy-call landing page and persist for 90 days. The user wants the original submission's affiliate protected for five days against another affiliate's repeat submission; afterward attribution may switch. Admin attribution corrections require a recorded reason.
+Affiliates may join by invitation or application with approval. Referral links go to the strategy-call landing page and persist for 90 days. The original qualified submission's affiliate is protected for five full elapsed days. Only a new qualified submission after that window can switch attribution; time passing alone cannot. Conversion locks attribution, including a waived-setup enrollment. Admin corrections require a recorded reason.
 
 **Why:** These are the user's business rules, not implementation defaults.
 
 **How to apply:** Preserve this distinction between latest referral clicks and submission attribution protection; make boundary behavior explicit before changing it.
+
+Automatic identity matching must use an exact normalized email, never a shared phone number. A different qualified email represents a separate lead; enrollment without an exact qualified email match remains unattributed until a reasoned admin correction.
+
+**Why:** Unrelated practices can share an office or booking-centre number. Phone-only matching can pay the wrong affiliate and expose another practice's financial information.
+
+**How to apply:** Keep the same identity boundary at submission, enrollment attachment, and conversion locking. Do not reintroduce a single-phone-candidate fallback.
 
 Affiliates see practice names and billing status, not customer contact details. Affiliate access should be passwordless and branded access emails should use Resend.
 

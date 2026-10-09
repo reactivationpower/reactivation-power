@@ -9,6 +9,8 @@ import { logger } from '@/lib/logger'
 import { sendEmail } from '@/lib/mail'
 import { dueKeyFor, hoursSinceSlot } from './slots'
 import { cleanupAuthRecords } from '@/lib/auth/retention'
+import { cleanupAffiliateTelemetry } from '@/lib/affiliates/retention'
+import { retryAffiliateHistory } from '@/lib/affiliates/ledger'
 import { reconcilePendingEnrollments } from '@/actions/enrollment'
 
 /**
@@ -39,7 +41,7 @@ export const CRON_JOBS: Record<CronJobName, CronJobDefinition> = {
     label: 'Authentication record cleanup',
     description: 'Removes retired sign-in codes, obsolete rate-limit counters, and inactive security sessions after one day; preserves analytics history.',
     hourEt: 4,
-    run: cleanupAuthRecords,
+    run: async () => ({ ...await cleanupAuthRecords(), affiliates: await cleanupAffiliateTelemetry() }),
   },
   'billing-retry': {
     name: 'billing-retry',
@@ -49,8 +51,9 @@ export const CRON_JOBS: Record<CronJobName, CronJobDefinition> = {
     run: async () => {
       const summary = await retryPastDueInvoices('cron')
       const enrollments = await reconcilePendingEnrollments()
+      const affiliates = await retryAffiliateHistory()
       // Keep per-invoice detail in the log but cap it so the row stays small.
-      return { ...summary, enrollments, details: summary.details.slice(0, 50) }
+      return { ...summary, enrollments, affiliates, details: summary.details.slice(0, 50) }
     },
   },
   'demo-reset': {

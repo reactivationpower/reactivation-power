@@ -84,6 +84,8 @@ const sendEmail = vi.fn(async (..._args: unknown[]) => ({ ok: true, logId: 'log'
 vi.mock('@/lib/mail', () => ({ sendEmail }))
 const cleanup = vi.fn(async () => ({ challengesDeleted: 2, rateLimitsDeleted: 1, idleSessionsDeleted: 3 }))
 vi.mock('@/lib/auth/retention', () => ({ cleanupAuthRecords: cleanup }))
+vi.mock('@/lib/affiliates/retention', () => ({ cleanupAffiliateTelemetry: vi.fn(async () => ({ ipStripped: 0, telemetryDeleted: 0, sessionsDeleted: 0, challengesDeleted: 0 })) }))
+vi.mock('@/lib/affiliates/ledger', () => ({ retryAffiliateHistory: vi.fn(async () => ({ examined: 0, completed: 0 })) }))
 
 const { tick } = await import('@/lib/cron/scheduler')
 const { dueKeyFor, hoursSinceSlot } = await import('@/lib/cron/slots')
