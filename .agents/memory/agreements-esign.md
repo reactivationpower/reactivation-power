@@ -3,6 +3,9 @@ name: Agreement e-sign flow constraints
 description: Durable rules for the owned e-sign flow — edit/sign linearization, one agreement per link, when the signed copy is delivered, Stripe element readiness
 ---
 - **Edit vs sign is linearized in the database, not in application checks.** A version bump only lands when the row is still unsigned and on the expected version (conditional update inside a transaction); signing only lands when the row is unsigned and on the version the customer saw. Keep it that way — a signature on a non-current version permanently blocks payment.
+- **Support-address corrections must not rewrite signed snapshots, certificates or historical PDFs.**
+  **Why:** The user treats them as historical legal records; a signed correction requires an explicit amendment, not silent regeneration.
+  **How to apply:** Update shared defaults for unsigned/new rendering and retain section-hash re-initial requirements. Inspect literal custom content read-only and change unsigned content only through audited version edits.
 - **One agreement per payment link is a DB constraint** (unique link_id) and creation is conflict-safe; do not add code paths that assume a second agreement can exist for a link.
 - **Signed-copy email + PDF go out on completion (subscription started), not at signature time.** The sign-request email wording reflects this; if a "copy at signature" is wanted, that is a product change, not a bug.
 - **Stripe Elements readiness must be keyed by client secret, not a boolean.** An amount edit updates the same PaymentIntent, so the element never remounts and `onReady` never re-fires; call `elements.fetchUpdates()` instead.

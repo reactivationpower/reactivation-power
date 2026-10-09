@@ -19,7 +19,7 @@ export const AGREEMENT_DEFAULTS = {
 export const COMPANY = {
   name: 'Patient Pipeline',
   legalName: 'Beyond Healthcare LLC',
-  supportEmail: 'support@reactivationpower.com',
+  supportEmail: 'team@patientpipeline.app',
   siteUrl: 'https://patientpipeline.app',
 } as const
 

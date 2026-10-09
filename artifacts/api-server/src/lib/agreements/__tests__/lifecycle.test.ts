@@ -96,6 +96,31 @@ d('agreement lifecycle', () => {
 
     // Initial every section, then sign the current version
     const doc = store.renderCurrent(loaded)
+    const { renderDocument } = await import('../template')
+    const historical = renderDocument(loaded.version.body.replaceAll('{{company_email}}', 'support@reactivationpower.com'), {
+      customer: loaded.customer, ...loaded.version, asOf: new Date(),
+    })
+    const { eq } = await import('drizzle-orm')
+    for (const s of historical.sections.filter(s => s.requiresInitials)) {
+      await db.insert(schema.agreementInitialsTable).values({
+        id: randomUUID(), agreementId: loaded.agreement.id, sectionId: s.id,
+        sectionHash: s.hash, version: 1, initials: 'RT',
+      })
+    }
+    const valid = await store.validInitials(loaded, doc)
+    const supportSection = doc.sections.find(s => s.paragraphs.some(p => p.includes('team@patientpipeline.app')))!
+    expect(valid[supportSection.id]).toBeUndefined()
+    expect(Object.keys(valid)).toHaveLength(doc.sections.filter(s => s.requiresInitials).length - 1)
+    expect(await actions.signAgreement(loaded.agreement.token, {
+      version: 1, consent: true, signerName: 'Race Tester', signerTitle: 'Owner',
+      signatureType: 'typed', signatureData: 'Race Tester',
+    })).toMatchObject({ ok: false })
+    const unchanged = (await store.loadAgreementByLink(linkId))!
+    expect(unchanged.agreement.currentVersion).toBe(loaded.agreement.currentVersion)
+    expect(unchanged.agreement.currentHash).toBe(loaded.agreement.currentHash)
+    expect(unchanged.agreement.signedAt).toBeNull()
+    expect(await db.select().from(schema.agreementInitialsTable).where(eq(schema.agreementInitialsTable.agreementId, loaded.agreement.id)))
+      .toHaveLength(historical.sections.filter(s => s.requiresInitials).length)
     for (const s of doc.sections.filter((x) => x.requiresInitials)) {
       const r = await actions.recordAgreementInitials(loaded.agreement.token, { version: 1, sectionId: s.id, initials: 'RT' })
       expect(r.ok).toBe(true)
