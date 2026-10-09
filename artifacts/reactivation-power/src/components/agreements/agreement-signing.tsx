@@ -65,12 +65,19 @@ function initialsFromName(name: string): string {
 
 export function AgreementSigning({ token, initial }: { token: string; initial: any }) {
   return initial.enrollment_flow
-    ? <EnrollmentSigning token={token} initial={initial} />
-    : <LegacyAgreementSigning token={token} initial={initial} />
+    ? <EnrollmentSigning key={token} token={token} initial={initial} />
+    : <LegacyAgreementSigning key={token} token={token} initial={initial} />
 }
 
 function LegacyAgreementSigning({ token, initial }: { token: string; initial: any }) {
   const [agreement, setAgreement] = useState<any>(initial)
+  const currentVersion = useRef(agreement.version)
+  currentVersion.current = agreement.version
+  const active = useRef(true)
+  useEffect(() => {
+    active.current = true
+    return () => { active.current = false }
+  }, [])
   useAgreementDisplayAcknowledgment(token, agreement.version, agreement.signed || agreement.expired)
   const [initials, setInitials] = useState<Record<string, string>>(initial.initials ?? {})
   const [changedSections, setChangedSections] = useState<Set<string>>(new Set())
@@ -183,9 +190,11 @@ function LegacyAgreementSigning({ token, initial }: { token: string; initial: an
 
   const onInitial = useCallback(
     async (sectionId: string, value: string) => {
-      const res = await recordAgreementInitials(token, { version: agreement.version, sectionId, initials: value })
+      const version = agreement.version
+      const res = await recordAgreementInitials(token, { version, sectionId, initials: value })
+      if (!active.current || currentVersion.current !== version) return { ok: false, error: 'The agreement changed. Please review it again.' }
       if (res.ok) {
-        setInitials(res.initials ?? {})
+        setInitials(prev => ({ ...prev, [sectionId]: res.initials[sectionId] }))
         setChangedSections((prev) => {
           if (!prev.has(sectionId)) return prev
           const next = new Set(prev)
@@ -374,6 +383,7 @@ function LegacyAgreementSigning({ token, initial }: { token: string; initial: an
 
       <article data-agreement-document className="rounded-lg border border-border bg-card p-5 sm:p-8">
         <AgreementDocument
+          scope={`${token}:${agreement.version}`}
           sections={doc.sections}
           initials={initials}
           onInitial={onInitial}

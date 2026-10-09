@@ -1,8 +1,7 @@
 // @ts-nocheck
-import { useState } from 'react'
-import { Check, Loader2 } from 'lucide-react'
-
-import { Input } from '@/components/ui/input'
+import { useEffect, useRef, useState } from 'react'
+import { Check } from 'lucide-react'
+import { InitialsBox } from './initials-box'
 import { SignatureImage } from '@/components/agreements/signature-pad'
 
 export function formatUsd(cents: number): string {
@@ -83,7 +82,7 @@ interface Section {
 
 /**
  * The agreement body. In signing mode each required section has an initials
- * box; typing 1–6 letters and leaving the box saves them to the server.
+ * box. Reuse always requires explicit activation and a confirmed source save.
  */
 export function AgreementDocument({
   sections,
@@ -92,6 +91,7 @@ export function AgreementDocument({
   readOnly,
   highlight,
   suggestedInitials,
+  scope,
 }: {
   sections: Section[]
   initials: Record<string, string>
@@ -100,7 +100,66 @@ export function AgreementDocument({
   /** Sections changed by the latest edit (shown with a marker until re-initialed). */
   highlight?: Set<string>
   suggestedInitials?: string
+  /** Signer link + document version. Resets drafts and queued acknowledgments. */
+  scope?: string
 }) {
+  const key = JSON.stringify([scope, readOnly, sections.map(s => [s.id, s.hash, s.requiresInitials])])
+  return <ScopedAgreementDocument key={key} {...{ sections, initials, onInitial, readOnly, highlight, suggestedInitials }} />
+}
+
+function ScopedAgreementDocument({ sections, initials, onInitial, readOnly, highlight, suggestedInitials }) {
+  const firstId = sections.find(s => s.requiresInitials)?.id
+  const [firstDraft, setFirstDraft] = useState(initials[firstId] ?? '')
+  const source = useRef(initials[firstId] ?? '')
+  const [seenFirst, setSeenFirst] = useState(source.current)
+  if (seenFirst !== (initials[firstId] ?? '')) {
+    source.current = initials[firstId] ?? ''
+    setSeenFirst(source.current)
+    setFirstDraft(source.current)
+  }
+  const draftRef = useRef(firstDraft)
+  draftRef.current = firstDraft
+  const pending = useRef(new Map())
+  const tail = useRef(Promise.resolve())
+  const active = useRef(true)
+  useEffect(() => {
+    active.current = true
+    return () => { active.current = false }
+  }, [])
+
+  function save(sectionId, value) {
+    if (pending.current.has(sectionId)) return pending.current.get(sectionId)
+    // Serialize full-map server responses, including rapid clicks on different
+    // sections. A queued acknowledgment cannot survive a scope/version change.
+    const attempt = tail.current.then(async () => {
+      if (!active.current || !onInitial) return { ok: false, error: 'Review the current agreement and try again.' }
+      try {
+        const result = await onInitial(sectionId, value)
+        if (!active.current) return { ok: false, error: 'The agreement changed. Please review it again.' }
+        if (result.ok && sectionId === firstId) source.current = value
+        return result
+      } catch {
+        return { ok: false, error: 'Could not save initials. Please try again.' }
+      }
+    }).finally(() => pending.current.delete(sectionId))
+    pending.current.set(sectionId, attempt)
+    tail.current = attempt.then(() => undefined)
+    return attempt
+  }
+
+  async function reuse(sectionId) {
+    // Blur may have just started the first save. Wait for that exact attempt,
+    // not a placeholder or stale persisted value, before acknowledging this one.
+    const entered = draftRef.current.trim().toUpperCase()
+    const firstAttempt = pending.current.get(firstId)
+    if (firstAttempt || (entered && entered !== source.current)) {
+      const result = await (firstAttempt ?? save(firstId, entered))
+      if (!result.ok) return { ...result, error: `First section: ${result.error ?? 'Could not save initials. Please try again.'}` }
+    }
+    if (!active.current || !source.current) return { ok: false, error: 'Save your initials in the first section first.' }
+    return save(sectionId, source.current)
+  }
+
   return (
     <div className="flex flex-col gap-7">
       {sections.map((s, i) => (
@@ -121,79 +180,21 @@ export function AgreementDocument({
             ) : (
               <InitialsBox
                 sectionId={s.id}
+                sectionTitle={s.title}
                 value={initials[s.id] ?? ''}
                 changed={highlight?.has(s.id)}
                 suggested={suggestedInitials}
-                onSave={onInitial}
+                onSave={save}
+                onDraft={s.id === firstId ? setFirstDraft : undefined}
+                reuseLabel={s.id !== firstId && !initials[s.id] && firstDraft.trim()
+                  ? (firstDraft.trim().toUpperCase() === source.current ? `Use ${source.current} initials` : 'Use initials from first section')
+                  : undefined}
+                onReuse={reuse}
               />
             )
           ) : null}
         </section>
       ))}
-    </div>
-  )
-}
-
-function InitialsBox({
-  sectionId,
-  value,
-  changed,
-  suggested,
-  onSave,
-}: {
-  sectionId: string
-  value: string
-  changed?: boolean
-  suggested?: string
-  onSave?: (sectionId: string, value: string) => Promise<{ ok: boolean; error?: string }>
-}) {
-  const [draft, setDraft] = useState(value)
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  // Server value changed (e.g. cleared after an edit): follow it
-  const [seen, setSeen] = useState(value)
-  if (seen !== value) {
-    setSeen(value)
-    setDraft(value)
-  }
-  const saved = value && draft.trim().toUpperCase() === value
-
-  async function commit() {
-    const v = draft.trim().toUpperCase()
-    if (!v || v === value || !onSave) return
-    setSaving(true)
-    setError(null)
-    const res = await onSave(sectionId, v)
-    setSaving(false)
-    if (!res.ok) setError(res.error ?? 'Could not save initials')
-  }
-
-  return (
-    <div className="mt-3 flex flex-wrap items-center gap-3 rounded-lg border border-border bg-muted/40 p-3" data-testid={`initials-${sectionId}`}>
-      <label htmlFor={`initials-${sectionId}`} className="text-sm font-medium text-foreground">
-        Initial here {changed ? <span className="ml-1 rounded bg-amber-100 px-1.5 py-0.5 text-[11px] font-semibold text-amber-900">Updated — please re-initial</span> : null}
-      </label>
-      <div className="flex items-center gap-2">
-        <Input
-          id={`initials-${sectionId}`}
-          value={draft}
-          onChange={(e) => setDraft(e.target.value.toUpperCase().slice(0, 6))}
-          onBlur={commit}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              e.preventDefault()
-              void commit()
-            }
-          }}
-          placeholder={suggested || 'AB'}
-          maxLength={6}
-          autoCapitalize="characters"
-          className={`h-11 w-24 text-center text-lg font-semibold uppercase tracking-widest ${saved ? 'border-emerald-500 bg-emerald-50' : ''}`}
-          aria-label="Your initials"
-        />
-        {saving ? <Loader2 className="size-4 animate-spin text-muted-foreground" /> : saved ? <Check className="size-5 text-emerald-600" aria-label="Saved" /> : null}
-      </div>
-      {error ? <p className="w-full text-xs text-destructive">{error}</p> : null}
     </div>
   )
 }

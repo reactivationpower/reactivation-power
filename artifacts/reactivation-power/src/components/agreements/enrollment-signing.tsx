@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useAgreementDisplayAcknowledgment } from '@/hooks/use-agreement-display-acknowledgment'
 import { Elements, PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js'
 import { Loader2, Download } from 'lucide-react'
@@ -40,7 +40,18 @@ function SaveCard({ onSaved, onError }: { onSaved: () => Promise<void>; onError:
 }
 
 export function EnrollmentSigning({ token, initial }: { token: string; initial: any }) {
+  return <ScopedEnrollmentSigning key={token} token={token} initial={initial} />
+}
+
+function ScopedEnrollmentSigning({ token, initial }: { token: string; initial: any }) {
   const [agreement, setAgreement] = useState(initial)
+  const currentVersion = useRef(agreement.version)
+  currentVersion.current = agreement.version
+  const active = useRef(true)
+  useEffect(() => {
+    active.current = true
+    return () => { active.current = false }
+  }, [])
   const [checkout, setCheckout] = useState<any>(null)
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
@@ -50,12 +61,16 @@ export function EnrollmentSigning({ token, initial }: { token: string; initial: 
   const [title, setTitle] = useState('')
   const [initials, setInitials] = useState(initial.initials ?? {})
   const [chosenCard, setChosenCard] = useState('')
+  const initialsWrites = useRef({ epoch: 0, pending: 0 })
   const oneTime = agreement.offer_type === 'one_time'
 
   useAgreementDisplayAcknowledgment(token, agreement.version, agreement.signed || agreement.expired)
 
   async function refresh() {
+    const epoch = initialsWrites.current.epoch
+    const pending = initialsWrites.current.pending
     const [next, state] = await Promise.all([getAgreementPublic(token), getEnrollmentCheckout(token)])
+    if (!active.current || pending || initialsWrites.current.pending || epoch !== initialsWrites.current.epoch) return
     if (next) { setAgreement(next); setInitials(next.initials ?? {}) }
     if (state.ok) setCheckout(state.checkout)
     else setError(state.error ?? 'Enrollment is unavailable.')
@@ -78,9 +93,25 @@ export function EnrollmentSigning({ token, initial }: { token: string; initial: 
   }, [checkout?.cards, chosenCard])
 
   async function saveInitials(sectionId: string, value: string) {
-    const res = await recordAgreementInitials(token, { version: agreement.version, sectionId, initials: value })
-    if (res.ok) setInitials(res.initials ?? {})
-    else setError(res.error ?? 'Could not save initials.')
+    const version = agreement.version
+    initialsWrites.current.epoch++
+    initialsWrites.current.pending++
+    let res
+    try {
+      res = await recordAgreementInitials(token, { version, sectionId, initials: value })
+    } finally {
+      initialsWrites.current.pending--
+      initialsWrites.current.epoch++
+    }
+    if (!active.current || currentVersion.current !== version) return { ok: false, error: 'The agreement changed. Please review it again.' }
+    if (res.ok) {
+      setInitials(prev => ({ ...prev, [sectionId]: res.initials[sectionId] }))
+      setError('')
+    }
+    else {
+      setError(res.error ?? 'Could not save initials.')
+      if (res.stale) await refresh()
+    }
     return res
   }
   async function saveSignature() {
@@ -142,7 +173,7 @@ export function EnrollmentSigning({ token, initial }: { token: string; initial: 
     {!oneTime && <AgreementTermsBox amounts={agreement.amounts} fields={doc.fields} />}
     {oneTime && <div className="rounded-lg border bg-card p-4"><strong>One-time purchase price: {formatUsd(due)}</strong><p>No recurring subscription.</p></div>}
     <article data-agreement-document className="rounded-lg border bg-card p-6">
-      <AgreementDocument sections={doc.sections} initials={initials} onInitial={agreement.signed ? undefined : saveInitials} readOnly={agreement.signed} />
+      <AgreementDocument scope={`${token}:${agreement.version}`} sections={doc.sections} initials={initials} onInitial={agreement.signed ? undefined : saveInitials} readOnly={agreement.signed} />
     </article>
     {!agreement.signed && <section className="space-y-4 rounded-lg border bg-card p-6" data-testid="signature-section">
       <h2 className="text-lg font-semibold">Sign the agreement</h2>
