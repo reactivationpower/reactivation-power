@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useAgreementDisplayAcknowledgment } from '@/hooks/use-agreement-display-acknowledgment'
 import { Elements, PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js'
 import { AlertCircle, Check, CreditCard, Download, FileText, Loader2, RefreshCw, ShieldCheck } from 'lucide-react'
 
@@ -70,6 +71,7 @@ export function AgreementSigning({ token, initial }: { token: string; initial: a
 
 function LegacyAgreementSigning({ token, initial }: { token: string; initial: any }) {
   const [agreement, setAgreement] = useState<any>(initial)
+  useAgreementDisplayAcknowledgment(token, agreement.version, agreement.signed || agreement.expired)
   const [initials, setInitials] = useState<Record<string, string>>(initial.initials ?? {})
   const [changedSections, setChangedSections] = useState<Set<string>>(new Set())
   const [updateNotice, setUpdateNotice] = useState<{ changes: string[] } | null>(null)
@@ -370,7 +372,7 @@ function LegacyAgreementSigning({ token, initial }: { token: string; initial: an
 
       <AgreementTermsBox amounts={agreement.amounts} fields={doc.fields} />
 
-      <article className="rounded-lg border border-border bg-card p-5 sm:p-8">
+      <article data-agreement-document className="rounded-lg border border-border bg-card p-5 sm:p-8">
         <AgreementDocument
           sections={doc.sections}
           initials={initials}

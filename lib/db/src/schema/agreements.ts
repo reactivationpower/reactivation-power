@@ -63,6 +63,9 @@ export const agreementsTable = pgTable(
     sentAt: timestamp("sent_at", { withTimezone: true }),
     lastSentAt: timestamp("last_sent_at", { withTimezone: true }),
     viewedAt: timestamp("viewed_at", { withTimezone: true }),
+    displayAcknowledgedAt: timestamp("display_acknowledged_at", { withTimezone: true }),
+    primaryCardSavedAt: timestamp("primary_card_saved_at", { withTimezone: true }),
+    backupCardSavedAt: timestamp("backup_card_saved_at", { withTimezone: true }),
     signedAt: timestamp("signed_at", { withTimezone: true }),
     signedVersion: integer("signed_version"),
     /** Fingerprint of the rendered document that was signed. */

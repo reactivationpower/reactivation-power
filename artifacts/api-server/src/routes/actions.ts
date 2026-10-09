@@ -25,6 +25,7 @@ import * as commissions from "../actions/commissions";
 import * as customerBilling from "../actions/customer-billing";
 import * as cron from "../actions/cron";
 import * as leadNotifications from "../actions/lead-notifications";
+import * as enrollmentNotifications from "../actions/enrollment-notifications";
 
 /**
  * RPC bridge for the former Next.js server actions.
@@ -50,6 +51,7 @@ type ActionFn = (...args: unknown[]) => Promise<unknown>;
 type ActionModule = Record<string, unknown>;
 
 const MODULES: Record<string, ActionModule> = {
+  "enrollment-notifications": enrollmentNotifications,
   "lead-notifications": leadNotifications,
   "admin-auth": adminAuth,
   "admin-team": adminTeam,
@@ -76,6 +78,9 @@ type Auth = "public" | "portal" | "admin" | "super_admin" | "manage_services";
 // hint: Logic changed on both sides. Requires understanding intent of each change.
 /** Allow-list: module -> action -> required auth. Anything else is 404. */
 const ACTIONS: Record<string, Record<string, Auth>> = {
+  "enrollment-notifications": {
+    listNotifications: "admin", markRead: "admin", claimDelivery: "admin", savePreferences: "admin",
+  },
   "lead-notifications": { getLeadEmailSettings: "portal", saveLeadEmailSettings: "portal" },
   "admin-auth": {
     adminLogin: "public", completeAdminInvite: "public", adminLogout: "public",
@@ -148,6 +153,7 @@ const ACTIONS: Record<string, Record<string, Auth>> = {
   agreements: {
     // Public signing page (agreement token in the URL is the credential).
     getAgreementPublic: "public",
+    acknowledgeAgreementDisplay: "public",
     getAgreementVersion: "public",
     recordAgreementInitials: "public",
     signAgreement: "public",

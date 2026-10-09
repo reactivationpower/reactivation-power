@@ -13,3 +13,9 @@ description: How the reactivation-power web app runs vitest (jsdom + Testing Lib
 
 - If a web-app test fails with "Failed to resolve import @workspace/<lib>", the workspace symlink under the artifact's node_modules/@workspace is missing (type-only imports in source hide it). Run `pnpm install --offline` at the root to restore it; no package.json change needed.
 - "Other…" concern type-in is guarded by a render test (type → change event, then tap a routing button); the CONCERN_FALLBACK and per-sector complaint fallbacks are asserted after clearing the box.
+
+Limit jsdom worker fan-out before increasing individual test deadlines when simple mocked UI tests time out only during full configured validation.
+
+**Why:** Concurrent typechecking, API tests, and unrestricted jsdom startup can overload the workspace and cause false timeouts in unrelated, otherwise passing UI tests.
+
+**How to apply:** Diagnose timing-only failures against the validation workload; keep worker concurrency bounded instead of masking contention with longer deadlines.

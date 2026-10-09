@@ -4,6 +4,7 @@ const state = vi.hoisted(() => ({
   terms: {} as any, cards: [] as any[], signed: true, committed: false,
   intent: {} as any,
   create: vi.fn(), confirm: vi.fn(), retrieve: vi.fn(),
+  setupRetrieve: vi.fn(), insertCard: vi.fn(), cardMilestones: [] as any[],
 }))
 vi.mock('@workspace/db', async importOriginal => {
   const actual = await importOriginal<any>()
@@ -16,7 +17,11 @@ vi.mock('@workspace/db', async importOriginal => {
   }
   const db: any = {
     select: () => query(),
-    update: () => ({ set: (values: any) => ({ where: async () => Object.assign(state.terms, values) }) }),
+    update: (table: any) => ({ set: (values: any) => ({ where: async () => {
+      if (table === actual.agreementsTable) state.cardMilestones.push(values)
+      else Object.assign(state.terms, values)
+    } }) }),
+    insert: () => ({ values: state.insertCard }),
     execute: vi.fn(),
     transaction: async (fn: any) => {
       state.committed = false
@@ -29,7 +34,11 @@ vi.mock('@workspace/db', async importOriginal => {
 })
 vi.mock('@/lib/stripe', () => ({
   getStripeMode: () => 'test',
-  stripe: { paymentIntents: { create: state.create, confirm: state.confirm, retrieve: state.retrieve } },
+  stripe: {
+    paymentIntents: { create: state.create, confirm: state.confirm, retrieve: state.retrieve },
+    setupIntents: { retrieve: state.setupRetrieve },
+    paymentMethods: { detach: vi.fn() },
+  },
 }))
 vi.mock('@/lib/supabase/admin', () => ({
   getAdminClient: () => ({ from: () => ({
@@ -47,12 +56,17 @@ vi.mock('@/lib/agreements/store', () => ({
 }))
 vi.mock('../subscriptions', () => ({ activateSubscription: vi.fn() }))
 vi.mock('../payments', () => ({ PRODUCT_NAME: 'Patient Pipeline', provisionAccounts: vi.fn(), recordIntentPayment: vi.fn() }))
-import { checkout, confirm } from '../enrollment'
+import { checkout, confirm, saveCard } from '../enrollment'
 
 beforeEach(() => {
   vi.clearAllMocks()
   state.signed = true
   state.committed = false
+  state.cardMilestones = []
+  state.insertCard.mockImplementation(async card => { state.cards.push(card) })
+  state.setupRetrieve.mockResolvedValue({ status: 'succeeded', payment_method: {
+    id: 'pm_saved', card: { fingerprint: 'saved', brand: 'visa', last4: '4242', exp_month: 12, exp_year: 2030 },
+  } })
   state.terms = { linkId: 'link', customerId: 'customer', type: 'subscription', enrollmentFlow: true, enrollmentStripeMode: 'test', setupFeeCents: 49900, monthlyCents: 33000 }
   state.cards = [
     { id: 'first', stripePaymentMethodId: 'pm_first', fingerprint: 'first', rank: 'primary' },
@@ -69,6 +83,50 @@ beforeEach(() => {
 })
 
 describe('agreement-first enrollment', () => {
+  it('records the primary milestone only after Stripe verification and committed card insertion', async () => {
+    state.cards = []
+    state.terms.primaryIntentId = 'seti_mock'
+    expect(await saveCard('token')).toEqual({ ok: true })
+    expect(state.insertCard).toHaveBeenCalledOnce()
+    expect(state.committed).toBe(true)
+    expect(state.cardMilestones).toHaveLength(1)
+    expect(Object.keys(state.cardMilestones[0])).toEqual(['primaryCardSavedAt'])
+  })
+  it('records a distinct backup card for subscriptions but not repeated saves', async () => {
+    state.cards.pop()
+    state.terms.secondaryIntentId = 'seti_mock'
+    expect(await saveCard('token')).toEqual({ ok: true })
+    expect(Object.keys(state.cardMilestones[0])).toEqual(['backupCardSavedAt'])
+    expect(await saveCard('token')).toEqual({ ok: true })
+    expect(state.cardMilestones).toHaveLength(1)
+    expect(state.insertCard).toHaveBeenCalledOnce()
+  })
+  it('never records a milestone on pending/failed authorization or a duplicate physical card', async () => {
+    state.cards.pop()
+    state.terms.secondaryIntentId = 'seti_mock'
+    for (const status of ['requires_action', 'requires_payment_method', 'processing']) {
+      state.setupRetrieve.mockResolvedValue({ status })
+      expect((await saveCard('token')).ok).toBe(false)
+    }
+    state.setupRetrieve.mockResolvedValue({ status: 'succeeded', payment_method: {
+      id: 'pm_duplicate', card: { fingerprint: 'first' },
+    } })
+    expect((await saveCard('token')).ok).toBe(false)
+    expect(state.insertCard).not.toHaveBeenCalled()
+    expect(state.cardMilestones).toEqual([])
+  })
+  it('does not announce an unpersisted card or a backup card for full payment', async () => {
+    state.terms.type = 'one_time'
+    state.terms.primaryIntentId = 'seti_mock'
+    state.cards = []
+    state.insertCard.mockRejectedValueOnce(new Error('local persistence failed'))
+    await expect(saveCard('token')).rejects.toThrow('local persistence failed')
+    expect(state.cardMilestones).toEqual([])
+    expect(await saveCard('token')).toEqual({ ok: true })
+    expect(Object.keys(state.cardMilestones[0])).toEqual(['primaryCardSavedAt'])
+    expect(await saveCard('token')).toEqual({ ok: true })
+    expect(state.cardMilestones).toHaveLength(1)
+  })
   it('does not create a payment or card-save intent before signing', async () => {
     state.signed = false
     expect((await checkout('token')).checkout?.stage).toBe('awaiting_signature')

@@ -10,3 +10,4 @@ export * from "./cron-runs";
 export * from "./billing-notifications";
 export * from "./lead-followup";
 export * from "./lead-notifications";
+export * from "./enrollment-notifications";

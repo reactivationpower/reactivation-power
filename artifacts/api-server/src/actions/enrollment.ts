@@ -117,12 +117,19 @@ export async function saveCard(token: string) {
     if (current.some(card => isSameCard(card, { stripePaymentMethodId: pm.id, fingerprint: pm.card!.fingerprint ?? null })))
       throw new Error('That physical card is already saved. Please choose another.')
     if (current.length >= required) return
+    const persistedRank = current.some(card => card.rank === 'primary') ? 'secondary' : 'primary'
     await tx.insert(customerCardsTable).values({
       id: randomUUID(), customerId: c.customer.id, linkId: c.link.id,
       stripePaymentMethodId: pm.id, fingerprint: pm.card!.fingerprint ?? null,
       brand: pm.card!.brand, last4: pm.card!.last4, expMonth: pm.card!.exp_month, expYear: pm.card!.exp_year,
-      rank: current.some(card => card.rank === 'primary') ? 'secondary' : 'primary',
+      rank: persistedRank,
     })
+    // Durable evidence is committed with the Stripe-verified local card save.
+    // Replacement and retry never reset a milestone, even if ranks later swap.
+    await tx.update(agreementsTable).set(persistedRank === 'primary'
+      ? { primaryCardSavedAt: sql`coalesce(${agreementsTable.primaryCardSavedAt}, now())` }
+      : { backupCardSavedAt: sql`coalesce(${agreementsTable.backupCardSavedAt}, now())` })
+      .where(eq(agreementsTable.id, c.loaded.agreement.id))
   })
   return { ok: true }
 }

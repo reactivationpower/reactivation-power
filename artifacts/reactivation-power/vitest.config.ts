@@ -16,5 +16,8 @@ export default defineConfig({
     environment: 'jsdom',
     globals: false,
     setupFiles: ['./src/test/setup.ts'],
+    // Completion validation runs API tests and typechecking alongside these
+    // jsdom workers. Unbounded fan-out causes false timeouts under that load.
+    maxWorkers: 2,
   },
 })

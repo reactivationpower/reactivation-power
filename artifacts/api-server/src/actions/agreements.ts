@@ -2,6 +2,7 @@ import { and, desc, eq, isNull, sql } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import {
   agreementInitialsTable,
+  agreementEventsTable,
   agreementsTable,
   customersTable,
   db,
@@ -16,6 +17,8 @@ import {
 } from '@workspace/db'
 
 import { requireAdmin } from '@/lib/auth/admin-session'
+import { getAdminSession } from '@/lib/auth/admin-session'
+import { canAccessNotificationAgreement, notificationScope } from '@/lib/enrollment-notifications'
 import { getStripeMode } from '@/lib/stripe'
 import { sendAgreementSentEmail } from '@/lib/mail'
 import { renderTemplate } from '@/lib/mail/templates'
@@ -569,18 +572,20 @@ export async function resendAgreement(id: string, delivery?: { signerEmail?: str
 // ── Admin: hub & detail ────────────────────────────────────────────
 
 export async function listAgreements(): Promise<AgreementSummary[]> {
-  await requireAdmin()
+  const admin = await requireAdmin()
   const rows = await db
     .select({ agreement: agreementsTable, customer: customersTable, repName: paymentLinkTermsTable.repName })
     .from(agreementsTable)
     .innerJoin(customersTable, eq(customersTable.id, agreementsTable.customerId))
     .leftJoin(paymentLinkTermsTable, eq(paymentLinkTermsTable.linkId, agreementsTable.linkId))
+    .where(notificationScope(admin, 'customers'))
     .orderBy(desc(agreementsTable.lastActivityAt))
   return rows.map((r) => toSummary(r.agreement, r.customer, r.repName))
 }
 
 export async function getAgreementDetail(id: string): Promise<AgreementDetail | null> {
-  await requireAdmin()
+  const admin = await requireAdmin()
+  if (!await canAccessNotificationAgreement(admin, id)) return null
   const loaded = await loadAgreementById(id)
   return loaded ? toDetail(loaded) : null
 }
@@ -665,22 +670,38 @@ async function toPublic(loaded: LoadedAgreement): Promise<PublicAgreement> {
   }
 }
 
-/** Public: the agreement for the signing / signed-copy page. Records the first view. */
+/** Loading data is not evidence of an actual screen display. */
 export async function getAgreementPublic(token: string): Promise<PublicAgreement | null> {
   const loaded = await loadAgreementByToken(token)
-  if (!loaded) return null
+  return loaded ? toPublic(loaded) : null
+}
+
+/** Explicit acknowledgment after rendered document + trusted human interaction.
+ * A shared link establishes no viewer identity. Staff previews do not count.
+ */
+export async function acknowledgeAgreementDisplay(token: string, version: number) {
+  if (await getAdminSession()) return { ok: true }
+  const loaded = await loadAgreementByToken(token)
+  if (!loaded || isExpired(loaded.agreement) || loaded.agreement.signedAt ||
+    loaded.agreement.currentVersion !== version) return { ok: false }
   const a = loaded.agreement
-  if (!isSigned(a) && !isExpired(a) && (!a.viewedAt || a.viewedAt < (a.lastSentAt ?? a.viewedAt))) {
-    // First view (or first view after a re-send): status + audit event
-    const now = new Date()
-    await db
-      .update(agreementsTable)
-      .set({ viewedAt: now, status: a.status === 'sent' || a.status === 'draft' ? 'viewed' : a.status, updatedAt: now })
-      .where(eq(agreementsTable.id, a.id))
-    await logAgreementEvent(a.id, 'viewed', { version: a.currentVersion })
-  }
-  const fresh = await loadAgreementByToken(token)
-  return fresh ? toPublic(fresh) : null
+  const fingerprint = requestFingerprint()
+  await db.transaction(async tx => {
+    const [ack] = await tx.update(agreementsTable).set({
+      displayAcknowledgedAt: new Date(),
+      viewedAt: sql`coalesce(${agreementsTable.viewedAt}, now())`,
+      status: sql`case when ${agreementsTable.status} in ('sent','draft') then 'viewed' else ${agreementsTable.status} end`,
+      updatedAt: new Date(),
+    }).where(and(eq(agreementsTable.id, a.id), eq(agreementsTable.currentVersion, version),
+      isNull(agreementsTable.displayAcknowledgedAt), isNull(agreementsTable.signedAt),
+      loaded.terms?.enrollmentFlow ? sql`true` : isNull(agreementsTable.viewedAt))).returning()
+    if (ack) await tx.insert(agreementEventsTable).values({
+      id: newId(), agreementId: a.id, type: 'viewed', version,
+      ip: fingerprint.ip, userAgent: fingerprint.userAgent,
+      actor: 'customer', detail: { source: 'display_acknowledged', viewerIdentity: 'unknown_shared_link' },
+    })
+  })
+  return { ok: true }
 }
 
 /** Public: cheap poll for live updates. */

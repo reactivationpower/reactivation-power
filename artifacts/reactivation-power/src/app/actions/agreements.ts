@@ -14,6 +14,7 @@ export type AgreementTermsForm = {
 
 // Public signing page
 export const getAgreementPublic = action<any>('agreements', 'getAgreementPublic')
+export const acknowledgeAgreementDisplay = action<{ ok: boolean }>('agreements', 'acknowledgeAgreementDisplay')
 export const getAgreementVersion = action<any>('agreements', 'getAgreementVersion')
 export const recordAgreementInitials = action<any>('agreements', 'recordAgreementInitials')
 export const signAgreement = action<any>('agreements', 'signAgreement')

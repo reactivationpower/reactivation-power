@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { useEffect, useState } from 'react'
+import { useAgreementDisplayAcknowledgment } from '@/hooks/use-agreement-display-acknowledgment'
 import { Elements, PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js'
 import { Loader2, Download } from 'lucide-react'
 import {
@@ -50,6 +51,8 @@ export function EnrollmentSigning({ token, initial }: { token: string; initial: 
   const [initials, setInitials] = useState(initial.initials ?? {})
   const [chosenCard, setChosenCard] = useState('')
   const oneTime = agreement.offer_type === 'one_time'
+
+  useAgreementDisplayAcknowledgment(token, agreement.version, agreement.signed || agreement.expired)
 
   async function refresh() {
     const [next, state] = await Promise.all([getAgreementPublic(token), getEnrollmentCheckout(token)])
@@ -138,7 +141,7 @@ export function EnrollmentSigning({ token, initial }: { token: string; initial: 
   return <div className="space-y-6">
     {!oneTime && <AgreementTermsBox amounts={agreement.amounts} fields={doc.fields} />}
     {oneTime && <div className="rounded-lg border bg-card p-4"><strong>One-time purchase price: {formatUsd(due)}</strong><p>No recurring subscription.</p></div>}
-    <article className="rounded-lg border bg-card p-6">
+    <article data-agreement-document className="rounded-lg border bg-card p-6">
       <AgreementDocument sections={doc.sections} initials={initials} onInitial={agreement.signed ? undefined : saveInitials} readOnly={agreement.signed} />
     </article>
     {!agreement.signed && <section className="space-y-4 rounded-lg border bg-card p-6" data-testid="signature-section">

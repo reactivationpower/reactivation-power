@@ -31,3 +31,4 @@
 - [Strategy-call marketing funnel](strategy-call-marketing.md) — marketing-only pages avoid site navigation; patients get a providers-only rejection, not a booking form.
 - [Affiliate business policy](affiliate-business-policy.md) — referral protection, no setup commissions, collected-money earnings, durable clawbacks, and monthly external wire payouts.
 - [Internal sales lead policy](internal-sales-lead-policy.md) — provider-sales CRM uses GoHighLevel, separate from patient queues; consented cadence, call logging, and timezone boundaries.
+- [Enrollment notification policy](enrollment-notification-policy.md) — recover alerts without retrying billing; historical card replacements are not new milestones; shared-link views do not prove identity.

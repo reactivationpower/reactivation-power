@@ -34,6 +34,10 @@ export default defineConfig({
   // Only tables modelled in src/schema are managed; everything else in
   // Supabase's public schema is left alone.
   tablesFilter: [
+    "enrollment_notification_rollout",
+    "enrollment_notifications",
+    "enrollment_notification_state",
+    "enrollment_notification_preferences",
     "auth_idle_sessions",
     "portal_auth_credentials",
     "portal_auth_challenges",
