@@ -5,6 +5,7 @@ vi.mock('./sales-leads/provider', () => ({ safeSalesUpsert: mocks.sync, appointm
 vi.mock('./ghl', () => ({ getGhlFreeSlots: mocks.slots }))
 vi.mock('./marketing/outcomes', () => ({ bookingOutcome: vi.fn() }))
 vi.mock('./sales-leads/store', () => ({ stop: vi.fn(), activity: vi.fn() }))
+vi.mock('./sales-leads/dispatch', () => ({ nudgeSalesSync: vi.fn() }))
 import { newBookingHandoff, readBookingHandoff, withBookingHandoff, checkSavedBooking } from './booking-handoff'
 
 describe('durable saved-inquiry booking', () => {
@@ -14,7 +15,7 @@ describe('durable saved-inquiry booking', () => {
     vi.clearAllMocks()
     token = newBookingHandoff({ name: 'Synthetic', interest: 'both', services: 'Test', inactive: '100', newMonthly: '10' })
     saved = { id: 'submission', lead_id: 'lead', context: { bookingHandoff: token.context }, review: false }
-    lead = { id: 'lead', first_name: 'Synthetic', last_name: 'Test', email: 'test@example.invalid', phone: '+15555550123' }
+    lead = { id: 'lead', ghl_contact_id:'provider-contact', first_name: 'Synthetic', last_name: 'Test', email: 'test@example.invalid', phone: '+15555550123' }
     mocks.query.mockImplementation(async (sql: string, args: any[]) => {
       if (sql.includes('UNION ALL')) return { rows: args[0] === token.context.hash ? [saved] : [] }
       if (sql.startsWith('SELECT context')) return { rows: [saved] }
@@ -36,17 +37,21 @@ describe('durable saved-inquiry booking', () => {
     await withBookingHandoff(token.ref, slot, tz, book)
     expect(book).toHaveBeenCalledTimes(1)
     expect(book).toHaveBeenCalledWith('provider-contact', token.context.carried)
-    expect(mocks.sync).toHaveBeenCalledTimes(1)
+    expect(mocks.sync).not.toHaveBeenCalled()
   })
   it('reuses completed synchronization', async () => {
     lead.ghl_contact_id = 'existing'
     expect((await withBookingHandoff(token.ref, slot, tz, vi.fn().mockResolvedValue({ ok: true }))).ok).toBe(true)
     expect(mocks.sync).not.toHaveBeenCalled()
   })
-  it('recovers transient sync failures on explicit confirmation', async () => {
-    mocks.sync.mockRejectedValueOnce(new Error('outage'))
+  it('waits for the durable worker rather than creating a separate contact on Confirm', async () => {
+    lead.ghl_contact_id = null
     const book = vi.fn().mockResolvedValue({ ok: true })
     expect((await withBookingHandoff(token.ref, slot, tz, book)).ok).toBe(false)
+    expect((await withBookingHandoff(token.ref, slot, tz, book)).ok).toBe(false)
+    expect(mocks.sync).not.toHaveBeenCalled()
+    expect(book).not.toHaveBeenCalled()
+    lead.ghl_contact_id = 'provider-contact'
     expect((await withBookingHandoff(token.ref, slot, tz, book)).ok).toBe(true)
     expect(book).toHaveBeenCalledTimes(1)
   })
@@ -55,8 +60,8 @@ describe('durable saved-inquiry booking', () => {
     saved.review = true
     expect((await withBookingHandoff(token.ref, slot, tz, book)).error).toContain('verify')
     saved.review = false
-    mocks.sync.mockRejectedValue(new Error('Provider identity conflict: shared phone'))
-    expect((await withBookingHandoff(token.ref, slot, tz, book)).error).toContain('verify')
+    lead.ghl_contact_id = null
+    expect((await withBookingHandoff(token.ref, slot, tz, book)).error).toContain('pending')
     expect(book).not.toHaveBeenCalled()
   })
   it('rejects missing, invalid and expired references without provider writes', async () => {

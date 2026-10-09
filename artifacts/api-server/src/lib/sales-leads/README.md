@@ -108,3 +108,50 @@ day; slots are distributed across the three calling windows. Missed SMS slots
 older than five minutes are cancelled, not caught up in a burst. Calls and
 outbound/provider SMS share the daily cap; reservation/message echoes dedupe
 by provider ID. A plain reply never changes device timezone.
+
+## Prompt synchronization and diagnostics
+
+Contact/note enqueue registers a wake only after the enclosing SQL commit and
+connection release. The process coalesces wakes, preserving requests arriving
+during a drain, in ten-job batches with a yield between batches. It never invokes
+imports, discovery, SMS, email, or reconciliation. Independent five-minute wakes
+remain unchanged and recover work after process termination. Claims serialize a
+brief selection across workers and permit one job per lead, prioritize contact
+dependencies before notes, and rotate toward least-recently-served leads.
+Provider 429 responses persist a shared cooldown honoring Retry-After.
+
+List/detail status is derived from all contact/note jobs, not the last writer's
+stored label. Uncertain and failed work take precedence over pending; note-only
+completion becomes synced. Legacy stale labels need no replay or migration.
+Expired write claims are uncertain; retries cannot bypass that protection.
+Provider note markers can establish delivery during existing reconciliation.
+Contact uncertainty needs staff inspection. Booking never creates a contact
+independently: it waits for the durable contact job, nudges pending work, and asks
+the visitor to retry Confirm after synchronization. Legacy inquiries with no
+outstanding contact work receive one deduplicated durable job.
+
+Pending screens refresh local data every two seconds (otherwise 20 seconds);
+background tabs use React Query's default pause. Controlled drafts remain intact
+and contact drafts retain their starting revision for optimistic conflict checks.
+The healthcare form now queues its readable inquiry/consent note rather than
+running a second untracked provider path before redirecting to the saved calendar.
+
+Sanitized `sales_job_complete` logs contain kind, queue age, due wait, processing
+duration, measured provider duration/request count and failure HTTP status only.
+Compare those with browser completion-to-visible timing to distinguish provider
+latency, backlog, and stale views. These code defects do not establish the cause
+or duration of any past production incident. No live-contact test or deployment
+is authorized by this implementation.
+
+### Development measurements (2026-10-09)
+
+An isolated SQL schema with mocked delivery and a deliberately stalled import
+measured 181 ms from commit to first provider call and 1,032 ms from commit to
+observed completion of contact plus note. Simulated provider waits totaled 50 ms;
+the remainder includes database work and test observation delay, not external
+GoHighLevel latency. A separate browser pass using intercepted synthetic
+session/RPC responses measured completion-to-visible status at 2,331 ms on the
+list and 807 ms on detail. Terminal detail polls were 20,007 ms apart. Draft
+contact, note, and call fields survived refresh; retry displayed disabled
+in-flight feedback and uncertain state disabled retry. This is layered mocked
+verification, not a single live-provider end-to-end benchmark.

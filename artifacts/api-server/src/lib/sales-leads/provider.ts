@@ -6,6 +6,7 @@
  */
 const BASE = 'https://services.leadconnectorhq.com'
 import type { GhlUpsertInput } from '@/lib/ghl'
+import { salesTiming } from './timing'
 /** Provider upsert prefers phone/email according to location configuration.
  * Check both identities first; never let that implicit preference merge two
  * different people or erase existing tags. */
@@ -33,11 +34,11 @@ export async function safeSalesUpsert(input: GhlUpsertInput): Promise<string> {
     return existing.id
   }
   const result = await provider('/contacts/upsert','POST',body)
-  if (!result.contact?.id) throw new Error('GoHighLevel did not return a contact ID')
+  if (!result.contact?.id) throw new SalesProviderError(0, true)
   return result.contact.id
 }
 export class SalesProviderError extends Error {
-  constructor(public status: number, public uncertain: boolean = false) {
+  constructor(public status: number, public uncertain: boolean = false, public retryAfterSeconds = 0) {
     super(`GoHighLevel request failed (HTTP ${status}); check the required capability`)
   }
 }
@@ -47,6 +48,17 @@ export const locationId = () => {
   return id
 }
 export async function provider(path: string, method = 'GET', body?: unknown): Promise<any> {
+  const start = Date.now()
+  const timing = salesTiming.getStore()
+  try { return await request(path, method, body) }
+  catch (error) {
+    if (timing && error instanceof SalesProviderError) timing.providerStatus = error.status
+    throw error
+  } finally {
+    if (timing) { timing.providerMs += Date.now() - start; timing.providerRequests++ }
+  }
+}
+async function request(path: string, method: string, body?: unknown): Promise<any> {
   if (!process.env.GHL_API_TOKEN) throw new Error('Existing GoHighLevel private integration is not configured')
   let r: Response
   try {
@@ -55,8 +67,14 @@ export async function provider(path: string, method = 'GET', body?: unknown): Pr
       ...(body !== undefined ? { body: JSON.stringify(body) } : {}), signal: AbortSignal.timeout(15_000),
     })
   } catch { throw new SalesProviderError(0, method !== 'GET') }
-  if (!r.ok) throw new SalesProviderError(r.status, method !== 'GET' && r.status >= 500)
-  return r.json()
+  if (!r.ok) {
+    const retry = r.headers.get('retry-after') ?? ''
+    const seconds = /^\d+$/.test(retry) ? Number(retry) : Math.ceil((Date.parse(retry) - Date.now()) / 1000)
+    throw new SalesProviderError(r.status, method !== 'GET' && r.status >= 500,
+      Number.isFinite(seconds) ? Math.max(0, seconds) : 0)
+  }
+  try { return await r.json() }
+  catch { throw new SalesProviderError(r.status, method !== 'GET') }
 }
 export async function contactPage(query: string, cursor: { startAfter?: number; startAfterId?: string } = {}, limit = 100) {
   const qs = new URLSearchParams({ locationId: locationId(), query, limit: String(limit) })

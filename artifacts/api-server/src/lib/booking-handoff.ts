@@ -1,6 +1,7 @@
-import { createHash, randomBytes } from 'node:crypto'
+import { createHash, randomBytes, randomUUID } from 'node:crypto'
 import { pool } from '@workspace/db'
-import { safeSalesUpsert, appointments } from './sales-leads/provider'
+import { appointments } from './sales-leads/provider'
+import { nudgeSalesSync } from './sales-leads/dispatch'
 import { getGhlFreeSlots } from './ghl'
 import { activity, stop, intake, transaction } from './sales-leads/store'
 import { bookingOutcome } from './marketing/outcomes'
@@ -105,18 +106,18 @@ async function withSavedBooking(saved: any, slot: string, timezone: string, book
     if (otherPending) return { ok: false, error: 'Another scheduling attempt for your inquiry is still being checked. Please use the original scheduling link or contact us through the website before booking again.' }
     let contactId = lead.ghl_contact_id
     if (!contactId) {
-      try {
-        contactId = await safeSalesUpsert({
-          firstName: lead.first_name, lastName: lead.last_name, email: lead.email,
-          phone: lead.phone, companyName: lead.practice_name,
-          ...(lead.timezone ? { timezone: lead.timezone } : {}),
-          source: 'Patient Pipeline saved inquiry',
-        })
-        await c.query("UPDATE sales_leads SET ghl_contact_id=$2,sync_state='synced',sync_error=NULL WHERE id=$1", [lead.id, contactId])
-      } catch (error) {
-        const conflict = error instanceof Error && error.message.startsWith('Provider identity conflict')
-        return { ok: false, error: conflict ? SAVED_HELP : 'Your inquiry is saved, but contact synchronization is temporarily unavailable. Retry Confirm shortly, or contact us through the website for help.' }
-      }
+      const uncertain = (await c.query("SELECT id FROM sales_jobs WHERE lead_id=$1 AND kind='contact_sync' AND state='uncertain' LIMIT 1", [lead.id])).rows[0]
+      if (uncertain) return { ok: false, error: SAVED_HELP }
+      // Booking never owns a separate contact write. Reuse intake's durable job;
+      // only legacy inquiries without outstanding work need a new job.
+      // The shared lead lock is held, and these queries autocommit.
+      await c.query(`INSERT INTO sales_jobs(id,lead_id,kind,dedupe_key)
+        SELECT $1,$2,'contact_sync',$3 WHERE NOT EXISTS
+          (SELECT 1 FROM sales_jobs WHERE lead_id=$2 AND kind='contact_sync'
+            AND state IN ('pending','sending','failed','uncertain'))
+        ON CONFLICT(dedupe_key) DO NOTHING`, [randomUUID(), lead.id, `booking-contact:${lead.id}`])
+      nudgeSalesSync()
+      return { ok: false, error: 'Your inquiry is saved. Contact synchronization is still pending. Retry Confirm shortly, or contact us through the website for help.' }
     }
     const persist = async () => {
       await c.query(`UPDATE sales_submissions SET context=jsonb_set(context,$3::text[],$2::jsonb) WHERE id=$1`,

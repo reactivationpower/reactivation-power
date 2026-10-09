@@ -6,14 +6,15 @@ import { allowed, cadence, canAutomate, elapsedDays } from './cadence'
 import { schedulerHealthy } from './wake'
 import { contact, contactPage, locationId, notes, provider, safeSalesUpsert, SalesProviderError } from './provider'
 import { ingestProviderFacts, providerContext, providerDnd, reconcileLead } from './ingestion'
+import { salesTiming } from './timing'
 function importPhone(value: unknown): string {
   try { return phoneKey(String(value ?? '')) } catch { return '' } // original value remains in submission context for staff review
 }
 
 /** An expired dispatch is uncertain, never blindly retried: provider SMS has no
  * documented idempotency guarantee. Reconcile provider facts before resolution. */
-async function recoverClaims() {
-  await pool.query(`UPDATE sales_jobs SET state=CASE WHEN kind IN ('sms','reply_email','note_sync') THEN 'uncertain' ELSE 'pending' END,
+export async function recoverClaims() {
+  await pool.query(`UPDATE sales_jobs SET state=CASE WHEN kind IN ('sms','reply_email','note_sync','contact_sync') THEN 'uncertain' ELSE 'pending' END,
     last_error='Worker stopped after claiming; inspect provider before retry',claimed_at=NULL
     WHERE state='sending' AND claimed_at<now()-interval '5 minutes'`)
   await pool.query("UPDATE sales_imports SET state='pending',claimed_at=NULL WHERE state='running' AND claimed_at<now()-interval '5 minutes'")
@@ -62,10 +63,31 @@ async function plan() {
     })
   }
 }
-export async function claimSalesJob() {
-  return transaction(async c => (await c.query(`UPDATE sales_jobs SET state='sending',claimed_at=now(),attempts=attempts+1
-    WHERE id=(SELECT id FROM sales_jobs WHERE state='pending' AND due_at<=now()
-      ORDER BY due_at FOR UPDATE SKIP LOCKED LIMIT 1) RETURNING *`)).rows[0])
+export async function claimSalesJob(syncOnly = false) {
+  return transaction(async c => {
+    // Serialize the brief selection, not provider work, across all instances.
+    await c.query("SELECT pg_advisory_xact_lock(hashtextextended('sales-job-claim',0))")
+    return (await c.query(`UPDATE sales_jobs SET state='sending',claimed_at=now(),attempts=attempts+1
+    WHERE id=(SELECT j.id FROM sales_jobs j WHERE j.state='pending' AND j.due_at<=now()
+      AND NOT EXISTS (SELECT 1 FROM sales_settings WHERE id='internal'
+        AND (capabilities->'sync_rate_limit'->>'until')::timestamptz>now())
+      AND ($1=false OR j.kind IN ('contact_sync','note_sync'))
+      AND NOT EXISTS (SELECT 1 FROM sales_jobs b WHERE b.lead_id=j.lead_id AND b.state='sending')
+      AND (j.kind NOT IN ('contact_sync','note_sync') OR NOT EXISTS
+        (SELECT 1 FROM sales_jobs b WHERE b.lead_id=j.lead_id AND b.kind='contact_sync' AND b.state='uncertain'))
+      AND (j.kind<>'note_sync' OR NOT EXISTS
+        (SELECT 1 FROM sales_jobs b WHERE b.lead_id=j.lead_id AND b.kind='contact_sync' AND b.state IN ('pending','sending','failed','uncertain')))
+      ORDER BY COALESCE((SELECT max(b.claimed_at) FROM sales_jobs b WHERE b.lead_id=j.lead_id),'-infinity'::timestamptz),
+        j.due_at,j.created_at,j.id FOR UPDATE SKIP LOCKED LIMIT 1) RETURNING *`, [syncOnly])).rows[0]
+  })
+}
+export async function drainSalesSync() {
+  for (let i = 0; i < 10; i++) {
+    const job = await claimSalesJob(true)
+    if (!job) return false
+    await processSalesJob(job)
+  }
+  return true
 }
 async function synchronize(job: any) {
   const original = (await pool.query('SELECT * FROM sales_leads WHERE id=$1', [job.lead_id])).rows[0]
@@ -86,12 +108,16 @@ async function synchronize(job: any) {
       return
     }
     const tags = [...new Set([...(remote?.tags ?? []).filter((t: string) => !t.startsWith('pp-sales-stage:')), `pp-sales-stage:${lead.stage}`, 'patient-pipeline-sales-lead'])]
+    const healthcare = job.payload?.healthcare
+    if (healthcare) tags.push('reactivation-power-lead', 'healthcare-funnel',
+      ...(['reactivation','lead-follow-up','both'].includes(healthcare.interest) ? [`interest-${healthcare.interest}`] : []))
     const body = { firstName: lead.first_name, lastName: lead.last_name, email: lead.email, phone: lead.phone,
+      ...(healthcare ? { postalCode:healthcare.postalCode, city:healthcare.city, state:healthcare.state } : {}),
       companyName: lead.practice_name, ...(lead.timezone && ['browser','staff'].includes(lead.timezone_origin) ? { timezone: lead.timezone } : {}), tags }
     let contactId = lead.ghl_contact_id
     if (contactId) await provider(`/contacts/${encodeURIComponent(contactId)}`, 'PUT', { ...body, ...(lead.dnd ? { dnd:true } : {}) })
     else contactId = await safeSalesUpsert({ ...body, source:'Patient Pipeline internal sales' })
-    await c.query("UPDATE sales_leads SET ghl_contact_id=$2,sync_state='synced',sync_error=NULL,reconcile_at=now() WHERE id=$1", [lead.id, contactId])
+    await c.query("UPDATE sales_leads SET ghl_contact_id=$2,reconcile_at=now() WHERE id=$1", [lead.id, contactId])
   })
 }
 async function sendReplyEmail(job: any) {
@@ -153,6 +179,10 @@ async function dispatchSms(job: any) {
   })
 }
 export async function processSalesJob(job: any) {
+  return salesTiming.run({ providerMs: 0, providerRequests: 0 }, () => processJob(job))
+}
+async function processJob(job: any) {
+  const started = Date.now()
   try {
     // Disposable browser fixtures can exercise local persistence without ever
     // reaching real contacts, emails, or messaging. Intake cannot choose this source.
@@ -172,9 +202,20 @@ export async function processSalesJob(job: any) {
   } catch (e) {
     const uncertain = e instanceof SalesProviderError && e.uncertain
     const state = uncertain ? 'uncertain' : job.attempts >= 5 ? 'failed' : 'pending'
-    const error = uncertain ? 'Provider response uncertain. Do not retry until reconciled.' : e instanceof Error ? e.message.slice(0, 300) : 'Worker failed'
+    const error = uncertain ? 'Provider response uncertain. Do not retry until reconciled.' : e instanceof SalesProviderError ? e.message : 'Sync unavailable. Check provider permissions and contact identity before retrying.'
     await pool.query("UPDATE sales_jobs SET state=$2,last_error=$3,due_at=now()+($4 * interval '1 minute'),claimed_at=NULL WHERE id=$1", [job.id, state, error, Math.min(60, 2 ** job.attempts)])
+    if (e instanceof SalesProviderError && e.status === 429) {
+      const seconds = Math.max(60, e.retryAfterSeconds)
+      await pool.query(`UPDATE sales_settings SET capabilities=jsonb_set(capabilities,'{sync_rate_limit}',
+        jsonb_build_object('until',GREATEST(now()+($1 * interval '1 second'),
+          COALESCE((capabilities->'sync_rate_limit'->>'until')::timestamptz,now())))) WHERE id='internal'`, [seconds])
+    }
     if (job.lead_id && ['note_sync', 'contact_sync'].includes(job.kind)) await pool.query("UPDATE sales_leads SET sync_state='failed',sync_error=$2 WHERE id=$1", [job.lead_id, error])
+  } finally {
+    console.info(JSON.stringify({ event:'sales_job_complete', kind:job.kind,
+      queueAgeMs: Math.max(0, started - new Date(job.created_at).getTime()),
+      dueWaitMs: Math.max(0, started - new Date(job.due_at).getTime()),
+      processingMs: Date.now() - started, ...salesTiming.getStore() }))
   }
 }
 async function boundedReconciliation() {
@@ -232,6 +273,7 @@ export async function runSalesWorker() {
   busy = true
   try {
     await recoverClaims()
+    await drainSalesSync()
     await importSalesPage()
     await discoverScopedContacts()
     await boundedReconciliation()

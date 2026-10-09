@@ -7,21 +7,28 @@ const fixture = vi.hoisted(() => ({ pool: null as any }))
 const delivery = vi.hoisted(() => ({
   contact: vi.fn(), contactPage: vi.fn(), appointments: vi.fn(), conversations: vi.fn(), messages: vi.fn(), notes: vi.fn(), provider: vi.fn(),
 }))
+vi.mock('./dispatch', () => ({ nudgeSalesSync: vi.fn() }))
 vi.mock('@workspace/db', () => ({ pool: {
   query: (...args: any[]) => fixture.pool.query(...args),
   connect: () => fixture.pool.connect(),
 } }))
-import { activity, intake, stop, transaction } from './store'
-import { ingestMessages, ingestProviderFacts } from './ingestion'
-import { logSalesCall, updateSalesLead } from '@/actions/sales-leads'
+import { activity, enqueue, intake, stop, transaction } from './store'
+import { withSyncState } from './sync-state'
+import { nudgeSalesSync } from './dispatch'
+import { ingestMessages, ingestProviderFacts, reconcileLead } from './ingestion'
+import { logSalesCall, retrySalesSync, updateSalesLead } from '@/actions/sales-leads'
 vi.mock('@/lib/auth/admin-session', () => ({ requireAdmin: vi.fn(async () => ({ userId: 'fixture-admin', name: 'Fixture', email: 'fixture@example.invalid', role: 'super_admin' })) }))
 vi.mock('@/lib/data/admin-users', () => ({ listAdminUsers: async () => [], getAdminUserById: async () => null }))
-vi.mock('@/lib/sales-leads/worker', () => ({ runSalesWorker: vi.fn(async () => {}) }))
+vi.mock('@/lib/sales-leads/worker', () => ({
+  runSalesWorker: vi.fn(async () => {}),
+  drainSalesSync: async () => (await vi.importActual<typeof import('./worker')>('./worker')).drainSalesSync(),
+}))
 vi.mock('@/lib/sales-leads/provider', async importOriginal => ({
   ...await importOriginal<any>(), ...delivery, contactUrl: () => null, verifyCapabilities: vi.fn(), safeSalesUpsert: vi.fn(),
 }))
 vi.mock('@/lib/affiliates/attribution', () => ({ resolveQualifiedReferral: vi.fn(), attachCustomerReferral: vi.fn() }))
 vi.mock('@/lib/mail/send', () => ({ sendEmail: vi.fn() }))
+vi.mock('@/lib/marketing/outcomes', () => ({ bookingOutcome: vi.fn() }))
 const schema = `sales_fixture_${randomUUID().replaceAll('-', '')}`
 const input = (key: string, extra: any = {}) => ({ firstName: 'Fixture', lastName:'Lead', email:'fixture@example.invalid', phone:'+12125550199', practiceName:'Fixture Practice',
   source:'website', sourcePath:'/strategy-call/schedule', context:{ valueAdjusted:'no', utm_source:'fixture' }, consent:true, consentEvidence:{ checked:true, timestamp:new Date().toISOString() },
@@ -63,6 +70,146 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('internal sales durable storage (i
     const results = await Promise.all([intake(input('a')), intake(input('a')), intake(input('b'))])
     expect(new Set(results.map(r => r.id)).size).toBe(1)
     expect((await fixture.pool.query('SELECT count(*) FROM sales_submissions')).rows[0].count).toBe('2')
+  })
+  it('nudges only committed sync work, never a rollback', async () => {
+    const lead = await intake(input('commit'))
+    expect(nudgeSalesSync).toHaveBeenCalledTimes(1)
+    await expect(transaction(async c => {
+      await enqueue(c, lead.id, 'note_sync', 'rollback')
+      throw new Error('rollback')
+    })).rejects.toThrow('rollback')
+    expect(nudgeSalesSync).toHaveBeenCalledTimes(1)
+  })
+  it('measures commit-to-dispatch with slow import isolated from the fast lane', async () => {
+    const worker = await vi.importActual<typeof import('./worker')>('./worker')
+    const dispatcher = await vi.importActual<typeof import('./dispatch')>('./dispatch')
+    let release!: (value: any) => void
+    delivery.contactPage.mockImplementationOnce(() => new Promise(r => { release = r }))
+    await fixture.pool.query(`INSERT INTO sales_imports(id,scope,state,total,actor_id,expires_at)
+      VALUES('slow-import','fixture','pending',1,'fixture-admin',now()+interval '1 hour')`)
+    const importing = worker.importSalesPage()
+    await vi.waitFor(() => expect(release).toBeTypeOf('function'))
+    let committed = 0, began = 0, providerMs = 0
+    delivery.contact.mockImplementation(async () => {
+      began ||= performance.now()
+      const start = performance.now()
+      await new Promise(r => setTimeout(r, 25))
+      providerMs += performance.now() - start
+      return { id:'fixture-ghl', dnd:false }
+    })
+    vi.mocked(nudgeSalesSync).mockImplementationOnce(() => { committed = performance.now(); dispatcher.nudgeSalesSync() })
+    const lead = await intake(input('timing', { providerId:'fixture-ghl' }))
+    try {
+      await vi.waitFor(async () => expect((await withSyncState([lead]))[0].sync_state).toBe('synced'), { timeout:4000 })
+      expect(began - committed).toBeLessThan(2000)
+      console.info(JSON.stringify({ measurement:'mocked_sales_sync', commitToProviderMs:began-committed,
+        commitToObservedDoneMs:performance.now()-committed, simulatedProviderMs:providerMs }))
+    } finally {
+      release({ contacts:[],total:0,cursor:null })
+      await importing
+    }
+  })
+  it('contact-before-note claims exclude concurrent workers and finish note-only pending', async () => {
+    const worker = await vi.importActual<typeof import('./worker')>('./worker')
+    const lead = await intake(input('ordering', { providerId:'fixture-ghl' }))
+    const claims = await Promise.all([worker.claimSalesJob(true), worker.claimSalesJob(true)])
+    const claimed = claims.filter(Boolean)
+    expect(claimed).toHaveLength(1)
+    expect(claimed[0].kind).toBe('contact_sync')
+    await worker.processSalesJob(claimed[0])
+    expect((await withSyncState([lead]))[0].sync_state).toBe('pending')
+    const note = await worker.claimSalesJob(true)
+    expect(note.kind).toBe('note_sync')
+    await worker.processSalesJob(note)
+    expect((await withSyncState([lead]))[0].sync_state).toBe('synced')
+    await transaction(c => enqueue(c, lead.id, 'note_sync', 'note-only', { activityId:'new-note', body:'fixture' }))
+    expect((await withSyncState([lead]))[0].sync_state).toBe('pending')
+    await worker.processSalesJob(await worker.claimSalesJob(true))
+    expect((await withSyncState([lead]))[0].sync_state).toBe('synced')
+  })
+  it('older completion cannot clear newer work or uncertain errors', async () => {
+    const worker = await vi.importActual<typeof import('./worker')>('./worker')
+    const lead = await intake(input('older', { providerId:'fixture-ghl' }))
+    const job = await worker.claimSalesJob(true)
+    await transaction(c => enqueue(c, lead.id, 'contact_sync', 'newer'))
+    await worker.processSalesJob(job)
+    expect((await withSyncState([lead]))[0].sync_state).toBe('pending')
+    await fixture.pool.query("UPDATE sales_jobs SET state='uncertain' WHERE dedupe_key='newer'")
+    expect((await withSyncState([lead]))[0].sync_state).toBe('uncertain')
+    expect(await worker.claimSalesJob(true)).toBeUndefined()
+  })
+  it('backlog rotates across leads rather than consuming one lead first', async () => {
+    const worker = await vi.importActual<typeof import('./worker')>('./worker')
+    const first = await intake(input('first', { providerId:'fixture-ghl' }))
+    await transaction(c => enqueue(c, first.id, 'contact_sync', 'extra'))
+    const second = await intake(input('second', { email:'second@example.invalid', phone:'+12125550198', providerId:'fixture-two' }))
+    const job = await worker.claimSalesJob(true)
+    expect(job.lead_id).toBe(first.id)
+    await worker.processSalesJob(job)
+    expect((await worker.claimSalesJob(true)).lead_id).toBe(second.id)
+  })
+  it('expired contact and note claims become uncertain without replay', async () => {
+    const worker = await vi.importActual<typeof import('./worker')>('./worker')
+    const lead = await intake(input('expired'))
+    await fixture.pool.query("UPDATE sales_jobs SET state='sending',claimed_at=now()-interval '6 minutes'")
+    await worker.recoverClaims()
+    expect((await withSyncState([lead]))[0].sync_state).toBe('uncertain')
+    expect(await worker.claimSalesJob(true)).toBeUndefined()
+  })
+  it('429 respects a shared cooldown, while ordinary failure keeps durable pending work', async () => {
+    const worker = await vi.importActual<typeof import('./worker')>('./worker')
+    const { SalesProviderError } = await import('./provider')
+    const lead = await intake(input('rate', { providerId:'fixture-ghl' }))
+    delivery.contact.mockRejectedValueOnce(new SalesProviderError(429, false, 600))
+    await worker.processSalesJob(await worker.claimSalesJob(true))
+    const state = (await withSyncState([lead]))[0]
+    expect(state.sync_state).toBe('pending')
+    expect(state.sync_error).toContain('automatic retry')
+    await intake(input('other-rate', { email:'other@example.invalid', phone:'+12125550198' }))
+    expect(await worker.claimSalesJob(true)).toBeUndefined()
+  })
+  it('uncertain note timeout refuses retry and a provider marker reconciles without reposting', async () => {
+    const worker = await vi.importActual<typeof import('./worker')>('./worker')
+    const { SalesProviderError } = await import('./provider')
+    const lead = await intake(input('note-timeout', { providerId:'fixture-ghl' }))
+    await worker.processSalesJob(await worker.claimSalesJob(true))
+    const note = await worker.claimSalesJob(true)
+    delivery.provider.mockRejectedValueOnce(new SalesProviderError(0, true))
+    await worker.processSalesJob(note)
+    expect((await withSyncState([lead]))[0].sync_state).toBe('uncertain')
+    await expect(retrySalesSync(lead.id)).rejects.toThrow('Reconciliation')
+    const writes = delivery.provider.mock.calls.length
+    delivery.notes.mockResolvedValueOnce([{ id:'remote-note',body:`[Patient Pipeline ${note.payload.activityId}] fixture` }])
+    await reconcileLead(lead.id)
+    expect((await withSyncState([lead]))[0].sync_state).toBe('synced')
+    expect(await worker.claimSalesJob(true)).toBeUndefined()
+    expect(delivery.provider).toHaveBeenCalledTimes(writes)
+  })
+  it('pending jobs survive a lost wake and are picked up by scheduled recovery', async () => {
+    const worker = await vi.importActual<typeof import('./worker')>('./worker')
+    const lead = await intake(input('restart', { providerId:'fixture-ghl' }))
+    // The dispatcher is deliberately mocked: no resident process gets the wake.
+    await worker.runSalesWorker()
+    expect((await withSyncState([lead]))[0].sync_state).toBe('synced')
+  })
+  it('booking reuses the queue and repeated Confirm cannot replay an accepted-but-timed-out create', async () => {
+    const worker = await vi.importActual<typeof import('./worker')>('./worker')
+    const { safeSalesUpsert, SalesProviderError } = await import('./provider')
+    const { newBookingHandoff, withBookingHandoff } = await import('../booking-handoff')
+    const handoff = newBookingHandoff({ name:'Fixture' })
+    const lead = await intake(input('booking-timeout', { context:{ bookingHandoff:handoff.context } }))
+    const book = vi.fn()
+    const confirm = () => withBookingHandoff(handoff.ref, '2027-01-01T15:00:00Z', 'America/New_York', book)
+    expect((await confirm()).error).toContain('pending')
+    expect(safeSalesUpsert).not.toHaveBeenCalled()
+    vi.mocked(safeSalesUpsert).mockRejectedValueOnce(new SalesProviderError(0, true))
+    await worker.processSalesJob(await worker.claimSalesJob(true))
+    expect((await withSyncState([lead]))[0].sync_state).toBe('uncertain')
+    expect((await confirm()).ok).toBe(false)
+    expect((await confirm()).ok).toBe(false)
+    expect(await worker.claimSalesJob(true)).toBeUndefined()
+    expect(safeSalesUpsert).toHaveBeenCalledTimes(1)
+    expect(book).not.toHaveBeenCalled()
   })
   it('reviews shared-phone/different-email identities rather than erasing them', async () => {
     await intake(input('a'))

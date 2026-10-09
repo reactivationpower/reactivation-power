@@ -8,6 +8,7 @@ import { allowed, cadence, suggestedFollowup, validTimezone } from '@/lib/sales-
 import { contactPage, contactUrl, verifyCapabilities } from '@/lib/sales-leads/provider'
 import { runSalesWorker } from '@/lib/sales-leads/worker'
 import { schedulerHealthy } from '@/lib/sales-leads/wake'
+import { withSyncState } from '@/lib/sales-leads/sync-state'
 const safeText = (s: unknown, max = 200) => typeof s === 'string' ? s.trim().slice(0, max) : ''
 function email(s: unknown) {
   const value = emailKey(safeText(s, 254))
@@ -30,7 +31,7 @@ export async function listSalesLeads(input: { query?: string; stage?: string; so
     pool.query(`SELECT count(*) FROM sales_leads ${where}`, values), listAdminUsers(), settings(),
     pool.query('SELECT reply_notifications FROM sales_preferences WHERE admin_id=$1', [admin.userId]),
   ])
-  return { leads: rows.rows, total: Number(count.rows[0].count), team: team.filter(u => u.active && u.confirmedAt).map(u => ({ id: u.id, name: u.name, email: u.email, active: u.active })),
+  return { leads: await withSyncState(rows.rows), total: Number(count.rows[0].count), team: team.filter(u => u.active && u.confirmedAt).map(u => ({ id: u.id, name: u.name, email: u.email, active: u.active })),
     settings: cfg, reply_notifications: preference.rows[0]?.reply_notifications !== false, admin_id: admin.userId, super_admin: admin.role === 'super_admin' }
 }
 export async function getSalesLead(leadId: string) {
@@ -42,7 +43,7 @@ export async function getSalesLead(leadId: string) {
     pool.query('SELECT * FROM sales_submissions WHERE lead_id=$1 ORDER BY submitted_at DESC', [leadId]),
     pool.query('SELECT id,kind,state,attempts,last_error,due_at FROM sales_jobs WHERE lead_id=$1 ORDER BY created_at DESC LIMIT 100', [leadId]),
   ])
-  return { lead, activities: activities.rows, submissions: submissions.rows, jobs: jobs.rows, contact_url: contactUrl(lead.ghl_contact_id), suggested_followup: suggestedFollowup(new Date(), leadId) }
+  return { lead: (await withSyncState([lead]))[0], activities: activities.rows, submissions: submissions.rows, jobs: jobs.rows, contact_url: contactUrl(lead.ghl_contact_id), suggested_followup: suggestedFollowup(new Date(), leadId) }
 }
 export async function createSalesLead(input: { firstName: string; lastName: string; email: string; phone: string; practiceName: string; notes?: string; affiliateId?: string }) {
   const admin = await requireAdmin(), leadEmail = email(input.email), phone = phoneKey(safeText(input.phone, 32))
@@ -230,9 +231,10 @@ export async function convertSalesLead(leadId: string) {
 export async function retrySalesSync(leadId: string) {
   await requireAdmin()
   await transaction(async c => {
-    const uncertain = (await c.query("SELECT id FROM sales_jobs WHERE lead_id=$1 AND state='uncertain' AND kind='note_sync'", [leadId])).rows
+    await c.query("SELECT pg_advisory_xact_lock(hashtextextended($1,0))", [`sales-send:${leadId}`])
+    const uncertain = (await c.query("SELECT id FROM sales_jobs WHERE lead_id=$1 AND state='uncertain' AND kind IN ('contact_sync','note_sync')", [leadId])).rows
     if (uncertain.length) throw new Error('A note may already exist in GoHighLevel. Reconciliation must confirm it before retrying.')
-    await c.query("UPDATE sales_jobs SET state='pending',due_at=now(),last_error=NULL WHERE lead_id=$1 AND state='failed' AND kind IN ('contact_sync','note_sync')", [leadId])
+    await c.query("UPDATE sales_jobs SET state='pending',due_at=now(),attempts=0,last_error=NULL WHERE lead_id=$1 AND state='failed' AND kind IN ('contact_sync','note_sync')", [leadId])
     await enqueue(c, leadId, 'contact_sync', `retry:${id()}`)
     await c.query("UPDATE sales_leads SET sync_state='pending',sync_error=NULL WHERE id=$1", [leadId])
   })

@@ -78,5 +78,5 @@ export function LeadsTabs() {
 
 /** Shared dashboard query (team, settings, identity) with 20s refresh. */
 export function useDashboard(input: Parameters<typeof listSalesLeads>[0] = {}) {
-  return useQuery({ queryKey: ['sales-leads', 'list', input], queryFn: () => listSalesLeads(input), refetchInterval: REFRESH_MS, placeholderData: (p) => p })
+  return useQuery({ queryKey: ['sales-leads', 'list', input], queryFn: () => listSalesLeads(input), refetchInterval: q => q.state.data?.leads.some(l => l.sync_state === 'pending') ? 2000 : REFRESH_MS, placeholderData: (p) => p })
 }

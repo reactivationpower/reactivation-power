@@ -1,6 +1,8 @@
 import { randomUUID } from 'node:crypto'
 import { pool, type PoolClient } from '@workspace/db'
 import { validTimezone } from './cadence'
+import { nudgeSalesSync } from './dispatch'
+const syncTransactions = new WeakSet<PoolClient>()
 export const id = () => randomUUID()
 export const emailKey = (s: string) => s.trim().toLowerCase()
 export function phoneKey(s: string) {
@@ -12,8 +14,13 @@ export function phoneKey(s: string) {
 }
 export async function transaction<T>(fn: (client: PoolClient) => Promise<T>): Promise<T> {
   const c = await pool.connect()
-  try { await c.query('BEGIN'); const value = await fn(c); await c.query('COMMIT'); return value }
-  catch (e) { await c.query('ROLLBACK'); throw e } finally { c.release() }
+  let committed = false
+  try { await c.query('BEGIN'); const value = await fn(c); await c.query('COMMIT'); committed = true; return value }
+  catch (e) { await c.query('ROLLBACK'); throw e } finally {
+    const sync = syncTransactions.delete(c)
+    c.release()
+    if (committed && sync) nudgeSalesSync()
+  }
 }
 export async function settings(client: Pick<PoolClient, 'query'> = pool) {
   await client.query("INSERT INTO sales_settings(id) VALUES('internal') ON CONFLICT DO NOTHING")
@@ -36,6 +43,7 @@ export async function activity(c: PoolClient, leadId: string, input: {
   return row
 }
 export async function enqueue(c: PoolClient, leadId: string | null, kind: string, dedupe: string, payload: unknown = {}, dueAt?: string) {
+  if (kind === 'contact_sync' || kind === 'note_sync') syncTransactions.add(c)
   await c.query(`INSERT INTO sales_jobs(id,lead_id,kind,dedupe_key,payload,due_at) VALUES($1,$2,$3,$4,$5,COALESCE($6::timestamptz,now()))
     ON CONFLICT(dedupe_key) DO UPDATE SET state='pending',due_at=EXCLUDED.due_at,last_error=NULL,finished_at=NULL,claimed_at=NULL
     WHERE sales_jobs.kind='sms' AND sales_jobs.state='cancelled' AND sales_jobs.last_error='Timezone changed' AND EXCLUDED.due_at>now()`,
@@ -46,6 +54,7 @@ export async function stop(c: PoolClient, leadId: string, reason: string) {
   await c.query("UPDATE sales_jobs SET state='cancelled',last_error=$2,finished_at=now() WHERE lead_id=$1 AND kind IN ('sms','call_task') AND state='pending'", [leadId, reason])
 }
 export interface Intake {
+  noteBody?: string;
   firstName: string; lastName: string; email: string; phone: string; practiceName: string; source: string; sourcePath: string;
   context: Record<string, unknown>; consentEvidence?: Record<string, unknown>; consent?: boolean; timezone?: string | null;
   affiliateId?: string | null; historical?: boolean; providerId?: string; submittedAt?: string; dedupeKey: string;
@@ -92,12 +101,17 @@ export async function intake(input: Intake, forceLeadId?: string | null): Promis
       [id(), lead.id, input.source, input.sourcePath, input.submittedAt ?? null, JSON.stringify(input.context),
         JSON.stringify(input.consentEvidence ?? {}), Boolean(input.historical), input.dedupeKey])
     await activity(c, lead.id, { kind: 'submission', body: `${input.source}: ${input.sourcePath}`, dedupeKey: `submission:${input.dedupeKey}`, occurredAt: input.submittedAt })
-    if (!input.historical) await enqueue(c, lead.id, 'contact_sync', `intake:${input.dedupeKey}`)
+    if (!input.historical) await enqueue(c, lead.id, 'contact_sync', `intake:${input.dedupeKey}`, {
+      ...(input.context.legacySourcePath ? { healthcare: {
+        postalCode: input.context.zip, city: input.context.city, state: input.context.state,
+        interest: input.context.productInterest,
+      } } : {}),
+    })
     if (!input.historical) {
       const noteId = id()
       await enqueue(c, lead.id, 'note_sync', `submission-note:${input.dedupeKey}`, {
         activityId: noteId,
-        body: `[Patient Pipeline ${noteId}] Inquiry ${input.submittedAt ?? new Date().toISOString()} from ${input.sourcePath}\n${JSON.stringify(input.context).slice(0, 4000)}\nConsent: ${JSON.stringify(input.consentEvidence ?? {}).slice(0, 600)}`,
+        body: `[Patient Pipeline ${noteId}] Inquiry ${input.submittedAt ?? new Date().toISOString()} from ${input.sourcePath}\n${input.noteBody ?? JSON.stringify(input.context).slice(0, 4000)}\nConsent: ${JSON.stringify(input.consentEvidence ?? {}).slice(0, 600)}`,
       })
     }
     if (!input.historical && validTimezone(input.timezone) && input.timezone !== lead.timezone) {

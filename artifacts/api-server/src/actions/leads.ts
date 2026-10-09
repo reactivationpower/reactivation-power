@@ -2,11 +2,6 @@ import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { getAdminClient } from '@/lib/supabase/admin'
 import { referralFromRequest, resolveQualifiedReferral } from '@/lib/affiliates/attribution'
-import {
-  addGhlContactNote,
-  ghlConfigured,
-  upsertGhlContact,
-} from '@/lib/ghl'
 import { isProductInterest, PRODUCT_INTEREST_LABELS, readLeadFields, validateLeadFields, validatedCalculatorScenario } from '@workspace/shared/lead-validation'
 import { validatedBookingFunnel } from '@workspace/shared/booking-funnel'
 import {
@@ -15,9 +10,8 @@ import {
   reactivatedPatients,
   scenarioEstimates,
 } from '@workspace/shared/opportunity'
-import { intake, transaction } from '@/lib/sales-leads/store'
+import { intake } from '@/lib/sales-leads/store'
 import { validTimezone } from '@/lib/sales-leads/cadence'
-import { safeSalesUpsert } from '@/lib/sales-leads/provider'
 import { requestVisitorId, leadOutcome } from '@/lib/marketing/outcomes'
 import { newBookingHandoff } from '@/lib/booking-handoff'
 
@@ -208,6 +202,20 @@ export async function submitHealthcareLead(
     sourceLeadId: String(submittedLead.id),
   })
   const salesLead = await intake({
+    noteBody: [
+      `Interested in: ${PRODUCT_INTEREST_LABELS[interest]}`,
+      `Name: ${firstName} ${lastName}\nPractice: ${practiceName}\nLocation: ${city}, ${state} ${zip}`,
+      `Years in practice: ${yearsInPractice}\nServices: ${services.join(', ')}`,
+      `Inactive patient files: ${inactiveCount ?? 'not provided'}${inactiveNote}`,
+      `Annual patient value used: ${money(patientValue)}${valueNote}`,
+      ...(revenueShown !== null ? [`${scenario ? 'Reactivation estimate shown to lead' : 'Revenue estimate shown to lead'}: ${money(revenueShown)} (illustrative, not guaranteed)`] : []),
+      ...(scenario && estimates ? [
+        `Additional new patients per month: ${scenario.additionalPatientsPerMonth}`,
+        `New patient first-year value used: ${money(scenario.newPatientValue)}`,
+        `New patient first-year cohort value estimate: ${money(estimates.newPatients)}`,
+        `Combined illustrative opportunity: ${money(estimates.combined)} (12 months; illustrative, not guaranteed)`,
+      ] : []),
+    ].join('\n'),
     firstName, lastName, email, phone: `+1${phoneDigits}`, practiceName,
     source: attribution.affiliateId ? 'affiliate' : 'website', sourcePath: actualPath, submittedAt,
     consent, timezone, affiliateId: attribution.affiliateId, dedupeKey: `landing:${submittedLead.id}`,
@@ -227,91 +235,9 @@ export async function submitHealthcareLead(
     },
   })
 
-  // The funnel still carries the provider id when available. Local sync jobs
+  // Intake committed contact and stable-marker note jobs together. Do not
+  // duplicate those writes or delay the saved booking handoff on provider I/O.
   if (!salesLead.review) await leadOutcome(salesLead.id, String(submittedLead.id))
-  // recover outages; ambiguous identity never updates an arbitrary contact.
-  let ghlContactId = ''
-  if (ghlConfigured() && !salesLead.review) {
-    try {
-      ghlContactId = await transaction(async c => {
-        await c.query('SELECT pg_advisory_xact_lock(hashtextextended($1,0))', [`sales-send:${salesLead.id}`])
-        const current = (await c.query('SELECT ghl_contact_id FROM sales_leads WHERE id=$1 FOR UPDATE', [salesLead.id])).rows[0]
-        if (current?.ghl_contact_id) return current.ghl_contact_id as string
-        const contactId = await safeSalesUpsert({
-        firstName,
-        lastName,
-        email,
-        phone: `+1${phoneDigits}`,
-        companyName: practiceName || undefined,
-        postalCode: zip,
-        city: city || undefined,
-        state: state || undefined,
-        timezone: timezone || undefined,
-        tags: [
-          'reactivation-power-lead',
-          'healthcare-funnel',
-          ...(scheduleSource ? [`interest-${interest}`] : []),
-        ],
-        source: `Reactivation Power ${scheduleSource ? '/schedule-a-call' : '/healthcare'} landing page`,
-        })
-        await c.query("UPDATE sales_leads SET ghl_contact_id=$2,sync_state='synced',sync_error=NULL WHERE id=$1", [salesLead.id, contactId])
-        return contactId
-      })
-
-      const submissionNote = [
-        `${scheduleSource ? 'SCHEDULE A CALL' : 'HEALTHCARE FUNNEL'} SUBMISSION — Reactivation Power`,
-        '',
-        `Name: ${firstName} ${lastName}`,
-        `Practice: ${practiceName || '(not provided)'}`,
-        `Location: ${city && state ? `${city}, ${state} ${zip}` : zip}`,
-        '',
-        `Years in practice: ${yearsInPractice}`,
-        `Interested in: ${PRODUCT_INTEREST_LABELS[interest]}`,
-        ...(inactiveCount !== null ? [
-          `Inactive patient files: ${inactiveCount.toLocaleString('en-US')}${inactiveNote}`,
-        ] : ['Inactive patient files: (not provided)']),
-        ...(revenueShown !== null ? [
-          `Annual patient value used: ${money(patientValue)}${valueNote}`,
-          `${scenario ? 'Reactivation estimate shown to lead' : 'Revenue estimate shown to lead'}: ${money(revenueShown)} (illustrative, not guaranteed)`,
-        ] : ['Revenue estimate: not applicable to lead-only inquiry']),
-        ...(scenario && estimates ? [
-          `Additional new patients per month: ${scenario.additionalPatientsPerMonth}`,
-          `New patient first-year value used: ${money(scenario.newPatientValue)}`,
-          `New patient first-year cohort value estimate: ${money(estimates.newPatients)} (12 months of additional new patients; illustrative, not guaranteed)`,
-          `Combined illustrative opportunity: ${money(estimates.combined)} (reactivation + new patient first-year cohort value; not annual cash or guaranteed revenue)`,
-        ] : []),
-        `Services offered: ${services.length > 0 ? services.join(', ') : '(none selected)'}`,
-      ].join('\n')
-
-      const consentNote = [
-        'CONSENT RECORD',
-        '',
-        `${firstName} ${lastName} consented to be contacted by text message and phone call for marketing related to Reactivation Power.`,
-        '',
-        `Submitted: ${new Date().toISOString()}`,
-        `IP address: ${ip}`,
-        `Page: ${scheduleSource ? '/schedule-a-call' : '/healthcare'}`,
-      ].join('\n')
-
-      await Promise.all([
-        addGhlContactNote(ghlContactId, submissionNote),
-        addGhlContactNote(ghlContactId, consentNote),
-      ])
-    } catch (err) {
-      // Never lose the lead because CRM sync failed — log and continue
-      console.error('GoHighLevel lead sync unavailable; local inquiry saved for retry')
-    }
-  }
-
-  if (ghlContactId && !salesLead.review) {
-    // The authoritative contact link was committed under the synchronization
-    // lock above. A failed legacy annotation must not strand a saved inquiry.
-    try {
-      await supabase.from('landing_leads').update({ ghl_contact_id: ghlContactId }).eq('id', submittedLead.id)
-    } catch {
-      console.error('Legacy inquiry annotation unavailable; saved scheduling handoff remains valid')
-    }
-  }
 
   // Straight to the calendar; the calculator now lives on the thank-you page
   redirect(`/healthcare/book-a-call?bookingRef=${handoff.ref}`)

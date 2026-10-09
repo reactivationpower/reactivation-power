@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Link, useParams, useLocation } from 'wouter'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
@@ -14,9 +14,10 @@ export default function AdminLeadDetailPage() {
   const { id = '' } = useParams<{ id: string }>()
   const qc = useQueryClient()
   const dash = useDashboard()
-  const q = useQuery({ queryKey: ['sales-leads', 'detail', id], queryFn: () => getSalesLead(id), refetchInterval: REFRESH_MS })
+  const q = useQuery({ queryKey: ['sales-leads', 'detail', id], queryFn: () => getSalesLead(id), refetchInterval: q => q.state.data?.lead.sync_state === 'pending' ? 2000 : REFRESH_MS })
   const refresh = () => qc.invalidateQueries({ queryKey: ['sales-leads'] })
   const [draft, setDraft] = useState<Record<string, string> | null>(null)
+  const draftRevision = useRef<number | null>(null)
   const [note, setNote] = useState('')
   const [disp, setDisp] = useState<SalesDisposition | null>(null)
   const [callNotes, setCallNotes] = useState(''); const [fu, setFu] = useState(''); const [useSlot, setUseSlot] = useState(false)
@@ -25,7 +26,7 @@ export default function AdminLeadDetailPage() {
 
   const save = useMutation({
     mutationFn: (p: Parameters<typeof updateSalesLead>[1]) => updateSalesLead(id, p),
-    onSuccess: () => { toast.success('Saved'); setDraft(null); setNextFu(null); refresh() },
+    onSuccess: () => { toast.success('Saved'); setDraft(null); draftRevision.current = null; setNextFu(null); refresh() },
     onError: (e) => toast.error(errMsg(e)),
   })
   const addNote = useMutation({ mutationFn: () => addSalesNote(id, note.trim()), onSuccess: () => { toast.success('Note added'); setNote(''); refresh() }, onError: (e) => toast.error(errMsg(e)) })
@@ -49,7 +50,10 @@ export default function AdminLeadDetailPage() {
   const superAdmin = dash.data?.super_admin === true
   const tz = lead.timezone
   const v = (k: string, server: string) => draft?.[k] ?? server
-  const setV = (k: string, val: string) => setDraft({ ...(draft ?? {}), [k]: val })
+  const setV = (k: string, val: string) => {
+    if (!draft) draftRevision.current = lead.revision
+    setDraft({ ...(draft ?? {}), [k]: val })
+  }
   const nonTerminal = disp !== null && !TERMINAL.includes(disp)
   const hasFu = !!fu || (useSlot && !!suggested_followup)
   const canLog = !!disp && callNotes.trim().length > 0 && (!nonTerminal || hasFu) && !log.isPending
@@ -59,7 +63,7 @@ export default function AdminLeadDetailPage() {
 
   const saveContact = () => {
     const d = draft ?? {}
-    save.mutate({ revision: lead.revision, ...(d.firstName !== undefined && { firstName: d.firstName.trim() }), ...(d.lastName !== undefined && { lastName: d.lastName.trim() }),
+    save.mutate({ revision: draftRevision.current ?? lead.revision, ...(d.firstName !== undefined && { firstName: d.firstName.trim() }), ...(d.lastName !== undefined && { lastName: d.lastName.trim() }),
       ...(d.email !== undefined && { email: d.email.trim() }), ...(d.phone !== undefined && { phone: d.phone.trim() }), ...(d.practiceName !== undefined && { practiceName: d.practiceName.trim() }),
       ...(d.timezone !== undefined && { timezone: d.timezone.trim() }), ...(d.consentEvidence !== undefined && { consentEvidence: d.consentEvidence.trim() }) })
   }
@@ -88,7 +92,7 @@ export default function AdminLeadDetailPage() {
       {(lead.sync_state !== 'synced' || lead.sync_error) && (
         <Banner kind={lead.sync_error ? 'error' : 'info'}>
           <div className="flex flex-wrap items-center justify-between gap-2"><span>Sync: {lead.sync_state}{lead.sync_error ? ` - ${lead.sync_error}` : ''}</span>
-            <button className={btn2} disabled={retry.isPending} onClick={() => retry.mutate()} data-testid="button-retry-sync">Retry sync</button></div>
+            <button className={btn2} disabled={retry.isPending || lead.sync_state === 'uncertain'} onClick={() => retry.mutate()} data-testid="button-retry-sync">{retry.isPending ? 'Queuing retry...' : 'Retry sync'}</button></div>
         </Banner>
       )}
 
