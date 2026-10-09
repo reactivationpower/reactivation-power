@@ -27,10 +27,14 @@ export async function authTransaction<T>(fn: (client: PoolClient) => Promise<T>)
 
 /** Durable counters: concurrent requests / multiple servers share the limit. */
 export async function authRateLimit(scope: string, value: string, max: number, windowSeconds: number): Promise<boolean> {
+  if (!Number.isSafeInteger(windowSeconds) || windowSeconds <= 0 || windowSeconds > 2_147_483_647) {
+    throw new Error('Invalid authentication rate-limit window')
+  }
   const result = await pool.query(
-    `INSERT INTO portal_auth_limits (key) VALUES ($1)
+    `INSERT INTO portal_auth_limits (key, window_seconds) VALUES ($1, $2)
      ON CONFLICT (key) DO UPDATE SET
        attempts = CASE WHEN portal_auth_limits.window_start <= statement_timestamp() - ($2::int * interval '1 second') THEN 1 ELSE portal_auth_limits.attempts + 1 END,
+       window_seconds = CASE WHEN portal_auth_limits.window_start <= statement_timestamp() - ($2::int * interval '1 second') THEN $2::int ELSE GREATEST(COALESCE(portal_auth_limits.window_seconds, 3600), $2::int) END,
        window_start = CASE WHEN portal_auth_limits.window_start <= statement_timestamp() - ($2::int * interval '1 second') THEN statement_timestamp() ELSE portal_auth_limits.window_start END
      RETURNING attempts`, [authDigest(`${scope}:${value}`), windowSeconds])
   return result.rows[0].attempts <= max

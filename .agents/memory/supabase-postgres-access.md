@@ -7,6 +7,9 @@ description: How the app and drizzle-kit reach Supabase's Postgres directly, why
 - The pooler's TLS cert is signed by Supabase's own CA: `pg` needs `ssl: { rejectUnauthorized: false }`. The direct `db.<ref>.supabase.co` host is IPv6-only and unreachable from the workspace.
 - **Never `drizzle-kit push`** against Supabase — the public schema has ~25 tables drizzle does not model and push would drop them. Use `generate` → review → `migrate`; `tablesFilter` in drizzle.config.ts is a second guard. Keep `out`/`schema` relative in the config (drizzle-kit mangles absolute paths once a snapshot exists).
 - Tests gated on `SUPABASE_DB_URL` write to the *shared* database. Every DB-backed test must delete everything it creates, including side tables filled indirectly (`billing_notifications`, `commission_entries`, `cron_runs`), and mock `sendEmail` — an unmocked send throws inside the outbox, leaves rows `pending`, and the daily cron then tries to deliver them.
+- Retention/deletion tests must use an isolated disposable schema with no public search-path fallback, not execute a global cleanup on shared application tables.
+  **Why:** dev and production share Supabase; otherwise testing a maintenance function can delete real security state.
+  **How to apply:** copy only needed table definitions, scope every test connection to that schema, and drop it afterward.
 - Use transaction-local temporary tables for large synthetic performance fixtures, rather than bulk-seeding shared patient records.
   **Why:** Development and production share Supabase; a latency benchmark must not expose synthetic patients to real callers or background jobs.
   **How to apply:** Copy the real schema and indexes into temporary tables on one checked-out connection and roll back in cleanup.

@@ -76,6 +76,8 @@ Training portal + patient-reactivation dialer for healthcare/service businesses:
 
 ## Architecture decisions
 
+- **Authentication retention:** `auth-cleanup` runs daily at **4:00 AM ET** through the same claimed job registry, dashboard, and failure alerts as billing/demo jobs. External schedulers can wake it via `GET /api/cron/auth-cleanup` with `Authorization: Bearer <CRON_SECRET>`; this is needed for an on-time run on autoscale. Retired portal login/password challenges, obsolete rate-limit windows, and expired/revoked/five-minute-idle security sessions are retained for **one day after retirement**, then deleted. Current counters persist their window duration; legacy counters conservatively use the former maximum one-hour window. Live codes, current counters, active sessions, credentials, and historical `sessions`/`activity_events` are not deleted. Missing challenge/session rows remain invalid; no activity endpoint may recreate them.
+
 - Actions are exposed by name through one RPC route rather than rewritten as REST; page data goes through per-page loaders instead of exposing the data layer generically. Auth is enforced at the route level (cookies `tp_session` / `tp_admin`) in addition to the checks inside the actions.
 - A `redirect()` from an action/loader is returned as JSON and followed client-side with a full navigation (cookies are set server-side). Only same-origin path redirects are followed (`safeRedirect`).
 - `revalidatePath` is a no-op; components call `router.refresh()` after mutations so `usePageData` re-fetches.

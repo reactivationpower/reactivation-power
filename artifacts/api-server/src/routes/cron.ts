@@ -40,6 +40,7 @@ function cronRoute(job: CronJobName) {
 
 router.get("/cron/demo-reset", cronRoute("demo-reset"));
 router.get("/cron/billing-retry", cronRoute("billing-retry"));
+router.get("/cron/auth-cleanup", cronRoute("auth-cleanup"));
 // Five-minute external trigger keeps retries moving when autoscale sleeps.
 router.get("/cron/lead-emails", async (req, res) => {
   const expected = process.env.CRON_SECRET;

@@ -24,6 +24,8 @@ const retry = vi.fn(async () => {
 vi.mock('@/lib/billing/dunning', () => ({ retryPastDueInvoices: retry }))
 vi.mock('@/lib/demo/seed', () => ({ ensureDemoSeeded: vi.fn(async () => ({ status: 'fresh' })) }))
 vi.mock('@/lib/mail', () => ({ sendEmail: vi.fn(async (..._args: unknown[]) => ({ ok: true, logId: 'log' })) }))
+const authCleanup = vi.fn(async () => ({ challengesDeleted: 0, rateLimitsDeleted: 0, idleSessionsDeleted: 0 }))
+vi.mock('@/lib/auth/retention', () => ({ cleanupAuthRecords: authCleanup }))
 
 const { cronRunsTable, db, pool } = await import('@workspace/db')
 const { runCronJob, CRON_RUN_STALE_MS } = await import('@/lib/cron/jobs')
@@ -32,6 +34,7 @@ const MARK = 'cron-db-test'
 const cleanup = async () => {
   await db.delete(cronRunsTable).where(and(eq(cronRunsTable.job, 'billing-retry'), eq(cronRunsTable.dueKey, DUE_KEY)))
   await db.delete(cronRunsTable).where(and(eq(cronRunsTable.job, 'billing-retry'), eq(cronRunsTable.actor, MARK)))
+  await db.delete(cronRunsTable).where(and(eq(cronRunsTable.job, 'auth-cleanup'), eq(cronRunsTable.dueKey, DUE_KEY)))
 }
 
 describe.skipIf(!hasDb)('cron slot claim (Postgres)', () => {
@@ -39,6 +42,20 @@ describe.skipIf(!hasDb)('cron slot claim (Postgres)', () => {
   afterAll(async () => {
     await cleanup()
     await pool.end()
+  })
+
+  it('claims the authentication cleanup slot only once across concurrent triggers', async () => {
+    const outcomes = await Promise.all([
+      runCronJob('auth-cleanup', { trigger: 'scheduler', dueKey: DUE_KEY }),
+      runCronJob('auth-cleanup', { trigger: 'http', dueKey: DUE_KEY }),
+      runCronJob('auth-cleanup', { trigger: 'scheduler', dueKey: DUE_KEY }),
+    ])
+    expect(authCleanup).toHaveBeenCalledTimes(1)
+    expect(outcomes.filter(o => !('skipped' in o))).toHaveLength(1)
+    expect(outcomes.filter(o => 'skipped' in o)).toHaveLength(2)
+    const rows = await db.select().from(cronRunsTable).where(and(eq(cronRunsTable.job, 'auth-cleanup'), eq(cronRunsTable.dueKey, DUE_KEY)))
+    expect(rows).toHaveLength(1)
+    expect(rows[0]).toMatchObject({ status: 'ok', summary: { challengesDeleted: 0, rateLimitsDeleted: 0, idleSessionsDeleted: 0 } })
   })
 
   it('scheduler instances and the external trigger racing for one slot run it once', async () => {

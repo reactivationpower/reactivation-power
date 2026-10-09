@@ -26,6 +26,8 @@ export const portalChallengesTable = pgTable('portal_auth_challenges', {
 export const portalAuthLimitsTable = pgTable('portal_auth_limits', {
   key: text('key').primaryKey(),
   windowStart: timestamp('window_start', { withTimezone: true }).notNull().defaultNow(),
+  // Null denotes a legacy counter (all legacy windows were at most one hour).
+  windowSeconds: integer('window_seconds'),
   attempts: integer('attempts').notNull().default(1),
 }).enableRLS()
 

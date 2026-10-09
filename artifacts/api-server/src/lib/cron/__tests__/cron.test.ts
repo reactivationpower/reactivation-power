@@ -81,6 +81,8 @@ const seed = vi.fn(async () => ({
 vi.mock('@/lib/demo/seed', () => ({ ensureAllDemosSeeded: seed }))
 const sendEmail = vi.fn(async (..._args: unknown[]) => ({ ok: true, logId: 'log' }))
 vi.mock('@/lib/mail', () => ({ sendEmail }))
+const cleanup = vi.fn(async () => ({ challengesDeleted: 2, rateLimitsDeleted: 1, idleSessionsDeleted: 3 }))
+vi.mock('@/lib/auth/retention', () => ({ cleanupAuthRecords: cleanup }))
 
 const { tick } = await import('@/lib/cron/scheduler')
 const { dueKeyFor, hoursSinceSlot } = await import('@/lib/cron/slots')
@@ -117,6 +119,7 @@ describe('runCronJob / tick', () => {
     rows.length = 0
     retry.mockClear()
     seed.mockClear()
+    cleanup.mockClear()
     sendEmail.mockClear()
     process.env.SUPER_ADMIN_EMAIL = 'owner@example.com'
   })
@@ -128,6 +131,8 @@ describe('runCronJob / tick', () => {
     await tick(now)
     expect(retry).toHaveBeenCalledTimes(1)
     expect(seed).toHaveBeenCalledTimes(1)
+    expect(cleanup).toHaveBeenCalledTimes(1)
+    expect(rows.find((r) => r.job === 'auth-cleanup')).toMatchObject({ dueKey: '2026-09-22', status: 'ok', trigger: 'scheduler' })
     expect(rows.filter((r) => r.job === 'billing-retry')).toHaveLength(1)
     expect(rows.find((r) => r.job === 'billing-retry')).toMatchObject({ dueKey: '2026-09-22', status: 'ok', trigger: 'scheduler' })
   })
@@ -187,7 +192,8 @@ describe('runCronJob / tick', () => {
     const statuses = await getCronJobStatuses()
     expect(statuses.find((s) => s.name === 'billing-retry')?.lastRun?.status).toBe('failed')
     // A slot with no run well past its hour is flagged so the gap is visible.
-    expect(statuses.find((s) => s.name === 'billing-retry')?.overdue).toBe(hoursSinceSlot(statuses[0]!.expectedDueKey, 6) > 2)
+    const billing = statuses.find((s) => s.name === 'billing-retry')!
+    expect(billing.overdue).toBe(hoursSinceSlot(billing.expectedDueKey, 6) > 2)
   })
 
   it('a demo reset error result is a failure, not a success with an error inside', async () => {

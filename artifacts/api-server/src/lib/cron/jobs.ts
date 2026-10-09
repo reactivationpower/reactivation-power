@@ -8,6 +8,7 @@ import { appOrigin } from '@/lib/app-origin'
 import { logger } from '@/lib/logger'
 import { sendEmail } from '@/lib/mail'
 import { dueKeyFor, hoursSinceSlot } from './slots'
+import { cleanupAuthRecords } from '@/lib/auth/retention'
 
 /**
  * The scheduled jobs and the single entry point that runs one of them.
@@ -19,7 +20,7 @@ import { dueKeyFor, hoursSinceSlot } from './slots'
  * is still a successful *run*; only the job itself breaking is a failure.
  */
 
-export type CronJobName = 'billing-retry' | 'demo-reset'
+export type CronJobName = 'billing-retry' | 'demo-reset' | 'auth-cleanup'
 export type CronTrigger = 'scheduler' | 'http' | 'admin'
 
 export interface CronJobDefinition {
@@ -32,6 +33,13 @@ export interface CronJobDefinition {
 }
 
 export const CRON_JOBS: Record<CronJobName, CronJobDefinition> = {
+  'auth-cleanup': {
+    name: 'auth-cleanup',
+    label: 'Authentication record cleanup',
+    description: 'Removes retired sign-in codes, obsolete rate-limit counters, and inactive security sessions after one day; preserves analytics history.',
+    hourEt: 4,
+    run: cleanupAuthRecords,
+  },
   'billing-retry': {
     name: 'billing-retry',
     label: 'Daily billing retry',
