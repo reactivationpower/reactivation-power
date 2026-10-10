@@ -37,3 +37,9 @@ The confirmation text should tell attendees they should also have received an em
 **Why:** The user explicitly requested this wording.
 
 **How to apply:** Include this in confirmation SMS copy; do not claim the email was sent if the email send failed.
+
+Use the meeting host's personal voice with Patient Pipeline clearly identified. The user approved Jacob-style messages and requires easy support for adding or replacing salespeople, with messages sent as the person hosting each meeting.
+
+**Why:** The user wants personal host communication without permanently tying the messaging to Jacob.
+
+**How to apply:** Keep shared copy separate from host identity and reply routing. Resolve the actual assigned meeting host rather than globally replacing Jacob for all appointments. This is a messaging requirement, not permission to change meeting assignment.
