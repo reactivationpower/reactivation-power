@@ -8,11 +8,11 @@ The internal sales dashboard includes all website inquiry sources, affiliate ref
 
 **How to apply:** Isolate internal provider-sales leads from customer-practice patient data and do not expose sales conversation context to affiliates.
 
-Salespeople must send, receive, read, and reply to both lead emails and texts inside the Patient Pipeline portal. The user's latest preferred split is Resend for system emails, appointment reminders, automated follow-up emails, and manual portal emails; GHL for texts and calls. Patient Pipeline controls scheduling without GHL workflows.
+Salespeople send lead emails from the portal through Resend, with Reply-To set to Jacob's configured staff mailbox. Email replies are read outside the portal. Texts use the user's GoHighLevel number for both sending and receiving within the portal.
 
-**Why:** After considering GHL for all lead communication, the user explicitly preferred combining Resend email and GHL texts/calls into one portal view with two-way sending and receiving.
+**Why:** The user found the incoming-email domain/webhook setup too complicated and explicitly simplified the requirement to outgoing portal email with external mailbox replies, while retaining two-way portal texting.
 
-**How to apply:** Use a dedicated Resend receiving connection for portal email replies and GHL's messaging for texts. Do not substitute links to external inboxes for portal send/reply controls. Keep system email distinct from lead conversations. Verify receiving access, domain setup, and live delivery before calling the inbox operational; Resend sending alone is not email receiving.
+**How to apply:** Do not require Resend receiving, token reply addresses, or an incoming-email webhook to send email. Keep GHL SMS compose and receive in the portal. Verify the external reply mailbox's real mail routing; setting Reply-To does not create a mailbox. Emails read externally cannot automatically pause portal outreach.
 
 The user wants aggressive 30-day unresponsive-lead follow-up: two touches per day for the first three business days, varied morning/lunch/late-day slots, Monday–Friday 9–5 Eastern for business follow-up. Texts additionally stay within 8 AM–8 PM in the contact's device-derived local timezone. Consent comes from the lead form checkbox; store consent and timezone locally and in GoHighLevel.
 
@@ -44,8 +44,3 @@ The user selected Supabase's native scheduler for five-minute internal-sales wak
 
 **How to apply:** Keep the independent database wakeup, secure its bearer in Vault, and require a healthy published-worker wake before activating automation. Do not replace it with an in-process-only timer or another provider without approval.
 
-The user selected the existing patientpipeline.app root domain for receiving portal replies rather than a separate replies subdomain.
-
-**Why:** Resend's domain allowance was full; the user chose using the existing domain after being told this routes the whole domain's incoming mail to Resend and does not create normal staff mailboxes.
-
-**How to apply:** Allow root-domain reply addresses. Coordinate any future staff mailbox setup before changing MX routing; do not silently switch back to a replies subdomain.

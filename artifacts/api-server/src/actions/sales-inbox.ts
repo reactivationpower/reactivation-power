@@ -1,9 +1,8 @@
 import { z } from 'zod'
 import { createHash } from 'node:crypto'
-import { resolveMx } from 'node:dns/promises'
 import { pool } from '@workspace/db'
 import { requireAdmin } from '@/lib/auth/admin-session'
-import { inboxSettings, receivingAccess, replyAddress } from '@/lib/sales-inbox/store'
+import { inboxSettings, SALES_REPLY_TO } from '@/lib/sales-inbox/store'
 import { contact, contactUrl, conversations, provider, SalesProviderError } from '@/lib/sales-leads/provider'
 import { reconcileLead } from '@/lib/sales-leads/ingestion'
 import { smsAllowed } from '@/lib/appointment-messages/schedule'
@@ -39,13 +38,12 @@ async function readiness(lead:any) {
   const host = (await pool.query('SELECT * FROM appointment_hosts WHERE admin_id=$1 AND active=true',[lead.assignee_id])).rows
   if(host.length!==1) reasons.push('Assign this lead to a salesperson with exactly one active GHL host profile in Leads Settings.')
   if(lead.dnd || lead.stage==='Lost/Do Not Contact') reasons.push('This lead is marked do not contact.')
-  if(!cfg.email_ready) reasons.push('Email receiving setup has not been confirmed.')
   if(!cfg.sms_ready) reasons.push('SMS sending readiness has not been confirmed in inbox settings.')
   if(!lead.consent) reasons.push('Documented SMS consent is required.')
   const zone = ['staff','browser'].includes(lead.timezone_origin) ? lead.timezone : null
   if(!smsAllowed(new Date(),zone)) reasons.push('Texting requires a verified recipient timezone and the 8 AM–8 PM local window.')
   const base = host.length===1 && !lead.dnd && lead.stage!=='Lost/Do Not Contact'
-  return { email:!!(base&&cfg.email_ready&&lead.email&&process.env.NODE_ENV==='production'),
+  return { email:!!(base&&lead.email&&process.env.NODE_ENV==='production'),
     sms:!!(base&&cfg.sms_ready&&lead.consent&&lead.ghl_contact_id&&smsAllowed(new Date(),zone)&&process.env.NODE_ENV==='production'),
     reasons:[...reasons,...(process.env.NODE_ENV!=='production'?['Preview does not send live messages. Publish and complete readiness checks first.']:[])] }
 }
@@ -119,7 +117,6 @@ export async function sendMessage(input:unknown) {
       const threads=await conversations(lead.ghl_contact_id)
       if(threads.length!==1||threads[0].assignedTo!==host.ghl_user_id) throw new Error('Assign the GHL conversation to this salesperson before texting')
     } else {
-      if(!cfg.email_ready) throw new Error('Email receiving setup must be completed first')
       if(!z.string().email().safeParse(lead.email).success) throw new Error('Lead email address is invalid')
       if(lead.ghl_contact_id) {
         const remote=await contact(lead.ghl_contact_id)
@@ -127,7 +124,7 @@ export async function sendMessage(input:unknown) {
           String(remote.email??'').toLowerCase()!==lead.email.toLowerCase()) throw new Error('Contact email identity needs review')
         if(remote.dnd||remote.dndSettings?.Email?.status==='active') throw new Error('Contact has opted out of emails')
       }
-      replyTo=await replyAddress(lead.id,c)
+      replyTo=SALES_REPLY_TO
     }
     // Commit intent before provider call. Crashes/network uncertainty never trigger blind replay.
     await c.query(`INSERT INTO sales_inbox_messages(id,lead_id,channel,direction,subject,body,author_id,author_name,state,fingerprint)
@@ -166,24 +163,15 @@ export async function sendMessage(input:unknown) {
 export async function getInboxSettings() {
   const admin=await requireAdmin()
   const cfg=await inboxSettings()
-  const issues=admin.role==='super_admin'?(await pool.query("SELECT count(*) FROM sales_inbox_inbound WHERE state='review' OR last_error IS NOT NULL")).rows[0].count:0
   return {superAdmin:admin.role==='super_admin',settings:cfg,
-    receivingAccess:admin.role==='super_admin'?await receivingAccess():false,webhookConfigured:!!process.env.RESEND_WEBHOOK_SECRET,receivingIssues:Number(issues)}
+    replyTo:SALES_REPLY_TO}
 }
 export async function saveInboxSettings(input:unknown) {
   const admin=await requireAdmin()
   if(admin.role!=='super_admin') throw new Error('Only a super admin can configure inbox sending')
-  const data=z.object({emailDomain:z.string().trim().toLowerCase().max(200),emailReady:z.boolean(),smsReady:z.boolean()}).parse(input)
-  if(data.emailDomain&&!/^(?:[a-z0-9-]+\.)*patientpipeline\.app$/.test(data.emailDomain)) throw new Error('Use patientpipeline.app or a receiving subdomain under it')
-  if(data.emailReady) {
-    if(!data.emailDomain||!process.env.RESEND_WEBHOOK_SECRET||!await receivingAccess()) throw new Error('Resend receiving access and signed webhook setup are required')
-    const mx=await resolveMx(data.emailDomain).catch(()=>[])
-    if(!mx.some((r:{exchange:string})=>r.exchange.endsWith('.amazonaws.com')||r.exchange.endsWith('.resend.com'))) throw new Error('Configure Resend receiving MX records for this domain first')
-  }
+  const data=z.object({smsReady:z.boolean()}).parse(input)
   await transaction(async c=>{
-    const current=await inboxSettings(c)
-    if(current.email_domain&&current.email_domain!==data.emailDomain&&(await c.query('SELECT 1 FROM sales_inbox_threads LIMIT 1')).rowCount)
-      throw new Error('Receiving domain has active threads. Preserve reply routing; contact an administrator for a migration.')
-    await c.query("UPDATE sales_inbox_settings SET email_domain=$1,email_ready=$2,sms_ready=$3 WHERE id='internal'",[data.emailDomain,data.emailReady,data.smsReady])
+    await inboxSettings(c)
+    await c.query("UPDATE sales_inbox_settings SET sms_ready=$1 WHERE id='internal'",[data.smsReady])
   })
 }

@@ -29,7 +29,7 @@ export default function AdminLeadsInboxPage() {
 
   return (
     <div className="space-y-6">
-      <header><h1 className="text-2xl font-semibold">Leads</h1><p className="mt-1 text-sm text-muted-foreground">One thread per lead: email, texts and call records together.</p></header>
+      <header><h1 className="text-2xl font-semibold">Leads</h1><p className="mt-1 text-sm text-muted-foreground">Sent emails, two-way texts and call records together. Email replies go to jacobb@patientpipeline.app and are read in that mailbox, not here.</p></header>
       <LeadsTabs />
       <div className="grid gap-6 lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)]">
         <aside className={`min-w-0 space-y-3 ${selected ? 'hidden lg:block' : ''}`} aria-label="Conversations">

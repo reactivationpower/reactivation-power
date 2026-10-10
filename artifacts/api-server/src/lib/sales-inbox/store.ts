@@ -2,6 +2,7 @@ import { randomBytes } from 'node:crypto'
 import { pool, type PoolClient } from '@workspace/db'
 import { ReplitConnectors } from '@replit/connectors-sdk'
 type Client = Pick<PoolClient, 'query'>
+export const SALES_REPLY_TO = 'jacobb@patientpipeline.app'
 export async function inboxSettings(c: Client = pool) {
   await c.query("INSERT INTO sales_inbox_settings(id) VALUES('internal') ON CONFLICT DO NOTHING")
   return (await c.query("SELECT * FROM sales_inbox_settings WHERE id='internal'")).rows[0]

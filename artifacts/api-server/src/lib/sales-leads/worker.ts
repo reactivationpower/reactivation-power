@@ -272,8 +272,8 @@ export async function runSalesWorker() {
   if (busy) return
   busy = true
   try {
-    const { runInboxInbound } = await import('../sales-inbox/inbound')
-    await runInboxInbound().catch(() => console.warn('Inbox receiving unavailable; will retry on next scheduled wake'))
+    const { pool: inboxPool } = await import('@workspace/db')
+    await inboxPool.query("UPDATE sales_inbox_messages SET state='uncertain',error='Sending was interrupted; check provider before composing another message' WHERE state='sending' AND created_at<now()-interval '15 minutes'")
     const { runAppointmentMessages } = await import('../appointment-messages/worker')
     await runAppointmentMessages()
     await recoverClaims()

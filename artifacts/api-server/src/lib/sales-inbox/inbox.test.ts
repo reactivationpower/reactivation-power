@@ -50,10 +50,12 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('unified inbox isolated persistenc
     await expect(sendMessage({...input,body:'Changed'})).rejects.toThrow('another message')
     expect((await getConversation('lead')).messages).toHaveLength(1)
   })
-  it('uses Resend with a thread-specific reply address, never the staff mailbox',async()=>{
+  it('uses Resend with Jacob’s mailbox, without receiving setup',async()=>{
+    await f.pool.query("UPDATE sales_inbox_settings SET email_ready=false,email_domain=''")
     await sendMessage(message('email'))
     expect(f.send.mock.calls[0][0]).toBe('sales_personal')
-    expect(f.send.mock.calls[0][3].replyTo).toMatch(/^[a-f0-9]{48}@replies.patientpipeline.app$/)
+    expect(f.send.mock.calls[0][3].replyTo).toBe('jacobb@patientpipeline.app')
+    expect((await f.pool.query('SELECT count(*) FROM sales_inbox_threads')).rows[0].count).toBe('0')
   })
   it('rejects cross-salesperson reads, lists, and sends',async()=>{
     expect((await listInbox()).leads.map(l=>l.id)).toEqual(['lead'])
