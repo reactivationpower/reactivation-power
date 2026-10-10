@@ -31,3 +31,9 @@ Strategy-call emails and texts should instruct attendees to watch the 4-minute w
 **Why:** The user explicitly requested this preparation instruction alongside the computer requirement.
 
 **How to apply:** Include the walkthrough link and preparation wording in confirmation and reminder messaging, retaining the Google Meet/computer instruction.
+
+The confirmation text should tell attendees they should also have received an email and ask them to check their spam folder if they do not see it.
+
+**Why:** The user explicitly requested this wording.
+
+**How to apply:** Include this in confirmation SMS copy; do not claim the email was sent if the email send failed.
