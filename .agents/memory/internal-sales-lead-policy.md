@@ -8,11 +8,11 @@ The internal sales dashboard includes all website inquiry sources, affiliate ref
 
 **How to apply:** Isolate internal provider-sales leads from customer-practice patient data and do not expose sales conversation context to affiliates.
 
-Salespeople send lead emails from the portal through Resend, with Reply-To set to Jacob's configured staff mailbox. Email replies are read outside the portal. Texts use the user's GoHighLevel number for both sending and receiving within the portal.
+The lead page needs one conversation panel combining automated appointment emails sent through Resend, two-way texting through the existing GoHighLevel sub-account/number, and GHL call history. The user does not need a manual email composer or incoming email in the portal.
 
-**Why:** The user found the incoming-email domain/webhook setup too complicated and explicitly simplified the requirement to outgoing portal email with external mailbox replies, while retaining two-way portal texting.
+**Why:** The user clarified that they are turning off GHL appointment-reminder automations. They want branded automated emails visible on the contact, not a full email inbox.
 
-**How to apply:** Do not require Resend receiving, token reply addresses, or an incoming-email webhook to send email. Keep GHL SMS compose and receive in the portal. Verify the external reply mailbox's real mail routing; setting Reply-To does not create a mailbox. Emails read externally cannot automatically pause portal outreach.
+**How to apply:** Resend sends appointment notifications/confirmations, reminders, reschedules, and cancellations with Patient Pipeline branding/logo. Display these sent emails in the lead's timeline. GHL provides portal SMS sending/receiving and provider-reported sending/delivery/failure statuses. Include GHL calls, recording playback and transcripts where available, and a link to view in GHL. Do not require Resend receiving or token reply addresses. Keep email Reply-To directed to the configured external staff mailbox.
 
 The user wants aggressive 30-day unresponsive-lead follow-up: two touches per day for the first three business days, varied morning/lunch/late-day slots, Monday–Friday 9–5 Eastern for business follow-up. Texts additionally stay within 8 AM–8 PM in the contact's device-derived local timezone. Consent comes from the lead form checkbox; store consent and timezone locally and in GoHighLevel.
 

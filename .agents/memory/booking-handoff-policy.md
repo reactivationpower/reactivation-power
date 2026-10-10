@@ -44,11 +44,11 @@ Use the meeting host's personal voice with Patient Pipeline clearly identified. 
 
 **How to apply:** Keep shared copy separate from host identity and reply routing. Resolve the actual assigned meeting host rather than globally replacing Jacob for all appointments. This is a messaging requirement, not permission to change meeting assignment.
 
-The user simplified lead communication: send emails through Resend in the portal with Reply-To set to Jacob's staff mailbox; email replies stay outside the portal. Send and receive GHL texts inside the portal.
+The user clarified that branded appointment notifications, reminders, reschedules, and cancellations must be sent automatically through Resend and visible on the lead's conversation timeline. No manual email composer or incoming portal email is needed. Two-way GHL texting and GHL calls belong in that same panel on the lead page.
 
-**Why:** The user explicitly chose individual reply ownership rather than a team-managed reply inbox.
+**Why:** The user is turning off GHL reminder automations and wants the portal to combine automated email history with GHL conversations, not become an email inbox.
 
-**How to apply:** Preserve lead ownership and verify GHL text routing. Do not block outbound email on Resend receiving setup or route replies into token addresses. This supersedes the earlier two-way portal-email and root-domain Resend receiving decisions.
+**How to apply:** Preserve lead ownership and verify GHL text routing/statuses. Include call playback and transcripts when GHL provides them, plus a GHL link. Do not block outgoing email on Resend receiving or route replies into token addresses; the previously selected external Reply-To remains. This supersedes manual-email-composer and two-way portal-email scope.
 
 The user approved building booking confirmation email/text, a 24-hour email/text reminder, and a final text 30 minutes before the meeting. Preserve the recipient-local 8 AM–8 PM texting window; nighttime confirmation emails need not wait.
 
