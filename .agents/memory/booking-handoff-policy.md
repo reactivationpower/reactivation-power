@@ -43,3 +43,9 @@ Use the meeting host's personal voice with Patient Pipeline clearly identified. 
 **Why:** The user wants personal host communication without permanently tying the messaging to Jacob.
 
 **How to apply:** Keep shared copy separate from host identity and reply routing. Resolve the actual assigned meeting host rather than globally replacing Jacob for all appointments. This is a messaging requirement, not permission to change meeting assignment.
+
+Each salesperson handles their own email and text replies: Jacob handles Jacob's replies, and future salespeople handle theirs.
+
+**Why:** The user explicitly chose individual reply ownership rather than a team-managed reply inbox.
+
+**How to apply:** Plan host-specific email reply destinations and SMS conversation ownership/access. Verify routing before enabling personal-voice messages; a shared sending number alone does not route replies to the correct salesperson.
