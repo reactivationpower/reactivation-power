@@ -8,6 +8,12 @@ The internal sales dashboard includes all website inquiry sources, affiliate ref
 
 **How to apply:** Isolate internal provider-sales leads from customer-practice patient data and do not expose sales conversation context to affiliates.
 
+Salespeople must send, receive, read, and reply to both lead emails and texts inside the Patient Pipeline portal. GHL is the delivery and receiving backend, not the required daily interface. Patient Pipeline controls appointment-message scheduling without GHL workflows.
+
+**Why:** The user explicitly chose GHL for communicating with leads while reiterating that sending and receiving must happen through the portal. These are complementary requirements, not conflicting ones.
+
+**How to apply:** Build the portal conversation experience on GHL's two-way messaging. Do not propose a separate Resend receiving domain for lead conversations or substitute links to GHL for portal send/reply controls. This supersedes the earlier Resend-based lead-email direction; unrelated transactional email remains separate. Verify provider readiness rather than claiming that the existing read-only history is a working inbox.
+
 The user wants aggressive 30-day unresponsive-lead follow-up: two touches per day for the first three business days, varied morning/lunch/late-day slots, Monday–Friday 9–5 Eastern for business follow-up. Texts additionally stay within 8 AM–8 PM in the contact's device-derived local timezone. Consent comes from the lead form checkbox; store consent and timezone locally and in GoHighLevel.
 
 **Why:** These are explicit outreach requirements, including variability and contact-local quiet hours.
