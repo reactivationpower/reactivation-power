@@ -19,3 +19,9 @@ The user requested removal of both the analytics consent popup and floating anal
 **Why:** Removing visible controls is not permission to attach behavioral history to new visitors.
 
 **How to apply:** Retain opt-in gates and distinguish operational outcomes from detailed session reporting; new visitors no longer opt into detailed tracking through this UI.
+
+Strategy-call confirmation and reminder emails and texts must say attendees need to be in front of a computer because the meeting is on Google Meet.
+
+**Why:** The user explicitly requested this preparation instruction in both email and text messages.
+
+**How to apply:** Include the computer requirement and identify Google Meet in both channels, not only on the booking page.
