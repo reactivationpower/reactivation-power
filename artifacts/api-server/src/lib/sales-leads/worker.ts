@@ -272,6 +272,8 @@ export async function runSalesWorker() {
   if (busy) return
   busy = true
   try {
+    const { runAppointmentMessages } = await import('../appointment-messages/worker')
+    await runAppointmentMessages()
     await recoverClaims()
     await drainSalesSync()
     await importSalesPage()

@@ -128,6 +128,8 @@ async function withSavedBooking(saved: any, slot: string, timezone: string, book
       try {
         await c.query("UPDATE sales_leads SET stage='Strategy Call Booked',appointment_status='confirmed',revision=revision+1 WHERE id=$1", [lead.id])
         await stop(c, lead.id, 'appointment_received')
+        const { registerAppointment } = await import('./appointment-messages/store')
+        await registerAppointment(c, appointmentId, lead.id, handoff.slot, handoff.timezone)
         await activity(c, lead.id, { kind: 'appointment', status: 'confirmed', providerId: appointmentId, dedupeKey: `booking:${appointmentId}` })
         handoff.result = result
         await persist()
@@ -177,6 +179,8 @@ async function withSavedBooking(saved: any, slot: string, timezone: string, book
     catch { c.release(true) } // Never return a possibly locked session to the pool.
     if (outcomeId) {
       await bookingOutcome(saved.lead_id, outcomeId)
+      const { runAppointmentMessages } = await import('./appointment-messages/worker')
+      void runAppointmentMessages()
     }
   }
 }

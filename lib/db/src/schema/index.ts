@@ -13,3 +13,4 @@ export * from "./lead-followup";
 export * from "./lead-notifications";
 export * from "./enrollment-notifications";
 export * from "./enrollment-invitations";
+export * from "./appointment-messages";

@@ -1,4 +1,5 @@
 import { canonicalEmailLinks } from './links'
+import { renderAppointmentMessage, type AppointmentCopy } from '../appointment-messages/content'
 import {
   BRAND,
   button,
@@ -131,6 +132,7 @@ export interface CronFailedData {
   dashboardUrl: string
 }
 export interface TemplateDataMap {
+  strategy_appointment: AppointmentCopy
   sales_lead_reply: { name: string; leadName: string; leadUrl: string }
   affiliate_access: { businessName: string; loginUrl: string }
   affiliate_onboarding_v1: { businessName: string; onboardingUrl: string }
@@ -900,6 +902,13 @@ export interface AccessRestoredData {
 
 type AnyTemplate = { [K in TemplateId]: TemplateDefinition<K> }[TemplateId]
 export const TEMPLATES: { [K in TemplateId]: TemplateDefinition<K> } = {
+  strategy_appointment: {
+    id: 'strategy_appointment', name: 'Strategy call confirmation and reminders',
+    description: 'Personal meeting-host messages with preparation instructions and Google Meet details.',
+    sample: { firstName: 'Alex', host: 'Jacob', start: '2026-11-12T17:00:00Z', timezone: 'America/New_York',
+      meetingUrl: 'https://meet.google.com/abc-defg-hij', walkthroughUrl: `${BRAND.siteUrl}/walkthrough`, kind: 'confirmation' },
+    render: renderAppointmentMessage,
+  },
   sales_lead_reply: {
     id: 'sales_lead_reply', name: 'Internal sales lead reply', description: 'A provider-sales prospect replied; delivered once to the assigned salesperson.',
     sample: { name: 'Team', leadName: 'Dr. Sample', leadUrl: `${BRAND.siteUrl}/admin/leads/sample` },

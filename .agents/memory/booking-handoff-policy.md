@@ -49,3 +49,9 @@ Each salesperson handles their own email and text replies: Jacob handles Jacob's
 **Why:** The user explicitly chose individual reply ownership rather than a team-managed reply inbox.
 
 **How to apply:** Plan host-specific email reply destinations and SMS conversation ownership/access. Verify routing before enabling personal-voice messages; a shared sending number alone does not route replies to the correct salesperson.
+
+The user approved building booking confirmation email/text, a 24-hour email/text reminder, and a final text 30 minutes before the meeting. Preserve the recipient-local 8 AM–8 PM texting window; nighttime confirmation emails need not wait.
+
+**Why:** The user accepted the reminder discussion and explicitly recalled the existing 8 AM–8 PM device-timezone window. This is appointment messaging, distinct from the stricter weekday Eastern business-hour limits on unbooked-lead outreach.
+
+**How to apply:** Use the captured browser/device timezone (not a claim of GPS location). Skip overdue reminders and avoid clustered texts on short-notice bookings. The final text focuses on joining from a computer rather than repeating the walkthrough request. Never backfill historical appointments or enable production sends merely by deploying the feature.

@@ -12,7 +12,7 @@ describe('outgoing email link domain', () => {
       const rendered = renderTemplate(template.id, data as never)
       for (const url of rendered.html.matchAll(/(?:href|src)="(https?:\/\/[^"]+)"/g)) {
         // Receipt links belong to Stripe, not to the app.
-        expect(['patientpipeline.app', 'pay.stripe.com']).toContain(new URL(url[1]!).hostname)
+        expect(['patientpipeline.app', 'pay.stripe.com', ...(template.id === 'strategy_appointment' ? ['meet.google.com'] : [])]).toContain(new URL(url[1]!).hostname)
       }
       expect(rendered.html).not.toContain('reactivationpower.com')
       expect(toPlainText(rendered.html)).not.toContain('reactivationpower.com')

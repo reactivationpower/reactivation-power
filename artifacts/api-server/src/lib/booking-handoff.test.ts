@@ -4,6 +4,8 @@ vi.mock('@workspace/db', () => ({ pool: { query: mocks.query, connect: async () 
 vi.mock('./sales-leads/provider', () => ({ safeSalesUpsert: mocks.sync, appointments: mocks.events }))
 vi.mock('./ghl', () => ({ getGhlFreeSlots: mocks.slots }))
 vi.mock('./marketing/outcomes', () => ({ bookingOutcome: vi.fn() }))
+vi.mock('./appointment-messages/store', () => ({ registerAppointment: vi.fn() }))
+vi.mock('./appointment-messages/worker', () => ({ runAppointmentMessages: vi.fn() }))
 vi.mock('./sales-leads/store', () => ({ stop: vi.fn(), activity: vi.fn() }))
 vi.mock('./sales-leads/dispatch', () => ({ nudgeSalesSync: vi.fn() }))
 import { newBookingHandoff, readBookingHandoff, withBookingHandoff, checkSavedBooking } from './booking-handoff'

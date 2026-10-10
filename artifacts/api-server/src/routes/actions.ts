@@ -14,6 +14,7 @@ import * as booking from "../actions/booking";
 import * as demo from "../actions/demo";
 import * as leads from "../actions/leads";
 import * as salesLeads from "../actions/sales-leads";
+import * as appointmentMessages from "../actions/appointment-messages";
 import * as marketing from "../actions/marketing";
 import * as leadFollowUp from "../actions/lead-followup";
 import * as mail from "../actions/mail";
@@ -59,6 +60,7 @@ type ActionModule = Record<string, unknown>;
 const MODULES: Record<string, ActionModule> = {
   marketing,
   "sales-leads": salesLeads,
+  "appointment-messages": appointmentMessages,
   affiliates,
   "affiliate-onboarding": affiliateOnboarding,
   "enrollment-notifications": enrollmentNotifications,
@@ -106,6 +108,9 @@ const ACTIONS: Record<string, Record<string, Auth>> = {
     previewSalesImport: "super_admin", startSalesImport: "super_admin", getSalesImport: "super_admin",
     resumeSalesImport: "super_admin", resolveSalesMerge: "super_admin", convertSalesLead: "admin",
     retrySalesSync: "admin", salesCadencePreview: "admin", getSalesMedia: "super_admin",
+  },
+  "appointment-messages": {
+    getAppointmentMessaging: "admin", saveAppointmentHost: "super_admin", saveAppointmentMessaging: "super_admin",
   },
   affiliates: {
     applyAffiliate: "public", requestAffiliateAccess: "public", verifyAffiliateAccess: "public", captureAffiliateReferral: "public",
