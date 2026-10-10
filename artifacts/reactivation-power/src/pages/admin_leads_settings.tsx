@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { AppointmentMessaging } from '@/components/leads/appointment-messaging'
+import { InboxSetup } from '@/components/leads/inbox-setup'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { salesCadencePreview, saveSalesReplyPreference, saveSalesSettings, verifySalesCapabilities } from '@/app/actions/sales-leads'
@@ -35,6 +36,7 @@ export default function AdminLeadsSettingsPage() {
       <header><h1 className="text-2xl font-semibold">Leads</h1><p className="mt-1 text-sm text-muted-foreground">Settings for the provider sales pipeline.</p></header>
       <LeadsTabs />
       <AppointmentMessaging />
+      <InboxSetup />
       {ro && <Banner kind="info">Only super admins can change these settings. You can still set your own reply notification preference.</Banner>}
       {!s.default_assignee_id && <Banner kind="warn">A default assignee is required. Until one is set, new leads are unassigned and automation cannot be enabled.</Banner>}
       <section className={card + ' space-y-2'} data-testid="section-scheduler">

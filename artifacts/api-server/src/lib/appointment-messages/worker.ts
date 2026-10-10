@@ -9,6 +9,7 @@ import { logger } from '../logger'
 import { APPOINTMENT_LOCK, appointmentSettings, reconcileAppointment } from './store'
 import { MINUTE, nextSmsWindow, smsAllowed } from './schedule'
 import { renderAppointmentMessage, type AppointmentCopy } from './content'
+import { replyAddress } from '../sales-inbox/store'
 
 function channelBlocked(remote: any, channel: string) {
   return remote?.dnd === true || remote?.dndSettings?.[channel]?.status === 'active'
@@ -68,10 +69,15 @@ async function dispatch(c: PoolClient, job: any, row: any, lead: any) {
     AND e.status IN ('sent','delivered','opened','clicked') LIMIT 1`, [row.appointment_id, row.version])).rowCount
   const copy: AppointmentCopy = { firstName: lead.first_name, host: host.name, start: snap.start, timezone: row.timezone,
     meetingUrl: snap.meetingUrl, walkthroughUrl: `${PUBLIC_APP_ORIGIN}/walkthrough`, kind: job.kind, emailAccepted: !!accepted }
+  let portalReplyTo: string | undefined
+  if (!sms) {
+    try { portalReplyTo = await replyAddress(lead.id, c) }
+    catch { return defer(c, job.id, 'Portal email receiving setup must be completed before sending') }
+  }
   // Freeze all provider inputs before dispatch. A crash after this point is
   // uncertain, never automatically replayed (SMS has no reliable dedupe key).
   const data = job.snapshot ?? { copy, rendered: renderAppointmentMessage(copy), recipient: lead.email,
-    from: `${host.name} | Patient Pipeline <${fromAddress().match(/<?([^<>\s]+@patientpipeline\.app)>?$/i)?.[1]}>`, replyTo: host.reply_email }
+    from: `${host.name} | Patient Pipeline <${fromAddress().match(/<?([^<>\s]+@patientpipeline\.app)>?$/i)?.[1]}>`, replyTo: portalReplyTo }
   await c.query("UPDATE appointment_deliveries SET state='sending',claimed_at=now(),attempts=attempts+1,snapshot=$2 WHERE id=$1", [job.id, JSON.stringify(data)])
   try {
     let providerId: string | undefined, logId: string | undefined

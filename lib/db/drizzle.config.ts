@@ -34,6 +34,7 @@ export default defineConfig({
   // Only tables modelled in src/schema are managed; everything else in
   // Supabase's public schema is left alone.
   tablesFilter: [
+    "sales_inbox_settings", "sales_inbox_threads", "sales_inbox_messages", "sales_inbox_inbound",
     "appointment_message_settings", "appointment_hosts", "appointment_messages", "appointment_deliveries",
     "sales_leads", "sales_submissions", "sales_activities", "sales_jobs",
     "sales_settings", "sales_preferences", "sales_imports", "sales_merge_reviews",

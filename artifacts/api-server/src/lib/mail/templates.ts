@@ -132,6 +132,7 @@ export interface CronFailedData {
   dashboardUrl: string
 }
 export interface TemplateDataMap {
+  sales_personal: { subject: string; body: string; host: string }
   strategy_appointment: AppointmentCopy
   sales_lead_reply: { name: string; leadName: string; leadUrl: string }
   affiliate_access: { businessName: string; loginUrl: string }
@@ -902,6 +903,13 @@ export interface AccessRestoredData {
 
 type AnyTemplate = { [K in TemplateId]: TemplateDefinition<K> }[TemplateId]
 export const TEMPLATES: { [K in TemplateId]: TemplateDefinition<K> } = {
+  sales_personal: {
+    id: 'sales_personal', name: 'Personal sales conversation',
+    description: 'A message written by the assigned salesperson in the portal.',
+    sample: { subject: 'Your Patient Pipeline questions', body: 'Thanks for speaking with us. How can I help?', host: 'Jacob' },
+    render: d => ({ subject: d.subject, previewText: d.subject,
+      html: layout([`<p style="white-space:pre-wrap">${esc(d.body)}</p>`, `<p>${esc(d.host)}<br/>Patient Pipeline</p>`], { previewText:d.subject }) }),
+  },
   strategy_appointment: {
     id: 'strategy_appointment', name: 'Strategy call confirmation and reminders',
     description: 'Personal meeting-host messages with preparation instructions and Google Meet details.',

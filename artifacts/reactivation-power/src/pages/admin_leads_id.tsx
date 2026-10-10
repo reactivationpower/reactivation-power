@@ -78,6 +78,7 @@ export default function AdminLeadDetailPage() {
           <div className="mt-2 flex flex-wrap gap-1.5"><Pill>{lead.stage}</Pill>{lead.dnd && <Pill tone="bg-destructive/15 text-destructive">Do not disturb</Pill>}{!lead.consent && <Pill tone="bg-yellow-500/15">No consent on file</Pill>}<Pill>{`Automation ${lead.automation_state}`}</Pill></div>
         </div>
         <div className="flex flex-wrap gap-2">
+          <Link href={`/admin/leads/inbox?lead=${encodeURIComponent(id)}`} className={btn2} data-testid="link-inbox">Open conversation</Link>
           {contact_url ? (
             <a href={contact_url} target="_blank" rel="noopener noreferrer" className={btn} data-testid="link-ghl-call">Open in GoHighLevel to call</a>
           ) : (

@@ -8,11 +8,11 @@ The internal sales dashboard includes all website inquiry sources, affiliate ref
 
 **How to apply:** Isolate internal provider-sales leads from customer-practice patient data and do not expose sales conversation context to affiliates.
 
-Salespeople must send, receive, read, and reply to both lead emails and texts inside the Patient Pipeline portal. GHL is the delivery and receiving backend, not the required daily interface. Patient Pipeline controls appointment-message scheduling without GHL workflows.
+Salespeople must send, receive, read, and reply to both lead emails and texts inside the Patient Pipeline portal. The user's latest preferred split is Resend for system emails, appointment reminders, automated follow-up emails, and manual portal emails; GHL for texts and calls. Patient Pipeline controls scheduling without GHL workflows.
 
-**Why:** The user explicitly chose GHL for communicating with leads while reiterating that sending and receiving must happen through the portal. These are complementary requirements, not conflicting ones.
+**Why:** After considering GHL for all lead communication, the user explicitly preferred combining Resend email and GHL texts/calls into one portal view with two-way sending and receiving.
 
-**How to apply:** Build the portal conversation experience on GHL's two-way messaging. Do not propose a separate Resend receiving domain for lead conversations or substitute links to GHL for portal send/reply controls. This supersedes the earlier Resend-based lead-email direction; unrelated transactional email remains separate. Verify provider readiness rather than claiming that the existing read-only history is a working inbox.
+**How to apply:** Use a dedicated Resend receiving connection for portal email replies and GHL's messaging for texts. Do not substitute links to external inboxes for portal send/reply controls. Keep system email distinct from lead conversations. Verify receiving access, domain setup, and live delivery before calling the inbox operational; Resend sending alone is not email receiving.
 
 The user wants aggressive 30-day unresponsive-lead follow-up: two touches per day for the first three business days, varied morning/lunch/late-day slots, Monday–Friday 9–5 Eastern for business follow-up. Texts additionally stay within 8 AM–8 PM in the contact's device-derived local timezone. Consent comes from the lead form checkbox; store consent and timezone locally and in GoHighLevel.
 

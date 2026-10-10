@@ -272,6 +272,8 @@ export async function runSalesWorker() {
   if (busy) return
   busy = true
   try {
+    const { runInboxInbound } = await import('../sales-inbox/inbound')
+    await runInboxInbound().catch(() => console.warn('Inbox receiving unavailable; will retry on next scheduled wake'))
     const { runAppointmentMessages } = await import('../appointment-messages/worker')
     await runAppointmentMessages()
     await recoverClaims()

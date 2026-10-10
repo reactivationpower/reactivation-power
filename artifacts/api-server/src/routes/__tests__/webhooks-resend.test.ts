@@ -5,6 +5,8 @@ import type { EmailLog } from '@workspace/db'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const store = vi.hoisted(() => ({ rows: [] as EmailLog[], writes: 0, transactions: 0 }))
+const incoming = vi.hoisted(() => ({ accept: vi.fn(async () => {}) }))
+vi.mock('@/lib/sales-inbox/inbound', () => ({ acceptReceivedEmail: incoming.accept }))
 vi.mock('drizzle-orm', () => ({ eq: (column: string, value: string) => ({ column, value }) }))
 vi.mock('@workspace/db', () => ({
   emailLogTable: { id: 'id', providerId: 'providerId' },
@@ -152,6 +154,15 @@ describe('verified delivery webhook HTTP boundary', () => {
     } })
   }
   const failure = { type: 'email.suppressed', created_at: '2026-10-01T10:00:00Z', data: { email_id: 're_1' } }
+  it('accepts incoming email only after signature verification, without treating it as an outbound delivery', async () => {
+    incoming.accept.mockClear()
+    const event = { type: 'email.received', created_at: '2026-10-01T10:00:00Z', data: { email_id: 'incoming-fixture' } }
+    expect((await post(event, 'v1,AAAA')).status).toBe(401)
+    expect(incoming.accept).not.toHaveBeenCalled()
+    expect((await post(event)).status).toBe(200)
+    expect(incoming.accept).toHaveBeenCalledWith('incoming-fixture')
+    expect(store.transactions).toBe(0)
+  })
   it('correlates a valid failed-code event and makes retries no-ops', async () => {
     expect((await post(failure)).status).toBe(200)
     expect((await post(failure)).status).toBe(200)

@@ -44,11 +44,11 @@ Use the meeting host's personal voice with Patient Pipeline clearly identified. 
 
 **How to apply:** Keep shared copy separate from host identity and reply routing. Resolve the actual assigned meeting host rather than globally replacing Jacob for all appointments. This is a messaging requirement, not permission to change meeting assignment.
 
-Each salesperson handles their own email and text replies inside the Patient Pipeline portal: Jacob handles Jacob's replies, and future salespeople handle theirs. GHL handles two-way delivery in the background.
+Each salesperson handles their own email and text replies inside the Patient Pipeline portal: Jacob handles Jacob's replies, and future salespeople handle theirs. The latest preferred backend split is Resend for email and GHL for texts/calls.
 
 **Why:** The user explicitly chose individual reply ownership rather than a team-managed reply inbox.
 
-**How to apply:** Preserve host-specific ownership and access for both channels in the portal. The later portal-inbox requirement supersedes routing lead-email replies only to a salesperson's external mailbox. Verify GHL two-way routing before enabling personal-voice messages; a shared sending number alone does not route replies to the correct salesperson.
+**How to apply:** Preserve host-specific ownership and access for both channels in the portal. The later portal-inbox requirement supersedes routing lead-email replies only to a salesperson's external mailbox. Verify Resend receiving and GHL text routing before enabling personal-voice messages; a shared sending number alone does not route replies to the correct salesperson.
 
 The user approved building booking confirmation email/text, a 24-hour email/text reminder, and a final text 30 minutes before the meeting. Preserve the recipient-local 8 AM–8 PM texting window; nighttime confirmation emails need not wait.
 

@@ -14,6 +14,7 @@ import * as booking from "../actions/booking";
 import * as demo from "../actions/demo";
 import * as leads from "../actions/leads";
 import * as salesLeads from "../actions/sales-leads";
+import * as salesInbox from "../actions/sales-inbox";
 import * as appointmentMessages from "../actions/appointment-messages";
 import * as marketing from "../actions/marketing";
 import * as leadFollowUp from "../actions/lead-followup";
@@ -60,6 +61,7 @@ type ActionModule = Record<string, unknown>;
 const MODULES: Record<string, ActionModule> = {
   marketing,
   "sales-leads": salesLeads,
+  "sales-inbox": salesInbox,
   "appointment-messages": appointmentMessages,
   affiliates,
   "affiliate-onboarding": affiliateOnboarding,
@@ -100,6 +102,10 @@ const ACTIONS: Record<string, Record<string, Auth>> = {
     getMarketingSetup: "admin", getMarketingReport: "admin", getMarketingActivity: "admin", getMarketingEvents: "admin",
     saveMarketingSource: "super_admin", saveMarketingLink: "super_admin", saveMarketingPage: "super_admin",
     saveMarketingSettings: "super_admin", getMarketingAudit: "super_admin", removeMarketingHistory: "super_admin",
+  },
+  "sales-inbox": {
+    listInbox: "admin", getConversation: "admin", refreshConversation: "admin",
+    sendMessage: "admin", getInboxSettings: "admin", saveInboxSettings: "admin",
   },
   "sales-leads": {
     listSalesLeads: "admin", getSalesLead: "admin", createSalesLead: "admin",

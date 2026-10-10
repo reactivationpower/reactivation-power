@@ -8,6 +8,7 @@ vi.mock('@workspace/db', () => ({ pool: { query: (...a: any[]) => fixture.pool.q
 vi.mock('../sales-leads/provider', async original => ({ ...await original<any>(), provider: mocks.provider, contact: mocks.contact, conversations: mocks.conversations }))
 vi.mock('../sales-leads/dispatch', () => ({ nudgeSalesSync: vi.fn() }))
 vi.mock('../mail/send', () => ({ fromAddress: () => 'Patient Pipeline <team@patientpipeline.app>', sendEmail: mocks.send }))
+vi.mock('../sales-inbox/store', () => ({ replyAddress: async () => 'thread@replies.example.invalid' }))
 vi.mock('../data/admin-users', () => ({ getAdminUserById: mocks.user }))
 import { registerAppointment, reconcileAppointment } from './store'
 import { runAppointmentMessages } from './worker'
@@ -65,7 +66,7 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('appointment outbox (isolated data
     await Promise.all([runAppointmentMessages(),runAppointmentMessages()])
     expect(mocks.send).toHaveBeenCalledTimes(1)
     expect(mocks.send.mock.calls[0][2].host).toBe('Morgan')
-    expect(mocks.send.mock.calls[0][3].replyTo).toBe('host@example.invalid')
+    expect(mocks.send.mock.calls[0][3].replyTo).toBe('thread@replies.example.invalid')
     expect((await rows()).filter((r:any)=>r.state==='sent')).toHaveLength(2)
     await due(); await runAppointmentMessages()
     expect(mocks.send).toHaveBeenCalledTimes(1)

@@ -87,6 +87,7 @@ import PageAdminCustomerId from '@/pages/admin_customers_id';
 import PageAdminLeadId from '@/pages/admin_leads_id';
 import PageAdminLeadsSettings from '@/pages/admin_leads_settings';
 import PageAdminLeadsImport from '@/pages/admin_leads_import';
+import PageAdminLeadsInbox from '@/pages/admin_leads_inbox';
 import PageAdminLeadSources from '@/pages/admin_lead_sources';
 import PageAdminMarketingAnalytics from '@/pages/admin_marketing_analytics';
 import PageAnalyticsTest from '@/pages/analytics-test';
@@ -233,6 +234,9 @@ function Router() {
       </Route>
       <Route path="/admin/leads/settings">
         <RoutedErrorBoundary><AdminLayout><PageAdminLeadsSettings /></AdminLayout></RoutedErrorBoundary>
+      </Route>
+      <Route path="/admin/leads/inbox">
+        <RoutedErrorBoundary><AdminLayout><PageAdminLeadsInbox /></AdminLayout></RoutedErrorBoundary>
       </Route>
       <Route path="/admin/leads/import">
         <RoutedErrorBoundary><AdminLayout><PageAdminLeadsImport /></AdminLayout></RoutedErrorBoundary>

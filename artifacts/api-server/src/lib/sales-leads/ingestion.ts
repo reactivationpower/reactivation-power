@@ -9,6 +9,7 @@ export function providerDnd(c: any) {
 // TYPE_CALL=1, TYPE_EMAIL=3. Prefer the explicit symbol, never guess type=1 is SMS.
 const smsType = (m: any) => ['SMS','TYPE_SMS','TYPE_CAMPAIGN_SMS','TYPE_CUSTOM_SMS'].includes(m.messageType ?? m.type) || (!m.messageType && m.type === 2)
 const callType = (m: any) => ['CALL','TYPE_CALL','TYPE_CAMPAIGN_CALL','TYPE_CUSTOM_CALL','TYPE_IVR_CALL'].includes(m.messageType ?? m.type) || (!m.messageType && m.type === 1)
+const emailType = (m: any) => ['EMAIL','TYPE_EMAIL','TYPE_CAMPAIGN_EMAIL'].includes(m.messageType ?? m.type) || (!m.messageType && m.type === 3)
 export const safeProviderText = (value: unknown) => String(value ?? '').replace(/https?:\/\/[^\s<>"']+/g, raw => {
   try {
     const url = new URL(raw)
@@ -32,10 +33,10 @@ export async function ingestMessages(leadId: string, rows: any[]) {
     const lead = (await c.query('SELECT * FROM sales_leads WHERE id=$1 FOR UPDATE', [leadId])).rows[0]
     if (!lead) return
     for (const m of rows) {
-      if (!m.id || !(smsType(m) || callType(m))) continue
+      if (!m.id || !(smsType(m) || callType(m) || emailType(m))) continue
       const occurredAt = Number.isFinite(Date.parse(m.dateAdded)) ? m.dateAdded : undefined
-      const inbound = m.direction === 'inbound' && smsType(m)
-      const kind = callType(m) ? 'provider_call' : inbound ? 'inbound_sms' : 'outbound_sms'
+      const inbound = m.direction === 'inbound' && (smsType(m) || emailType(m))
+      const kind = callType(m) ? 'provider_call' : `${inbound?'inbound':'outbound'}_${emailType(m)?'email':'sms'}`
       const a = await activity(c, leadId, { kind, body: safeProviderText(m.body ?? m.meta?.callStatus),
         providerId: m.id, status: String(m.status ?? ''), occurredAt, dedupeKey: `ghl-message:${m.id}` })
       // Any genuine reply pauses even if duplicate/out-of-order. Old import replies never start automation.

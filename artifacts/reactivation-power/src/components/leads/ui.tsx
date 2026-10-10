@@ -65,12 +65,12 @@ export function Empty({ title, body }: { title: string; body: string }) {
 
 export function LeadsTabs() {
   const [loc] = useLocation()
-  const tabs = [['/admin/leads', 'Pipeline'], ['/admin/leads/import', 'Import'], ['/admin/leads/settings', 'Settings']]
+  const tabs = [['/admin/leads', 'Pipeline'], ['/admin/leads/inbox', 'Inbox'], ['/admin/leads/import', 'Import'], ['/admin/leads/settings', 'Settings']]
   return (
-    <nav className="flex gap-1 border-b border-border" aria-label="Leads sections">
+    <nav className="flex gap-1 overflow-x-auto border-b border-border" aria-label="Leads sections">
       {tabs.map(([h, l]) => (
         <Link key={h} href={h} data-testid={`tab-leads-${l.toLowerCase()}`}
-          className={`-mb-px border-b-2 px-3 py-2 text-sm font-medium ${loc === h ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'}`}>{l}</Link>
+          className={`-mb-px shrink-0 border-b-2 px-3 py-2 text-sm font-medium ${loc === h ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'}`}>{l}</Link>
       ))}
     </nav>
   )

@@ -82,6 +82,8 @@ export async function updateSalesLead(leadId: string, input: {
     await c.query("SELECT pg_advisory_xact_lock(hashtextextended($1,0))", [`sales-send:${leadId}`])
     const lead = (await c.query('SELECT * FROM sales_leads WHERE id=$1 FOR UPDATE', [leadId])).rows[0]
     if (!lead) throw new Error('Lead not found')
+    if (admin.role !== 'super_admin' && assignment !== undefined && assignment !== lead.assignee_id)
+      throw new Error('Only a super admin can change lead ownership')
     if (lead.revision !== input.revision) {
       await c.query("UPDATE sales_leads SET sync_state='conflict',sync_error='Another update changed this lead; reload before saving' WHERE id=$1", [leadId])
       return { conflict: true }
