@@ -25,3 +25,9 @@ Strategy-call confirmation and reminder emails and texts must say attendees need
 **Why:** The user explicitly requested this preparation instruction in both email and text messages.
 
 **How to apply:** Include the computer requirement and identify Google Meet in both channels, not only on the booking page.
+
+Strategy-call emails and texts should instruct attendees to watch the 4-minute walkthrough video before the meeting. Explain that it gives a basic understanding and that additional questions or further explanation are welcome on the call.
+
+**Why:** The user explicitly requested this preparation instruction alongside the computer requirement.
+
+**How to apply:** Include the walkthrough link and preparation wording in confirmation and reminder messaging, retaining the Google Meet/computer instruction.
