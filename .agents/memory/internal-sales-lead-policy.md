@@ -43,3 +43,9 @@ The user selected Supabase's native scheduler for five-minute internal-sales wak
 **Why:** The user chose the existing database rather than another external scheduler.
 
 **How to apply:** Keep the independent database wakeup, secure its bearer in Vault, and require a healthy published-worker wake before activating automation. Do not replace it with an in-process-only timer or another provider without approval.
+
+The user selected the existing patientpipeline.app root domain for receiving portal replies rather than a separate replies subdomain.
+
+**Why:** Resend's domain allowance was full; the user chose using the existing domain after being told this routes the whole domain's incoming mail to Resend and does not create normal staff mailboxes.
+
+**How to apply:** Allow root-domain reply addresses. Coordinate any future staff mailbox setup before changing MX routing; do not silently switch back to a replies subdomain.

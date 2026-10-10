@@ -174,11 +174,11 @@ export async function saveInboxSettings(input:unknown) {
   const admin=await requireAdmin()
   if(admin.role!=='super_admin') throw new Error('Only a super admin can configure inbox sending')
   const data=z.object({emailDomain:z.string().trim().toLowerCase().max(200),emailReady:z.boolean(),smsReady:z.boolean()}).parse(input)
-  if(data.emailDomain&&!/^[a-z0-9-]+(?:\.[a-z0-9-]+)*\.patientpipeline\.app$/.test(data.emailDomain)) throw new Error('Use a dedicated receiving subdomain such as replies.patientpipeline.app')
+  if(data.emailDomain&&!/^(?:[a-z0-9-]+\.)*patientpipeline\.app$/.test(data.emailDomain)) throw new Error('Use patientpipeline.app or a receiving subdomain under it')
   if(data.emailReady) {
     if(!data.emailDomain||!process.env.RESEND_WEBHOOK_SECRET||!await receivingAccess()) throw new Error('Resend receiving access and signed webhook setup are required')
     const mx=await resolveMx(data.emailDomain).catch(()=>[])
-    if(!mx.some((r:{exchange:string})=>r.exchange.endsWith('.amazonaws.com')||r.exchange.endsWith('.resend.com'))) throw new Error('Configure Resend receiving MX records for this subdomain first')
+    if(!mx.some((r:{exchange:string})=>r.exchange.endsWith('.amazonaws.com')||r.exchange.endsWith('.resend.com'))) throw new Error('Configure Resend receiving MX records for this domain first')
   }
   await transaction(async c=>{
     const current=await inboxSettings(c)

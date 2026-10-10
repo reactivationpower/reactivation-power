@@ -4,7 +4,7 @@ import { toast } from 'sonner'
 import { getInboxSettings, saveInboxSettings } from '@/app/actions/sales-inbox'
 import { Banner, ErrorBox, Field, Pill, Skeleton, btn, card, errMsg, inp } from '@/components/leads/ui'
 
-const RECOMMENDED = 'replies.patientpipeline.app'
+const RECOMMENDED = 'patientpipeline.app'
 
 function Check({ ok, label }: { ok: boolean; label: string }) {
   return <li className="flex flex-wrap items-center justify-between gap-2"><span>{label}</span><Pill tone={ok ? 'bg-success/15 text-success' : 'bg-yellow-500/15'}>{ok ? 'Detected' : 'Not detected'}</Pill></li>
@@ -28,7 +28,7 @@ export function InboxSetup() {
   const sms = draft.sms ?? settings.sms_ready
   const email = draft.email ?? settings.email_ready
   const dirty = draft.domain !== undefined || draft.sms !== undefined || draft.email !== undefined
-  const domainOk = !domain.trim() || /^[a-z0-9-]+(?:\.[a-z0-9-]+)*\.patientpipeline\.app$/i.test(domain.trim())
+  const domainOk = !domain.trim() || /^(?:[a-z0-9-]+\.)*patientpipeline\.app$/i.test(domain.trim())
 
   return (
     <section className={card + ' space-y-4 break-words'} data-testid="section-inbox-setup">
@@ -40,8 +40,8 @@ export function InboxSetup() {
       <div className="space-y-2 rounded-md bg-muted/50 p-3 text-sm">
         <p className="font-medium">Email receiving requirements</p>
         <ol className="list-decimal space-y-1 pl-5">
-          <li>Pick a dedicated replies subdomain. Recommended: <code className="break-all rounded bg-card px-1">{RECOMMENDED}</code>.</li>
-          <li>At your DNS provider, add the inbound MX record Resend shows for that subdomain. This is manual; this page does not change DNS.</li>
+          <li>The selected receiving domain is <code className="break-all rounded bg-card px-1">{RECOMMENDED}</code>. Resend will receive mail for this entire domain; this does not create staff mailboxes.</li>
+          <li>At your DNS provider, add the inbound MX record Resend shows for that domain. This is manual; this page does not change DNS.</li>
           <li>In Resend, add an <code className="rounded bg-card px-1">email.received</code> webhook pointing at the existing <code className="break-all rounded bg-card px-1">/api/webhooks/resend</code> endpoint. It uses the same signing secret as the current Resend webhook configuration.</li>
           <li>Reading received messages may need a Resend key with full access. Provision it securely as <code>RESEND_RECEIVING_API_KEY</code>, and the webhook signing secret as <code>RESEND_WEBHOOK_SECRET</code>. Never paste keys into this page.</li>
         </ol>
