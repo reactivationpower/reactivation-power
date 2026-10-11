@@ -24,7 +24,7 @@ export async function getAppointmentMessaging() {
       FROM appointment_messages a JOIN sales_leads l ON l.id=a.lead_id WHERE a.last_error IS NOT NULL AND ($1 OR l.assignee_id=$2)
       ORDER BY a.reconcile_at DESC LIMIT 20`, [admin.role === 'super_admin', admin.userId]), settings(),
   ])
-  return { config, hosts: hosts.rows, team: team.filter(u => u.active && u.confirmedAt).map(u => ({ id: u.id, name: u.name, email: u.email })),
+  return { config: { ...config, sms_enabled: cfg.capabilities?.appointment_sms?.enabled === true }, hosts: hosts.rows, team: team.filter(u => u.active && u.confirmedAt).map(u => ({ id: u.id, name: u.name, email: u.email })),
     deliveries: jobs.rows, issues: appointments.rows, superAdmin: admin.role === 'super_admin', schedulerReady: schedulerHealthy(cfg.capabilities) }
 }
 export async function saveAppointmentHost(input: unknown) {
@@ -51,17 +51,23 @@ export async function saveAppointmentHost(input: unknown) {
   })
 }
 export async function saveAppointmentMessaging(input: unknown) {
-  await owner()
-  const data = z.object({ enabled: z.boolean(), confirmReadiness: z.boolean().optional() }).parse(input)
+  const admin = await owner()
+  const data = z.object({ enabled: z.boolean(), confirmReadiness: z.boolean().optional(),
+    smsEnabled: z.boolean().default(false) }).parse(input)
   await transaction(async c => {
     await c.query('SELECT pg_advisory_xact_lock(hashtextextended($1,0))', [APPOINTMENT_LOCK])
     const current = await appointmentSettings(c)
+    const cfg = await settings(c)
     if (data.enabled) {
-      const cfg = await settings(c)
       if (!schedulerHealthy(cfg.capabilities)) throw new Error('A healthy published scheduler wake is required')
-      if (!data.confirmReadiness && !current.readiness_confirmed_at) throw new Error('Confirm reply routing, SMS readiness, email sender and workflow review first')
+      if ((!current.readiness_confirmed_at || data.smsEnabled && cfg.capabilities?.appointment_sms?.enabled !== true) && !data.confirmReadiness)
+        throw new Error('Confirm reply routing, email sender and duplicate workflow review; automatic texts require separate SMS readiness confirmation')
       if (!(await c.query('SELECT 1 FROM appointment_hosts WHERE active=true LIMIT 1')).rowCount) throw new Error('Add a verified meeting-host profile first')
     }
+    await c.query(`UPDATE sales_settings SET capabilities=jsonb_set(capabilities,'{appointment_sms}',$1::jsonb)
+      WHERE id='internal'`, [JSON.stringify({ enabled: data.enabled && data.smsEnabled, confirmedBy: admin.userId })])
+    if (!data.smsEnabled) await c.query(`UPDATE appointment_deliveries SET state='cancelled',last_error='Automatic appointment texts disabled'
+      WHERE channel='sms' AND state IN ('pending','blocked')`)
     await c.query(`UPDATE appointment_message_settings SET enabled=$1,
       enabled_at=CASE WHEN $1 AND NOT enabled THEN now() ELSE enabled_at END,
       readiness_confirmed_at=CASE WHEN $2 THEN now() ELSE readiness_confirmed_at END WHERE id='strategy'`, [data.enabled, !!data.confirmReadiness])

@@ -104,6 +104,14 @@ describe('delivery event ordering and privacy', () => {
     expect(row.status).toBe('suppressed')
     expect(row.error).toContain('suppressed')
   })
+  it('records delivery evidence arriving after a newer open without moving the clock back', () => {
+    const row = { status:'sent',lastEvent:'email.opened',lastEventAt:new Date('2026-10-01T10:02:00Z'),deliveredAt:null } as EmailLog
+    const patch = deliveryPatch(row,{type:'email.delivered',created_at:'2026-10-01T10:01:00Z'})
+    expect(patch).toMatchObject({status:'delivered',deliveredAt:new Date('2026-10-01T10:01:00Z')})
+    expect(patch).not.toHaveProperty('lastEventAt')
+    Object.assign(row,patch)
+    expect(deliveryPatch(row,{type:'email.delivered',created_at:'2026-10-01T10:01:00Z'})).toBeNull()
+  })
   it('records an older bounce even after an open event, without moving the clock back', () => {
     const row = logRow()
     Object.assign(row, deliveryPatch(row, { type: 'email.opened', created_at: '2026-10-01T10:02:00Z' }))
@@ -154,13 +162,13 @@ describe('verified delivery webhook HTTP boundary', () => {
     } })
   }
   const failure = { type: 'email.suppressed', created_at: '2026-10-01T10:00:00Z', data: { email_id: 're_1' } }
-  it('accepts incoming email only after signature verification, without treating it as an outbound delivery', async () => {
+  it('ignores incoming email without invoking receiving services', async () => {
     incoming.accept.mockClear()
     const event = { type: 'email.received', created_at: '2026-10-01T10:00:00Z', data: { email_id: 'incoming-fixture' } }
     expect((await post(event, 'v1,AAAA')).status).toBe(401)
     expect(incoming.accept).not.toHaveBeenCalled()
-    expect((await post(event)).status).toBe(200)
-    expect(incoming.accept).toHaveBeenCalledWith('incoming-fixture')
+    expect((await post(event)).status).toBe(202)
+    expect(incoming.accept).not.toHaveBeenCalled()
     expect(store.transactions).toBe(0)
   })
   it('correlates a valid failed-code event and makes retries no-ops', async () => {

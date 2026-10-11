@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import { ReplitConnectors } from '@replit/connectors-sdk'
-import { db, emailLogTable } from '@workspace/db'
+import { db, emailLogTable, type PoolClient } from '@workspace/db'
 import { logger } from '@/lib/logger'
 import { toPlainText } from './layout'
 import { renderTemplate, type TemplateDataMap, type TemplateId } from './templates'
@@ -38,6 +38,10 @@ export interface SendResult {
 }
 
 export interface SendOptions {
+  /** Optional durable outbox correlation, saved before dispatch. Server-only. */
+  logId?: string
+  /** Reuse the outbox's checked-out connection; never borrow a nested pool slot. */
+  logClient?: Pick<PoolClient, 'query'>
   /** Durable outboxes freeze the exact content and sender on their first attempt. Never log this. */
   deliverySnapshot?: ReturnType<typeof renderTemplate> & { from: string }
   /** Provider-level deduplication for durable outbox retries (24-hour retention). */
@@ -74,7 +78,8 @@ export async function sendEmail<K extends TemplateId>(
   options: SendOptions = {},
 ): Promise<SendResult> {
   const recipient = to.trim().toLowerCase()
-  const logId = randomUUID()
+  const logId = options.logId ?? randomUUID()
+  const log = (row: Parameters<typeof writeLog>[0]) => writeLog(row, options.logClient)
   const authentication = isAuthenticationEmail(type)
   const sensitiveDelivery = authentication || type === 'agreement_sent' || type === 'affiliate_onboarding_v1'
   const metadata = safeEmailMetadata(type, options.metadata)
@@ -83,7 +88,7 @@ export async function sendEmail<K extends TemplateId>(
     rendered = options.deliverySnapshot ?? renderTemplate(type, data)
   } catch (err) {
     const error = authentication ? 'Authentication email rendering failed' : sensitiveDelivery ? 'Email rendering failed' : err instanceof Error ? err.message : 'Email rendering failed'
-    await writeLog({ id: logId, type, recipient, subject: 'Email rendering failed', metadata, status: 'failed', error })
+    await log({ id: logId, type, recipient, subject: 'Email rendering failed', metadata, status: 'failed', error })
     logger.error({ email: { type, recipient, logId } }, 'email rendering failed')
     return { ok: false, logId, error }
   }
@@ -91,7 +96,7 @@ export async function sendEmail<K extends TemplateId>(
 
   if (!EMAIL_RE.test(recipient)) {
     const error = 'Invalid recipient address'
-    await writeLog({ ...base, status: 'failed', error })
+    await log({ ...base, status: 'failed', error })
     logger.error({ email: { type, recipient, logId } }, `email failed: ${error}`)
     return { ok: false, logId, error }
   }
@@ -123,18 +128,18 @@ export async function sendEmail<K extends TemplateId>(
     const payload = (await response.json().catch(() => ({}))) as ResendSendResponse
     if (!response.ok || !payload.id) {
       const error = authentication ? `Resend rejected the authentication email (HTTP ${response.status})` : sensitiveDelivery ? `Resend rejected the email (HTTP ${response.status})` : payload.message || `Resend responded ${response.status}`
-      await writeLog({ ...base, status: 'failed', error })
+      await log({ ...base, status: 'failed', error })
       logger.error({ email: { type, recipient, logId, status: response.status } }, `email failed: ${error}`)
       return { ok: false, logId, error }
     }
-    await writeLog({ ...base, status: 'sent', providerId: payload.id })
+    await log({ ...base, status: 'sent', providerId: payload.id })
     logger.info({ email: { type, recipient, logId, providerId: payload.id } }, 'email sent')
     return { ok: true, logId, providerId: payload.id }
   } catch (err) {
     const senderConfigurationError = err instanceof Error && err.message === 'RESEND_FROM must use a patientpipeline.app email address'
     const uncertain = !senderConfigurationError
     const error = sensitiveDelivery && !senderConfigurationError ? (authentication ? 'Authentication email send failed; check the registered inbox and email provider' : 'Email send failed; check the recipient and email provider') : err instanceof Error ? err.message : String(err)
-    await writeLog({ ...base, status: uncertain && type === 'agreement_sent' ? 'pending' : 'failed', error })
+    await log({ ...base, status: uncertain && type === 'agreement_sent' ? 'pending' : 'failed', error })
     logger.error({ ...(!sensitiveDelivery ? { err } : {}), email: { type, recipient, logId } }, `email failed: ${error}`)
     return { ok: false, logId, error, ...(uncertain ? { uncertain: true } : {}) }
   }
@@ -149,8 +154,14 @@ async function writeLog(row: {
   providerId?: string
   error?: string
   metadata: Record<string, unknown> | null
-}): Promise<void> {
+}, client?: Pick<PoolClient, 'query'>): Promise<void> {
   try {
+    if (client) {
+      await client.query(`INSERT INTO email_log(id,type,recipient,subject,status,provider_id,error,metadata)
+        VALUES($1,$2,$3,$4,$5,$6,$7,$8)`, [row.id,row.type,row.recipient,row.subject,row.status,
+        row.providerId ?? null,row.error ?? null,JSON.stringify(row.metadata)])
+      return
+    }
     await db.insert(emailLogTable).values({
       id: row.id,
       type: row.type,

@@ -24,28 +24,49 @@ export function eventState(event: any) {
   if (status === 'confirmed' || status === 'new') return 'scheduled'
   return 'hold' // No reminders for no-show, showed, unknown or unrecognized states.
 }
-export async function reconcileAppointment(c: PoolClient, row: any, event: any, smsZone: string | null, now = new Date()) {
+export async function reconcileAppointment(c: PoolClient, row: any, event: any, smsZone: string | null, now = new Date(), smsEnabled = false) {
   const status = eventState(event)
-  const start = new Date(event.startTime)
+  const start = new Date(event.startTime ?? (status === 'cancelled' ? row.starts_at : ''))
   if (!Number.isFinite(+start)) throw new Error('Appointment time could not be verified')
-  const snapshot = { start: start.toISOString(), hostId: event.assignedUserId, meetingUrl: meetLink(event.address), status, smsZone }
+  const snapshot = { start: start.toISOString(), hostId: event.assignedUserId ?? (status === 'cancelled' ? row.snapshot?.hostId : undefined), meetingUrl: meetLink(event.address), status, smsZone, smsEnabled }
   const fingerprint = createHash('sha256').update(JSON.stringify(snapshot)).digest('hex')
   if (fingerprint === row.fingerprint) return
   const version = row.version + 1
   const previous = row.snapshot
   // A link becoming available or a zone correction should not generate a second confirmation.
-  const substantialChange = previous?.start !== snapshot.start || previous?.hostId !== snapshot.hostId || previous?.status !== snapshot.status
-  const sentInitial = (await c.query(`SELECT 1 FROM appointment_deliveries WHERE appointment_id=$1 AND kind IN ('confirmation','rescheduled')
-    AND state IN ('sent','uncertain','sending') LIMIT 1`, [row.appointment_id])).rowCount
-  const kind: MessageKind = status === 'cancelled' ? 'cancelled' : sentInitial && substantialChange ? 'rescheduled' : 'confirmation'
+  const attempted = (await c.query(`SELECT channel,kind,snapshot FROM appointment_deliveries WHERE appointment_id=$1
+    AND state IN ('sent','uncertain','sending')`, [row.appointment_id])).rows
+  const sentInitial = attempted.some(d => ['confirmation','rescheduled'].includes(d.kind))
+  const kind: MessageKind = status === 'cancelled' ? 'cancelled' : sentInitial ? 'rescheduled' : 'confirmation'
   await c.query('BEGIN')
   try {
+    const pending = (await c.query(`SELECT kind,channel,due_at,expires_at FROM appointment_deliveries
+      WHERE appointment_id=$1 AND state IN ('pending','blocked') AND kind IN ('day_before','final')`,
+      [row.appointment_id])).rows
     await c.query("UPDATE appointment_deliveries SET state='cancelled',last_error='Appointment changed' WHERE appointment_id=$1 AND state IN ('pending','blocked')", [row.appointment_id])
     await c.query(`UPDATE appointment_messages SET starts_at=$2,version=$3,fingerprint=$4,snapshot=$5,last_error=NULL WHERE appointment_id=$1`,
       [row.appointment_id, start, version, fingerprint, JSON.stringify(snapshot)])
     if (status !== 'hold' && (start > now || status === 'cancelled')) {
-      let slots = scheduleMessages(now, start, smsZone, kind)
-      if (sentInitial && !substantialChange) slots = slots.filter(s => s.kind !== 'confirmation')
+       let slots = scheduleMessages(now, start, smsZone, kind).filter(s => smsEnabled || s.channel === 'email')
+       // Metadata-only refreshes must not erase an already scheduled reminder
+       // simply because its original booking is now less than an hour away.
+       if (previous?.start === snapshot.start && previous?.hostId === snapshot.hostId &&
+           previous?.status === 'scheduled' && status === 'scheduled') {
+         for (const p of pending) if ((smsEnabled || p.channel === 'email') && new Date(p.expires_at) > now &&
+           !slots.some(s => s.kind === p.kind && s.channel === p.channel)) {
+           slots.push({ kind: p.kind, channel: p.channel, dueAt: new Date(p.due_at), expiresAt: new Date(p.expires_at) })
+         }
+       }
+       // Deduplicate per channel and actual sent snapshot, not the last reconciled
+       // version: a second reschedule can arrive while the first is still queued.
+       slots = slots.filter(slot => {
+         if (!['confirmation','rescheduled','cancelled'].includes(slot.kind)) return true
+         return !attempted.some(d => d.channel === slot.channel &&
+           (slot.kind === 'cancelled' ? d.kind === 'cancelled' && previous?.status === 'cancelled' :
+             ['confirmation','rescheduled'].includes(d.kind) &&
+             d.snapshot?.copy?.start === snapshot.start &&
+             (d.snapshot?.copy?.hostId ?? previous?.hostId) === snapshot.hostId))
+       })
       // Reconciliation must not re-send a reminder just because a link/host changed.
       for (const slot of slots) {
         if (slot.kind === 'day_before' || slot.kind === 'final') {

@@ -93,6 +93,7 @@ export interface LayoutOptions {
   previewText: string
   /** Optional line under the standard footer, e.g. a support note. */
   footerNote?: string
+  transactionalContext?: 'strategy call'
 }
 
 /** Wrap assembled body blocks in the branded shell. */
@@ -138,7 +139,7 @@ ${parts.join('\n')}
         <tr>
           <td class="inner" style="padding:24px 40px;font-family:${FONT};font-size:12px;line-height:18px;color:${BRAND.muted};text-align:center;">
             ${BRAND.name} &middot; ${esc(BRAND.tagline)}<br />
-            This is a transactional message about your ${BRAND.name} account.${opts.footerNote ? `<br />${opts.footerNote}` : ''}
+            This is a transactional message about your ${BRAND.name} ${opts.transactionalContext ?? 'account'}.${opts.footerNote ? `<br />${opts.footerNote}` : ''}
           </td>
         </tr>
       </table>

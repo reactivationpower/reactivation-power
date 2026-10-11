@@ -96,4 +96,14 @@ describe('Patient Pipeline outgoing sender and links', () => {
     expect(mocks.values).toHaveBeenCalledWith(expect.objectContaining({ status: 'sent', providerId: 'test-email', metadata: null }))
     expect(JSON.stringify(mocks.values.mock.calls)).not.toContain('092814')
   })
+  it('logs an outbox send on its existing connection with its durable correlation ID', async () => {
+    const query=vi.fn().mockResolvedValue({rows:[]})
+    const result=await sendEmail('strategy_appointment','fixture@example.invalid',TEMPLATES.strategy_appointment.sample,
+      {logId:'durable-log',logClient:{query},idempotencyKey:'delivery-fixture',replyTo:'jacobb@patientpipeline.app'})
+    expect(result).toMatchObject({ok:true,logId:'durable-log'})
+    expect(mocks.values).not.toHaveBeenCalled()
+    expect(query.mock.calls[0][1][0]).toBe('durable-log')
+    expect(query.mock.calls[0][1][4]).toBe('sent')
+    expect(mocks.proxy.mock.calls[0][2]).toMatchObject({headers:{'Idempotency-Key':'delivery-fixture'},body:{reply_to:'jacobb@patientpipeline.app'}})
+  })
 })

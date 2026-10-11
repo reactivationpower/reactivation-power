@@ -6,6 +6,7 @@ const fixture = vi.hoisted(() => ({
 }))
 vi.mock('@workspace/db', () => {
   const query = async (sql: string, args: any[] = []) => {
+    if (sql.startsWith('SELECT * FROM appointment_message_settings')) return { rows: [{enabled:false}] }
     if (sql.includes('UNION ALL')) return { rows: [...fixture.submissions.values()].filter(s => s.context.bookingHandoff.hash === args[0]) }
     if (sql.startsWith('SELECT context')) return { rows: [fixture.submissions.get(args[0])] }
     if (sql.startsWith('SELECT * FROM sales_leads')) return { rows: [fixture.leads.get(args[0])] }

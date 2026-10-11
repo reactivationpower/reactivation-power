@@ -61,4 +61,17 @@ describe('personal host content and provider input', () => {
     expect(eventState({appointmentStatus:'cancelled'})).toBe('cancelled')
     expect(eventState({appointmentStatus:'showed'})).toBe('hold')
   })
+  it.each(['confirmation','day_before','rescheduled','cancelled'] as const)('brands %s in the recipient timezone', kind => {
+    const message=renderAppointmentMessage({...copy,kind,timezone:'America/Los_Angeles'})
+    expect(message.html).toContain('patient-pipeline-logo.png')
+    expect(message.html).toContain('Morgan')
+    expect(message.html).toContain('9:00 AM')
+    expect(message.html).toContain('PDT')
+    expect(message.html).toContain('strategy call.')
+    if(kind!=='cancelled') {
+      expect(message.html).toContain('4-minute')
+      expect(message.html).toContain('computer')
+      expect(message.html).toContain(copy.meetingUrl)
+    }
+  })
 })

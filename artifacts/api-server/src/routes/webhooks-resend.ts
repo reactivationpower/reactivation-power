@@ -4,7 +4,6 @@ import { eq } from "drizzle-orm";
 import { db, emailLogTable, type EmailLog } from "@workspace/db";
 import { logger } from "@/lib/logger";
 import { DELIVERY_FAILURES, deliveryFailureMessage } from "@/lib/mail/diagnostics";
-import { acceptReceivedEmail } from "@/lib/sales-inbox/inbound";
 
 /**
  * Resend delivery events (sent, delivered, opened, clicked, bounced, ...).
@@ -110,7 +109,18 @@ export function deliveryPatch(row: EmailLog, event: ResendEvent): Partial<typeof
     row.lastEventAt > patch.lastEventAt! ||
     (row.lastEventAt.getTime() === patch.lastEventAt!.getTime() && row.lastEvent === patch.lastEvent)
   );
-  if (olderOrDuplicate && (!failedNow || failedBefore)) return null;
+  // Delivery can arrive after a newer open/click. Keep independent evidence
+  // without moving the last-event clock backward or erasing a failure.
+  if (olderOrDuplicate && (!failedNow || failedBefore)) {
+    const evidence: Partial<typeof emailLogTable.$inferInsert> = {}
+    if (patch.deliveredAt && !row.deliveredAt) {
+      evidence.deliveredAt = patch.deliveredAt
+      if (!failedBefore) evidence.status = 'delivered'
+    }
+    if (patch.openedAt && !row.openedAt) evidence.openedAt = patch.openedAt
+    if (patch.clickedAt && !row.clickedAt) evidence.clickedAt = patch.clickedAt
+    return Object.keys(evidence).length ? { ...evidence, lastClickedUrl: null } : null
+  }
   if (failedBefore && !failedNow) {
     delete patch.status;
     delete patch.error;
@@ -158,11 +168,6 @@ router.post("/webhooks/resend", async (req: Request, res: Response): Promise<voi
     return;
   }
   const emailId = event.data?.email_id;
-  if (event.type === 'email.received') {
-    await acceptReceivedEmail(emailId);
-    res.status(200).json({ received: true });
-    return;
-  }
   const patch = eventPatch(event);
   if (!emailId || !patch) {
     res.status(202).json({ ignored: true });

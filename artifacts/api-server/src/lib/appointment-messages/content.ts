@@ -2,9 +2,13 @@ import { esc, layout } from '../mail/layout'
 import type { MessageKind } from './schedule'
 export type AppointmentCopy = {
   firstName: string; host: string; start: string; timezone: string; meetingUrl: string; walkthroughUrl: string;
-  kind: MessageKind; emailAccepted?: boolean;
+  kind: MessageKind; emailAccepted?: boolean; hostId?: string;
 }
 export function renderAppointmentMessage(d: AppointmentCopy) {
+  if (d.kind !== 'cancelled' && !/^https:\/\/meet\.google\.com\/[a-z]{3}-[a-z]{4}-[a-z]{3}$/i.test(d.meetingUrl))
+    throw new Error('A verified Google Meet link is required')
+  if (!/^https:\/\/patientpipeline\.app\/walkthrough\/?$/.test(d.walkthroughUrl))
+    throw new Error('The Patient Pipeline walkthrough link is required')
   const when = new Intl.DateTimeFormat('en-US', { timeZone: d.timezone, dateStyle: 'full', timeStyle: 'short' }).format(new Date(d.start))
   const zone = new Intl.DateTimeFormat('en-US', { timeZone: d.timezone, timeZoneName: 'short' }).formatToParts(new Date(d.start)).find(p => p.type === 'timeZoneName')?.value ?? d.timezone
   const time = `${when} ${zone}`
@@ -27,5 +31,7 @@ export function renderAppointmentMessage(d: AppointmentCopy) {
       <h2>Joining our call</h2><p><strong>Please be in front of a computer at your scheduled appointment time.</strong> We’ll meet on Google Meet using this link:</p>
       <p><a href="${esc(d.meetingUrl)}">Join our Google Meet</a></p><p>If you need to change your appointment, reply to this email.</p><p>Looking forward to speaking with you!</p>`
   return { subject: title, previewText: title, sms,
-    html: layout([`<p>Hi ${esc(d.firstName)},</p>`, body, `<p>${esc(d.host)}<br/>Patient Pipeline</p>`], { previewText: title }) }
+    html: layout([`<p>Hi ${esc(d.firstName)},</p>`, body, `<p>${esc(d.host)}<br/>Patient Pipeline</p>`], {
+      previewText: title, transactionalContext: 'strategy call',
+    }) }
 }
