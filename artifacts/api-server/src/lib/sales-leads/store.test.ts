@@ -6,6 +6,8 @@ import { readFileSync } from 'node:fs'
 const fixture = vi.hoisted(() => ({ pool: null as any }))
 const delivery = vi.hoisted(() => ({
   contact: vi.fn(), contactPage: vi.fn(), appointments: vi.fn(), conversations: vi.fn(), messages: vi.fn(), notes: vi.fn(), provider: vi.fn(),
+  // Stand-in for the real lookup: our own contact holds the phone unless a test says otherwise.
+  textContactFor: vi.fn(async (_phone: string, id: string) => (delivery.contact as any)(id)),
 }))
 vi.mock('./dispatch', () => ({ nudgeSalesSync: vi.fn() }))
 vi.mock('@workspace/db', () => ({ pool: {
@@ -343,12 +345,18 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('internal sales durable storage (i
     expect((await fixture.pool.query("SELECT status FROM sales_activities WHERE kind='sms_dispatch'")).rows[0].status).toBe('uncertain')
     expect(await worker.claimSalesJob()).toBeUndefined()
   })
-  it('skips automated texts when the GoHighLevel contact does not carry the lead phone', async () => {
+  it('texts through the older GoHighLevel contact that holds the lead phone', async () => {
     const { worker } = await preparedSms()
-    delivery.contact.mockResolvedValue({ id:'fixture-ghl',locationId:process.env.GHL_LOCATION_ID,dnd:false,email:'fixture@example.invalid' })
+    delivery.textContactFor.mockResolvedValueOnce({ id:'older-ghl', phone:'+12125550199', dnd:false })
+    await worker.processSalesJob(await worker.claimSalesJob())
+    expect(delivery.provider).toHaveBeenCalledWith('/conversations/messages', 'POST', expect.objectContaining({ contactId:'older-ghl' }))
+  })
+  it('still honors an opt-out on the contact that holds the phone', async () => {
+    const { worker } = await preparedSms()
+    delivery.textContactFor.mockResolvedValueOnce({ id:'older-ghl', phone:'+12125550199', dndSettings:{ SMS:{ status:'active' } } })
     await worker.processSalesJob(await worker.claimSalesJob())
     expect(delivery.provider).not.toHaveBeenCalled()
-    expect((await fixture.pool.query("SELECT state,last_error FROM sales_jobs WHERE id='sms-fixture'")).rows[0]).toMatchObject({ state:'cancelled', last_error:expect.stringContaining('shared') })
+    expect((await fixture.pool.query("SELECT state,last_error FROM sales_jobs WHERE id='sms-fixture'")).rows[0]).toMatchObject({ state:'cancelled', last_error:expect.stringContaining('opted out') })
   })
   it('missed old slots are cancelled rather than accumulating a burst', async () => {
     const { worker } = await preparedSms()

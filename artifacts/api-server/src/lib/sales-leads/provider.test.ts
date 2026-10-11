@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { phoneOwnedByOtherContact, safeSalesUpsert } from './provider'
+import { phoneOwnedByOtherContact, safeSalesUpsert, textContactFor } from './provider'
 
 const other = { id: 'other', email: 'owner@example.invalid', phone: '+1 (212) 555-0199' }
 let calls: { url: string; method: string; body?: any }[] = []
@@ -57,5 +57,27 @@ describe('shared phone in GoHighLevel', () => {
     fakeProvider(() => [{ ...other, email: 'visitor@example.invalid' }], { other: { ...other, email: 'visitor@example.invalid' } })
     await expect(safeSalesUpsert({ firstName: 'A', lastName: 'B', email: 'visitor@example.invalid', phone: '' }, ['other'])).rejects.toThrow('belongs to another lead')
     expect(calls.some(c => c.method !== 'GET')).toBe(false)
+  })
+
+  it('texts go through our own contact when it holds the phone', async () => {
+    fakeProvider(() => [], { mine: { id: 'mine', phone: '+12125550199' } })
+    expect((await textContactFor('+12125550199', 'mine'))?.id).toBe('mine')
+  })
+
+  it('texts go through the older contact that holds the phone', async () => {
+    fakeProvider(() => [other], { mine: { id: 'mine', phone: '' }, other })
+    expect((await textContactFor('+12125550199', 'mine'))?.id).toBe('other')
+    expect(calls.some(c => c.method === 'PUT')).toBe(false)
+  })
+
+  it('adds the phone to our own contact when nobody holds it', async () => {
+    const mine = { id: 'mine', phone: '' }
+    fakeProvider(() => [], { mine })
+    vi.mocked(fetch).mockImplementationOnce(async () => new Response(JSON.stringify({ contact: mine })))
+      .mockImplementationOnce(async () => new Response(JSON.stringify({ contacts: [], meta: { total: 0 } })))
+      .mockImplementationOnce(async (_u: any, init: any) => { calls.push({ url: '/contacts/mine', method: init.method, body: JSON.parse(init.body) }); return new Response('{}') })
+      .mockImplementationOnce(async () => new Response(JSON.stringify({ contact: { id: 'mine', phone: '+12125550199' } })))
+    expect((await textContactFor('+12125550199', 'mine'))?.id).toBe('mine')
+    expect(calls.find(c => c.method === 'PUT')?.body).toEqual({ phone: '+12125550199' })
   })
 })

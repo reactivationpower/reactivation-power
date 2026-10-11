@@ -3,9 +3,10 @@ import { randomUUID } from 'node:crypto'
 import { readFileSync } from 'node:fs'
 import pg from 'pg'
 const fixture = vi.hoisted(() => ({ pool: null as any, lock: `appointment-test-${Math.random()}` }))
-const mocks = vi.hoisted(() => ({ provider: vi.fn(), contact: vi.fn(), conversations: vi.fn(), send: vi.fn(), user: vi.fn() }))
+const mocks = vi.hoisted(() => ({ provider: vi.fn(), contact: vi.fn(), textContact: vi.fn(), conversations: vi.fn(), send: vi.fn(), user: vi.fn() }))
 vi.mock('@workspace/db', () => ({ pool: { query: (...a: any[]) => fixture.pool.query(...a), connect: () => fixture.pool.connect() } }))
-vi.mock('../sales-leads/provider', async original => ({ ...await original<any>(), provider: mocks.provider, contact: mocks.contact, conversations: mocks.conversations }))
+vi.mock('../sales-leads/provider', async original => ({ ...await original<any>(), provider: mocks.provider, contact: mocks.contact, conversations: mocks.conversations,
+  textContactFor: (_phone: string, id: string) => mocks.textContact(id) }))
 vi.mock('../sales-leads/dispatch', () => ({ nudgeSalesSync: vi.fn() }))
 vi.mock('../mail/send', () => ({ fromAddress: () => 'Patient Pipeline <team@patientpipeline.app>', sendEmail: mocks.send }))
 vi.mock('../sales-inbox/store', () => ({ SALES_REPLY_TO: 'jacobb@patientpipeline.app' }))
@@ -59,6 +60,7 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('appointment outbox (isolated data
     event = { id:'appointment', contactId:'contact', calendarId:'calendar-fixture', locationId:'location-fixture', startTime:start, assignedUserId:'host', address:'https://meet.google.com/abc-defg-hij', appointmentStatus:'confirmed' }
     mocks.provider.mockImplementation(async (path: string) => path.includes('/appointments/') ? { appointment: event, traceId:'trace-fixture' } : {messageId:'sms-fixture'})
     mocks.contact.mockResolvedValue({id:'contact',locationId:'location-fixture',email:'fixture@example.invalid',phone:'+12125550199',assignedTo:'host'})
+    mocks.textContact.mockImplementation((id: string) => mocks.contact(id))
     mocks.conversations.mockResolvedValue([{id:'thread',assignedTo:'host'}])
     mocks.user.mockResolvedValue({active:true,confirmedAt:'2026-01-01'})
     mocks.send.mockResolvedValue({ok:true,logId:'email-fixture',providerId:'provider-fixture'})
@@ -123,6 +125,13 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('appointment outbox (isolated data
     await runAppointmentMessages()
     expect((await rows()).find((r:any)=>r.kind==='confirmation'&&r.channel==='sms').state).toBe('skipped')
     expect(mocks.provider.mock.calls.some(([path])=>path==='/conversations/messages')).toBe(false)
+  })
+  it('texts through an older GoHighLevel contact that already holds the phone', async () => {
+    await runAppointmentMessages(); await due()
+    mocks.textContact.mockResolvedValue({ id:'older-contact', phone:'+12125550199' })
+    await runAppointmentMessages()
+    expect((await rows()).find((r:any)=>r.kind==='confirmation'&&r.channel==='sms').state).toBe('sent')
+    expect(mocks.provider).toHaveBeenCalledWith('/conversations/messages', 'POST', expect.objectContaining({ contactId:'older-contact' }))
   })
   it('texts without requiring the GHL conversation to be assigned to the host', async () => {
     await runAppointmentMessages(); await due()

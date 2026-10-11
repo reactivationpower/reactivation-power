@@ -1,5 +1,5 @@
 import { pool, type PoolClient } from '@workspace/db'
-import { provider, contact, SalesProviderError } from '../sales-leads/provider'
+import { provider, contact, SalesProviderError, textContactFor, textsBlocked } from '../sales-leads/provider'
 import { settings } from '../sales-leads/store'
 import { schedulerHealthy } from '../sales-leads/wake'
 import { getAdminUserById } from '../data/admin-users'
@@ -38,7 +38,11 @@ async function dispatch(c: PoolClient, job: any, row: any, lead: any, smsEnabled
   const remote = await contact(lead.ghl_contact_id)
   if (!remote || remote.id !== lead.ghl_contact_id || remote.locationId !== process.env.GHL_LOCATION_ID) throw new AppointmentCheckError('contact could not be verified')
   const sms = job.channel === 'sms'
-  if (lead.dnd || lead.stage === 'Lost/Do Not Contact' || channelBlocked(remote, sms ? 'SMS' : 'Email') || sms && !lead.consent) {
+  // Texts go to the phone the person entered, through whichever GoHighLevel
+  // contact holds it (an older contact may already own that phone).
+  const textContact = sms ? await textContactFor(lead.phone, lead.ghl_contact_id) : null
+  if (sms && !textContact) return defer(c, job.id, 'No GoHighLevel contact could receive texts for this phone')
+  if (lead.dnd || lead.stage === 'Lost/Do Not Contact' || (sms ? textsBlocked(textContact) : channelBlocked(remote, 'Email')) || sms && !lead.consent) {
     await c.query("UPDATE appointment_deliveries SET state='skipped',last_error='Consent or do-not-contact restriction' WHERE id=$1", [job.id]); return
   }
   if (sms) {
@@ -54,8 +58,7 @@ async function dispatch(c: PoolClient, job: any, row: any, lead: any, smsEnabled
       const next = new Date(+new Date(last.sent_at) + SMS_GAP * MINUTE)
       return defer(c, job.id, 'Spacing texts apart', next)
     }
-    if (!/^\+[1-9]\d{9,14}$/.test(lead.phone) || String(remote.phone).replace(/[^\d+]/g,'') !== lead.phone)
-      return defer(c, job.id, 'Phone identity needs review')
+    if (!/^\+[1-9]\d{9,14}$/.test(lead.phone)) return defer(c, job.id, 'Phone number is not valid for texting')
     await c.query('UPDATE sales_leads SET assignee_id=$2,revision=revision+1 WHERE id=$1 AND assignee_id IS DISTINCT FROM $2', [lead.id, host.admin_id])
   } else if (!lead.email || String(remote.email ?? '').toLowerCase() !== lead.email.toLowerCase()) {
     return defer(c, job.id, 'Email identity needs review')
@@ -74,7 +77,7 @@ async function dispatch(c: PoolClient, job: any, row: any, lead: any, smsEnabled
   try {
     let providerId: string | undefined, logId: string | undefined
     if (sms) {
-      const result = await provider('/conversations/messages', 'POST', { type: 'SMS', contactId: lead.ghl_contact_id, message: data.rendered.sms })
+      const result = await provider('/conversations/messages', 'POST', { type: 'SMS', contactId: textContact!.id, message: data.rendered.sms })
       if (!result.messageId) throw new SalesProviderError(0, true)
       providerId = result.messageId
     } else {

@@ -20,6 +20,30 @@ export async function phoneOwnedByOtherContact(phone: string, email: string, own
   return page.contacts.some((row: any) => row.id !== ownContactId && normalizePhone(row.phone) === normalizePhone(phone) &&
     !!row.email && String(row.email).trim().toLowerCase() !== String(email ?? '').trim().toLowerCase())
 }
+/** The GoHighLevel contact that texts to `phone` must go through, so the person
+ * who typed that number on a form always gets the text. This location does not
+ * allow two contacts with the same phone, so when an older contact already holds
+ * it, our own contact was saved without a phone and texts go through that older
+ * contact instead. If nobody holds the phone, it is added to our own contact.
+ * Search can be stale, so every candidate is re-read before use. */
+export async function textContactFor(phone: string, ownId: string | null) {
+  const target = normalizePhone(phone)
+  if (!target) return null
+  const own = ownId ? await contact(ownId) : null
+  if (own && normalizePhone(own.phone) === target) return own
+  const page = await contactPage(phone, {}, 100)
+  for (const row of page.contacts) {
+    if (row.id === ownId || normalizePhone(row.phone) !== target) continue
+    const fresh = await contact(row.id)
+    if (fresh && normalizePhone(fresh.phone) === target) return fresh
+  }
+  if (!own) return null
+  await provider(`/contacts/${encodeURIComponent(own.id)}`, 'PUT', { phone })
+  const updated = await contact(own.id)
+  return updated && normalizePhone(updated.phone) === target ? updated : null
+}
+/** True when the contact has texts turned off (a STOP reply or a manual DND). */
+export const textsBlocked = (remote: any) => remote?.dnd === true || remote?.dndSettings?.SMS?.status === 'active'
 /** `ownedElsewhere` lists GoHighLevel contact IDs already linked to other local
  * leads; they are never written to, even if a (possibly stale) search matches them. */
 export async function safeSalesUpsert(input: GhlUpsertInput, ownedElsewhere: string[] = []): Promise<string> {

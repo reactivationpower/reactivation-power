@@ -25,4 +25,8 @@ Confirm can arrive before the post-commit contact sync finishes (fast form-to-ca
 
 The user requires a straight flow: button → form → submit → calendar → booked page. A live inquiry must never stop at a staff-review screen.
 **Why:** A visitor whose phone matched another lead (different email) was blocked from booking; the user said they must be able to book.
-**How to apply:** Same email = same lead. Phone-only match with a different email = separate lead with a staff "possible duplicate" note; its GHL contact omits the shared phone and automated texts skip it. Imports still use the review queue.
+**How to apply:** Same email = same lead. Phone-only match with a different email = separate lead with a staff "possible duplicate" note; its GHL contact omits the shared phone (the location disallows duplicate phones).
+
+Every new lead must get both emails and texts, regardless of older records (user, 2026-10-11: "I don't ever want there to be a reason why somebody doesn't receive communications").
+**Why:** A real lead's confirmation text was held back because an older GHL contact (same person, older email) held his phone.
+**How to apply:** Texts go through whichever GHL contact currently holds the entered phone (re-read fresh); never skip for shared-phone reasons. Only a real opt-out (DND/STOP) on that contact stops texts. Replies land on that older contact's GHL conversation. Imports still use the review queue.

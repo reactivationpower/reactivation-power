@@ -5,7 +5,7 @@ import { activity, enqueue, id, intake, phoneKey, settings, sharesOlderPhone, st
 import { cadence, canAutomate, elapsedDays, textAllowed } from './cadence'
 import { assignTextNumbers, followupTexts, renderFollowupText } from './followup-texts'
 import { schedulerHealthy } from './wake'
-import { contact, contactPage, locationId, notes, phoneOwnedByOtherContact, provider, safeSalesUpsert, SalesProviderError } from './provider'
+import { contact, contactPage, locationId, notes, phoneOwnedByOtherContact, provider, safeSalesUpsert, SalesProviderError, textContactFor, textsBlocked } from './provider'
 import { salesTiming } from './timing'
 import { runInboxInbound } from '../sales-inbox/inbound'
 import { ingestProviderFacts, providerContext, providerDnd, reconcileLead, refreshLeadMessages } from './ingestion'
@@ -164,16 +164,18 @@ async function dispatchSms(job: any) {
     }
     const touches = (await c.query(`SELECT count(DISTINCT COALESCE(provider_id,id)) FROM sales_activities WHERE lead_id=$1 AND kind IN ('call','provider_call','outbound_sms','sms_dispatch')
       AND (occurred_at AT TIME ZONE 'America/New_York')::date=(now() AT TIME ZONE 'America/New_York')::date`, [lead.id])).rows[0]
-    const digits = (v: unknown) => String(v ?? '').replace(/\D/g, '').replace(/^1(?=\d{10}$)/, '')
-    const snapshotPhone = lead.provider_snapshot?.phone
-    if (await sharesOlderPhone(c, lead) || (lead.ghl_contact_id && lead.provider_snapshot && digits(snapshotPhone) !== digits(lead.phone))) {
-      await c.query("UPDATE sales_jobs SET state='cancelled',finished_at=now(),last_error='Phone is shared with another contact; texts skipped' WHERE id=$1", [job.id])
-      return
-    }
     if (!cfg.automation_enabled || !schedulerHealthy(cfg.capabilities) || !['verified','operator_confirmed'].includes(cfg.capabilities.sms_write?.state) || !canAutomate(lead) || lead.automation_state !== 'active' || !lead.ghl_contact_id ||
       elapsedDays(new Date(lead.created_at), new Date()) >= 30 || !textAllowed(new Date(), lead.timezone) ||
       Date.now() - new Date(job.due_at).getTime() > 5 * 60000 || Number(touches.count) >= 2) {
       await c.query("UPDATE sales_jobs SET state='cancelled',finished_at=now(),last_error='Eligibility, daily cap, or permitted send window changed' WHERE id=$1", [job.id])
+      return
+    }
+    // Texts always go to the phone the person entered, even when an older
+    // GoHighLevel contact holds that phone. Only a real opt-out stops them.
+    const textContact = await textContactFor(lead.phone, lead.ghl_contact_id)
+    if (!textContact || textsBlocked(textContact)) {
+      await c.query("UPDATE sales_jobs SET state='cancelled',finished_at=now(),last_error=$2 WHERE id=$1",
+        [job.id, textContact ? 'Recipient opted out of texts' : 'No GoHighLevel contact could receive texts for this phone'])
       return
     }
     await activity(c, lead.id, { kind: 'sms_dispatch', status: 'dispatching', body: `Automated follow-up text ${Number(job.payload?.textNumber) || 1}`, dedupeKey: `sms-dispatch:${job.id}` })
@@ -181,7 +183,7 @@ async function dispatchSms(job: any) {
     // final eligibility check and then race ahead of the provider request.
     try {
       const result = await provider('/conversations/messages', 'POST', {
-        type: 'SMS', contactId: lead.ghl_contact_id,
+        type: 'SMS', contactId: textContact.id,
         message: renderFollowupText(followupTexts(cfg), job.payload?.textNumber, lead), status: 'pending',
       })
       if (!result.messageId) throw new SalesProviderError(0, true)
