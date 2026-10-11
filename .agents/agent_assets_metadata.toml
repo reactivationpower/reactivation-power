@@ -1712,3 +1712,17 @@ mtime_ms = 1791577198876
 storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/1cb6b004-d5e1-491b-821e-ee972a6f9ab0/fe56f024-af73-4b9c-af4f-199425ce469e"
 storage_version_token = "1791577254935551"
 content_type = "application/octet-stream"
+
+[[outputs]]
+id = "4oZPQmZSZU6uNtnnp0Y4-"
+uri = "file://generated-artifacts/patient-texting/whitaker-transcript.html"
+type = "html"
+title = "Whitaker fictional texting — verified model transcript"
+description = "Actual 21-message simulation with 10 model-generated replies, original submission timestamp, handoff summary and pending appointment preferences. No SMS sent; provider commissioning remains blocked."
+logical_id = "d57b300d-eb50-4f57-8a6f-13cb23c99119"
+content_hash = "sha256:f109177aeb64a22f1674172285c959f3d67d67db0a98ca476a315e6585ae7ab4"
+size = 9389
+mtime_ms = 1791675302751
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/d57b300d-eb50-4f57-8a6f-13cb23c99119/2d3d0ba9-ab5d-4560-bc72-19b42c5ab723"
+storage_version_token = "1791675326345201"
+content_type = "text/html"

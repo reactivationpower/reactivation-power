@@ -29,6 +29,8 @@ vi.mock('@/lib/sales-leads/provider', async importOriginal => ({
 vi.mock('@/lib/affiliates/attribution', () => ({ resolveQualifiedReferral: vi.fn(), attachCustomerReferral: vi.fn() }))
 vi.mock('@/lib/mail/send', () => ({ sendEmail: vi.fn() }))
 vi.mock('@/lib/marketing/outcomes', () => ({ bookingOutcome: vi.fn() }))
+vi.mock('@/lib/sales-inbox/inbound', () => ({ runInboxInbound: vi.fn() }))
+vi.mock('@/lib/appointment-messages/worker', () => ({ runAppointmentMessages: vi.fn() }))
 const schema = `sales_fixture_${randomUUID().replaceAll('-', '')}`
 const input = (key: string, extra: any = {}) => ({ firstName: 'Fixture', lastName:'Lead', email:'fixture@example.invalid', phone:'+12125550199', practiceName:'Fixture Practice',
   source:'website', sourcePath:'/strategy-call/schedule', context:{ valueAdjusted:'no', utm_source:'fixture' }, consent:true, consentEvidence:{ checked:true, timestamp:new Date().toISOString() },
@@ -190,6 +192,8 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('internal sales durable storage (i
     const lead = await intake(input('restart', { providerId:'fixture-ghl' }))
     // The dispatcher is deliberately mocked: no resident process gets the wake.
     await worker.runSalesWorker()
+    const legacyInbox = await import('../sales-inbox/inbound')
+    expect(legacyInbox.runInboxInbound).toHaveBeenCalled()
     expect((await withSyncState([lead]))[0].sync_state).toBe('synced')
   })
   it('booking reuses the queue and repeated Confirm cannot replay an accepted-but-timed-out create', async () => {

@@ -40,6 +40,7 @@ app.use("/api", webhooksLeadsRouter);
 app.use("/api", marketingRouter);
 // Parse sensitive intake separately: bounded body, no retained raw-body copy.
 app.use("/api/actions/affiliate-onboarding", express.json({ limit: "3mb" }));
+app.use("/api/actions/patient-texting", express.json({ limit: "32kb" }));
 app.use(
   express.json({
     limit: "10mb",
@@ -58,7 +59,7 @@ const errorHandler: ErrorRequestHandler = (err, req, res, _next) => {
     res.end();
     return;
   }
-  if (req.path.startsWith('/api/actions/affiliate-onboarding/')) {
+  if (req.path.startsWith('/api/actions/affiliate-onboarding/') || req.path.startsWith('/api/actions/patient-texting/')) {
     const status = typeof err?.status === 'number' && err.status >= 400 && err.status < 500 ? err.status : 500;
     res.setHeader('Cache-Control', 'no-store, private');
     res.status(status).json({ ok: false, error: status === 413 ? 'Upload a PDF no larger than 2 MB.' : 'Secure onboarding request could not be processed.' });

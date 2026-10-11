@@ -3,6 +3,7 @@ const mocks = vi.hoisted(() => ({
   queue: vi.fn(), deliver: vi.fn(), returning: vi.fn(), where: vi.fn(), tx: {} as any,
 }))
 vi.mock('../notifications', () => ({ queueLeadEmail: mocks.queue, deliverLeadEmails: mocks.deliver }))
+vi.mock('../../patient-texting/live', () => ({ routeNewTextLead: vi.fn() }))
 vi.mock('@workspace/db', async () => {
   const actual = await vi.importActual<any>('@workspace/db')
   const builder: any = {}

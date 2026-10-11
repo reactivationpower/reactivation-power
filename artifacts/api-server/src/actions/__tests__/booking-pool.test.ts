@@ -6,7 +6,9 @@ const fixture = vi.hoisted(() => ({
 }))
 vi.mock('@workspace/db', () => {
   const query = async (sql: string, args: any[] = []) => {
-    if (sql.startsWith('SELECT * FROM appointment_message_settings')) return { rows: [{enabled:false}] }
+    // Appointment registration now reads settings through the existing
+    // transaction. Disabled here; provider/appointment behavior has its own suite.
+    if (sql.includes('appointment_message_settings')) return { rows: [{ enabled: false }] }
     if (sql.includes('UNION ALL')) return { rows: [...fixture.submissions.values()].filter(s => s.context.bookingHandoff.hash === args[0]) }
     if (sql.startsWith('SELECT context')) return { rows: [fixture.submissions.get(args[0])] }
     if (sql.startsWith('SELECT * FROM sales_leads')) return { rows: [fixture.leads.get(args[0])] }
@@ -36,6 +38,7 @@ vi.mock('@/lib/ghl', () => ({
 }))
 vi.mock('@/lib/sales-leads/provider', () => ({ appointments: fixture.events, safeSalesUpsert: vi.fn() }))
 vi.mock('@/lib/marketing/outcomes', () => ({ bookingOutcome: fixture.outcomes }))
+vi.mock('@/lib/appointment-messages/worker', () => ({ runAppointmentMessages: vi.fn() }))
 import { bookStrategyCall } from '../booking'
 import { pool } from '@workspace/db'
 import { newBookingHandoff, checkSavedBooking } from '@/lib/booking-handoff'

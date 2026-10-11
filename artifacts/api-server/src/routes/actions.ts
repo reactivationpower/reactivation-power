@@ -18,6 +18,7 @@ import * as salesInbox from "../actions/sales-inbox";
 import * as appointmentMessages from "../actions/appointment-messages";
 import * as marketing from "../actions/marketing";
 import * as leadFollowUp from "../actions/lead-followup";
+import * as patientTexting from "../actions/patient-texting";
 import * as mail from "../actions/mail";
 import * as payments from "../actions/payments";
 import * as reactivation from "../actions/reactivation";
@@ -59,6 +60,7 @@ type ActionFn = (...args: unknown[]) => Promise<unknown>;
 type ActionModule = Record<string, unknown>;
 
 const MODULES: Record<string, ActionModule> = {
+  "patient-texting": patientTexting,
   marketing,
   "sales-leads": salesLeads,
   "sales-inbox": salesInbox,
@@ -92,6 +94,12 @@ type Auth = "public" | "portal" | "affiliate" | "admin" | "super_admin" | "manag
 // hint: Logic changed on both sides. Requires understanding intent of each change.
 /** Allow-list: module -> action -> required auth. Anything else is 404. */
 const ACTIONS: Record<string, Record<string, Auth>> = {
+  "patient-texting": {
+    getTextSettings: "portal", saveTextSettings: "portal", getTextConversation: "portal",
+    startTextSimulation: "portal", changeTextSimulation: "portal",
+    openTextConversation: "portal", takeTextConversation: "portal", saveTextEligibility: "portal",
+    saveTextConnection: "portal", revokeTextConnection: "portal",
+  },
   "affiliate-onboarding": {
     getMyOnboarding: "affiliate", saveMyOnboarding: "affiliate",
     getAdminOnboarding: "super_admin", reviewOnboarding: "super_admin",
@@ -297,7 +305,7 @@ router.post("/actions/:module/:fn", async (req: Request, res: Response) => {
   const rawArgs = Array.isArray(req.body?.args) ? (req.body.args as unknown[]) : [];
   const args = rawArgs.map(decodeArg);
     const result = await runWithRequestContext(req, res, () => {
-      if (moduleName === 'affiliates' || moduleName === 'affiliate-onboarding') assertSameOrigin();
+      if (moduleName === 'affiliates' || moduleName === 'affiliate-onboarding' || moduleName === 'patient-texting') assertSameOrigin();
       return (fn as ActionFn)(...args);
     });
     res.json({ ok: true, result: result === undefined ? null : result });
@@ -312,8 +320,8 @@ router.post("/actions/:module/:fn", async (req: Request, res: Response) => {
       return;
     }
     // Database/validation exceptions can contain sensitive parameters. Never log them for intake.
-    if (moduleName !== 'affiliate-onboarding') logger.error({ err, module: req.params.module, fn: req.params.fn }, "action failed");
-    if (moduleName === 'affiliate-onboarding' && !(err instanceof Error && !('code' in err))) {
+    if (moduleName !== 'affiliate-onboarding' && moduleName !== 'patient-texting') logger.error({ err, module: req.params.module, fn: req.params.fn }, "action failed");
+    if ((moduleName === 'affiliate-onboarding' || moduleName === 'patient-texting') && !(err instanceof Error && !('code' in err) && !('cause' in err))) {
       res.status(500).json({ ok: false, error: 'Secure onboarding request failed. Please try again.' });
       return;
     }

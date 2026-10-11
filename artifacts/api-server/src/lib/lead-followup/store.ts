@@ -1,4 +1,5 @@
 import { randomBytes, randomUUID } from "node:crypto";
+import { withRecipientLock, pauseForCall, routeNewTextLead } from '../patient-texting/live';
 import { queueLeadEmail, deliverLeadEmails } from './notifications';
 import { and, asc, desc, eq, gt, gte, ilike, inArray, isNotNull, isNull, lt, lte, ne, notInArray, or, sql } from "drizzle-orm";
 import {
@@ -441,6 +442,7 @@ export async function upsertWebhookLead(opts: {
     })
     // xmax is 0 on a freshly inserted row and non-zero after ON CONFLICT UPDATE.
     .returning({ id: campaignLeadsTable.id, inserted: sql<boolean>`(xmax = 0)` })
+  if (saved.inserted && !opts.suppressNotification) await routeNewTextLead(tx, opts.campaign.ownerId, saved.id)
   if (saved.inserted && !opts.suppressNotification) await queueLeadEmail(tx, {
     id: `lead/${saved.id}`, ownerId: opts.campaign.ownerId, campaignId: opts.campaign.id, count: 1,
   })
@@ -593,6 +595,10 @@ const LEASE_MS = 120_000;
 /** A row-locked compare-and-swap makes a lead callable by just one browser tab. */
 export async function claimLeadCall(ownerId: string, leadId: string, callerId: string) {
   return db.transaction(async tx => {
+    const [identity] = await tx.select({ phoneKey: campaignLeadsTable.phoneKey }).from(campaignLeadsTable)
+      .where(and(eq(campaignLeadsTable.id, leadId), eq(campaignLeadsTable.ownerId, ownerId)));
+    if (!identity) throw new LeadCallBlockedError("Lead not found.");
+    await withRecipientLock(tx, ownerId, identity.phoneKey);
     const [lead] = await tx.select().from(campaignLeadsTable)
       .where(and(eq(campaignLeadsTable.id, leadId), eq(campaignLeadsTable.ownerId, ownerId))).for("update");
     if (!lead) throw new LeadCallBlockedError("Lead not found.");
@@ -605,6 +611,12 @@ export async function claimLeadCall(ownerId: string, leadId: string, callerId: s
     if (lead.callLeaseToken && lead.callLeaseExpiresAt && lead.callLeaseExpiresAt > now) {
       throw new LeadCallBlockedError("Another caller is already working on this lead.");
     }
+    const competing = await tx.select({ id: campaignLeadsTable.id }).from(campaignLeadsTable).where(and(
+      eq(campaignLeadsTable.ownerId, ownerId), eq(campaignLeadsTable.phoneKey, lead.phoneKey),
+      ne(campaignLeadsTable.id, leadId), gt(campaignLeadsTable.callLeaseExpiresAt, now),
+    )).limit(1);
+    if (competing.length) throw new LeadCallBlockedError("This person is already being called in another campaign.");
+    await pauseForCall(tx, ownerId, lead.phoneKey);
     const token = randomUUID();
     await tx.update(campaignLeadsTable).set({
       callLeaseToken: token, callLeaseCallerId: callerId, callLeaseStartedAt: now,

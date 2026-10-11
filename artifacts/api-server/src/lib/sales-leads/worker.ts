@@ -7,6 +7,7 @@ import { schedulerHealthy } from './wake'
 import { contact, contactPage, locationId, notes, provider, safeSalesUpsert, SalesProviderError } from './provider'
 import { ingestProviderFacts, providerContext, providerDnd, reconcileLead } from './ingestion'
 import { salesTiming } from './timing'
+import { runInboxInbound } from '../sales-inbox/inbound'
 function importPhone(value: unknown): string {
   try { return phoneKey(String(value ?? '')) } catch { return '' } // original value remains in submission context for staff review
 }
@@ -272,8 +273,9 @@ export async function runSalesWorker() {
   if (busy) return
   busy = true
   try {
-    const { pool: inboxPool } = await import('@workspace/db')
-    await inboxPool.query("UPDATE sales_inbox_messages SET state='uncertain',error='Sending was interrupted; check provider before composing another message' WHERE state='sending' AND created_at<now()-interval '15 minutes'")
+    // Previously delivered emails retain their thread Reply-To addresses even
+    // when new messages route replies to an external mailbox.
+    await runInboxInbound()
     const { runAppointmentMessages } = await import('../appointment-messages/worker')
     await runAppointmentMessages()
     await recoverClaims()

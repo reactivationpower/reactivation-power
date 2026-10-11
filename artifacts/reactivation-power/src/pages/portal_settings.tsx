@@ -9,6 +9,7 @@ import { BatchSizeSelect } from '@/components/reactivation/batch-size-select'
 import { TeamManager } from '@/components/reactivation/team-manager'
 import { MyProfileForm } from '@/components/portal/my-profile-form'
 import { StageManager } from '@/components/reactivation/stage-manager'
+import { PatientTextSettings } from '@/components/patient-texting/text-settings'
 import { usePageData } from '@/hooks/use-page-data'
 import { PageError, PageLoading } from '@/components/page-status'
 
@@ -109,6 +110,13 @@ export default function SettingsPage() {
             >
               <LeadEmailSettings />
             </SettingsSection>}
+
+            <SettingsSection
+              title="Patient texting"
+              description="Office-wide reply handling, office hours, and text provider choice. Live texting stays disabled until every readiness item is verified."
+            >
+              <PatientTextSettings />
+            </SettingsSection>
 
             <SettingsSection
               title="Pipeline stages"

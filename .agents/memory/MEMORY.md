@@ -1,3 +1,5 @@
+- [Concurrent dynamic test imports](test-dynamic-imports.md) — mocked dynamic modules may execute real code in concurrent Vitest calls; retain disabled fixture boundaries.
+- [Patient texting boundaries](patient-texting-boundaries.md) — independent office billing; internal-sales separation; fictional model use has a non-resetting $1 authorization.
 - [Next.js port architecture](next-port-architecture.md) — actions via allow-listed RPC + per-page loaders; CRLF sources, headless H.264 limits, placeholder-grep first.
 - [Hosting direction](hosting-direction.md) — continue building in Replit; GitHub delivers code to Vercel for production hosting.
 - [Private video streaming](private-video-streaming.md) — cached Blob ranges can misreport totals and offsets; validate actual bytes, and distinguish protocol checks from real iPad playback.

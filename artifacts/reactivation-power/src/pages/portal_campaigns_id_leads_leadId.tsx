@@ -11,6 +11,7 @@ import { usePageData } from '@/hooks/use-page-data'
 import { PageError, PageLoading } from '@/components/page-status'
 import { Button } from '@/components/ui/button'
 import { PORTAL_NARROW } from '@/lib/portal-layout'
+import { TextConversation } from '@/components/patient-texting/text-conversation'
 import NotFound from '@/pages/not-found'
 import { CampaignStatusBadge, LeadStatusBadge, OfferSummary, RequestedTimeBadge } from '@/components/lead-followup/lead-bits'
 
@@ -148,6 +149,8 @@ export default function LeadDetailPage() {
           <OfferSummary campaign={campaign} className="mt-4" />
         </section>
       </div>
+
+      <TextConversation leadId={String(lead.id)} />
 
       <section className="mt-6 rounded-lg border border-border bg-card" aria-label="Call history">
         <div className="flex items-center gap-2 border-b border-border px-6 py-3">

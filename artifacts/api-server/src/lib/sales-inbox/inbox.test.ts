@@ -87,13 +87,17 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('unified inbox isolated persistenc
     expect((await sendMessage(input)).state).toBe('uncertain');expect((await sendMessage(input)).state).toBe('uncertain')
     expect(f.provider).toHaveBeenCalledTimes(1)
   })
-  it('receives email once, isolates threads, pauses outreach, and quarantines mismatched sender',async()=>{
+  it('still receives replies to previously sent thread addresses once, notifies staff and stops outreach',async()=>{
     const address=await replyAddress('lead')
+    await f.pool.query("UPDATE sales_leads SET assignee_id='admin',consent=true WHERE id='lead'")
+    await f.pool.query("INSERT INTO sales_jobs(id,lead_id,kind,dedupe_key,state) VALUES('legacy-outreach','lead','sms','legacy-outreach','pending')")
     const received={from:'Alex <fixture@example.invalid>',to:[address],subject:'Question',text:'Can you help?',created_at:'2026-10-12T14:00Z'}
     expect(await ingestReceivedEmail('inbound-fixture',received)).toBe('done')
     expect(await ingestReceivedEmail('inbound-fixture',received)).toBe('done')
     const thread=await getConversation('lead')
     expect(thread.messages.filter(m=>m.direction==='inbound')).toHaveLength(1)
+    expect((await f.pool.query("SELECT state FROM sales_jobs WHERE id='legacy-outreach'")).rows[0].state).toBe('cancelled')
+    expect((await f.pool.query("SELECT id FROM sales_jobs WHERE kind='reply_email' AND lead_id='lead'")).rows).toHaveLength(1)
     expect((await f.pool.query("SELECT stage,last_reply_at FROM sales_leads WHERE id='lead'")).rows[0]).toMatchObject({stage:'Engaged'})
     expect(await ingestReceivedEmail('wrong-fixture',{...received,from:'other@example.invalid'})).toBe('review')
     expect((await getConversation('lead')).messages).toHaveLength(1)

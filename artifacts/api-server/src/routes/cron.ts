@@ -6,11 +6,18 @@ import { deliverLeadEmails } from "@/lib/lead-followup/notifications";
 import { retryPendingEnrollmentInvitations } from "@/lib/agreements/enrollment-invitation";
 import { retryOnboardingInvitations } from "@/lib/affiliates/onboarding-invitations";
 import { runSalesWorker } from "@/lib/sales-leads/worker";
+import { reconcileTextIntents } from "@/lib/patient-texting/worker";
 import { reconcileMarketing } from "@/lib/marketing/reconcile";
 import { logger } from "@/lib/logger";
 import { NATIVE_WAKE_HEADER,NATIVE_WAKE_MARKER,recordNativeWake } from "@/lib/sales-leads/wake";
 
 const router: IRouter = Router();
+router.post('/cron/patient-texting', async (req, res) => {
+  if (!process.env.CRON_SECRET || req.get('authorization') !== `Bearer ${process.env.CRON_SECRET}`) {
+    res.status(401).json({ error: 'Unauthorized' }); return
+  }
+  res.json(await reconcileTextIntents())
+})
 /**
  * External triggers for the scheduled jobs (`Authorization: Bearer
  * $CRON_SECRET`), meant to be hit by an external cron at the slot time.

@@ -253,6 +253,20 @@
       "when": 1791672246718,
       "tag": "0035_abnormal_sally_floyd",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1791673923744,
+      "tag": "0036_open_rattler",
+      "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1791674390482,
+      "tag": "0037_vengeful_vulcan",
+      "breakpoints": true
     }
   ]
 }
