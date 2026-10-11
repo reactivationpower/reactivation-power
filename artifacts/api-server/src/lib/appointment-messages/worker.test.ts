@@ -15,6 +15,8 @@ vi.mock('../data/admin-users', () => ({ getAdminUserById: mocks.user }))
 vi.mock('./store', async original => ({ ...await original<any>(), APPOINTMENT_LOCK: fixture.lock }))
 import { registerAppointment, reconcileAppointment } from './store'
 import { runAppointmentMessages } from './worker'
+// Real remote database round trips; other isolated DB suites use the same limit.
+vi.setConfig({ testTimeout: 30000 })
 const schema = `appt_fixture_${randomUUID().replaceAll('-','')}`
 // Many sequential round trips to the shared remote DB; the 5s default times out
 // mid-case under full-suite load and leaks work into the next case.
@@ -130,6 +132,22 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('appointment outbox (isolated data
     expect(mocks.send).toHaveBeenCalledTimes(1)
     expect((await rows()).every((r:any)=>r.channel==='email')).toBe(true)
     expect(mocks.provider.mock.calls.some(([path])=>path==='/conversations/messages')).toBe(false)
+  })
+  it('turning on reminder texts later never sends a confirmation or "time changed" text for an unchanged booking', async () => {
+    await fixture.pool.query("UPDATE sales_settings SET capabilities=capabilities-'appointment_sms'")
+    await runAppointmentMessages(); await due(); await runAppointmentMessages()
+    expect(mocks.send).toHaveBeenCalledTimes(1)
+    await fixture.pool.query(`UPDATE sales_settings SET capabilities=jsonb_set(capabilities,'{appointment_sms}','{"enabled":true}')`)
+    await fixture.pool.query("UPDATE appointment_messages SET reconcile_at='2000-01-01'")
+    await runAppointmentMessages()
+    await fixture.pool.query("UPDATE appointment_messages SET reconcile_at='2000-01-01'; UPDATE appointment_deliveries SET due_at='2000-01-01' WHERE kind IN ('confirmation','rescheduled')")
+    await runAppointmentMessages()
+    const all = await rows()
+    expect(all.some((r:any)=>r.kind==='rescheduled')).toBe(false)
+    expect(all.some((r:any)=>r.channel==='sms'&&r.kind==='confirmation')).toBe(false)
+    expect(all.some((r:any)=>r.channel==='sms'&&r.state==='pending')).toBe(true) // later reminder texts still planned
+    expect(mocks.provider.mock.calls.some(([path])=>path==='/conversations/messages')).toBe(false)
+    expect(mocks.send).toHaveBeenCalledTimes(1)
   })
   it('blocks missing meeting links, then sends once when the verified link arrives', async () => {
     event.address=''

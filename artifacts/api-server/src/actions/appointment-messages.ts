@@ -58,11 +58,14 @@ export async function saveAppointmentMessaging(input: unknown) {
     await c.query('SELECT pg_advisory_xact_lock(hashtextextended($1,0))', [APPOINTMENT_LOCK])
     const current = await appointmentSettings(c)
     const cfg = await settings(c)
-    if (data.enabled) {
-      if (!schedulerHealthy(cfg.capabilities)) throw new Error('A healthy published scheduler wake is required')
-      if ((!current.readiness_confirmed_at || data.smsEnabled && cfg.capabilities?.appointment_sms?.enabled !== true) && !data.confirmReadiness)
-        throw new Error('Confirm reply routing, email sender and duplicate workflow review; automatic texts require separate SMS readiness confirmation')
-      if (!(await c.query('SELECT 1 FROM appointment_hosts WHERE active=true LIMIT 1')).rowCount) throw new Error('Add a verified meeting-host profile first')
+    const smsOn = current.enabled && cfg.capabilities?.appointment_sms?.enabled === true
+    // Only checks for turning something on. Turning reminder texts off (while
+    // keeping emails on) or turning everything off must always work.
+    // The super admin flipping the switch is the readiness confirmation.
+    const turningOn = data.enabled && (!current.enabled || (data.smsEnabled && !smsOn))
+    if (turningOn) {
+      if (!schedulerHealthy(cfg.capabilities)) throw new Error('Needs the published app running')
+      if (!(await c.query('SELECT 1 FROM appointment_hosts WHERE active=true LIMIT 1')).rowCount) throw new Error('Add who hosts the calls in Advanced first')
     }
     await c.query(`UPDATE sales_settings SET capabilities=jsonb_set(capabilities,'{appointment_sms}',$1::jsonb)
       WHERE id='internal'`, [JSON.stringify({ enabled: data.enabled && data.smsEnabled, confirmedBy: admin.userId })])
@@ -70,7 +73,7 @@ export async function saveAppointmentMessaging(input: unknown) {
       WHERE channel='sms' AND state IN ('pending','blocked')`)
     await c.query(`UPDATE appointment_message_settings SET enabled=$1,
       enabled_at=CASE WHEN $1 AND NOT enabled THEN now() ELSE enabled_at END,
-      readiness_confirmed_at=CASE WHEN $2 THEN now() ELSE readiness_confirmed_at END WHERE id='strategy'`, [data.enabled, !!data.confirmReadiness])
+      readiness_confirmed_at=CASE WHEN $2 THEN now() ELSE readiness_confirmed_at END WHERE id='strategy'`, [data.enabled, turningOn || !!data.confirmReadiness])
     if (!data.enabled) {
       await c.query("UPDATE appointment_deliveries SET state='cancelled',last_error='Automation disabled by administrator' WHERE state IN ('pending','blocked')")
       await c.query('UPDATE appointment_messages SET stopped=true WHERE NOT stopped')

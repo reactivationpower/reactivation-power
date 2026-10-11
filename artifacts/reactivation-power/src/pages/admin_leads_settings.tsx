@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { AppointmentMessaging } from '@/components/leads/appointment-messaging'
-import { InboxSetup } from '@/components/leads/inbox-setup'
+import { QuickSwitches } from '@/components/leads/quick-switches'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { salesCadencePreview, saveSalesReplyPreference, saveSalesSettings, verifySalesCapabilities } from '@/app/actions/sales-leads'
+import { salesCadencePreview, saveSalesSettings, verifySalesCapabilities } from '@/app/actions/sales-leads'
 import { Banner, ErrorBox, Field, LeadsTabs, Pill, Skeleton, btn, btn2, card, errMsg, fmt, inp, useDashboard, viewerTz } from '@/components/leads/ui'
 
 export default function AdminLeadsSettingsPage() {
@@ -13,13 +13,12 @@ export default function AdminLeadsSettingsPage() {
   const [draft, setDraft] = useState<{ assignee?: string; template?: string; days?: string }>({})
   const [tz, setTz] = useState(viewerTz)
   const save = useMutation({ mutationFn: saveSalesSettings, onSuccess: () => done('Settings saved'), onError: (e) => toast.error(errMsg(e)) })
-  const reply = useMutation({ mutationFn: saveSalesReplyPreference, onSuccess: () => done('Preference saved'), onError: (e) => toast.error(errMsg(e)) })
   const verify = useMutation({ mutationFn: verifySalesCapabilities, onSuccess: () => done('Capabilities checked'), onError: (e) => toast.error(errMsg(e)) })
   const preview = useQuery({ queryKey: ['sales-leads', 'cadence', tz], queryFn: () => salesCadencePreview(tz), retry: false, enabled: !!q.data })
 
   if (q.isLoading) return <div className="space-y-6"><h1 className="text-2xl font-semibold">Leads</h1><Skeleton rows={6} /></div>
   if (q.isError || !q.data) return <ErrorBox error={q.error} retry={() => q.refetch()} />
-  const { settings: s, team, super_admin, reply_notifications } = q.data
+  const { settings: s, team, super_admin } = q.data
   const ro = !super_admin
   const days = draft.days ?? s.later_days.join(', ')
   const parsedDays = days.split(',').map((x) => x.trim()).filter(Boolean).map(Number)
@@ -33,22 +32,24 @@ export default function AdminLeadsSettingsPage() {
 
   return (
     <div className="space-y-6">
-      <header><h1 className="text-2xl font-semibold">Leads</h1><p className="mt-1 text-sm text-muted-foreground">Settings for the provider sales pipeline.</p></header>
+      <header><h1 className="text-2xl font-semibold">Leads</h1><p className="mt-1 text-sm text-muted-foreground">Turn things on or off.</p></header>
       <LeadsTabs />
+      <QuickSwitches />
+      <details className="group space-y-4" data-testid="section-advanced">
+        <summary className="cursor-pointer select-none text-sm font-medium text-muted-foreground hover:text-foreground">Advanced</summary>
+        <div className="mt-4 space-y-6">
+      {ro && <Banner kind="info">Only super admins can change these settings.</Banner>}
       <AppointmentMessaging />
-      <InboxSetup />
-      {ro && <Banner kind="info">Only super admins can change these settings. You can still set your own reply notification preference.</Banner>}
-      {!s.default_assignee_id && <Banner kind="warn">A default assignee is required. Until one is set, new leads are unassigned and automation cannot be enabled.</Banner>}
       <section className={card + ' space-y-2'} data-testid="section-scheduler">
-        <h2 className="font-semibold">Five-minute scheduler</h2>
-        <p className="text-sm">{s.capabilities.native_scheduler?.requirement ?? 'External wake schedule not configured. In-process timers alone do not wake an idle autoscaled app.'}</p>
-        <p className="text-sm">{wake?.requirement ?? 'A healthy scheduled production wake is required before SMS automation can be enabled.'}</p>
-        <p className="text-xs text-muted-foreground">Last healthy wake: {fmt(wake?.checkedAt)} · {schedulerReady ? 'healthy' : 'pending or stale'}</p>
-        {!schedulerReady && <Banner kind="warn">Automation stays off until the published worker receives a healthy scheduled wake. Configuring the job does not publish the app or send texts.</Banner>}
+        <h2 className="font-semibold">Scheduler</h2>
+        <p className="text-sm">Reminders and automatic texts only go out while the published app is running.</p>
+        <p className="text-xs text-muted-foreground">Last check-in: {fmt(wake?.checkedAt)} · {schedulerReady ? 'Running' : 'Not running'}</p>
       </section>
 
       <section className={card + ' space-y-3'} data-testid="section-assignee">
         <h2 className="font-semibold">Default assignee</h2>
+        <p className="text-sm text-muted-foreground">Who gets new leads.</p>
+        {!s.default_assignee_id && <Banner kind="warn">Not set. New leads stay unassigned.</Banner>}
         <div className="flex flex-wrap gap-2">
           <select className={inp + ' max-w-sm'} disabled={ro} value={draft.assignee ?? s.default_assignee_id ?? ''} onChange={(e) => setDraft({ ...draft, assignee: e.target.value })} data-testid="select-default-assignee">
             <option value="">Not set</option>{team.filter((t) => t.active).map((t) => <option key={t.id} value={t.id}>{t.name || t.email}</option>)}
@@ -59,7 +60,7 @@ export default function AdminLeadsSettingsPage() {
 
       <section className={card + ' space-y-3'} data-testid="section-capabilities">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <div><h2 className="font-semibold">Admin scope and capability checks</h2><p className="text-xs text-muted-foreground">Last checked {fmt(s.capabilities_checked_at)}</p></div>
+          <div><h2 className="font-semibold">GoHighLevel checks</h2><p className="text-xs text-muted-foreground">Last checked {fmt(s.capabilities_checked_at)}</p></div>
           <button className={btn2} disabled={ro || verify.isPending} onClick={() => verify.mutate()} data-testid="button-verify">{verify.isPending ? 'Checking...' : 'Run checks'}</button>
         </div>
         {caps.length === 0 ? <p className="text-sm text-muted-foreground">No capability results yet. Run checks.</p> : (
@@ -67,12 +68,12 @@ export default function AdminLeadsSettingsPage() {
             <li key={k} className="flex flex-wrap items-center justify-between gap-2 py-2 text-sm" data-testid={`cap-${k}`}><div><p className="font-medium">{k}</p><p className="text-xs text-muted-foreground">{c.requirement}</p></div><Pill tone={['ok', 'verified', 'passed'].includes(c.state) ? 'bg-success/15 text-success' : 'bg-destructive/15 text-destructive'}>{c.state}</Pill></li>
           ))}</ul>
         )}
-        {failing.length > 0 && <Banner kind="warn">{failing.length} capability check{failing.length === 1 ? '' : 's'} not passing. Automation should stay off.</Banner>}
+        {failing.length > 0 && <Banner kind="warn">{failing.length} capability check{failing.length === 1 ? '' : 's'} not passing. Keep automatic texts off.</Banner>}
         {s.capabilities.sms_write?.state === 'review_required' && <div className="space-y-2 rounded-md border border-border p-3 text-sm">
-          <p>Read-only checks cannot prove SMS send permission or sender readiness. In the existing GoHighLevel location, verify <strong>conversations/message.write</strong>, an SMS-enabled sender, and required A2P/consent configuration. This app does not change existing GoHighLevel workflows. Review overlapping outreach workflows before enabling this plan.</p>
+          <p>Your GoHighLevel number must be approved for texting.</p>
           <button className={btn2} disabled={ro || save.isPending} onClick={() => {
-            if (window.confirm('Have you verified the SMS permission, sender/A2P configuration, and absence of overlapping outreach workflows in GoHighLevel? No test SMS has been sent by this app.')) save.mutate({ confirmSmsConfiguration: true })
-          }}>Confirm provider SMS configuration</button>
+            if (window.confirm('Is your GoHighLevel number approved for texting?')) save.mutate({ confirmSmsConfiguration: true })
+          }}>Yes, it's approved</button>
         </div>}
         <div className="flex items-center justify-between rounded-md bg-muted/50 p-3 text-sm">
           <span>Scope reviewed: {s.scope_reviewed_at ? fmt(s.scope_reviewed_at) : 'not reviewed'}</span>
@@ -80,13 +81,8 @@ export default function AdminLeadsSettingsPage() {
         </div>
       </section>
 
-      <section className={card + ' space-y-3'}>
-        <h2 className="font-semibold">Reply notifications</h2>
-        <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={reply_notifications} disabled={reply.isPending} onChange={(e) => reply.mutate(e.target.checked)} data-testid="checkbox-reply-notifications" />Notify me when a lead replies</label>
-      </section>
-
       <section className={card + ' space-y-3'} data-testid="section-template">
-        <div className="flex items-center justify-between"><h2 className="font-semibold">Template and cadence</h2><Pill>{s.approved_at ? `Approved ${fmt(s.approved_at)}` : 'Not approved'}</Pill></div>
+        <div className="flex items-center justify-between"><h2 className="font-semibold">Unbooked-lead text and schedule</h2><Pill>{s.approved_at ? `Approved ${fmt(s.approved_at)}` : 'Not approved'}</Pill></div>
         <Field label="Message template"><textarea rows={4} className={inp} disabled={ro} value={draft.template ?? s.template} onChange={(e) => setDraft({ ...draft, template: e.target.value })} data-testid="input-template" /></Field>
         <Field label="Later follow-up days (comma separated)" hint="Days after first touch."><input className={inp} disabled={ro} value={days} onChange={(e) => setDraft({ ...draft, days: e.target.value })} data-testid="input-later-days" /></Field>
         <div className="flex flex-wrap gap-2">
@@ -105,11 +101,13 @@ export default function AdminLeadsSettingsPage() {
       </section>
 
       <section className={card + ' space-y-3'} data-testid="section-automation">
-        <div className="flex items-center justify-between"><h2 className="font-semibold">Automation</h2><Pill tone={s.automation_enabled ? 'bg-success/15 text-success' : undefined}>{s.automation_enabled ? 'On' : 'Off'}</Pill></div>
-        <p className="text-sm text-muted-foreground">Off by default. Enabling requires a default assignee, passing read checks, confirmed provider SMS configuration, reviewed scope and an approved template. Only eligible website leads submitted after enabling enter this plan; historical and manually entered leads remain manual-only. Manual scheduling never restarts it.</p>
+        <div className="flex items-center justify-between"><h2 className="font-semibold">Automatic texts to unbooked leads</h2><Pill tone={s.automation_enabled ? 'bg-success/15 text-success' : undefined}>{s.automation_enabled ? 'On' : 'Off'}</Pill></div>
+        <p className="text-sm text-muted-foreground">Texts new website leads who haven't booked. Needs an assignee, passing checks and an approved text. Older leads are not included.</p>
         <button className={s.automation_enabled ? btn2 : btn} disabled={ro || save.isPending || (!s.automation_enabled && (!schedulerReady || !s.default_assignee_id || !s.approved_at || !s.scope_reviewed_at || failing.length > 0 || caps.length === 0))}
           onClick={() => save.mutate({ enableAutomation: !s.automation_enabled })} data-testid="button-toggle-automation">{s.automation_enabled ? 'Turn automation off' : 'Enable automation'}</button>
       </section>
+        </div>
+      </details>
     </div>
   )
 }

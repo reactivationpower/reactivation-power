@@ -38,6 +38,11 @@ export async function reconcileAppointment(c: PoolClient, row: any, event: any, 
     AND state IN ('sent','uncertain','sending')`, [row.appointment_id])).rows
   const sentInitial = attempted.some(d => ['confirmation','rescheduled'].includes(d.kind))
   const kind: MessageKind = status === 'cancelled' ? 'cancelled' : sentInitial ? 'rescheduled' : 'confirmation'
+  // A "time changed" notice is only true when the time or host differs from a
+  // notice already attempted. Turning on reminder texts, a new link or a zone
+  // fix must never send an "updated call time" message for an unchanged call.
+  const timeChanged = attempted.some(d => ['confirmation','rescheduled'].includes(d.kind) &&
+    (d.snapshot?.copy?.start !== snapshot.start || (d.snapshot?.copy?.hostId ?? previous?.hostId) !== snapshot.hostId))
   await c.query('BEGIN')
   try {
     const pending = (await c.query(`SELECT kind,channel,due_at,expires_at FROM appointment_deliveries
@@ -47,7 +52,8 @@ export async function reconcileAppointment(c: PoolClient, row: any, event: any, 
     await c.query(`UPDATE appointment_messages SET starts_at=$2,version=$3,fingerprint=$4,snapshot=$5,last_error=NULL WHERE appointment_id=$1`,
       [row.appointment_id, start, version, fingerprint, JSON.stringify(snapshot)])
     if (status !== 'hold' && (start > now || status === 'cancelled')) {
-       let slots = scheduleMessages(now, start, smsZone, kind).filter(s => smsEnabled || s.channel === 'email')
+       let slots = scheduleMessages(now, start, smsZone, kind).filter(s => (smsEnabled || s.channel === 'email') &&
+         !(s.kind === 'rescheduled' && !timeChanged))
        // Metadata-only refreshes must not erase an already scheduled reminder
        // simply because its original booking is now less than an hour away.
        if (previous?.start === snapshot.start && previous?.hostId === snapshot.hostId &&

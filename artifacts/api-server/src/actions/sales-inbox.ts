@@ -64,7 +64,7 @@ async function readiness(lead:any, adminId:string) {
   if(lead.dnd || lead.stage==='Lost/Do Not Contact') reasons.push('This lead is marked do not contact.')
   const capabilities=(await pool.query("SELECT capabilities FROM sales_settings WHERE id='internal'")).rows[0]?.capabilities
   const senderConfirmed=capabilities?.portal_sms_sender?.locationId===process.env.GHL_LOCATION_ID && !!capabilities?.portal_sms_sender?.number
-  if(!cfg.sms_ready || !senderConfirmed) reasons.push('Turn on texting once in Leads → Settings (check the box and save).')
+  if(!cfg.sms_ready || !senderConfirmed) reasons.push('Turn on texting in Leads → Settings.')
   if(!lead.ghl_contact_id) reasons.push('This lead is still syncing with GoHighLevel.')
   if(!lead.phone) reasons.push('This lead has no phone number.')
   return { email:false, emailReason:'Manual email is not supported; historical automated email remains available.',
@@ -163,7 +163,7 @@ export async function sendMessage(input:unknown) {
       fromNumber=await smsSender()
       if(capabilities?.portal_sms_sender?.locationId!==process.env.GHL_LOCATION_ID ||
         capabilities?.portal_sms_sender?.number!==fromNumber)
-        throw new Error('Your GoHighLevel number changed or is not set (sender changed). Re-save texting in Leads → Settings')
+        throw new Error('Your GoHighLevel number changed or is not set (sender changed). Turn texting off and on again in Leads → Settings')
     }
     // "Ask first" items come last, after every hard stop, so staff are never
     // asked "Send anyway?" for a text that would be refused regardless.
