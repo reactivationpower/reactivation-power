@@ -54,3 +54,6 @@ Hosted `pg_net` request/response tables can be owned by `supabase_admin` with PU
 - A successful migration command can silently skip pending SQL when another task has already applied a newer journal timestamp to the shared database.
   **Why:** Parallel task databases are not isolated: a new custom migration was older than the live migration high-water mark, so the command reported success without creating its tables.
   **How to apply:** Compare pending journal timestamps with the database high-water mark before applying; preserve applied entries, order genuinely pending migrations after it, and verify the required tables/columns afterward. For a parallel-task filename collision, accept the incoming snapshot and regenerate the next snapshot. If that task's identical SQL was already applied to the shared database, preserve its original applied timestamp after verifying SQL equivalence; a new timestamp would attempt duplicate table creation.
+- drizzle-kit generate does not escape apostrophes inside jsonb/text column defaults; the generated SQL is invalid until each `'` inside the literal is doubled.
+  **Why:** a follow-up-text default containing "it's" produced a broken ALTER TABLE.
+  **How to apply:** always read generated SQL before migrate when a default holds free text.

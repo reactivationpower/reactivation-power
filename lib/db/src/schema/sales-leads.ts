@@ -1,6 +1,15 @@
 import { pgTable, text, boolean, integer, jsonb, timestamp, uniqueIndex, index } from 'drizzle-orm/pg-core'
 import { createInsertSchema } from 'drizzle-zod'
 const instant = (name: string) => timestamp(name, { withTimezone: true })
+/** {firstName} and {practiceName} are filled in when the text is sent. */
+export const DEFAULT_FOLLOWUP_TEXTS: string[] = [
+  "Hi {firstName}, it's Patient Pipeline. Got your info for {practiceName}. Most practices have a long list of past patients who haven't been back in a while. On a quick call we'll show you how to get them booked again. Pick a time: https://patientpipeline.app/schedule-a-call Text STOP to opt out.",
+  "Hi {firstName}, quick question: when someone fills out a form on your website, how fast does someone at {practiceName} call them back? Reply with your best guess. Text STOP to opt out.",
+  "Hi {firstName}, most leads that don't book never got a second call. This 4-minute video shows how Patient Pipeline gives your front desk a daily call list and a script for every call: https://patientpipeline.app/walkthrough Text STOP to opt out.",
+  "Hi {firstName}, every past patient who comes back is a patient you already worked to win once. On a quick call we'll show you where those visits are hiding at {practiceName}. Grab a time: https://patientpipeline.app/schedule-a-call Text STOP to opt out.",
+  "Hi {firstName}, not ready for a call? No problem. Text us your biggest question about getting more patients booked, and we'll answer it right here. Text STOP to opt out.",
+  "Hi {firstName}, I don't want to keep bugging you, so this is my last text. Should I close your file, or is getting more patients back in still on your list? Just reply \"close\" or \"still interested.\" Text STOP to opt out.",
+]
 export const salesLeadsTable = pgTable('sales_leads', {
   id: text('id').primaryKey(), firstName: text('first_name').notNull(), lastName: text('last_name').notNull().default(''),
   email: text('email').notNull().default(''), phone: text('phone').notNull().default(''), practiceName: text('practice_name').notNull().default(''),
@@ -39,6 +48,8 @@ export const salesSettingsTable = pgTable('sales_settings', {
   id: text('id').primaryKey(), defaultAssigneeId: text('default_assignee_id'),
   automationEnabled: boolean('automation_enabled').notNull().default(false), approvedAt: instant('approved_at'),
   template: text('template').notNull().default('Hi {firstName}, this is the Patient Pipeline team. Would you like help planning your practice follow-up? Reply STOP to opt out.'),
+  /** One text per automated follow-up touch, in send order. Text 6 is always the last text a lead gets. */
+  followupTexts: jsonb('followup_texts').$type<string[]>().notNull().default(DEFAULT_FOLLOWUP_TEXTS),
   laterDays: jsonb('later_days').notNull().default([5, 7, 10, 14, 21, 28]),
   capabilities: jsonb('capabilities').notNull().default({}), capabilitiesCheckedAt: instant('capabilities_checked_at'),
   scopeReviewedAt: instant('scope_reviewed_at'), enabledAt: instant('enabled_at'),

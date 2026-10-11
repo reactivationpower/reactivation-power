@@ -3,6 +3,7 @@ import { sendEmail } from '@/lib/mail/send'
 import { getAdminUserById } from '@/lib/data/admin-users'
 import { activity, enqueue, id, intake, phoneKey, settings, stop, transaction } from './store'
 import { allowed, cadence, canAutomate, elapsedDays } from './cadence'
+import { assignTextNumbers, followupTexts, renderFollowupText } from './followup-texts'
 import { schedulerHealthy } from './wake'
 import { contact, contactPage, locationId, notes, provider, safeSalesUpsert, SalesProviderError } from './provider'
 import { salesTiming } from './timing'
@@ -55,10 +56,11 @@ async function plan() {
       await c.query("SELECT pg_advisory_xact_lock(hashtextextended($1,0))", [`sales-send:${lead.id}`])
       const fresh = (await c.query('SELECT * FROM sales_leads WHERE id=$1 FOR UPDATE', [lead.id])).rows[0]
       if (!canAutomate(fresh) || elapsedDays(new Date(fresh.created_at), new Date()) >= 30) { await stop(c, lead.id, 'ineligible'); return }
-      const slots = cadence(new Date(fresh.created_at), fresh.timezone, fresh.id, cfg.later_days)
+      // Number texts across the lead's whole cadence so a resumed plan keeps the same order.
+      const slots = assignTextNumbers(cadence(new Date(fresh.created_at), fresh.timezone, fresh.id, cfg.later_days))
       for (const slot of slots) {
         if (Date.parse(slot.dueAt) < Date.now() - 5 * 60000) continue // never replay overdue touches as a burst
-        await enqueue(c, fresh.id, slot.kind, `cadence:${fresh.id}:${slot.kind}:${slot.day}:${fresh.timezone}`, { day: slot.day, template: cfg.template }, slot.dueAt)
+        await enqueue(c, fresh.id, slot.kind, `cadence:${fresh.id}:${slot.kind}:${slot.day}:${fresh.timezone}`, { day: slot.day, ...(slot.textNumber && { textNumber: slot.textNumber }) }, slot.dueAt)
       }
       await c.query("UPDATE sales_leads SET automation_state='active',updated_at=now() WHERE id=$1", [lead.id])
     })
@@ -160,13 +162,13 @@ async function dispatchSms(job: any) {
       await c.query("UPDATE sales_jobs SET state='cancelled',finished_at=now(),last_error='Eligibility, daily cap, or permitted send window changed' WHERE id=$1", [job.id])
       return
     }
-    await activity(c, lead.id, { kind: 'sms_dispatch', status: 'dispatching', body: 'Approved automated follow-up', dedupeKey: `sms-dispatch:${job.id}` })
+    await activity(c, lead.id, { kind: 'sms_dispatch', status: 'dispatching', body: `Automated follow-up text ${Number(job.payload?.textNumber) || 1}`, dedupeKey: `sms-dispatch:${job.id}` })
     // Hold row/advisory lock through dispatch. Local stop cannot pass a completed
     // final eligibility check and then race ahead of the provider request.
     try {
       const result = await provider('/conversations/messages', 'POST', {
         type: 'SMS', contactId: lead.ghl_contact_id,
-        message: String(cfg.template).replaceAll('{firstName}', lead.first_name), status: 'pending',
+        message: renderFollowupText(followupTexts(cfg), job.payload?.textNumber, lead), status: 'pending',
       })
       if (!result.messageId) throw new SalesProviderError(0, true)
       await c.query("UPDATE sales_activities SET provider_id=$2,status='accepted' WHERE dedupe_key=$1", [`sms-dispatch:${job.id}`, result.messageId])

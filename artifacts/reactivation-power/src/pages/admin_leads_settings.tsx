@@ -6,11 +6,13 @@ import { toast } from 'sonner'
 import { salesCadencePreview, saveSalesSettings, verifySalesCapabilities } from '@/app/actions/sales-leads'
 import { Banner, ErrorBox, Field, LeadsTabs, Pill, Skeleton, btn, btn2, card, errMsg, fmt, inp, useDashboard, viewerTz } from '@/components/leads/ui'
 
+const TEXT_LABELS = ['Text 1 — day 1', 'Text 2 — day 2', 'Text 3 — day 3', 'Text 4 — about day 7', 'Text 5 — about day 14', 'Text 6 — about day 28 (last text)']
+
 export default function AdminLeadsSettingsPage() {
   const qc = useQueryClient()
   const q = useDashboard()
   const done = (m: string) => { toast.success(m); setDraft({}); qc.invalidateQueries({ queryKey: ['sales-leads'] }) }
-  const [draft, setDraft] = useState<{ assignee?: string; template?: string; days?: string }>({})
+  const [draft, setDraft] = useState<{ assignee?: string; texts?: string[]; days?: string }>({})
   const [tz, setTz] = useState(viewerTz)
   const save = useMutation({ mutationFn: saveSalesSettings, onSuccess: () => done('Settings saved'), onError: (e) => toast.error(errMsg(e)) })
   const verify = useMutation({ mutationFn: verifySalesCapabilities, onSuccess: () => done('Capabilities checked'), onError: (e) => toast.error(errMsg(e)) })
@@ -21,9 +23,10 @@ export default function AdminLeadsSettingsPage() {
   const { settings: s, team, super_admin } = q.data
   const ro = !super_admin
   const days = draft.days ?? s.later_days.join(', ')
+  const texts = draft.texts ?? s.followup_texts
   const parsedDays = days.split(',').map((x) => x.trim()).filter(Boolean).map(Number)
   const daysOk = parsedDays.length > 0 && parsedDays.every((n) => Number.isInteger(n) && n > 0)
-  const dirty = draft.assignee !== undefined || draft.template !== undefined || draft.days !== undefined
+  const dirty = draft.assignee !== undefined || draft.texts !== undefined || draft.days !== undefined
   const caps = Object.entries(s.capabilities)
   const wake = s.capabilities.scheduler_wake
   const wakeAt = Date.parse(wake?.checkedAt ?? '')
@@ -82,20 +85,25 @@ export default function AdminLeadsSettingsPage() {
       </section>
 
       <section className={card + ' space-y-3'} data-testid="section-template">
-        <div className="flex items-center justify-between"><h2 className="font-semibold">Unbooked-lead text and schedule</h2><Pill>{s.approved_at ? `Approved ${fmt(s.approved_at)}` : 'Not approved'}</Pill></div>
-        <Field label="Message template"><textarea rows={4} className={inp} disabled={ro} value={draft.template ?? s.template} onChange={(e) => setDraft({ ...draft, template: e.target.value })} data-testid="input-template" /></Field>
+        <div className="flex items-center justify-between"><h2 className="font-semibold">Unbooked-lead texts and schedule</h2><Pill>{s.approved_at ? `Approved ${fmt(s.approved_at)}` : 'Not approved'}</Pill></div>
+        <p className="text-sm text-muted-foreground">Up to 6 texts, sent in order. Text 6 is always the last one. {'{firstName}'} and {'{practiceName}'} are filled in for each lead.</p>
+        {texts.map((t, i) => (
+          <Field key={i} label={TEXT_LABELS[i]!}><textarea rows={3} className={inp} disabled={ro} value={t}
+            onChange={(e) => setDraft({ ...draft, texts: texts.map((x, j) => j === i ? e.target.value : x) })} data-testid={`input-followup-text-${i + 1}`} /></Field>
+        ))}
         <Field label="Later follow-up days (comma separated)" hint="Days after first touch."><input className={inp} disabled={ro} value={days} onChange={(e) => setDraft({ ...draft, days: e.target.value })} data-testid="input-later-days" /></Field>
         <div className="flex flex-wrap gap-2">
-          <button className={btn} disabled={ro || !dirty || !daysOk || save.isPending} data-testid="button-save-template"
-            onClick={() => save.mutate({ ...(draft.template !== undefined && { template: draft.template }), ...(draft.days !== undefined && { laterDays: parsedDays }) })}>Save template</button>
-          <button className={btn2} disabled={ro || dirty || !s.template || save.isPending} onClick={() => save.mutate({ approveTemplate: true })} data-testid="button-approve-template" title={dirty ? 'Save changes before approving' : undefined}>Approve saved template</button>
+          <button className={btn} disabled={ro || !dirty || !daysOk || texts.some((t) => !t.includes('STOP')) || save.isPending} data-testid="button-save-template"
+            onClick={() => save.mutate({ ...(draft.texts !== undefined && { followupTexts: draft.texts }), ...(draft.days !== undefined && { laterDays: parsedDays }) })}>Save texts</button>
+          <button className={btn2} disabled={ro || dirty || save.isPending} onClick={() => save.mutate({ approveTemplate: true })} data-testid="button-approve-template" title={dirty ? 'Save changes before approving' : undefined}>Approve saved texts</button>
         </div>
         {!daysOk && <p className="text-xs text-destructive">Enter positive whole numbers separated by commas.</p>}
+        {texts.some((t) => !t.includes('STOP')) && <p className="text-xs text-destructive">Every text needs "STOP" so leads can opt out.</p>}
         <div className="border-t border-border pt-3">
           <Field label="Preview timezone (IANA)"><input className={inp + ' max-w-sm'} value={tz} onChange={(e) => setTz(e.target.value)} data-testid="input-preview-tz" /></Field>
           <p className="mt-2 text-xs text-muted-foreground">Preview only. Nothing is sent.</p>
           {preview.isLoading ? <Skeleton rows={2} /> : preview.isError ? <p className="text-sm text-destructive">{errMsg(preview.error)}</p> : (
-            <ul className="mt-2 space-y-1 text-sm" data-testid="list-cadence">{(preview.data ?? []).map((p, i) => <li key={i}>Day {p.day} · {p.kind} · {fmt(p.dueAt, tz)}</li>)}</ul>
+            <ul className="mt-2 space-y-1 text-sm" data-testid="list-cadence">{(preview.data ?? []).map((p, i) => <li key={i}>Day {p.day} · {p.kind === 'sms' ? `Text ${p.textNumber ?? ''}`.trim() : 'Call reminder'} · {fmt(p.dueAt, tz)}</li>)}</ul>
           )}
         </div>
       </section>

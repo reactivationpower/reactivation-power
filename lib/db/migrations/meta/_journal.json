@@ -267,6 +267,13 @@
       "when": 1791674390482,
       "tag": "0037_vengeful_vulcan",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1791731211357,
+      "tag": "0038_striped_northstar",
+      "breakpoints": true
     }
   ]
 }

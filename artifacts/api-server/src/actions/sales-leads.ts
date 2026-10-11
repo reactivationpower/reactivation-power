@@ -9,6 +9,7 @@ import { contactPage, contactUrl, verifyCapabilities } from '@/lib/sales-leads/p
 import { runSalesWorker } from '@/lib/sales-leads/worker'
 import { schedulerHealthy } from '@/lib/sales-leads/wake'
 import { withSyncState } from '@/lib/sales-leads/sync-state'
+import { assignTextNumbers, followupTexts, validateFollowupTexts } from '@/lib/sales-leads/followup-texts'
 const safeText = (s: unknown, max = 200) => typeof s === 'string' ? s.trim().slice(0, max) : ''
 function email(s: unknown) {
   const value = emailKey(safeText(s, 254))
@@ -136,17 +137,17 @@ export async function logSalesCall(leadId: string, input: { disposition: SalesDi
     await c.query("UPDATE sales_jobs SET state='done',finished_at=now() WHERE lead_id=$1 AND kind='call_task' AND state='pending' AND due_at::date<=now()::date", [leadId])
   })
 }
-export async function saveSalesSettings(input: { defaultAssigneeId?: string; template?: string; laterDays?: number[]; approveTemplate?: boolean; reviewScope?: boolean; confirmSmsConfiguration?: boolean; enableAutomation?: boolean }) {
+export async function saveSalesSettings(input: { defaultAssigneeId?: string; followupTexts?: string[]; laterDays?: number[]; approveTemplate?: boolean; reviewScope?: boolean; confirmSmsConfiguration?: boolean; enableAutomation?: boolean }) {
   const admin = await requireAdmin('super_admin')
   const assignment = input.defaultAssigneeId !== undefined ? await assignee(input.defaultAssigneeId) : undefined
-  if (input.template !== undefined && (!input.template.includes('STOP') || input.template.length < 20 || input.template.length > 1000)) throw new Error('Template must be 20–1000 characters and include STOP opt-out language')
+  const texts = input.followupTexts !== undefined ? validateFollowupTexts(input.followupTexts) : undefined
   if (input.laterDays && (input.laterDays.length !== 6 || input.laterDays.some((n, i, a) => !Number.isInteger(n) || n < 5 || n >= 30 || (i > 0 && n <= a[i - 1]!)))) throw new Error('Choose six increasing elapsed calendar days between 5 and 29')
   await transaction(async c => {
     const cfg = await settings(c)
     await c.query("SELECT id FROM sales_settings WHERE id='internal' FOR UPDATE")
     const update: Record<string, unknown> = {}
     if (assignment !== undefined) update.default_assignee_id = assignment
-    if (input.template !== undefined && input.template !== cfg.template) { update.template = input.template; update.approved_at = null; update.automation_enabled = false }
+    if (texts && JSON.stringify(texts) !== JSON.stringify(followupTexts(cfg))) { update.followup_texts = JSON.stringify(texts); update.approved_at = null; update.automation_enabled = false }
     if (input.laterDays) { update.later_days = JSON.stringify(input.laterDays); update.approved_at = null; update.automation_enabled = false }
     if (input.approveTemplate) update.approved_at = new Date()
     if (input.reviewScope) update.scope_reviewed_at = new Date()
@@ -160,7 +161,7 @@ export async function saveSalesSettings(input: { defaultAssigneeId?: string; tem
     if (input.enableAutomation) {
       const caps = cfg.capabilities
       if (!schedulerHealthy(caps)) throw new Error('Wait for a healthy scheduled wake on the published app before enabling automation. The Supabase five-minute job must be active.')
-      if (!(assignment ?? cfg.default_assignee_id) || !(update.approved_at ?? cfg.approved_at) || !(update.scope_reviewed_at ?? cfg.scope_reviewed_at)) throw new Error('Review the default assignee, template, and eligible new-lead scope first')
+      if (!(assignment ?? cfg.default_assignee_id) || !(update.approved_at ?? cfg.approved_at) || !(update.scope_reviewed_at ?? cfg.scope_reviewed_at)) throw new Error('Review the default assignee, follow-up texts, and eligible new-lead scope first')
       // No read-only probe can prove SMS write permission, number/A2P configuration, or delivery.
       // Do not let a checkbox bypass missing verification; operator review is explicit and auditable.
       if (!['verified', 'operator_confirmed'].includes(caps.sms_write?.state)) throw new Error('Confirm the existing GoHighLevel conversations/message.write permission, SMS-enabled number, and A2P configuration before enabling. No real send was authorized.')
@@ -245,7 +246,7 @@ export async function retrySalesSync(leadId: string) {
 export async function salesCadencePreview(timezone: string) {
   await requireAdmin()
   if (!validTimezone(timezone)) throw new Error('Enter a verified IANA timezone')
-  return cadence(new Date(), timezone, 'preview', (await settings()).later_days)
+  return assignTextNumbers(cadence(new Date(), timezone, 'preview', (await settings()).later_days))
 }
 export async function getSalesMedia(leadId: string, activityId: string) {
   await requireAdmin('super_admin')
