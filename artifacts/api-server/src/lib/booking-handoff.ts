@@ -83,7 +83,42 @@ export async function withLegacyBooking(contactId: string, slot: string, timezon
   return withSavedBooking(saved, slot, timezone, book, carried)
 }
 
+export const CONTACT_PENDING = 'Your inquiry is saved. Contact synchronization is still pending. Retry Confirm shortly, or contact us through the website for help.'
+const CONTACT_WAIT_MS = 15000
+const CONTACT_PENDING_RESULT = { ok: false, error: CONTACT_PENDING, contactPending: true } as const
+
+/** A visitor can press Confirm moments after submitting the form, before the
+ * background contact sync has finished. Wait briefly for that sync, but never
+ * while holding the lead lock: the sync worker needs the same lock to save the
+ * contact ID. Booking still never writes a contact itself. */
 async function withSavedBooking(saved: any, slot: string, timezone: string, book: BookingOperation, legacyCarried?: Record<string, string>) {
+  const deadline = Date.now() + CONTACT_WAIT_MS
+  for (;;) {
+    const result: any = await attemptSavedBooking(saved, slot, timezone, book, legacyCarried)
+    if (!result?.contactPending) return result
+    if (Date.now() >= deadline || !(await waitForContactSync(saved.lead_id, deadline))) {
+      return { ok: false, error: CONTACT_PENDING }
+    }
+  }
+}
+
+/** True once the lead has a contact ID; false if the sync stops being active
+ * (failed/uncertain/backed off) or the deadline passes. */
+async function waitForContactSync(leadId: string, deadline: number) {
+  nudgeSalesSync()
+  while (Date.now() < deadline) {
+    await new Promise(resolve => setTimeout(resolve, 400))
+    const row = (await pool.query(`SELECT l.ghl_contact_id IS NOT NULL AS ready, EXISTS(SELECT 1 FROM sales_jobs j
+      WHERE j.lead_id=l.id AND j.kind='contact_sync' AND (j.state='sending' OR (j.state='pending' AND j.due_at<=now()))) AS active
+      FROM sales_leads l WHERE l.id=$1`, [leadId])).rows[0]
+    if (!row) return false
+    if (row.ready) return true
+    if (!row.active) return false
+  }
+  return false
+}
+
+async function attemptSavedBooking(saved: any, slot: string, timezone: string, book: BookingOperation, legacyCarried?: Record<string, string>) {
   const c = await pool.connect()
   const key = `sales-send:${saved.lead_id}`
   let outcomeId: string | undefined
@@ -116,8 +151,7 @@ async function withSavedBooking(saved: any, slot: string, timezone: string, book
           (SELECT 1 FROM sales_jobs WHERE lead_id=$2 AND kind='contact_sync'
             AND state IN ('pending','sending','failed','uncertain'))
         ON CONFLICT(dedupe_key) DO NOTHING`, [randomUUID(), lead.id, `booking-contact:${lead.id}`])
-      nudgeSalesSync()
-      return { ok: false, error: 'Your inquiry is saved. Contact synchronization is still pending. Retry Confirm shortly, or contact us through the website for help.' }
+      return CONTACT_PENDING_RESULT
     }
     const persist = async () => {
       await c.query(`UPDATE sales_submissions SET context=jsonb_set(context,$3::text[],$2::jsonb) WHERE id=$1`,

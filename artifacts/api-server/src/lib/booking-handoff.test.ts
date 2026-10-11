@@ -57,6 +57,42 @@ describe('durable saved-inquiry booking', () => {
     expect((await withBookingHandoff(token.ref, slot, tz, book)).ok).toBe(true)
     expect(book).toHaveBeenCalledTimes(1)
   })
+  it('books in one Confirm when the background contact sync finishes moments later', async () => {
+    lead.ghl_contact_id = null
+    const base = mocks.query.getMockImplementation()!
+    let polls = 0
+    mocks.query.mockImplementation(async (sql: string, args: any[]) => {
+      if (sql.startsWith('SELECT l.ghl_contact_id IS NOT NULL')) {
+        polls++
+        // The worker saves the contact ID on the second check.
+        if (polls === 2) lead.ghl_contact_id = 'provider-contact'
+        return { rows: [{ ready: !!lead.ghl_contact_id, active: true }] }
+      }
+      return base(sql, args)
+    })
+    const book = vi.fn().mockResolvedValue({ ok: true })
+    const result = await withBookingHandoff(token.ref, slot, tz, book)
+    expect(result.ok).toBe(true)
+    expect(book).toHaveBeenCalledTimes(1)
+    expect(book).toHaveBeenCalledWith('provider-contact', token.context.carried)
+    expect(mocks.sync).not.toHaveBeenCalled()
+    // The lead lock is released before waiting, so the worker can save the contact.
+    const sqls = mocks.query.mock.calls.map(call => String(call[0]))
+    const firstPoll = sqls.findIndex(sql => sql.startsWith('SELECT l.ghl_contact_id IS NOT NULL'))
+    expect(sqls.slice(0, firstPoll).filter(sql => sql.includes('pg_advisory_unlock'))).toHaveLength(1)
+  })
+  it('stops waiting and asks for a retry when the contact sync is no longer running', async () => {
+    lead.ghl_contact_id = null
+    const base = mocks.query.getMockImplementation()!
+    mocks.query.mockImplementation(async (sql: string, args: any[]) => {
+      if (sql.startsWith('SELECT l.ghl_contact_id IS NOT NULL')) return { rows: [{ ready: false, active: false }] }
+      return base(sql, args)
+    })
+    const book = vi.fn().mockResolvedValue({ ok: true })
+    const result = await withBookingHandoff(token.ref, slot, tz, book)
+    expect(result).toEqual({ ok: false, error: expect.stringContaining('Contact synchronization is still pending') })
+    expect(book).not.toHaveBeenCalled()
+  })
   it('blocks local and provider identity conflicts', async () => {
     const book = vi.fn()
     saved.review = true
