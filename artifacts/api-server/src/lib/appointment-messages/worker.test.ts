@@ -15,6 +15,7 @@ vi.mock('../data/admin-users', () => ({ getAdminUserById: mocks.user }))
 vi.mock('./store', async original => ({ ...await original<any>(), APPOINTMENT_LOCK: fixture.lock }))
 import { registerAppointment, reconcileAppointment } from './store'
 import { runAppointmentMessages } from './worker'
+import { SalesProviderError } from '../sales-leads/provider'
 // Real remote database round trips; other isolated DB suites use the same limit.
 vi.setConfig({ testTimeout: 30000 })
 const schema = `appt_fixture_${randomUUID().replaceAll('-','')}`
@@ -53,8 +54,10 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('appointment outbox (isolated data
       INSERT INTO appointment_message_settings(id,enabled) VALUES('strategy',true);
       INSERT INTO appointment_hosts(ghl_user_id,admin_id,name,reply_email) VALUES('host','admin','Morgan','host@example.invalid');`)
     await fixture.pool.query("INSERT INTO sales_settings(id,capabilities) VALUES('internal',$1)",[JSON.stringify({scheduler_wake:{state:'verified',checkedAt:now.toISOString()},appointment_sms:{enabled:true}})])
-    event = { id:'appointment', contactId:'contact', calendarId:'calendar-fixture', startTime:start, assignedUserId:'host', address:'https://meet.google.com/abc-defg-hij', appointmentStatus:'confirmed' }
-    mocks.provider.mockImplementation(async (path: string) => path.includes('/appointments/') ? { event } : {messageId:'sms-fixture'})
+    // Real GoHighLevel reply shape: GET /calendars/events/appointments/:id
+    // returns { appointment: {...}, traceId }, with an offset local start time.
+    event = { id:'appointment', contactId:'contact', calendarId:'calendar-fixture', locationId:'location-fixture', startTime:start, assignedUserId:'host', address:'https://meet.google.com/abc-defg-hij', appointmentStatus:'confirmed' }
+    mocks.provider.mockImplementation(async (path: string) => path.includes('/appointments/') ? { appointment: event, traceId:'trace-fixture' } : {messageId:'sms-fixture'})
     mocks.contact.mockResolvedValue({id:'contact',locationId:'location-fixture',email:'fixture@example.invalid',phone:'+12125550199',assignedTo:'host'})
     mocks.conversations.mockResolvedValue([{id:'thread',assignedTo:'host'}])
     mocks.user.mockResolvedValue({active:true,confirmedAt:'2026-01-01'})
@@ -68,6 +71,40 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('appointment outbox (isolated data
   async function due() {
     await fixture.pool.query("UPDATE appointment_messages SET reconcile_at='2000-01-01'; UPDATE appointment_deliveries SET due_at='2000-01-01' WHERE kind='confirmation'")
   }
+  it('a fresh booking creates and sends the confirmation email and text', async () => {
+    event.startTime = '2026-10-14T12:00:00-04:00' // GoHighLevel's offset format
+    await runAppointmentMessages()
+    expect((await fixture.pool.query('SELECT last_error FROM appointment_messages')).rows).toEqual([{last_error:null}])
+    const planned = (await rows()).filter((r:any)=>r.kind==='confirmation')
+    expect(planned.map((r:any)=>r.channel).sort()).toEqual(['email','sms'])
+    await due(); await runAppointmentMessages()
+    expect(mocks.send).toHaveBeenCalledTimes(1)
+    expect(mocks.send.mock.calls[0][1]).toBe('fixture@example.invalid')
+    expect(mocks.send.mock.calls[0][2]).toMatchObject({kind:'confirmation',start:'2026-10-14T16:00:00.000Z',meetingUrl:'https://meet.google.com/abc-defg-hij'})
+    const texts = mocks.provider.mock.calls.filter(([path])=>path==='/conversations/messages')
+    expect(texts).toHaveLength(1)
+    expect(texts[0][2]).toMatchObject({type:'SMS',contactId:'contact'})
+    expect((await rows()).filter((r:any)=>r.kind==='confirmation').every((r:any)=>r.state==='sent')).toBe(true)
+  })
+  it('still accepts the older { event } reply shape', async () => {
+    mocks.provider.mockImplementation(async (path: string) => path.includes('/appointments/') ? { event } : {messageId:'sms-fixture'})
+    await runAppointmentMessages(); await due(); await runAppointmentMessages()
+    expect(mocks.send).toHaveBeenCalledTimes(1)
+  })
+  it.each([
+    ['an empty reply', async () => ({ traceId:'trace-fixture' }), 'appointment not found'],
+    ['a 404', async () => { throw new SalesProviderError(404) }, 'appointment not found'],
+    ['an outage', async () => { throw new SalesProviderError(503) }, 'GoHighLevel request failed (HTTP 503)'],
+    ['another contact', async () => ({ appointment: { ...event, contactId:'other' } }), 'contact mismatch'],
+    ['another calendar', async () => ({ appointment: { ...event, calendarId:'other' } }), 'calendar mismatch'],
+    ['another location', async () => ({ appointment: { ...event, locationId:'other' } }), 'location mismatch'],
+  ])('pauses with a specific reason for %s and sends nothing', async (_label, reply, reason) => {
+    mocks.provider.mockImplementation(async (path: string) => path.includes('/appointments/') ? reply() : {messageId:'sms-fixture'})
+    await runAppointmentMessages()
+    expect((await fixture.pool.query('SELECT last_error FROM appointment_messages')).rows).toEqual([{last_error:`Sending paused: ${reason}`}])
+    expect(await rows()).toEqual([])
+    expect(mocks.send).not.toHaveBeenCalled()
+  })
   it('registers once, dispatches once across overlapping wakes, never uses a hardcoded host', async () => {
     await runAppointmentMessages() // plans future relative to real DB clock
     expect((await fixture.pool.query('SELECT last_error FROM appointment_messages')).rows).toEqual([{last_error:null}])

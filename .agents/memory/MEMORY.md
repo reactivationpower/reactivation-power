@@ -42,3 +42,4 @@
 - [Saved inquiry booking](booking-handoff-policy.md) — preserve calendar design and identity protection; reconcile uncertain writes; no analytics consent popup or floating controls.
 - [Sales sync safety](sales-sync-policy.md) — keep durable fast sync separate from maintenance; contact uncertainty also constrains booking.
 - [Conversation previews](conversation-preview-policy.md) — frozen send evidence, with disclosed link/image restrictions; no manual or incoming-email scope.
+- [GoHighLevel reply shapes](ghl-api-shapes.md) — appointment lookup returns `appointment`, not `event`; copy live shapes into test fakes.

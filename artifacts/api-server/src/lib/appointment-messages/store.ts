@@ -2,6 +2,8 @@ import { pool, type PoolClient } from '@workspace/db'
 import { createHash } from 'node:crypto'
 import { REMINDER_KINDS, scheduleMessages, type MessageKind } from './schedule'
 export const APPOINTMENT_LOCK = 'appointment-message-worker'
+/** A specific, non-personal reason why an appointment could not be verified. */
+export class AppointmentCheckError extends Error {}
 export async function appointmentSettings(c: Pick<PoolClient, 'query'> = pool) {
   await c.query("INSERT INTO appointment_message_settings(id) VALUES('strategy') ON CONFLICT DO NOTHING")
   return (await c.query("SELECT * FROM appointment_message_settings WHERE id='strategy'")).rows[0]
@@ -27,7 +29,7 @@ export function eventState(event: any) {
 export async function reconcileAppointment(c: PoolClient, row: any, event: any, smsZone: string | null, now = new Date(), smsEnabled = false) {
   const status = eventState(event)
   const start = new Date(event.startTime ?? (status === 'cancelled' ? row.starts_at : ''))
-  if (!Number.isFinite(+start)) throw new Error('Appointment time could not be verified')
+  if (!Number.isFinite(+start)) throw new AppointmentCheckError('appointment time could not be verified')
   const snapshot = { start: start.toISOString(), hostId: event.assignedUserId ?? (status === 'cancelled' ? row.snapshot?.hostId : undefined), meetingUrl: meetLink(event.address), status, smsZone, smsEnabled }
   const fingerprint = createHash('sha256').update(JSON.stringify(snapshot)).digest('hex')
   if (fingerprint === row.fingerprint) return

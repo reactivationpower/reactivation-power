@@ -6,7 +6,7 @@ import { getAdminUserById } from '../data/admin-users'
 import { sendEmail, fromAddress } from '../mail/send'
 import { PUBLIC_APP_ORIGIN } from '../app-origin'
 import { logger } from '../logger'
-import { APPOINTMENT_LOCK, appointmentSettings, reconcileAppointment } from './store'
+import { APPOINTMENT_LOCK, AppointmentCheckError, appointmentSettings, reconcileAppointment } from './store'
 import { MINUTE, SMS_GAP, nextSmsWindow, smsAllowed } from './schedule'
 import { renderAppointmentMessage, type AppointmentCopy } from './content'
 import { SALES_REPLY_TO } from '../sales-inbox/store'
@@ -36,7 +36,7 @@ async function dispatch(c: PoolClient, job: any, row: any, lead: any, smsEnabled
   if (!user?.active || !user.confirmedAt) return defer(c, job.id, 'Host staff account is inactive or unverified')
   if (!snap.meetingUrl && job.kind !== 'cancelled') return defer(c, job.id, 'Waiting for the verified Google Meet link')
   const remote = await contact(lead.ghl_contact_id)
-  if (!remote || remote.id !== lead.ghl_contact_id || remote.locationId !== process.env.GHL_LOCATION_ID) throw new Error('Contact could not be verified')
+  if (!remote || remote.id !== lead.ghl_contact_id || remote.locationId !== process.env.GHL_LOCATION_ID) throw new AppointmentCheckError('contact could not be verified')
   const sms = job.channel === 'sms'
   if (lead.dnd || lead.stage === 'Lost/Do Not Contact' || channelBlocked(remote, sms ? 'SMS' : 'Email') || sms && !lead.consent) {
     await c.query("UPDATE appointment_deliveries SET state='skipped',last_error='Consent or do-not-contact restriction' WHERE id=$1", [job.id]); return
@@ -99,6 +99,25 @@ async function dispatch(c: PoolClient, job: any, row: any, lead: any, smsEnabled
   }
 }
 
+/** GoHighLevel returns `{ appointment: {...} }` (older docs show `event`).
+ * Every identity check must pass before anything is planned or sent. */
+async function verifiedAppointment(appointmentId: string, contactId: string) {
+  const reply = await provider(`/calendars/events/appointments/${encodeURIComponent(appointmentId)}`)
+  const event = reply?.appointment ?? reply?.event
+  if (!event || typeof event !== 'object') throw new AppointmentCheckError('appointment not found')
+  if (event.contactId !== contactId) throw new AppointmentCheckError('contact mismatch')
+  if (event.calendarId !== process.env.GHL_CALENDAR_ID) throw new AppointmentCheckError('calendar mismatch')
+  if (event.locationId !== undefined && event.locationId !== process.env.GHL_LOCATION_ID) throw new AppointmentCheckError('location mismatch')
+  return event
+}
+/** Short, non-personal reason for the saved error and the server log. */
+function pauseReason(error: unknown) {
+  if (error instanceof AppointmentCheckError) return error.message
+  if (error instanceof SalesProviderError) return error.status === 404 ? 'appointment not found' :
+    error.status ? `GoHighLevel request failed (HTTP ${error.status})` : 'GoHighLevel did not respond'
+  return 'unexpected error'
+}
+
 /** Durable five-minute production wake plus immediate post-booking nudge.
  * Dedicated lock prevents overlap; never sends from preview/dev. */
 export async function runAppointmentMessages() {
@@ -129,9 +148,8 @@ export async function runAppointmentMessages() {
       await c.query('SELECT pg_advisory_lock(hashtextextended($1,0))', [key])
       try {
         const lead = (await c.query('SELECT * FROM sales_leads WHERE id=$1', [row.lead_id])).rows[0]
-        if (!lead?.ghl_contact_id) throw new Error('Contact missing')
-        const event = (await provider(`/calendars/events/appointments/${encodeURIComponent(row.appointment_id)}`)).event
-        if (!event || event.contactId !== lead.ghl_contact_id || event.calendarId !== process.env.GHL_CALENDAR_ID) throw new Error('Appointment identity mismatch')
+        if (!lead?.ghl_contact_id) throw new AppointmentCheckError('lead has no GoHighLevel contact')
+        const event = await verifiedAppointment(row.appointment_id, lead.ghl_contact_id)
         await reconcileAppointment(c, row, event, safeZone(lead), new Date(), smsEnabled)
         await c.query("UPDATE appointment_messages SET last_error=NULL,reconcile_at=now()+interval '5 minutes' WHERE appointment_id=$1", [row.appointment_id])
         const jobs = (await c.query(`SELECT * FROM appointment_deliveries WHERE appointment_id=$1 AND version=$2
@@ -141,9 +159,12 @@ export async function runAppointmentMessages() {
           await c.query(`UPDATE appointment_messages SET stopped=true WHERE appointment_id=$1 AND NOT EXISTS
             (SELECT 1 FROM appointment_deliveries WHERE appointment_id=$1 AND state IN ('pending','blocked','sending'))`, [row.appointment_id])
         }
-      } catch {
+      } catch (error) {
         // Never interpret an API outage/404 as permission to send stale details.
-        await c.query("UPDATE appointment_messages SET last_error='Provider reconciliation failed; sending paused',reconcile_at=now()+interval '5 minutes' WHERE appointment_id=$1", [row.appointment_id])
+        const reason = pauseReason(error)
+        logger.warn({ appointmentId: row.appointment_id, reason }, 'Appointment messages paused')
+        await c.query("UPDATE appointment_messages SET last_error=$2,reconcile_at=now()+interval '5 minutes' WHERE appointment_id=$1",
+          [row.appointment_id, `Sending paused: ${reason}`])
       } finally { await c.query('SELECT pg_advisory_unlock(hashtextextended($1,0))', [key]) }
     }
   } catch { logger.warn('Appointment-message processing unavailable; no blind replay') }
