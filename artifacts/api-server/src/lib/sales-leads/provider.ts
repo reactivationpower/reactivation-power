@@ -26,7 +26,8 @@ export async function safeSalesUpsert(input: GhlUpsertInput): Promise<string> {
   if (matches.size > 1) throw new Error('Provider identity conflict: email and phone match different GoHighLevel records. Review those contacts before retrying.')
   const existing = [...matches.values()][0]
   const tags = [...new Set([...(existing?.tags ?? []), ...(input.tags ?? [])])]
-  const body = { ...input, ...(tags.length ? { tags } : {}), ...(existing ? {} : { locationId: locationId(), country: 'US' }) }
+  const { phone, ...rest } = input
+  const body = { ...rest, ...(phone ? { phone } : {}), ...(tags.length ? { tags } : {}), ...(existing ? {} : { locationId: locationId(), country: 'US' }) }
   if (existing) {
     // Matching office phone alone does not authorize replacing another email.
     if (existing.email && input.email && existing.email.toLowerCase() !== input.email.toLowerCase()) throw new Error('Provider identity conflict: shared phone with a different email. Review before contact sync.')

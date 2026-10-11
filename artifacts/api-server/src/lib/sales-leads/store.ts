@@ -57,6 +57,15 @@ export async function stop(c: PoolClient, leadId: string, reason: string) {
   await c.query("UPDATE sales_leads SET automation_state=$2 WHERE id=$1", [leadId, reason])
   await c.query("UPDATE sales_jobs SET state='cancelled',last_error=$2,finished_at=now() WHERE lead_id=$1 AND kind IN ('sms','call_task') AND state='pending'", [leadId, reason])
 }
+/** A live inquiry can reuse an older lead's phone (often a shared office line) with
+ * a different email. That newer lead keeps its own GoHighLevel contact without the
+ * phone, so it never takes over the other contact, and automated texts are skipped. */
+export async function sharesOlderPhone(c: Pick<PoolClient, 'query'>, lead: { id: string; phone: string; email: string; created_at: Date | string }) {
+  if (!lead.phone) return false
+  return (await c.query(`SELECT EXISTS(SELECT 1 FROM sales_leads o WHERE o.id<>$1 AND o.phone=$2 AND o.email IS DISTINCT FROM $3
+    AND (o.created_at<$4::timestamptz OR (o.created_at=$4::timestamptz AND o.id<$1))) AS shared`,
+    [lead.id, lead.phone, lead.email, lead.created_at])).rows[0].shared === true
+}
 export interface Intake {
   noteBody?: string;
   firstName: string; lastName: string; email: string; phone: string; practiceName: string; source: string; sourcePath: string;
@@ -74,14 +83,19 @@ export async function intake(input: Intake, forceLeadId?: string | null): Promis
     const exactProvider = matches.find(l => l.ghl_contact_id && l.ghl_contact_id === input.providerId)
     const exactEmail = matches.filter(l => email && l.email === email)
     const ambiguous = !exactProvider && (matches.length > 1 || (matches.length === 1 && email && matches[0].email && email !== matches[0].email))
-    if (forceLeadId === undefined && ambiguous) {
+    // Live visitors must be able to book right away. A matching email is the same
+    // person; a phone-only match with a different email becomes its own lead.
+    // Imports and multi-email conflicts still go to staff review.
+    const separate = forceLeadId === undefined && ambiguous && !input.historical && exactEmail.length === 0
+    const byEmail = forceLeadId === undefined && ambiguous && !input.historical && exactEmail.length === 1
+    if (forceLeadId === undefined && ambiguous && !separate && !byEmail) {
       const reviewId = id()
       await c.query(`INSERT INTO sales_merge_reviews(id,dedupe_key,candidates,submission) VALUES($1,$2,$3,$4) ON CONFLICT(dedupe_key) DO NOTHING`,
         [reviewId, input.dedupeKey, JSON.stringify(matches.map(l => ({ id: l.id, name: `${l.first_name} ${l.last_name}`, email: l.email, phone: l.phone }))), JSON.stringify(input)])
       return { id: reviewId, review: true }
     }
     let lead = forceLeadId ? (await c.query('SELECT * FROM sales_leads WHERE id=$1 FOR UPDATE', [forceLeadId])).rows[0] :
-      forceLeadId === null ? null : exactProvider ?? exactEmail[0] ?? matches[0]
+      forceLeadId === null || separate ? null : exactProvider ?? exactEmail[0] ?? matches[0]
     if (forceLeadId && !lead) throw new Error('Selected lead no longer exists')
     if (!lead) {
       const cfg = await settings(c)
@@ -105,6 +119,8 @@ export async function intake(input: Intake, forceLeadId?: string | null): Promis
       [id(), lead.id, input.source, input.sourcePath, input.submittedAt ?? null, JSON.stringify(input.context),
         JSON.stringify(input.consentEvidence ?? {}), Boolean(input.historical), input.dedupeKey])
     await activity(c, lead.id, { kind: 'submission', body: `${input.source}: ${input.sourcePath}`, dedupeKey: `submission:${input.dedupeKey}`, occurredAt: input.submittedAt })
+    if (separate) await activity(c, lead.id, { kind: 'note', dedupeKey: `shared-phone:${input.dedupeKey}`,
+      body: `Possible duplicate: this inquiry uses the same phone as ${matches.map(l => `${l.first_name} ${l.last_name}`.trim() || 'another lead').join(', ')} but a different email. It was kept as a separate lead so the visitor could book. Its GoHighLevel contact has no phone, and automated texts are skipped. Merge them if they are the same person.` })
     if (!input.historical) await enqueue(c, lead.id, 'contact_sync', `intake:${input.dedupeKey}`, {
       ...(input.context.legacySourcePath ? { healthcare: {
         postalCode: input.context.zip, city: input.context.city, state: input.context.state,

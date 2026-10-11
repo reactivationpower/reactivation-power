@@ -22,3 +22,7 @@ replay. See docs/portal-sms-transport.md for the integration contract and limits
 Confirm can arrive before the post-commit contact sync finishes (fast form-to-calendar visitors).
 **Why:** Users hit "Contact synchronization is still pending" on their first Confirm; the sync and booking share the `sales-send:<lead>` advisory lock.
 **How to apply:** Wait briefly for the durable sync only while NOT holding the lead lock (holding it deadlocks the worker), then retry the locked attempt; never write the contact from booking.
+
+The user requires a straight flow: button → form → submit → calendar → booked page. A live inquiry must never stop at a staff-review screen.
+**Why:** A visitor whose phone matched another lead (different email) was blocked from booking; the user said they must be able to book.
+**How to apply:** Same email = same lead. Phone-only match with a different email = separate lead with a staff "possible duplicate" note; its GHL contact omits the shared phone and automated texts skip it. Imports still use the review queue.

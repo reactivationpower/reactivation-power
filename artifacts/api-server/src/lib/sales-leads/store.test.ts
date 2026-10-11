@@ -12,7 +12,7 @@ vi.mock('@workspace/db', () => ({ pool: {
   query: (...args: any[]) => fixture.pool.query(...args),
   connect: () => fixture.pool.connect(),
 } }))
-import { activity, enqueue, intake, stop, transaction } from './store'
+import { activity, enqueue, intake, sharesOlderPhone, stop, transaction } from './store'
 import { withSyncState } from './sync-state'
 import { nudgeSalesSync } from './dispatch'
 import { ingestMessages, ingestProviderFacts, reconcileLead } from './ingestion'
@@ -230,9 +230,23 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('internal sales durable storage (i
     expect(safeSalesUpsert).toHaveBeenCalledTimes(1)
     expect(book).not.toHaveBeenCalled()
   })
-  it('reviews shared-phone/different-email identities rather than erasing them', async () => {
-    await intake(input('a'))
+  it('keeps a live shared-phone/different-email inquiry as its own bookable lead, flagged for staff', async () => {
+    const first = await intake(input('a'))
     const next = await intake(input('b',{ email:'other@example.invalid' }))
+    expect(next.review).toBeUndefined()
+    expect(next.id).not.toBe(first.id)
+    expect((await fixture.pool.query("SELECT * FROM sales_merge_reviews WHERE state='pending'")).rows).toHaveLength(0)
+    const leads = (await fixture.pool.query('SELECT * FROM sales_leads ORDER BY created_at, id')).rows
+    expect(leads).toHaveLength(2)
+    expect((await fixture.pool.query("SELECT 1 FROM sales_submissions WHERE lead_id=$1", [next.id])).rows).toHaveLength(1)
+    expect((await fixture.pool.query("SELECT body FROM sales_activities WHERE lead_id=$1 AND kind='note'", [next.id])).rows[0].body).toContain('Possible duplicate')
+    const newer = leads.find((l: any) => l.id === next.id), older = leads.find((l: any) => l.id === first.id)
+    expect(await sharesOlderPhone(fixture.pool, newer)).toBe(true)
+    expect(await sharesOlderPhone(fixture.pool, older)).toBe(false)
+  })
+  it('still reviews imported shared-phone/different-email identities rather than erasing them', async () => {
+    await intake(input('a'))
+    const next = await intake(input('b',{ email:'other@example.invalid', historical:true }))
     expect(next.review).toBe(true)
     expect((await fixture.pool.query("SELECT * FROM sales_merge_reviews WHERE state='pending'")).rows).toHaveLength(1)
     expect((await fixture.pool.query('SELECT * FROM sales_leads')).rows).toHaveLength(1)

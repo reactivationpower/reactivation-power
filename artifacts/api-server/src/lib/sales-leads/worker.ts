@@ -1,7 +1,7 @@
 import { pool } from '@workspace/db'
 import { sendEmail } from '@/lib/mail/send'
 import { getAdminUserById } from '@/lib/data/admin-users'
-import { activity, enqueue, id, intake, phoneKey, settings, stop, transaction } from './store'
+import { activity, enqueue, id, intake, phoneKey, settings, sharesOlderPhone, stop, transaction } from './store'
 import { cadence, canAutomate, elapsedDays, textAllowed } from './cadence'
 import { assignTextNumbers, followupTexts, renderFollowupText } from './followup-texts'
 import { schedulerHealthy } from './wake'
@@ -114,11 +114,13 @@ async function synchronize(job: any) {
     const healthcare = job.payload?.healthcare
     if (healthcare) tags.push('reactivation-power-lead', 'healthcare-funnel',
       ...(['reactivation','lead-follow-up','both'].includes(healthcare.interest) ? [`interest-${healthcare.interest}`] : []))
-    const body = { firstName: lead.first_name, lastName: lead.last_name, email: lead.email, phone: lead.phone,
+    const sharedPhone = await sharesOlderPhone(c, lead)
+    const body = { firstName: lead.first_name, lastName: lead.last_name, email: lead.email, phone: sharedPhone ? '' : lead.phone,
       ...(healthcare ? { postalCode:healthcare.postalCode, city:healthcare.city, state:healthcare.state } : {}),
       companyName: lead.practice_name, ...(lead.timezone && ['browser','staff'].includes(lead.timezone_origin) ? { timezone: lead.timezone } : {}), tags }
     let contactId = lead.ghl_contact_id
-    if (contactId) await provider(`/contacts/${encodeURIComponent(contactId)}`, 'PUT', { ...body, ...(lead.dnd ? { dnd:true } : {}) })
+    const { phone: _phone, ...withoutPhone } = body
+    if (contactId) await provider(`/contacts/${encodeURIComponent(contactId)}`, 'PUT', { ...(sharedPhone ? withoutPhone : body), ...(lead.dnd ? { dnd:true } : {}) })
     else contactId = await safeSalesUpsert({ ...body, source:'Patient Pipeline internal sales' })
     await c.query("UPDATE sales_leads SET ghl_contact_id=$2,reconcile_at=now() WHERE id=$1", [lead.id, contactId])
   })
@@ -156,6 +158,10 @@ async function dispatchSms(job: any) {
     }
     const touches = (await c.query(`SELECT count(DISTINCT COALESCE(provider_id,id)) FROM sales_activities WHERE lead_id=$1 AND kind IN ('call','provider_call','outbound_sms','sms_dispatch')
       AND (occurred_at AT TIME ZONE 'America/New_York')::date=(now() AT TIME ZONE 'America/New_York')::date`, [lead.id])).rows[0]
+    if (await sharesOlderPhone(c, lead)) {
+      await c.query("UPDATE sales_jobs SET state='cancelled',finished_at=now(),last_error='Phone is shared with another lead; texts skipped' WHERE id=$1", [job.id])
+      return
+    }
     if (!cfg.automation_enabled || !schedulerHealthy(cfg.capabilities) || !['verified','operator_confirmed'].includes(cfg.capabilities.sms_write?.state) || !canAutomate(lead) || lead.automation_state !== 'active' || !lead.ghl_contact_id ||
       elapsedDays(new Date(lead.created_at), new Date()) >= 30 || !textAllowed(new Date(), lead.timezone) ||
       Date.now() - new Date(job.due_at).getTime() > 5 * 60000 || Number(touches.count) >= 2) {
