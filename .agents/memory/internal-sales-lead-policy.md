@@ -32,6 +32,12 @@ Call opens the lead's GoHighLevel contact in a new tab. The user wants inbound t
 
 **How to apply:** Retrieve existing available GoHighLevel media with appropriate permissions; do not silently enable new recording.
 
+For internal call media, fail closed on provider redirects and use the contact-level GHL link unless a stable call permalink is independently verified. An undocumented media error must not be labeled “not recorded” or “expired.”
+
+**Why:** GHL documents direct audio retrieval but not reliable range semantics or a stable call UI permalink. Read-only sampling established message identity checks, not successful media availability. Broadening to attachment/CDN URLs would introduce a new credential and SSRF boundary.
+
+**How to apply:** Keep playback bounded and ephemeral without persisting private media URLs; any future redirect/CDN support needs explicit host, redirect, credential-isolation and range verification.
+
 Read-only private-integration probes cannot prove SMS sending permission, sender/A2P readiness, or recording/transcription access. Distinguish API-verified reads from an administrator's provider-configuration confirmation.
 
 **Why:** Contact/calendar writes in the existing helper do not establish every proposed capability; an unapproved real-contact send is not an acceptable permission test.

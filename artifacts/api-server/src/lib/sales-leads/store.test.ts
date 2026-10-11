@@ -31,6 +31,9 @@ vi.mock('@/lib/mail/send', () => ({ sendEmail: vi.fn() }))
 vi.mock('@/lib/marketing/outcomes', () => ({ bookingOutcome: vi.fn() }))
 vi.mock('@/lib/sales-inbox/inbound', () => ({ runInboxInbound: vi.fn() }))
 vi.mock('@/lib/appointment-messages/worker', () => ({ runAppointmentMessages: vi.fn() }))
+// Multi-transaction lifecycle cases use the remote shared DB, not an in-memory store.
+// Allow network latency without increasing pool size or weakening assertions.
+vi.setConfig({ testTimeout: 30000 })
 const schema = `sales_fixture_${randomUUID().replaceAll('-', '')}`
 const input = (key: string, extra: any = {}) => ({ firstName: 'Fixture', lastName:'Lead', email:'fixture@example.invalid', phone:'+12125550199', practiceName:'Fixture Practice',
   source:'website', sourcePath:'/strategy-call/schedule', context:{ valueAdjusted:'no', utm_source:'fixture' }, consent:true, consentEvidence:{ checked:true, timestamp:new Date().toISOString() },
@@ -49,8 +52,10 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('internal sales durable storage (i
     const ddl = readFileSync(new URL('../../../../../lib/db/migrations/0029_bitter_ultragirl.sql', import.meta.url), 'utf8')
       .split('ALTER TABLE sales_leads ENABLE ROW LEVEL SECURITY;')[0].replaceAll('"public"."sales_leads"', `"${schema}"."sales_leads"`).replaceAll('--> statement-breakpoint','')
     await fixture.pool.query(ddl)
+    const inboxDdl = readFileSync(new URL('../../../../../lib/db/migrations/0035_abnormal_sally_floyd.sql', import.meta.url), 'utf8')
+      .split('ALTER TABLE sales_inbox_settings ENABLE ROW LEVEL SECURITY;')[0].replaceAll('"public"."sales_leads"', `"${schema}"."sales_leads"`)
+    await fixture.pool.query(inboxDdl)
     await fixture.pool.query('CREATE TABLE customers(id text PRIMARY KEY,email text NOT NULL)')
-    await fixture.pool.query(`CREATE TABLE sales_inbox_messages (id text PRIMARY KEY,lead_id text,provider_id text,channel text,state text,error text,created_at timestamptz DEFAULT now())`)
   })
   beforeEach(async () => {
     vi.useRealTimers(); vi.clearAllMocks()

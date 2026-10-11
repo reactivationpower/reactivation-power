@@ -4,6 +4,7 @@ import pinoHttp from "pino-http";
 import router from "./routes";
 import webhooksLeadsRouter from "./routes/webhooks-leads";
 import marketingRouter from "./routes/marketing";
+import salesCallMediaRouter from "./routes/sales-call-media";
 import { logger } from "./lib/logger";
 import { redactSecretPath } from "./lib/redact-path";
 import { respondDatabaseUnavailable } from "./lib/database-unavailable";
@@ -38,6 +39,7 @@ app.use(cookieParser());
 // is still attributed to its campaign and shown on the Lead sources tab.
 app.use("/api", webhooksLeadsRouter);
 app.use("/api", marketingRouter);
+app.use("/api", salesCallMediaRouter);
 // Parse sensitive intake separately: bounded body, no retained raw-body copy.
 app.use("/api/actions/affiliate-onboarding", express.json({ limit: "3mb" }));
 app.use("/api/actions/patient-texting", express.json({ limit: "32kb" }));

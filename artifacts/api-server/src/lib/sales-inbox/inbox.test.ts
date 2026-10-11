@@ -14,6 +14,9 @@ import { updateSalesLead } from '../../actions/sales-leads'
 import { ingestReceivedEmail } from './inbound'
 import { replyAddress } from './store'
 import { ingestMessages, refreshLeadMessages } from '../sales-leads/ingestion'
+// These cases perform many sequential round trips to the shared remote DB.
+// Keep time bounded without timing out mid-send and leaking work into the next case.
+vi.setConfig({ testTimeout: 30000 })
 const schema=`inbox_fixture_${randomUUID().replaceAll('-','')}`
 describe.skipIf(!process.env.SUPABASE_DB_URL)('unified inbox isolated persistence, mocked delivery',()=>{
   let admin:pg.Pool

@@ -65,6 +65,7 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('appointment outbox (isolated data
   }
   it('registers once, dispatches once across overlapping wakes, never uses a hardcoded host', async () => {
     await runAppointmentMessages() // plans future relative to real DB clock
+    expect((await fixture.pool.query('SELECT last_error FROM appointment_messages')).rows).toEqual([{last_error:null}])
     await due()
     await Promise.all([runAppointmentMessages(),runAppointmentMessages()])
     expect(mocks.send).toHaveBeenCalledTimes(1)
