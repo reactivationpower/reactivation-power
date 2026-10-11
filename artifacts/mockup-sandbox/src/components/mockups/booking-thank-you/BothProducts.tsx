@@ -25,7 +25,7 @@ function SliderField({ id, label, display, min, max, step, value, onChange, tone
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-col justify-end lg:min-h-10">
-        <div className="flex items-baseline justify-between gap-4">
+        <div className="flex items-end justify-between gap-4">
           <label htmlFor={id} className="text-sm font-medium leading-5 text-foreground">{label}</label>
           <span className={`shrink-0 whitespace-nowrap text-lg font-bold leading-5 tabular-nums ${tone === 'navy' ? 'text-primary' : 'text-accent'}`}>{display}</span>
         </div>
@@ -133,10 +133,10 @@ function CombinedOpportunity() {
             <div className="flex flex-col gap-6 p-6 md:p-8">
               <HalfHeader icon={Megaphone} title="Lead Follow-Up" tone="navy"
                 blurb="New inquiries from your ads and website get called quickly, with a script built for your campaign." />
-              <SliderField id="bty-leads" label="How many additional new patients could better follow-up bring in each month?"
+              <SliderField id="bty-leads" label="How many more new patients per month?"
                 display={`${leadsPerMonth}${leadsPerMonth >= LEADS_MAX ? '+' : ''} / mo`}
                 min={LEADS_MIN} max={LEADS_MAX} step={1} value={leadsPerMonth} onChange={setLeadsPerMonth} tone="navy" />
-              <SliderField id="bty-lead-value" label="What's a new patient worth over their first year?" display={formatMoney(leadValue)}
+              <SliderField id="bty-lead-value" label="What's a new patient worth in year one?" display={formatMoney(leadValue)}
                 min={VALUE_MIN} max={COMBINED_VALUE_MAX} step={VALUE_STEP} value={leadValue} onChange={setLeadValue} tone="navy" />
               <div className="mt-auto flex flex-col gap-1 rounded-lg bg-primary/[0.07] px-5 py-5">
                 <p className="text-sm font-medium text-muted-foreground">Estimated additional annual revenue</p>
