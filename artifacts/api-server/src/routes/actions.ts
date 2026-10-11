@@ -310,6 +310,10 @@ router.post("/actions/:module/:fn", async (req: Request, res: Response) => {
     });
     res.json({ ok: true, result: result === undefined ? null : result });
   } catch (err) {
+    if (moduleName === 'sales-inbox' && err instanceof salesInbox.InboxAccessError) {
+      res.status(403).json({ ok: false, error: err.message });
+      return;
+    }
     if (respondDatabaseUnavailable(err, res)) return;
     if (isRedirectSignal(err)) {
       res.json({ ok: true, result: null, redirect: err.location });

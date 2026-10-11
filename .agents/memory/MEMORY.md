@@ -41,3 +41,4 @@
 - [Customer enrollment boundaries](customer-enrollment-policy.md) — commercial identities, access records, and offers stay distinct; opening setup is not conversion.
 - [Saved inquiry booking](booking-handoff-policy.md) — preserve calendar design and identity protection; reconcile uncertain writes; no analytics consent popup or floating controls.
 - [Sales sync safety](sales-sync-policy.md) — keep durable fast sync separate from maintenance; contact uncertainty also constrains booking.
+- [Conversation previews](conversation-preview-policy.md) — frozen send evidence, with disclosed link/image restrictions; no manual or incoming-email scope.

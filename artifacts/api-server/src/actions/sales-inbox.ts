@@ -8,11 +8,16 @@ import { refreshLeadMessages } from '@/lib/sales-leads/ingestion'
 import { canonicalSmsStatus } from '@/lib/sales-inbox/status'
 import { smsAllowed } from '@/lib/appointment-messages/schedule'
 import { getAdminUserById } from '@/lib/data/admin-users'
+import { listAppointmentEmailHistory } from '@/lib/appointment-messages/history'
+import { safeEmailPreview } from '@/lib/sales-inbox/email-preview'
 import { toPlainText } from '@/lib/mail/layout'
 import { stop, transaction } from '@/lib/sales-leads/store'
 
+export class InboxAccessError extends Error {
+  constructor() { super('Lead not available to this salesperson') }
+}
 export function assertInboxAccess(admin: {role:string;userId:string}, lead: any) {
-  if (!['super_admin','sales_rep'].includes(admin.role) || !lead || (admin.role !== 'super_admin' && lead.assignee_id !== admin.userId)) throw new Error('Lead not available to this salesperson')
+  if (!['super_admin','sales_rep'].includes(admin.role) || !lead || (admin.role !== 'super_admin' && lead.assignee_id !== admin.userId)) throw new InboxAccessError()
 }
 async function accessible(id: string) {
   const admin = await requireAdmin()
@@ -54,34 +59,48 @@ export async function getConversation(leadId:string) {
   await accessible(leadId)
   const synchronization = await refreshLeadMessages(leadId)
   const {lead} = await accessible(leadId)
-  const [local,external,appointments,ready] = await Promise.all([
+  const [local,external,appointments,ready,emailHistory] = await Promise.all([
     pool.query(`SELECT m.*,COALESCE(e.status,a.status,m.state) AS status,m.error FROM sales_inbox_messages m
       LEFT JOIN email_log e ON e.id=m.email_log_id
       LEFT JOIN LATERAL (SELECT status FROM sales_activities WHERE provider_id=m.provider_id AND lead_id=m.lead_id ORDER BY occurred_at DESC LIMIT 1) a ON true
       WHERE m.lead_id=$1 ORDER BY m.created_at DESC LIMIT 500`,[leadId]),
     pool.query(`SELECT a.* FROM sales_activities a WHERE lead_id=$1 AND kind IN ('inbound_sms','outbound_sms','provider_call','inbound_email','outbound_email')
-      AND NOT EXISTS(SELECT 1 FROM sales_inbox_messages m WHERE m.provider_id=a.provider_id)
-      AND NOT EXISTS(SELECT 1 FROM appointment_deliveries d WHERE d.provider_id=a.provider_id)
+       AND NOT EXISTS(SELECT 1 FROM sales_inbox_messages m WHERE m.provider_id=a.provider_id AND m.lead_id=a.lead_id)
+       AND NOT EXISTS(SELECT 1 FROM appointment_deliveries d JOIN appointment_messages am USING(appointment_id) WHERE d.provider_id=a.provider_id AND am.lead_id=a.lead_id)
       ORDER BY occurred_at DESC LIMIT 500`,[leadId]),
-    pool.query(`SELECT d.*, e.status AS email_status FROM appointment_deliveries d JOIN appointment_messages a USING(appointment_id)
-      LEFT JOIN email_log e ON e.id=d.email_log_id WHERE a.lead_id=$1 AND d.snapshot IS NOT NULL ORDER BY d.due_at DESC LIMIT 200`,[leadId]),
+    pool.query(`SELECT d.*, p.status AS sms_status FROM appointment_deliveries d JOIN appointment_messages a USING(appointment_id)
+      LEFT JOIN LATERAL (SELECT status FROM sales_activities WHERE provider_id=d.provider_id AND lead_id=a.lead_id AND kind='outbound_sms'
+        ORDER BY occurred_at DESC LIMIT 1) p ON true
+      WHERE a.lead_id=$1 AND d.channel='sms' AND d.snapshot IS NOT NULL ORDER BY d.due_at DESC LIMIT 200`,[leadId]),
     readiness(lead),
+    listAppointmentEmailHistory(leadId),
   ])
   const messages = [
-    ...local.rows.map(m=>({...m,status:m.state==='uncertain'?'uncertain':m.status,body:m.body+(m.error?`\n[${m.error}]`:'')})),
+    ...local.rows.map(m=>({id:m.id,channel:m.channel,direction:m.direction,subject:m.subject,
+      author_name:m.author_name,provider_id:m.provider_id,created_at:m.created_at,source:m.channel==='sms'?'portal':'history',
+      status:m.state==='uncertain'?'uncertain':m.status,body:m.body+(m.error?`\n[${m.error}]`:'')})),
     ...external.rows.map(a=>({id:a.id,channel:a.kind==='provider_call'?'call':a.kind.endsWith('email')?'email':'sms',
       direction:a.kind.startsWith('inbound')?'inbound':a.kind==='provider_call'?'event':'outbound',body:a.body,status:a.status,
-      provider_id:a.provider_id,source:'ghl',author_name:a.author_name,created_at:a.occurred_at})),
-    ...appointments.rows.map(d=>({id:d.id,channel:d.channel,direction:'outbound',subject:d.snapshot?.rendered?.subject,
-      body:d.channel==='sms'?d.snapshot?.rendered?.sms:toPlainText(String(d.snapshot?.rendered?.html??'')),
-      status:d.email_status??d.state,created_at:d.sent_at??d.claimed_at??d.due_at,author_name:d.snapshot?.copy?.host})),
+       provider_id:a.provider_id,source:'ghl',author_name:a.author_name,created_at:a.occurred_at,
+       ...(a.kind==='provider_call' ? {callMedia:{detailsUrl:`/api/sales/leads/${encodeURIComponent(leadId)}/calls/${encodeURIComponent(a.id)}/details`}} : {})})),
+    ...appointments.rows.map(d=>({id:d.id,channel:d.channel,direction:'outbound',
+      body:d.snapshot?.rendered?.sms,provider_id:d.provider_id,source:'appointment',
+      status:d.sms_status??d.state,created_at:d.sent_at??d.claimed_at??d.due_at,author_name:d.snapshot?.copy?.host})),
+     ...emailHistory.messages.map(e=>{
+       const html=e.html===null?null:safeEmailPreview(e.html)
+       return {id:e.id,channel:e.channel,direction:e.direction,subject:e.subject,body:html===null?null:toPlainText(html),
+         status:e.status,created_at:e.createdAt,author_name:e.authorName,source:e.source,provider_id:e.providerId,
+         emailSnapshot:{html,contentAvailable:e.contentAvailable,recipient:e.recipient,from:e.from,replyTo:e.replyTo,
+           dispatchState:e.dispatchState,providerStatus:e.providerStatus,sentAt:e.sentAt,deliveredAt:e.deliveredAt}}
+     }),
   ].sort((a,b)=>+new Date(a.created_at)-+new Date(b.created_at))
   await accessible(leadId) // ownership may have changed while awaiting provider I/O
   return {lead:{id:lead.id,first_name:lead.first_name,last_name:lead.last_name,email:lead.email,phone:lead.phone},
     messages:messages.map(m=>({...m,source:m.source??(m.channel==='sms'?'portal':'history'),
       source_id:m.id,provider_id:m.provider_id??null,raw_status:m.status,
       canonical_status:m.channel==='sms'?canonicalSmsStatus(m.status):m.status})),
-    synchronization,readiness:ready,contactUrl:contactUrl(lead.ghl_contact_id)}
+     synchronization,historyTruncated:emailHistory.hasMore||local.rows.length===500||external.rows.length===500||appointments.rows.length===200,
+     readiness:ready,contactUrl:contactUrl(lead.ghl_contact_id)}
 }
 export async function refreshConversation(leadId:string) {
   await accessible(leadId)

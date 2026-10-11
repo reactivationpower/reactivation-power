@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { addSalesNote, convertSalesLead, getSalesLead, getSalesMedia, logSalesCall, retrySalesSync, updateSalesLead } from '@/app/actions/sales-leads'
 import { SALES_DISPOSITIONS, SALES_STAGES, type SalesDisposition, type SalesStage } from '@workspace/shared/sales-leads'
+import { LeadConversation } from '@/components/leads/conversation'
 import { MarketingActivityPanel } from '@/components/marketing/activity-panel'
 import { Banner, ErrorBox, Field, Pill, REFRESH_MS, Skeleton, btn, btn2, card, errMsg, fmt, inp, localToIso, useDashboard, viewerTz } from '@/components/leads/ui'
 
@@ -96,6 +97,8 @@ export default function AdminLeadDetailPage() {
             <button className={btn2} disabled={retry.isPending || lead.sync_state === 'uncertain'} onClick={() => retry.mutate()} data-testid="button-retry-sync">{retry.isPending ? 'Queuing retry...' : 'Retry sync'}</button></div>
         </Banner>
       )}
+
+      <LeadConversation leadId={id} embedded />
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="min-w-0 space-y-6 break-words lg:col-span-2">
