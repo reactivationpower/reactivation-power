@@ -38,16 +38,13 @@ function SliderField({ id, label, display, min, max, step, value, onChange, tone
   )
 }
 
-function HalfHeader({ icon: Icon, kicker, title, blurb, tone }: { icon: LucideIcon; kicker: string; title: string; blurb: string; tone: Tone }) {
+function HalfHeader({ icon: Icon, title, blurb, tone }: { icon: LucideIcon; title: string; blurb: string; tone: Tone }) {
   const color = tone === 'navy' ? 'text-primary' : 'text-accent'
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex items-start gap-3">
+      <div className="flex items-center gap-3">
         <span className={`grid size-10 shrink-0 place-items-center rounded-lg ${tone === 'navy' ? 'bg-primary/10' : 'bg-accent/10'} ${color}`} aria-hidden="true"><Icon className="size-5" /></span>
-        <div className="flex flex-col">
-          <p className={`text-xs font-semibold uppercase tracking-[0.08em] ${color}`}>{kicker}</p>
-          <h3 className="text-lg font-bold text-foreground md:text-xl">{title}</h3>
-        </div>
+        <h3 className="text-lg font-bold text-foreground md:text-xl">{title}</h3>
       </div>
       <p className="text-sm leading-relaxed text-muted-foreground">{blurb}</p>
     </div>
@@ -120,7 +117,7 @@ function CombinedOpportunity() {
         <div className="w-full overflow-hidden rounded-2xl border border-border bg-card text-left shadow-[0_1px_2px_rgb(15_23_42/.04),0_24px_48px_-28px_rgb(15_23_42/.3)]">
           <div className="grid grid-cols-1 lg:grid-cols-2">
             <div className="flex flex-col gap-6 border-b border-border p-6 md:p-8 lg:border-b-0 lg:border-r">
-              <HalfHeader icon={RotateCcw} kicker="Workflow 01" title="Patient Reactivation" tone="accent"
+              <HalfHeader icon={RotateCcw} title="Patient Reactivation" tone="accent"
                 blurb="Your team calls inactive patients with a guided script and brings them back for care." />
               <SliderField id="bty-inactive" label="How many inactive patient files do you have?"
                 display={`${inactiveCount.toLocaleString('en-US')}${inactiveCount >= INACTIVE_MAX ? '+' : ''}`}
@@ -130,11 +127,11 @@ function CombinedOpportunity() {
               <div className="mt-auto flex flex-col gap-1 rounded-lg bg-accent/10 px-5 py-5">
                 <p className="text-sm font-medium text-muted-foreground">Estimated additional annual revenue</p>
                 <p className="text-3xl font-bold tabular-nums text-accent md:text-4xl" aria-live="polite">{formatMoney(reactivationRevenue)}</p>
-                <p className="text-sm text-muted-foreground">from roughly {reactivated.toLocaleString('en-US')} returning patients, using an illustrative 5% rate</p>
+                <p className="min-h-10 text-sm text-muted-foreground">from roughly {reactivated.toLocaleString('en-US')} returning patients, using an illustrative 5% rate</p>
               </div>
             </div>
             <div className="flex flex-col gap-6 p-6 md:p-8">
-              <HalfHeader icon={Megaphone} kicker="Workflow 02" title="Lead Follow-Up" tone="navy"
+              <HalfHeader icon={Megaphone} title="Lead Follow-Up" tone="navy"
                 blurb="New inquiries from your ads and website get called quickly, with a script built for your campaign." />
               <SliderField id="bty-leads" label="How many additional new patients could better follow-up bring in each month?"
                 display={`${leadsPerMonth}${leadsPerMonth >= LEADS_MAX ? '+' : ''} / mo`}
@@ -144,7 +141,7 @@ function CombinedOpportunity() {
               <div className="mt-auto flex flex-col gap-1 rounded-lg bg-primary/[0.07] px-5 py-5">
                 <p className="text-sm font-medium text-muted-foreground">Estimated additional annual revenue</p>
                 <p className="text-3xl font-bold tabular-nums text-primary md:text-4xl" aria-live="polite">{formatMoney(leadRevenue)}</p>
-                <p className="text-sm text-muted-foreground">from {leadPatientsPerYear.toLocaleString('en-US')} additional new patients over 12 months</p>
+                <p className="min-h-10 text-sm text-muted-foreground">from {leadPatientsPerYear.toLocaleString('en-US')} additional new patients over 12 months</p>
               </div>
             </div>
           </div>
