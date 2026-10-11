@@ -50,3 +50,9 @@ The user selected Supabase's native scheduler for five-minute internal-sales wak
 
 **How to apply:** Keep the independent database wakeup, secure its bearer in Vault, and require a healthy published-worker wake before activating automation. Do not replace it with an in-process-only timer or another provider without approval.
 
+
+Manual staff texts may be sent from preview (same DB and GHL account as production) and must not require the GHL contact/conversation to be assigned to the salesperson; the user found those gates needlessly complicated ("You just need to fix it for us"). The sender profile falls back to the sender's own or the only active host.
+
+**Why:** The user wants to text leads directly from the portal without extra setup steps.
+
+**How to apply:** Keep consent, opt-out/DND, 8 AM–8 PM, phone identity, sender binding (one Settings checkbox) and no-blind-resend. Automatic texts/emails stay off unless deliberately enabled. Contact info on the lead page is read-only with an Edit button, not always-editable fields.

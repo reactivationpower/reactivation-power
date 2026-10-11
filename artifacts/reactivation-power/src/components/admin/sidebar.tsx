@@ -75,7 +75,7 @@ export function AdminSidebar({ admin }: { admin: AdminIdentity | null }) {
     .filter((group) => group.items.length > 0)
 
   return (
-    <aside className="flex w-64 shrink-0 flex-col border-r border-border bg-sidebar">
+    <aside className="flex h-full w-64 shrink-0 flex-col border-r border-border bg-sidebar">
       <div className="p-4">
         <div className="flex items-center gap-3 rounded-lg border border-border p-3">
           <img

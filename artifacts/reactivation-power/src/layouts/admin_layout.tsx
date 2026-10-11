@@ -24,7 +24,7 @@ function AdminContent({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-screen">
-      <div className="hidden md:block"><AdminSidebar admin={admin} /></div>
+      <div className="sticky top-0 hidden h-screen shrink-0 md:block"><AdminSidebar admin={admin} /></div>
       <div className="flex min-w-0 flex-1 flex-col">
         <details className="border-b border-border bg-card md:hidden">
           <summary className="cursor-pointer px-4 py-3 text-sm font-semibold">Admin navigation</summary>

@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent } from 'react'
 import { Link } from 'wouter'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { getConversation, refreshConversation, sendMessage, type EmailSnapshot, type InboxChannel, type InboxMessage, type SendState } from '@/app/actions/sales-inbox'
-import { Banner, ErrorBox, Field, Pill, Skeleton, btn, btn2, card, errMsg, fmt, inp } from '@/components/leads/ui'
+import { Banner, ErrorBox, Pill, Skeleton, btn2, card, errMsg, fmt } from '@/components/leads/ui'
 
 export const THREAD_MS = 30000
 export const SMS_MAX = 1600
@@ -19,6 +19,8 @@ function newId() {
 const statusOf = (e: unknown) => (e && typeof e === 'object' && 'status' in e && typeof (e as { status: unknown }).status === 'number' ? (e as { status: number }).status : 0)
 export const isDenied = (e: unknown) => [401, 403].includes(statusOf(e)) || (e instanceof Error && e.message === 'Lead not available to this salesperson')
 
+type View = 'texts' | 'other'
+
 /** Outer wrapper: keyed by leadId so drafts, filters and media state never leak across contacts. */
 export function LeadConversation({ leadId, onBack, embedded = false }: { leadId: string; onBack?: () => void; embedded?: boolean }) {
   return <Thread key={leadId} leadId={leadId} onBack={onBack} embedded={embedded} />
@@ -28,9 +30,9 @@ function Thread({ leadId, onBack, embedded }: { leadId: string; onBack?: () => v
   const qc = useQueryClient()
   const key = conversationKey(leadId)
   const [denied, setDenied] = useState(false)
+  const [view, setView] = useState<View>('texts')
   const q = useQuery({ queryKey: key, queryFn: () => getConversation(leadId), enabled: !denied, retry: (n, e) => !isDenied(e) && n < 2,
     refetchInterval: denied ? false : THREAD_MS, refetchIntervalInBackground: false })
-  const [filter, setFilter] = useState<Record<InboxChannel, boolean>>({ email: true, sms: true, call: true })
   const [syncNote, setSyncNote] = useState<{ kind: 'warn' | 'error'; text: string } | null>(null)
 
   useEffect(() => {
@@ -53,52 +55,128 @@ function Thread({ leadId, onBack, embedded }: { leadId: string; onBack?: () => v
   if (denied) return <section className={card + ' space-y-2'} data-testid="conversation-denied">{back}<h2 className="font-semibold">Conversation not available</h2><p className="text-sm text-muted-foreground">You no longer have access to this lead's conversation. Nothing from it is kept on this screen.</p></section>
   if (q.isLoading) return <div className={card} data-testid="conversation-loading"><Skeleton rows={5} /></div>
   if (!q.data) return <div className={card + ' space-y-3'}>{back}<ErrorBox error={q.error} retry={() => q.refetch()} /></div>
-  const { lead, messages, readiness, contactUrl, historyTruncated, synchronization } = q.data
-  const shown = [...messages].filter((m) => filter[m.channel]).sort((a, b) => +new Date(a.created_at) - +new Date(b.created_at))
-  const stale = q.isError
+  const { lead, messages, readiness, historyTruncated, synchronization } = q.data
+  const texts = messages.filter((m) => m.channel === 'sms').sort((a, b) => +new Date(a.created_at) - +new Date(b.created_at))
+  const other = messages.filter((m) => m.channel !== 'sms')
 
   return (
-    <div className="min-w-0 space-y-4 break-words" data-testid="lead-conversation">
-      <section className={card + ' space-y-3'}>
-        <div className="flex flex-wrap items-start justify-between gap-3">
+    <section className="flex min-w-0 flex-col overflow-hidden rounded-xl border border-border bg-card break-words" data-testid="lead-conversation">
+      <header className="space-y-2 border-b border-border px-4 py-3">
+        {back}
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="min-w-0">
-            {back}
-            <h2 className="text-lg font-semibold" data-testid="text-thread-name">{embedded ? 'Conversation' : `${lead.first_name} ${lead.last_name}`}</h2>
-            <p className="break-all text-sm text-muted-foreground">{[lead.email, lead.phone].filter(Boolean).join(' · ') || 'No contact details'}</p>
-            {!embedded && <Link href={`/admin/leads/${encodeURIComponent(lead.id)}`} className="text-sm text-muted-foreground hover:underline" data-testid="link-lead-detail">Open lead record</Link>}
+            <h2 className="truncate font-semibold" data-testid="text-thread-name">{lead.first_name} {lead.last_name}</h2>
+            <p className="truncate text-xs text-muted-foreground">{lead.phone || 'No phone number'}</p>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <button className={btn2} disabled={refresh.isPending} onClick={() => refresh.mutate()} data-testid="button-refresh-thread">{refresh.isPending ? 'Refreshing...' : 'Refresh'}</button>
-            {!embedded && (contactUrl ? <a href={contactUrl} target="_blank" rel="noopener noreferrer" className={btn2} data-testid="link-thread-call">Call in GoHighLevel</a>
-              : <button className={btn2} disabled title="No GoHighLevel contact is linked yet">Call in GoHighLevel</button>)}
+          <div className="flex items-center gap-2">
+            <div className="inline-flex rounded-lg bg-muted p-0.5" role="tablist" aria-label="Conversation type">
+              {([['texts', `Texts${texts.length ? ` (${texts.length})` : ''}`], ['other', `Emails & calls${other.length ? ` (${other.length})` : ''}`]] as const).map(([v, l]) => (
+                <button key={v} type="button" role="tab" aria-selected={view === v} onClick={() => setView(v)} data-testid={`tab-conversation-${v}`}
+                  className={`rounded-md px-3 py-1 text-sm font-medium transition-colors ${view === v ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}>{l}</button>
+              ))}
+            </div>
+            <button className={btn2 + ' px-2.5 py-1.5'} disabled={refresh.isPending} onClick={() => refresh.mutate()} data-testid="button-refresh-thread" title="Check GoHighLevel for new messages">{refresh.isPending ? 'Refreshing...' : 'Refresh'}</button>
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Filter channels">
-          <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Show</span>
-          {(Object.keys(CH_LABEL) as InboxChannel[]).map((c) => (
-            <button key={c} type="button" aria-pressed={filter[c]} onClick={() => setFilter({ ...filter, [c]: !filter[c] })} data-testid={`filter-${c}`}
-              className={`rounded-full border px-3 py-1 text-sm font-medium transition-colors ${filter[c] ? 'border-primary bg-primary text-primary-foreground' : 'border-input bg-card hover:bg-muted'}`}>{CH_LABEL[c]}</button>
-          ))}
-          {q.isFetching && <span className="text-xs text-muted-foreground">Updating...</span>}
-        </div>
-        <p className="text-xs text-muted-foreground" data-testid="text-sync-time">Last updated {fmt(new Date(q.dataUpdatedAt).toISOString())}. Updates every 30 seconds while open. Calls are placed in GoHighLevel, never from this browser.</p>
-        {stale && <Banner kind="warn"><span data-testid="banner-stale">Could not update: {errMsg(q.error)}. Showing the last loaded history; drafts are kept.</span></Banner>}
-        {synchronization && synchronization.state !== 'current' && <Banner kind="warn"><span data-testid="banner-provider-sync">{synchronization.reason || 'Provider refresh is delayed; showing saved history.'}</span></Banner>}
+        {!embedded && <Link href={`/admin/leads/${encodeURIComponent(lead.id)}`} className="text-xs text-muted-foreground hover:underline" data-testid="link-lead-detail">Open lead record</Link>}
+        {q.isError && <Banner kind="warn"><span data-testid="banner-stale">Could not update: {errMsg(q.error)}. Showing the last loaded messages; your draft is kept.</span></Banner>}
+        {synchronization && synchronization.state !== 'current' && synchronization.state !== 'throttled' && <Banner kind="warn"><span data-testid="banner-provider-sync">{synchronization.reason || 'Could not reach GoHighLevel; showing saved messages.'}</span></Banner>}
         {syncNote && <Banner kind={syncNote.kind}><span data-testid="banner-sync">{syncNote.text}</span></Banner>}
-      </section>
+      </header>
+      {view === 'texts'
+        ? <TextThread leadId={leadId} texts={texts} ready={readiness.sms} reasons={readiness.reasons} to={lead.phone} />
+        : <OtherActivity messages={other} truncated={!!historyTruncated} />}
+      <p className="sr-only" aria-live="polite">{q.isFetching ? 'Updating messages' : ''}</p>
+    </section>
+  )
+}
 
-      <section className={card} aria-label="Messages" data-testid="section-thread">
-        {historyTruncated && <p className="mb-3 text-xs text-muted-foreground" data-testid="text-history-truncated">Older history is not shown. GoHighLevel has additional provider text and call history; automated email history is stored separately.</p>}
-        {shown.length === 0 ? <p className="text-sm text-muted-foreground" data-testid="text-thread-empty">{messages.length === 0 ? 'No messages or calls recorded for this lead yet.' : 'Nothing matches the selected channels.'}</p> : (
-          <ol className="max-h-[32rem] space-y-3 overflow-y-auto">{shown.map((m) => <MessageRow key={m.id} m={m} />)}</ol>
+const dayKey = (iso: string) => new Date(iso).toDateString()
+function dayLabel(iso: string) {
+  const d = new Date(iso), today = new Date(), y = new Date(); y.setDate(today.getDate() - 1)
+  if (d.toDateString() === today.toDateString()) return 'Today'
+  if (d.toDateString() === y.toDateString()) return 'Yesterday'
+  return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', ...(d.getFullYear() !== today.getFullYear() ? { year: 'numeric' } : {}) })
+}
+const timeOf = (iso: string) => new Date(iso).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+function textStatus(m: InboxMessage): { label: string; bad?: boolean } | null {
+  if (m.direction !== 'outbound') return null
+  const s = String(m.canonical_status ?? m.status ?? '')
+  if (s === 'delivered') return { label: 'Delivered' }
+  if (s === 'read') return { label: 'Read' }
+  if (s === 'failed') return { label: 'Not delivered', bad: true }
+  if (s === 'uncertain') return { label: 'May not have sent — check GoHighLevel', bad: true }
+  if (s === 'sending' || s === 'pending') return { label: 'Sending…' }
+  if (s === 'accepted' || s === 'sent') return { label: 'Sent' }
+  return null
+}
+const cleanBody = (b: string | null) => (b ?? '').replace(/\n\[[^\]]*\]$/, '')
+
+function TextThread({ leadId, texts, ready, reasons, to }: { leadId: string; texts: InboxMessage[]; ready: boolean; reasons: string[]; to: string | null }) {
+  const scroller = useRef<HTMLDivElement>(null)
+  const nearBottom = useRef(true)
+  const lastCount = useRef(0)
+  useLayoutEffect(() => {
+    const el = scroller.current
+    if (!el) return
+    // Jump to the newest message on open and when new ones arrive, unless the user scrolled up to read.
+    if (lastCount.current === 0 || nearBottom.current) el.scrollTop = el.scrollHeight
+    lastCount.current = texts.length
+  }, [texts.length])
+  return (
+    <>
+      <div ref={scroller} onScroll={(e) => { const el = e.currentTarget; nearBottom.current = el.scrollHeight - el.scrollTop - el.clientHeight < 80 }}
+        className="h-[28rem] overflow-y-auto bg-muted/30 px-3 py-4 sm:px-4 lg:h-[calc(100vh-22rem)] lg:min-h-[24rem]" aria-label="Text messages" data-testid="section-thread">
+        {texts.length === 0 ? (
+          <div className="flex h-full items-center justify-center text-center"><p className="text-sm text-muted-foreground" data-testid="text-thread-empty">No texts yet. Send the first one below.</p></div>
+        ) : (
+          <ol className="space-y-1">
+            {texts.map((m, i) => {
+              const out = m.direction === 'outbound'
+              const prev = texts[i - 1], next = texts[i + 1]
+              const newDay = !prev || dayKey(prev.created_at) !== dayKey(m.created_at)
+              const lastOfRun = !next || next.direction !== m.direction || dayKey(next.created_at) !== dayKey(m.created_at)
+              const st = textStatus(m)
+              return (
+                <li key={m.id} data-testid={`message-${m.id}`}>
+                  {newDay && <p className="py-3 text-center text-xs font-medium text-muted-foreground">{dayLabel(m.created_at)}</p>}
+                  <div className={`flex ${out ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-[80%] whitespace-pre-wrap rounded-2xl px-3.5 py-2 text-sm leading-relaxed sm:max-w-[70%] ${out ? 'bg-primary text-primary-foreground' : 'border border-border bg-card text-foreground'} ${lastOfRun ? (out ? 'rounded-br-md' : 'rounded-bl-md') : ''}`}
+                      title={fmt(m.created_at)}>{cleanBody(m.body) || <span className="italic opacity-70">(no text)</span>}</div>
+                  </div>
+                  {lastOfRun && (
+                    <p className={`mt-1 mb-2 px-1 text-[11px] text-muted-foreground ${out ? 'text-right' : 'text-left'}`}>
+                      {out && m.source === 'appointment' ? 'Automatic reminder · ' : out && m.author_name ? `${m.author_name} · ` : ''}{timeOf(m.created_at)}
+                      {st && <span className={st.bad ? 'font-medium text-destructive' : ''}> · {st.label}</span>}
+                    </p>
+                  )}
+                </li>
+              )
+            })}
+          </ol>
         )}
-      </section>
+      </div>
+      <SmsComposer leadId={leadId} ready={ready} reasons={reasons} to={to} />
+    </>
+  )
+}
 
-      {readiness.reasons.length > 0 && (
-        <Banner kind="warn"><p className="font-medium">Some sending is blocked</p><ul className="mt-1 list-disc pl-5">{readiness.reasons.map((r, i) => <li key={i}>{r}</li>)}</ul></Banner>
+function OtherActivity({ messages, truncated }: { messages: InboxMessage[]; truncated: boolean }) {
+  const [filter, setFilter] = useState<Record<'email' | 'call', boolean>>({ email: true, call: true })
+  const shown = messages.filter((m) => m.channel !== 'sms' && filter[m.channel]).sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at))
+  return (
+    <div className="space-y-3 p-4">
+      <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Filter">
+        {(['email', 'call'] as const).map((c) => (
+          <button key={c} type="button" aria-pressed={filter[c]} onClick={() => setFilter({ ...filter, [c]: !filter[c] })} data-testid={`filter-${c}`}
+            className={`rounded-full border px-3 py-1 text-sm font-medium transition-colors ${filter[c] ? 'border-primary bg-primary text-primary-foreground' : 'border-input bg-card hover:bg-muted'}`}>{c === 'email' ? 'Emails' : 'Calls'}</button>
+        ))}
+      </div>
+      {truncated && <p className="text-xs text-muted-foreground" data-testid="text-history-truncated">Older history is not shown here. GoHighLevel has the full history.</p>}
+      {shown.length === 0 ? <p className="py-8 text-center text-sm text-muted-foreground" data-testid="text-other-empty">{messages.length === 0 ? 'No emails or calls yet.' : 'Nothing matches the selected filters.'}</p> : (
+        <ol className="max-h-[36rem] space-y-3 overflow-y-auto">{shown.map((m) => <MessageRow key={m.id} m={m} />)}</ol>
       )}
-      <SmsComposer leadId={leadId} ready={readiness.sms} to={lead.phone} />
-      <p className="text-xs text-muted-foreground" data-testid="external-reply-warning">Email replies are read in the external Reply-To mailbox, not here. An external email reply does not automatically stop portal outreach; staff must update the lead before further contact.</p>
+      <p className="text-xs text-muted-foreground" data-testid="external-reply-warning">Email replies go to the reply-to mailbox, not here. An email reply does not automatically stop portal outreach, so update the lead if they respond.</p>
     </div>
   )
 }
@@ -106,7 +184,7 @@ function Thread({ leadId, onBack, embedded }: { leadId: string; onBack?: () => v
 function statusLabel(m: InboxMessage) {
   const s = m.canonical_status ?? m.status
   if (!s) return null
-  return s === 'sent' || s === 'accepted' ? 'accepted by provider' : s
+  return s === 'sent' || s === 'accepted' ? 'sent' : s
 }
 
 function MessageRow({ m }: { m: InboxMessage }) {
@@ -220,53 +298,69 @@ export function CallMediaPanel({ detailsUrl, id }: { detailsUrl: string; id: str
 
 type Outcome = { state: SendState | 'error'; error?: string } | null
 
-export function SmsComposer({ leadId, ready, to }: { leadId: string; ready: boolean; to: string | null }) {
+export function SmsComposer({ leadId, ready, reasons = [], to }: { leadId: string; ready: boolean; reasons?: string[]; to: string | null }) {
   const qc = useQueryClient()
   const [body, setBody] = useState('')
   const [outcome, setOutcome] = useState<Outcome>(null)
+  const box = useRef<HTMLTextAreaElement>(null)
   // Same payload reuses the same requestId (safe retry); any change gets a new one.
   const pending = useRef<{ payload: string; requestId: string } | null>(null)
   const send = useMutation({
     mutationFn: (input: Parameters<typeof sendMessage>[0]) => sendMessage(input),
     onSuccess: (r) => {
       const accepted = r.state === 'sent' || r.canonical_state === 'accepted'
-      setOutcome(accepted ? { state: 'sent' } : r)
-      if (accepted) { setBody(''); pending.current = null; toast.success('Text accepted by provider') }
+      setOutcome(accepted ? null : r)
+      if (accepted) { setBody(''); pending.current = null; toast.success('Text sent') }
       qc.invalidateQueries({ queryKey: conversationKey(leadId) })
       qc.invalidateQueries({ queryKey: ['sales-leads'] })
     },
     onError: (e) => setOutcome({ state: 'error', error: errMsg(e) }),
   })
+  useLayoutEffect(() => {
+    const el = box.current
+    if (!el) return
+    el.style.height = 'auto'
+    el.style.height = `${Math.min(el.scrollHeight, 160)}px`
+  }, [body])
   const len = body.trim().length
   const over = len > SMS_MAX
   const canSend = ready && !!to && len > 0 && !over && !send.isPending
   const submit = () => {
+    if (!canSend) return
     const payload = body.trim()
     if (!pending.current || pending.current.payload !== payload) pending.current = { payload, requestId: newId() }
     setOutcome(null)
     send.mutate({ leadId, channel: 'sms', body: payload, requestId: pending.current.requestId })
   }
+  const onKey = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); submit() }
+  }
   return (
-    <section className={card + ' min-w-0 space-y-3'} data-testid="composer-sms">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h3 className="font-semibold">Text</h3>
-        <Pill tone={ready ? 'bg-success/15 text-success' : 'bg-yellow-500/15'}>{ready ? 'Ready' : 'Blocked'}</Pill>
+    <div className="space-y-2 border-t border-border p-3" data-testid="composer-sms">
+      {!ready && (
+        <div className="rounded-lg border border-yellow-500/40 bg-yellow-500/10 px-3 py-2 text-sm" role="status" data-testid="sms-blocked">
+          <p className="font-medium">You can’t text this lead yet:</p>
+          <ul className="mt-0.5 list-disc pl-5">{(reasons.length ? reasons : ['Texting is not available.']).map((r, i) => <li key={i}>{r}</li>)}</ul>
+        </div>
+      )}
+      <div className="flex items-end gap-2">
+        <label className="sr-only" htmlFor={`sms-${leadId}`}>Text message</label>
+        <textarea id={`sms-${leadId}`} ref={box} rows={1} value={body} onChange={(e) => setBody(e.target.value)} onKeyDown={onKey}
+          placeholder={ready ? 'Text message' : 'Texting is blocked'} data-testid="input-sms-body"
+          className="max-h-40 min-h-[2.5rem] flex-1 resize-none rounded-2xl border border-input bg-card px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-ring disabled:opacity-60" />
+        <button type="button" className="inline-flex h-10 shrink-0 items-center justify-center rounded-full bg-primary px-5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+          disabled={!canSend} onClick={submit} data-testid="button-send-sms">
+          {send.isPending ? 'Sending…' : outcome && (outcome.state === 'error' || outcome.state === 'failed') ? 'Try again' : 'Send'}
+        </button>
       </div>
-      <p className="break-all text-xs text-muted-foreground">To: {to || 'no phone on file'}</p>
-      <Field label="Message" hint={`Plain text only. ${len}/${SMS_MAX} characters.`}>
-        <textarea rows={4} className={inp} value={body} maxLength={SMS_MAX + 200} disabled={!ready || send.isPending} aria-invalid={over}
-          onChange={(e) => { setBody(e.target.value); if (outcome?.state === 'sent') setOutcome(null) }} data-testid="input-sms-body" />
-      </Field>
-      {over && <p className="text-xs text-destructive" data-testid="text-sms-over">Texts are limited to {SMS_MAX} characters.</p>}
-      <button className={btn} disabled={!canSend} onClick={submit} data-testid="button-send-sms">
-        {send.isPending ? 'Sending...' : outcome && outcome.state !== 'sent' && outcome.state !== 'sending' ? 'Try text again' : 'Send text'}
-      </button>
-      {!ready && <p className="text-xs text-muted-foreground">Texting is blocked. See the reasons above.</p>}
-      {outcome?.state === 'sent' && <Banner kind="ok">Accepted by the provider. This does not confirm delivery.</Banner>}
-      {outcome?.state === 'sending' && <Banner kind="info">Still sending. Check the thread shortly before trying again.</Banner>}
-      {outcome?.state === 'uncertain' && <Banner kind="warn">The result is uncertain. It may have been sent. Check the thread before trying again; nothing is resent automatically.{outcome.error ? ` ${outcome.error}` : ''}</Banner>}
-      {outcome?.state === 'failed' && <Banner kind="error">Not sent{outcome.error ? `: ${outcome.error}` : '.'} Your draft is kept.</Banner>}
-      {outcome?.state === 'error' && <Banner kind="error"><span data-testid="banner-send-error">Could not reach the server: {outcome.error}. Your draft is kept. Trying again with the same message is safe.</span></Banner>}
-    </section>
+      <div className="flex justify-between gap-2 px-1 text-[11px] text-muted-foreground">
+        <span>Sent from your GoHighLevel number{to ? ` to ${to}` : ''}. Enter sends · Shift+Enter for a new line.</span>
+        {len > 140 && <span className={over ? 'font-medium text-destructive' : ''} data-testid={over ? 'text-sms-over' : 'text-sms-count'}>{len}/{SMS_MAX}</span>}
+      </div>
+      {outcome?.state === 'sending' && <Banner kind="info">Still sending. Check the thread in a moment before trying again.</Banner>}
+      {outcome?.state === 'uncertain' && <Banner kind="warn">We’re not sure this text went out. Check GoHighLevel before sending it again.{outcome.error ? ` ${outcome.error}` : ''}</Banner>}
+      {outcome?.state === 'failed' && <Banner kind="error">Not sent{outcome.error ? `: ${outcome.error}` : '.'} Your message is kept.</Banner>}
+      {outcome?.state === 'error' && <Banner kind="error"><span data-testid="banner-send-error">Not sent: {outcome.error}. Your message is kept, so you can try again.</span></Banner>}
+    </div>
   )
 }

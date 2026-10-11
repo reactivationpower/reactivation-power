@@ -73,8 +73,8 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('unified inbox isolated persistenc
     await expect(updateSalesLead('other',{revision:lead.revision,assigneeId:'admin'})).rejects.toThrow('Only a super admin')
     expect((await f.pool.query("SELECT assignee_id FROM sales_leads WHERE id='other'")).rows[0].assignee_id).toBe('someone-else')
   })
-  it('blocks preview, quiet hours, lack of consent, opt-out, mismatched phone and conversation ownership',async()=>{
-    vi.stubEnv('NODE_ENV','development');await expect(sendMessage(message())).rejects.toThrow('preview')
+  it('allows preview sends but blocks quiet hours, lack of consent, opt-out and mismatched phone',async()=>{
+    vi.stubEnv('NODE_ENV','development');expect((await sendMessage(message())).state).toBe('sent');f.provider.mockClear()
     vi.stubEnv('NODE_ENV','production');vi.setSystemTime(new Date('2026-10-12T02:00Z'));await expect(sendMessage(message())).rejects.toThrow('8 AM')
     vi.setSystemTime(new Date('2026-10-12T14:00Z'))
     await f.pool.query("UPDATE sales_leads SET consent=false WHERE id='lead'");await expect(sendMessage(message())).rejects.toThrow('consent')
@@ -83,7 +83,6 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('unified inbox isolated persistenc
     await expect(sendMessage(message())).rejects.toThrow('opted out')
     f.contact.mockResolvedValueOnce({id:'contact',locationId:process.env.GHL_LOCATION_ID,phone:'+12125550999'})
     await expect(sendMessage(message())).rejects.toThrow('identity')
-    f.threads.mockResolvedValue([{assignedTo:'wrong'}]);await expect(sendMessage(message())).rejects.toThrow('Assign')
     expect(f.provider).not.toHaveBeenCalled()
   })
   it('never automatically replays an uncertain provider send',async()=>{
@@ -92,11 +91,14 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('unified inbox isolated persistenc
     expect((await sendMessage(input)).state).toBe('uncertain');expect((await sendMessage(input)).state).toBe('uncertain')
     expect(f.provider).toHaveBeenCalledTimes(1)
   })
-  it('supports first SMS only with verified contact ownership and explicit sender',async()=>{
-    f.threads.mockResolvedValue([])
-    expect(await sendMessage(message())).toMatchObject({state:'sent',canonical_state:'accepted'})
+  it('sends without requiring GHL contact reassignment and uses the only sender profile for unassigned leads',async()=>{
     f.contact.mockResolvedValue({...await f.contact(),assignedTo:'other'})
-    await expect(sendMessage(message())).rejects.toThrow('Assign')
+    expect(await sendMessage(message())).toMatchObject({state:'sent',canonical_state:'accepted'})
+    expect(f.provider).not.toHaveBeenCalledWith(expect.stringContaining('/contacts/'),'PUT',expect.anything())
+    await f.pool.query("UPDATE sales_leads SET assignee_id=NULL WHERE id='lead'")
+    f.admin={userId:'owner',role:'super_admin',name:'Owner'};f.provider.mockResolvedValue({messageId:'provider-sms-2'})
+    expect(await sendMessage(message())).toMatchObject({state:'sent'})
+    expect((await getConversation('lead')).readiness).toMatchObject({sms:true,reasons:[]})
   })
   it('does not silently switch the configured sender',async()=>{
     f.sender.mockResolvedValue('+12125550001')

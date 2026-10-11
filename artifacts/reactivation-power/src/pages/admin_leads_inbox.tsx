@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { listInbox } from '@/app/actions/sales-inbox'
 import { Empty, ErrorBox, Field, LeadsTabs, Skeleton, btn2, fmt, inp } from '@/components/leads/ui'
 import { LeadConversation } from '@/components/leads/conversation'
+import { LeadContactPanel } from '@/components/leads/contact-panel'
 
 const PAGE_SIZE = 25
 
@@ -21,9 +22,9 @@ export default function AdminLeadsInboxPage() {
 
   return (
     <div className="space-y-6">
-      <header><h1 className="text-2xl font-semibold">Leads</h1><p className="mt-1 text-sm text-muted-foreground">Automated email snapshots, two-way texts and call records together. Texts are sent here; email replies go to jacobb@patientpipeline.app and are read in that mailbox.</p></header>
+      <header><h1 className="text-2xl font-semibold">Leads</h1><p className="mt-1 text-sm text-muted-foreground">Text your leads here. Their replies show up in the thread.</p></header>
       <LeadsTabs />
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)]">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,18rem)_minmax(0,1fr)] xl:grid-cols-[minmax(0,17rem)_minmax(0,1fr)_minmax(0,20rem)]">
         <aside className={`min-w-0 space-y-3 ${selected ? 'hidden lg:block' : ''}`} aria-label="Conversations">
           <Field label="Search leads"><input type="search" className={inp} value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Name, practice, email or phone" data-testid="input-inbox-search" /></Field>
           {list.isLoading ? <Skeleton rows={6} /> : list.isError || !list.data ? <ErrorBox error={list.error} retry={() => list.refetch()} /> : list.data.leads.length === 0 ? (
@@ -51,8 +52,9 @@ export default function AdminLeadsInboxPage() {
           )}
         </aside>
         <main className={`min-w-0 ${selected ? '' : 'hidden lg:block'}`}>
-          {selected ? <LeadConversation leadId={selected} onBack={() => select(null)} /> : <Empty title="Select a conversation" body="Choose a lead to see email, texts and calls in one place." />}
+          {selected ? <LeadConversation leadId={selected} onBack={() => select(null)} /> : <Empty title="Pick a lead" body="Choose a lead on the left to see and send texts." />}
         </main>
+        {selected && <aside className="min-w-0 lg:col-start-2 xl:col-start-auto" aria-label="Contact info"><LeadContactPanel key={selected} leadId={selected} /></aside>}
       </div>
     </div>
   )

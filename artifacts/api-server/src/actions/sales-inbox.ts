@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto'
 import { pool } from '@workspace/db'
 import { requireAdmin } from '@/lib/auth/admin-session'
 import { inboxSettings, SALES_REPLY_TO } from '@/lib/sales-inbox/store'
-import { contact, contactUrl, conversations, provider, SalesProviderError, smsSender } from '@/lib/sales-leads/provider'
+import { contact, contactUrl, provider, SalesProviderError, smsSender } from '@/lib/sales-leads/provider'
 import { refreshLeadMessages } from '@/lib/sales-leads/ingestion'
 import { canonicalSmsStatus } from '@/lib/sales-inbox/status'
 import { smsAllowed } from '@/lib/appointment-messages/schedule'
@@ -38,27 +38,35 @@ export async function listInbox(input: {query?:string;page?:number} = {}) {
   ])
   return {leads:rows.rows,total:Number(count.rows[0].count)}
 }
-async function readiness(lead:any) {
+/** Host for a manual text: lead owner's profile, else the sender's own, else the only active profile. */
+async function textingHost(q:{query:(sql:string,args?:any[])=>Promise<any>}, lead:any, adminId:string) {
+  for (const id of [lead.assignee_id, adminId].filter(Boolean)) {
+    const rows=(await q.query('SELECT * FROM appointment_hosts WHERE admin_id=$1 AND active=true',[id])).rows
+    if(rows.length===1) return rows[0]
+    if(rows.length>1) return null
+  }
+  const all=(await q.query('SELECT * FROM appointment_hosts WHERE active=true')).rows
+  return all.length===1 ? all[0] : null
+}
+async function readiness(lead:any, adminId:string) {
   const cfg = await inboxSettings(), reasons:string[]=[]
-  const host = (await pool.query('SELECT * FROM appointment_hosts WHERE admin_id=$1 AND active=true',[lead.assignee_id])).rows
-  if(host.length!==1) reasons.push('Assign this lead to a salesperson with exactly one active GHL host profile in Leads Settings.')
+  const host = await textingHost(pool, lead, adminId)
+  if(!host) reasons.push('Add a sender profile in Leads → Settings.')
   if(lead.dnd || lead.stage==='Lost/Do Not Contact') reasons.push('This lead is marked do not contact.')
-  if(!cfg.sms_ready) reasons.push('SMS sending readiness has not been confirmed in inbox settings.')
   const capabilities=(await pool.query("SELECT capabilities FROM sales_settings WHERE id='internal'")).rows[0]?.capabilities
   const senderConfirmed=capabilities?.portal_sms_sender?.locationId===process.env.GHL_LOCATION_ID && !!capabilities?.portal_sms_sender?.number
-  if(!senderConfirmed) reasons.push('Reconfirm inbox SMS readiness to bind the existing GHL number. API access alone does not verify A2P or sending permission.')
-  if(!lead.consent) reasons.push('Documented SMS consent is required.')
+  if(!cfg.sms_ready || !senderConfirmed) reasons.push('Turn on texting once in Leads → Settings (check the box and save).')
+  if(!lead.consent) reasons.push('This lead has not agreed to receive texts.')
+  if(!lead.ghl_contact_id) reasons.push('This lead is still syncing with GoHighLevel.')
   const zone = ['staff','browser'].includes(lead.timezone_origin) ? lead.timezone : null
-  if(!smsAllowed(new Date(),zone)) reasons.push('Texting requires a verified recipient timezone and the 8 AM–8 PM local window.')
-  const base = host.length===1 && !lead.dnd && lead.stage!=='Lost/Do Not Contact'
+  if(!smsAllowed(new Date(),zone)) reasons.push(zone ? 'Texts can only go out 8 AM–8 PM in the lead’s time zone.' : 'Set the lead’s time zone first.')
   return { email:false, emailReason:'Manual email is not supported; historical automated email remains available.',
-    sms:!!(base&&cfg.sms_ready&&senderConfirmed&&lead.consent&&lead.ghl_contact_id&&smsAllowed(new Date(),zone)&&process.env.NODE_ENV==='production'),
-    reasons:[...reasons,...(process.env.NODE_ENV!=='production'?['Preview does not send live messages. Publish and complete readiness checks first.']:[])] }
+    sms:reasons.length===0, reasons }
 }
 export async function getConversation(leadId:string) {
   await accessible(leadId)
   const synchronization = await refreshLeadMessages(leadId)
-  const {lead} = await accessible(leadId)
+  const {admin,lead} = await accessible(leadId)
   const [local,external,appointments,ready,emailHistory] = await Promise.all([
     pool.query(`SELECT m.*,COALESCE(e.status,a.status,m.state) AS status,m.error FROM sales_inbox_messages m
       LEFT JOIN email_log e ON e.id=m.email_log_id
@@ -72,7 +80,7 @@ export async function getConversation(leadId:string) {
       LEFT JOIN LATERAL (SELECT status FROM sales_activities WHERE provider_id=d.provider_id AND lead_id=a.lead_id AND kind='outbound_sms'
         ORDER BY occurred_at DESC LIMIT 1) p ON true
       WHERE a.lead_id=$1 AND d.channel='sms' AND d.snapshot IS NOT NULL ORDER BY d.due_at DESC LIMIT 200`,[leadId]),
-    readiness(lead),
+    readiness(lead,admin.userId),
     listAppointmentEmailHistory(leadId),
   ])
   const messages = [
@@ -126,35 +134,30 @@ export async function sendMessage(input:unknown) {
       if(existing.fingerprint!==fingerprint) throw new Error('This request ID already belongs to another message')
       return {state:['accepted','sent','delivered','read'].includes(existing.state)?'sent':existing.state,canonical_state:existing.state,error:existing.error}
     }
-    if(process.env.NODE_ENV!=='production') throw new Error('Live sending is disabled in preview')
+    // Manual texts are explicit staff actions, so preview may send them too
+    // (same database and GoHighLevel account as the published app).
     const cfg=await inboxSettings(c)
     const capabilities=(await c.query("SELECT capabilities FROM sales_settings WHERE id='internal'")).rows[0]?.capabilities
     if(Date.parse(capabilities?.sync_rate_limit?.until)>Date.now()) throw new Error('Provider is rate limited; try again after the cooldown')
     if(lead.dnd||lead.stage==='Lost/Do Not Contact') throw new Error('This lead is marked do not contact')
-    const hosts=(await c.query('SELECT * FROM appointment_hosts WHERE admin_id=$1 AND active=true',[lead.assignee_id])).rows
-    if(hosts.length!==1) throw new Error('Assigned salesperson needs one verified host profile')
-    const host=hosts[0]
+    const host=await textingHost(c,lead,admin.userId)
+    if(!host) throw new Error('Add a sender profile in Leads → Settings first')
     const staff=await getAdminUserById(host.admin_id)
     if(!staff?.active||!staff.confirmedAt) throw new Error('Assigned salesperson must have an active, verified account')
     let fromNumber:string
     {
-      if(!cfg.sms_ready) throw new Error('Confirm SMS readiness first')
+      if(!cfg.sms_ready) throw new Error('Turn on texting in Leads → Settings first')
       if(!lead.consent) throw new Error('Documented SMS consent is required')
       if(!smsAllowed(new Date(),['staff','browser'].includes(lead.timezone_origin)?lead.timezone:null)) throw new Error('Texting is only available 8 AM–8 PM in the verified recipient timezone')
       if(!lead.ghl_contact_id) throw new Error('Contact synchronization must finish first')
       const remote=await contact(lead.ghl_contact_id)
       if(!remote||remote.id!==lead.ghl_contact_id||remote.locationId!==process.env.GHL_LOCATION_ID||
-        String(remote.phone??'').replace(/[^+\d]/g,'')!==lead.phone||!/^\+[1-9]\d{9,14}$/.test(lead.phone)) throw new Error('Contact phone identity needs review')
+        String(remote.phone??'').replace(/[^+\d]/g,'')!==lead.phone||!/^\+[1-9]\d{9,14}$/.test(lead.phone)) throw new Error('The phone number in GoHighLevel does not match this lead (identity check failed)')
       if(remote.dnd||remote.dndSettings?.SMS?.status==='active') throw new Error('Contact has opted out of texts')
-      const threads=await conversations(lead.ghl_contact_id)
-      if(remote.assignedTo!==host.ghl_user_id ||
-        threads.length>1 || (threads.length===1 && (threads[0].assignedTo!==host.ghl_user_id ||
-          threads[0].contactId!==lead.ghl_contact_id || threads[0].locationId!==process.env.GHL_LOCATION_ID)))
-        throw new Error('Assign the GHL contact and conversation to this salesperson before texting')
       fromNumber=await smsSender()
       if(capabilities?.portal_sms_sender?.locationId!==process.env.GHL_LOCATION_ID ||
         capabilities?.portal_sms_sender?.number!==fromNumber)
-        throw new Error('Existing SMS number needs confirmation in inbox settings; sender changed or is not bound')
+        throw new Error('Your GoHighLevel number changed or is not set (sender changed). Re-save texting in Leads → Settings')
     }
     // Commit intent before provider call. Crashes/network uncertainty never trigger blind replay.
     await c.query(`INSERT INTO sales_inbox_messages(id,lead_id,channel,direction,subject,body,author_id,author_name,state,fingerprint)

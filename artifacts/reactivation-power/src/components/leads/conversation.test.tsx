@@ -58,7 +58,9 @@ it('explains that external email replies do not stop outreach and refreshes lead
   api.sendMessage.mockResolvedValue({ state: 'sent', canonical_state: 'accepted' })
   const { qc } = wrap(<LeadConversation leadId="A" />)
   const invalidate = vi.spyOn(qc, 'invalidateQueries')
+  fireEvent.click(await screen.findByTestId('tab-conversation-other'))
   expect((await screen.findByTestId('external-reply-warning')).textContent).toContain('does not automatically stop portal outreach')
+  fireEvent.click(screen.getByTestId('tab-conversation-texts'))
   fireEvent.change(screen.getByTestId('input-sms-body'), { target: { value: 'Synthetic only' } })
   fireEvent.click(screen.getByTestId('button-send-sms'))
   await waitFor(() => expect(invalidate).toHaveBeenCalledWith({ queryKey: ['sales-leads'] }))
@@ -93,14 +95,38 @@ it('drops cached data on authorization loss', async () => {
   await waitFor(() => expect(qc.getQueryData(['sales-inbox', 'conversation', 'A'])).toBeUndefined())
 })
 
-it('filters channels', async () => {
-  api.getConversation.mockResolvedValue(conv('A'))
+it('shows texts as chat bubbles and keeps emails and calls on their own tab', async () => {
+  api.getConversation.mockResolvedValue(conv('A', { messages: [
+    { id: 's1', channel: 'sms', direction: 'inbound', body: 'Synthetic text', status: null, created_at: '2024-01-01T10:00:00Z' },
+    { id: 's2', channel: 'sms', direction: 'outbound', body: 'Our reply', status: 'delivered', canonical_status: 'delivered', created_at: '2024-01-01T10:05:00Z' },
+    { id: 'c1', channel: 'call', direction: 'event', body: 'Call', status: null, created_at: '2024-01-01T11:00:00Z' },
+  ] }))
   wrap(<LeadConversation leadId="A" />)
   await screen.findByText('Synthetic text')
-  fireEvent.click(screen.getByTestId('filter-sms'))
+  expect(screen.getByText('Our reply').className).toContain('bg-primary')
+  expect(screen.getByText('Synthetic text').className).not.toContain('bg-primary')
+  expect(screen.getByText(/Delivered/)).toBeTruthy()
+  expect(screen.queryByTestId('message-c1')).toBeNull()
+  fireEvent.click(screen.getByTestId('tab-conversation-other'))
+  expect(screen.getByTestId('message-c1')).toBeTruthy()
   expect(screen.queryByText('Synthetic text')).toBeNull()
-  fireEvent.click(screen.getByTestId('filter-email')); fireEvent.click(screen.getByTestId('filter-call'))
-  expect(screen.getByTestId('text-thread-empty').textContent).toMatch(/Nothing matches/)
+  fireEvent.click(screen.getByTestId('filter-call'))
+  expect(screen.getByTestId('text-other-empty').textContent).toMatch(/Nothing matches/)
+})
+
+it('sends with Enter and lists plain reasons when texting is blocked', async () => {
+  api.getConversation.mockResolvedValueOnce(conv('A')).mockResolvedValue(conv('A'))
+  api.sendMessage.mockResolvedValue({ state: 'sent', canonical_state: 'accepted' })
+  wrap(<LeadConversation leadId="A" />)
+  const box = await screen.findByTestId('input-sms-body')
+  fireEvent.change(box, { target: { value: 'Hi' } })
+  fireEvent.keyDown(box, { key: 'Enter' })
+  await waitFor(() => expect(api.sendMessage).toHaveBeenCalledTimes(1))
+  cleanup()
+  api.getConversation.mockResolvedValue(conv('B', { readiness: { email: false, sms: false, reasons: ['This lead has not agreed to receive texts.'] } }))
+  wrap(<LeadConversation leadId="B" />)
+  expect((await screen.findByTestId('sms-blocked')).textContent).toContain('not agreed')
+  expect((screen.getByTestId('button-send-sms') as HTMLButtonElement).disabled).toBe(true)
 })
 
 it('shows provider sync failures even when saved history loaded successfully', async () => {
@@ -122,6 +148,7 @@ it('treats ownership denial from the RPC as permission loss, not stale data', as
 it('renders email snapshots in a locked sandbox', async () => {
   api.getConversation.mockResolvedValue(conv('A'))
   wrap(<LeadConversation leadId="A" />)
+  fireEvent.click(await screen.findByTestId('tab-conversation-other'))
   const frame = await screen.findByTestId('iframe-email-e1') as HTMLIFrameElement
   expect(frame.getAttribute('sandbox')).toBe('')
   expect(frame.getAttribute('srcdoc')).toContain("default-src 'none'")
@@ -138,6 +165,7 @@ it('lazy-loads call details and reports honest errors', async () => {
     .mockResolvedValueOnce({ ok: true, status: 200, json: async () => ({ state: 'available', segments: [{ text: 'Synthetic transcript', startMs: 0, channel: 1 }] }) })
   vi.stubGlobal('fetch', fetchMock)
   wrap(<LeadConversation leadId="A" />)
+  fireEvent.click(await screen.findByTestId('tab-conversation-other'))
   await screen.findByTestId('button-call-details-c1')
   expect(fetchMock).not.toHaveBeenCalled()
   fireEvent.click(screen.getByTestId('button-call-details-c1'))
