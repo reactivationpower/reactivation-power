@@ -1,10 +1,13 @@
 import { useCallback, useMemo, useState } from 'react'
+import { useEmbeddedStartHold } from '@/lib/video'
 
 export function useSceneControls(baseDurations: Record<string, number>) {
   const sceneKeys = useMemo(() => Object.keys(baseDurations), [baseDurations])
   const [activeIndex, setActiveIndex] = useState(0)
   const [locked, setLocked] = useState(false)
-  const [paused, setPaused] = useState(false)
+  // Embedded previews load paused and silent until the first Play.
+  const { held, release } = useEmbeddedStartHold()
+  const [paused, setPaused] = useState(held)
   const [mountKey, setMountKey] = useState(0)
   const [tick, setTick] = useState(0)
   const durations = useMemo(() => {
@@ -25,11 +28,16 @@ export function useSceneControls(baseDurations: Record<string, number>) {
     setTick(value => value + 1)
   }, [sceneKeys])
   const jumpTo = useCallback((index: number) => {
-    setActiveIndex(index); setPaused(false); setMountKey(value => value + 1); setTick(value => value + 1)
-  }, [])
+    release(); setActiveIndex(index); setPaused(false); setMountKey(value => value + 1); setTick(value => value + 1)
+  }, [release])
   const toggleLock = useCallback(() => {
-    setLocked(value => !value); setPaused(false); setMountKey(value => value + 1)
-  }, [])
+    release(); setLocked(value => !value); setPaused(false); setMountKey(value => value + 1)
+  }, [release])
+  // The first Play remounts the held player so the scene, animations and narration start from the first frame.
+  const togglePause = useCallback(() => {
+    if (held) { release(); setPaused(false); setMountKey(value => value + 1); setTick(value => value + 1); return }
+    setPaused(value => !value)
+  }, [held, release])
   return { sceneKeys, activeIndex, locked, paused, mountKey, tick, durations, activeDuration: baseDurations[sceneKeys[activeIndex]],
-    activeStartTime, totalDuration, onSceneChange, jumpTo, toggleLock, togglePause: () => setPaused(value => !value) }
+    activeStartTime, totalDuration, onSceneChange, jumpTo, toggleLock, togglePause }
 }

@@ -1,5 +1,6 @@
 // Playback wrapper for videos whose control bar the Replit workspace renders
-// outside the iframe. Renders no UI of its own: it remounts the player for
+// outside the iframe. Renders no UI of its own: it starts the player paused
+// on a still frame until the first Play, remounts the player for
 // scene jumps and lock replays, freezes DOM animations while paused, and
 // connects the workspace's control bar over postMessage (see
 // workspaceControls.ts). Only active inside an iframe (the preview pane); as
@@ -7,9 +8,10 @@
 // untouched. The scaffold does not mount it: the scene-controls reference
 // says whether to wrap VideoTemplate with it in App.tsx.
 
-import { useEffect, useSyncExternalStore, type ReactNode } from 'react';
+import { useEffect, useState, useSyncExternalStore, type ReactNode } from 'react';
 
 import { VideoPausedContext } from './hooks';
+import { holdUntilFirstPlay } from './playerActions';
 import { playerBridge } from './playerBridge';
 import { installWorkspaceControls } from './workspaceControls';
 
@@ -22,6 +24,8 @@ export function WorkspaceControlledVideo({ children }: { children: ReactNode }) 
 }
 
 function ControlledVideo({ children }: { children: ReactNode }) {
+  // Embedded previews load paused and silent until the first Play.
+  useState(holdUntilFirstPlay);
   const { paused, loopEpoch, remountEpoch } = useSyncExternalStore(
     playerBridge.subscribe,
     playerBridge.getState,

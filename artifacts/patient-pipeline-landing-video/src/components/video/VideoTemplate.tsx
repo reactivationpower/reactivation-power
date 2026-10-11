@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ComponentType } from 'react'
 import { AnimatePresence } from 'framer-motion'
-import { VideoCanvas, VideoPausedContext, useVideoPlayer, type VideoAspectRatio } from '@/lib/video'
+import { VideoCanvas, VideoPausedContext, useVideoAudio, useVideoPlayer, type VideoAspectRatio } from '@/lib/video'
 import { Opportunity } from './video_scenes/Opportunity'
 import { Introduction } from './video_scenes/Introduction'
 import { Niches } from './video_scenes/Niches'
@@ -29,9 +29,13 @@ const START_SEC = (() => {
   return result
 })()
 
-export default function VideoTemplate({ durations = SCENE_DURATIONS, loop = true, paused = false, muted = false, onSceneChange }: {
+export default function VideoTemplate({ durations = SCENE_DURATIONS, loop = true, paused: pausedProp = false, muted: mutedProp = false, onSceneChange }: {
   durations?: Record<string, number>; loop?: boolean; paused?: boolean; muted?: boolean; onSceneChange?: (key: string) => void
 } = {}) {
+  // The workspace-controlled player (lib/video/controls.tsx) pauses and mutes through the bridge.
+  const bridgeAudio = useVideoAudio()
+  const paused = pausedProp || bridgeAudio.paused
+  const muted = mutedProp || bridgeAudio.muted
   const { currentSceneKey } = useVideoPlayer({ durations, loop, paused })
   const baseKey = currentSceneKey.replace(/_r[12]$/, '')
   const SceneComponent = SCENES[baseKey]

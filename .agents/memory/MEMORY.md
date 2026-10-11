@@ -44,4 +44,5 @@
 - [Conversation previews](conversation-preview-policy.md) — frozen send evidence, with disclosed link/image restrictions; no manual or incoming-email scope.
 - [GoHighLevel reply shapes](ghl-api-shapes.md) — appointment lookup returns `appointment`, not `event`; copy live shapes into test fakes.
 - [RPC mutationFn args](rpc-mutation-args.md) — wrap RPC actions in an arrow for useMutation or react-query's context is sent as an extra server arg.
+- [Embedded video start hold](video-embedded-start.md) — videos start paused when iframed; framer JS tweens need skipAnimations, not getAnimations; top-level must still autoplay.
 - [Sales automation enable rules](sales-automation-readiness.md) — one shared rule list gates the server and the settings checklist; never add a separate check.

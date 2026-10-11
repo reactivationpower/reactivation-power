@@ -41,6 +41,11 @@ export interface PlayerBridgeState {
    * content (see isPlaceholderPlayback), not by mount state.
    */
   placeholderPlayback: ScenePlayback | null;
+  /**
+   * True while an embedded player is held paused on its first frame, waiting
+   * for the viewer's first Play (see playerActions.holdUntilFirstPlay).
+   */
+  startHeld: boolean;
 }
 
 const INITIAL_STATE: PlayerBridgeState = {
@@ -55,6 +60,7 @@ const INITIAL_STATE: PlayerBridgeState = {
   workspaceOwned: false,
   placeholderMounted: false,
   placeholderPlayback: null,
+  startHeld: false,
 };
 
 /** Whether the current playback is the scaffold placeholder's, not a video. */
@@ -108,6 +114,12 @@ export const playerBridge = {
   setLocked(locked: boolean) {
     if (state.locked !== locked) {
       commit({ ...state, locked });
+    }
+  },
+
+  setStartHeld(startHeld: boolean) {
+    if (state.startHeld !== startHeld) {
+      commit({ ...state, startHeld, paused: startHeld ? true : state.paused });
     }
   },
 

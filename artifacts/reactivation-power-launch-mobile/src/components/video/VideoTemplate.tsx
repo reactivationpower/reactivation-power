@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { AnimatePresence } from 'framer-motion'
-import { VideoCanvas, VideoPausedContext, useVideoPlayer, type VideoAspectRatio } from '@/lib/video'
+import { VideoCanvas, VideoPausedContext, useVideoAudio, useVideoPlayer, type VideoAspectRatio } from '@/lib/video'
 import { Opportunities } from './video_scenes/Opportunities'
 import { Reactivation } from './video_scenes/Reactivation'
 import { LeadFollowUp } from './video_scenes/LeadFollowUp'
@@ -17,9 +17,13 @@ const START_SEC: Record<string, number> = (() => {
   return result
 })()
 
-export default function VideoTemplate({ durations=SCENE_DURATIONS, loop=true, paused=false, muted=false, onSceneChange }: {
+export default function VideoTemplate({ durations=SCENE_DURATIONS, loop=true, paused:pausedProp=false, muted:mutedProp=false, onSceneChange }: {
   durations?: Record<string,number>; loop?:boolean; paused?:boolean; muted?:boolean; onSceneChange?:(key:string)=>void
 } = {}) {
+  // The workspace-controlled player (lib/video/controls.tsx) pauses and mutes through the bridge.
+  const bridgeAudio = useVideoAudio()
+  const paused = pausedProp || bridgeAudio.paused
+  const muted = mutedProp || bridgeAudio.muted
   const { currentSceneKey } = useVideoPlayer({ durations, loop, paused })
   const baseKey=currentSceneKey.replace(/_r[12]$/,'')
   const Scene=SCENES[baseKey]
@@ -40,7 +44,7 @@ export default function VideoTemplate({ durations=SCENE_DURATIONS, loop=true, pa
   return <VideoPausedContext.Provider value={paused}>
     <VideoCanvas aspectRatio={VIDEO_ASPECT_RATIO} style={{ backgroundColor:'#15233c' }}>
       <AnimatePresence mode="sync">{Scene && <Scene key={currentSceneKey} />}</AnimatePresence>
-      <audio ref={audioRef} src={`${import.meta.env.BASE_URL}audio/composite_audio.mp3`} preload="auto" autoPlay muted={muted} />
+      <audio ref={audioRef} src={`${import.meta.env.BASE_URL}audio/composite_audio.mp3`} preload="auto" autoPlay={!paused} muted={muted} />
     </VideoCanvas>
   </VideoPausedContext.Provider>
 }

@@ -1,10 +1,13 @@
 import { useCallback, useMemo, useState } from 'react'
+import { useEmbeddedStartHold } from '@/lib/video'
 
 export function useSceneControls(baseDurations:Record<string,number>) {
   const keys=useMemo(()=>Object.keys(baseDurations),[baseDurations])
   const [activeIndex,setActiveIndex]=useState(0)
   const [locked,setLocked]=useState(false)
-  const [paused,setPaused]=useState(false)
+  // Embedded previews load paused and silent until the first Play.
+  const {held,release}=useEmbeddedStartHold()
+  const [paused,setPaused]=useState(held)
   const [mountKey,setMountKey]=useState(0)
   const [tick,setTick]=useState(0)
   const durations=useMemo(()=>{
@@ -18,9 +21,13 @@ export function useSceneControls(baseDurations:Record<string,number>) {
     if(index>=0) setActiveIndex(index)
     setTick(n=>n+1)
   },[keys])
-  const jumpTo=useCallback((index:number)=>{setActiveIndex(index);setPaused(false);setMountKey(n=>n+1);setTick(n=>n+1)},[])
-  const toggleLock=useCallback(()=>{setLocked(n=>!n);setPaused(false);setMountKey(n=>n+1);setTick(n=>n+1)},[])
-  const togglePause=useCallback(()=>setPaused(n=>!n),[])
+  const jumpTo=useCallback((index:number)=>{release();setActiveIndex(index);setPaused(false);setMountKey(n=>n+1);setTick(n=>n+1)},[release])
+  const toggleLock=useCallback(()=>{release();setLocked(n=>!n);setPaused(false);setMountKey(n=>n+1);setTick(n=>n+1)},[release])
+  // The first Play remounts the held player so the scene, animations and narration start from the first frame.
+  const togglePause=useCallback(()=>{
+    if(held){release();setPaused(false);setMountKey(n=>n+1);setTick(n=>n+1);return}
+    setPaused(n=>!n)
+  },[held,release])
   return {
     keys,activeIndex,locked,paused,mountKey,tick,durations,onSceneChange,jumpTo,toggleLock,togglePause,
     activeDuration:baseDurations[keys[activeIndex]],activeStartTime:keys.slice(0,activeIndex).reduce((t,k)=>t+baseDurations[k],0),

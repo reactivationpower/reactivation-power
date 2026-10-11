@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { AnimatePresence } from 'framer-motion'
-import { VideoCanvas, VideoPausedContext, useVideoPlayer, type VideoAspectRatio } from '@/lib/video'
+import { VideoCanvas, VideoPausedContext, useVideoAudio, useVideoPlayer, type VideoAspectRatio } from '@/lib/video'
 import { Opening, Preparation, OpenCampaigns, EnterOffer, PriceAndSave, FindForm, ConnectForm, TestForm, PracticeScript, FindLeads, Checklist } from './video_scenes/FirstCampaignScenes'
 import { AudioClockContext } from './AudioClockContext'
 import narrationTiming from './narration-timing.json'
@@ -22,9 +22,13 @@ const START_SEC: Record<string,number> = (() => {
   return starts
 })()
 
-export default function VideoTemplate({ durations=SCENE_DURATIONS, loop=true, paused=false, muted=false, onSceneChange }: {
+export default function VideoTemplate({ durations=SCENE_DURATIONS, loop=true, paused:pausedProp=false, muted:mutedProp=false, onSceneChange }: {
   durations?: Record<string,number>; loop?:boolean; paused?:boolean; muted?:boolean; onSceneChange?:(key:string)=>void
 } = {}) {
+  // The workspace-controlled player (lib/video/controls.tsx) pauses and mutes through the bridge.
+  const bridgeAudio = useVideoAudio()
+  const paused = pausedProp || bridgeAudio.paused
+  const muted = mutedProp || bridgeAudio.muted
   const { currentSceneKey } = useVideoPlayer({ durations, loop, paused })
   const baseKey=currentSceneKey.replace(/_r[12]$/,'')
   const Scene=SCENES[baseKey]
@@ -46,7 +50,7 @@ export default function VideoTemplate({ durations=SCENE_DURATIONS, loop=true, pa
     <AudioClockContext.Provider value={audioRef}>
     <VideoCanvas aspectRatio={VIDEO_ASPECT_RATIO} style={{backgroundColor:'#092a3b'}}>
       <AnimatePresence mode="sync">{Scene && <Scene key={currentSceneKey}/>}</AnimatePresence>
-      <audio ref={audioRef} src={`${import.meta.env.BASE_URL}audio/composite_conversation_v1.mp3`} preload="auto" autoPlay muted={muted}/>
+      <audio ref={audioRef} src={`${import.meta.env.BASE_URL}audio/composite_conversation_v1.mp3`} preload="auto" autoPlay={!paused} muted={muted}/>
     </VideoCanvas>
     </AudioClockContext.Provider>
   </VideoPausedContext.Provider>

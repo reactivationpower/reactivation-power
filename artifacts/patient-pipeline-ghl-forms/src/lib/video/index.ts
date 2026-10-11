@@ -15,6 +15,7 @@ export type {
 } from './hooks';
 
 export { WorkspaceControlledVideo } from './controls';
+export { isEmbedded, useEmbeddedStartHold } from './embeddedStart';
 
 export {
   MediaFrame,

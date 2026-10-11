@@ -2,7 +2,7 @@
 /// <reference lib="dom.iterable" />
 import { useEffect, useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
-import { VideoCanvas, VideoPausedContext, useVideoPlayer, useSceneTimer } from '@/lib/video'
+import { VideoCanvas, VideoPausedContext, useVideoAudio, useVideoPlayer, useSceneTimer } from '@/lib/video'
 import rawLesson from './lesson.json'
 import { TutorialScene, type Lesson, type Scene } from './video_scenes/TutorialScene'
 import './Tutorial.css'
@@ -29,9 +29,13 @@ function TimedScene({ scene, audio, paused, forced }: {
   })))
   return <TutorialScene lesson={LESSON} scene={scene} time={forced ?? time} paused={paused}/>
 }
-export default function VideoTemplate({ durations = SCENE_DURATIONS, loop = true, paused = false, muted = false, onSceneChange }: {
+export default function VideoTemplate({ durations = SCENE_DURATIONS, loop = true, paused: pausedProp = false, muted: mutedProp = false, onSceneChange }: {
   durations?: Record<string, number>; loop?: boolean; paused?: boolean; muted?: boolean; onSceneChange?: (key: string) => void
 } = {}) {
+  // The workspace-controlled player (lib/video/controls.tsx) pauses and mutes through the bridge.
+  const bridgeAudio = useVideoAudio()
+  const paused = pausedProp || bridgeAudio.paused
+  const muted = mutedProp || bridgeAudio.muted
   const frameQuery = new URLSearchParams(window.location.search).get('frame')
   const frameMode = frameQuery !== null
   const [forced, setForced] = useState<number | null>(frameMode ? Number(frameQuery) * 1000 : null)
