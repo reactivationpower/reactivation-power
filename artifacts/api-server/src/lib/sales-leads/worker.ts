@@ -2,7 +2,7 @@ import { pool } from '@workspace/db'
 import { sendEmail } from '@/lib/mail/send'
 import { getAdminUserById } from '@/lib/data/admin-users'
 import { activity, enqueue, id, intake, phoneKey, settings, stop, transaction } from './store'
-import { allowed, cadence, canAutomate, elapsedDays } from './cadence'
+import { cadence, canAutomate, elapsedDays, textAllowed } from './cadence'
 import { assignTextNumbers, followupTexts, renderFollowupText } from './followup-texts'
 import { schedulerHealthy } from './wake'
 import { contact, contactPage, locationId, notes, provider, safeSalesUpsert, SalesProviderError } from './provider'
@@ -157,7 +157,7 @@ async function dispatchSms(job: any) {
     const touches = (await c.query(`SELECT count(DISTINCT COALESCE(provider_id,id)) FROM sales_activities WHERE lead_id=$1 AND kind IN ('call','provider_call','outbound_sms','sms_dispatch')
       AND (occurred_at AT TIME ZONE 'America/New_York')::date=(now() AT TIME ZONE 'America/New_York')::date`, [lead.id])).rows[0]
     if (!cfg.automation_enabled || !schedulerHealthy(cfg.capabilities) || !['verified','operator_confirmed'].includes(cfg.capabilities.sms_write?.state) || !canAutomate(lead) || lead.automation_state !== 'active' || !lead.ghl_contact_id ||
-      elapsedDays(new Date(lead.created_at), new Date()) >= 30 || !allowed(new Date(), lead.timezone) ||
+      elapsedDays(new Date(lead.created_at), new Date()) >= 30 || !textAllowed(new Date(), lead.timezone) ||
       Date.now() - new Date(job.due_at).getTime() > 5 * 60000 || Number(touches.count) >= 2) {
       await c.query("UPDATE sales_jobs SET state='cancelled',finished_at=now(),last_error='Eligibility, daily cap, or permitted send window changed' WHERE id=$1", [job.id])
       return

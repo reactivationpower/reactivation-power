@@ -102,9 +102,10 @@ eligibility and dispatch. Expired SMS/email/note dispatch claims become uncertai
 not automatically replayed. Note markers reconcile ambiguous note writes.
 SMS acceptance that is uncertain still consumes a daily touch.
 
-Quiet hours intersect M–F 9 AM–5 PM America/New_York with 8 AM–8 PM in the
-verified contact IANA zone. Calendar days, weekends and DST are computed per
-day; slots are distributed across the three calling windows. Missed SMS slots
+Call reminders use M–F 9 AM–5 PM America/New_York. Automated texts use only
+the lead's own clock: M–F 8 AM–8 PM in the verified contact IANA zone (no
+Eastern business-hour limit). Calendar days, weekends and DST are computed per
+day; slots are distributed across three windows. Missed SMS slots
 older than five minutes are cancelled, not caught up in a burst. Calls and
 outbound/provider SMS share the daily cap; reservation/message echoes dedupe
 by provider ID. A plain reply never changes device timezone.

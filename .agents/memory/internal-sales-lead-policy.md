@@ -66,3 +66,8 @@ Strategy-call reminders go by both email and text at booking, 1 day, 12 hours, 2
 New sales leads go to the configured default assignee, which must be a verified, active staff account (never a deactivated duplicate). Existing leads are not reassigned when the default changes.
 
 **Why:** Owner request.
+
+## Automated follow-up text timing (owner decision, 2026-10-11)
+Automated texts to unbooked provider leads go out 8 AM–8 PM weekdays on the **lead's own clock**, with no Eastern business-hour limit. Only staff call reminders stay on Eastern 9–5.
+**Why:** the owner rejected texts for West Coast leads being squeezed into the Eastern-afternoon overlap.
+**How to apply:** any future fallback for unknown time zones must still aim for the recipient's 8–8 (e.g. area-code guess), not an Eastern-hours window.
