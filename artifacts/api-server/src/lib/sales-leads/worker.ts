@@ -5,7 +5,7 @@ import { activity, enqueue, id, intake, phoneKey, settings, sharesOlderPhone, st
 import { cadence, canAutomate, elapsedDays, textAllowed } from './cadence'
 import { assignTextNumbers, followupTexts, renderFollowupText } from './followup-texts'
 import { schedulerHealthy } from './wake'
-import { contact, contactPage, locationId, notes, provider, safeSalesUpsert, SalesProviderError } from './provider'
+import { contact, contactPage, locationId, notes, phoneOwnedByOtherContact, provider, safeSalesUpsert, SalesProviderError } from './provider'
 import { salesTiming } from './timing'
 import { runInboxInbound } from '../sales-inbox/inbound'
 import { ingestProviderFacts, providerContext, providerDnd, reconcileLead, refreshLeadMessages } from './ingestion'
@@ -114,14 +114,20 @@ async function synchronize(job: any) {
     const healthcare = job.payload?.healthcare
     if (healthcare) tags.push('reactivation-power-lead', 'healthcare-funnel',
       ...(['reactivation','lead-follow-up','both'].includes(healthcare.interest) ? [`interest-${healthcare.interest}`] : []))
-    const sharedPhone = await sharesOlderPhone(c, lead)
+    const sharedPhone = await sharesOlderPhone(c, lead) || await phoneOwnedByOtherContact(lead.phone, lead.email, lead.ghl_contact_id)
     const body = { firstName: lead.first_name, lastName: lead.last_name, email: lead.email, phone: sharedPhone ? '' : lead.phone,
       ...(healthcare ? { postalCode:healthcare.postalCode, city:healthcare.city, state:healthcare.state } : {}),
       companyName: lead.practice_name, ...(lead.timezone && ['browser','staff'].includes(lead.timezone_origin) ? { timezone: lead.timezone } : {}), tags }
     let contactId = lead.ghl_contact_id
     const { phone: _phone, ...withoutPhone } = body
     if (contactId) await provider(`/contacts/${encodeURIComponent(contactId)}`, 'PUT', { ...(sharedPhone ? withoutPhone : body), ...(lead.dnd ? { dnd:true } : {}) })
-    else contactId = await safeSalesUpsert({ ...body, source:'Patient Pipeline internal sales' })
+    else {
+      const owned = (await c.query(`SELECT ghl_contact_id FROM sales_leads WHERE id<>$1 AND ghl_contact_id IS NOT NULL
+        AND (($2<>'' AND email=$2) OR ($3<>'' AND phone=$3))`, [lead.id, lead.email ?? '', lead.phone ?? ''])).rows.map((r: any) => r.ghl_contact_id)
+      contactId = await safeSalesUpsert({ ...body, source:'Patient Pipeline internal sales' }, owned)
+    }
+    const owner = (await c.query('SELECT 1 FROM sales_leads WHERE ghl_contact_id=$1 AND id<>$2', [contactId, lead.id])).rowCount
+    if (owner) throw new Error('Provider identity conflict: GoHighLevel returned a contact that belongs to another lead. Review both contacts before retrying.')
     await c.query("UPDATE sales_leads SET ghl_contact_id=$2,reconcile_at=now() WHERE id=$1", [lead.id, contactId])
   })
 }
@@ -158,8 +164,10 @@ async function dispatchSms(job: any) {
     }
     const touches = (await c.query(`SELECT count(DISTINCT COALESCE(provider_id,id)) FROM sales_activities WHERE lead_id=$1 AND kind IN ('call','provider_call','outbound_sms','sms_dispatch')
       AND (occurred_at AT TIME ZONE 'America/New_York')::date=(now() AT TIME ZONE 'America/New_York')::date`, [lead.id])).rows[0]
-    if (await sharesOlderPhone(c, lead)) {
-      await c.query("UPDATE sales_jobs SET state='cancelled',finished_at=now(),last_error='Phone is shared with another lead; texts skipped' WHERE id=$1", [job.id])
+    const digits = (v: unknown) => String(v ?? '').replace(/\D/g, '').replace(/^1(?=\d{10}$)/, '')
+    const snapshotPhone = lead.provider_snapshot?.phone
+    if (await sharesOlderPhone(c, lead) || (lead.ghl_contact_id && lead.provider_snapshot && digits(snapshotPhone) !== digits(lead.phone))) {
+      await c.query("UPDATE sales_jobs SET state='cancelled',finished_at=now(),last_error='Phone is shared with another contact; texts skipped' WHERE id=$1", [job.id])
       return
     }
     if (!cfg.automation_enabled || !schedulerHealthy(cfg.capabilities) || !['verified','operator_confirmed'].includes(cfg.capabilities.sms_write?.state) || !canAutomate(lead) || lead.automation_state !== 'active' || !lead.ghl_contact_id ||
@@ -211,7 +219,7 @@ async function processJob(job: any) {
   } catch (e) {
     const uncertain = e instanceof SalesProviderError && e.uncertain
     const state = uncertain ? 'uncertain' : job.attempts >= 5 ? 'failed' : 'pending'
-    const error = uncertain ? 'Provider response uncertain. Do not retry until reconciled.' : e instanceof SalesProviderError ? e.message : 'Sync unavailable. Check provider permissions and contact identity before retrying.'
+    const error = uncertain ? 'Provider response uncertain. Do not retry until reconciled.' : e instanceof SalesProviderError ? e.message : e instanceof Error && e.message.startsWith('Provider identity conflict') ? e.message : 'Sync unavailable. Check provider permissions and contact identity before retrying.'
     await pool.query("UPDATE sales_jobs SET state=$2,last_error=$3,due_at=now()+($4 * interval '1 minute'),claimed_at=NULL WHERE id=$1", [job.id, state, error, Math.min(60, 2 ** job.attempts)])
     if (e instanceof SalesProviderError && e.status === 429) {
       const seconds = Math.max(60, e.retryAfterSeconds)

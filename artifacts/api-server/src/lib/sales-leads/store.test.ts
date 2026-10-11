@@ -24,7 +24,7 @@ vi.mock('@/lib/sales-leads/worker', () => ({
   drainSalesSync: async () => (await vi.importActual<typeof import('./worker')>('./worker')).drainSalesSync(),
 }))
 vi.mock('@/lib/sales-leads/provider', async importOriginal => ({
-  ...await importOriginal<any>(), ...delivery, contactUrl: () => null, verifyCapabilities: vi.fn(), safeSalesUpsert: vi.fn(),
+  ...await importOriginal<any>(), ...delivery, contactUrl: () => null, verifyCapabilities: vi.fn(), safeSalesUpsert: vi.fn(), phoneOwnedByOtherContact: vi.fn(async () => false),
 }))
 vi.mock('@/lib/affiliates/attribution', () => ({ resolveQualifiedReferral: vi.fn(), attachCustomerReferral: vi.fn() }))
 vi.mock('@/lib/mail/send', () => ({ sendEmail: vi.fn() }))
@@ -59,7 +59,7 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('internal sales durable storage (i
   })
   beforeEach(async () => {
     vi.useRealTimers(); vi.clearAllMocks()
-    delivery.contact.mockResolvedValue({ id:'fixture-ghl', locationId:process.env.GHL_LOCATION_ID, dnd:false, firstName:'Fixture', lastName:'Lead', email:'fixture@example.invalid' })
+    delivery.contact.mockResolvedValue({ id:'fixture-ghl', locationId:process.env.GHL_LOCATION_ID, dnd:false, firstName:'Fixture', lastName:'Lead', email:'fixture@example.invalid', phone:'+12125550199' })
     delivery.appointments.mockResolvedValue([]); delivery.conversations.mockResolvedValue([]); delivery.notes.mockResolvedValue([])
     delivery.provider.mockResolvedValue({ messageId:'fixture-message' })
     await fixture.pool.query('TRUNCATE customers,sales_imports,sales_activities,sales_jobs,sales_submissions,sales_leads,sales_merge_reviews,sales_settings CASCADE')
@@ -230,6 +230,16 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('internal sales durable storage (i
     expect(safeSalesUpsert).toHaveBeenCalledTimes(1)
     expect(book).not.toHaveBeenCalled()
   })
+  it('creates the contact without a phone that another GoHighLevel contact already owns', async () => {
+    const worker = await vi.importActual<typeof import('./worker')>('./worker')
+    const { safeSalesUpsert, phoneOwnedByOtherContact } = await import('./provider')
+    vi.mocked(phoneOwnedByOtherContact).mockResolvedValueOnce(true)
+    vi.mocked(safeSalesUpsert).mockResolvedValueOnce('ghl-new')
+    const lead = await intake(input('provider-shared-phone'))
+    await worker.processSalesJob(await worker.claimSalesJob(true))
+    expect(vi.mocked(safeSalesUpsert).mock.calls[0][0]).toMatchObject({ email:'fixture@example.invalid', phone:'' })
+    expect((await fixture.pool.query('SELECT ghl_contact_id,phone FROM sales_leads WHERE id=$1',[lead.id])).rows[0]).toEqual({ ghl_contact_id:'ghl-new', phone:'+12125550199' })
+  })
   it('keeps a live shared-phone/different-email inquiry as its own bookable lead, flagged for staff', async () => {
     const first = await intake(input('a'))
     const next = await intake(input('b',{ email:'other@example.invalid' }))
@@ -332,6 +342,13 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('internal sales durable storage (i
     expect((await fixture.pool.query("SELECT state FROM sales_jobs WHERE id='sms-fixture'")).rows[0].state).toBe('uncertain')
     expect((await fixture.pool.query("SELECT status FROM sales_activities WHERE kind='sms_dispatch'")).rows[0].status).toBe('uncertain')
     expect(await worker.claimSalesJob()).toBeUndefined()
+  })
+  it('skips automated texts when the GoHighLevel contact does not carry the lead phone', async () => {
+    const { worker } = await preparedSms()
+    delivery.contact.mockResolvedValue({ id:'fixture-ghl',locationId:process.env.GHL_LOCATION_ID,dnd:false,email:'fixture@example.invalid' })
+    await worker.processSalesJob(await worker.claimSalesJob())
+    expect(delivery.provider).not.toHaveBeenCalled()
+    expect((await fixture.pool.query("SELECT state,last_error FROM sales_jobs WHERE id='sms-fixture'")).rows[0]).toMatchObject({ state:'cancelled', last_error:expect.stringContaining('shared') })
   })
   it('missed old slots are cancelled rather than accumulating a burst', async () => {
     const { worker } = await preparedSms()

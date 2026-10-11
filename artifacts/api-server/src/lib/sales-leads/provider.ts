@@ -10,9 +10,20 @@ import { salesTiming } from './timing'
 /** Provider upsert prefers phone/email according to location configuration.
  * Check both identities first; never let that implicit preference merge two
  * different people or erase existing tags. */
-export async function safeSalesUpsert(input: GhlUpsertInput): Promise<string> {
+const normalizePhone = (value: string) => String(value ?? '').replace(/\D/g, '').replace(/^1(?=\d{10}$)/, '')
+/** True when a different GoHighLevel contact, with a different email, already has
+ * this phone (often a shared office line or a repeat tester). Writing the phone to
+ * our contact would collide with or take over that contact, so callers omit it. */
+export async function phoneOwnedByOtherContact(phone: string, email: string, ownContactId?: string | null) {
+  if (!normalizePhone(phone)) return false
+  const page = await contactPage(phone, {}, 100)
+  return page.contacts.some((row: any) => row.id !== ownContactId && normalizePhone(row.phone) === normalizePhone(phone) &&
+    !!row.email && String(row.email).trim().toLowerCase() !== String(email ?? '').trim().toLowerCase())
+}
+/** `ownedElsewhere` lists GoHighLevel contact IDs already linked to other local
+ * leads; they are never written to, even if a (possibly stale) search matches them. */
+export async function safeSalesUpsert(input: GhlUpsertInput, ownedElsewhere: string[] = []): Promise<string> {
   const matches = new Map<string, any>()
-  const normalizePhone = (value: string) => value.replace(/\D/g, '').replace(/^1(?=\d{10}$)/, '')
   for (const [query, kind] of [[input.email,'email'],[input.phone,'phone']]) {
     if (!query) continue
     const page = await contactPage(query!, {}, 100)
@@ -22,6 +33,16 @@ export async function safeSalesUpsert(input: GhlUpsertInput): Promise<string> {
         normalizePhone(String(row.phone ?? '')) === normalizePhone(input.phone)
       if (exact) matches.set(row.id, row)
     }
+  }
+  // Search results can lag behind real edits. Re-read every match and keep only
+  // contacts whose current email or phone still matches before trusting them.
+  for (const [matchId] of [...matches]) {
+    const fresh = await contact(matchId)
+    const still = fresh && ((input.email && String(fresh.email ?? '').trim().toLowerCase() === input.email.trim().toLowerCase()) ||
+      (input.phone && normalizePhone(String(fresh.phone ?? '')) === normalizePhone(input.phone)))
+    if (!still) { matches.delete(matchId); continue }
+    if (ownedElsewhere.includes(matchId)) throw new Error('Provider identity conflict: matching GoHighLevel contact belongs to another lead. Review before contact sync.')
+    matches.set(matchId, fresh)
   }
   if (matches.size > 1) throw new Error('Provider identity conflict: email and phone match different GoHighLevel records. Review those contacts before retrying.')
   const existing = [...matches.values()][0]
@@ -34,7 +55,10 @@ export async function safeSalesUpsert(input: GhlUpsertInput): Promise<string> {
     await provider(`/contacts/${encodeURIComponent(existing.id)}`, 'PUT', body)
     return existing.id
   }
-  const result = await provider('/contacts/upsert','POST',body)
+  // We already searched by email and phone and found no match. Use plain create:
+  // GoHighLevel's upsert can silently merge into another contact (e.g. same name)
+  // and overwrite its email. A duplicate rejection here is a safe, visible failure.
+  const result = await provider('/contacts/','POST',body)
   if (!result.contact?.id) throw new SalesProviderError(0, true)
   return result.contact.id
 }
