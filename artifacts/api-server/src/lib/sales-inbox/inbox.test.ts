@@ -73,11 +73,14 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('unified inbox isolated persistenc
     await expect(updateSalesLead('other',{revision:lead.revision,assigneeId:'admin'})).rejects.toThrow('Only a super admin')
     expect((await f.pool.query("SELECT assignee_id FROM sales_leads WHERE id='other'")).rows[0].assignee_id).toBe('someone-else')
   })
-  it('allows preview sends but blocks quiet hours, lack of consent, opt-out and mismatched phone',async()=>{
+  it('allows preview sends, asks before night or no-consent texts, and blocks opt-out and mismatched phone',async()=>{
     vi.stubEnv('NODE_ENV','development');expect((await sendMessage(message())).state).toBe('sent');f.provider.mockClear()
-    vi.stubEnv('NODE_ENV','production');vi.setSystemTime(new Date('2026-10-12T02:00Z'));await expect(sendMessage(message())).rejects.toThrow('8 AM')
+    vi.stubEnv('NODE_ENV','production');vi.setSystemTime(new Date('2026-10-12T02:00Z'));await expect(sendMessage(message())).rejects.toThrow('Send anyway')
     vi.setSystemTime(new Date('2026-10-12T14:00Z'))
-    await f.pool.query("UPDATE sales_leads SET consent=false WHERE id='lead'");await expect(sendMessage(message())).rejects.toThrow('consent')
+    await f.pool.query("UPDATE sales_leads SET consent=false WHERE id='lead'");await expect(sendMessage(message())).rejects.toThrow('not agreed')
+    expect(f.provider).not.toHaveBeenCalled()
+    f.provider.mockResolvedValueOnce({messageId:'provider-sms-confirmed'})
+    expect((await sendMessage({...message(),confirmed:true})).state).toBe('sent');f.provider.mockClear()
     await f.pool.query("UPDATE sales_leads SET consent=true WHERE id='lead'")
     f.contact.mockResolvedValueOnce({id:'contact',locationId:process.env.GHL_LOCATION_ID,phone:'+12125550199',dnd:true})
     await expect(sendMessage(message())).rejects.toThrow('opted out')

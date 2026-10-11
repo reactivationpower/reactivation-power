@@ -1,5 +1,5 @@
 import { pool, type PoolClient } from '@workspace/db'
-import { provider, contact, conversations, SalesProviderError } from '../sales-leads/provider'
+import { provider, contact, SalesProviderError } from '../sales-leads/provider'
 import { settings } from '../sales-leads/store'
 import { schedulerHealthy } from '../sales-leads/wake'
 import { getAdminUserById } from '../data/admin-users'
@@ -7,7 +7,7 @@ import { sendEmail, fromAddress } from '../mail/send'
 import { PUBLIC_APP_ORIGIN } from '../app-origin'
 import { logger } from '../logger'
 import { APPOINTMENT_LOCK, appointmentSettings, reconcileAppointment } from './store'
-import { MINUTE, nextSmsWindow, smsAllowed } from './schedule'
+import { MINUTE, SMS_GAP, nextSmsWindow, smsAllowed } from './schedule'
 import { renderAppointmentMessage, type AppointmentCopy } from './content'
 import { SALES_REPLY_TO } from '../sales-inbox/store'
 import { randomUUID } from 'node:crypto'
@@ -47,23 +47,15 @@ async function dispatch(c: PoolClient, job: any, row: any, lead: any, smsEnabled
       const next = nextSmsWindow(now, zone)
       return defer(c, job.id, next ? 'Waiting for 8 AM–8 PM recipient-local window' : 'Verified recipient timezone required', next ?? undefined)
     }
-    const last = (await c.query(`SELECT sent_at FROM appointment_deliveries d JOIN appointment_messages a USING(appointment_id)
+    const last = job.kind === 'starting' ? null : (await c.query(`SELECT sent_at FROM appointment_deliveries d JOIN appointment_messages a USING(appointment_id)
       WHERE a.lead_id=$1 AND d.channel='sms' AND d.state IN ('sent','uncertain')
-      AND d.sent_at > now()-interval '1 hour' ORDER BY d.sent_at DESC LIMIT 1`, [lead.id])).rows[0]
+      AND d.sent_at > now()-make_interval(mins => $2) ORDER BY d.sent_at DESC LIMIT 1`, [lead.id, SMS_GAP])).rows[0]
     if (last) {
-      const next = new Date(+new Date(last.sent_at) + 60 * MINUTE)
-      return defer(c, job.id, 'Spacing texts at least one hour apart', next)
+      const next = new Date(+new Date(last.sent_at) + SMS_GAP * MINUTE)
+      return defer(c, job.id, 'Spacing texts apart', next)
     }
     if (!/^\+[1-9]\d{9,14}$/.test(lead.phone) || String(remote.phone).replace(/[^\d+]/g,'') !== lead.phone)
       return defer(c, job.id, 'Phone identity needs review')
-    // Contact assignment is supported by the private-integration API. Never
-    // pretend it proves conversation routing: verify the thread separately.
-    if (remote.assignedTo !== host.ghl_user_id) {
-      await provider(`/contacts/${encodeURIComponent(lead.ghl_contact_id)}`, 'PUT', { assignedTo: host.ghl_user_id })
-    }
-    const threads = await conversations(lead.ghl_contact_id)
-    if (threads.length !== 1 || threads[0].assignedTo !== host.ghl_user_id)
-      return defer(c, job.id, 'Assign this contact’s conversation to the meeting host in GHL before texting')
     await c.query('UPDATE sales_leads SET assignee_id=$2,revision=revision+1 WHERE id=$1 AND assignee_id IS DISTINCT FROM $2', [lead.id, host.admin_id])
   } else if (!lead.email || String(remote.email ?? '').toLowerCase() !== lead.email.toLowerCase()) {
     return defer(c, job.id, 'Email identity needs review')

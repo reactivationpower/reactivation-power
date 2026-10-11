@@ -1,6 +1,6 @@
 import { pool, type PoolClient } from '@workspace/db'
 import { createHash } from 'node:crypto'
-import { scheduleMessages, type MessageKind } from './schedule'
+import { REMINDER_KINDS, scheduleMessages, type MessageKind } from './schedule'
 export const APPOINTMENT_LOCK = 'appointment-message-worker'
 export async function appointmentSettings(c: Pick<PoolClient, 'query'> = pool) {
   await c.query("INSERT INTO appointment_message_settings(id) VALUES('strategy') ON CONFLICT DO NOTHING")
@@ -41,8 +41,8 @@ export async function reconcileAppointment(c: PoolClient, row: any, event: any, 
   await c.query('BEGIN')
   try {
     const pending = (await c.query(`SELECT kind,channel,due_at,expires_at FROM appointment_deliveries
-      WHERE appointment_id=$1 AND state IN ('pending','blocked') AND kind IN ('day_before','final')`,
-      [row.appointment_id])).rows
+      WHERE appointment_id=$1 AND state IN ('pending','blocked') AND kind = ANY($2)`,
+      [row.appointment_id, REMINDER_KINDS])).rows
     await c.query("UPDATE appointment_deliveries SET state='cancelled',last_error='Appointment changed' WHERE appointment_id=$1 AND state IN ('pending','blocked')", [row.appointment_id])
     await c.query(`UPDATE appointment_messages SET starts_at=$2,version=$3,fingerprint=$4,snapshot=$5,last_error=NULL WHERE appointment_id=$1`,
       [row.appointment_id, start, version, fingerprint, JSON.stringify(snapshot)])
@@ -69,7 +69,7 @@ export async function reconcileAppointment(c: PoolClient, row: any, event: any, 
        })
       // Reconciliation must not re-send a reminder just because a link/host changed.
       for (const slot of slots) {
-        if (slot.kind === 'day_before' || slot.kind === 'final') {
+        if (REMINDER_KINDS.includes(slot.kind)) {
           const prior = (await c.query(`SELECT 1 FROM appointment_deliveries WHERE appointment_id=$1 AND kind=$2 AND channel=$3
             AND state IN ('sent','uncertain','sending') AND snapshot->'copy'->>'start'=$4 LIMIT 1`,
             [row.appointment_id, slot.kind, slot.channel, snapshot.start])).rowCount

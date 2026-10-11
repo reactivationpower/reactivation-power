@@ -48,6 +48,15 @@ async function textingHost(q:{query:(sql:string,args?:any[])=>Promise<any>}, lea
   const all=(await q.query('SELECT * FROM appointment_hosts WHERE active=true')).rows
   return all.length===1 ? all[0] : null
 }
+/** Things staff may override with an "Send anyway?" prompt. */
+function softChecks(lead:any) {
+  const out:string[]=[]
+  if(!lead.consent) out.push('This lead has not agreed to receive texts.')
+  const zone = ['staff','browser'].includes(lead.timezone_origin) ? lead.timezone : null
+  if(!zone) out.push('We don’t know this lead’s time zone.')
+  else if(!smsAllowed(new Date(),zone)) out.push(`It’s ${new Intl.DateTimeFormat('en-US',{timeZone:zone,timeStyle:'short'}).format(new Date())} for this lead.`)
+  return out
+}
 async function readiness(lead:any, adminId:string) {
   const cfg = await inboxSettings(), reasons:string[]=[]
   const host = await textingHost(pool, lead, adminId)
@@ -56,12 +65,9 @@ async function readiness(lead:any, adminId:string) {
   const capabilities=(await pool.query("SELECT capabilities FROM sales_settings WHERE id='internal'")).rows[0]?.capabilities
   const senderConfirmed=capabilities?.portal_sms_sender?.locationId===process.env.GHL_LOCATION_ID && !!capabilities?.portal_sms_sender?.number
   if(!cfg.sms_ready || !senderConfirmed) reasons.push('Turn on texting once in Leads → Settings (check the box and save).')
-  if(!lead.consent) reasons.push('This lead has not agreed to receive texts.')
   if(!lead.ghl_contact_id) reasons.push('This lead is still syncing with GoHighLevel.')
-  const zone = ['staff','browser'].includes(lead.timezone_origin) ? lead.timezone : null
-  if(!smsAllowed(new Date(),zone)) reasons.push(zone ? 'Texts can only go out 8 AM–8 PM in the lead’s time zone.' : 'Set the lead’s time zone first.')
   return { email:false, emailReason:'Manual email is not supported; historical automated email remains available.',
-    sms:reasons.length===0, reasons }
+    sms:reasons.length===0, reasons, confirm:softChecks(lead) }
 }
 export async function getConversation(leadId:string) {
   await accessible(leadId)
@@ -117,11 +123,12 @@ export async function refreshConversation(leadId:string) {
   return result
 }
 const sendSchema=z.object({leadId:z.string().min(1),channel:z.literal('sms'),subject:z.string().trim().max(200).regex(/^[^\r\n]*$/).optional(),
-  body:z.string().trim().min(1).max(10000),requestId:z.string().uuid()})
+  body:z.string().trim().min(1).max(10000),requestId:z.string().uuid(),confirmed:z.boolean().optional()})
 export async function sendMessage(input:unknown) {
   const data=sendSchema.parse(input), admin=await requireAdmin()
   if(data.channel==='sms'&&data.body.length>1600) throw new Error('Text messages are limited to 1,600 characters')
-  const fingerprint=createHash('sha256').update(JSON.stringify({...data,author:admin.userId})).digest('hex')
+  const {confirmed,...fields}=data
+  const fingerprint=createHash('sha256').update(JSON.stringify({...fields,author:admin.userId})).digest('hex')
   const c=await pool.connect()
   const key=`sales-send:${data.leadId}`
   let locked=false
@@ -147,8 +154,8 @@ export async function sendMessage(input:unknown) {
     let fromNumber:string
     {
       if(!cfg.sms_ready) throw new Error('Turn on texting in Leads → Settings first')
-      if(!lead.consent) throw new Error('Documented SMS consent is required')
-      if(!smsAllowed(new Date(),['staff','browser'].includes(lead.timezone_origin)?lead.timezone:null)) throw new Error('Texting is only available 8 AM–8 PM in the verified recipient timezone')
+      const soft=softChecks(lead)
+      if(soft.length&&!confirmed) throw Object.assign(new Error(`${soft.join(' ')} Send anyway?`),{needsConfirm:true})
       if(!lead.ghl_contact_id) throw new Error('Contact synchronization must finish first')
       const remote=await contact(lead.ghl_contact_id)
       if(!remote||remote.id!==lead.ghl_contact_id||remote.locationId!==process.env.GHL_LOCATION_ID||

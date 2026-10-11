@@ -82,12 +82,12 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('appointment outbox (isolated data
     expect((await rows()).find((r:any)=>r.kind==='confirmation'&&r.channel==='sms').state).toBe('skipped')
     expect(mocks.provider.mock.calls.some(([path])=>path==='/conversations/messages')).toBe(false)
   })
-  it('stops at unknown SMS reply ownership instead of sending in the wrong salesperson’s name', async () => {
+  it('texts without requiring the GHL conversation to be assigned to the host', async () => {
     await runAppointmentMessages(); await due()
     mocks.conversations.mockResolvedValue([{id:'thread',assignedTo:'someone-else'}])
     await runAppointmentMessages()
-    expect((await rows()).find((r:any)=>r.kind==='confirmation'&&r.channel==='sms').last_error).toContain('conversation')
-    expect(mocks.provider.mock.calls.some(([path])=>path==='/conversations/messages')).toBe(false)
+    expect(mocks.provider.mock.calls.some(([path])=>path==='/conversations/messages')).toBe(true)
+    expect(mocks.provider.mock.calls.some(([path,method])=>String(path).startsWith('/contacts/')&&method==='PUT')).toBe(false)
   })
   it('does not replay uncertain email acceptance', async () => {
     await runAppointmentMessages(); await due()

@@ -1,5 +1,17 @@
 import { parts, validTimezone } from '../sales-leads/cadence'
-export type MessageKind = 'confirmation' | 'day_before' | 'final' | 'rescheduled' | 'cancelled'
+export type ReminderKind = 'day_before' | 'twelve_hours' | 'two_hours' | 'starting'
+/** 'final' is the old 30-minute text; kept only so older rows still render. */
+export type MessageKind = 'confirmation' | ReminderKind | 'final' | 'rescheduled' | 'cancelled'
+export const REMINDER_KINDS: MessageKind[] = ['day_before', 'twelve_hours', 'two_hours', 'starting', 'final']
+/** Reminder plan: when (minutes before the call) and whether an email goes with the text. */
+export const REMINDERS: { kind: ReminderKind; before: number; email: boolean }[] = [
+  { kind: 'day_before', before: 24 * 60, email: true },
+  { kind: 'twelve_hours', before: 12 * 60, email: true },
+  { kind: 'two_hours', before: 2 * 60, email: true },
+  { kind: 'starting', before: 5, email: true },
+]
+/** Minimum gap between automatic texts. The 5-minute "starting now" text is never held back. */
+export const SMS_GAP = 30
 export type MessageSlot = { kind: MessageKind; channel: 'email' | 'sms'; dueAt: Date; expiresAt: Date }
 export const MINUTE = 60_000
 export const DAY = 1440 * MINUTE
@@ -28,19 +40,28 @@ export function scheduleMessages(now: Date, start: Date, zone: string | null, ki
   add(kind, 'email', now, expiry)
   add(kind, 'sms', now, expiry)
   if (kind === 'cancelled') return slots
-  const dayBefore = new Date(start.getTime() - DAY)
-  // No late catch-up, and don't put a reminder within an hour of confirmation.
-  if (dayBefore.getTime() - now.getTime() >= 60 * MINUTE) {
-    add('day_before', 'email', dayBefore, new Date(dayBefore.getTime() + 60 * MINUTE))
-    add('day_before', 'sms', dayBefore, new Date(start.getTime() - 60 * MINUTE))
-  }
-  const final = new Date(start.getTime() - 30 * MINUTE)
-  if (final > now && smsAllowed(final, zone)) add('final', 'sms', final, new Date(start.getTime() - 5 * MINUTE))
-  // Preserve the confirmation, suppress clustered texts (including morning deferrals).
+  REMINDERS.forEach((r, i) => {
+    const due = new Date(start.getTime() - r.before * MINUTE)
+    if (r.kind === 'starting') {
+      // Join-now text: send near the start or not at all, never a late catch-up.
+      if (due > now) {
+        add('starting', 'sms', due, new Date(start.getTime() + 5 * MINUTE))
+        add('starting', 'email', due, new Date(start.getTime() + 5 * MINUTE))
+      }
+      return
+    }
+    // No late catch-up, and don't stack a reminder right on top of the confirmation.
+    if (due.getTime() - now.getTime() < SMS_GAP * MINUTE) return
+    const next = REMINDERS[i + 1]
+    // A text that falls at night may wait for 8 AM, but only until the next reminder is due.
+    add(r.kind, 'sms', due, new Date(start.getTime() - next.before * MINUTE))
+    // Emails have no quiet hours; they go at the exact time or within the hour.
+    if (r.email) add(r.kind, 'email', due, new Date(Math.min(due.getTime() + 60 * MINUTE, start.getTime() - next.before * MINUTE)))
+  })
   let previous = -Infinity
   return slots.sort((a,b) => +a.dueAt - +b.dueAt).filter(s => {
     if (s.channel !== 'sms') return true
-    if (+s.dueAt - previous < 60 * MINUTE) return false
+    if (s.kind !== 'starting' && +s.dueAt - previous < SMS_GAP * MINUTE) return false
     previous = +s.dueAt
     return true
   })
