@@ -91,6 +91,16 @@ export const notes = (id: string) => provider(`/contacts/${encodeURIComponent(id
 export const appointments = (id: string) => provider(`/contacts/${encodeURIComponent(id)}/appointments`).then(j => j.events ?? j.appointments ?? [])
 export const conversations = (id: string) => provider(`/conversations/search?${new URLSearchParams({ locationId: locationId(), contactId: id, limit: '20' })}`).then(j => j.conversations ?? [])
 export const messages = (id: string, cursor?: string) => provider(`/conversations/${encodeURIComponent(id)}/messages?${new URLSearchParams({ limit: '100', ...(cursor ? { lastMessageId: cursor } : {}) })}`).then(j => j.messages)
+/** Fail closed if the location no longer has exactly one SMS sender. Never use
+ * GHL's implicit default or infer a number from a previous recipient's thread. */
+export async function smsSender() {
+  const result = await provider(`/phone-system/numbers/location/${encodeURIComponent(locationId())}?skipNumberPool=true`)
+  const numbers = result.numbers
+  if (!Array.isArray(numbers) || numbers.length !== 1 ||
+    numbers[0].capabilities?.sms !== true || !/^\+[1-9]\d{9,14}$/.test(numbers[0].phoneNumber))
+    throw new Error('SMS sender unavailable: verify exactly one active SMS number in the existing GHL location')
+  return numbers[0].phoneNumber as string
+}
 export async function verifyCapabilities() {
   const result: Record<string, { state: string; requirement: string }> = {}
   const checks = [

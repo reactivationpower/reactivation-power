@@ -3,16 +3,16 @@ import { createHash } from 'node:crypto'
 import { pool } from '@workspace/db'
 import { requireAdmin } from '@/lib/auth/admin-session'
 import { inboxSettings, SALES_REPLY_TO } from '@/lib/sales-inbox/store'
-import { contact, contactUrl, conversations, provider, SalesProviderError } from '@/lib/sales-leads/provider'
-import { reconcileLead } from '@/lib/sales-leads/ingestion'
+import { contact, contactUrl, conversations, provider, SalesProviderError, smsSender } from '@/lib/sales-leads/provider'
+import { refreshLeadMessages } from '@/lib/sales-leads/ingestion'
+import { canonicalSmsStatus } from '@/lib/sales-inbox/status'
 import { smsAllowed } from '@/lib/appointment-messages/schedule'
-import { sendEmail } from '@/lib/mail/send'
 import { getAdminUserById } from '@/lib/data/admin-users'
 import { toPlainText } from '@/lib/mail/layout'
 import { stop, transaction } from '@/lib/sales-leads/store'
 
 export function assertInboxAccess(admin: {role:string;userId:string}, lead: any) {
-  if (!lead || (admin.role !== 'super_admin' && lead.assignee_id !== admin.userId)) throw new Error('Lead not available to this salesperson')
+  if (!['super_admin','sales_rep'].includes(admin.role) || !lead || (admin.role !== 'super_admin' && lead.assignee_id !== admin.userId)) throw new Error('Lead not available to this salesperson')
 }
 async function accessible(id: string) {
   const admin = await requireAdmin()
@@ -39,20 +39,25 @@ async function readiness(lead:any) {
   if(host.length!==1) reasons.push('Assign this lead to a salesperson with exactly one active GHL host profile in Leads Settings.')
   if(lead.dnd || lead.stage==='Lost/Do Not Contact') reasons.push('This lead is marked do not contact.')
   if(!cfg.sms_ready) reasons.push('SMS sending readiness has not been confirmed in inbox settings.')
+  const capabilities=(await pool.query("SELECT capabilities FROM sales_settings WHERE id='internal'")).rows[0]?.capabilities
+  const senderConfirmed=capabilities?.portal_sms_sender?.locationId===process.env.GHL_LOCATION_ID && !!capabilities?.portal_sms_sender?.number
+  if(!senderConfirmed) reasons.push('Reconfirm inbox SMS readiness to bind the existing GHL number. API access alone does not verify A2P or sending permission.')
   if(!lead.consent) reasons.push('Documented SMS consent is required.')
   const zone = ['staff','browser'].includes(lead.timezone_origin) ? lead.timezone : null
   if(!smsAllowed(new Date(),zone)) reasons.push('Texting requires a verified recipient timezone and the 8 AM–8 PM local window.')
   const base = host.length===1 && !lead.dnd && lead.stage!=='Lost/Do Not Contact'
-  return { email:!!(base&&lead.email&&process.env.NODE_ENV==='production'),
-    sms:!!(base&&cfg.sms_ready&&lead.consent&&lead.ghl_contact_id&&smsAllowed(new Date(),zone)&&process.env.NODE_ENV==='production'),
+  return { email:false, emailReason:'Manual email is not supported; historical automated email remains available.',
+    sms:!!(base&&cfg.sms_ready&&senderConfirmed&&lead.consent&&lead.ghl_contact_id&&smsAllowed(new Date(),zone)&&process.env.NODE_ENV==='production'),
     reasons:[...reasons,...(process.env.NODE_ENV!=='production'?['Preview does not send live messages. Publish and complete readiness checks first.']:[])] }
 }
 export async function getConversation(leadId:string) {
+  await accessible(leadId)
+  const synchronization = await refreshLeadMessages(leadId)
   const {lead} = await accessible(leadId)
   const [local,external,appointments,ready] = await Promise.all([
     pool.query(`SELECT m.*,COALESCE(e.status,a.status,m.state) AS status,m.error FROM sales_inbox_messages m
       LEFT JOIN email_log e ON e.id=m.email_log_id
-      LEFT JOIN LATERAL (SELECT status FROM sales_activities WHERE provider_id=m.provider_id ORDER BY occurred_at DESC LIMIT 1) a ON true
+      LEFT JOIN LATERAL (SELECT status FROM sales_activities WHERE provider_id=m.provider_id AND lead_id=m.lead_id ORDER BY occurred_at DESC LIMIT 1) a ON true
       WHERE m.lead_id=$1 ORDER BY m.created_at DESC LIMIT 500`,[leadId]),
     pool.query(`SELECT a.* FROM sales_activities a WHERE lead_id=$1 AND kind IN ('inbound_sms','outbound_sms','provider_call','inbound_email','outbound_email')
       AND NOT EXISTS(SELECT 1 FROM sales_inbox_messages m WHERE m.provider_id=a.provider_id)
@@ -66,22 +71,28 @@ export async function getConversation(leadId:string) {
     ...local.rows.map(m=>({...m,status:m.state==='uncertain'?'uncertain':m.status,body:m.body+(m.error?`\n[${m.error}]`:'')})),
     ...external.rows.map(a=>({id:a.id,channel:a.kind==='provider_call'?'call':a.kind.endsWith('email')?'email':'sms',
       direction:a.kind.startsWith('inbound')?'inbound':a.kind==='provider_call'?'event':'outbound',body:a.body,status:a.status,
-      author_name:a.author_name,created_at:a.occurred_at})),
+      provider_id:a.provider_id,source:'ghl',author_name:a.author_name,created_at:a.occurred_at})),
     ...appointments.rows.map(d=>({id:d.id,channel:d.channel,direction:'outbound',subject:d.snapshot?.rendered?.subject,
       body:d.channel==='sms'?d.snapshot?.rendered?.sms:toPlainText(String(d.snapshot?.rendered?.html??'')),
       status:d.email_status??d.state,created_at:d.sent_at??d.claimed_at??d.due_at,author_name:d.snapshot?.copy?.host})),
   ].sort((a,b)=>+new Date(a.created_at)-+new Date(b.created_at))
-  return {lead:{id:lead.id,first_name:lead.first_name,last_name:lead.last_name,email:lead.email,phone:lead.phone},messages,readiness:ready,contactUrl:contactUrl(lead.ghl_contact_id)}
+  await accessible(leadId) // ownership may have changed while awaiting provider I/O
+  return {lead:{id:lead.id,first_name:lead.first_name,last_name:lead.last_name,email:lead.email,phone:lead.phone},
+    messages:messages.map(m=>({...m,source:m.source??(m.channel==='sms'?'portal':'history'),
+      source_id:m.id,provider_id:m.provider_id??null,raw_status:m.status,
+      canonical_status:m.channel==='sms'?canonicalSmsStatus(m.status):m.status})),
+    synchronization,readiness:ready,contactUrl:contactUrl(lead.ghl_contact_id)}
 }
 export async function refreshConversation(leadId:string) {
   await accessible(leadId)
-  await reconcileLead(leadId)
+  const result=await refreshLeadMessages(leadId)
+  if(result.state!=='current') throw new Error(result.reason??'Provider refresh unavailable; showing saved history')
+  return result
 }
-const sendSchema=z.object({leadId:z.string().min(1),channel:z.enum(['email','sms']),subject:z.string().trim().max(200).regex(/^[^\r\n]*$/).optional(),
+const sendSchema=z.object({leadId:z.string().min(1),channel:z.literal('sms'),subject:z.string().trim().max(200).regex(/^[^\r\n]*$/).optional(),
   body:z.string().trim().min(1).max(10000),requestId:z.string().uuid()})
 export async function sendMessage(input:unknown) {
   const data=sendSchema.parse(input), admin=await requireAdmin()
-  if(data.channel==='email'&&!data.subject) throw new Error('Enter an email subject')
   if(data.channel==='sms'&&data.body.length>1600) throw new Error('Text messages are limited to 1,600 characters')
   const fingerprint=createHash('sha256').update(JSON.stringify({...data,author:admin.userId})).digest('hex')
   const c=await pool.connect()
@@ -94,18 +105,20 @@ export async function sendMessage(input:unknown) {
     const existing=(await c.query('SELECT * FROM sales_inbox_messages WHERE id=$1',[data.requestId])).rows[0]
     if(existing) {
       if(existing.fingerprint!==fingerprint) throw new Error('This request ID already belongs to another message')
-      return {state:existing.state,error:existing.error}
+      return {state:['accepted','sent','delivered','read'].includes(existing.state)?'sent':existing.state,canonical_state:existing.state,error:existing.error}
     }
     if(process.env.NODE_ENV!=='production') throw new Error('Live sending is disabled in preview')
     const cfg=await inboxSettings(c)
+    const capabilities=(await c.query("SELECT capabilities FROM sales_settings WHERE id='internal'")).rows[0]?.capabilities
+    if(Date.parse(capabilities?.sync_rate_limit?.until)>Date.now()) throw new Error('Provider is rate limited; try again after the cooldown')
     if(lead.dnd||lead.stage==='Lost/Do Not Contact') throw new Error('This lead is marked do not contact')
     const hosts=(await c.query('SELECT * FROM appointment_hosts WHERE admin_id=$1 AND active=true',[lead.assignee_id])).rows
     if(hosts.length!==1) throw new Error('Assigned salesperson needs one verified host profile')
     const host=hosts[0]
     const staff=await getAdminUserById(host.admin_id)
     if(!staff?.active||!staff.confirmedAt) throw new Error('Assigned salesperson must have an active, verified account')
-    let replyTo:string|undefined
-    if(data.channel==='sms') {
+    let fromNumber:string
+    {
       if(!cfg.sms_ready) throw new Error('Confirm SMS readiness first')
       if(!lead.consent) throw new Error('Documented SMS consent is required')
       if(!smsAllowed(new Date(),['staff','browser'].includes(lead.timezone_origin)?lead.timezone:null)) throw new Error('Texting is only available 8 AM–8 PM in the verified recipient timezone')
@@ -115,16 +128,14 @@ export async function sendMessage(input:unknown) {
         String(remote.phone??'').replace(/[^+\d]/g,'')!==lead.phone||!/^\+[1-9]\d{9,14}$/.test(lead.phone)) throw new Error('Contact phone identity needs review')
       if(remote.dnd||remote.dndSettings?.SMS?.status==='active') throw new Error('Contact has opted out of texts')
       const threads=await conversations(lead.ghl_contact_id)
-      if(threads.length!==1||threads[0].assignedTo!==host.ghl_user_id) throw new Error('Assign the GHL conversation to this salesperson before texting')
-    } else {
-      if(!z.string().email().safeParse(lead.email).success) throw new Error('Lead email address is invalid')
-      if(lead.ghl_contact_id) {
-        const remote=await contact(lead.ghl_contact_id)
-        if(!remote||remote.id!==lead.ghl_contact_id||remote.locationId!==process.env.GHL_LOCATION_ID||
-          String(remote.email??'').toLowerCase()!==lead.email.toLowerCase()) throw new Error('Contact email identity needs review')
-        if(remote.dnd||remote.dndSettings?.Email?.status==='active') throw new Error('Contact has opted out of emails')
-      }
-      replyTo=SALES_REPLY_TO
+      if(remote.assignedTo!==host.ghl_user_id ||
+        threads.length>1 || (threads.length===1 && (threads[0].assignedTo!==host.ghl_user_id ||
+          threads[0].contactId!==lead.ghl_contact_id || threads[0].locationId!==process.env.GHL_LOCATION_ID)))
+        throw new Error('Assign the GHL contact and conversation to this salesperson before texting')
+      fromNumber=await smsSender()
+      if(capabilities?.portal_sms_sender?.locationId!==process.env.GHL_LOCATION_ID ||
+        capabilities?.portal_sms_sender?.number!==fromNumber)
+        throw new Error('Existing SMS number needs confirmation in inbox settings; sender changed or is not bound')
     }
     // Commit intent before provider call. Crashes/network uncertainty never trigger blind replay.
     await c.query(`INSERT INTO sales_inbox_messages(id,lead_id,channel,direction,subject,body,author_id,author_name,state,fingerprint)
@@ -132,24 +143,16 @@ export async function sendMessage(input:unknown) {
     [data.requestId,lead.id,data.channel,data.subject??'',data.body,admin.userId,host.name,fingerprint])
     await stop(c,lead.id,'manual_conversation')
     try {
-      let providerId:string|undefined,logId:string|undefined
-      if(data.channel==='sms') {
-        const result=await provider('/conversations/messages','POST',{type:'SMS',contactId:lead.ghl_contact_id,message:data.body})
+      let providerId:string|undefined
+      {
+        const result=await provider('/conversations/messages','POST',{type:'SMS',contactId:lead.ghl_contact_id,message:data.body,fromNumber,toNumber:lead.phone,status:'pending'})
         if(!result.messageId) throw new SalesProviderError(0,true)
         providerId=result.messageId
-      } else {
-        const result=await sendEmail('sales_personal',lead.email,{subject:data.subject!,body:data.body,host:host.name},
-          {replyTo,idempotencyKey:data.requestId,metadata:{leadId:lead.id,inboxMessageId:data.requestId}})
-        logId=result.logId
-        if(!result.ok) {
-          const state=result.uncertain?'uncertain':'failed'
-          await c.query("UPDATE sales_inbox_messages SET state=$2,email_log_id=$3,error='Email acceptance not confirmed; review before another send' WHERE id=$1",[data.requestId,state,logId])
-          return {state,error:'Email acceptance not confirmed; review before another send'}
-        }
-        providerId=result.providerId
       }
-      await c.query("UPDATE sales_inbox_messages SET state='sent',provider_id=$2,email_log_id=$3 WHERE id=$1",[data.requestId,providerId,logId??null])
-      return {state:'sent'}
+      await c.query("UPDATE sales_inbox_messages SET state='accepted',provider_id=$2 WHERE id=$1",[data.requestId,providerId])
+      // Existing composer calls provider acceptance "sent"; keep that wire
+      // alias until the separate UI integration consumes canonical_state.
+      return {state:'sent',canonical_state:'accepted'}
     } catch(error) {
       const state=error instanceof SalesProviderError&&!error.uncertain?'failed':'uncertain'
       const message=state==='failed'?'Provider rejected this message. Check sending readiness.':'Provider acceptance uncertain. Do not resend without checking.'
@@ -170,8 +173,12 @@ export async function saveInboxSettings(input:unknown) {
   const admin=await requireAdmin()
   if(admin.role!=='super_admin') throw new Error('Only a super admin can configure inbox sending')
   const data=z.object({smsReady:z.boolean()}).parse(input)
+  const number=data.smsReady?await smsSender():null
   await transaction(async c=>{
     await inboxSettings(c)
+    await c.query("INSERT INTO sales_settings(id) VALUES('internal') ON CONFLICT DO NOTHING")
+    if(number) await c.query(`UPDATE sales_settings SET capabilities=jsonb_set(capabilities,'{portal_sms_sender}',$1::jsonb) WHERE id='internal'`,
+      [JSON.stringify({number,locationId:process.env.GHL_LOCATION_ID,confirmedBy:admin.userId,confirmedAt:new Date().toISOString()})])
     await c.query("UPDATE sales_inbox_settings SET sms_ready=$1 WHERE id='internal'",[data.smsReady])
   })
 }

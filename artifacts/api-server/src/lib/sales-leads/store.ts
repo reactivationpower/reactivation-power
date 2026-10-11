@@ -34,9 +34,13 @@ export async function activity(c: PoolClient, leadId: string, input: {
   const row = (await c.query(`INSERT INTO sales_activities(id,lead_id,kind,body,author_id,author_name,disposition,next_followup_at,provider_id,status,occurred_at,dedupe_key)
     VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,COALESCE($11::timestamptz,now()),$12)
     ON CONFLICT(dedupe_key) DO UPDATE SET status=CASE
-      WHEN sales_activities.kind IN ('inbound_sms','outbound_sms') AND sales_activities.status IN ('delivered','received','read','failed','undelivered')
-        AND EXCLUDED.status IN ('pending','queued','sent','') THEN sales_activities.status
+      WHEN sales_activities.kind IN ('inbound_sms','outbound_sms') AND (
+        lower(sales_activities.status) IN ('delivered','received','read','failed','undelivered') OR
+        (lower(sales_activities.status)='sent' AND lower(EXCLUDED.status) IN ('accepted','pending','queued','sending','')) OR
+        lower(EXCLUDED.status) NOT IN ('accepted','pending','queued','sending','sent','delivered','received','read','failed','undelivered'))
+        THEN sales_activities.status
       ELSE COALESCE(EXCLUDED.status,sales_activities.status) END
+    WHERE sales_activities.lead_id=EXCLUDED.lead_id AND sales_activities.kind=EXCLUDED.kind
     RETURNING *, (xmax=0) AS inserted`, [activityId, leadId, input.kind, input.body?.slice(0, 10000) ?? '', input.authorId ?? null,
     input.authorName ?? null, input.disposition ?? null, input.nextFollowupAt ?? null, input.providerId ?? null, input.status ?? null,
     input.occurredAt ?? null, input.dedupeKey ?? activityId])).rows[0]

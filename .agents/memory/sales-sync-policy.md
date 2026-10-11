@@ -10,3 +10,11 @@ Do not add an untracked provider write to form submission as a speed workaround.
 Booking must reuse the durable contact queue, never create a contact independently. Uncertain contact creation must block staff retry and booking confirmation.
 **Why:** The booking handoff and sales queue share identity ownership; protecting just one entry point still permits a duplicate after a lost provider response.
 **How to apply:** Reconcile evidence before another write; never treat a missing local contact ID as proof that the provider did not accept creation.
+
+Portal SMS must pin the operator-confirmed existing location number, not rely on
+GHL's implicit sender or infer a sender from prior conversations.
+**Why:** Verified read access and a single currently active number are not proof
+of A2P/send readiness or permission to silently switch numbers later.
+**How to apply:** Keep readiness confirmation separate from read-only capability
+probes. Uncertain sends need provider evidence, never body/time matching or blind
+replay. See docs/portal-sms-transport.md for the integration contract and limits.

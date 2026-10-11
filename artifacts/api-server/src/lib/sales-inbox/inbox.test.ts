@@ -2,17 +2,18 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vites
 import pg from 'pg'
 import { randomUUID } from 'node:crypto'
 import { readFileSync } from 'node:fs'
-const f=vi.hoisted(()=>({pool:null as any,admin:{userId:'admin',role:'sales_rep',name:'Agent'},send:vi.fn(),contact:vi.fn(),threads:vi.fn(),provider:vi.fn()}))
+const f=vi.hoisted(()=>({pool:null as any,admin:{userId:'admin',role:'sales_rep',name:'Agent'},send:vi.fn(),contact:vi.fn(),threads:vi.fn(),provider:vi.fn(),sender:vi.fn(),messages:vi.fn()}))
 vi.mock('@workspace/db',()=>({pool:{query:(...a:any[])=>f.pool.query(...a),connect:()=>f.pool.connect()}}))
 vi.mock('../auth/admin-session',()=>({requireAdmin:async()=>f.admin}))
 vi.mock('../data/admin-users',()=>({getAdminUserById:async(id:string)=>({id,active:true,confirmedAt:'2026-01-01'})}))
 vi.mock('../mail/send',()=>({sendEmail:f.send}))
 vi.mock('../sales-leads/dispatch',()=>({nudgeSalesSync:vi.fn()}))
-vi.mock('../sales-leads/provider',async original=>({...await original<any>(),contact:f.contact,conversations:f.threads,provider:f.provider}))
-import { sendMessage, getConversation, listInbox } from '../../actions/sales-inbox'
+vi.mock('../sales-leads/provider',async original=>({...await original<any>(),contact:f.contact,conversations:f.threads,provider:f.provider,smsSender:f.sender,messages:f.messages,appointments:async()=>[],notes:async()=>[]}))
+import { sendMessage, getConversation, listInbox, refreshConversation } from '../../actions/sales-inbox'
 import { updateSalesLead } from '../../actions/sales-leads'
 import { ingestReceivedEmail } from './inbound'
 import { replyAddress } from './store'
+import { ingestMessages, refreshLeadMessages } from '../sales-leads/ingestion'
 const schema=`inbox_fixture_${randomUUID().replaceAll('-','')}`
 describe.skipIf(!process.env.SUPABASE_DB_URL)('unified inbox isolated persistence, mocked delivery',()=>{
   let admin:pg.Pool
@@ -38,7 +39,10 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('unified inbox isolated persistenc
       INSERT INTO appointment_hosts(ghl_user_id,admin_id,name,reply_email) VALUES('host','admin','Morgan','unused@example.invalid');
       INSERT INTO sales_inbox_settings(id,email_domain,email_ready,sms_ready) VALUES('internal','replies.patientpipeline.app',true,true);`)
     f.contact.mockResolvedValue({id:'contact',locationId:process.env.GHL_LOCATION_ID,email:'fixture@example.invalid',phone:'+12125550199',assignedTo:'host'})
-    f.threads.mockResolvedValue([{id:'thread',assignedTo:'host'}]);f.provider.mockResolvedValue({messageId:'provider-sms'})
+    f.threads.mockResolvedValue([{id:'thread',assignedTo:'host',contactId:'contact',locationId:process.env.GHL_LOCATION_ID}]);f.provider.mockResolvedValue({messageId:'provider-sms'})
+    f.sender.mockResolvedValue('+12125550000');f.messages.mockResolvedValue({messages:[],nextPage:false})
+    await f.pool.query(`INSERT INTO sales_settings(id,capabilities) VALUES('internal',$1) ON CONFLICT(id) DO UPDATE SET capabilities=EXCLUDED.capabilities`,
+      [JSON.stringify({portal_sms_sender:{number:'+12125550000',locationId:process.env.GHL_LOCATION_ID}})])
     f.send.mockResolvedValue({ok:true,logId:'mail-log',providerId:'provider-email'})
   })
   const message=(channel:'sms'|'email'='sms')=>({leadId:'lead',requestId:randomUUID(),channel,body:'Synthetic message',subject:'Synthetic subject'})
@@ -46,16 +50,14 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('unified inbox isolated persistenc
     const input=message()
     const results=await Promise.all([sendMessage(input),sendMessage(input)])
     expect(results.map(r=>r.state)).toEqual(['sent','sent']);expect(f.provider).toHaveBeenCalledTimes(1)
-    expect(f.provider).toHaveBeenCalledWith('/conversations/messages','POST',expect.objectContaining({type:'SMS',contactId:'contact'}))
+    expect(results.map(r=>r.canonical_state)).toEqual(['accepted','accepted'])
+    expect(f.provider).toHaveBeenCalledWith('/conversations/messages','POST',expect.objectContaining({type:'SMS',contactId:'contact',fromNumber:'+12125550000',toNumber:'+12125550199',status:'pending'}))
     await expect(sendMessage({...input,body:'Changed'})).rejects.toThrow('another message')
     expect((await getConversation('lead')).messages).toHaveLength(1)
   })
-  it('uses Resend with Jacob’s mailbox, without receiving setup',async()=>{
-    await f.pool.query("UPDATE sales_inbox_settings SET email_ready=false,email_domain=''")
-    await sendMessage(message('email'))
-    expect(f.send.mock.calls[0][0]).toBe('sales_personal')
-    expect(f.send.mock.calls[0][3].replyTo).toBe('jacobb@patientpipeline.app')
-    expect((await f.pool.query('SELECT count(*) FROM sales_inbox_threads')).rows[0].count).toBe('0')
+  it('rejects manual email without calling a delivery provider',async()=>{
+    await expect(sendMessage(message('email'))).rejects.toThrow()
+    expect(f.send).not.toHaveBeenCalled();expect(f.provider).not.toHaveBeenCalled()
   })
   it('rejects cross-salesperson reads, lists, and sends',async()=>{
     expect((await listInbox()).leads.map(l=>l.id)).toEqual(['lead'])
@@ -86,6 +88,36 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('unified inbox isolated persistenc
     const input=message()
     expect((await sendMessage(input)).state).toBe('uncertain');expect((await sendMessage(input)).state).toBe('uncertain')
     expect(f.provider).toHaveBeenCalledTimes(1)
+  })
+  it('supports first SMS only with verified contact ownership and explicit sender',async()=>{
+    f.threads.mockResolvedValue([])
+    expect(await sendMessage(message())).toMatchObject({state:'sent',canonical_state:'accepted'})
+    f.contact.mockResolvedValue({...await f.contact(),assignedTo:'other'})
+    await expect(sendMessage(message())).rejects.toThrow('Assign')
+  })
+  it('does not silently switch the configured sender',async()=>{
+    f.sender.mockResolvedValue('+12125550001')
+    await expect(sendMessage(message())).rejects.toThrow('sender changed')
+    expect(f.provider).not.toHaveBeenCalled()
+  })
+  it('persists duplicate inbound replies once and never regresses terminal delivery',async()=>{
+    await sendMessage(message())
+    const row={id:'provider-sms',type:2,direction:'outbound',status:'delivered',dateAdded:'2026-10-12T14:00Z',contactId:'contact'}
+    await ingestMessages('lead',[row,{...row,status:'pending'},{...row,status:'failed'}])
+    expect((await f.pool.query("SELECT state FROM sales_inbox_messages")).rows[0].state).toBe('delivered')
+    const reply={...row,id:'reply',direction:'inbound',body:'STOP',status:'received'}
+    await ingestMessages('lead',[reply,reply,{...reply,contactId:'other-contact',id:'wrong'}])
+    expect((await f.pool.query("SELECT count(*) FROM sales_activities WHERE kind='inbound_sms'")).rows[0].count).toBe('1')
+    expect((await f.pool.query("SELECT dnd FROM sales_leads WHERE id='lead'")).rows[0].dnd).toBe(true)
+    await expect(sendMessage(message())).rejects.toThrow('do not contact')
+  })
+  it('bounds concurrent refresh and reports provider outage without losing history',async()=>{
+    f.messages.mockRejectedValue(new Error('offline'))
+    const states=await Promise.all([refreshLeadMessages('lead'),refreshLeadMessages('lead')])
+    expect(states.map(s=>s.state).sort()).toEqual(['throttled','unavailable'])
+    expect(f.messages).toHaveBeenCalledTimes(1)
+    expect((await getConversation('lead')).synchronization.state).toBe('throttled')
+    await expect(refreshConversation('lead')).rejects.toThrow('Refresh in progress')
   })
   it('still receives replies to previously sent thread addresses once, notifies staff and stops outreach',async()=>{
     const address=await replyAddress('lead')

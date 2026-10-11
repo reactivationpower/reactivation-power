@@ -5,9 +5,9 @@ import { activity, enqueue, id, intake, phoneKey, settings, stop, transaction } 
 import { allowed, cadence, canAutomate, elapsedDays } from './cadence'
 import { schedulerHealthy } from './wake'
 import { contact, contactPage, locationId, notes, provider, safeSalesUpsert, SalesProviderError } from './provider'
-import { ingestProviderFacts, providerContext, providerDnd, reconcileLead } from './ingestion'
 import { salesTiming } from './timing'
 import { runInboxInbound } from '../sales-inbox/inbound'
+import { ingestProviderFacts, providerContext, providerDnd, reconcileLead, refreshLeadMessages } from './ingestion'
 function importPhone(value: unknown): string {
   try { return phoneKey(String(value ?? '')) } catch { return '' } // original value remains in submission context for staff review
 }
@@ -226,7 +226,7 @@ async function boundedReconciliation() {
     WHERE id IN (SELECT id FROM sales_leads WHERE source<>'test_fixture' AND ghl_contact_id IS NOT NULL AND reconcile_at<=now()
       ORDER BY reconcile_at FOR UPDATE SKIP LOCKED LIMIT 5) RETURNING id`)).rows)
   for (const row of rows) {
-    try { await reconcileLead(row.id) }
+    try { await refreshLeadMessages(row.id,false) }
     catch { await pool.query("UPDATE sales_leads SET reconcile_at=now()+interval '30 minutes',sync_state='failed',sync_error='Reconciliation unavailable: check contact/message/notes/calendar read permissions' WHERE id=$1", [row.id]) }
   }
 }
