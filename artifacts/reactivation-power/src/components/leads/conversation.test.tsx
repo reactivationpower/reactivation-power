@@ -53,6 +53,17 @@ it('blocks texts over 1600 characters', async () => {
   expect((screen.getByTestId('button-send-sms') as HTMLButtonElement).disabled).toBe(true)
 })
 
+it('explains that external email replies do not stop outreach and refreshes lead context after a text', async () => {
+  api.getConversation.mockResolvedValue(conv('A'))
+  api.sendMessage.mockResolvedValue({ state: 'sent', canonical_state: 'accepted' })
+  const { qc } = wrap(<LeadConversation leadId="A" />)
+  const invalidate = vi.spyOn(qc, 'invalidateQueries')
+  expect((await screen.findByTestId('external-reply-warning')).textContent).toContain('does not automatically stop portal outreach')
+  fireEvent.change(screen.getByTestId('input-sms-body'), { target: { value: 'Synthetic only' } })
+  fireEvent.click(screen.getByTestId('button-send-sms'))
+  await waitFor(() => expect(invalidate).toHaveBeenCalledWith({ queryKey: ['sales-leads'] }))
+})
+
 it('isolates drafts when switching contacts', async () => {
   api.getConversation.mockImplementation((id: string) => Promise.resolve(conv(id)))
   const { qc, rerender } = wrap(<LeadConversation leadId="A" />)

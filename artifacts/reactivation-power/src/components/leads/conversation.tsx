@@ -98,6 +98,7 @@ function Thread({ leadId, onBack, embedded }: { leadId: string; onBack?: () => v
         <Banner kind="warn"><p className="font-medium">Some sending is blocked</p><ul className="mt-1 list-disc pl-5">{readiness.reasons.map((r, i) => <li key={i}>{r}</li>)}</ul></Banner>
       )}
       <SmsComposer leadId={leadId} ready={readiness.sms} to={lead.phone} />
+      <p className="text-xs text-muted-foreground" data-testid="external-reply-warning">Email replies are read in the external Reply-To mailbox, not here. An external email reply does not automatically stop portal outreach; staff must update the lead before further contact.</p>
     </div>
   )
 }
@@ -232,6 +233,7 @@ export function SmsComposer({ leadId, ready, to }: { leadId: string; ready: bool
       setOutcome(accepted ? { state: 'sent' } : r)
       if (accepted) { setBody(''); pending.current = null; toast.success('Text accepted by provider') }
       qc.invalidateQueries({ queryKey: conversationKey(leadId) })
+      qc.invalidateQueries({ queryKey: ['sales-leads'] })
     },
     onError: (e) => setOutcome({ state: 'error', error: errMsg(e) }),
   })
