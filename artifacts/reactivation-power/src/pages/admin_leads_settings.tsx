@@ -4,6 +4,7 @@ import { QuickSwitches } from '@/components/leads/quick-switches'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { salesCadencePreview, saveSalesSettings, verifySalesCapabilities } from '@/app/actions/sales-leads'
+import { salesAutomationRequirements, schedulerHealthy, SALES_AUTOMATION_GHL_CHECKS } from '@workspace/shared/sales-automation'
 import { Banner, ErrorBox, Field, LeadsTabs, Pill, Skeleton, btn, btn2, card, errMsg, fmt, inp, useDashboard, viewerTz } from '@/components/leads/ui'
 
 const TEXT_LABELS = ['Text 1 — day 1', 'Text 2 — day 2', 'Text 3 — day 3', 'Text 4 — about day 7', 'Text 5 — about day 14', 'Text 6 — about day 28 (last text)']
@@ -15,6 +16,7 @@ export default function AdminLeadsSettingsPage() {
   const [draft, setDraft] = useState<{ assignee?: string; texts?: string[]; days?: string }>({})
   const [tz, setTz] = useState(viewerTz)
   const save = useMutation({ mutationFn: saveSalesSettings, onSuccess: () => done('Settings saved'), onError: (e) => toast.error(errMsg(e)) })
+  const toggle = useMutation({ mutationFn: (input: { enableAutomation: boolean }) => saveSalesSettings(input), onSuccess: () => done('Settings saved') })
   const verify = useMutation({ mutationFn: verifySalesCapabilities, onSuccess: () => done('Capabilities checked'), onError: (e) => toast.error(errMsg(e)) })
   const preview = useQuery({ queryKey: ['sales-leads', 'cadence', tz], queryFn: () => salesCadencePreview(tz), retry: false, enabled: !!q.data })
 
@@ -29,9 +31,11 @@ export default function AdminLeadsSettingsPage() {
   const dirty = draft.assignee !== undefined || draft.texts !== undefined || draft.days !== undefined
   const caps = Object.entries(s.capabilities)
   const wake = s.capabilities.scheduler_wake
-  const wakeAt = Date.parse(wake?.checkedAt ?? '')
-  const schedulerReady = wake?.state === 'verified' && Number.isFinite(wakeAt) && wakeAt <= Date.now() && Date.now() - wakeAt < 10 * 60_000
-  const failing = caps.filter(([k, c]) => ['contacts', 'conversations', 'messages', 'notes', 'appointments', 'sms_write'].includes(k) && !['ok', 'verified', 'passed', 'operator_confirmed'].includes(c.state))
+  const schedulerReady = schedulerHealthy(s.capabilities)
+  const requirements = salesAutomationRequirements(s)
+  const ready = requirements.every((r) => r.ok)
+  const failing = requirements.filter((r) => !r.ok && (r.key === 'sms_write' || (SALES_AUTOMATION_GHL_CHECKS as readonly string[]).includes(r.key)))
+  const busy = save.isPending || toggle.isPending
 
   return (
     <div className="space-y-6">
@@ -111,11 +115,28 @@ export default function AdminLeadsSettingsPage() {
       <section className={card + ' space-y-3'} data-testid="section-automation">
         <div className="flex items-center justify-between"><h2 className="font-semibold">Automatic texts to unbooked leads</h2><Pill tone={s.automation_enabled ? 'bg-success/15 text-success' : undefined}>{s.automation_enabled ? 'On' : 'Off'}</Pill></div>
         <p className="text-sm text-muted-foreground">Texts new website leads who haven't booked. Needs an assignee, passing checks and an approved text. Older leads are not included.</p>
-        <button className={s.automation_enabled ? btn2 : btn} disabled={ro || save.isPending || (!s.automation_enabled && (!schedulerReady || !s.default_assignee_id || !s.approved_at || !s.scope_reviewed_at || failing.length > 0 || caps.length === 0))}
-          onClick={() => save.mutate({ enableAutomation: !s.automation_enabled })} data-testid="button-toggle-automation">{s.automation_enabled ? 'Turn automation off' : 'Enable automation'}</button>
+        <button className={s.automation_enabled ? btn2 : btn} disabled={ro || busy || (!s.automation_enabled && !ready)}
+          onClick={() => toggle.mutate({ enableAutomation: !s.automation_enabled })} data-testid="button-toggle-automation">{s.automation_enabled ? 'Turn automation off' : 'Enable automation'}</button>
+        {toggle.isError && <Banner kind="error"><span data-testid="automation-error">{errMsg(toggle.error)}</span></Banner>}
+        {!s.automation_enabled && <AutomationChecklist items={requirements} />}
       </section>
         </div>
       </details>
+    </div>
+  )
+}
+
+function AutomationChecklist({ items }: { items: ReturnType<typeof salesAutomationRequirements> }) {
+  const left = items.filter((r) => !r.ok).length
+  return (
+    <div className="space-y-2 border-t border-border pt-3" data-testid="automation-checklist">
+      <p className="text-sm font-medium">{left === 0 ? 'Everything is ready.' : `${left} step${left === 1 ? '' : 's'} left before you can turn this on:`}</p>
+      <ul className="space-y-1.5 text-sm">{items.map((r) => (
+        <li key={r.key} className="flex items-start gap-2" data-testid={`automation-req-${r.key}`} data-ok={r.ok ? 'true' : 'false'}>
+          <span aria-hidden className={`mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${r.ok ? 'bg-success/15 text-success' : 'bg-destructive/15 text-destructive'}`}>{r.ok ? '✓' : '✕'}</span>
+          <div><p><span className="sr-only">{r.ok ? 'Done: ' : 'Not done: '}</span>{r.label}</p>{!r.ok && <p className="text-xs text-muted-foreground">{r.fix}</p>}</div>
+        </li>
+      ))}</ul>
     </div>
   )
 }

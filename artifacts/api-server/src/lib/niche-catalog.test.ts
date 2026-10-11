@@ -34,6 +34,7 @@ const NICHE_CATALOG_MODULES = [
 const SHARED_MODULES = [
   'marketing-analytics',
   'sales-leads',
+  'sales-automation',
   'analytics-types',
   'booking-funnel',
   'call-time',

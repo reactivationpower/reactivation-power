@@ -23,11 +23,8 @@ export function nativeWakeCommand(target: string) {
   )::extensions.http_request);`
 }
 
-export function schedulerHealthy(capabilities: Record<string, any>, now = Date.now()) {
-  const wake = capabilities.scheduler_wake
-  const at = Date.parse(wake?.checkedAt ?? '')
-  return wake?.state === 'verified' && Number.isFinite(at) && at <= now && now - at < 10 * 60_000
-}
+/** One copy shared with the web app's automation checklist. */
+export { schedulerHealthy } from '@workspace/shared/sales-automation'
 
 /** Operator provisioning, not a public/RPC action. Never return decrypted secrets. */
 export async function configureNativeWake(target: string) {

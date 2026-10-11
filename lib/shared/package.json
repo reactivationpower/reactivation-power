@@ -24,6 +24,7 @@
     "./sales-leads": "./src/sales-leads.ts",
     "./script-merge": "./src/script-merge.ts",
     "./types": "./src/types.ts",
-    "./us-timezones": "./src/us-timezones.ts"
+    "./us-timezones": "./src/us-timezones.ts",
+    "./sales-automation": "./src/sales-automation.ts"
   }
 }

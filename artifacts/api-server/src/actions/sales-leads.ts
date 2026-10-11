@@ -7,7 +7,7 @@ import { activity, emailKey, enqueue, id, intake, phoneKey, settings, stop, tran
 import { allowed, cadence, suggestedFollowup, validTimezone } from '@/lib/sales-leads/cadence'
 import { contactPage, contactUrl, verifyCapabilities } from '@/lib/sales-leads/provider'
 import { runSalesWorker } from '@/lib/sales-leads/worker'
-import { schedulerHealthy } from '@/lib/sales-leads/wake'
+import { salesAutomationMissing } from '@workspace/shared/sales-automation'
 import { withSyncState } from '@/lib/sales-leads/sync-state'
 import { assignTextNumbers, followupTexts, validateFollowupTexts } from '@/lib/sales-leads/followup-texts'
 const safeText = (s: unknown, max = 200) => typeof s === 'string' ? s.trim().slice(0, max) : ''
@@ -159,14 +159,15 @@ export async function saveSalesSettings(input: { defaultAssigneeId?: string; fol
       } })
     }
     if (input.enableAutomation) {
-      const caps = cfg.capabilities
-      if (!schedulerHealthy(caps)) throw new Error('Wait for a healthy scheduled wake on the published app before enabling automation. The Supabase five-minute job must be active.')
-      if (!(assignment ?? cfg.default_assignee_id) || !(update.approved_at ?? cfg.approved_at) || !(update.scope_reviewed_at ?? cfg.scope_reviewed_at)) throw new Error('Review the default assignee, follow-up texts, and eligible new-lead scope first')
-      // No read-only probe can prove SMS write permission, number/A2P configuration, or delivery.
-      // Do not let a checkbox bypass missing verification; operator review is explicit and auditable.
-      if (!['verified', 'operator_confirmed'].includes(caps.sms_write?.state)) throw new Error('Confirm the existing GoHighLevel conversations/message.write permission, SMS-enabled number, and A2P configuration before enabling. No real send was authorized.')
-      for (const key of ['contacts', 'conversations', 'messages', 'notes', 'appointments']) if (caps[key]?.state !== 'verified') throw new Error(`Verify GoHighLevel ${key} capability first`)
-      if (!cfg.capabilities_checked_at || Date.now() - new Date(cfg.capabilities_checked_at).getTime() > 86400000) throw new Error('Recheck capabilities before enabling')
+      // Same rules the settings page shows as a checklist. No read-only probe can prove SMS write
+      // permission, number/A2P configuration, or delivery, so sms_write needs explicit operator review.
+      const missing = salesAutomationMissing({
+        default_assignee_id: (assignment ?? cfg.default_assignee_id) as string | null,
+        approved_at: (update.approved_at ?? cfg.approved_at) as Date | string | null,
+        scope_reviewed_at: (update.scope_reviewed_at ?? cfg.scope_reviewed_at) as Date | string | null,
+        capabilities_checked_at: cfg.capabilities_checked_at, capabilities: cfg.capabilities,
+      })
+      if (missing.length) throw new Error(missing[0]!.error)
       update.enabled_at = new Date(); update.automation_enabled = true
     } else if (input.enableAutomation === false) update.automation_enabled = false
     const entries = Object.entries(update)
