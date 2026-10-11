@@ -3,7 +3,6 @@ import { Link } from "wouter";
 import { useSearch } from 'wouter'
 import { CalendarClock, CheckCircle2 } from 'lucide-react'
 import { BookingCalendar } from '@/components/landing/booking-calendar'
-import { BookingHelp } from '@/components/landing/booking-help'
 import { usePageData } from '@/hooks/use-page-data'
 import { PageError, PageLoading } from '@/components/page-status'
 
@@ -92,7 +91,6 @@ export default function BookACallPage() {
             </div>
           )}
         </div>
-        <BookingHelp bookingRef={bookingRef} funnelSource={funnelSource} thankYouHref={thankYouHref} />
       </section>
 
       <footer className="border-t border-border bg-card">

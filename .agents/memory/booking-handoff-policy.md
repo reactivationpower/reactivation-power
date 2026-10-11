@@ -55,3 +55,7 @@ The user approved building booking confirmation email/text, a 24-hour email/text
 **Why:** The user accepted the reminder discussion and explicitly recalled the existing 8 AM–8 PM device-timezone window. This is appointment messaging, distinct from the stricter weekday Eastern business-hour limits on unbooked-lead outreach.
 
 **How to apply:** Use the captured browser/device timezone (not a claim of GPS location). Skip overdue reminders and avoid clustered texts on short-notice bookings. The final text focuses on joining from a computer rather than repeating the walkthrough request. Never backfill historical appointments or enable production sends merely by deploying the feature.
+
+The user removed the visitor-facing "Check booking status" / "Request scheduling help" buttons from the booking calendar page.
+**Why:** The user said the live page has no reason to expose calendar-testing controls.
+**How to apply:** Don't re-add visitor buttons for status checks or help requests; server-side reconciliation and help states stay.
