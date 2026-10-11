@@ -3,10 +3,12 @@ import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import {
+  ALL_SERVICES,
   CONCERN_OPTIONS,
   SERVICE_GROUPS,
   displayNicheName,
   matchNicheByName,
+  publicServiceName,
   suggestNicheForService,
 } from '@workspace/niche-catalog'
 import { extractSlots, formatPhone } from '@workspace/shared'
@@ -103,6 +105,43 @@ describe('@workspace/niche-catalog is the only copy', () => {
     )?.niche).toBe(canonicalNiche)
     expect(matchNicheByName('SoftWave/shock wave', [niche])).toBe(niche)
     expect(displayNicheName('Chiropractic')).toBe('Chiropractic')
+  })
+
+  it('points every lead-form extra checkbox at a niche in the Weight Loss group', () => {
+    const weightNiches = new Set(
+      SERVICE_GROUPS.find((group) => group.id === 'weight')!.services.map(
+        (service) => service.niche,
+      ),
+    )
+    const extras = SERVICE_GROUPS.flatMap((group) => group.formExtras ?? [])
+    expect(extras.length).toBeGreaterThan(0)
+    for (const extra of extras) {
+      expect(weightNiches.has(extra.niche), extra.niche).toBe(true)
+    }
+    expect(
+      SERVICE_GROUPS.find((group) => group.id === 'chiropractic')?.formExtras,
+    ).toEqual([
+      { label: 'ChiroThin', niche: 'ChiroThin' },
+      {
+        label: 'Other In-Office Weight Loss Programs',
+        niche: 'Weight Loss (Not ChiroThin)',
+      },
+    ])
+    expect(
+      SERVICE_GROUPS.find((group) => group.id === 'medspa')?.formExtras,
+    ).toEqual([
+      { label: 'GLP-1 Patients', niche: 'GLP Patients' },
+      { label: 'Non-GLP-1 Weight Loss', niche: 'Weight Loss (Not ChiroThin)' },
+    ])
+  })
+
+  it('lists each niche once in ALL_SERVICES', () => {
+    const niches = ALL_SERVICES.map((service) => service.niche)
+    expect(new Set(niches).size).toBe(niches.length)
+    expect(publicServiceName('ChiroThin')).toBe('ChiroThin')
+    expect(publicServiceName('Weight Loss (Not ChiroThin)')).toBe(
+      'In-Office Weight Loss Programs',
+    )
   })
 })
 

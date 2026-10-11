@@ -20,7 +20,11 @@ export function ServicesMultiSelect({
   error?: string
   onSelectionChange?: (selected: string[]) => void
 }) {
-  const [selected, setSelected] = useState<string[]>(defaultSelected)
+  // Keyed by niche: a niche shown in two sections (e.g. ChiroThin under
+  // Chiropractic and Weight Loss) is one selection, submitted and counted once.
+  const [selected, setSelected] = useState<string[]>(() => [
+    ...new Set(defaultSelected),
+  ])
 
   function toggle(niche: string) {
     const next = selected.includes(niche)
@@ -64,11 +68,11 @@ export function ServicesMultiSelect({
               {group.title}
             </p>
             <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
-              {group.services.map((service) => {
+              {[...group.services, ...(group.formExtras ?? [])].map((service) => {
                 const checked = selected.includes(service.niche)
                 return (
                   <button
-                    key={service.niche}
+                    key={`${group.id}:${service.niche}`}
                     type="button"
                     role="checkbox"
                     aria-checked={checked}

@@ -28,6 +28,13 @@ export interface ServiceGroup {
    * live in another group. Never rendered as lead-form checkboxes.
    */
   alsoOffered?: string[]
+  /**
+   * Extra lead-form-only checkboxes shown after `services`. Each points at a
+   * niche that already lives in another group (Weight Loss), so the picker
+   * links them by niche and submits each niche once. Kept out of `services`
+   * and `ALL_SERVICES` so cards and label lookups never list it twice.
+   */
+  formExtras?: CatalogService[]
 }
 
 export const PRACTICE_TYPES_LINE =
@@ -49,6 +56,13 @@ export const SERVICE_GROUPS: ServiceGroup[] = [
       { label: 'Gut Health', niche: 'Gut Health' },
     ],
     alsoOffered: ['ChiroThin & Weight Loss Programs'],
+    formExtras: [
+      { label: 'ChiroThin', niche: 'ChiroThin' },
+      {
+        label: 'Other In-Office Weight Loss Programs',
+        niche: 'Weight Loss (Not ChiroThin)',
+      },
+    ],
   },
   {
     id: 'medspa',
@@ -73,6 +87,10 @@ export const SERVICE_GROUPS: ServiceGroup[] = [
       { label: 'Body Waxing', niche: 'Body Waxing' },
     ],
     alsoOffered: ['GLP-1 & Weight Loss Programs'],
+    formExtras: [
+      { label: 'GLP-1 Patients', niche: 'GLP Patients' },
+      { label: 'Non-GLP-1 Weight Loss', niche: 'Weight Loss (Not ChiroThin)' },
+    ],
   },
   {
     id: 'dental',
