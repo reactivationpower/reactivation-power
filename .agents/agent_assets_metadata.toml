@@ -1726,3 +1726,31 @@ mtime_ms = 1791675302751
 storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/d57b300d-eb50-4f57-8a6f-13cb23c99119/2d3d0ba9-ab5d-4560-bc72-19b42c5ab723"
 storage_version_token = "1791675326345201"
 content_type = "text/html"
+
+[[outputs]]
+id = "_9Ga0gcVrj1QTL_hCv9D-"
+uri = "file://generated-artifacts/reluctant-patient/reluctant-patient-report.html"
+type = "html"
+title = "Reluctant Melissa — full conversation and assessment"
+description = "Separate fictional run: 10 patient turns, 9 actual AI replies, candid findings, handoff outcome, and remaining authorization."
+logical_id = "c89e9ef2-5129-477b-a5c9-85a697df9060"
+content_hash = "sha256:754b0ef1def3f525ff009c2def4160737f384db985f2075f1fbe0f8f6b6adb4c"
+size = 12588
+mtime_ms = 1791678418055
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/c89e9ef2-5129-477b-a5c9-85a697df9060/10cb38a7-52a4-4491-98a3-fd42cbcb602d"
+storage_version_token = "1791678430126328"
+content_type = "text/html"
+
+[[outputs]]
+id = "WZOke9tg7VS7nEvBv93pP"
+uri = "file://generated-artifacts/reluctant-patient/preserved-original.html"
+type = "html"
+title = "Preserved original Melissa conversation"
+description = "The complete prior 21-message transcript, saved before the simulation-only reset."
+logical_id = "0596a515-0964-48d0-87f6-acd4362d7dc1"
+content_hash = "sha256:ce998fef606ed2e9eac004375eae412feae8736f01460d809fd56d7ecfeaffc6"
+size = 6407
+mtime_ms = 1791678418055
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/0596a515-0964-48d0-87f6-acd4362d7dc1/a10265ef-f4ed-4d4f-9469-d689e5c4a1b1"
+storage_version_token = "1791678430673770"
+content_type = "text/html"
