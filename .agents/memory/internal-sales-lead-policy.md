@@ -62,3 +62,7 @@ Strategy-call reminders go by both email and text at booking, 1 day, 12 hours, 2
 **Why:** The owner asked for this reminder set and the same no-assignment simplicity as manual texts.
 
 **How to apply:** Night texts wait for 8 AM only if still before the next reminder; short-notice bookings get only the booking message and the 5-minute "starting" message, which is never held back by text spacing.
+
+New sales leads go to the configured default assignee, which must be a verified, active staff account (never a deactivated duplicate). Existing leads are not reassigned when the default changes.
+
+**Why:** Owner request.

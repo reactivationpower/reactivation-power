@@ -74,6 +74,15 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('internal sales durable storage (i
     expect((await fixture.pool.query('SELECT * FROM sales_submissions')).rows).toHaveLength(2)
     expect((await fixture.pool.query("SELECT * FROM sales_activities WHERE kind='note'")).rows[0].body).toBe('Read me before calling')
   })
+  it('assigns new leads to the default assignee without reassigning existing leads', async () => {
+    const before = await intake(input('unassigned', { email:'before@example.invalid', phone:'+12125550101' }))
+    await fixture.pool.query("UPDATE sales_settings SET default_assignee_id='fixture-default-assignee' WHERE id='internal'")
+    const after = await intake(input('assigned', { email:'after@example.invalid', phone:'+12125550102' }))
+    await intake(input('repeat', { email:'before@example.invalid', phone:'+12125550101' }))
+    const rows = (await fixture.pool.query('SELECT id,assignee_id FROM sales_leads')).rows
+    expect(rows.find((r: any) => r.id === after.id)?.assignee_id).toBe('fixture-default-assignee')
+    expect(rows.find((r: any) => r.id === before.id)?.assignee_id).toBeNull()
+  })
   it('deduplicates repeated ingestion and concurrent intake', async () => {
     const results = await Promise.all([intake(input('a')), intake(input('a')), intake(input('b'))])
     expect(new Set(results.map(r => r.id)).size).toBe(1)
