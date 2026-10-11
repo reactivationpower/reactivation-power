@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { getConversation, refreshConversation, sendMessage, type EmailSnapshot, type InboxChannel, type InboxMessage, type SendState } from '@/app/actions/sales-inbox'
 import { Banner, ErrorBox, Pill, Skeleton, btn2, card, errMsg, fmt } from '@/components/leads/ui'
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 
 export const THREAD_MS = 30000
 export const SMS_MAX = 1600
@@ -84,7 +85,7 @@ function Thread({ leadId, onBack, embedded }: { leadId: string; onBack?: () => v
         {syncNote && <Banner kind={syncNote.kind}><span data-testid="banner-sync">{syncNote.text}</span></Banner>}
       </header>
       {view === 'texts'
-        ? <TextThread leadId={leadId} texts={texts} ready={readiness.sms} reasons={readiness.reasons} to={lead.phone} />
+        ? <TextThread leadId={leadId} texts={texts} ready={readiness.sms} reasons={readiness.reasons} confirm={readiness.confirm ?? []} to={lead.phone} />
         : <OtherActivity messages={other} truncated={!!historyTruncated} />}
       <p className="sr-only" aria-live="polite">{q.isFetching ? 'Updating messages' : ''}</p>
     </section>
@@ -112,7 +113,7 @@ function textStatus(m: InboxMessage): { label: string; bad?: boolean } | null {
 }
 const cleanBody = (b: string | null) => (b ?? '').replace(/\n\[[^\]]*\]$/, '')
 
-function TextThread({ leadId, texts, ready, reasons, to }: { leadId: string; texts: InboxMessage[]; ready: boolean; reasons: string[]; to: string | null }) {
+function TextThread({ leadId, texts, ready, reasons, confirm, to }: { leadId: string; texts: InboxMessage[]; ready: boolean; reasons: string[]; confirm: string[]; to: string | null }) {
   const scroller = useRef<HTMLDivElement>(null)
   const nearBottom = useRef(true)
   const lastCount = useRef(0)
@@ -156,7 +157,7 @@ function TextThread({ leadId, texts, ready, reasons, to }: { leadId: string; tex
           </ol>
         )}
       </div>
-      <SmsComposer leadId={leadId} ready={ready} reasons={reasons} to={to} />
+      <SmsComposer leadId={leadId} ready={ready} reasons={reasons} confirm={confirm} to={to} />
     </>
   )
 }
@@ -297,16 +298,26 @@ export function CallMediaPanel({ detailsUrl, id }: { detailsUrl: string; id: str
 }
 
 type Outcome = { state: SendState | 'error'; error?: string } | null
+type SendInput = Parameters<typeof sendMessage>[0]
 
-export function SmsComposer({ leadId, ready, reasons = [], to }: { leadId: string; ready: boolean; reasons?: string[]; to: string | null }) {
+/** The server ends "ask first" refusals with this question (e.g. it became night after the thread loaded). */
+const ASK_SUFFIX = 'Send anyway?'
+const askItems = (e: unknown) => {
+  const m = errMsg(e).trim()
+  return m.endsWith(ASK_SUFFIX) ? [m.slice(0, -ASK_SUFFIX.length).trim()].filter(Boolean) : null
+}
+
+export function SmsComposer({ leadId, ready, reasons = [], confirm = [], to }: { leadId: string; ready: boolean; reasons?: string[]; confirm?: string[]; to: string | null }) {
   const qc = useQueryClient()
   const [body, setBody] = useState('')
   const [outcome, setOutcome] = useState<Outcome>(null)
+  // "Send anyway?" popup: the concerns to show and the exact send waiting on a yes.
+  const [ask, setAsk] = useState<{ items: string[]; input: SendInput } | null>(null)
   const box = useRef<HTMLTextAreaElement>(null)
   // Same payload reuses the same requestId (safe retry); any change gets a new one.
   const pending = useRef<{ payload: string; requestId: string } | null>(null)
   const send = useMutation({
-    mutationFn: (input: Parameters<typeof sendMessage>[0]) => sendMessage(input),
+    mutationFn: (input: SendInput) => sendMessage(input),
     onSuccess: (r) => {
       const accepted = r.state === 'sent' || r.canonical_state === 'accepted'
       setOutcome(accepted ? null : r)
@@ -314,7 +325,11 @@ export function SmsComposer({ leadId, ready, reasons = [], to }: { leadId: strin
       qc.invalidateQueries({ queryKey: conversationKey(leadId) })
       qc.invalidateQueries({ queryKey: ['sales-leads'] })
     },
-    onError: (e) => setOutcome({ state: 'error', error: errMsg(e) }),
+    onError: (e, input) => {
+      const items = !input.confirmed && askItems(e)
+      if (items) setAsk({ items: items.length ? items : ['Please double-check before sending.'], input })
+      else setOutcome({ state: 'error', error: errMsg(e) })
+    },
   })
   useLayoutEffect(() => {
     const el = box.current
@@ -324,35 +339,39 @@ export function SmsComposer({ leadId, ready, reasons = [], to }: { leadId: strin
   }, [body])
   const len = body.trim().length
   const over = len > SMS_MAX
-  const canSend = ready && !!to && len > 0 && !over && !send.isPending
+  // Only true hard stops block sending; "ask first" items become a popup on Send.
+  const stops = !ready ? (reasons.length ? reasons : ['Texting is not available.']) : !to ? ['This lead has no phone number.'] : []
+  const canSend = ready && !!to && len > 0 && !over && !send.isPending && !ask
   const submit = () => {
     if (!canSend) return
     const payload = body.trim()
     if (!pending.current || pending.current.payload !== payload) pending.current = { payload, requestId: newId() }
     setOutcome(null)
-    send.mutate({ leadId, channel: 'sms', body: payload, requestId: pending.current.requestId })
+    const input: SendInput = { leadId, channel: 'sms', body: payload, requestId: pending.current.requestId }
+    if (confirm.length) setAsk({ items: confirm, input })
+    else send.mutate(input)
+  }
+  const sendAnyway = () => {
+    if (!ask) return
+    send.mutate({ ...ask.input, confirmed: true })
+    setAsk(null)
   }
   const onKey = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); submit() }
   }
   return (
     <div className="space-y-2 border-t border-border p-3" data-testid="composer-sms">
-      {!ready && (
-        <div className="rounded-lg border border-yellow-500/40 bg-yellow-500/10 px-3 py-2 text-sm" role="status" data-testid="sms-blocked">
-          <p className="font-medium">You can’t text this lead yet:</p>
-          <ul className="mt-0.5 list-disc pl-5">{(reasons.length ? reasons : ['Texting is not available.']).map((r, i) => <li key={i}>{r}</li>)}</ul>
-        </div>
-      )}
       <div className="flex items-end gap-2">
         <label className="sr-only" htmlFor={`sms-${leadId}`}>Text message</label>
         <textarea id={`sms-${leadId}`} ref={box} rows={1} value={body} onChange={(e) => setBody(e.target.value)} onKeyDown={onKey}
-          placeholder={ready ? 'Text message' : 'Texting is blocked'} data-testid="input-sms-body"
+          placeholder="Text message" data-testid="input-sms-body"
           className="max-h-40 min-h-[2.5rem] flex-1 resize-none rounded-2xl border border-input bg-card px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-ring disabled:opacity-60" />
         <button type="button" className="inline-flex h-10 shrink-0 items-center justify-center rounded-full bg-primary px-5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
           disabled={!canSend} onClick={submit} data-testid="button-send-sms">
           {send.isPending ? 'Sending…' : outcome && (outcome.state === 'error' || outcome.state === 'failed') ? 'Try again' : 'Send'}
         </button>
       </div>
+      {stops.length > 0 && <p className="px-1 text-xs text-muted-foreground" role="status" data-testid="sms-blocked">Can’t send: {stops.join(' ')}</p>}
       <div className="flex justify-between gap-2 px-1 text-[11px] text-muted-foreground">
         <span>Sent from your GoHighLevel number{to ? ` to ${to}` : ''}. Enter sends · Shift+Enter for a new line.</span>
         {len > 140 && <span className={over ? 'font-medium text-destructive' : ''} data-testid={over ? 'text-sms-over' : 'text-sms-count'}>{len}/{SMS_MAX}</span>}
@@ -361,6 +380,20 @@ export function SmsComposer({ leadId, ready, reasons = [], to }: { leadId: strin
       {outcome?.state === 'uncertain' && <Banner kind="warn">We’re not sure this text went out. Check GoHighLevel before sending it again.{outcome.error ? ` ${outcome.error}` : ''}</Banner>}
       {outcome?.state === 'failed' && <Banner kind="error">Not sent{outcome.error ? `: ${outcome.error}` : '.'} Your message is kept.</Banner>}
       {outcome?.state === 'error' && <Banner kind="error"><span data-testid="banner-send-error">Not sent: {outcome.error}. Your message is kept, so you can try again.</span></Banner>}
+      <AlertDialog open={!!ask} onOpenChange={(open) => { if (!open) setAsk(null) }}>
+        <AlertDialogContent data-testid="dialog-send-anyway">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Send anyway?</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-1">{ask?.items.map((t, i) => <p key={i}>{t}</p>)}</div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel data-testid="button-send-anyway-no">No, keep draft</AlertDialogCancel>
+            <AlertDialogAction onClick={sendAnyway} data-testid="button-send-anyway-yes">Yes, send</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

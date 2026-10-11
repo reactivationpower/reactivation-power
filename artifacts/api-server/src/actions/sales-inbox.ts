@@ -48,7 +48,7 @@ async function textingHost(q:{query:(sql:string,args?:any[])=>Promise<any>}, lea
   const all=(await q.query('SELECT * FROM appointment_hosts WHERE active=true')).rows
   return all.length===1 ? all[0] : null
 }
-/** Things staff may override with an "Send anyway?" prompt. */
+/** "Ask first" items: staff may override them with a "Send anyway?" prompt. */
 function softChecks(lead:any) {
   const out:string[]=[]
   if(!lead.consent) out.push('This lead has not agreed to receive texts.')
@@ -66,6 +66,7 @@ async function readiness(lead:any, adminId:string) {
   const senderConfirmed=capabilities?.portal_sms_sender?.locationId===process.env.GHL_LOCATION_ID && !!capabilities?.portal_sms_sender?.number
   if(!cfg.sms_ready || !senderConfirmed) reasons.push('Turn on texting once in Leads → Settings (check the box and save).')
   if(!lead.ghl_contact_id) reasons.push('This lead is still syncing with GoHighLevel.')
+  if(!lead.phone) reasons.push('This lead has no phone number.')
   return { email:false, emailReason:'Manual email is not supported; historical automated email remains available.',
     sms:reasons.length===0, reasons, confirm:softChecks(lead) }
 }
@@ -154,8 +155,6 @@ export async function sendMessage(input:unknown) {
     let fromNumber:string
     {
       if(!cfg.sms_ready) throw new Error('Turn on texting in Leads → Settings first')
-      const soft=softChecks(lead)
-      if(soft.length&&!confirmed) throw Object.assign(new Error(`${soft.join(' ')} Send anyway?`),{needsConfirm:true})
       if(!lead.ghl_contact_id) throw new Error('Contact synchronization must finish first')
       const remote=await contact(lead.ghl_contact_id)
       if(!remote||remote.id!==lead.ghl_contact_id||remote.locationId!==process.env.GHL_LOCATION_ID||
@@ -166,6 +165,12 @@ export async function sendMessage(input:unknown) {
         capabilities?.portal_sms_sender?.number!==fromNumber)
         throw new Error('Your GoHighLevel number changed or is not set (sender changed). Re-save texting in Leads → Settings')
     }
+    // "Ask first" items come last, after every hard stop, so staff are never
+    // asked "Send anyway?" for a text that would be refused regardless.
+    // `confirmed` is excluded from the fingerprint, so a confirmed retry keeps
+    // the same request ID and duplicate-send protection.
+    const soft=softChecks(lead)
+    if(soft.length&&!confirmed) throw new Error(`${soft.join(' ')} Send anyway?`)
     // Commit intent before provider call. Crashes/network uncertainty never trigger blind replay.
     await c.query(`INSERT INTO sales_inbox_messages(id,lead_id,channel,direction,subject,body,author_id,author_name,state,fingerprint)
       VALUES($1,$2,$3,'outbound',$4,$5,$6,$7,'sending',$8)`,

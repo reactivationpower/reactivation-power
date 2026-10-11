@@ -114,7 +114,7 @@ it('shows texts as chat bubbles and keeps emails and calls on their own tab', as
   expect(screen.getByTestId('text-other-empty').textContent).toMatch(/Nothing matches/)
 })
 
-it('sends with Enter and lists plain reasons when texting is blocked', async () => {
+it('sends with Enter and shows hard stops as one small gray line, not a yellow box', async () => {
   api.getConversation.mockResolvedValueOnce(conv('A')).mockResolvedValue(conv('A'))
   api.sendMessage.mockResolvedValue({ state: 'sent', canonical_state: 'accepted' })
   wrap(<LeadConversation leadId="A" />)
@@ -123,10 +123,57 @@ it('sends with Enter and lists plain reasons when texting is blocked', async () 
   fireEvent.keyDown(box, { key: 'Enter' })
   await waitFor(() => expect(api.sendMessage).toHaveBeenCalledTimes(1))
   cleanup()
-  api.getConversation.mockResolvedValue(conv('B', { readiness: { email: false, sms: false, reasons: ['This lead has not agreed to receive texts.'] } }))
+  api.getConversation.mockResolvedValue(conv('B', { readiness: { email: false, sms: false, reasons: ['This lead is marked do not contact.'] } }))
   wrap(<LeadConversation leadId="B" />)
-  expect((await screen.findByTestId('sms-blocked')).textContent).toContain('not agreed')
+  const line = await screen.findByTestId('sms-blocked')
+  expect(line.tagName).toBe('P')
+  expect(line.textContent).toContain('do not contact')
+  expect(line.className).not.toContain('yellow')
+  expect(screen.getByTestId('composer-sms').innerHTML).not.toContain('yellow')
+  const box2 = screen.getByTestId('input-sms-body') as HTMLTextAreaElement
+  fireEvent.change(box2, { target: { value: 'Still typing' } })
+  expect(box2.value).toBe('Still typing')
   expect((screen.getByTestId('button-send-sms') as HTMLButtonElement).disabled).toBe(true)
+})
+
+it('asks "Send anyway?" for ask-first items; No keeps the draft, Yes sends with the same request id', async () => {
+  const confirm = ['It’s 10:15 PM for this lead.']
+  api.getConversation.mockResolvedValue(conv('A', { readiness: { email: false, sms: true, reasons: [], confirm } }))
+  api.sendMessage.mockResolvedValue({ state: 'sent', canonical_state: 'accepted' })
+  wrap(<LeadConversation leadId="A" />)
+  const box = await screen.findByTestId('input-sms-body') as HTMLTextAreaElement
+  expect(screen.queryByTestId('sms-blocked')).toBeNull()
+  fireEvent.change(box, { target: { value: 'Late hello' } })
+  fireEvent.click(screen.getByTestId('button-send-sms'))
+  expect((await screen.findByTestId('dialog-send-anyway')).textContent).toContain('10:15 PM')
+  expect(api.sendMessage).not.toHaveBeenCalled()
+  fireEvent.click(screen.getByTestId('button-send-anyway-no'))
+  await waitFor(() => expect(screen.queryByTestId('dialog-send-anyway')).toBeNull())
+  expect(box.value).toBe('Late hello')
+  expect(api.sendMessage).not.toHaveBeenCalled()
+  fireEvent.click(screen.getByTestId('button-send-sms'))
+  fireEvent.click(await screen.findByTestId('button-send-anyway-yes'))
+  await waitFor(() => expect(api.sendMessage).toHaveBeenCalledTimes(1))
+  expect(api.sendMessage.mock.calls[0][0]).toMatchObject({ body: 'Late hello', confirmed: true })
+  await waitFor(() => expect(box.value).toBe(''))
+})
+
+it('turns a server "Send anyway?" refusal into the popup and resends confirmed with the same request id', async () => {
+  api.getConversation.mockResolvedValue(conv('A'))
+  api.sendMessage.mockRejectedValueOnce(new Error('It’s 8:05 PM for this lead. Send anyway?')).mockResolvedValueOnce({ state: 'sent', canonical_state: 'accepted' })
+  wrap(<LeadConversation leadId="A" />)
+  const box = await screen.findByTestId('input-sms-body') as HTMLTextAreaElement
+  fireEvent.change(box, { target: { value: 'Evening' } })
+  fireEvent.click(screen.getByTestId('button-send-sms'))
+  const dialog = await screen.findByTestId('dialog-send-anyway')
+  expect(dialog.textContent).toContain('8:05 PM for this lead.')
+  expect(screen.queryByTestId('banner-send-error')).toBeNull()
+  fireEvent.click(screen.getByTestId('button-send-anyway-yes'))
+  await waitFor(() => expect(api.sendMessage).toHaveBeenCalledTimes(2))
+  const [a, b] = api.sendMessage.mock.calls.map((c) => c[0])
+  expect(a.confirmed).toBeUndefined()
+  expect(b).toMatchObject({ requestId: a.requestId, confirmed: true })
+  await waitFor(() => expect(box.value).toBe(''))
 })
 
 it('shows provider sync failures even when saved history loaded successfully', async () => {

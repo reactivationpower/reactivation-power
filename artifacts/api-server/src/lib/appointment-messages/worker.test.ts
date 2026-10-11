@@ -16,6 +16,9 @@ vi.mock('./store', async original => ({ ...await original<any>(), APPOINTMENT_LO
 import { registerAppointment, reconcileAppointment } from './store'
 import { runAppointmentMessages } from './worker'
 const schema = `appt_fixture_${randomUUID().replaceAll('-','')}`
+// Many sequential round trips to the shared remote DB; the 5s default times out
+// mid-case under full-suite load and leaks work into the next case.
+vi.setConfig({ testTimeout: 30000 })
 describe.skipIf(!process.env.SUPABASE_DB_URL)('appointment outbox (isolated database, mocked delivery)', () => {
   let admin: pg.Pool
   const now = new Date('2026-10-12T14:00Z')
