@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { useSearch } from 'wouter'
 import { CheckCircle2 } from 'lucide-react'
-import { OpportunityCalculator } from '@/components/landing/opportunity-calculator'
+import { CombinedOpportunity } from '@/components/landing/combined-opportunity'
 import { usePageData } from '@/hooks/use-page-data'
 import { PageError, PageLoading } from '@/components/page-status'
 
@@ -20,10 +20,8 @@ export default function ThankYouPage() {
   if (loading) return <PageLoading />
   if (error) return <PageError error={error} />
   const {
-    firstName, inactiveCount, patientValue, timezone, timezoneLabel, bookedFor,
-    servicesLabel, scenario, estimates, scenarioSupplied,
+    firstName, inactiveCount, patientValue, timezoneLabel, bookedFor, servicesLabel, scenario,
   } = data
-  const leadOnly = (data.productInterest ?? search.get('interest')) === 'lead-follow-up'
 
   return (
     <main className="flex min-h-screen flex-col bg-background">
@@ -71,50 +69,15 @@ export default function ThankYouPage() {
           </>
         )}
 
-        {scenario && estimates ? (
-          <div className="mt-14 w-full border-t border-border pt-12 md:mt-16">
-            <h2 className="text-center text-2xl font-bold text-foreground">Your illustrative opportunity</h2>
-            <p className="mt-3 text-center text-sm text-muted-foreground">
-              These estimates are based on your inputs, not a guarantee of results or annual cash.
-            </p>
-            <div className="mt-8 grid gap-4 sm:grid-cols-3">
-              {[
-                ['Reactivation estimate', estimates.reactivation, `${scenario.inactivePatients.toLocaleString('en-US')} inactive patients × 5% reactivation × $${scenario.patientValue.toLocaleString('en-US')} annual patient value`],
-                ['New patient first-year cohort value', estimates.newPatients, `${scenario.additionalPatientsPerMonth} additional new patients/month × 12 months × $${scenario.newPatientValue.toLocaleString('en-US')} first-year value`],
-                ['Combined illustrative opportunity', estimates.combined, 'Reactivation + new patient first-year cohort value'],
-              ].map(([label, amount, detail]) => (
-                <div key={label} className="rounded-xl border border-border bg-card p-6 text-center">
-                  <h3 className="text-sm font-semibold text-foreground">{label}</h3>
-                  <p className="mt-3 text-2xl font-bold text-accent">${Number(amount).toLocaleString('en-US')}</p>
-                  <p className="mt-3 text-xs leading-relaxed text-muted-foreground">{detail}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        ) : scenarioSupplied ? (
-          <p role="alert" className="mt-10 text-center text-muted-foreground">
-            The calculator values in this link are invalid. Please return to the calculator to review your estimate.
-          </p>
-        ) : leadOnly ? (
-          <p className="mt-10 max-w-xl text-center text-muted-foreground">
-             We&apos;ll discuss your lead campaign and offer, as well as how
-             Reactivation fits alongside Lead Follow-Up in the Patient Pipeline
-             launch offer.
-          </p>
-        ) : (
-           <div className="mt-14 w-full border-t border-border pt-12 md:mt-16">
-             <p className="mb-6 text-center text-sm leading-relaxed text-muted-foreground">
-               Patient Pipeline includes staff-led Reactivation and campaign-specific
-               Lead Follow-Up together in one launch offer. This calculator
-               illustrates the inactive-patient side only.
-             </p>
-            <OpportunityCalculator
-              inactiveCount={inactiveCount}
-              defaultPatientValue={patientValue}
-              servicesLabel={servicesLabel}
-            />
-          </div>
-        )}
+        <div className="mt-14 w-full border-t border-border pt-12 md:mt-16">
+          <CombinedOpportunity
+            inactiveCount={scenario?.inactivePatients ?? inactiveCount}
+            patientValue={scenario?.patientValue ?? patientValue}
+            leadsPerMonth={scenario?.additionalPatientsPerMonth}
+            leadValue={scenario?.newPatientValue}
+            servicesLabel={servicesLabel}
+          />
+        </div>
       </section>
 
       <footer className="border-t border-border bg-card">
