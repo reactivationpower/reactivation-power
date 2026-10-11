@@ -94,6 +94,44 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('appointment outbox (isolated data
     expect(mocks.provider.mock.calls.some(([path])=>path==='/conversations/messages')).toBe(true)
     expect(mocks.provider.mock.calls.some(([path,method])=>String(path).startsWith('/contacts/')&&method==='PUT')).toBe(false)
   })
+  it('spaces ordinary texts apart but never holds back the 5-minute "starting" text', async () => {
+    await runAppointmentMessages()
+    await fixture.pool.query(`UPDATE appointment_deliveries SET state='sent',sent_at=now() WHERE kind='confirmation';
+      UPDATE appointment_messages SET reconcile_at='2000-01-01';
+      UPDATE appointment_deliveries SET due_at='2000-01-01' WHERE kind IN ('two_hours','starting') AND channel='sms'`)
+    await runAppointmentMessages()
+    const sms = (await rows()).filter((r:any)=>r.channel==='sms')
+    expect(sms.find((r:any)=>r.kind==='starting').state).toBe('sent')
+    expect(sms.find((r:any)=>r.kind==='two_hours')).toMatchObject({state:'blocked',last_error:'Spacing texts apart'})
+  })
+  it('keeps a night-time booking text queued for 8 AM when only the link or time zone changes', async () => {
+    const night = new Date('2026-10-12T01:00:00.000Z') // 9 PM Eastern
+    vi.setSystemTime(night)
+    const c = await fixture.pool.connect()
+    try {
+      const row = (await c.query('SELECT * FROM appointment_messages')).rows[0]
+      await reconcileAppointment(c,row,event,'America/New_York',night,true)
+      await c.query(`UPDATE appointment_deliveries SET state='sent',sent_at=now(),
+        snapshot=jsonb_build_object('copy',jsonb_build_object('start',$1::text,'hostId','host'))
+        WHERE kind='confirmation' AND channel='email'`, [start])
+      event.address='https://meet.google.com/xyz-abcd-efg'
+      await reconcileAppointment(c,row,event,'America/Chicago',night,true)
+      const active=(await rows()).filter((r:any)=>['pending','blocked'].includes(r.state))
+      expect(active.filter((r:any)=>r.kind==='rescheduled')).toHaveLength(0)
+      const text=active.find((r:any)=>r.kind==='confirmation'&&r.channel==='sms')
+      expect(new Date(text.due_at).toISOString()).toBe('2026-10-12T12:00:00.000Z')
+    } finally { c.release() }
+    // 8 AM Eastern: the queued booking text goes out.
+    vi.setSystemTime(new Date('2026-10-12T12:00:00.000Z'))
+    await fixture.pool.query("UPDATE sales_settings SET capabilities=jsonb_set(capabilities,'{scheduler_wake,checkedAt}',to_jsonb('2026-10-12T12:00:00.000Z'::text))")
+    await fixture.pool.query("UPDATE appointment_messages SET reconcile_at='2000-01-01'; UPDATE appointment_deliveries SET due_at='2000-01-01' WHERE kind='confirmation' AND channel='sms' AND state='pending'")
+    await runAppointmentMessages()
+    const sent=mocks.provider.mock.calls.filter(([path])=>path==='/conversations/messages')
+    expect(sent).toHaveLength(1)
+    expect(sent[0][2].message).toContain('confirmed')
+    expect(sent[0][2].message).toContain('xyz-abcd-efg')
+    expect((await rows()).find((r:any)=>r.kind==='confirmation'&&r.channel==='sms'&&r.state==='sent')).toBeTruthy()
+  })
   it('does not replay uncertain email acceptance', async () => {
     await runAppointmentMessages(); await due()
     mocks.send.mockResolvedValue({ok:false,uncertain:true,logId:'email-fixture'})

@@ -56,3 +56,9 @@ Manual staff texts may be sent from preview (same DB and GHL account as producti
 **Why:** The user wants to text leads directly from the portal without extra setup steps.
 
 **How to apply:** Keep consent, opt-out/DND, 8 AM–8 PM, phone identity, sender binding (one Settings checkbox) and no-blind-resend. Automatic texts/emails stay off unless deliberately enabled. Contact info on the lead page is read-only with an Edit button, not always-editable fields.
+
+Strategy-call reminders go by both email and text at booking, 1 day, 12 hours, 2 hours and ~5 minutes before. Automatic reminder texts also do not require GHL conversation assignment and must not reassign the GHL contact owner.
+
+**Why:** The owner asked for this reminder set and the same no-assignment simplicity as manual texts.
+
+**How to apply:** Night texts wait for 8 AM only if still before the next reminder; short-notice bookings get only the booking message and the 5-minute "starting" message, which is never held back by text spacing.

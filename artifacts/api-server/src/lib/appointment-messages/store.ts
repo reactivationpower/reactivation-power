@@ -47,7 +47,7 @@ export async function reconcileAppointment(c: PoolClient, row: any, event: any, 
   try {
     const pending = (await c.query(`SELECT kind,channel,due_at,expires_at FROM appointment_deliveries
       WHERE appointment_id=$1 AND state IN ('pending','blocked') AND kind = ANY($2)`,
-      [row.appointment_id, REMINDER_KINDS])).rows
+      [row.appointment_id, [...REMINDER_KINDS, 'confirmation', 'rescheduled']])).rows
     await c.query("UPDATE appointment_deliveries SET state='cancelled',last_error='Appointment changed' WHERE appointment_id=$1 AND state IN ('pending','blocked')", [row.appointment_id])
     await c.query(`UPDATE appointment_messages SET starts_at=$2,version=$3,fingerprint=$4,snapshot=$5,last_error=NULL WHERE appointment_id=$1`,
       [row.appointment_id, start, version, fingerprint, JSON.stringify(snapshot)])
@@ -55,11 +55,14 @@ export async function reconcileAppointment(c: PoolClient, row: any, event: any, 
        let slots = scheduleMessages(now, start, smsZone, kind).filter(s => (smsEnabled || s.channel === 'email') &&
          !(s.kind === 'rescheduled' && !timeChanged))
        // Metadata-only refreshes must not erase an already scheduled reminder
-       // simply because its original booking is now less than an hour away.
+       // simply because its original booking is now less than an hour away,
+       // nor a booking text still waiting for 8 AM (only queued ones are kept,
+       // so turning texts on later never creates a retroactive confirmation).
+       const initial = (k: string) => k === 'confirmation' || k === 'rescheduled'
        if (previous?.start === snapshot.start && previous?.hostId === snapshot.hostId &&
            previous?.status === 'scheduled' && status === 'scheduled') {
          for (const p of pending) if ((smsEnabled || p.channel === 'email') && new Date(p.expires_at) > now &&
-           !slots.some(s => s.kind === p.kind && s.channel === p.channel)) {
+           !slots.some(s => s.channel === p.channel && (s.kind === p.kind || initial(s.kind) && initial(p.kind)))) {
            slots.push({ kind: p.kind, channel: p.channel, dueAt: new Date(p.due_at), expiresAt: new Date(p.expires_at) })
          }
        }
