@@ -1726,3 +1726,17 @@ mtime_ms = 1791678418055
 storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/0596a515-0964-48d0-87f6-acd4362d7dc1/a10265ef-f4ed-4d4f-9469-d689e5c4a1b1"
 storage_version_token = "1791678430673770"
 content_type = "text/html"
+
+[[outputs]]
+id = "v2IEWero-Z2ThexXgki5T"
+uri = "file://screenshots/booking-thank-you-both-products.jpg"
+type = "image"
+title = "New booking page — Reactivation + Lead Follow-Up"
+description = "Preview of the new \"you're booked\" page with sliders for both products and a combined total."
+logical_id = "c259268b-324f-4370-a886-6b7488d87cab"
+content_hash = "sha256:e49e9e3147d01acfd8aca7b606b865b003966b619636b41c2b76cfbb392379a7"
+size = 163329
+mtime_ms = 1791734778106
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/c259268b-324f-4370-a886-6b7488d87cab/51a6bc38-546d-4198-9681-6a01fd87649e"
+storage_version_token = "1791734782549620"
+content_type = "image/jpeg"

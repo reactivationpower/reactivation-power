@@ -55,7 +55,7 @@ function HalfHeader({ icon: Icon, kicker, title, blurb, tone }: { icon: LucideIc
 }
 
 function useCountUp(target: number, active: boolean) {
-  const [shown, setShown] = useState(0)
+  const [shown, setShown] = useState(() => (new URLSearchParams(location.search).has('instant') ? target : 0))
   const raf = useRef<number | null>(null)
   useEffect(() => {
     if (!active) return
