@@ -1,0 +1,103 @@
+@import url("https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&display=swap");
+
+/* Tokens from reactivation-power/src/index.css, restated as HSL triplets because the
+   sandbox's Tailwind theme compiles utilities to hsl(var(--token)). */
+:root {
+  color-scheme: light;
+  --background: 210 34.5% 98%;
+  --foreground: 217.3 36.1% 17.5%;
+  --card: 0 0% 100%;
+  --card-foreground: 217.3 36.1% 17.5%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 217.3 36.1% 17.5%;
+  --primary: 217.3 36.1% 17.5%;
+  --primary-foreground: 210 34.5% 98%;
+  --secondary: 210 40.6% 96%;
+  --secondary-foreground: 215.3 27.9% 26.8%;
+  --muted: 210 40.6% 96%;
+  --muted-foreground: 215.4 18.4% 47%;
+  --accent: 193.7 47.2% 42.5%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 357.2 100% 45.3%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 214.3 33% 91.4%;
+  --input: 212.7 29.9% 84%;
+  --ring: 193.7 47.2% 42.5%;
+  --success: 143.9 55.3% 40.5%;
+  --radius: 0.5rem;
+}
+
+body {
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: 'Geist', 'Geist Fallback', sans-serif;
+}
+
+@layer components {
+  .range-slider {
+    --range-pct: 50%;
+    appearance: none;
+    -webkit-appearance: none;
+    width: 100%;
+    height: 0.625rem;
+    margin: 0;
+    border-radius: 9999px;
+    cursor: grab;
+    background: linear-gradient(
+      to right,
+      hsl(var(--accent)) 0%,
+      hsl(var(--accent)) var(--range-pct),
+      hsl(var(--input)) var(--range-pct),
+      hsl(var(--input)) 100%
+    );
+    outline: none;
+    touch-action: pan-y;
+  }
+  .range-slider:active { cursor: grabbing; }
+  .range-slider:focus-visible {
+    box-shadow: 0 0 0 3px color-mix(in oklch, hsl(var(--accent)) 30%, transparent);
+  }
+  .range-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 9999px;
+    background: hsl(var(--card));
+    border: 3px solid hsl(var(--accent));
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.12), 0 4px 10px rgb(0 0 0 / 0.18);
+    transition: transform 120ms ease, box-shadow 120ms ease;
+  }
+  .range-slider::-moz-range-thumb {
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 9999px;
+    background: hsl(var(--card));
+    border: 3px solid hsl(var(--accent));
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.12), 0 4px 10px rgb(0 0 0 / 0.18);
+    transition: transform 120ms ease, box-shadow 120ms ease;
+  }
+  .range-slider::-moz-range-track { background: transparent; height: 0.625rem; }
+  .range-slider:hover::-webkit-slider-thumb,
+  .range-slider:focus-visible::-webkit-slider-thumb {
+    transform: scale(1.1);
+    box-shadow: 0 2px 4px rgb(0 0 0 / 0.14), 0 6px 14px rgb(0 0 0 / 0.22);
+  }
+  .range-slider:hover::-moz-range-thumb,
+  .range-slider:focus-visible::-moz-range-thumb {
+    transform: scale(1.1);
+    box-shadow: 0 2px 4px rgb(0 0 0 / 0.14), 0 6px 14px rgb(0 0 0 / 0.22);
+  }
+  .range-slider:active::-webkit-slider-thumb { transform: scale(1.05); }
+  .range-slider:active::-moz-range-thumb { transform: scale(1.05); }
+}
+/* Navy slider + combined total panel, matching the homepage combined calculator. */
+.range-slider.range-navy {
+  background: linear-gradient(to right, hsl(var(--primary)) 0%, hsl(var(--primary)) var(--range-pct), hsl(var(--input)) var(--range-pct), hsl(var(--input)) 100%);
+}
+.range-slider.range-navy::-webkit-slider-thumb { border-color: hsl(var(--primary)); }
+.range-slider.range-navy::-moz-range-thumb { border-color: hsl(var(--primary)); }
+.bty-total {
+  background: hsl(var(--primary));
+  background-image: radial-gradient(36rem 18rem at 100% 0%, color-mix(in oklch, hsl(var(--accent)) 45%, transparent), transparent 70%);
+}
