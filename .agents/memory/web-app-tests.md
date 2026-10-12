@@ -31,3 +31,15 @@ Database fixtures must be unique per test invocation, not just per test file.
 **Why:** Parallel workspaces share Supabase. Fixed owner IDs let one suite's cleanup delete another suite's in-flight campaigns; scheduler tests also see global running-job rows despite distinct due keys.
 
 **How to apply:** Use random fixture owners for owner-scoped data and isolated schemas for global queries such as scheduled-job claims. Keep cleanup confined to the invocation's fixtures.
+
+Full-suite UI tests have much more CPU contention than focused runs. Avoid repeated whole-page accessibility scans inside large template loops, and control delayed copy-feedback timers in tests.
+
+**Why:** Full-suite validation timed out loops that passed alone; faster loops then exposed a delayed React state update after jsdom teardown (`window is not defined`).
+
+**How to apply:** Resolve stable picker/copy controls once per render, await clipboard state updates with `act`, and use fake timers with explicit cleanup for delayed feedback. Do not merely raise timeouts or ignore uncaught errors.
+
+Time-sensitive database tests must control both JavaScript time and SQL time, and must arrange delivery conditions before a worker wake.
+
+**Why:** Freezing only JavaScript Date allowed real database time to pass queued confirmations before test opt-outs or uncertain responses were installed. The same safety tests then passed or failed depending on the day and time.
+
+**How to apply:** Use a clock confined to the unique fixture schema, with `pg_catalog` explicitly last in its search path when overriding SQL `now()`. Advance both clocks together. Plan without dispatch when a test needs to modify a pending delivery; do not assume the first worker wake only plans.

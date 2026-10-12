@@ -17,8 +17,6 @@ vi.mock('./store', async original => ({ ...await original<any>(), APPOINTMENT_LO
 import { registerAppointment, reconcileAppointment } from './store'
 import { runAppointmentMessages } from './worker'
 import { SalesProviderError } from '../sales-leads/provider'
-// Real remote database round trips; other isolated DB suites use the same limit.
-vi.setConfig({ testTimeout: 30000 })
 const schema = `appt_fixture_${randomUUID().replaceAll('-','')}`
 // Many sequential round trips to the shared remote DB; the 5s default times out
 // mid-case under full-suite load and leaks work into the next case.
@@ -33,7 +31,13 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('appointment outbox (isolated data
     const config = { connectionString: url.toString(), ssl: { rejectUnauthorized:false }, max:1 }
     admin = new pg.Pool(config)
     await admin.query(`CREATE SCHEMA "${schema}"`)
-    fixture.pool = new pg.Pool({ ...config, max:2, options:`-c search_path=${schema}` })
+    // Put pg_catalog explicitly last so this isolated schema's now() controls
+    // worker SQL as well as the fake JavaScript Date. Never alter public data.
+    fixture.pool = new pg.Pool({ ...config, max:2, options:`-c search_path=${schema},pg_catalog` })
+    await fixture.pool.query(`CREATE TABLE fixture_clock (instant timestamptz NOT NULL);
+      INSERT INTO fixture_clock VALUES ('2026-10-12T14:00:00.000Z');
+      CREATE FUNCTION "${schema}".now() RETURNS timestamptz LANGUAGE sql STABLE
+      AS 'SELECT instant FROM fixture_clock';`)
     await fixture.pool.query(`CREATE TABLE sales_leads (LIKE public.sales_leads INCLUDING ALL);
       CREATE TABLE sales_settings (LIKE public.sales_settings INCLUDING ALL);
       CREATE TABLE email_log (LIKE public.email_log INCLUDING ALL);`)
@@ -46,7 +50,7 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('appointment outbox (isolated data
     await admin?.query(`DROP SCHEMA IF EXISTS "${schema}" CASCADE`); await admin?.end()
   })
   beforeEach(async () => {
-    vi.useFakeTimers({ toFake: ['Date'] }); vi.setSystemTime(now)
+    vi.useFakeTimers({ toFake: ['Date'] }); await setClock(now)
     vi.stubEnv('NODE_ENV','production'); vi.stubEnv('GHL_CALENDAR_ID','calendar-fixture'); vi.stubEnv('GHL_LOCATION_ID','location-fixture')
     vi.clearAllMocks()
     await fixture.pool.query('TRUNCATE appointment_deliveries,appointment_messages,appointment_hosts,appointment_message_settings,sales_leads,sales_settings,email_log CASCADE')
@@ -66,12 +70,25 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('appointment outbox (isolated data
     mocks.send.mockResolvedValue({ok:true,logId:'email-fixture',providerId:'provider-fixture'})
     const c = await fixture.pool.connect()
     try { await registerAppointment(c,'appointment','lead',start,'America/New_York') } finally { c.release() }
-    // Database now() is actual server time, independent of the frozen test clock.
     await fixture.pool.query("UPDATE appointment_messages SET reconcile_at='2000-01-01'")
   })
+  async function setClock(time: Date) {
+    vi.setSystemTime(time)
+    await fixture.pool.query('UPDATE fixture_clock SET instant=$1', [time])
+  }
   const rows = async () => (await fixture.pool.query('SELECT * FROM appointment_deliveries ORDER BY kind,channel')).rows
   async function due() {
     await fixture.pool.query("UPDATE appointment_messages SET reconcile_at='2000-01-01'; UPDATE appointment_deliveries SET due_at='2000-01-01' WHERE kind='confirmation'")
+  }
+  // Plan without dispatching, so each case can arrange its provider response
+  // before any confirmation is attempted. A worker wake may send immediately.
+  async function plan() {
+    const c = await fixture.pool.connect()
+    try {
+      const row = (await c.query('SELECT * FROM appointment_messages')).rows[0]
+      await reconcileAppointment(c, row, event, 'America/New_York', new Date(), true)
+    } finally { c.release() }
+    await due()
   }
   it('a fresh booking creates and sends the confirmation email and text', async () => {
     event.startTime = '2026-10-14T12:00:00-04:00' // GoHighLevel's offset format
@@ -108,7 +125,7 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('appointment outbox (isolated data
     expect(mocks.send).not.toHaveBeenCalled()
   })
   it('registers once, dispatches once across overlapping wakes, never uses a hardcoded host', async () => {
-    await runAppointmentMessages() // plans future relative to real DB clock
+    await runAppointmentMessages()
     expect((await fixture.pool.query('SELECT last_error FROM appointment_messages')).rows).toEqual([{last_error:null}])
     await due()
     await Promise.all([runAppointmentMessages(),runAppointmentMessages()])
@@ -120,14 +137,14 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('appointment outbox (isolated data
     expect(mocks.send).toHaveBeenCalledTimes(1)
   })
   it('skips texts for opted-out contacts and blocks mismatched ownership', async () => {
-    await runAppointmentMessages(); await due()
+    await plan()
     mocks.contact.mockResolvedValue({id:'contact',locationId:'location-fixture',email:'fixture@example.invalid',phone:'+12125550199',assignedTo:'host',dndSettings:{SMS:{status:'active'}}})
     await runAppointmentMessages()
     expect((await rows()).find((r:any)=>r.kind==='confirmation'&&r.channel==='sms').state).toBe('skipped')
     expect(mocks.provider.mock.calls.some(([path])=>path==='/conversations/messages')).toBe(false)
   })
   it('texts through an older GoHighLevel contact that already holds the phone', async () => {
-    await runAppointmentMessages(); await due()
+    await plan()
     mocks.textContact.mockResolvedValue({ id:'older-contact', phone:'+12125550199' })
     await runAppointmentMessages()
     expect((await rows()).find((r:any)=>r.kind==='confirmation'&&r.channel==='sms').state).toBe('sent')
@@ -152,7 +169,7 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('appointment outbox (isolated data
   })
   it('keeps a night-time booking text queued for 8 AM when only the link or time zone changes', async () => {
     const night = new Date('2026-10-12T01:00:00.000Z') // 9 PM Eastern
-    vi.setSystemTime(night)
+    await setClock(night)
     const c = await fixture.pool.connect()
     try {
       const row = (await c.query('SELECT * FROM appointment_messages')).rows[0]
@@ -168,7 +185,7 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('appointment outbox (isolated data
       expect(new Date(text.due_at).toISOString()).toBe('2026-10-12T12:00:00.000Z')
     } finally { c.release() }
     // 8 AM Eastern: the queued booking text goes out.
-    vi.setSystemTime(new Date('2026-10-12T12:00:00.000Z'))
+    await setClock(new Date('2026-10-12T12:00:00.000Z'))
     await fixture.pool.query("UPDATE sales_settings SET capabilities=jsonb_set(capabilities,'{scheduler_wake,checkedAt}',to_jsonb('2026-10-12T12:00:00.000Z'::text))")
     await fixture.pool.query("UPDATE appointment_messages SET reconcile_at='2000-01-01'; UPDATE appointment_deliveries SET due_at='2000-01-01' WHERE kind='confirmation' AND channel='sms' AND state='pending'")
     await runAppointmentMessages()
@@ -179,7 +196,7 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('appointment outbox (isolated data
     expect((await rows()).find((r:any)=>r.kind==='confirmation'&&r.channel==='sms'&&r.state==='sent')).toBeTruthy()
   })
   it('does not replay uncertain email acceptance', async () => {
-    await runAppointmentMessages(); await due()
+    await plan()
     mocks.send.mockResolvedValue({ok:false,uncertain:true,logId:'email-fixture'})
     await runAppointmentMessages(); await due(); await runAppointmentMessages()
     expect(mocks.send).toHaveBeenCalledTimes(1)
@@ -281,7 +298,7 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('appointment outbox (isolated data
     expect((await rows()).some((r:any)=>r.state==='pending'&&r.kind==='day_before')).toBe(false)
   })
   it('recovers a committed acceptance after a worker crash without sending again', async () => {
-    await runAppointmentMessages()
+    await plan()
     await fixture.pool.query(`INSERT INTO email_log(id,type,recipient,subject,status,provider_id)
       VALUES('committed','strategy_appointment','fixture@example.invalid','Saved','sent','accepted-fixture');
       UPDATE appointment_deliveries SET state='sending',email_log_id='committed',claimed_at=now()
@@ -291,7 +308,7 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('appointment outbox (isolated data
     expect((await rows()).find((r:any)=>r.channel==='email'&&r.kind==='confirmation').provider_id).toBe('accepted-fixture')
   })
   it('does not send into another location or replay a definite email failure', async () => {
-    await runAppointmentMessages(); await due()
+    await plan()
     mocks.contact.mockResolvedValue({id:'contact',locationId:'wrong-location'})
     await runAppointmentMessages()
     expect(mocks.send).not.toHaveBeenCalled()
@@ -303,6 +320,7 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('appointment outbox (isolated data
   })
   it('skips expired reminder backlog instead of sending catch-up emails', async () => {
     await runAppointmentMessages()
+    mocks.send.mockClear() // The initial confirmation is valid, not an expired reminder.
     await fixture.pool.query("UPDATE appointment_deliveries SET due_at='2000-01-01',expires_at='2000-01-02' WHERE kind='day_before'")
     await runAppointmentMessages()
     expect((await rows()).filter((r:any)=>r.kind==='day_before').every((r:any)=>r.state==='skipped')).toBe(true)

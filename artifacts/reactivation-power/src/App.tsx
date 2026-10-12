@@ -23,6 +23,7 @@ import Page_admin_analytics from '@/pages/admin_analytics';
 import Page_admin_courses from '@/pages/admin_courses';
 import Page_admin_courses_id from '@/pages/admin_courses_id';
 import Page_admin_emails from '@/pages/admin_emails';
+import PageAdminMarketingTexts from '@/pages/admin_marketing_texts';
 import Page_admin_landing from '@/pages/admin_landing';
 import Page_admin_participants from '@/pages/admin_participants';
 import Page_admin_participants_id from '@/pages/admin_participants_id';
@@ -152,6 +153,9 @@ function Router() {
             <Page_admin_emails />
           </AdminLayout>
         </RoutedErrorBoundary>
+      </Route>
+      <Route path="/admin/marketing-texts">
+        <RoutedErrorBoundary><AdminLayout><PageAdminMarketingTexts /></AdminLayout></RoutedErrorBoundary>
       </Route>
       <Route path="/admin/landing">
         <RoutedErrorBoundary>

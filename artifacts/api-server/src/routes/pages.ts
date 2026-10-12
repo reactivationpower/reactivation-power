@@ -62,6 +62,8 @@ import {
 import { listCommissions } from "../actions/commissions";
 import { getPortalLoginState } from '../actions/auth';
 import { listCustomers, getCustomerRecord, getEnrollmentSetup } from '../lib/data/customers';
+import { MARKETING_TEXTS } from '@workspace/shared/marketing-texts';
+import { TEXT_HANDOFF_INSTRUCTIONS } from '../lib/marketing/text-handoff';
 
 const visibleQueueItem = (item: leadStore.CallNextItem) => ({ ...item, lead: withoutLeadLeaseToken(item.lead) });
 
@@ -162,6 +164,9 @@ add("/admin/emails", "super_admin", async (req) => {
   return { adminEmail: session?.email ?? null };
 });
 add("/admin/landing", "super_admin", async () => ({}));
+add("/admin/marketing-texts", "super_admin", async () => ({
+  texts: MARKETING_TEXTS, instructions: TEXT_HANDOFF_INSTRUCTIONS,
+}));
 add("/admin/team", "super_admin", async (req) => {
   const session = await getAdminSessionFromRequest(req);
   return { members: await listAdminUsers(), currentUserId: session?.userId ?? null };

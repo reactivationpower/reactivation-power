@@ -12,6 +12,7 @@
     "./campaign-tokens": "./src/campaign-tokens.ts",
     "./booking-funnel": "./src/booking-funnel.ts",
     "./email-templates": "./src/email-templates.ts",
+    "./marketing-texts": "./src/marketing-texts.ts",
     "./format": "./src/format.ts",
     "./lazy-time": "./src/lazy-time.ts",
     "./lead-followup": "./src/lead-followup.ts",

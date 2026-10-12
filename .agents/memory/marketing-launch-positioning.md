@@ -26,3 +26,9 @@ Treat email image addresses as part of a domain-link repair, not just call-butto
 **Why:** Updating the booking buttons left the exported emails' logo on the unavailable old domain, so a successfully tested button still produced a visibly broken email.
 
 **How to apply:** Inspect both href and src destinations across the generated package. Check that public image responses contain actual image bytes, then render an exported email and confirm the logo decodes before presenting the replacement ZIP.
+
+Dr. Jason used the original reactivation system in his former practice, has sold his offices, and does not currently use Patient Pipeline in an office. His approved historical result was 30–40% of that office's “new patients” being former patients reactivated into a new plan of care, not one or two visits. Patient Pipeline expands on that original system, described in his approved voice as “on steroids,” after six months of development.
+
+**Why:** The user supplied these distinctions explicitly for the provider marketing campaign; collapsing the original system into the expanded platform would falsely imply current product use or guaranteed results.
+
+**How to apply:** Keep the former-practice context and new-plan-of-care distinction in future founder stories. Never convert the historical percentage into a product outcome promise or claim current office ownership/use.

@@ -43,6 +43,7 @@ const SHARED_MODULES = [
   'campaign-tokens',
   'csv-patients',
   'email-templates',
+  'marketing-texts',
   'format',
   'lazy-time',
   'lead-followup',
