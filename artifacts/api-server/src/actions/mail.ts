@@ -23,6 +23,7 @@ export interface TransactionalTemplatePreview {
 export async function listTransactionalTemplates(): Promise<{
   from: string
   templates: TransactionalTemplatePreview[]
+  /** Signing-secret presence only; not proof of provider events or inbox receipt. */
   deliveryTrackingConfigured: boolean
 }> {
   await requireAdmin('super_admin')

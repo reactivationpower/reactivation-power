@@ -37,7 +37,7 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('appointment outbox (isolated data
     await fixture.pool.query(`CREATE TABLE fixture_clock (instant timestamptz NOT NULL);
       INSERT INTO fixture_clock VALUES ('2026-10-12T14:00:00.000Z');
       CREATE FUNCTION "${schema}".now() RETURNS timestamptz LANGUAGE sql STABLE
-      AS 'SELECT instant FROM fixture_clock';`)
+      AS 'SELECT instant FROM "${schema}".fixture_clock';`)
     await fixture.pool.query(`CREATE TABLE sales_leads (LIKE public.sales_leads INCLUDING ALL);
       CREATE TABLE sales_settings (LIKE public.sales_settings INCLUDING ALL);
       CREATE TABLE email_log (LIKE public.email_log INCLUDING ALL);`)
@@ -75,6 +75,8 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('appointment outbox (isolated data
   async function setClock(time: Date) {
     vi.setSystemTime(time)
     await fixture.pool.query('UPDATE fixture_clock SET instant=$1', [time])
+    const clock = (await fixture.pool.query('SELECT now() AS at')).rows[0].at
+    expect(clock.getTime()).toBe(Date.now())
   }
   const rows = async () => (await fixture.pool.query('SELECT * FROM appointment_deliveries ORDER BY kind,channel')).rows
   async function due() {
@@ -89,6 +91,11 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('appointment outbox (isolated data
       await reconcileAppointment(c, row, event, 'America/New_York', new Date(), true)
     } finally { c.release() }
     await due()
+    expect(mocks.send).not.toHaveBeenCalled()
+    expect(mocks.provider).not.toHaveBeenCalled()
+    const confirmations = (await rows()).filter((r:any) => r.kind === 'confirmation')
+    expect(confirmations).toHaveLength(2)
+    expect(confirmations.every((r:any) => r.state === 'pending')).toBe(true)
   }
   it('a fresh booking creates and sends the confirmation email and text', async () => {
     event.startTime = '2026-10-14T12:00:00-04:00' // GoHighLevel's offset format
@@ -319,9 +326,9 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('appointment outbox (isolated data
     expect((await rows()).find((r:any)=>r.channel==='email'&&r.kind==='confirmation').state).toBe('failed')
   })
   it('skips expired reminder backlog instead of sending catch-up emails', async () => {
-    await runAppointmentMessages()
-    mocks.send.mockClear() // The initial confirmation is valid, not an expired reminder.
-    await fixture.pool.query("UPDATE appointment_deliveries SET due_at='2000-01-01',expires_at='2000-01-02' WHERE kind='day_before'")
+    await plan()
+    await fixture.pool.query(`UPDATE appointment_deliveries SET due_at='2000-01-01',expires_at='2000-01-02' WHERE kind='day_before';
+      UPDATE appointment_deliveries SET due_at='2099-01-01' WHERE kind='confirmation'`)
     await runAppointmentMessages()
     expect((await rows()).filter((r:any)=>r.kind==='day_before').every((r:any)=>r.state==='skipped')).toBe(true)
     expect(mocks.send).not.toHaveBeenCalled()

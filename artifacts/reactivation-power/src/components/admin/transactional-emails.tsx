@@ -23,6 +23,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { notifyDone, notifyError } from '@/lib/notify'
 import { cn } from '@/lib/utils'
+import { EmailTrackingNotice } from './email-tracking-notice'
 
 /**
  * Transactional (account) emails: the branded templates the app sends on
@@ -78,7 +79,7 @@ export function TransactionalEmails({ adminEmail }: { adminEmail?: string | null
         fd.set('template', template.id)
         fd.set('to', testTo)
         const result = await sendTestEmail(fd)
-        if (result.ok) notifyDone('Test email sent', `${template.name} → ${testTo}`)
+        if (result.ok) notifyDone('Test email accepted by Resend', 'Check the delivery log and ask the recipient to confirm receipt.')
         else notifyError('Send failed', result.error ?? 'Resend rejected the message')
         await refreshLog()
       } catch (err) {
@@ -100,13 +101,7 @@ export function TransactionalEmails({ adminEmail }: { adminEmail?: string | null
           via Resend. Open and click tracking are per-domain switches in the Resend dashboard; events land in the log below through the webhook.
         </span>
       </div>
-      {deliveryTrackingConfigured === false && (
-        <p role="alert" className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-          Delivery tracking is not configured. “Accepted” only means Resend accepted the send, not that it reached the inbox.
-          Configure /api/webhooks/resend in Resend for delivery, bounce, failure, suppression, and complaint events,
-          then save its signing secret as RESEND_WEBHOOK_SECRET in the server’s secrets.
-        </p>
-      )}
+      <EmailTrackingNotice configured={deliveryTrackingConfigured} />
 
       {/* Template picker */}
       <div className="rounded-lg border border-border bg-card">
@@ -271,7 +266,7 @@ export function TransactionalEmails({ adminEmail }: { adminEmail?: string | null
                       <StatusBadge status={r.status} error={r.error} />
                     </td>
                     <td className="min-w-[240px] px-4 py-2 text-muted-foreground">
-                      {r.error || (r.status === 'sent' ? 'Accepted by Resend; inbox delivery not confirmed.' : '—')}
+                      {r.error || (r.status === 'sent' ? 'Accepted by Resend; inbox delivery not confirmed.' : r.status === 'delivered' ? 'Accepted by the recipient’s mail server; inbox placement not confirmed.' : '—')}
                       {r.lastEventAt && <div className="text-xs">Last event: {r.lastEvent} · {fmt(r.lastEventAt)}</div>}
                       {['failed', 'bounced', 'suppressed', 'complained'].includes(r.status) &&
                         ['portal_login_code', 'portal_password_setup', 'portal_welcome', 'admin_invite'].includes(r.type) && (

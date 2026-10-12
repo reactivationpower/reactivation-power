@@ -27,6 +27,7 @@ export interface EmailLogRow {
   test: boolean
 }
 
+// Configured means secret presence, not verified provider delivery or inbox receipt.
 export const listTransactionalTemplates = action<{ from: string; templates: TransactionalTemplatePreview[]; deliveryTrackingConfigured: boolean }>(
   'mail',
   'listTransactionalTemplates',

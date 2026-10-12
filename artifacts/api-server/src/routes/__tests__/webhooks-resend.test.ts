@@ -183,6 +183,36 @@ describe('verified delivery webhook HTTP boundary', () => {
     expect(store.transactions).toBe(0)
     expect(store.writes).toBe(0)
   })
+  it('rejects unsigned events without touching the log', async () => {
+    const response = await fetch(url, {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(failure),
+    })
+    expect(response.status).toBe(401)
+    expect(store.transactions).toBe(0)
+  })
+  it('matches signed delivery evidence by provider ID, not recipient or row order', async () => {
+    const other = { ...logRow(), id: 'other-log', providerId: 're_other' }
+    store.rows.unshift(other)
+    const event = { type: 'email.delivered', created_at: '2026-10-01T10:00:00Z', data: { email_id: 're_1' } }
+    expect((await post(event)).status).toBe(200)
+    expect(other.status).toBe('sent')
+    expect(store.rows[1]).toMatchObject({
+      status: 'delivered', deliveredAt: new Date(event.created_at),
+      lastEvent: 'email.delivered', lastEventAt: new Date(event.created_at),
+    })
+    expect((await post(event)).status).toBe(200)
+    expect(store.writes).toBe(1)
+  })
+  it('preserves a terminal failure after signed delivery, open, and click events', async () => {
+    expect((await post(failure)).status).toBe(200)
+    for (const type of ['email.delivered', 'email.opened', 'email.clicked']) {
+      expect((await post({ ...failure, type, created_at: '2026-10-01T10:01:00Z' })).status).toBe(200)
+    }
+    expect(store.rows[0].status).toBe('suppressed')
+    expect(store.rows[0].error).toContain('suppressed')
+    expect(store.rows[0].lastClickedUrl).toBeNull()
+  })
   it('fails closed without a signing secret', async () => {
     vi.stubEnv('RESEND_WEBHOOK_SECRET', '')
     expect((await post(failure)).status).toBe(503)

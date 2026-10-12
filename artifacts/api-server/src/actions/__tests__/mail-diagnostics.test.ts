@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const mocks = vi.hoisted(() => ({
   requireAdmin: vi.fn(),
@@ -18,9 +18,10 @@ vi.mock('@workspace/db', () => ({
 }))
 vi.mock('drizzle-orm', () => ({ desc: vi.fn(), eq: vi.fn(), sql: vi.fn() }))
 
-import { listEmailLog, listTransactionalTemplates } from '../mail'
+import { listEmailLog, listTransactionalTemplates, sendTestEmail } from '../mail'
 
 describe('administrator authentication-email diagnostics', () => {
+  afterEach(() => vi.unstubAllEnvs())
   beforeEach(() => {
     mocks.requireAdmin.mockReset()
     mocks.requireAdmin.mockResolvedValue({ userId: 'admin-1' })
@@ -47,9 +48,10 @@ describe('administrator authentication-email diagnostics', () => {
     mocks.requireAdmin.mockRejectedValue(new Error('Not authorized'))
     await expect(listEmailLog()).rejects.toThrow('Not authorized')
     await expect(listTransactionalTemplates()).rejects.toThrow('Not authorized')
+    await expect(sendTestEmail(new FormData())).rejects.toThrow('Not authorized')
   })
   it('reports missing tracking configuration without exposing the signing secret', async () => {
-    vi.stubEnv('RESEND_WEBHOOK_SECRET', '')
+    vi.stubEnv('RESEND_WEBHOOK_SECRET', '   ')
     expect((await listTransactionalTemplates()).deliveryTrackingConfigured).toBe(false)
     vi.stubEnv('RESEND_WEBHOOK_SECRET', 'test-only-signing-secret')
     const result = await listTransactionalTemplates()
