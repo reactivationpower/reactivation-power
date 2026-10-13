@@ -10,6 +10,7 @@ import { runSalesWorker } from '@/lib/sales-leads/worker'
 import { salesAutomationMissing } from '@workspace/shared/sales-automation'
 import { withSyncState } from '@/lib/sales-leads/sync-state'
 import { assignTextNumbers, followupTexts, validateFollowupTexts } from '@/lib/sales-leads/followup-texts'
+import { termsAcceptanceHistory } from './lead-terms'
 const safeText = (s: unknown, max = 200) => typeof s === 'string' ? s.trim().slice(0, max) : ''
 function email(s: unknown) {
   const value = emailKey(safeText(s, 254))
@@ -39,12 +40,13 @@ export async function getSalesLead(leadId: string) {
   await requireAdmin()
   const lead = (await pool.query('SELECT * FROM sales_leads WHERE id=$1', [leadId])).rows[0]
   if (!lead) throw new Error('Lead not found')
-  const [activities, submissions, jobs] = await Promise.all([
+  const [activities, submissions, jobs, terms_acceptances] = await Promise.all([
     pool.query('SELECT * FROM sales_activities WHERE lead_id=$1 ORDER BY occurred_at DESC LIMIT 500', [leadId]),
     pool.query('SELECT * FROM sales_submissions WHERE lead_id=$1 ORDER BY submitted_at DESC', [leadId]),
     pool.query('SELECT id,kind,state,attempts,last_error,due_at FROM sales_jobs WHERE lead_id=$1 ORDER BY created_at DESC LIMIT 100', [leadId]),
+    termsAcceptanceHistory(leadId),
   ])
-  return { lead: (await withSyncState([lead]))[0], activities: activities.rows, submissions: submissions.rows, jobs: jobs.rows, contact_url: contactUrl(lead.ghl_contact_id), suggested_followup: suggestedFollowup(new Date(), leadId) }
+  return { lead: (await withSyncState([lead]))[0], activities: activities.rows, submissions: submissions.rows, jobs: jobs.rows, terms_acceptances, contact_url: contactUrl(lead.ghl_contact_id), suggested_followup: suggestedFollowup(new Date(), leadId) }
 }
 export async function createSalesLead(input: { firstName: string; lastName: string; email: string; phone: string; practiceName: string; notes?: string; affiliateId?: string }) {
   const admin = await requireAdmin(), leadEmail = email(input.email), phone = phoneKey(safeText(input.phone, 32))

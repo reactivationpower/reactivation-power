@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'wouter'
 import { AppointmentMessaging } from '@/components/leads/appointment-messaging'
 import { QuickSwitches } from '@/components/leads/quick-switches'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -42,6 +43,7 @@ export default function AdminLeadsSettingsPage() {
       <header><h1 className="text-2xl font-semibold">Leads</h1><p className="mt-1 text-sm text-muted-foreground">Turn things on or off.</p></header>
       <LeadsTabs />
       <QuickSwitches />
+      {super_admin && <section className={card + ' flex flex-wrap items-center justify-between gap-2'} data-testid="section-terms-link"><div><h2 className="font-semibold">Terms of Service</h2><p className="text-sm text-muted-foreground">Manage the terms checkbox on marketing lead forms.</p></div><Link href="/admin/leads/terms" className={btn2} data-testid="link-terms-admin">Manage terms</Link></section>}
       <details className="group space-y-4" data-testid="section-advanced">
         <summary className="cursor-pointer select-none text-sm font-medium text-muted-foreground hover:text-foreground">Advanced</summary>
         <div className="mt-4 space-y-6">

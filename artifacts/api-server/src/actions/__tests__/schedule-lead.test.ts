@@ -9,6 +9,7 @@ const { insert, upsert, note, redirect } = vi.hoisted(() => ({
 }))
 
 vi.mock('next/headers', () => ({ headers: async () => new Headers() }))
+vi.mock('@/lib/lead-terms/store', async original => ({ ...await original<any>(), currentTerms: async () => ({ active: false, version: null }) }))
 vi.mock('next/navigation', () => ({ redirect }))
 vi.mock('@/lib/supabase/admin', () => ({ getAdminClient: () => ({ from: () => ({ insert, update: () => ({ eq: async () => ({ error: null }) }) }) }) }))
 vi.mock('@/lib/sales-leads/store', () => ({

@@ -1,4 +1,5 @@
 /** Internal provider-sales CRM. Never use these types for practice patient queues. */
+import type { LeadTermsAcceptance } from './lead-terms'
 export const SALES_STAGES = ['New', 'Attempting Contact', 'Engaged', 'Follow-Up Scheduled', 'Strategy Call Booked', 'No-Show', 'Won', 'Not Now', 'Lost/Do Not Contact'] as const
 export const SALES_DISPOSITIONS = ['No Answer', 'Voicemail', 'Spoke–Did Not Schedule', 'Follow-Up Requested', 'Not Now', 'Booked', 'Wrong Number', 'Do Not Contact'] as const
 export type SalesStage = typeof SALES_STAGES[number]
@@ -31,6 +32,7 @@ export interface SalesDashboard {
   reply_notifications: boolean; admin_id: string; super_admin: boolean;
 }
 export interface SalesDetail {
+  terms_acceptances?: LeadTermsAcceptance[];
   lead: SalesLead; activities: SalesActivity[]; submissions: SalesSubmission[];
   contact_url: string | null; suggested_followup: string | null;
   jobs: Array<{ id: string; kind: string; state: string; attempts: number; last_error: string | null; due_at: string }>;

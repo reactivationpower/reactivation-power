@@ -13,6 +13,7 @@ import * as billing from "../actions/billing";
 import * as booking from "../actions/booking";
 import * as demo from "../actions/demo";
 import * as leads from "../actions/leads";
+import * as leadTerms from "../actions/lead-terms";
 import * as salesLeads from "../actions/sales-leads";
 import * as salesInbox from "../actions/sales-inbox";
 import * as appointmentMessages from "../actions/appointment-messages";
@@ -60,6 +61,7 @@ type ActionFn = (...args: unknown[]) => Promise<unknown>;
 type ActionModule = Record<string, unknown>;
 
 const MODULES: Record<string, ActionModule> = {
+  "lead-terms": leadTerms,
   "patient-texting": patientTexting,
   marketing,
   "sales-leads": salesLeads,
@@ -94,6 +96,11 @@ type Auth = "public" | "portal" | "affiliate" | "admin" | "super_admin" | "manag
 // hint: Logic changed on both sides. Requires understanding intent of each change.
 /** Allow-list: module -> action -> required auth. Anything else is 404. */
 const ACTIONS: Record<string, Record<string, Auth>> = {
+  "lead-terms": {
+    getCurrentTerms: "public", getTermsVersion: "public",
+    getTermsAdmin: "super_admin", saveTermsDraft: "super_admin", publishTerms: "super_admin",
+    downloadTermsEvidence: "admin",
+  },
   "patient-texting": {
     getTextSettings: "portal", saveTextSettings: "portal", getTextConversation: "portal",
     startTextSimulation: "portal", changeTextSimulation: "portal",
@@ -305,7 +312,7 @@ router.post("/actions/:module/:fn", async (req: Request, res: Response) => {
   const rawArgs = Array.isArray(req.body?.args) ? (req.body.args as unknown[]) : [];
   const args = rawArgs.map(decodeArg);
     const result = await runWithRequestContext(req, res, () => {
-      if (moduleName === 'affiliates' || moduleName === 'affiliate-onboarding' || moduleName === 'patient-texting') assertSameOrigin();
+      if (moduleName === 'affiliates' || moduleName === 'affiliate-onboarding' || moduleName === 'patient-texting' || moduleName === 'lead-terms') assertSameOrigin();
       return (fn as ActionFn)(...args);
     });
     res.json({ ok: true, result: result === undefined ? null : result });

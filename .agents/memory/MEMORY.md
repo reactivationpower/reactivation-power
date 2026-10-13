@@ -46,3 +46,4 @@
 - [RPC mutationFn args](rpc-mutation-args.md) — wrap RPC actions in an arrow for useMutation or react-query's context is sent as an extra server arg.
 - [Embedded video start hold](video-embedded-start.md) — videos start paused when iframed; framer JS tweens need skipAnimations, not getAnimations; top-level must still autoplay.
 - [Sales automation enable rules](sales-automation-readiness.md) — one shared rule list gates the server and the settings checklist; never add a separate check.
+- [Lead Terms rollout](lead-terms-rollout.md) — shared-DB publication is global; update every serving host before activating the attorney's first version.

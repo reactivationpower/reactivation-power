@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto'
 import { pool, type PoolClient } from '@workspace/db'
 import { validTimezone } from './cadence'
 import { nudgeSalesSync } from './dispatch'
+import { requireCurrentAcceptance, recordTermsAcceptance, type MarketingTermsInput } from '../lead-terms/store'
 const syncTransactions = new WeakSet<PoolClient>()
 export const id = () => randomUUID()
 export const emailKey = (s: string) => s.trim().toLowerCase()
@@ -71,14 +72,28 @@ export interface Intake {
   firstName: string; lastName: string; email: string; phone: string; practiceName: string; source: string; sourcePath: string;
   context: Record<string, unknown>; consentEvidence?: Record<string, unknown>; consent?: boolean; timezone?: string | null;
   affiliateId?: string | null; historical?: boolean; providerId?: string; submittedAt?: string; dedupeKey: string;
+  /** Only the public marketing action sets this; imports/manual/customer flows never do. */
+  marketingTerms?: MarketingTermsInput & { identity: { firstName: string; lastName: string; email: string; phone: string; practiceName: string } };
 }
 /** Identity is serialized across all ingestion workers; shared office phones are never blindly merged. */
-export async function intake(input: Intake, forceLeadId?: string | null): Promise<{ id: string; review?: boolean }> {
+export async function intake(input: Intake, forceLeadId?: string | null): Promise<{ id: string; review?: boolean; bookingRef?: string }> {
   const email = emailKey(input.email), phone = phoneKey(input.phone)
   return transaction(async c => {
     await c.query("SELECT pg_advisory_xact_lock(hashtextextended('sales-intake',0))")
-    const existingSubmission = (await c.query('SELECT lead_id FROM sales_submissions WHERE dedupe_key=$1', [input.dedupeKey])).rows[0]
-    if (existingSubmission) return { id: existingSubmission.lead_id }
+    const terms = input.marketingTerms ? await requireCurrentAcceptance(c, input.marketingTerms) : null
+    const existingSubmission = (await c.query('SELECT id,lead_id,context FROM sales_submissions WHERE dedupe_key=$1', [input.dedupeKey])).rows[0]
+    if (existingSubmission) {
+      if (input.marketingTerms) {
+        const old = existingSubmission.context
+        // Retry keys are not permission to attach a different person's acceptance.
+        for (const key of ['firstName', 'lastName', 'email', 'phone', 'practiceName']) {
+          if (old[key] !== input.context[key]) throw new Error('This request was already saved with different entries. Please reload the form.')
+        }
+        if (terms?.active && !(await c.query('SELECT id FROM lead_terms_acceptances WHERE submission_id=$1 AND version_id=$2',
+          [existingSubmission.id, terms.version.id])).rowCount) throw new Error('Saved submission has no matching terms evidence')
+      }
+      return { id: existingSubmission.lead_id, bookingRef: existingSubmission.context?.bookingHandoff?.ref }
+    }
     const matches = (await c.query(`SELECT * FROM sales_leads WHERE ($1<>'' AND email=$1) OR ($2<>'' AND phone=$2) OR ($3::text IS NOT NULL AND ghl_contact_id=$3) FOR UPDATE`, [email, phone, input.providerId ?? null])).rows
     const exactProvider = matches.find(l => l.ghl_contact_id && l.ghl_contact_id === input.providerId)
     const exactEmail = matches.filter(l => email && l.email === email)
@@ -89,6 +104,7 @@ export async function intake(input: Intake, forceLeadId?: string | null): Promis
     const separate = forceLeadId === undefined && ambiguous && !input.historical && exactEmail.length === 0
     const byEmail = forceLeadId === undefined && ambiguous && !input.historical && exactEmail.length === 1
     if (forceLeadId === undefined && ambiguous && !separate && !byEmail) {
+      if (input.marketingTerms) throw new Error('We could not safely save this inquiry. Please contact Patient Pipeline.')
       const reviewId = id()
       await c.query(`INSERT INTO sales_merge_reviews(id,dedupe_key,candidates,submission) VALUES($1,$2,$3,$4) ON CONFLICT(dedupe_key) DO NOTHING`,
         [reviewId, input.dedupeKey, JSON.stringify(matches.map(l => ({ id: l.id, name: `${l.first_name} ${l.last_name}`, email: l.email, phone: l.phone }))), JSON.stringify(input)])
@@ -114,10 +130,13 @@ export async function intake(input: Intake, forceLeadId?: string | null): Promis
         [lead.id, input.affiliateId ?? null, input.providerId ?? null, Boolean(input.consent && !input.historical),
           !input.historical && validTimezone(input.timezone) ? input.timezone : null])
     }
+    const submissionId = id()
     await c.query(`INSERT INTO sales_submissions(id,lead_id,source,source_path,submitted_at,context,consent_evidence,historical,dedupe_key)
       VALUES($1,$2,$3,$4,COALESCE($5::timestamptz,now()),$6,$7,$8,$9) ON CONFLICT(dedupe_key) DO NOTHING`,
-      [id(), lead.id, input.source, input.sourcePath, input.submittedAt ?? null, JSON.stringify(input.context),
+      [submissionId, lead.id, input.source, input.sourcePath, input.submittedAt ?? null, JSON.stringify(input.context),
         JSON.stringify(input.consentEvidence ?? {}), Boolean(input.historical), input.dedupeKey])
+    if (terms && input.marketingTerms) await recordTermsAcceptance(c, terms, input.marketingTerms, submissionId, lead.id,
+      input.marketingTerms.identity, input.sourcePath)
     await activity(c, lead.id, { kind: 'submission', body: `${input.source}: ${input.sourcePath}`, dedupeKey: `submission:${input.dedupeKey}`, occurredAt: input.submittedAt })
     if (separate) await activity(c, lead.id, { kind: 'note', dedupeKey: `shared-phone:${input.dedupeKey}`,
       body: `Possible duplicate: this inquiry uses the same phone as ${matches.map(l => `${l.first_name} ${l.last_name}`.trim() || 'another lead').join(', ')} but a different email. It was kept as a separate lead so the visitor could book. Its GoHighLevel contact has no phone, and automated texts are skipped. Merge them if they are the same person.` })
@@ -138,6 +157,6 @@ export async function intake(input: Intake, forceLeadId?: string | null): Promis
       // An updated verified browser timezone invalidates existing SMS slots; planner recalculates only an active sequence.
       await c.query("UPDATE sales_jobs SET state='cancelled',last_error='Timezone changed',finished_at=now() WHERE lead_id=$1 AND kind='sms' AND state='pending'", [lead.id])
     }
-    return { id: lead.id }
+    return { id: lead.id, bookingRef: (input.context.bookingHandoff as { ref?: string } | undefined)?.ref }
   })
 }

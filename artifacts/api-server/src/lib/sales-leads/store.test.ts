@@ -20,6 +20,8 @@ import { nudgeSalesSync } from './dispatch'
 import { ingestMessages, ingestProviderFacts, reconcileLead } from './ingestion'
 import { logSalesCall, retrySalesSync, updateSalesLead } from '@/actions/sales-leads'
 vi.mock('@/lib/auth/admin-session', () => ({ requireAdmin: vi.fn(async () => ({ userId: 'fixture-admin', name: 'Fixture', email: 'fixture@example.invalid', role: 'super_admin' })) }))
+// This suite exercises CRM workflows, not marketing terms; it has no legal tables.
+vi.mock('@/actions/lead-terms', () => ({ termsAcceptanceHistory: async () => [] }))
 vi.mock('@/lib/data/admin-users', () => ({ listAdminUsers: async () => [], getAdminUserById: async () => null }))
 vi.mock('@/lib/sales-leads/worker', () => ({
   runSalesWorker: vi.fn(async () => {}),

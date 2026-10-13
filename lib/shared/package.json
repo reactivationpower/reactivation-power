@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "exports": {
+    "./lead-terms": "./src/lead-terms.ts",
     "./marketing-analytics": "./src/marketing-analytics.ts",
     ".": "./src/index.ts",
     "./analytics-types": "./src/analytics-types.ts",

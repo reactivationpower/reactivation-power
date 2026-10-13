@@ -1,4 +1,5 @@
 import { respondDatabaseUnavailable } from "../lib/database-unavailable";
+import { getTermsAdmin, getTermsVersion } from "../actions/lead-terms";
 import { Router, type IRouter, type Request, type Response } from "express";
 import { readBookingHandoff, INVALID_HANDOFF, SAVED_HELP } from "../lib/booking-handoff";
 import { cookies } from 'next/headers';
@@ -123,6 +124,9 @@ function add(path: string, auth: AuthKind, loader: Loader): void {
     }
   });
 }
+
+add("/terms/:id", undefined, async req => ({ version: await getTermsVersion(String(req.params.id)) }));
+add("/admin/leads/terms", "super_admin", async () => getTermsAdmin());
 
 add("/portal/_layout", "portal", async () => {
   const participant = await getCurrentParticipant();

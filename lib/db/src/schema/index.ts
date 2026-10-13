@@ -16,3 +16,4 @@ export * from "./lead-notifications";
 export * from "./enrollment-notifications";
 export * from "./enrollment-invitations";
 export * from "./appointment-messages";
+export * from "./lead-terms";

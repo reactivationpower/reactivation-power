@@ -8,6 +8,9 @@ import {
 } from '@/app/actions/leads'
 import { useOpportunity } from '@/components/landing/opportunity-context'
 import { ServicesMultiSelect } from '@/components/landing/services-multi-select'
+import { getCurrentTerms } from '@/app/actions/lead-terms'
+import { nextAccepted, termsId } from '@/components/landing/terms-state'
+import type { CurrentLeadTerms } from '@workspace/shared/lead-terms'
 import { Button } from '@/components/ui/button'
 import { readLeadFields, validateLeadFields } from '@workspace/shared/lead-validation'
 import type { CalculatorScenario } from '@workspace/shared/opportunity'
@@ -65,6 +68,53 @@ export function LeadForm({ scheduleMode = false, calculatorScenario, funnelSourc
     if (state.error) track('request_error', { category: 'unavailable', control: 'lead-form' })
   }, [state])
 
+  // Terms acceptance: fetched per mounted form. Loading/error block submit.
+  const [termsStatus, setTermsStatus] = useState<'loading' | 'error' | 'ready'>('loading')
+  const [terms, setTerms] = useState<CurrentLeadTerms | null>(null)
+  const [accepted, setAccepted] = useState(false)
+  const [termsChanged, setTermsChanged] = useState(false)
+  const termsRef = useRef<CurrentLeadTerms | null>(null)
+  const termsRequest = useRef(0)
+  const submissionId = useRef('')
+  if (!submissionId.current) submissionId.current = crypto.randomUUID()
+  const applyTerms = (next: CurrentLeadTerms) => {
+    const previous = termsRef.current
+    if (previous && termsId(previous) !== termsId(next)) setTermsChanged(true)
+    setAccepted((a) => nextAccepted(previous, next, a))
+    termsRef.current = next
+    setTerms(next)
+    setTermsStatus('ready')
+  }
+  const applyTermsRef = useRef(applyTerms)
+  applyTermsRef.current = applyTerms
+  const loadTerms = (silent: boolean) => {
+    const request = ++termsRequest.current
+    if (!silent) setTermsStatus('loading')
+    getCurrentTerms().then((t) => {
+      if (request === termsRequest.current) applyTermsRef.current(t)
+    }, () => { if (request === termsRequest.current) setTermsStatus('error') })
+  }
+  const loadTermsRef = useRef(loadTerms)
+  loadTermsRef.current = loadTerms
+  useEffect(() => {
+    loadTermsRef.current(false)
+    const refresh = () => loadTermsRef.current(true)
+    const timer = window.setInterval(refresh, 60000)
+    window.addEventListener('focus', refresh)
+    return () => { ++termsRequest.current; window.clearInterval(timer); window.removeEventListener('focus', refresh) }
+  }, [])
+  // Server says terms are stale/missing: adopt its version and always uncheck
+  useEffect(() => {
+    if (!state.terms) return
+    ++termsRequest.current
+    termsRef.current = state.terms
+    setTerms(state.terms)
+    setTermsStatus('ready')
+    setAccepted(false)
+    setTermsChanged(true)
+  }, [state.terms])
+  const activeTerms = terms && terms.active ? terms.version : null
+
   const [phone, setPhone] = useState('')
   const [zip, setZip] = useState('')
   const [zipPlace, setZipPlace] = useState<{
@@ -81,6 +131,7 @@ export function LeadForm({ scheduleMode = false, calculatorScenario, funnelSourc
   // number counts, because they've now confirmed it
   const [inactiveEdited, setInactiveEdited] = useState(false)
   const [productInterest, setProductInterest] = useState('')
+  const [yearsInPractice, setYearsInPractice] = useState('')
   // Follow the slider if the visitor moves it after this form has mounted
   const sliderCount = calculatorScenario?.inactivePatients ?? calc?.inactiveCount
   useEffect(() => {
@@ -103,6 +154,8 @@ export function LeadForm({ scheduleMode = false, calculatorScenario, funnelSourc
         setInactive(state.values.inactivePatients)
       if (state.values.productInterest !== undefined)
         setProductInterest(state.values.productInterest)
+      if (state.values.yearsInPractice !== undefined)
+        setYearsInPractice(state.values.yearsInPractice)
     }
   }, [state.values])
 
@@ -134,6 +187,10 @@ export function LeadForm({ scheduleMode = false, calculatorScenario, funnelSourc
       [...new URLSearchParams(window.location.search)].filter(([key]) => /^utm_(source|medium|campaign|term|content)$/.test(key)),
     ))
     const found = validateLeadFields(readLeadFields(new FormData(e.currentTarget)))
+    if (termsStatus !== 'ready') {
+      e.preventDefault()
+      found.termsAccepted = 'Terms of Service could not be loaded. Retry before submitting.'
+    } else if (activeTerms && !accepted) found.termsAccepted = 'Please review and accept the Terms of Service.'
     if (scheduleMode && !productInterest)
       found.productInterest = 'Select how we can help your practice.'
     if (Object.keys(found).length > 0) {
@@ -187,6 +244,8 @@ export function LeadForm({ scheduleMode = false, calculatorScenario, funnelSourc
       <input type="hidden" name="deviceTimezone" defaultValue="" />
       <input type="hidden" name="actualSourcePath" defaultValue="" />
       <input type="hidden" name="utmContext" defaultValue="" />
+      <input type="hidden" name="termsVersion" value={activeTerms?.id ?? ''} />
+      <input type="hidden" name="marketingSubmissionId" value={submissionId.current} />
       {calculatorScenario && !scheduleMode && (
         <>
           <input type="hidden" name="calculatorScenario" value="combined" />
@@ -398,7 +457,8 @@ export function LeadForm({ scheduleMode = false, calculatorScenario, funnelSourc
             id={`${uid}-years`}
             name="yearsInPractice"
             required
-            defaultValue={v.yearsInPractice ?? ''}
+            value={yearsInPractice}
+            onChange={(e) => { setYearsInPractice(e.target.value); clearError('yearsInPractice') }}
             aria-invalid={errors.yearsInPractice ? 'true' : undefined}
             className={inputClass(Boolean(errors.yearsInPractice))}
           >
@@ -509,6 +569,40 @@ export function LeadForm({ scheduleMode = false, calculatorScenario, funnelSourc
         )}
       </div>
 
+      <div className="flex flex-col gap-1.5" data-testid="terms-block">
+        {termsStatus === 'loading' && <p className="text-xs text-muted-foreground" data-testid="terms-loading">Loading terms…</p>}
+        {termsStatus === 'error' && (
+          <p role="alert" className="text-sm font-medium text-destructive" data-testid="terms-error">
+            Terms of Service could not be loaded.{' '}
+            <button type="button" className="underline" onClick={() => loadTerms(false)} data-testid="button-retry-terms">Retry</button>
+          </p>
+        )}
+        {activeTerms && termsStatus === 'ready' && (
+          <>
+            {termsChanged && <p role="status" className="text-xs text-muted-foreground">Please review the current terms and check again.</p>}
+            <label className={`flex items-start gap-2.5 rounded-md border px-3 py-3 text-sm leading-relaxed ${errors.termsAccepted ? 'border-destructive bg-destructive/5' : 'border-input bg-card'}`}>
+              <input
+                type="checkbox"
+                name="termsAccepted"
+                required
+                checked={accepted}
+                onChange={(e) => { setAccepted(e.target.checked); clearError('termsAccepted') }}
+                aria-invalid={errors.termsAccepted ? 'true' : undefined}
+                data-testid="checkbox-terms"
+                className="mt-0.5 size-4 shrink-0 accent-accent"
+              />
+              <span className="text-muted-foreground">
+                {activeTerms.checkbox_wording}{' '}
+                <a href={`/terms/${activeTerms.id}`} target="_blank" rel="noopener noreferrer" className="underline" data-testid="link-terms">View terms</a>
+                <RequiredMark />
+              </span>
+            </label>
+            <p className="text-xs text-muted-foreground">Terms version: {activeTerms.label}</p>
+          </>
+        )}
+        {errors.termsAccepted && <p role="alert" className="text-xs font-medium text-destructive">{errors.termsAccepted}</p>}
+      </div>
+
       {state.error ? (
         <p role="alert" className="text-sm font-medium text-destructive">
           {state.error}
@@ -523,7 +617,7 @@ export function LeadForm({ scheduleMode = false, calculatorScenario, funnelSourc
 
       <Button
         type="submit"
-        disabled={pending}
+        disabled={pending || termsStatus !== 'ready'}
         className="h-12 bg-accent text-base font-semibold text-accent-foreground hover:bg-accent/90"
       >
         {pending ? 'Submitting…' : 'Get My Free Strategy Call'}

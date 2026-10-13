@@ -13,6 +13,7 @@ vi.mock('@/app/actions/leads', () => ({
   lookupZip: lookup,
 }))
 vi.mock('@/components/marketing/use-page-meta', () => ({ usePageMeta: vi.fn() }))
+vi.mock('@/app/actions/lead-terms', () => ({ getCurrentTerms: vi.fn(async () => ({ active: false, version: null })) }))
 
 const fields = [
   ['What can we help with?', 'productInterest', true],

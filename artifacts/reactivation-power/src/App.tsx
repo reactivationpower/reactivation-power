@@ -85,6 +85,8 @@ import Page_schedule_a_call_confirmation from '@/pages/schedule-a-call_confirmat
 import PageAdminLeads from '@/pages/admin_leads';
 import PageAdminCustomers from '@/pages/admin_customers';
 import PageAdminCustomerId from '@/pages/admin_customers_id';
+import PageAdminLeadsTerms from '@/pages/admin_leads_terms';
+import PageTerms from '@/pages/terms_id';
 import PageAdminLeadId from '@/pages/admin_leads_id';
 import PageAdminLeadsSettings from '@/pages/admin_leads_settings';
 import PageAdminLeadsImport from '@/pages/admin_leads_import';
@@ -253,6 +255,12 @@ function Router() {
       </Route>
       <Route path="/analytics-test">
         <RoutedErrorBoundary><RootLayout><PageAnalyticsTest /></RootLayout></RoutedErrorBoundary>
+      </Route>
+      <Route path="/admin/leads/terms">
+        <RoutedErrorBoundary><AdminLayout><PageAdminLeadsTerms /></AdminLayout></RoutedErrorBoundary>
+      </Route>
+      <Route path="/terms/:id">
+        <RoutedErrorBoundary><RootLayout><PageTerms /></RootLayout></RoutedErrorBoundary>
       </Route>
       <Route path="/admin/leads/:id">
         <RoutedErrorBoundary><AdminLayout><PageAdminLeadId /></AdminLayout></RoutedErrorBoundary>

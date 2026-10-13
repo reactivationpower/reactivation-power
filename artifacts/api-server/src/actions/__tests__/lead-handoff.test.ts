@@ -1,6 +1,7 @@
 import { beforeEach, expect, it, vi } from 'vitest'
 const m = vi.hoisted(() => ({ intake: vi.fn(), sync: vi.fn(), query: vi.fn(), update: vi.fn() }))
 vi.mock('next/headers', () => ({ headers: async () => new Headers() }))
+vi.mock('@/lib/lead-terms/store', async original => ({ ...await original<any>(), currentTerms: async () => ({ active: false, version: null }) }))
 vi.mock('@/lib/supabase/admin', () => ({ getAdminClient: () => ({
   from: () => ({ insert: () => ({ select: () => ({ single: async () => ({ data: { id: 'saved-landing' } }) }) }), update: () => ({ eq: m.update }) }),
 }) }))

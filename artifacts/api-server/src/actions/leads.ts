@@ -14,6 +14,9 @@ import { intake } from '@/lib/sales-leads/store'
 import { validTimezone } from '@/lib/sales-leads/cadence'
 import { requestVisitorId, leadOutcome } from '@/lib/marketing/outcomes'
 import { newBookingHandoff } from '@/lib/booking-handoff'
+import { randomUUID } from 'node:crypto'
+import { currentTerms, termsRequestEvidence, TermsAcceptanceError } from '@/lib/lead-terms/store'
+import { termsAcceptanceError, type CurrentLeadTerms } from '@workspace/shared/lead-terms'
 
 export interface LeadState {
   error?: string
@@ -23,6 +26,7 @@ export interface LeadState {
   values?: Record<string, string>
   /** Services echoed back (multi-value) */
   services?: string[]
+  terms?: CurrentLeadTerms
 }
 
 /** Look up city/state for a US zip code (server-side, no API key). */
@@ -108,6 +112,23 @@ export async function submitHealthcareLead(
   if (Object.keys(fieldErrors).length > 0) {
     return { fieldErrors, values, services }
   }
+  const marketingTerms = {
+    version: String(formData.get('termsVersion') ?? '').slice(0, 100),
+    checked: formData.get('termsAccepted') === 'on',
+    ...termsRequestEvidence(),
+    identity: { firstName: firstNameRaw, lastName: lastNameRaw, email, phone, practiceName },
+  }
+  // Cheap early gate avoids the earlier legacy landing-row write on normal
+  // validation errors. Intake repeats this check under the publishing lock.
+  try {
+    const terms = await currentTerms()
+    const error = termsAcceptanceError(terms, marketingTerms.version, marketingTerms.checked)
+    if (error) return { terms, fieldErrors: { termsAccepted: error }, values, services }
+  } catch {
+    return { error: 'Terms of Service could not be loaded. Your entries are saved; please try again.', values, services }
+  }
+  const suppliedSubmissionId = String(formData.get('marketingSubmissionId') ?? '')
+  const submissionKey = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(suppliedSubmissionId) ? suppliedSubmissionId : randomUUID()
   const scenario = validatedCalculatorScenario(fields)
   const estimates = scenario ? scenarioEstimates(scenario) : null
   const sourceParams = new URLSearchParams(baseSourcePath.split('?')[1] ?? '')
@@ -197,11 +218,13 @@ export async function submitHealthcareLead(
     services, source_path: sourcePath,
   }).select('id').single()
   if (error) return { error: 'Something went wrong. Please try again.', values, services }
+  let salesLead: Awaited<ReturnType<typeof intake>>
+  try {
   const attribution = await resolveQualifiedReferral({
     email, phone: phoneDigits, practiceName, affiliateId: await referralFromRequest(email),
     sourceLeadId: String(submittedLead.id),
   })
-  const salesLead = await intake({
+  salesLead = await intake({
     noteBody: [
       `Interested in: ${PRODUCT_INTEREST_LABELS[interest]}`,
       `Name: ${firstName} ${lastName}\nPractice: ${practiceName}\nLocation: ${city}, ${state} ${zip}`,
@@ -218,14 +241,15 @@ export async function submitHealthcareLead(
     ].join('\n'),
     firstName, lastName, email, phone: `+1${phoneDigits}`, practiceName,
     source: attribution.affiliateId ? 'affiliate' : 'website', sourcePath: actualPath, submittedAt,
-    consent, timezone, affiliateId: attribution.affiliateId, dedupeKey: `landing:${submittedLead.id}`,
+    consent, timezone, affiliateId: attribution.affiliateId, dedupeKey: `marketing:${submissionKey}:${marketingTerms.version || 'inactive'}`,
+    marketingTerms,
     consentEvidence: {
       checked: consent, submittedAt, sourcePath: actualPath, ip,
       disclosure: 'I consent to being contacted by text message and phone call for marketing related to Patient Pipeline. Message and data rates may apply. Reply STOP to opt out at any time.',
       disclosureVersion: 'patient-pipeline-sms-v1',
     },
     context: {
-      bookingHandoff: handoff.context,
+      bookingHandoff: { ...handoff.context, ref: handoff.ref },
       marketingVisitorId: await requestVisitorId(),
       firstName, lastName, email, phone, practiceName, zip, city, state, yearsInPractice, services, productInterest: interest,
       inactivePatients: inactiveCount, patientValue, revenueShown, scenario, estimates,
@@ -234,11 +258,18 @@ export async function submitHealthcareLead(
       utm, affiliateId: attribution.affiliateId, deviceTimezone: timezone, legacySourcePath: sourcePath,
     },
   })
+  } catch (err) {
+    // The legacy row is not acceptance evidence. It precedes canonical intake;
+    // on a failed intake remove only this invocation's legacy row, best effort.
+    await supabase.from('landing_leads').delete().eq('id', submittedLead.id).then(() => {}, () => {})
+    if (err instanceof TermsAcceptanceError) return { terms: err.terms, fieldErrors: { termsAccepted: err.message }, values, services }
+    return { error: 'We could not save your request. Your entries are saved; please try again.', values, services }
+  }
 
   // Intake committed contact and stable-marker note jobs together. Do not
   // duplicate those writes or delay the saved booking handoff on provider I/O.
   if (!salesLead.review) await leadOutcome(salesLead.id, String(submittedLead.id))
 
   // Straight to the calendar; the calculator now lives on the thank-you page
-  redirect(`/healthcare/book-a-call?bookingRef=${handoff.ref}`)
+  redirect(`/healthcare/book-a-call?bookingRef=${salesLead.bookingRef ?? handoff.ref}`)
 }

@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { Link, useParams, useLocation } from 'wouter'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
+import { downloadTermsEvidence } from '@/app/actions/lead-terms'
 import { addSalesNote, convertSalesLead, getSalesLead, getSalesMedia, logSalesCall, retrySalesSync, updateSalesLead } from '@/app/actions/sales-leads'
 import { SALES_DISPOSITIONS, SALES_STAGES, type SalesDisposition, type SalesStage } from '@workspace/shared/sales-leads'
 import { LeadConversation } from '@/components/leads/conversation'
@@ -42,6 +43,14 @@ export default function AdminLeadDetailPage() {
   })
   const convert = useMutation({ mutationFn: () => convertSalesLead(id), onSuccess: (r) => navigate(r.enrollmentUrl), onError: (e) => toast.error(errMsg(e)) })
   const retry = useMutation({ mutationFn: () => retrySalesSync(id), onSuccess: () => { toast.success('Sync retry queued'); refresh() }, onError: (e) => toast.error(errMsg(e)) })
+  const evidence = useMutation({
+    mutationFn: (aid: string) => downloadTermsEvidence(aid),
+    onSuccess: (data, aid) => {
+      const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }))
+      const a = document.createElement('a'); a.href = url; a.download = `terms-acceptance-${aid}.json`; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url)
+    },
+    onError: (e) => toast.error(errMsg(e)),
+  })
   const media = useMutation({
     mutationFn: (aid: string) => getSalesMedia(id, aid),
     onSuccess: (r) => { if (r.contactUrl) window.open(r.contactUrl, '_blank', 'noopener,noreferrer'); else toast.message(r.explanation || 'Media unavailable') ; if (r.contactUrl) toast.message(r.explanation) },
@@ -51,6 +60,7 @@ export default function AdminLeadDetailPage() {
   if (q.isLoading) return <Skeleton rows={8} />
   if (q.isError || !q.data) return <ErrorBox error={q.error} retry={() => q.refetch()} />
   const { lead, activities, submissions, contact_url, suggested_followup, jobs } = q.data
+  const acceptances = q.data.terms_acceptances ?? []
   const team = dash.data?.team ?? []
   const superAdmin = dash.data?.super_admin === true
   const tz = lead.timezone
@@ -224,6 +234,21 @@ export default function AdminLeadDetailPage() {
             )}
           </section>
 
+          <section className={card + ' space-y-3'} data-testid="section-terms-acceptances">
+            <h2 className="font-semibold">Terms acceptance history</h2>
+            {acceptances.length === 0 ? <p className="text-sm text-muted-foreground">No Terms acceptance recorded for this lead. This does not mean the lead declined; it may predate the Terms checkbox.</p> : acceptances.map((t) => (
+              <div key={t.id} className="space-y-1 rounded-md border border-border p-2 text-sm" data-testid={`terms-acceptance-${t.id}`}>
+                <p className="font-medium">{t.label} · {fmt(t.accepted_at, tz)}</p>
+                <p className="text-xs text-muted-foreground">Source: {t.source_path}</p>
+                <p className="text-xs text-muted-foreground">Submitted identity (unverified): {t.submitted_identity.firstName} {t.submitted_identity.lastName} · {t.submitted_identity.email} · {t.submitted_identity.phone}{t.submitted_identity.practiceName ? ` · ${t.submitted_identity.practiceName}` : ''}</p>
+                <p className="text-xs text-muted-foreground">Checkbox: {t.checkbox_wording}</p>
+                <div className="flex flex-wrap gap-2 pt-1">
+                  <Link href={`/terms/${t.version_id}`} className={btn2 + ' px-3 py-1'}>Archived document</Link>
+                  <button className={btn2 + ' px-3 py-1'} disabled={evidence.isPending} onClick={() => evidence.mutate(t.id)} data-testid={`button-download-evidence-${t.id}`}>Download evidence</button>
+                </div>
+              </div>
+            ))}
+          </section>
           <MarketingActivityPanel leadId={id} tz={tz} />
           <section className={card + ' space-y-3'} data-testid="section-owner">
             <h2 className="font-semibold">Owner and stage</h2>
