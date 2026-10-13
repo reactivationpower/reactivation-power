@@ -52,6 +52,7 @@ async function issueAdminCookie(user: AdminUser): Promise<void> {
 
 /** Only follow same-origin /admin paths, and only ones this role may open. */
 function landingFor(user: AdminUser, next: string): string {
+  if (user.role.startsWith('reseller_')) return adminHomeFor(user.role)
   if (!/^\/admin(\/|\?|$)/.test(next)) return adminHomeFor(user.role)
   const permitted = /^\/admin\/payments(\/|\?|$)/.test(next) ||
     (user.canManageServices && /^\/admin\/participants(\/|\?|$)/.test(next))

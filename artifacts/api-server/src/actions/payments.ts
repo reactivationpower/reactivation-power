@@ -4,6 +4,8 @@ import { revalidatePath } from 'next/cache'
 import { canDeleteLink, cleanCustomer, type CustomerInput } from '@/lib/billing/rules'
 
 import { requireAdmin } from '@/lib/auth/admin-session'
+import { requireSeller, scopedProspect, assertSellerLink, audit as resellerAudit } from '@/lib/resellers/store'
+import { assertPrices, type StandardPrices } from '@/lib/resellers/policy'
 import { getAdminClient } from '@/lib/supabase/admin'
 import { getStripeMode, stripe } from '@/lib/stripe'
 import { cardFromIntent, recordHistory } from '@/lib/billing/dunning'
@@ -436,8 +438,11 @@ export async function createPaymentLink(input: {
   requestId?: string
   salesLeadId?: string
   existingCustomerId?: string
+  resellerProspectId?: string
 }): Promise<{ ok: boolean; error?: string; link?: PaymentLink; invitation?: InvitationOutcome }> {
-  const rep = await requireAdmin()
+  const rep = await requireSeller()
+  if (rep.companyId && (!input.resellerProspectId || input.salesLeadId || input.existingCustomerId))
+    throw new Error('Create reseller offers from an assigned prospect.')
   if (input.requestId != null && !/^[0-9a-f-]{36}$/i.test(input.requestId))
     return { ok: false, error: 'Invalid creation request. Reopen New Customer.' }
 
@@ -483,6 +488,16 @@ export async function createPaymentLink(input: {
     data = await transaction(async client => {
       const tx = drizzle(client)
       let lead: Record<string, any> | undefined
+      const prospect = input.resellerProspectId ? await scopedProspect(rep, input.resellerProspectId, client, true) : null
+      if (prospect) {
+        const company = (await client.query('SELECT * FROM reseller_companies WHERE id=$1 FOR SHARE', [prospect.company_id])).rows[0]
+        if (!company || company.terminated_at) throw new Error('This reseller relationship has ended.')
+        const member = (await client.query('SELECT active FROM reseller_members WHERE user_id=$1 FOR SHARE', [prospect.salesperson_id])).rows[0]
+        const actingMember = rep.companyId ? (await client.query('SELECT active FROM reseller_members WHERE user_id=$1 FOR SHARE', [rep.userId])).rows[0] : null
+        if (!member?.active || (rep.companyId && !actingMember?.active)) throw new Error('This reseller member is deactivated.')
+        if (prospect.do_not_contact || ['Lost','Do Not Contact'].includes(prospect.stage)) throw new Error('This prospect is closed to enrollment.')
+        if (prospect.email.toLowerCase() !== customerInput.email) throw new Error('Enrollment email must match the reseller prospect.')
+      }
       if (input.salesLeadId) {
         await client.query("SELECT pg_advisory_xact_lock(hashtextextended($1,0))", [`sales-send:${input.salesLeadId}`])
         lead = (await client.query('SELECT * FROM sales_leads WHERE id=$1 FOR UPDATE', [input.salesLeadId])).rows[0]
@@ -496,12 +511,24 @@ export async function createPaymentLink(input: {
         if (row.email !== customerInput.email) throw new Error('This request already belongs to a different email')
         const [terms] = await tx.select().from(paymentLinkTermsTable).where(eq(paymentLinkTermsTable.linkId, String(row.id)))
         if (!terms || (input.existingCustomerId && terms.customerId !== input.existingCustomerId)) throw new Error('Saved customer identity does not match')
+        if (prospect) {
+          const sale = (await client.query('SELECT * FROM reseller_sales WHERE link_id=$1', [String(row.id)])).rows[0]
+          if (!sale || sale.prospect_id !== prospect.id) throw new Error('Saved reseller attribution does not match.')
+        }
         if (lead) await linkSalesCustomerInTransaction(client, input.salesLeadId!, terms.customerId, customerInput.email, rep)
         return row
       }
       if (lead?.customer_id) throw new Error('This lead is already linked. Open its customer record to continue enrollment or explicitly create another offer.')
       if (lead?.stage === 'Lost/Do Not Contact') throw new Error('This lead is closed to enrollment')
       await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${`customer-email-${customerInput.email}`}))`)
+      const matches = (await client.query('SELECT id FROM customers WHERE lower(trim(email))=$1', [customerInput.email])).rows
+      if (prospect && matches.some(c => c.id !== prospect.customer_id))
+        throw new Error('Customer identity conflict. The owner must review and explicitly resolve attribution before selling.')
+      if (!prospect && matches.length && (await client.query('SELECT 1 FROM reseller_sales WHERE customer_id=ANY($1::text[]) LIMIT 1',
+        [matches.map(c => c.id)])).rowCount) throw new Error('Use the reseller prospect to create an offer for this customer.')
+      const standard: StandardPrices | undefined = prospect
+        ? (await client.query('SELECT * FROM reseller_prices WHERE singleton=true FOR SHARE')).rows[0] : undefined
+      if (prospect) assertPrices(standard, offer.type, offer.type === 'one_time' ? amountCents : 0, monthlyCents, setupFeeCents)
       if (input.existingCustomerId) {
         const [expected] = await tx.select().from(customersTable).where(eq(customersTable.id, input.existingCustomerId))
         if (!expected || expected.email.trim().toLowerCase() !== customerInput.email) throw new Error('Customer identity changed. Reopen setup from the customer record.')
@@ -515,7 +542,7 @@ export async function createPaymentLink(input: {
       const row = inserted.rows[0] as Record<string, unknown>
       await tx.insert(paymentLinkTermsTable).values({
         linkId: String(row.id), token, customerId: customer.id, type: offer.type,
-        repId: rep.userId, repName: rep.name || rep.email, setupFeeCents, monthlyCents,
+        repId: prospect ? null : rep.userId, repName: prospect ? null : rep.name || rep.email, setupFeeCents, monthlyCents,
         billingAnchor: offer.type === 'subscription' ? 'calendar_month' : 'thirty_days',
         enrollmentFlow: true, enrollmentStripeMode: getStripeMode(), stripeCustomerId: customer.stripeCustomerId,
       })
@@ -524,6 +551,16 @@ export async function createPaymentLink(input: {
       await tx.insert(enrollmentInvitationsTable).values({
         linkId: String(row.id), recipient: customer.email,
       })
+      if (prospect && standard) {
+        await client.query(`INSERT INTO reseller_sales(link_id,company_id,salesperson_id,prospect_id,customer_id,
+          price_version,standard_lifetime_cents,standard_monthly_cents,standard_setup_cents,
+          quoted_lifetime_cents,quoted_monthly_cents,quoted_setup_cents) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,
+        [String(row.id), prospect.company_id, prospect.salesperson_id, prospect.id, customer.id, standard.version,
+          standard.lifetime_cents, standard.monthly_cents, standard.setup_cents, offer.type === 'one_time' ? amountCents : 0, monthlyCents, setupFeeCents])
+        await client.query(`UPDATE reseller_prospects SET customer_id=$2,stage='Offer',revision=revision+1,updated_at=now() WHERE id=$1`, [prospect.id, customer.id])
+        await resellerAudit(client, prospect.company_id, rep.userId, 'offer_created', 'Approved standard-price offer', prospect.id,
+          { linkId: String(row.id), priceVersion: standard.version, salespersonId: prospect.salesperson_id })
+      }
       if (lead) {
         if (!lead.email) await client.query('UPDATE sales_leads SET email=$2 WHERE id=$1', [input.salesLeadId, customerInput.email])
         await linkSalesCustomerInTransaction(client, input.salesLeadId!, customer.id, customerInput.email, rep)
@@ -534,7 +571,7 @@ export async function createPaymentLink(input: {
     // Only explicit validation messages are surfaced; database details stay private.
     const cause = (error as { cause?: unknown })?.cause ?? error
     logger.warn({ code: (cause as { code?: string })?.code ?? 'validation' }, 'Customer enrollment transaction rejected')
-    const message = error instanceof Error && /^(Lead not found|Enrollment email|This request|Saved customer|This lead|Customer identity|Multiple customers)/.test(error.message)
+    const message = error instanceof Error && /^(Lead not found|Enrollment email|This request|Saved |This lead|Customer identity|Multiple customers|Selling is|Lifetime discount|Monthly discount|Setup pricing|This reseller|This prospect|Use the reseller)/.test(error.message)
       ? error.message : 'Could not save the customer and offer. No enrollment email was sent.'
     return { ok: false, error: message }
   }
@@ -552,7 +589,8 @@ export async function createPaymentLink(input: {
 
 /** Safe initial-send retry: no customer creation, charge, or explicit resend. */
 export async function retryCustomerEnrollment(linkId: string): Promise<{ ok: boolean; invitation: InvitationOutcome }> {
-  const rep = await requireAdmin()
+  const rep = await requireSeller()
+  await assertSellerLink(rep, linkId)
   try {
   const [terms] = await db.select().from(paymentLinkTermsTable).where(eq(paymentLinkTermsTable.linkId, linkId)).limit(1)
   if (!terms?.enrollmentFlow) return { ok: false, invitation: { status: 'failed', error: 'Enrollment offer not found.' } }

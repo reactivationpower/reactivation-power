@@ -96,6 +96,13 @@ import PageAdminMarketingAnalytics from '@/pages/admin_marketing_analytics';
 import PageAnalyticsTest from '@/pages/analytics-test';
 import { MarketingAnalytics } from '@/components/marketing/analytics-consent';
 import PageAffOnboarding from '@/pages/affiliates_onboarding';
+import ResellersLayout from '@/layouts/resellers_layout';
+import PageAdminResellers from '@/pages/admin_resellers';
+import PageAdminResellerId from '@/pages/admin_resellers_id';
+import PageResellers from '@/pages/resellers';
+import PageResellerProspect from '@/pages/resellers_prospects_id';
+import PageResellerOnboarding from '@/pages/resellers_onboarding';
+import PageResellerCustomer from '@/pages/resellers_customers_id';
 
 function Router() {
   return (
@@ -282,6 +289,24 @@ function Router() {
       </Route>
       <Route path="/admin/affiliates/:id">
         <RoutedErrorBoundary><AdminLayout><PageAdminAffId /></AdminLayout></RoutedErrorBoundary>
+      </Route>
+      <Route path="/admin/resellers">
+        <RoutedErrorBoundary><AdminLayout><PageAdminResellers /></AdminLayout></RoutedErrorBoundary>
+      </Route>
+      <Route path="/admin/resellers/:id">
+        <RoutedErrorBoundary><AdminLayout><PageAdminResellerId /></AdminLayout></RoutedErrorBoundary>
+      </Route>
+      <Route path="/resellers/customers/:id">
+        <RoutedErrorBoundary><ResellersLayout><PageResellerCustomer /></ResellersLayout></RoutedErrorBoundary>
+      </Route>
+      <Route path="/resellers/onboarding">
+        <RoutedErrorBoundary><PageResellerOnboarding /></RoutedErrorBoundary>
+      </Route>
+      <Route path="/resellers/prospects/:id">
+        <RoutedErrorBoundary><ResellersLayout><PageResellerProspect /></ResellersLayout></RoutedErrorBoundary>
+      </Route>
+      <Route path="/resellers">
+        <RoutedErrorBoundary><ResellersLayout><PageResellers /></ResellersLayout></RoutedErrorBoundary>
       </Route>
       <Route path="/demo">
         <RoutedErrorBoundary>

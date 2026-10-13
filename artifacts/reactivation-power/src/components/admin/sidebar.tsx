@@ -50,6 +50,7 @@ const NAV: { group: string; items: { href: string; label: string; icon: any; rol
       { href: '/admin/agreements', label: 'Agreements', icon: FilePenLine },
       { href: '/admin/commissions', label: 'Commissions', icon: BadgeDollarSign },
       { href: '/admin/affiliates', label: 'Affiliates', icon: Handshake, roles: ['super_admin'] },
+      { href: '/admin/resellers', label: 'Resellers', icon: Building2, roles: ['super_admin'] },
       { href: '/admin/landing', label: 'Landing Pages', icon: Globe, roles: ['super_admin'] },
     ],
   },

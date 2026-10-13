@@ -8,7 +8,8 @@ import { PageError, PageLoading } from '@/components/page-status'
 import { EnrollmentNotifications } from '@/components/admin/enrollment-notifications'
 import { AuthenticatedSession } from '@/components/authenticated-session'
 
-const ROLE_LABEL = { super_admin: 'Super Admin', sales_rep: 'Sales Rep' } as const
+const ROLE_LABEL = { super_admin: 'Super Admin', sales_rep: 'Sales Rep',
+  reseller_manager: 'Reseller Manager', reseller_salesperson: 'Reseller Salesperson' } as const
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return <AuthenticatedSession kind="admin"><AdminContent>{children}</AdminContent></AuthenticatedSession>

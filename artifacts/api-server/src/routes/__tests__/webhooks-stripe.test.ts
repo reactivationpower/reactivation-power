@@ -63,6 +63,12 @@ const affiliateHandlers = {
   recordAffiliateEligibility: vi.fn(async () => undefined),
 }
 vi.mock('@/lib/affiliates/ledger', () => affiliateHandlers)
+vi.mock('@/lib/resellers/ledger', () => ({
+  processResellerDispute: vi.fn(async () => undefined),
+  processResellerRefundedCharge: vi.fn(async () => undefined),
+  recordResellerEligibility: vi.fn(async () => undefined),
+  queueResellerHistory: vi.fn(async () => undefined),
+}))
 
 const { default: router } = await import('@/routes/webhooks-stripe')
 

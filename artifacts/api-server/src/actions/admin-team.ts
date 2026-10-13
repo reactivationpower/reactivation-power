@@ -21,7 +21,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export async function listTeam(): Promise<AdminUser[]> {
   await requireAdmin('super_admin')
-  return listAdminUsers()
+  return (await listAdminUsers()).filter(u => !u.role.startsWith('reseller_'))
 }
 
 export async function inviteTeamMember(formData: FormData): Promise<InviteResult> {
@@ -31,7 +31,7 @@ export async function inviteTeamMember(formData: FormData): Promise<InviteResult
   const role = String(formData.get('role') ?? 'sales_rep')
   const rate = normalizeRate(formData.get('rate'))
   if (!EMAIL_RE.test(email)) throw new Error('Please enter a valid email address.')
-  if (!isAdminRole(role)) throw new Error('Unknown role.')
+  if (role !== 'super_admin' && role !== 'sales_rep') throw new Error('Unknown staff role.')
   return inviteAdminUser({
     email, name, role, defaultCommissionRate: rate,
     invitedBy: actor.userId, invitedByName: actor.name ?? actor.email,
@@ -42,10 +42,12 @@ export async function updateTeamMember(formData: FormData): Promise<AdminUser> {
   const actor = await requireAdmin('super_admin')
   const id = String(formData.get('id') ?? '')
   if (!id) throw new Error('Missing user id.')
+  const target = await getAdminUserById(id)
+  if (target?.role.startsWith('reseller_')) throw new Error('Manage reseller members from Resellers.')
   const patch: { role?: 'super_admin' | 'sales_rep'; defaultCommissionRate?: number; name?: string | null } = {}
   const role = formData.get('role')
   if (role != null) {
-    if (!isAdminRole(role)) throw new Error('Unknown role.')
+    if (role !== 'super_admin' && role !== 'sales_rep') throw new Error('Unknown staff role.')
     patch.role = role
   }
   const rate = formData.get('rate')

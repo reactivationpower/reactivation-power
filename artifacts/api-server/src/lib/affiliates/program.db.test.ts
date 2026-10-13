@@ -63,6 +63,7 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('affiliate program isolated Postgr
     await pool.query(migration)
     await pool.query(await readFile(new URL('../../../../../lib/db/migrations/0027_affiliate_cash_evidence.sql', import.meta.url), 'utf8'))
     await pool.query(await readFile(new URL('../../../../../lib/db/migrations/0033_affiliate_secure_intake.sql', import.meta.url), 'utf8'))
+    await pool.query(await readFile(new URL('../../../../../lib/db/migrations/0040_reseller_program.sql', import.meta.url), 'utf8'))
   }, 30000)
   afterAll(async () => {
     if (isolated.schema) await actual.pool.query(`DROP SCHEMA IF EXISTS "${isolated.schema}" CASCADE`)

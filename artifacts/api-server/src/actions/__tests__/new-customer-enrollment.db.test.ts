@@ -21,7 +21,7 @@ vi.mock('@replit/connectors-sdk', () => ({
 }))
 vi.mock('@/lib/auth/admin-session', () => ({
   requireAdmin: async () => ({ userId: 'test-rep', name: 'Test rep', email: 'rep@example.test', role: 'sales_rep' }),
-  getAdminSession: async () => null,
+  getAdminSession: async () => ({ userId: 'test-rep', name: 'Test rep', email: 'rep@example.test', role: 'sales_rep' }),
 }))
 vi.mock('@/lib/stripe', () => ({
   getStripeMode: () => 'test',
@@ -79,9 +79,10 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('New Customer → agreement → mo
       await scopedPool.query(`CREATE TABLE ${table} (LIKE public.${table} INCLUDING ALL)`)
     }
     await scopedPool.query(readFileSync(new URL('../../../../../lib/db/migrations/0028_complex_slipstream.sql', import.meta.url), 'utf8'))
+    await scopedPool.query(readFileSync(new URL('../../../../../lib/db/migrations/0040_reseller_program.sql', import.meta.url), 'utf8'))
   }, 30_000)
   beforeEach(async () => {
-    await scopedPool.query(`TRUNCATE ${tables.join(', ')}`)
+    await scopedPool.query(`TRUNCATE ${tables.join(', ')} CASCADE`)
     vi.clearAllMocks()
     state.proxy.mockResolvedValue({ ok: true, status: 200, json: async () => ({ id: randomUUID() }) })
   })

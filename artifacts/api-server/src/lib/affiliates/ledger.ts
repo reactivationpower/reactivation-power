@@ -38,6 +38,7 @@ export async function processAffiliateHistory(row: PaymentHistory) {
     if (row.amountCents <= 0 || row.currency !== 'usd' || !row.linkId) return
     const terms = (await client.query('SELECT * FROM payment_link_terms WHERE link_id=$1', [row.linkId])).rows[0]
     if (!terms) return
+    if ((await client.query('SELECT 1 FROM reseller_sales WHERE link_id=$1', [row.linkId])).rowCount) return
     const saleType = terms.type === 'one_time' ? 'one_time' : row.stripeInvoiceId ? 'monthly' : 'setup'
     if (saleType === 'setup') return
     const attribution = (await client.query(`SELECT a.*,c.email FROM affiliate_attributions a JOIN customers c ON c.id=a.customer_id
@@ -184,6 +185,8 @@ export async function calculateHistory(customerId: string, from: Date) {
 }
 /** Durable retry inbox, populated only by actual billing recording, never by scanning old unassigned sales. */
 export async function queueAffiliateHistory(row: PaymentHistory) {
+  const { queueResellerHistory } = await import('@/lib/resellers/ledger')
+  await queueResellerHistory(row)
   await pool.query('INSERT INTO affiliate_history_work(history_id) VALUES($1) ON CONFLICT DO NOTHING', [row.id])
   try {
     await processAffiliateHistory(row)
@@ -194,6 +197,8 @@ export async function queueAffiliateHistory(row: PaymentHistory) {
   }
 }
 export async function retryAffiliateHistory() {
+  const { retryResellerHistory } = await import('@/lib/resellers/ledger')
+  await retryResellerHistory()
   // Repair a process crash between the billing write and its retry-inbox insertion.
   // Existing attribution must already have been effective at the transaction time.
   await pool.query(`INSERT INTO affiliate_history_work(history_id)

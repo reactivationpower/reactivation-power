@@ -11,6 +11,7 @@ import {
   updateAgreement,
   type AgreementTermsForm,
 } from '@/app/actions/agreements'
+import * as R from '@/app/actions/resellers'
 import { AgreementDocument, AgreementTermsBox, formatUsd } from '@/components/agreements/agreement-document'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -31,6 +32,7 @@ export function AgreementFormDialog({
   agreementId,
   mode,
   onSaved,
+  reseller = false,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -38,7 +40,11 @@ export function AgreementFormDialog({
   agreementId?: string | null
   mode: 'send' | 'edit'
   onSaved?: (detail: any) => void
+  reseller?: boolean
 }) {
+  const api = reseller
+    ? { getForm: R.getAgreementForm, preview: R.previewAgreement, previewEmail: R.previewEnrollmentEmail, send: R.sendAgreement, update: R.updateAgreement }
+    : { getForm: getAgreementSendForm, preview: previewAgreement, previewEmail: previewEnrollmentEmail, send: sendAgreement, update: updateAgreement }
   const [loading, setLoading] = useState(true)
   const [form, setForm] = useState<AgreementTermsForm & { body: string; noticeDays: number } | null>(null)
   const [defaults, setDefaults] = useState<any>(null)
@@ -61,7 +67,7 @@ export function AgreementFormDialog({
     setSent(null)
     setConfirming(false)
     setTab('terms')
-    getAgreementSendForm(linkId)
+    api.getForm(linkId)
       .then((res) => {
         if (!res.ok) {
           setError(res.error ?? 'Could not load the agreement form.')
@@ -75,13 +81,13 @@ export function AgreementFormDialog({
       })
       .catch((err) => setError(err instanceof Error ? err.message : 'Could not load the agreement form.'))
       .finally(() => setLoading(false))
-  }, [open, linkId])
+  }, [open, linkId, reseller])
 
   // Debounced preview whenever the form changes
   useEffect(() => {
     if (!form || !open) return
     const t = setTimeout(() => {
-      previewAgreement(linkId, form)
+      api.preview(linkId, form)
         .then((res) => {
           if (res.ok) {
             setPreview(res.document)
@@ -100,8 +106,8 @@ export function AgreementFormDialog({
     setSaving(true)
     setError(null)
     try {
-      const res = mode === 'edit' && agreementId ? await updateAgreement(agreementId, form)
-        : await sendAgreement(linkId, form, { signerEmail, copyEmails: copyEmails.split(/[,\n;]/).map(s => s.trim()).filter(Boolean) })
+      const res = mode === 'edit' && agreementId ? await api.update(agreementId, form)
+        : await api.send(linkId, form, { signerEmail, copyEmails: copyEmails.split(/[,\n;]/).map(s => s.trim()).filter(Boolean) })
       if (!res.ok) {
         setError(res.error ?? 'Could not save the agreement.')
         return
@@ -218,17 +224,17 @@ export function AgreementFormDialog({
                       </Field>
                     ) : (<>
                     <Field label="Term (months)" htmlFor="ag-term">
-                      <Input id="ag-term" type="number" min={1} max={60} step={1} value={form.termMonths} onChange={(e) => set('termMonths', e.target.value)} data-testid="ag-term" />
+                      <Input disabled={reseller} id="ag-term" type="number" min={1} max={60} step={1} value={form.termMonths} onChange={(e) => set('termMonths', e.target.value)} data-testid="ag-term" />
                     </Field>
                     <Field label="Advance notice (days; standard template: 0)" htmlFor="ag-notice">
-                      <Input id="ag-notice" type="number" min={0} max={365} step={1} value={form.noticeDays} onChange={(e) => set('noticeDays', e.target.value)} />
+                      <Input disabled={reseller} id="ag-notice" type="number" min={0} max={365} step={1} value={form.noticeDays} onChange={(e) => set('noticeDays', e.target.value)} />
                       <p className="text-xs text-muted-foreground">The standard template accepts portal cancellation without advance notice. Positive values are for legacy or custom terms and are not enforced by the portal.</p>
                     </Field>
                     <Field label="Monthly amount ($)" htmlFor="ag-monthly">
                       <Input id="ag-monthly" type="number" min={0.5} step={0.01} value={form.monthlyDollars} onChange={(e) => set('monthlyDollars', e.target.value)} data-testid="ag-monthly" />
                     </Field>
                     <Field label="Setup fee ($) — 0 to waive" htmlFor="ag-setup">
-                      <Input id="ag-setup" type="number" min={0} step={0.01} value={form.setupFeeDollars} onChange={(e) => set('setupFeeDollars', e.target.value)} data-testid="ag-setup" />
+                      <Input disabled={reseller} id="ag-setup" type="number" min={0} step={0.01} value={form.setupFeeDollars} onChange={(e) => set('setupFeeDollars', e.target.value)} data-testid="ag-setup" />
                     </Field>
                     </>)}
                   </div>
@@ -254,6 +260,7 @@ export function AgreementFormDialog({
               {tab === 'text' ? (
                 <div className="flex flex-col gap-2">
                   <Textarea
+                    disabled={reseller}
                     value={form.body}
                     onChange={(e) => set('body', e.target.value)}
                     className="min-h-[420px] font-mono text-xs leading-relaxed"
@@ -312,7 +319,7 @@ export function AgreementFormDialog({
                  if (mode === 'edit') { void handleSave(); return }
                  setEmailPreview(null)
                  setConfirming(true)
-                 void previewEnrollmentEmail(linkId, form).then(res => res.ok ? setEmailPreview(res) : setError(res.error ?? 'Email preview failed'))
+                 void api.previewEmail(linkId, form).then(res => res.ok ? setEmailPreview(res) : setError(res.error ?? 'Email preview failed'))
                }} disabled={saving || !form || Boolean(previewError)} data-testid="agreement-save">
                 {saving ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
                  {mode === 'edit' ? 'Save new version' : 'Review delivery'}

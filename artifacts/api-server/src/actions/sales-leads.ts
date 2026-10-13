@@ -20,7 +20,7 @@ function email(s: unknown) {
 async function assignee(value: string | null) {
   if (!value) return null
   const user = await getAdminUserById(value)
-  if (!user?.active || !user.confirmedAt) throw new Error('Choose an active, verified staff account')
+  if (!user?.active || !user.confirmedAt || user.role.startsWith('reseller_')) throw new Error('Choose an active, verified internal staff account')
   return user.id
 }
 export async function listSalesLeads(input: { query?: string; stage?: string; source?: string; assignee?: string; page?: number } = {}) {

@@ -3,7 +3,9 @@
  *
  * The throttle tests are pure. The remaining suites drive the real Stripe
  * sandbox (the workspace Stripe integration) plus the Supabase drizzle tables,
- * so they self-skip when Stripe cannot be initialised. They create disposable
+ * so they require RUN_STRIPE_INTEGRATION_TESTS=1 and self-skip when Stripe
+ * cannot be initialised. Ordinary regressions must not create sandbox charges.
+ * They create disposable
  * customers and subscriptions and remove them in afterAll.
  */
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
@@ -90,8 +92,10 @@ describe('billing link request throttle', () => {
 
 let stripeReady = false
 try {
-  await initStripe()
-  stripeReady = true
+  if(process.env.RUN_STRIPE_INTEGRATION_TESTS === '1') {
+    await initStripe()
+    stripeReady = true
+  }
 } catch {
   stripeReady = false
 }

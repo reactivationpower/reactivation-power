@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs'
 const f=vi.hoisted(()=>({pool:null as any,admin:{userId:'admin',role:'sales_rep',name:'Agent'},send:vi.fn(),contact:vi.fn(),threads:vi.fn(),provider:vi.fn(),sender:vi.fn(),messages:vi.fn()}))
 vi.mock('@workspace/db',()=>({pool:{query:(...a:any[])=>f.pool.query(...a),connect:()=>f.pool.connect()}}))
 vi.mock('../auth/admin-session',()=>({requireAdmin:async()=>f.admin}))
-vi.mock('../data/admin-users',()=>({getAdminUserById:async(id:string)=>({id,active:true,confirmedAt:'2026-01-01'})}))
+vi.mock('../data/admin-users',()=>({getAdminUserById:async(id:string)=>({id,role:'sales_rep',active:true,confirmedAt:'2026-01-01'})}))
 vi.mock('../mail/send',()=>({sendEmail:f.send}))
 vi.mock('../sales-leads/dispatch',()=>({nudgeSalesSync:vi.fn()}))
 vi.mock('../sales-leads/provider',async original=>({...await original<any>(),contact:f.contact,conversations:f.threads,provider:f.provider,smsSender:f.sender,messages:f.messages,appointments:async()=>[],notes:async()=>[]}))

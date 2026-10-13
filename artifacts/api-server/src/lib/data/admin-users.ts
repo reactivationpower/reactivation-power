@@ -81,7 +81,7 @@ export async function listAdminUsers(): Promise<AdminUser[]> {
     if (error) throw new Error(`Could not list admin users: ${error.message}`)
     for (const u of data.users) {
       const admin = toAdminUser(u)
-      if (admin) users.push(admin)
+      if (admin && !admin.role.startsWith('reseller_')) users.push(admin)
     }
     if (data.users.length < 200) break
   }
@@ -168,13 +168,19 @@ export async function inviteAdminUser(input: {
   defaultCommissionRate: number
   invitedBy: string | null
   invitedByName?: string | null
+  deferDelivery?: boolean
+  resellerCompanyId?: string
 }): Promise<InviteResult> {
   const supabase = getAdminClient()
   const email = input.email.trim().toLowerCase()
 
   const existing = await findAuthUserByEmail(email)
-  if (existing && toAdminUser(existing)) {
-    throw new Error('An admin account with that email already exists.')
+  if (existing && input.role.startsWith('reseller_')) {
+    if (!input.resellerCompanyId || existing.app_metadata?.reseller_company_id !== input.resellerCompanyId ||
+      existing.app_metadata?.[ROLE_KEY] !== input.role || existing.app_metadata?.[INVITED_BY_KEY] !== input.invitedBy)
+      throw new Error('An account with that email already exists. Existing identities cannot be converted through a reseller invitation.')
+  } else if (existing && toAdminUser(existing)) {
+    throw new Error('That email is already on the team.')
   }
 
   let user: User | null = existing
@@ -199,6 +205,7 @@ export async function inviteAdminUser(input: {
       [ACTIVE_KEY]: true,
       [RATE_KEY]: normalizeRate(input.defaultCommissionRate),
       [INVITED_BY_KEY]: input.invitedBy,
+      ...(input.resellerCompanyId ? {reseller_company_id:input.resellerCompanyId}:{}),
     },
     ...(input.name ? { user_metadata: { ...(user.user_metadata ?? {}), full_name: input.name } } : {}),
   })
@@ -208,6 +215,7 @@ export async function inviteAdminUser(input: {
   invalidateAdminProfile(user.id)
   const admin = toAdminUser(updated.data.user)
   if (!admin) throw new Error('Admin profile could not be read back.')
+  if (input.deferDelivery) return { user: admin, emailSent: false, inviteLink: null, emailError: null }
 
   // One-time set-password link, delivered by our branded email. If sending
   // fails the link is handed back so the UI can offer it for manual sharing.

@@ -18,6 +18,7 @@ import {
 } from '@workspace/db'
 
 import { requireAdmin } from '@/lib/auth/admin-session'
+import { requireSeller, assertSellerLink, assertAgreementPrices } from '@/lib/resellers/store'
 import { supersedeInitialInvitation } from '@/lib/agreements/enrollment-invitation'
 import { getAdminSession } from '@/lib/auth/admin-session'
 import { canAccessNotificationAgreement, notificationScope } from '@/lib/enrollment-notifications'
@@ -343,7 +344,8 @@ export async function getAgreementSendForm(linkId: string): Promise<{
   customerEmail?: string
   customerName?: string
 }> {
-  await requireAdmin()
+  const seller = await requireSeller()
+  await assertSellerLink(seller, linkId)
   const found = await customerAndTermsForLink(linkId)
   if (!found) return { ok: false, error: 'Agreements are only sent for subscription links.' }
   const existing = await loadAgreementByLink(linkId)
@@ -388,7 +390,8 @@ export async function previewAgreement(
   linkId: string,
   form: AgreementTermsForm,
 ): Promise<{ ok: boolean; error?: string; document?: RenderedDocument }> {
-  await requireAdmin()
+  const seller = await requireSeller()
+  await assertSellerLink(seller, linkId)
   const found = await customerAndTermsForLink(linkId)
   if (!found) return { ok: false, error: 'Customer not found.' }
   const parsed = termsFromForm(form, found.terms.type)
@@ -436,7 +439,8 @@ async function emailSignRequest(loaded: LoadedAgreement, resend: boolean): Promi
 }
 
 export async function previewEnrollmentEmail(linkId: string, form: AgreementTermsForm) {
-  await requireAdmin()
+  const seller = await requireSeller()
+  await assertSellerLink(seller, linkId)
   const found = await customerAndTermsForLink(linkId)
   if (!found) return { ok: false, error: 'Customer not found.' }
   const parsed = termsFromForm(form, found.terms.type)
@@ -468,11 +472,15 @@ export async function sendAgreement(
   form: AgreementTermsForm,
   delivery?: { signerEmail?: string; copyEmails?: string[] },
 ): Promise<{ ok: boolean; error?: string; emailed?: boolean; deliveryStatus?: 'failed' | 'provider_accepted'; detail?: AgreementDetail }> {
-  const admin = await requireAdmin()
+  const admin = await requireSeller()
+  await assertSellerLink(admin, linkId)
   const found = await customerAndTermsForLink(linkId)
   if (!found) return { ok: false, error: 'Customer not found.' }
   const parsed = termsFromForm(form, found.terms.type)
   if (!parsed.ok) return { ok: false, error: parsed.error }
+  await assertAgreementPrices(linkId, found.terms.type, parsed.value, admin)
+  if (admin.companyId && form.body !== (await getAgreementSendForm(linkId)).form?.body)
+    throw new Error('Resellers cannot change the standard agreement text.')
   let addresses: ReturnType<typeof deliveryAddresses>
   try { addresses = deliveryAddresses(delivery, found.customer.email) }
   catch (e) { return { ok: false, error: e instanceof Error ? e.message : 'Invalid email addresses.' } }
@@ -526,12 +534,15 @@ export async function updateAgreement(
   id: string,
   form: AgreementTermsForm,
 ): Promise<{ ok: boolean; error?: string; detail?: AgreementDetail }> {
-  const admin = await requireAdmin()
+  const admin = await requireSeller()
   const loaded = await loadAgreementById(id)
   if (!loaded) return { ok: false, error: 'Agreement not found.' }
+  await assertSellerLink(admin, loaded.agreement.linkId)
   if (isSigned(loaded.agreement)) return { ok: false, error: 'This agreement is signed and can no longer be edited.' }
   const parsed = termsFromForm(form, loaded.terms?.type)
   if (!parsed.ok) return { ok: false, error: parsed.error }
+  await assertAgreementPrices(loaded.agreement.linkId, loaded.terms?.type ?? 'subscription', parsed.value, admin)
+  if (admin.companyId && form.body !== loaded.version.body) throw new Error('Resellers cannot change the agreement text.')
   let next: LoadedAgreement
   try {
     next = await addVersion(loaded, parsed.value, { id: admin.userId, name: admin.name || admin.email })
@@ -549,9 +560,10 @@ export async function updateAgreement(
 
 /** Re-send the signing link (extends the expiry). */
 export async function resendAgreement(id: string, delivery?: { signerEmail?: string; copyEmails?: string[] }): Promise<{ ok: boolean; error?: string; emailed?: boolean; deliveryStatus?: 'failed' | 'provider_accepted' }> {
-  const admin = await requireAdmin()
+  const admin = await requireSeller()
   const loaded = await loadAgreementById(id)
   if (!loaded) return { ok: false, error: 'Agreement not found.' }
+  await assertSellerLink(admin, loaded.agreement.linkId)
   if (isSigned(loaded.agreement)) return { ok: false, error: 'This agreement is already signed.' }
   let addresses: ReturnType<typeof deliveryAddresses>
   try { addresses = deliveryAddresses(delivery, loaded.agreement.signerDeliveryEmail ?? loaded.customer.email) }

@@ -10,6 +10,7 @@ export type AdminSession = AdminPayload & { canManageServices: boolean }
 export type AdminRequirement = 'admin' | 'super_admin' | 'manage_services'
 
 export function satisfies(role: AdminRole, requirement: AdminRequirement, canManageServices = false): boolean {
+  if (role === 'reseller_manager' || role === 'reseller_salesperson') return false
   return requirement === 'admin' || role === 'super_admin' ||
     (requirement === 'manage_services' && canManageServices === true)
 }
@@ -23,6 +24,12 @@ async function validate(token: string | undefined): Promise<AdminSession | null>
   // live profile so demotion/deactivation take effect immediately.
   const live = await getLiveAdminProfile(payload.userId)
   if (!live || !live.active) return null
+  if (live.role === 'reseller_manager' || live.role === 'reseller_salesperson') {
+    const { pool } = await import('@workspace/db')
+    const member = (await pool.query(`SELECT m.active,m.role,c.terminated_at FROM reseller_members m
+      JOIN reseller_companies c ON c.id=m.company_id WHERE m.user_id=$1`, [payload.userId])).rows[0]
+    if (!member?.active || member.terminated_at || member.role !== live.role) return null
+  }
   return { ...payload, email: live.email, name: live.name, role: live.role, canManageServices: live.canManageServices === true }
 }
 
@@ -50,5 +57,5 @@ export async function requireAdmin(requirement: AdminRequirement = 'admin'): Pro
 
 /** Where a role lands after signing in / when a page is not allowed. */
 export function adminHomeFor(role: AdminRole): string {
-  return role === 'super_admin' ? '/admin' : '/admin/payments'
+  return role.startsWith('reseller_') ? '/resellers' : role === 'super_admin' ? '/admin' : '/admin/payments'
 }

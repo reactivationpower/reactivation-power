@@ -1,7 +1,7 @@
 // Thin client stubs for the server actions in artifacts/api-server/src/actions/admin-auth.ts
 import { action } from '@/lib/api'
 
-export type AdminRole = 'super_admin' | 'sales_rep'
+export type AdminRole = 'super_admin' | 'sales_rep' | 'reseller_manager' | 'reseller_salesperson'
 export interface AdminIdentity {
   userId: string
   email: string

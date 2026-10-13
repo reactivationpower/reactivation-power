@@ -3,8 +3,8 @@ import { createHmac, timingSafeEqual } from 'crypto'
 export const ADMIN_COOKIE_NAME = 'tp_admin'
 export const ADMIN_SESSION_MAX_AGE = 60 * 60 * 24 * 7 // 7 days
 
-export type AdminRole = 'super_admin' | 'sales_rep'
-export const ADMIN_ROLES: readonly AdminRole[] = ['super_admin', 'sales_rep']
+export type AdminRole = 'super_admin' | 'sales_rep' | 'reseller_manager' | 'reseller_salesperson'
+export const ADMIN_ROLES: readonly AdminRole[] = ['super_admin', 'sales_rep', 'reseller_manager', 'reseller_salesperson']
 
 export function isAdminRole(value: unknown): value is AdminRole {
   return typeof value === 'string' && (ADMIN_ROLES as readonly string[]).includes(value)

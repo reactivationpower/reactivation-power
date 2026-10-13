@@ -3,6 +3,7 @@ import type Stripe from "stripe";
 import { and, eq, lte } from "drizzle-orm";
 import { db, stripeEventsTable, paymentHistoryTable, paymentLinkTermsTable } from "@workspace/db";
 import { processAffiliateDispute, processAffiliateHistory, recordAffiliateEligibility } from "@/lib/affiliates/ledger";
+import { processResellerDispute, recordResellerEligibility, queueResellerHistory, processResellerRefundedCharge } from "@/lib/resellers/ledger";
 import { logger } from "@/lib/logger";
 import { getStripeWebhookSecret, stripe } from "@/lib/stripe";
 import { getAdminClient } from "@/lib/supabase/admin";
@@ -67,17 +68,24 @@ export async function dispatchEvent(event: Stripe.Event): Promise<HandleResult> 
   if (event.type === 'customer.subscription.updated' || event.type === 'customer.subscription.deleted') {
     const sub = event.data.object as Stripe.Subscription;
     const [terms] = await db.select().from(paymentLinkTermsTable).where(eq(paymentLinkTermsTable.stripeSubscriptionId, sub.id)).limit(1);
+    if (terms) await recordResellerEligibility(terms.linkId,
+      event.type !== 'customer.subscription.deleted' && !['paused', 'canceled', 'incomplete_expired'].includes(sub.status) && !sub.pause_collection,
+      new Date((sub.ended_at ?? event.created) * 1000), event.id);
     if (terms) await recordAffiliateEligibility(terms.customerId,
       event.type !== 'customer.subscription.deleted' && !['paused', 'canceled', 'incomplete_expired'].includes(sub.status) && !sub.pause_collection,
       new Date((sub.ended_at ?? event.created) * 1000), event.id);
   }
   switch (event.type) {
+    case 'charge.refunded':
+      await processResellerRefundedCharge(event.data.object as Stripe.Charge,new Date(event.created*1000));
+      return handleChargeRefunded(event.data.object as Stripe.Charge,event.id);
     case 'charge.dispute.created':
     case 'charge.dispute.updated':
     case 'charge.dispute.closed':
     case 'charge.dispute.funds_withdrawn':
     case 'charge.dispute.funds_reinstated':
       await processAffiliateDispute(event.data.object as Stripe.Dispute, new Date(event.created * 1000));
+      await processResellerDispute(event.data.object as Stripe.Dispute, new Date(event.created * 1000));
       return { handled: true };
     case "payment_intent.succeeded": {
       const intent = event.data.object as Stripe.PaymentIntent;
@@ -97,8 +105,6 @@ export async function dispatchEvent(event: Stripe.Event): Promise<HandleResult> 
       return handleSubscriptionUpdated(event.data.object as Stripe.Subscription, event.id);
     case "customer.subscription.deleted":
       return handleSubscriptionDeleted(event.data.object as Stripe.Subscription, event.id);
-    case "charge.refunded":
-      return handleChargeRefunded(event.data.object as Stripe.Charge, event.id);
     default:
       return { handled: false, note: "unhandled event type" };
   }
@@ -149,7 +155,10 @@ router.post("/webhooks/stripe", async (req: Request, res: Response) => {
     const result = await dispatchEvent(event);
     // Retry even when the billing handler already recorded history before a prior attempt failed.
     const history = await db.select().from(paymentHistoryTable).where(eq(paymentHistoryTable.stripeEventId, event.id));
-    for (const row of history) await processAffiliateHistory(row);
+    for (const row of history) {
+      await queueResellerHistory(row);
+      await processAffiliateHistory(row);
+    }
     await reconcileMarketing().catch(() => logger.warn("Marketing payment outcome awaits reconciliation"));
     await db
       .update(stripeEventsTable)

@@ -281,6 +281,13 @@
       "when": 1791903978758,
       "tag": "0039_fair_beyonder",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1791910000000,
+      "tag": "0040_reseller_program",
+      "breakpoints": true
     }
   ]
 }

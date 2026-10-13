@@ -4,6 +4,21 @@ import {
   downloadOnboardingW9, getAdminOnboarding, isStaleError, resendOnboardingInvitation, reviewOnboarding, revealOnboardingWire,
   type FullWire, type Onboarding,
 } from '@/app/actions/affiliate-onboarding'
+
+export interface OnboardingPanelApi {
+  get: (id: string) => Promise<Onboarding>
+  review: (id: string, version: number) => Promise<unknown>
+  reveal: (id: string, version: number) => Promise<FullWire>
+  w9: (id: string, version: number) => Promise<{ base64: string; filename: string }>
+  resend?: (id: string) => Promise<{ ok: boolean; error?: string }>
+}
+const affiliateApi: OnboardingPanelApi = {
+  get: getAdminOnboarding,
+  review: (affiliateId, version) => reviewOnboarding({ affiliateId, version }),
+  reveal: (affiliateId, version) => revealOnboardingWire({ affiliateId, version }),
+  w9: (affiliateId, version) => downloadOnboardingW9({ affiliateId, version }),
+  resend: resendOnboardingInvitation,
+}
 import { Section, btn2Cls, btnCls, fmtDate } from './shared'
 
 const REVEAL_MS = 60_000
@@ -15,7 +30,7 @@ function addr(a: unknown) {
   return [x.line1, x.line2, [x.city, x.state, x.zip].filter(Boolean).join(' '), x.country].filter(Boolean).join(', ')
 }
 
-export function AdminOnboardingPanel({ affiliateId }: { affiliateId: string }) {
+export function AdminOnboardingPanel({ affiliateId, api = affiliateApi }: { affiliateId: string; api?: OnboardingPanelApi }) {
   const [d, setD] = useState<Onboarding | null>(null)
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading')
   const [err, setErr] = useState('')
@@ -30,7 +45,7 @@ export function AdminOnboardingPanel({ affiliateId }: { affiliateId: string }) {
   const load = useCallback(async () => {
     const forId = affiliateId
     setState('loading'); setErr('')
-    try { const r = await getAdminOnboarding(forId); if (current.current === forId) { setD(r); setState('ready') } }
+    try { const r = await api.get(forId); if (current.current === forId) { setD(r); setState('ready') } }
     catch (e) { if (current.current === forId) { setErr((e as Error).message); setState('error') } }
   }, [affiliateId])
 
@@ -56,7 +71,7 @@ export function AdminOnboardingPanel({ affiliateId }: { affiliateId: string }) {
   const reveal = () => run('reveal', async () => {
     if (!d) return
     const forId = affiliateId
-    const w = await revealOnboardingWire({ affiliateId: forId, version: d.version })
+    const w = await api.reveal(forId, d.version)
     if (current.current !== forId) return
     setWire(w)
     if (timer.current) clearTimeout(timer.current)
@@ -65,7 +80,7 @@ export function AdminOnboardingPanel({ affiliateId }: { affiliateId: string }) {
 
   const download = () => run('w9', async () => {
     if (!d) return
-    const r = await downloadOnboardingW9({ affiliateId, version: d.version })
+    const r = await api.w9(affiliateId, d.version)
     const bin = atob(r.base64); const bytes = new Uint8Array(bin.length)
     for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i)
     const url = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }))
@@ -76,11 +91,12 @@ export function AdminOnboardingPanel({ affiliateId }: { affiliateId: string }) {
 
   const review = () => run('review', async () => {
     if (!d) return
-    await reviewOnboarding({ affiliateId, version: d.version }); toast.success('Marked reviewed'); hide(); await load()
+    await api.review(affiliateId, d.version); toast.success('Marked reviewed'); hide(); await load()
   })
 
   const resend = () => run('resend', async () => {
-    const r = await resendOnboardingInvitation(affiliateId)
+    if (!api.resend) return
+    const r = await api.resend(affiliateId)
     if (r.ok === false) throw new Error(r.error ?? 'Resend failed')
     toast.success('Onboarding invitation queued'); await load()
   })
@@ -132,7 +148,7 @@ export function AdminOnboardingPanel({ affiliateId }: { affiliateId: string }) {
           <div className="border-t border-border pt-4">
             <div className="flex items-center justify-between gap-2">
               <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Invitations</p>
-              <button className={btn2Cls} disabled={busy === 'resend'} onClick={() => void resend()} data-testid="button-resend-onboarding">{busy === 'resend' ? 'Queueing...' : 'Resend invitation'}</button>
+              {api.resend ? <button className={btn2Cls} disabled={busy === 'resend'} onClick={() => void resend()} data-testid="button-resend-onboarding">{busy === 'resend' ? 'Queueing...' : 'Resend invitation'}</button> : null}
             </div>
             {d.invitations?.length ? (
               <ul className="mt-2 divide-y divide-border">

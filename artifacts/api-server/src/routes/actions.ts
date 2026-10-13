@@ -35,6 +35,8 @@ import * as leadNotifications from "../actions/lead-notifications";
 import * as enrollmentNotifications from "../actions/enrollment-notifications";
 import * as affiliates from "../actions/affiliates";
 import * as affiliateOnboarding from "../actions/affiliate-onboarding";
+import * as resellers from "../actions/resellers";
+import * as resellerOnboarding from "../actions/reseller-onboarding";
 import { affiliateSession, assertSameOrigin } from "../lib/affiliates/access";
 
 /**
@@ -61,6 +63,8 @@ type ActionFn = (...args: unknown[]) => Promise<unknown>;
 type ActionModule = Record<string, unknown>;
 
 const MODULES: Record<string, ActionModule> = {
+  resellers,
+  "reseller-onboarding": resellerOnboarding,
   "lead-terms": leadTerms,
   "patient-texting": patientTexting,
   marketing,
@@ -91,11 +95,26 @@ const MODULES: Record<string, ActionModule> = {
   agreements,
 };
 
-type Auth = "public" | "portal" | "affiliate" | "admin" | "super_admin" | "manage_services";
+type Auth = "public" | "portal" | "affiliate" | "admin" | "super_admin" | "manage_services" | "reseller";
 
 // hint: Logic changed on both sides. Requires understanding intent of each change.
 /** Allow-list: module -> action -> required auth. Anything else is 404. */
 const ACTIONS: Record<string, Record<string, Auth>> = {
+  resellers: {
+    listCompanies: "super_admin", createCompany: "super_admin", savePrices: "super_admin",
+    getCompany: "super_admin", inviteMember: "super_admin", resendMemberInvite: "super_admin",
+    setMemberActive: "super_admin", terminateCompany: "super_admin", resolveCustomerConflict: "super_admin",
+    adjustLedger: "super_admin", recordPayout: "super_admin", retryPayoutNotification: "super_admin",
+    getWorkspace: "reseller", getProspect: "reseller", getSale: "reseller", createProspect: "reseller", updateProspect: "reseller",
+    logFollowup: "reseller", createOffer: "reseller", retryEnrollment: "reseller",
+    getAgreementForm: "reseller", previewAgreement: "reseller", previewEnrollmentEmail: "reseller",
+    sendAgreement: "reseller", updateAgreement: "reseller", resendAgreement: "reseller",
+  },
+  "reseller-onboarding": {
+    getMyOnboarding: "reseller", saveMyOnboarding: "reseller",
+    getAdminOnboarding: "super_admin", reviewOnboarding: "super_admin",
+    revealOnboardingWire: "super_admin", downloadOnboardingW9: "super_admin",
+  },
   "lead-terms": {
     getCurrentTerms: "public", getTermsVersion: "public",
     getTermsAdmin: "super_admin", saveTermsDraft: "super_admin", publishTerms: "super_admin",
@@ -270,6 +289,10 @@ const ACTIONS: Record<string, Record<string, Auth>> = {
 
 async function isAuthorized(req: Request, auth: Auth): Promise<boolean> {
   if (auth === "public") return true;
+  if (auth === "reseller") {
+    const session = await getAdminSessionFromRequest(req);
+    return Boolean(session && (session.role === 'super_admin' || session.role === 'reseller_manager' || session.role === 'reseller_salesperson'));
+  }
   if (auth === "affiliate") return Boolean(await affiliateSession(req));
   if (auth === "admin" || auth === "super_admin" || auth === "manage_services") {
     const session = await getAdminSessionFromRequest(req);
@@ -312,7 +335,7 @@ router.post("/actions/:module/:fn", async (req: Request, res: Response) => {
   const rawArgs = Array.isArray(req.body?.args) ? (req.body.args as unknown[]) : [];
   const args = rawArgs.map(decodeArg);
     const result = await runWithRequestContext(req, res, () => {
-      if (moduleName === 'affiliates' || moduleName === 'affiliate-onboarding' || moduleName === 'patient-texting' || moduleName === 'lead-terms') assertSameOrigin();
+      if (moduleName === 'resellers' || moduleName === 'reseller-onboarding' || moduleName === 'affiliates' || moduleName === 'affiliate-onboarding' || moduleName === 'patient-texting' || moduleName === 'lead-terms') assertSameOrigin();
       return (fn as ActionFn)(...args);
     });
     res.json({ ok: true, result: result === undefined ? null : result });
@@ -331,8 +354,8 @@ router.post("/actions/:module/:fn", async (req: Request, res: Response) => {
       return;
     }
     // Database/validation exceptions can contain sensitive parameters. Never log them for intake.
-    if (moduleName !== 'affiliate-onboarding' && moduleName !== 'patient-texting') logger.error({ err, module: req.params.module, fn: req.params.fn }, "action failed");
-    if ((moduleName === 'affiliate-onboarding' || moduleName === 'patient-texting') && !(err instanceof Error && !('code' in err) && !('cause' in err))) {
+    if (moduleName !== 'reseller-onboarding' && moduleName !== 'affiliate-onboarding' && moduleName !== 'patient-texting') logger.error({ err, module: req.params.module, fn: req.params.fn }, "action failed");
+    if ((moduleName === 'reseller-onboarding' || moduleName === 'affiliate-onboarding' || moduleName === 'patient-texting') && !(err instanceof Error && !('code' in err) && !('cause' in err))) {
       res.status(500).json({ ok: false, error: 'Secure onboarding request failed. Please try again.' });
       return;
     }

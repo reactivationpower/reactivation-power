@@ -38,7 +38,7 @@ export interface PortalWelcomeData {
 
 export interface AdminInviteData {
   name: string | null
-  role: 'super_admin' | 'sales_rep'
+  role: 'super_admin' | 'sales_rep' | 'reseller_manager' | 'reseller_salesperson'
   invitedByName: string | null
   inviteUrl: string
 }
@@ -182,6 +182,8 @@ const longDate = (iso: string) =>
 const ROLE_LABEL: Record<AdminInviteData['role'], string> = {
   super_admin: 'Super Admin',
   sales_rep: 'Sales Rep',
+  reseller_manager: 'Reseller Company Manager',
+  reseller_salesperson: 'Reseller Salesperson',
 }
 
 const SUPPORT_NOTE = `Questions? Reply to this email and we'll help.`
@@ -244,14 +246,14 @@ const adminInvite: TemplateDefinition<'admin_invite'> = {
     inviteUrl: `${BRAND.siteUrl}/admin-login?token_hash=sample-token&type=magiclink`,
   },
   render: (d) => ({
-    subject: `You've been invited to the ${BRAND.name} admin`,
+    subject: `You've been invited to the ${BRAND.name} ${d.role.startsWith('reseller_') ? 'reseller workspace' : 'admin'}`,
     previewText: `Set your password to join as a ${ROLE_LABEL[d.role]}.`,
     html: layout(
       [
-        h1(`You're invited to the ${BRAND.name} admin`),
+        h1(`You're invited to the ${BRAND.name} ${d.role.startsWith('reseller_') ? 'reseller workspace' : 'admin'}`),
         p(`Hi ${esc(greetingName(d.name))},`),
         p(
-          `${d.invitedByName ? esc(d.invitedByName) : 'A super admin'} has invited you to join the ${BRAND.name} admin as a <strong>${ROLE_LABEL[d.role]}</strong>. Set a password and you're in.`,
+          `${d.invitedByName ? esc(d.invitedByName) : 'The owner'} has invited you to join ${BRAND.name} as a <strong>${ROLE_LABEL[d.role]}</strong>. Set your personal password to sign in.${d.role.startsWith('reseller_') ? ' Your company manager can complete secure U.S. wire and W-9 onboarding in the reseller workspace. Patient Pipeline pays the company, which pays its own staff.' : ''}`,
         ),
         button('Set your password', d.inviteUrl),
         fallbackLink(d.inviteUrl),
