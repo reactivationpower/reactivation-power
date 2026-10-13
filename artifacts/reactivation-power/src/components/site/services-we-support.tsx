@@ -18,11 +18,14 @@ const GROUP_ICONS: Record<ServiceGroupId, LucideIcon> = {
 export function ServicesWeSupport({
   surface = 'background',
   className = '',
+  additionalServices = {},
 }: {
   /** Match the section to the alternating page background it sits on */
   surface?: 'background' | 'card'
   /** Border classes so the page controls separators against its neighbors */
   className?: string
+  /** Display-only additions for this page, without changing lead-form choices. */
+  additionalServices?: Partial<Record<ServiceGroupId, string[]>>
 }) {
   const sectionBg = surface === 'card' ? 'bg-card' : 'bg-background'
   const cardBg = surface === 'card' ? 'bg-background' : 'bg-card'
@@ -81,7 +84,7 @@ export function ServicesWeSupport({
                       {service.label}
                     </li>
                   ))}
-                  {group.alsoOffered?.map((line) => (
+                  {[...(group.alsoOffered ?? []), ...(additionalServices[group.id] ?? [])].map((line) => (
                     <li
                       key={line}
                       className="flex items-start gap-2.5 text-sm leading-snug text-foreground"
