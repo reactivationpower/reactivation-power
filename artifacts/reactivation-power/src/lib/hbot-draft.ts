@@ -66,84 +66,80 @@ const S = (step_key: string, title: string, content: string): ScriptFlowStep => 
 })
 
 export const hbotDraftSteps: ScriptFlowStep[] = [
-  S('open_status', 'Opening: Status Check',
-`{{contact_first_name}}, how have you been since your last hyperbaric sessions with us?
+  S('open', 'The Open',
+`Hi, this is {{caller_name}} with {{provider_name}}'s office. Is {{contact_first_name}} available, please?
 
-(Let them answer. Do not assume they improved or completed treatment.)`),
-  S('resp_completed_well', 'Completed and Doing Well',
-`That's good to hear, {{contact_first_name}}. Finishing a plan is something to be glad about.
+Hi {{contact_first_name}}. We're updating files for patients we haven't seen in a while, and yours came up. {{asked_by_provider}} Do you have a quick minute?`),
+  S('open_status', 'Opening Question',
+`So {{contact_first_name}}, how have you felt since your hyperbaric care with us? I usually hear one of three things. Still feeling great, starting to come back a little, or pretty much back to where you started. Which one is closest for you?
 
-(Nothing further is needed unless they bring something up.)
+(Only three answers. Tap the one you hear.)`),
+  S('resp_completed_well', 'Still Feeling Great',
+`That's great to hear, {{contact_first_name}}. That's exactly what we hope for when someone finishes care with us. {{provider_name}} will be glad to know you're still doing well.
 
-While I have you, can I ask a few quick questions to update your file?
+(Let them respond, then continue.)`),
+  S('resp_returning', 'Starting to Come Back',
+`Thanks for telling me, {{contact_first_name}}. What have you noticed coming back?
 
-(Wait for the yes.)`),
-  S('resp_returning', 'Concern Returning',
-`I'm sorry to hear that, {{contact_first_name}}. Thank you for telling me.
+(Let them answer. Stay warm. Do not book yet.)`),
+  S('resp_still_present', 'Fully Back',
+`I'm sorry to hear that, {{contact_first_name}}. What has changed since we last saw you?
 
-(Do not guess why it came back.)
+(Let them answer. Stay warm. Do not book yet.)`),
+  S('resp_no_improvement', 'No Improvement',
+`I'm sorry to hear that, {{contact_first_name}}. What were you hoping would change?
 
-While I have you, can I ask a few quick questions to update your file?
-
-(Wait for the yes.)`),
-  S('resp_still_present', 'Still Present / No Improvement',
-`Thank you for being straight with me, {{contact_first_name}}. That's useful for us to know.
-
-(Do not suggest more sessions. Do not say improvement is coming.)
-
-While I have you, can I ask a few quick questions to update your file?
-
-(Wait for the yes.)`),
+(Let them answer. Do not assume more sessions would help.)`),
   S('resp_stopped_early', 'Stopped Early',
-`Thanks for telling me, {{contact_first_name}}. People stop for all kinds of reasons, and that's your call.
+`Thanks for telling me, {{contact_first_name}}. What led you to stop?
 
-(Do not suggest they should have continued. Listen for any reaction to treatment.)
+(Let them answer. Stay warm. Listen for any reaction to treatment. Do not suggest they should have continued.)`),
+  S('permission_well', 'Ask Permission',
+`While I have you, {{contact_first_name}}, can I ask you a few quick questions about anything else you've noticed?
 
-If you don't mind me asking, what led you to stop?
+(Wait for the yes.)`),
+  S('permission_returning', 'Transition: Ask Permission',
+`{{contact_first_name}}, we'll come back to the concern you mentioned. First, can I ask a few quick questions so your file is up to date?
 
-(Let them answer. Note only what they describe.)`),
-  S('permission', 'Permission',
-`While I have you, can I ask a few quick questions to update your file?
+(Wait for the yes.)`),
+  S('permission', 'Transition: Ask Permission',
+`{{contact_first_name}}, we'll come back to what you mentioned. First, can I ask a few quick questions so your file is up to date?
 
 (Wait for the yes.)`),
   S('digging_in_well', 'Questions: Update the File', `${DIG_INTRO}\n\n${DIG_CLOSE_NEW}`),
   S('digging_in_returning', 'Questions: Update the File (Returning)', `${DIG_INTRO}\n\n${DIG_CLOSE_RET}`),
   S('digging_in_still', 'Questions: Update the File (Still Present)', `${DIG_INTRO}\n\n${DIG_CLOSE_RET}`),
   S('making_it_real', 'Making It Real',
-`{{contact_first_name}}, I'd like to ask three quick questions about {{main_concern}}.
+`{{contact_first_name}}, I'd like to ask three quick questions about {{main_concern}}. This will help us update your file.
 
-Has it been bothering you for a week or two, or longer than that?
+How long has it been bothering you, like a week or two, or longer than that?
 
-(Let them answer.)
+(Let them answer. If it fits, you can say "Got it.")
 
-Does it bother you once or twice a month, or more often than that?
+Is it something you experience like 1 to 2 times a month, or is it more often than that?
 
-(Let them answer.)
+(Let them answer. If it fits, you can say "I see." or "I understand.")
 
-When it's at its worst, does it interfere with work, home, or your own time?
+When it's at its worst, does it ever interfere with work, at home, or relaxing and doing your own thing?
 
-(Let them answer. Note only what they describe.)`),
-  S('review', 'Read-Back',
+(Let them answer. If they name an impact, reflect only what they said about work, home, or their own time. If not, you can say "Got it, thank you.")`),
+  S('review', 'The Review',
 `{{contact_first_name}}, let me make sure I have this right.
 
-(Read back their answers about how long, how often, and work, home, or their own time.)
+(Read back their three answers: how long, how often, what it gets in the way of. Use only what they said.)
 
 Did I get that right?
 
-(Let them answer. Correct the notes if needed.)`),
-  S('recommend', 'Permission to Recommend',
-`{{contact_first_name}}, I'd like to help you get a clear answer about the next step. Can I make a recommendation?
+(Let them answer. If they correct you, take the correction and move on.)`),
+  S('recommend', 'The Recommendation',
+`{{contact_first_name}}, that's worth getting looked at instead of just dealing with it. Can I make a recommendation?
 
 (Wait for the yes.)
 
-Let's arrange a visit so {{provider_name}} can review {{main_concern}} and any changes in your health.
+Let's get you in so {{provider_name}} can take a look at {{main_concern}}. We'll talk through whether further care here makes sense. If it's not the right fit, we'll say so. Either way you'll know where you stand. Does that sound reasonable?
 
-We'll talk through whether further care here makes sense. That might not mean more hyperbaric sessions.
-
-If another kind of care is needed, we'll explain the next step. Does that sound reasonable?
-
-(Tap their answer. Book a review visit, not a treatment session.)`),
-  S('book_review', 'Clinician Review Visit',
+(Tap what you hear. A review visit is not clearance for hyperbaric treatment.)`),
+  S('book_review', 'Scheduling: Review Visit',
 `Wonderful. Let's find a time for {{provider_name}} to review things with you.
 
 (Offer review visit times only. Do not book a treatment session, state a session count, or discuss price unless asked.)
@@ -327,28 +323,34 @@ const objChoices = (f: string) => [
 ]
 
 export const hbotDraftChoices: ScriptFlowChoice[] = [
-  C('open_status', 'Doing well / finished their sessions', 'resp_completed_well', 'positive'),
-  C('open_status', 'The original concern is coming back', 'resp_returning', 'caution'),
-  C('open_status', 'Still having it / no improvement', 'resp_still_present', 'caution'),
-  C('open_status', 'They stopped early', 'resp_stopped_early', 'caution'),
-  C('open_status', 'They mention a reaction to past treatment', 'handoff_reaction', 'caution'),
-  URGENT('open_status'),
-  DECLINE('open_status'),
-  C('resp_completed_well', 'They said yes', 'digging_in_well', 'positive'),
+  C('open', 'Patient is on the line: continue', 'open_status'),
+  C('open_status', '“Still feeling great”', 'resp_completed_well', 'positive'),
+  C('open_status', '“It’s starting to come back again”', 'resp_returning', 'caution'),
+  C('open_status', '“Pretty much back to where I was”', 'resp_still_present', 'negative'),
+  C('resp_completed_well', 'They confirmed it still feels good', 'permission_well'),
   C('resp_completed_well', 'They have nothing to add', 'exit_healthy'),
   DECLINE('resp_completed_well'),
   URGENT('resp_completed_well'),
-  C('resp_returning', 'They said yes', 'digging_in_returning', 'positive'),
+  C('resp_returning', 'They explained what changed', 'permission_returning'),
   DECLINE('resp_returning'),
   URGENT('resp_returning'),
-  C('resp_still_present', 'They said yes', 'digging_in_still', 'positive'),
+  C('resp_still_present', 'They explained what changed', 'permission'),
+  C('resp_still_present', '“It never improved”', 'resp_no_improvement', 'caution'),
+  C('resp_still_present', '“I stopped early”', 'resp_stopped_early', 'caution'),
+  REACT('resp_still_present'),
   DECLINE('resp_still_present'),
   URGENT('resp_still_present'),
   C('resp_stopped_early', 'They shared why', 'permission', 'positive'),
   C('resp_stopped_early', 'They mention a reaction to past treatment', 'handoff_reaction', 'caution'),
   URGENT('resp_stopped_early'),
   DECLINE('resp_stopped_early'),
-  C('permission', 'They said yes', 'digging_in_returning', 'positive'),
+  C('resp_no_improvement', 'They explained what they hoped for', 'permission'),
+  REACT('resp_no_improvement'), URGENT('resp_no_improvement'), DECLINE('resp_no_improvement'),
+  C('permission_well', '“Yes, that’s okay”', 'digging_in_well'),
+  DECLINE('permission_well'), URGENT('permission_well'), REACT('permission_well'),
+  C('permission_returning', '“Yes, that’s okay”', 'digging_in_returning'),
+  DECLINE('permission_returning'), URGENT('permission_returning'), REACT('permission_returning'),
+  C('permission', '“Yes, that’s okay”', 'digging_in_still'),
   DECLINE('permission'),
   URGENT('permission'),
   ...digChoices('digging_in_well'),
