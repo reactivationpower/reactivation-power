@@ -4,6 +4,8 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import {
   HBOT_CONCERN_OPTIONS,
   HBOT_DRAFT_NICHE_ID,
+  HBOT_DRAFT_SCREENS,
+  HBOT_REVIEW_ONLY_SCREEN_KEYS,
   hbotDraftChoices,
   hbotDraftSteps,
   withHbotDraft,
@@ -46,7 +48,7 @@ it('has no missing destinations', () => {
   }
 })
 
-it('reaches every step from the opening', () => {
+it('reaches all ordinary steps from the opening and retains separate review screens', () => {
   const seen = new Set([hbotDraftSteps[0].step_key])
   const q = [...seen]
   while (q.length) {
@@ -55,7 +57,12 @@ it('reaches every step from the opening', () => {
       if (!seen.has(c.to_step_key)) { seen.add(c.to_step_key); q.push(c.to_step_key) }
     }
   }
-  expect([...seen].sort()).toEqual(hbotDraftSteps.map((s) => s.step_key).sort())
+  expect([...seen].sort()).toEqual(hbotDraftSteps
+    .filter(s => !HBOT_REVIEW_ONLY_SCREEN_KEYS.includes(s.step_key))
+    .map((s) => s.step_key).sort())
+  for (const key of HBOT_REVIEW_ONLY_SCREEN_KEYS) {
+    expect(HBOT_DRAFT_SCREENS.some(s => s.key === key)).toBe(true)
+  }
 })
 
 it('keeps eight chips in approved order, matching eight questions', () => {
@@ -106,11 +113,55 @@ it('matches the approved opener and three-answer opening structure', () => {
   expect(choices.map(c => c.variant)).toEqual(['positive', 'caution', 'negative'])
 })
 
-it('keeps honest no-improvement and stopped-early routes without adding opener buttons', () => {
+it('keeps supplemental historical review screens outside the ordinary button flow', () => {
   const choices = hbotDraftChoices.filter(c => c.from_step_key === 'resp_still_present')
-  expect(choices.some(c => c.to_step_key === 'resp_no_improvement')).toBe(true)
-  expect(choices.some(c => c.to_step_key === 'resp_stopped_early')).toBe(true)
+  expect(choices).toHaveLength(1)
+  expect(choices[0].label).toBe('They explained what changed')
   const review = hbotDraftSteps.find(s => s.step_key === 'review')
   expect(review.content).toContain('Use only what they said.')
   expect(review.content).not.toContain('feeling the way you did when you finished')
+})
+
+it('has no generic decline, emergency, or clinical-reaction response buttons anywhere', () => {
+  for (const c of hbotDraftChoices) {
+    expect(c.label).not.toMatch(/^They decline$|emergency|sudden change|reaction to past treatment/i)
+    expect(HBOT_REVIEW_ONLY_SCREEN_KEYS).not.toContain(c.to_step_key)
+  }
+})
+
+it('matches approved Chiro-family labels and colors through the main caller path', () => {
+  const choicesFor = key => hbotDraftChoices.filter(c => c.from_step_key === key)
+    .map(({ label, variant }) => ({ label, variant }))
+  for (const key of ['permission_well', 'permission_returning', 'permission']) {
+    expect(choicesFor(key)).toEqual([{ label: '“Yes, that’s okay”', variant: 'default' }])
+  }
+  expect(choicesFor('digging_in_well')).toEqual([
+    { label: 'They named their biggest concern', variant: 'caution' },
+    { label: 'Nothing is bothering them', variant: 'positive' },
+  ])
+  expect(choicesFor('digging_in_returning')).toEqual([
+    { label: 'They named their biggest concern', variant: 'caution' },
+  ])
+  expect(choicesFor('making_it_real')).toEqual([
+    { label: 'Continue to the review', variant: 'default' },
+  ])
+  expect(choicesFor('review')).toEqual([
+    { label: 'They agreed with the recap', variant: 'positive' },
+    { label: 'Not quite / they hesitate', variant: 'negative' },
+  ])
+})
+
+it('renders the approved permission and question buttons without the extra actions', () => {
+  view(true)
+  fireEvent.change(screen.getByLabelText('Select niche'), { target: { value: HBOT_DRAFT_NICHE_ID } })
+  fireEvent.change(screen.getByTestId('select-hbot-draft-screen'), { target: { value: 'permission_well' } })
+  fireEvent.click(screen.getByRole('button', { name: '“Yes, that’s okay”' }))
+  expect(screen.getByRole('button', { name: 'They named their biggest concern' })).toBeTruthy()
+  expect(screen.getByRole('button', { name: 'Nothing is bothering them' })).toBeTruthy()
+  expect(screen.queryByRole('button', { name: /They decline|emergency|reaction to past treatment/i })).toBeNull()
+  fireEvent.click(screen.getByRole('button', { name: 'They named their biggest concern' }))
+  fireEvent.click(screen.getByRole('button', { name: 'Continue to the review' }))
+  fireEvent.click(screen.getByRole('button', { name: 'They agreed with the recap' }))
+  fireEvent.click(screen.getByRole('button', { name: '“I need to think about it”' }))
+  expect(screen.getByRole('heading', { name: 'Objection: Need to Think' })).toBeTruthy()
 })

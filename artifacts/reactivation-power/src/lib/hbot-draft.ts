@@ -147,8 +147,14 @@ Let's get you in so {{provider_name}} can take a look at {{main_concern}}. We'll
 Which day tends to work best for you?
 
 (Let them answer. Confirm the day and time, then close.)`),
-  S('obj_hub', 'Objection: What Did They Say?',
-`(Listen fully. Acknowledge first. Then choose the closest objection below.)`),
+  S('bridge_no', 'Not Quite / They Hesitate',
+`{{contact_first_name}}, I don't want to assume anything. Is it the timing, or is something else holding you back?
+
+(Stay easy about it. Let them answer.)`),
+  S('obj_hub', 'Uncover the Real Concern',
+`I understand, {{contact_first_name}}. What would keep you from coming in for a review visit?
+
+(Let them answer. Then tap what you hear.)`),
   S('obj_cost', 'Objection: Cost',
 `I understand, {{contact_first_name}}. Cost matters.
 
@@ -302,24 +308,24 @@ const C = (from: string, label: string, to: string | null, variant: ScriptFlowVa
   sort_order: cid,
 })
 
-const URGENT = (f: string) => C(f, 'They report an emergency or sudden change', 'handoff_urgent', 'negative')
-const REACT = (f: string) => C(f, 'They mention a reaction to past treatment', 'handoff_reaction', 'caution')
-const DECLINE = (f: string) => C(f, 'They decline', 'exit_decline', 'negative')
-const OBJ = (f: string) => C(f, 'They raise an objection', 'obj_hub', 'objection')
-
-const digChoices = (f: string) => [
-  C(f, 'They named a concern', 'making_it_real', 'positive'),
-  C(f, 'Nothing bothers them', 'exit_healthy'),
-  REACT(f),
-  URGENT(f),
-  DECLINE(f),
+// Former-patient reactivation follows the approved Chiro-family button pattern.
+// These supplemental drafts remain available only through Jump to screen.
+export const HBOT_REVIEW_ONLY_SCREEN_KEYS = [
+  'resp_no_improvement', 'resp_stopped_early', 'handoff_reaction', 'handoff_urgent',
+]
+const objectionChoices = (f: string) => [
+  C(f, '“It’s the cost or insurance”', 'obj_cost', 'objection'),
+  C(f, '“I’m worried about the time”', 'obj_time', 'objection'),
+  C(f, '“I need to talk to my spouse”', 'obj_spouse', 'objection'),
+  C(f, '“I need to think about it”', 'obj_think', 'objection'),
+  C(f, '“Just send me some info”', 'obj_send_info', 'objection'),
+  C(f, '“I’m considering another option”', 'obj_other_provider', 'objection'),
+  C(f, '“What about coverage?”', 'obj_coverage', 'objection'),
+  C(f, '“The chamber felt closed in”', 'obj_chamber_anxiety', 'objection'),
 ]
 const objChoices = (f: string) => [
-  C(f, 'They agree to a review visit', 'book_review', 'positive'),
-  C(f, 'They raise a different objection', 'obj_hub', 'objection'),
-  REACT(f),
-  URGENT(f),
-  DECLINE(f),
+  C(f, 'Resolved: back to scheduling', 'book_review', 'positive'),
+  C(f, 'Another concern came up', 'obj_hub', 'objection'),
 ]
 
 export const hbotDraftChoices: ScriptFlowChoice[] = [
@@ -328,74 +334,43 @@ export const hbotDraftChoices: ScriptFlowChoice[] = [
   C('open_status', '“It’s starting to come back again”', 'resp_returning', 'caution'),
   C('open_status', '“Pretty much back to where I was”', 'resp_still_present', 'negative'),
   C('resp_completed_well', 'They confirmed it still feels good', 'permission_well'),
-  C('resp_completed_well', 'They have nothing to add', 'exit_healthy'),
-  DECLINE('resp_completed_well'),
-  URGENT('resp_completed_well'),
   C('resp_returning', 'They explained what changed', 'permission_returning'),
-  DECLINE('resp_returning'),
-  URGENT('resp_returning'),
   C('resp_still_present', 'They explained what changed', 'permission'),
-  C('resp_still_present', '“It never improved”', 'resp_no_improvement', 'caution'),
-  C('resp_still_present', '“I stopped early”', 'resp_stopped_early', 'caution'),
-  REACT('resp_still_present'),
-  DECLINE('resp_still_present'),
-  URGENT('resp_still_present'),
-  C('resp_stopped_early', 'They shared why', 'permission', 'positive'),
-  C('resp_stopped_early', 'They mention a reaction to past treatment', 'handoff_reaction', 'caution'),
-  URGENT('resp_stopped_early'),
-  DECLINE('resp_stopped_early'),
+  C('resp_stopped_early', 'They shared why', 'permission'),
   C('resp_no_improvement', 'They explained what they hoped for', 'permission'),
-  REACT('resp_no_improvement'), URGENT('resp_no_improvement'), DECLINE('resp_no_improvement'),
   C('permission_well', '“Yes, that’s okay”', 'digging_in_well'),
-  DECLINE('permission_well'), URGENT('permission_well'), REACT('permission_well'),
   C('permission_returning', '“Yes, that’s okay”', 'digging_in_returning'),
-  DECLINE('permission_returning'), URGENT('permission_returning'), REACT('permission_returning'),
   C('permission', '“Yes, that’s okay”', 'digging_in_still'),
-  DECLINE('permission'),
-  URGENT('permission'),
-  ...digChoices('digging_in_well'),
-  ...digChoices('digging_in_returning'),
-  ...digChoices('digging_in_still'),
-  C('making_it_real', 'Continue to read-back', 'review', 'positive'),
-  REACT('making_it_real'),
-  URGENT('making_it_real'),
-  DECLINE('making_it_real'),
-  C('review', 'They confirmed it', 'recommend', 'positive'),
-  C('review', 'They corrected something', 'review', 'caution'),
-  URGENT('review'),
-  DECLINE('review'),
-  C('recommend', 'They said yes to a review visit', 'book_review', 'positive'),
-  OBJ('recommend'),
-  REACT('recommend'),
-  URGENT('recommend'),
-  DECLINE('recommend'),
+  C('digging_in_well', 'They named their biggest concern', 'making_it_real', 'caution'),
+  C('digging_in_well', 'Nothing is bothering them', 'exit_healthy', 'positive'),
+  C('digging_in_returning', 'They named their biggest concern', 'making_it_real', 'caution'),
+  C('digging_in_still', 'They named their biggest concern', 'making_it_real'),
+  C('making_it_real', 'Continue to the review', 'review'),
+  C('review', 'They agreed with the recap', 'recommend', 'positive'),
+  C('review', 'Not quite / they hesitate', 'bridge_no', 'negative'),
+  C('bridge_no', 'They’re ready to move forward', 'recommend', 'positive'),
+  ...objectionChoices('bridge_no'),
+  C('recommend', '“Yes, that sounds reasonable”', 'book_review', 'positive'),
+  C('recommend', 'Hesitant or soft no', 'obj_hub', 'caution'),
+  ...objectionChoices('recommend'),
   C('book_review', 'Visit confirmed', 'exit_review', 'positive'),
-  OBJ('book_review'),
-  DECLINE('book_review'),
-  C('obj_hub', 'Cost', 'obj_cost'),
-  C('obj_hub', 'Coverage / insurance', 'obj_coverage'),
-  C('obj_hub', 'Time', 'obj_time'),
-  C('obj_hub', 'Need to ask spouse', 'obj_spouse'),
-  C('obj_hub', 'Need to think', 'obj_think'),
-  C('obj_hub', 'Send me information', 'obj_send_info'),
-  C('obj_hub', 'Seeing another provider', 'obj_other_provider'),
-  C('obj_hub', 'Chamber felt closed in', 'obj_chamber_anxiety'),
-  REACT('obj_hub'),
-  URGENT('obj_hub'),
-  DECLINE('obj_hub'),
+  C('obj_hub', 'They’re ready: schedule', 'book_review', 'positive'),
+  ...objectionChoices('obj_hub'),
   ...['obj_cost', 'obj_coverage', 'obj_time', 'obj_chamber_anxiety'].flatMap(objChoices),
   C('obj_cost', 'They want the office to check the cost', 'exit_information'),
+  C('obj_cost', 'They want to leave it for now', 'exit_decline'),
   C('obj_coverage', 'They want the office to check billing', 'exit_information'),
+  C('obj_chamber_anxiety', 'They would rather not', 'exit_decline'),
   ...['obj_spouse', 'obj_think'].flatMap(f => [
     C(f, 'They ask us to check back', 'exit_follow_up'),
     C(f, 'They want to leave it with them', 'exit_decline'),
-    OBJ(f), REACT(f), URGENT(f),
+    C(f, 'Another concern came up', 'obj_hub', 'objection'),
   ]),
   C('obj_send_info', 'They request approved information', 'exit_information'),
-  OBJ('obj_send_info'), REACT('obj_send_info'), URGENT('obj_send_info'), DECLINE('obj_send_info'),
+  ...objChoices('obj_send_info'),
   C('obj_other_provider', 'They want to stay with their current provider', 'exit_decline'),
   C('obj_other_provider', 'They request a review here', 'book_review'),
-  OBJ('obj_other_provider'), REACT('obj_other_provider'), URGENT('obj_other_provider'), DECLINE('obj_other_provider'),
+  C('obj_other_provider', 'Another concern came up', 'obj_hub', 'objection'),
 ]
 
 /** Screens reachable via the draft-only reviewer selector. */
