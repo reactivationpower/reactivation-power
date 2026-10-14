@@ -64,7 +64,7 @@ export async function startSimulation(ownerId: string, leadId: string) {
   const policy = await readPolicy(ownerId)
   const clock = '2026-10-10T16:00:00.000Z'
   const ai = officeOpen(policy, new Date(clock)) ? policy.handling === 'ai' : policy.afterHours
-  const flow = await getScriptFlow('lead')
+  const flow = await getScriptFlow('lead', campaign.nicheId ? [campaign.nicheId] : [])
   const relevant = (s: { niche_id: string | null }) => !s.niche_id || s.niche_id === campaign.nicheId
   const state: Simulation = {
     mode: 'simulation', leadId, campaignId: campaign.id, patient: 'Melissa Tran',

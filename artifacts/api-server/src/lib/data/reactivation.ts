@@ -1,5 +1,6 @@
 
 import { getAdminClient } from '@/lib/supabase/admin'
+import { cachedScriptFlow } from './script-flow-cache'
 import { pool } from '@workspace/db'
 import { ensurePrimaryServices } from '@/lib/patients/outreach'
 import { planOutreach } from '@/lib/patients/outreach-policy'
@@ -97,18 +98,27 @@ export interface ScriptFlow {
 }
 
 /**
- * All flow steps and choices — general defaults (niche_id null) plus every
- * niche override. The client filters per selected niche: a niche row with the
- * same step_key replaces the general one.
+ * General defaults plus only the requested, server-authorized niche overrides.
+ * Account practice screens retain their enabled niches for instant switching;
+ * callers never need the scripts belonging to other accounts/sectors.
  */
 export type ScriptFlowKind = 'reactivation' | 'lead'
 
-export async function getScriptFlow(kind: ScriptFlowKind = 'reactivation'): Promise<ScriptFlow> {
-  const [steps, choices] = await Promise.all([
-    fetchAllRows<ScriptFlowStep>('script_flow_steps', kind),
-    fetchAllRows<ScriptFlowChoice>('script_flow_choices', kind),
-  ])
-  return { steps, choices }
+export async function getScriptFlow(
+  kind: ScriptFlowKind = 'reactivation',
+  nicheIds: readonly string[] = [],
+): Promise<ScriptFlow> {
+  const ids = [...new Set(nicheIds)].sort()
+  if (ids.some((id) => !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id))) {
+    throw new Error('Invalid script niche ID')
+  }
+  return cachedScriptFlow(JSON.stringify([kind, ids]), async () => {
+    const [steps, choices] = await Promise.all([
+      fetchAllRows<ScriptFlowStep>('script_flow_steps', kind, ids),
+      fetchAllRows<ScriptFlowChoice>('script_flow_choices', kind, ids),
+    ])
+    return { steps, choices }
+  })
 }
 
 /**
@@ -123,15 +133,20 @@ export async function getScriptFlow(kind: ScriptFlowKind = 'reactivation'): Prom
 async function fetchAllRows<T>(
   table: 'script_flow_steps' | 'script_flow_choices',
   kind: ScriptFlowKind,
+  nicheIds: readonly string[],
 ): Promise<T[]> {
   const supabase = getAdminClient()
   const PAGE = 1000
   const all: T[] = []
   for (let from = 0; ; from += PAGE) {
-    const { data, error } = await supabase
+    let query = supabase
       .from(table)
       .select('*')
       .eq('flow_kind', kind)
+    query = nicheIds.length
+      ? query.or(`niche_id.is.null,niche_id.in.(${nicheIds.join(',')})`)
+      : query.is('niche_id', null)
+    const { data, error } = await query
       .order('sort_order')
       .order('id')
       .range(from, from + PAGE - 1)

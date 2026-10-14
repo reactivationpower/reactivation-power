@@ -265,11 +265,11 @@ add("/portal/start", "portal", async () => {
 
 /** Everything a lead call or practice screen needs about the account: caller, provider, script. */
 async function leadCallContext(ownerId: string, participant: { role: string } & Record<string, any>) {
-  const [owner, flow, niches] = await Promise.all([
+  const [owner, niches] = await Promise.all([
     participant.role === "owner" ? Promise.resolve(participant) : getParticipantById(ownerId),
-    getScriptFlow("lead"),
     campaignNicheOptions(ownerId),
   ]);
+  const flow = await getScriptFlow("lead", niches.map((n) => n.id));
   return { owner, flow, niches };
 }
 
@@ -518,11 +518,12 @@ add("/portal/dialer/call/:contactId", "portal", async (req) => {
   const contact = await getContact(contactId);
   if (!contact || contact.owner_id !== ownerId) notFound();
   const sectors = await getOwnerSectors(ownerId);
-  const [niches, script, sections, queue, owner, callHistory, flow] = await Promise.all([
+  const [niches, script, sections, queue, owner, callHistory] = await Promise.all([
     getOwnerNiches(ownerId, sectors), getMasterScript(), getScriptSections(), getCallQueue(ownerId),
     participant.role === "owner" ? Promise.resolve(participant) : getParticipantById(ownerId),
-    getCallHistory(contactId), getScriptFlow(),
+    getCallHistory(contactId),
   ]);
+  const flow = await getScriptFlow("reactivation", niches.map((n) => n.id));
   const remaining = queue.filter((q) => q.contact.id !== contactId);
   const nextContactId = remaining[0]?.contact.id ?? null;
   const nicheInactive = Boolean(contact.niche && !contact.niche_active);
@@ -540,10 +541,11 @@ add("/portal/dialer/script", "portal", async (req) => {
   const backLabel = courseSlug || from === "training" ? "Back to Training" : "Back to Dialer";
   const ownerId = accessOwnerId(participant);
   const sectors = await getOwnerSectors(ownerId);
-  const [niches, flow, owner] = await Promise.all([
-    getOwnerNiches(ownerId, sectors), getScriptFlow(),
+  const [niches, owner] = await Promise.all([
+    getOwnerNiches(ownerId, sectors),
     participant.role === "owner" ? Promise.resolve(participant) : getParticipantById(ownerId),
   ]);
+  const flow = await getScriptFlow("reactivation", niches.map((n) => n.id));
   // HBOT is now a published niche. Practice and live calls use the same DB flow.
   const hbotDraftAvailable = false;
   return { screen, from, course, participant, courseSlug, backHref, backLabel, ownerId, sectors, niches, flow, owner, hbotDraftAvailable };
