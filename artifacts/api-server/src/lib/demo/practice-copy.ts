@@ -34,6 +34,7 @@ const CHIRO_COPY: DemoPracticeCopy = {
   complaints: {
     Chiropractic: ['Lower back pain', 'Neck pain', 'Headaches', 'Sciatica', 'Mid-back tightness', 'Shoulder pain'],
     Decompression: ['Herniated disc L4-L5', 'Sciatica', 'Degenerative disc disease', 'Lower back pain', 'Spinal stenosis'],
+    HBOT: ['Fatigue', 'Brain fog', 'Lingering injury'],
     'Joint Pain': ['Knee pain', 'Shoulder pain', 'Hip pain', 'Elbow tendonitis', 'Ankle pain'],
     ChiroThin: ['Weight loss', 'Weight management'],
     'Gut Health': ['Bloating', 'Acid reflux', 'IBS symptoms', 'Constipation', 'Food sensitivities'],
@@ -49,6 +50,7 @@ const CHIRO_COPY: DemoPracticeCopy = {
   serviceLabels: {
     Chiropractic: ['Chiropractic Adjustment', 'Adjustment', 'Chiro Wellness Visit'],
     Decompression: ['Spinal Decompression', 'DTS Therapy'],
+    HBOT: ['HBOT', 'Hyperbaric Oxygen Therapy'],
     'Joint Pain': ['Joint Pain Program', 'Knee Program'],
     ChiroThin: ['ChiroThin Weight Loss', 'ChiroThin'],
     'Gut Health': ['Gut Health Program', 'Digestive Health Consult'],

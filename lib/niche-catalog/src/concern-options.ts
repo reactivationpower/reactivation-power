@@ -27,6 +27,16 @@ export interface ConcernOption {
 }
 
 export const CONCERN_OPTIONS: Record<string, ConcernOption[]> = {
+  HBOT: [
+    { label: 'Fatigue / low energy', spoken: 'the fatigue or low energy' },
+    { label: 'Brain fog / concentration', spoken: 'the brain fog or trouble concentrating' },
+    { label: 'Ongoing pain / discomfort', spoken: 'the ongoing pain or discomfort' },
+    { label: 'Sleep problems', spoken: 'the trouble with sleep' },
+    { label: 'Slow healing / lingering injury', spoken: 'the healing or injury concern' },
+    { label: 'Headaches / migraines', spoken: 'the headaches or migraines' },
+    { label: 'Numbness / tingling', spoken: 'the numbness or tingling' },
+    { label: 'Recovery after activity', spoken: 'the trouble recovering after activity' },
+  ],
   Chiropractic: [
     { label: 'Headaches', spoken: 'your headaches' },
     { label: 'Fatigue / low energy', spoken: 'the fatigue' },

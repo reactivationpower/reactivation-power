@@ -188,7 +188,7 @@ function HomeContent() {
           <div className="mx-auto max-w-6xl px-4 pt-16 md:px-6 md:pt-24">
              <div className="mx-auto max-w-3xl text-center"><p className="dph-eyebrow justify-center">Patient Reactivation</p><h2 className="mt-4 text-balance text-3xl font-bold tracking-tight text-foreground md:text-4xl">Make space to reconnect with past patients</h2><p className="mt-5 text-pretty text-lg leading-relaxed text-muted-foreground">Your team can check in with inactive patients using a guided conversation organized by the service they came in for.</p></div>
           </div>
-          <ServicesWeSupport surface="card" className="!bg-transparent" additionalServices={{ chiropractic: ['HBOT'] }} />
+          <ServicesWeSupport surface="card" className="!bg-transparent" />
         </section>
         <section id="lead-follow-up" className="scroll-mt-24">
           <div className="mx-auto max-w-6xl px-4 py-16 md:px-6 md:py-24">

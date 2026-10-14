@@ -202,6 +202,7 @@ export const CHIRO_DEMO: DemoPractice = {
   niches: [
     'Chiropractic',
     'Decompression',
+    'HBOT',
     'Joint Pain',
     'Neuropathy',
     'Acupuncture',

@@ -319,6 +319,16 @@ export function ScriptFlowPlayer({
       className="overflow-hidden rounded-lg border border-border bg-card"
       aria-label="Interactive call script"
     >
+      {nicheId && steps.some((s) => s.niche_id === nicheId && s.step_key === 'obj_chamber_anxiety') && (
+        <details className="border-b border-border px-4 py-3 text-sm sm:px-6">
+          <summary className="cursor-pointer font-medium">HBOT clinical handoff guidance</summary>
+          <div className="mt-2 space-y-2 text-muted-foreground">
+            <p>Caller instructions—not for reading aloud. Book review visits only, not treatment sessions.</p>
+            <p>If a patient describes a prior reaction, pause treatment booking, write down their exact words, and pass the concern to the clinical team. Do not say it is normal or harmless, or advise on medication.</p>
+            <p>For an urgent concern, stop the ordinary script and follow the office’s clinician-approved urgent and emergency guidance. Do not judge urgency yourself. Notify the clinical team.</p>
+          </div>
+        </details>
+      )}
       {/* Step header */}
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border bg-muted/50 px-4 py-3 sm:px-6">
         <div className="flex items-center gap-2">

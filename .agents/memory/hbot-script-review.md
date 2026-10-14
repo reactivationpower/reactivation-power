@@ -2,11 +2,17 @@
 name: HBOT script review
 description: Interactive HBOT draft review and patient-use approval boundary.
 ---
-The HBOT caller-script draft must be reviewable through an interactive demo, not just a written manuscript.
+HBOT caller-script changes must be reviewable through an interactive demo, not just a written manuscript.
 
 **Why:** The user repeatedly said they need to review the caller scripts somewhere they can test them.
 
-**How to apply:** Preserve clickable draft review in the chiropractic demo. A request to test a draft is not clinical approval or authorization to enable it for real patient calls. Keep office/device details and clinical safety handoffs as separate approval requirements.
+**How to apply:** Preserve clickable review in the chiropractic demo. A request to test a draft alone is not authorization to enable it for real patient calls.
+
+On 2026-10-13, after reviewing the draft and its corrected Chiropractic-family branches, the user explicitly authorized making the HBOT script live.
+
+**Why:** The user said, "go ahead and make the HBOT script live."
+
+**How to apply:** HBOT may use the normal live niche and caller-script system; do not keep it demo-only. This product authorization is not independent medical validation or clearance for treatment. Keep review-visit-only scheduling and separate office-approved clinical handoffs.
 
 HBOT must "look, feel and sound like the existing approved niches."
 

@@ -544,9 +544,8 @@ add("/portal/dialer/script", "portal", async (req) => {
     getOwnerNiches(ownerId, sectors), getScriptFlow(),
     participant.role === "owner" ? Promise.resolve(participant) : getParticipantById(ownerId),
   ]);
-  // Review-only local draft. No DB niche/access grant and no live-call exposure.
-  const hbotDraftAvailable = Boolean(participant.is_demo && owner?.is_demo &&
-    demoPracticeByOwnerEmail(owner.email)?.key === "chiro");
+  // HBOT is now a published niche. Practice and live calls use the same DB flow.
+  const hbotDraftAvailable = false;
   return { screen, from, course, participant, courseSlug, backHref, backLabel, ownerId, sectors, niches, flow, owner, hbotDraftAvailable };
 });
 

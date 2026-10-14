@@ -48,6 +48,7 @@ export const SERVICE_GROUPS: ServiceGroup[] = [
     services: [
       { label: 'Chiropractic', niche: 'Chiropractic' },
       { label: 'Spinal Decompression', niche: 'Decompression' },
+      { label: 'HBOT', niche: 'HBOT' },
       { label: 'Neuropathy', niche: 'Neuropathy' },
       { label: 'Joint Pain', niche: 'Joint Pain' },
       { label: 'SoftWave/shock wave', niche: 'Acoustic Wave Therapy' },

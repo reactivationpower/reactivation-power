@@ -37,7 +37,7 @@ describe('demo practice config', () => {
 
   it('shares red light for both lead demos but keeps cellulite reduction aesthetics-only', () => {
     expect(CHIRO_DEMO.niches).toEqual([
-      'Chiropractic', 'Decompression', 'Joint Pain', 'Neuropathy', 'Acupuncture',
+      'Chiropractic', 'Decompression', 'HBOT', 'Joint Pain', 'Neuropathy', 'Acupuncture',
       'Massage Therapy', 'Acoustic Wave Therapy', 'Red Light / Body Contouring', 'Gut Health', 'ChiroThin',
       'Weight Loss (Not ChiroThin)', 'GLP Patients',
     ])

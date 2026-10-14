@@ -53,6 +53,10 @@ const KEYWORD_RULES: Array<{ niche: string; keywords: string[] }> = [
     keywords: ['decompression', 'decomp', 'dts', 'traction', 'disc therapy'],
   },
   {
+    niche: 'HBOT',
+    keywords: ['hbot', 'hyperbaric', 'hyper baric'],
+  },
+  {
     niche: 'Neuropathy',
     keywords: ['neuropathy', 'nerve pain', 'peripheral nerve', 'numbness'],
   },

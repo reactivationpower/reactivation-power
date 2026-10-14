@@ -18,6 +18,7 @@ function csvRow(cells: string[]): string {
 const NICHE_SAMPLES: Record<string, { service: string; complaint: string }> = {
   Chiropractic: { service: "Adjustment", complaint: "Lower back pain" },
   Decompression: { service: "Spinal Decompression", complaint: "Herniated disc L4-L5" },
+  HBOT: { service: "Hyperbaric Oxygen Therapy", complaint: "Fatigue" },
   Neuropathy: { service: "Neuropathy Treatment", complaint: "Numbness in both feet" },
   "Joint Pain": { service: "Knee Injection", complaint: "Right knee pain" },
   "Acoustic Wave Therapy": { service: "SoftWave/shock wave", complaint: "Plantar fasciitis" },
