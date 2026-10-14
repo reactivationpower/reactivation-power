@@ -50,6 +50,7 @@ export default function PracticeScriptPage() {
           owner={owner ?? null}
           isProvider={participant.role === 'owner'}
           initialStepKey={screen ?? null}
+          hbotDraftAvailable={data.hbotDraftAvailable === true}
         />
       </div>
     </div>

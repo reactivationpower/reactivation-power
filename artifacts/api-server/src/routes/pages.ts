@@ -544,7 +544,10 @@ add("/portal/dialer/script", "portal", async (req) => {
     getOwnerNiches(ownerId, sectors), getScriptFlow(),
     participant.role === "owner" ? Promise.resolve(participant) : getParticipantById(ownerId),
   ]);
-  return { screen, from, course, participant, courseSlug, backHref, backLabel, ownerId, sectors, niches, flow, owner };
+  // Review-only local draft. No DB niche/access grant and no live-call exposure.
+  const hbotDraftAvailable = Boolean(participant.is_demo && owner?.is_demo &&
+    demoPracticeByOwnerEmail(owner.email)?.key === "chiro");
+  return { screen, from, course, participant, courseSlug, backHref, backLabel, ownerId, sectors, niches, flow, owner, hbotDraftAvailable };
 });
 
 add("/portal/settings", "portal", async () => {
