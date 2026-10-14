@@ -271,12 +271,97 @@ I'm going to pass this to the clinical team, and someone will follow up with you
 (Note their preference. Do not push.)
 
 If anything changes, you're always welcome to call us. Take care.`),
-  S('exit_healthy', 'Healthy Completion: Nothing Bothering Them',
-`That's good to hear, {{contact_first_name}}. There's nothing more we need from you.
+  // Retain the existing key so an open review session can display the corrected screen.
+  S('exit_healthy', 'Nothing Found: Why Did They Stop?',
+`{{contact_first_name}}, I'm glad you're still feeling good.
 
-(No follow-up is implied. Do not suggest ongoing sessions.)
+Can I ask what changed that led you to stop coming in?
 
-If anything changes, you're always welcome to call us. Take care.`),
+(Let them answer. Do not argue with it.)
+
+(Tap the reason they give.)`),
+  S('lapsed_felt_fine', 'Reason: Feeling Fine',
+`That makes sense, {{contact_first_name}}. When you feel good, coming in stops feeling urgent. A check-in lets {{provider_name}} review how you've been doing.
+
+Would you like to keep feeling this way?
+
+(Let them answer.)
+
+Was anything else holding you back?
+
+(If they share another reason, tap that reason. Otherwise, continue.)
+
+Can I make a recommendation?
+
+(Wait for the yes.)
+
+Let's get a check-in on the schedule. Does that sound reasonable?`),
+  S('lapsed_cost', 'Reason: Cost or Insurance',
+`I understand, {{contact_first_name}}. A check-in is one visit, and you aren't committing to more care. We can explain the cost before you decide anything.
+
+Would that help?
+
+(Let them answer.)
+
+(Do not quote prices, packages, or discounts.)
+
+Was anything else holding you back?
+
+(If they share another reason, tap that reason. Otherwise, continue.)
+
+Can I make a recommendation?
+
+(Wait for the yes.)
+
+Let's get a check-in on the schedule. Does that sound reasonable?`),
+  S('lapsed_busy', 'Reason: Life Got Busy',
+`I hear you, {{contact_first_name}}. Life fills up fast, and appointments get pushed down the list. We can find a time that works around your schedule.
+
+Would that work?
+
+(Let them answer.)
+
+Was anything else holding you back?
+
+(If they share another reason, tap that reason. Otherwise, continue.)
+
+Can I make a recommendation?
+
+(Wait for the yes.)
+
+Let's find an easy time for a check-in. Does that sound reasonable?`),
+  S('lapsed_wait_pain', 'Reason: Waiting for Pain',
+`That's fair, {{contact_first_name}}. You don't have to wait until something bothers you to ask {{provider_name}} about how you've been doing.
+
+Would a check-in be helpful?
+
+(Let them answer.)
+
+Was anything else holding you back?
+
+(If they share another reason, tap that reason. Otherwise, continue.)
+
+Can I make a recommendation?
+
+(Wait for the yes.)
+
+Let's get a check-in on the schedule. Does that sound reasonable?`),
+  S('lapsed_moved', 'Reason: Moved or Changed Offices',
+`That's understandable, {{contact_first_name}}. Things change. If you're still nearby, we'd be glad to see you again. Your history is already in your file.
+
+Would coming back here be easier?
+
+(Let them answer.)
+
+Was anything else holding you back?
+
+(If they share another reason, tap that reason. Otherwise, continue.)
+
+Can I make a recommendation?
+
+(Wait for the yes.)
+
+Let's get a check-in on the schedule. Does that sound reasonable?`),
   S('exit_review', 'Review Visit: Closing',
 `Thank you, {{contact_first_name}}. We'll see you for the review visit at the time we confirmed.
 
@@ -343,6 +428,15 @@ export const hbotDraftChoices: ScriptFlowChoice[] = [
   C('permission', '“Yes, that’s okay”', 'digging_in_still'),
   C('digging_in_well', 'They named their biggest concern', 'making_it_real', 'caution'),
   C('digging_in_well', 'Nothing is bothering them', 'exit_healthy', 'positive'),
+  C('exit_healthy', '"I was feeling fine. Didn\'t think I needed it"', 'lapsed_felt_fine'),
+  C('exit_healthy', '“It was the cost or insurance”', 'lapsed_cost'),
+  C('exit_healthy', '“Life got busy”', 'lapsed_busy'),
+  C('exit_healthy', '"I\'ll come back if it hurts again"', 'lapsed_wait_pain'),
+  C('exit_healthy', '“I moved or tried another office”', 'lapsed_moved'),
+  ...['lapsed_felt_fine', 'lapsed_cost', 'lapsed_busy', 'lapsed_wait_pain', 'lapsed_moved'].flatMap(f => [
+    C(f, '“Yes, that sounds reasonable”', 'book_review', 'positive'),
+    C(f, 'Another reason came up', 'exit_healthy'),
+  ]),
   C('digging_in_returning', 'They named their biggest concern', 'making_it_real', 'caution'),
   C('digging_in_still', 'They named their biggest concern', 'making_it_real'),
   C('making_it_real', 'Continue to the review', 'review'),

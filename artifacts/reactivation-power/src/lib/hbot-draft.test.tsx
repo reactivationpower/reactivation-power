@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
+import chiropracticFlow from '../../../api-server/content/flows/chiropractic.json'
 import {
   HBOT_CONCERN_OPTIONS,
   HBOT_DRAFT_NICHE_ID,
@@ -165,4 +166,48 @@ it('renders the approved permission and question buttons without the extra actio
   fireEvent.click(screen.getByRole('button', { name: 'They agreed with the recap' }))
   fireEvent.click(screen.getByRole('button', { name: '“I need to think about it”' }))
   expect(screen.getByRole('heading', { name: 'Objection: Need to Think' })).toBeTruthy()
+})
+
+it('matches the approved nothing-found question, reason buttons, and reason-screen navigation', () => {
+  const approved = chiropracticFlow.steps.find(s => s.step_key === 'lapsed_commitment')
+  const hbot = hbotDraftSteps.find(s => s.step_key === 'exit_healthy')
+  expect(hbot.title).toBe(approved.title)
+  expect(hbot.content).toBe(approved.content)
+  const projectChoice = ({ label, to_step_key, variant }) => ({ label, to_step_key, variant })
+  expect(hbotDraftChoices.filter(c => c.from_step_key === 'exit_healthy').map(projectChoice))
+    .toEqual(chiropracticFlow.choices.filter(c => c.from_step_key === 'lapsed_commitment').map(projectChoice))
+  for (const key of ['lapsed_felt_fine', 'lapsed_cost', 'lapsed_busy', 'lapsed_wait_pain', 'lapsed_moved']) {
+    const hbotChoices = hbotDraftChoices.filter(c => c.from_step_key === key).map(projectChoice)
+    const approvedChoices = chiropracticFlow.choices.filter(c => c.from_step_key === key).map(projectChoice)
+      .map(c => ({ ...c, to_step_key: c.to_step_key === 'scheduling' ? 'book_review' : 'exit_healthy' }))
+    expect(hbotChoices).toEqual(approvedChoices)
+    const content = hbotDraftSteps.find(s => s.step_key === key).content
+    expect(content).toContain('Was anything else holding you back?')
+    expect(content).toContain('Can I make a recommendation?')
+    expect(content).not.toMatch(/regular hyperbaric|maintenance|prevents|prevention|more sessions/i)
+  }
+})
+
+it('lets the healthy path explore every reason, revisit reasons, and continue to a practice review visit', () => {
+  view(true)
+  fireEvent.change(screen.getByLabelText('Select niche'), { target: { value: HBOT_DRAFT_NICHE_ID } })
+  fireEvent.change(screen.getByTestId('select-hbot-draft-screen'), { target: { value: 'digging_in_well' } })
+  fireEvent.click(screen.getByRole('button', { name: 'Nothing is bothering them' }))
+  expect(screen.getByRole('heading', { name: 'Nothing Found: Why Did They Stop?' })).toBeTruthy()
+  expect(screen.getByText('Can I ask what changed that led you to stop coming in?')).toBeTruthy()
+  expect(screen.queryByText(/There's nothing more we need from you|No follow-up is implied/)).toBeNull()
+  const reasons = hbotDraftChoices.filter(c => c.from_step_key === 'exit_healthy')
+  for (const reason of reasons) {
+    fireEvent.click(screen.getByRole('button', { name: reason.label }))
+    const step = hbotDraftSteps.find(s => s.step_key === reason.to_step_key)
+    expect(screen.getByRole('heading', { name: step.title })).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Another reason came up' }))
+    expect(screen.getByRole('heading', { name: 'Nothing Found: Why Did They Stop?' })).toBeTruthy()
+  }
+  fireEvent.click(screen.getByRole('button', { name: '“Life got busy”' }))
+  fireEvent.click(screen.getByRole('button', { name: '“Yes, that sounds reasonable”' }))
+  expect(screen.getByRole('heading', { name: 'Scheduling: Review Visit' })).toBeTruthy()
+  fireEvent.click(screen.getByRole('button', { name: 'Visit confirmed' }))
+  expect(screen.getByText(/This preview does not book an appointment/)).toBeTruthy()
+  expect(setSelectedNiche).not.toHaveBeenCalled()
 })

@@ -10,9 +10,9 @@ The HBOT caller-script draft must be reviewable through an interactive demo, not
 
 HBOT must "look, feel and sound like the existing approved niches."
 
-**Why:** The user rejected the separate "Status Check" opening and its different caller voice.
+**Why:** The user rejected the separate "Status Check" opening and its different caller voice, then rejected ending the call when nothing was bothering the former patient.
 
-**How to apply:** Start from the approved Chiropractic-family caller copy and screen sequence, including the office introduction and three-response opening. Adapt only the service-specific content and necessary clinical boundaries; do not invent a different presentation or researcher-style caller voice for HBOT.
+**How to apply:** Start from the approved Chiropractic-family caller copy and screen sequence, including the office introduction, three-response opening, and nothing-found path that explores why they stopped coming in. Match working branches, not just screen appearance. Adapt only the service-specific content and necessary clinical boundaries; do not invent a different presentation or researcher-style caller voice for HBOT.
 
 The HBOT reactivation audience consists of former patients, not patients under an active care plan. Match the other Chiro-family response buttons; do not add generic "They decline" or emergency/sudden-change buttons to routine screens.
 
