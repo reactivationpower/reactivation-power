@@ -95,7 +95,7 @@ Hi {{contact_first_name}}. We're updating files for patients we haven't seen in 
 
 (Let them answer. Stay warm. Listen for any reaction to treatment. Do not suggest they should have continued.)`),
   S('permission_well', 'Ask Permission',
-`While I have you, {{contact_first_name}}, can I ask you a few quick questions about anything else you've noticed?
+`While I have you, can I ask you a few quick questions so I can complete your file update?
 
 (Wait for the yes.)`),
   S('permission_returning', 'Transition: Ask Permission',

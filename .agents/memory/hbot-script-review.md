@@ -19,3 +19,9 @@ The HBOT reactivation audience consists of former patients, not patients under a
 **Why:** The user explicitly clarified the audience and rejected those additional buttons.
 
 **How to apply:** Keep ordinary caller choices consistent with the approved family. Preserve necessary safety instructions separately for review, without presenting active-care triage choices throughout former-patient reactivation.
+
+The reason for the call is to see how former patients are doing and update their file; the permission request should explain the file-update purpose.
+
+**Why:** The user stated this purpose and asked to include it when requesting permission for questions.
+
+**How to apply:** Keep the caller's permission wording tied to completing the file update, rather than presenting the questions without a reason.

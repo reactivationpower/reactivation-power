@@ -155,6 +155,7 @@ it('renders the approved permission and question buttons without the extra actio
   view(true)
   fireEvent.change(screen.getByLabelText('Select niche'), { target: { value: HBOT_DRAFT_NICHE_ID } })
   fireEvent.change(screen.getByTestId('select-hbot-draft-screen'), { target: { value: 'permission_well' } })
+  expect(screen.getByText('While I have you, can I ask you a few quick questions so I can complete your file update?')).toBeTruthy()
   fireEvent.click(screen.getByRole('button', { name: '“Yes, that’s okay”' }))
   expect(screen.getByRole('button', { name: 'They named their biggest concern' })).toBeTruthy()
   expect(screen.getByRole('button', { name: 'Nothing is bothering them' })).toBeTruthy()
