@@ -3,6 +3,8 @@ import pg from "pg";
 export type { PoolClient } from "pg";
 import * as schema from "./schema";
 import { runtimePoolSettings } from "./pool-settings";
+import { trackDatabasePool } from "./read-tracking";
+export { configureDatabaseReadTracking, flushDatabaseReadTracking } from "./read-tracking";
 export { runtimePoolSettings } from "./pool-settings";
 export { isDatabaseUnavailable, DATABASE_UNAVAILABLE_MESSAGE } from "./capacity";
 
@@ -43,6 +45,7 @@ export function poolConfig(url = supabaseDbUrl()): pg.PoolConfig {
 }
 
 export const pool = new Pool(poolConfig());
+trackDatabasePool(pool);
 // pg removes broken idle clients before emitting; a listener prevents a process crash.
 // Never log the driver message/connection object, which may contain credentials or SQL.
 pool.on("error", (error: Error & { code?: string }) => {

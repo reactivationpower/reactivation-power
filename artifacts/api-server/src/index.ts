@@ -3,7 +3,8 @@ import { logger } from "./lib/logger";
 import { seedSuperAdmin } from "./lib/data/admin-users";
 import { initStripe } from "./lib/stripe";
 import { startCronScheduler, stopCronScheduler } from "./lib/cron/scheduler";
-import { pool } from "@workspace/db";
+import { pool, configureDatabaseReadTracking, flushDatabaseReadTracking } from "@workspace/db";
+import { tryGetRequestContext } from "./lib/request-context";
 import { seal, unseal } from "./lib/affiliates/onboarding-crypto";
 
 const rawPort = process.env["PORT"];
@@ -15,6 +16,17 @@ if (!rawPort) {
 }
 
 const port = Number(rawPort);
+
+configureDatabaseReadTracking(
+  report => logger.info(report, "Database read usage (estimated result bytes)"),
+  () => {
+    const request = tryGetRequestContext()?.req;
+    // Express route templates only: never raw paths, tokens or query strings.
+    return request && typeof request.route?.path === "string"
+      ? `${request.method} ${request.route.path}`
+      : "background";
+  },
+);
 
 if (Number.isNaN(port) || port <= 0) {
   throw new Error(`Invalid PORT value: "${rawPort}"`);
@@ -41,7 +53,10 @@ initStripe()
       } catch {
         logger.warn("Affiliate onboarding encryption unavailable; secure submissions remain blocked");
       }
-      seedSuperAdmin(logger).catch((err) => logger.error({ err }, "super admin seed failed"));
+      logger.info("Database read tracking enabled; five-minute summaries contain estimates, not patient data");
+      seedSuperAdmin(logger)
+        .catch((err) => logger.error({ err }, "super admin seed failed"))
+        .finally(flushDatabaseReadTracking);
       startCronScheduler();
     });
     let stopping = false;
@@ -56,6 +71,7 @@ initStripe()
           stopCronScheduler(),
         ]);
         await pool.end();
+        flushDatabaseReadTracking();
         clearTimeout(deadline);
         process.exit(0);
       } catch {
