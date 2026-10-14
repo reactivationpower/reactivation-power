@@ -121,7 +121,9 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('compact queue database reads', ()
     expect((await client.query('SELECT count(*)::int AS n FROM contact_services')).rows[0].n).toBe(before)
   })
 
-  it('measures large-list latency and policy payload against the previous full read', async () => {
+  // Disabled at the owner's request: repeated full-history benchmark reads
+  // consume shared Supabase egress. Keep small correctness tests enabled.
+  it.skip('measures large-list latency and policy payload against the previous full read', async () => {
     await client.query(`INSERT INTO contacts(id,owner_id,name,phone,niche_id,notes,created_at)
       SELECT md5('queue-bench-' || g)::uuid,$1,'Synthetic Patient','2125550100',$2,repeat('note ',200),
         $3::timestamptz - g * interval '1 second' FROM generate_series(1,10000) g`, [owner, a, new Date(now)])
