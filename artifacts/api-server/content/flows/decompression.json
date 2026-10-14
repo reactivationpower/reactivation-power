@@ -9,7 +9,7 @@
     {
       "step_key": "opening_question",
       "title": "Opening Question",
-      "content": "So {{contact_first_name}}, how have your back and neck felt since you finished decompression care?\n\nI usually hear one of three things. Still feeling great, starting to come back, or pretty much back to before.\n\nWhich one is closest for you?\n\n(Only three answers. Tap the one you hear.)",
+      "content": "So {{contact_first_name}}, how have you felt since finishing your decompression care with us?\n\nI usually hear one of three things. Still feeling great, starting to come back, or pretty much back to before.\n\nWhich one is closest for you?\n\n(Only three answers. Tap the one you hear.)",
       "sort_order": 1
     },
     {
