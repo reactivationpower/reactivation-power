@@ -3,8 +3,16 @@ import { createHmac, randomBytes, scrypt, timingSafeEqual } from 'node:crypto'
 export const MIN_PORTAL_PASSWORD_LENGTH = 12
 export const MAX_PORTAL_PASSWORD_LENGTH = 128
 export const CODE_LIFETIME_MS = 5 * 60 * 1000
-export const MAX_CODE_ATTEMPTS = 6
+export const MAX_CODE_ATTEMPTS = 5
+export const LOGIN_CODE_RESEND_SECONDS = 15
 
+/** Plain wording for a real remaining wait, e.g. "12 seconds" or "38 minutes". */
+export function waitText(seconds: number) {
+  const s = Math.max(1, Math.ceil(seconds))
+  if (s < 60) return `${s} second${s === 1 ? '' : 's'}`
+  const m = Math.ceil(s / 60)
+  return `${m} minute${m === 1 ? '' : 's'}`
+}
 export function authDigest(value: string): string {
   const secret = process.env.SESSION_SECRET || process.env.SUPABASE_JWT_SECRET
   if (!secret) throw new Error('SESSION_SECRET is not set')

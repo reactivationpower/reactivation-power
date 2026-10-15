@@ -9,7 +9,13 @@ Practice owners and callers must each use their own registered email as their us
 
 **How to apply:** Keep enrollment, caller invitations, profile editing, and welcome instructions consistent with individual accounts. Password setup/reset must verify access to the registered email; it must not directly grant portal access.
 
-Email codes must be single-use, expire after five minutes, permit at most six incorrect attempts, and have rate-limited resends. A fresh password-and-code sign-in is required after the five-minute inactivity logout.
+Email codes must be single-use, expire after five minutes, permit at most five incorrect attempts (owner lowered from six, Oct 2026), and have rate-limited resends. A fresh password-and-code sign-in is required after the five-minute inactivity logout.
+
+Owner-approved speed rules (Oct 2026, after a real customer was blocked right after creating her account): sign-in code emails and password emails use separate per-person limits (codes: 15-second resend gap, 10/hour; password emails: 5/hour). Saving a password from a setup link auto-emails the first code (always allowed) and shows code entry. Limit messages show the real remaining wait. Email only — SMS codes were declined for now.
+
+**Why:** shared limits made "set password, then sign in" hit a 60-second block.
+
+**How to apply:** never re-merge the two counters; per-person password-email limits keep the generic "if registered" reply so the wait time never reveals whether an account exists.
 
 **Why:** These were explicit user requirements. Passive playback and automatic requests must not postpone inactivity logout.
 

@@ -16,7 +16,8 @@ export function LoginForm({ next, email, setupToken, pendingLogin }: {
   const [state, setState] = useState<LoginState>(pendingLogin ?? {})
   const [pending, setPending] = useState(false)
   const [address, setAddress] = useState(pendingLogin?.email ?? email ?? '')
-  const [resendAt, setResendAt] = useState(pendingLogin?.codeSent ? Date.now() + 60_000 : 0)
+  // The server sends the real remaining wait (15 seconds after a fresh code), also after a reload.
+  const [resendAt, setResendAt] = useState(pendingLogin?.codeSent ? Date.now() + (pendingLogin.resendAfter ?? 0) * 1000 : 0)
   const [now, setNow] = useState(Date.now())
   const seconds = Math.max(0, Math.ceil((resendAt - now) / 1000))
   useEffect(() => {
@@ -29,16 +30,17 @@ export function LoginForm({ next, email, setupToken, pendingLogin }: {
     try {
       const result = await operation()
       setState(result)
-      if (result.passwordSet) {
+      if (result.email) setAddress(result.email)
+      if (submittedMode === 'set-password' && (result.passwordSet || result.codeSent)) {
         // Remove the one-time link from history, without leaving the page.
         window.history.replaceState(null, '', `${import.meta.env.BASE_URL.replace(/\/$/, '')}/login`)
-        setMode('password')
-      } else if (result.codeSent) {
+      }
+      if (result.codeSent) {
         setMode('code')
-        if (result.resendAfter) {
-          setNow(Date.now())
-          setResendAt(Date.now() + result.resendAfter * 1000)
-        }
+        setNow(Date.now())
+        setResendAt(Date.now() + (result.resendAfter ?? 0) * 1000)
+      } else if (result.passwordSet) {
+        setMode('password')
       } else if (submittedMode === 'code') {
         setMode('password')
       }
@@ -80,6 +82,7 @@ export function LoginForm({ next, email, setupToken, pendingLogin }: {
           <p className="text-sm text-muted-foreground">
             Enter the six-digit code sent to {address || state.email || 'your registered email'}.
             It expires in five minutes and can only be used once.
+            If you don't see it in a minute, check your spam or junk folder.
           </p>
           <div className="flex flex-col gap-2">
             <Label htmlFor="code">Sign-in code</Label>
@@ -87,7 +90,9 @@ export function LoginForm({ next, email, setupToken, pendingLogin }: {
               autoComplete="one-time-code" maxLength={6} placeholder="123456" required />
           </div>
           {state.attemptsRemaining != null && (
-            <p className="text-xs text-muted-foreground">{state.attemptsRemaining} incorrect attempts remaining.</p>
+            <p className="text-xs text-muted-foreground">
+              {`${state.attemptsRemaining} incorrect attempt${state.attemptsRemaining === 1 ? '' : 's'} remaining.`}
+            </p>
           )}
         </>
       ) : (
@@ -121,7 +126,7 @@ export function LoginForm({ next, email, setupToken, pendingLogin }: {
       {mode === 'code' && (
         <Button type="button" variant="outline" disabled={pending || seconds > 0}
           onClick={() => void run(() => resendLoginCode(), 'code')}>
-          {seconds > 0 ? `Resend code in ${seconds}s` : 'Resend code'}
+          {seconds > 0 ? `Resend code in ${seconds < 60 ? `${seconds}s` : `${Math.ceil(seconds / 60)} min`}` : 'Resend code'}
         </Button>
       )}
       {mode === 'password' ? (

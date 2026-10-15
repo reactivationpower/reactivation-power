@@ -1768,3 +1768,31 @@ mtime_ms = 1792002146236
 storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/931d0b14-cce0-48ce-8126-079af71760b9/2abb0fdc-dd1f-4aa1-9b09-ef19b19828da"
 storage_version_token = "1792002164914825"
 content_type = "application/pdf"
+
+[[outputs]]
+id = "8sAZEWke4tr0FP9oxS9JB"
+uri = "file://screenshots/code-screen.png"
+type = "image"
+title = "Code screen with spam tip"
+description = "Sign-in code screen with the new spam/junk folder line."
+logical_id = "58498875-b423-4782-be6b-d680a85c47e2"
+content_hash = "sha256:190d49b4488eba4521bdd737d07c1c4673c6ded46f8eccf91a353b88410c792b"
+size = 91103
+mtime_ms = 1792089458375
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/58498875-b423-4782-be6b-d680a85c47e2/91716924-59df-4099-bd76-a6dec936b4eb"
+storage_version_token = "1792089512425888"
+content_type = "image/png"
+
+[[outputs]]
+id = "B0XzCNTTaOmzmGRCS6tns"
+uri = "file://screenshots/password-link-sent.png"
+type = "image"
+title = "Password link message with spam tip"
+description = "Message shown after asking for a password link, with the new spam/junk folder line."
+logical_id = "c772586c-2a18-48b4-b9ac-bd32eea834bf"
+content_hash = "sha256:54932e72b745f8923b3cc2a55e9fb7b9ff91573d9eb2615831987f11559ba82c"
+size = 101690
+mtime_ms = 1792089462655
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/c772586c-2a18-48b4-b9ac-bd32eea834bf/fc307827-1560-4af3-b691-01c7f26df5e5"
+storage_version_token = "1792089513044836"
+content_type = "image/png"

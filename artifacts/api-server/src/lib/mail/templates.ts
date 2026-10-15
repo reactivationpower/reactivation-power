@@ -959,7 +959,7 @@ export const TEMPLATES: { [K in TemplateId]: TemplateDefinition<K> } = {
         button('Set your password', d.setupUrl),
         fallbackLink(d.setupUrl),
         p('This link expires in 30 minutes and can only be used once. If you did not request it, ignore this message.'),
-        small('Use your own email address, not a shared office inbox. After setting your password, sign in with your email, password, and a fresh email code.'),
+        small('Use your own email address, not a shared office inbox. After you set your password, we email you a sign-in code to finish signing in.'),
       ], { previewText: 'Set up or reset your password. This link expires in 30 minutes.' }),
     }),
   },

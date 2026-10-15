@@ -3,7 +3,9 @@ import type { Server } from 'node:http'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { pool } from '@workspace/db'
 import { authDigest, hashPortalPassword } from '@/lib/auth/portal-password'
-import { consumeLoginCode, createChallenge, pendingChallenge, reserveAuthEmail } from '@/lib/auth/portal-challenges'
+import {
+  consumeLoginCode, createChallenge, loginCodeWait, pendingChallenge, reserveLoginCodeEmail, reservePasswordEmail,
+} from '@/lib/auth/portal-challenges'
 import { decodeSession } from '@/lib/auth/token'
 import { getSessionFromRequest } from '@/lib/auth/session'
 import type { Request } from 'express'
@@ -49,11 +51,13 @@ async function subject(role: 'owner' | 'staff' = 'owner', withPassword = true) {
   if (withPassword) await pool.query(`INSERT INTO portal_auth_credentials (participant_id, email, password_hash, version)
     VALUES ($1, $2, $3, $4)`, [id, email, await hashPortalPassword(password), version])
   rememberLimit('password-account', email)
-  rememberLimit('email-minute', id); rememberLimit('email-hour', id)
+  for (const scope of ['login-code-gap', 'login-code-hour', 'password-email-gap', 'password-email-hour']) rememberLimit(scope, id)
   return { id, email, version }
 }
+/** The cookie the browser keeps (last header wins); a cleared cookie counts as none. */
 function cookieOf(res: Response, name: string) {
-  return res.headers.getSetCookie().find(c => c.startsWith(name + '='))?.split(';')[0] ?? ''
+  const value = res.headers.getSetCookie().filter(c => c.startsWith(name + '=')).at(-1)?.split(';')[0] ?? ''
+  return value === name + '=' ? '' : value
 }
 async function invoke(fn: string, values: Record<string, string> = {}, cookie = '') {
   const response = await fetch(base + fn, {
@@ -73,6 +77,11 @@ async function begin(person: { email: string }) {
   return { cookie, code }
 }
 const wrong = (code: string) => code === '000000' ? '000001' : '000000'
+/** Move a counter's window into the past so its short gap has elapsed. */
+const expireLimit = (scope: string, id: string, seconds = 16) => pool.query(
+  `UPDATE portal_auth_limits SET window_start = statement_timestamp() - ($2::int * interval '1 second') WHERE key = $1`,
+  [authDigest(`${scope}:${id}`), seconds])
+const lastCode = () => (mail.send.mock.calls.at(-1) as unknown as [string, string, { code: string }])[2].code
 
 // These exercise multiple real database/HTTP round trips, including twelve
 // serial guesses in one case. Allow network latency under parallel validation.
@@ -96,17 +105,22 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('owner and caller password plus em
     expect((await invoke('login', { email: person.email, firstName: 'MFA', lastName: 'Test' })).result.error).toBeTruthy()
     expect(mail.send).not.toHaveBeenCalled()
   })
-  it('allows a correct sixth attempt, but six incorrect guesses invalidate the challenge', async () => {
-    const one = await subject(), first = await begin(one)
-    for (let i = 0; i < 5; i++) {
+  it('allows a correct fifth attempt, but five incorrect guesses invalidate the challenge', async () => {
+    const one = await subject()
+    const started = await invoke('login', { email: one.email, password })
+    expect(started.result.attemptsRemaining).toBe(5)
+    const first = { cookie: cookieOf(started.response, 'tp_login_challenge'), code: lastCode() }
+    for (let i = 0; i < 4; i++) {
       const result = await invoke('verifyLoginCode', { code: wrong(first.code) }, first.cookie)
-      expect(result.result.attemptsRemaining).toBe(5 - i)
+      expect(result.result.attemptsRemaining).toBe(4 - i)
     }
     expect((await invoke('verifyLoginCode', { code: first.code }, first.cookie)).redirect).toBeTruthy()
     const two = await subject(), second = await begin(two)
-    for (let i = 0; i < 6; i++) await invoke('verifyLoginCode', { code: wrong(second.code) }, second.cookie)
+    for (let i = 0; i < 4; i++) await invoke('verifyLoginCode', { code: wrong(second.code) }, second.cookie)
+    const fifth = await invoke('verifyLoginCode', { code: wrong(second.code) }, second.cookie)
+    expect(fifth.result.error).toContain('5 incorrect attempts')
     const denied = await invoke('verifyLoginCode', { code: second.code }, second.cookie)
-    expect(denied.result.error).toContain('six incorrect attempts')
+    expect(denied.result.error).toContain('5 incorrect attempts')
     expect(cookieOf(denied.response, 'tp_session')).toBe('')
   })
   it('rejects the exact five-minute expiry, including the correct code', async () => {
@@ -124,35 +138,63 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('owner and caller password plus em
       WHERE id = $1`, [payload.sessionId])
     expect(await getSessionFromRequest({ cookies: { tp_session: signed } } as unknown as Request)).toBeNull()
     expect((await invoke('verifyLoginCode', { code: auth.code }, auth.cookie)).result.error).toBeTruthy()
-    await pool.query(`UPDATE portal_auth_limits SET window_start = statement_timestamp() - interval '61 seconds'
-      WHERE key = $1`, [authDigest(`email-minute:${person.id}`)])
+    await expireLimit('login-code-gap', person.id)
     const fresh = await begin(person)
     expect(fresh.cookie).not.toBe(auth.cookie)
     expect((await invoke('verifyLoginCode', { code: fresh.code }, fresh.cookie)).redirect).toBeTruthy()
   })
-  it('enforces resend cooldown and only the newest code remains usable', async () => {
+  it('enforces a 15-second resend gap with the real wait, and only the newest code remains usable', async () => {
     const person = await subject(), old = await begin(person)
-    expect((await invoke('resendLoginCode', {}, old.cookie)).result.error).toContain('60 seconds')
+    const blocked = await invoke('resendLoginCode', {}, old.cookie)
+    expect(blocked.result.error).toMatch(/Please wait (1[0-5]|[1-9]) seconds? before requesting another sign-in code/)
+    expect(blocked.result.resendAfter).toBeGreaterThan(0)
+    expect(blocked.result.resendAfter).toBeLessThanOrEqual(15)
+    expect(blocked.result.attemptsRemaining).toBe(5)
     expect(mail.send).toHaveBeenCalledTimes(1)
-    await pool.query(`UPDATE portal_auth_limits SET window_start = statement_timestamp() - interval '61 seconds'
-      WHERE key = $1`, [authDigest(`email-minute:${person.id}`)])
+    // A reload shows the same real remaining wait, not a fixed default.
+    expect(await loginCodeWait(person.id)).toBeLessThanOrEqual(15)
+    await expireLimit('login-code-gap', person.id)
+    expect(await loginCodeWait(person.id)).toBe(0)
     const next = await invoke('resendLoginCode', {}, old.cookie)
     expect(next.result.codeSent).toBe(true)
+    expect(next.result.resendAfter).toBe(15)
     expect(await pendingChallenge(old.cookie.split('=')[1], 'login')).toBeNull()
     const cookie = cookieOf(next.response, 'tp_login_challenge')
-    const code = (mail.send.mock.calls.at(-1) as unknown as [string, string, { code: string }])[2].code
-    expect((await invoke('verifyLoginCode', { code }, cookie)).redirect).toBeTruthy()
+    expect((await invoke('verifyLoginCode', { code: lastCode() }, cookie)).redirect).toBeTruthy()
   })
-  it('caps authentication emails at five per hour even after each one-minute cooldown', async () => {
+  it('caps sign-in codes at 10 per hour and reports the real remaining wait', async () => {
+    const person = await subject()
+    for (let i = 0; i < 10; i++) {
+      expect(await reserveLoginCodeEmail(person.id)).toBe(0)
+      await expireLimit('login-code-gap', person.id)
+    }
+    const wait = await reserveLoginCodeEmail(person.id)
+    expect(wait).toBeGreaterThan(3500)
+    expect(wait).toBeLessThanOrEqual(3600)
+    await pool.query(`UPDATE portal_auth_limits SET window_start = statement_timestamp() - interval '50 minutes'
+      WHERE key = $1`, [authDigest(`login-code-hour:${person.id}`)])
+    await expireLimit('login-code-gap', person.id)
+    const login = await invoke('login', { email: person.email, password })
+    expect(login.result.error).toMatch(/Please wait 10 minutes before requesting another sign-in code/)
+    expect(mail.send).not.toHaveBeenCalled()
+  })
+  it('keeps password emails on their own 5-per-hour limit that never blocks sign-in codes', async () => {
     const person = await subject()
     for (let i = 0; i < 5; i++) {
-      expect(await reserveAuthEmail(person.id)).toBe(true)
-      await pool.query(`UPDATE portal_auth_limits SET window_start = statement_timestamp() - interval '61 seconds'
-        WHERE key = $1`, [authDigest(`email-minute:${person.id}`)])
+      expect(await reservePasswordEmail(person.id)).toBe(0)
+      await expireLimit('password-email-gap', person.id)
     }
-    expect(await reserveAuthEmail(person.id)).toBe(false)
+    expect(await reservePasswordEmail(person.id)).toBeGreaterThan(0)
+    // Sign-in codes are unaffected by the exhausted password limit.
+    const auth = await begin(person)
+    expect((await invoke('verifyLoginCode', { code: auth.code }, auth.cookie)).redirect).toBeTruthy()
+    // And a limited password request still gives the same reply without sending mail.
+    mail.send.mockClear()
+    const limited = await invoke('requestPasswordSetup', { email: person.email })
+    expect(limited.result.message).toContain('If this email is registered')
+    expect(mail.send).not.toHaveBeenCalled()
   })
-  it('securely enrolls existing users, consumes reset links once, and requires both factors afterwards', async () => {
+  it('securely enrolls existing users, consumes reset links once, and emails the first code right away', async () => {
     const person = await subject('owner', false)
     expect((await invoke('login', { email: person.email, password })).result.error).toBeTruthy()
     const requested = await invoke('requestPasswordSetup', { email: person.email })
@@ -161,12 +203,44 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('owner and caller password plus em
     const link = new URL(call[2].setupUrl)
     expect(link.origin).toBe('https://patientpipeline.app')
     const token = link.searchParams.get('setup')!
-    expect((await invoke('setPortalPassword', { token, password, confirm: password })).result.passwordSet).toBe(true)
+    const saved = await invoke('setPortalPassword', { token, password, confirm: password })
+    // Password setup alone never grants access; it sends a code instead.
+    expect(saved.result.codeSent).toBe(true)
+    expect(saved.result.attemptsRemaining).toBe(5)
+    expect(saved.result.resendAfter).toBe(15)
+    expect(cookieOf(saved.response, 'tp_session')).toBe('')
+    expect((mail.send.mock.calls.at(-1) as unknown as [string])[0]).toBe('portal_login_code')
+    const cookie = cookieOf(saved.response, 'tp_login_challenge')
+    expect(cookie).toBeTruthy()
+    const code = lastCode()
     expect((await invoke('setPortalPassword', { token, password, confirm: password })).result.error).toBeTruthy()
-    await pool.query(`UPDATE portal_auth_limits SET window_start = statement_timestamp() - interval '61 seconds'
-      WHERE key = $1`, [authDigest(`email-minute:${person.id}`)])
+    expect((await invoke('verifyLoginCode', { code }, cookie)).redirect).toBeTruthy()
+  })
+  it('lets a person sign in right after a password reset without waiting', async () => {
+    const person = await subject()
+    expect(await reservePasswordEmail(person.id)).toBe(0)
+    const setup = await createChallenge(person, 'password', null)
+    mail.send.mockResolvedValueOnce({ ok: false, logId: 'fake-log' })
+    const saved = await invoke('setPortalPassword', { token: setup.token, password, confirm: password })
+    // If the code email fails, fall back to a normal sign-in, which is not blocked.
+    expect(saved.result.passwordSet).toBe(true)
+    expect(saved.result.codeSent).toBeUndefined()
+    expect(cookieOf(saved.response, 'tp_login_challenge')).toBe('')
     const auth = await begin(person)
     expect((await invoke('verifyLoginCode', { code: auth.code }, auth.cookie)).redirect).toBeTruthy()
+  })
+  it('always sends the first code after password setup, even when sign-in codes are used up', async () => {
+    const person = await subject()
+    for (let i = 0; i < 10; i++) {
+      await reserveLoginCodeEmail(person.id)
+      await expireLimit('login-code-gap', person.id)
+    }
+    expect(await reserveLoginCodeEmail(person.id)).toBeGreaterThan(0)
+    const setup = await createChallenge(person, 'password', null)
+    const saved = await invoke('setPortalPassword', { token: setup.token, password, confirm: password })
+    expect(saved.result.codeSent).toBe(true)
+    const cookie = cookieOf(saved.response, 'tp_login_challenge')
+    expect((await invoke('verifyLoginCode', { code: lastCode() }, cookie)).redirect).toBeTruthy()
   })
   it('password reset retires sessions and pending codes even if an old cookie is replayed', async () => {
     const person = await subject()
@@ -175,7 +249,7 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('owner and caller password plus em
     const signed = cookieOf(verified.response, 'tp_session').split('=')[1]
     const before = decodeSession(signed)!
     const setup = await createChallenge(person, 'password', null)
-    expect((await invoke('setPortalPassword', { token: setup.token, password: password + 'new', confirm: password + 'new' })).result.passwordSet).toBe(true)
+    expect((await invoke('setPortalPassword', { token: setup.token, password: password + 'new', confirm: password + 'new' })).result.codeSent).toBe(true)
     expect(await getSessionFromRequest({ cookies: { tp_session: signed } } as unknown as Request)).toBeNull()
     // Even a session issued by an in-flight old login after reset is denied by the password revision.
     await pool.query('UPDATE auth_idle_sessions SET revoked_at = NULL WHERE id = $1', [before.sessionId])

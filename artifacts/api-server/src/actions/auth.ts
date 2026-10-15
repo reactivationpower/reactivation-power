@@ -9,12 +9,13 @@ import { resolveLoginDestination } from '@/lib/auth/login-destination'
 import { logEvent } from '@/lib/data/activity'
 import { sendEmail } from '@/lib/mail/send'
 import {
-  authRateLimit, consumeLoginCode, createChallenge, invalidateChallenge,
-  pendingChallenge, reserveAuthEmail, savePortalPassword,
+  authRateLimitWait, consumeLoginCode, createChallenge, invalidateChallenge, loginCodeWait,
+  pendingChallenge, recordLoginCodeEmail, reserveLoginCodeEmail, reservePasswordEmail,
+  savePortalPassword, type SavedPassword,
 } from '@/lib/auth/portal-challenges'
 import {
-  hashPortalPassword, verifyPortalPassword, MAX_PORTAL_PASSWORD_LENGTH,
-  MIN_PORTAL_PASSWORD_LENGTH,
+  hashPortalPassword, verifyPortalPassword, waitText, MAX_CODE_ATTEMPTS,
+  MAX_PORTAL_PASSWORD_LENGTH, MIN_PORTAL_PASSWORD_LENGTH,
 } from '@/lib/auth/portal-password'
 
 const CHALLENGE_COOKIE = 'tp_login_challenge'
@@ -38,23 +39,26 @@ async function setChallengeCookie(token: string) {
     partitioned: secure, path: '/', maxAge: 300,
   })
 }
-async function passwordAttemptAllowed(email: string) {
+const codeWaitError = (wait: number) =>
+  `Please wait ${waitText(wait)} before requesting another sign-in code. You can get up to 10 codes per hour.`
+async function passwordAttemptWait(email: string) {
   const ip = await getClientIp() ?? 'unknown'
-  const [account, address] = await Promise.all([
-    authRateLimit('password-account', email, 10, 15 * 60),
-    authRateLimit('password-ip', ip, 30, 15 * 60),
+  const waits = await Promise.all([
+    authRateLimitWait('password-account', email, 10, 15 * 60),
+    authRateLimitWait('password-ip', ip, 30, 15 * 60),
   ])
-  return account && address
+  return Math.max(...waits)
 }
 
 /** Password verification does not grant a session. Both roles require a code. */
 export async function login(_prev: LoginState, form: FormData): Promise<LoginState> {
   const email = emailOf(form), password = String(form.get('password') ?? '')
   if (!email || !password) return { error: 'Please enter your email and password.' }
-  if (email.length > 254 || password.length > MAX_PORTAL_PASSWORD_LENGTH ||
-    !await passwordAttemptAllowed(email)) {
-    return { error: 'Too many sign-in attempts. Please try again in 15 minutes.' }
+  if (email.length > 254 || password.length > MAX_PORTAL_PASSWORD_LENGTH) {
+    return { error: 'Please check your email and password.' }
   }
+  const attemptWait = await passwordAttemptWait(email)
+  if (attemptWait) return { error: `Too many sign-in attempts. Please try again in ${waitText(attemptWait)}.` }
   const participant = await getParticipantByEmail(email)
   const credential = participant ? await pool.query(
     'SELECT password_hash, version FROM portal_auth_credentials WHERE participant_id = $1 AND email = $2',
@@ -69,9 +73,8 @@ export async function login(_prev: LoginState, form: FormData): Promise<LoginSta
     const block = await billingBlockForOwner(accessOwnerId(participant))
     if (block) return { error: 'There is a billing issue on this account, so access is paused.', billing: block }
   }
-  if (!await reserveAuthEmail(participant.id)) {
-    return { error: 'Please wait at least 60 seconds before requesting another email. You can request up to five emails per hour.' }
-  }
+  const emailWait = await reserveLoginCodeEmail(participant.id)
+  if (emailWait) return { error: codeWaitError(emailWait) }
   const created = await createChallenge({ id: participant.id, email }, 'login', row.version,
     String(form.get('next') ?? ''))
   const sent = await sendEmail('portal_login_code', email, { code: created.code! })
@@ -80,27 +83,27 @@ export async function login(_prev: LoginState, form: FormData): Promise<LoginSta
     return { error: 'We could not send your sign-in code. Please try again later.' }
   }
   await setChallengeCookie(created.token)
-  return { codeSent: true, email, attemptsRemaining: 6, resendAfter: 60 }
+  return { codeSent: true, email, attemptsRemaining: MAX_CODE_ATTEMPTS,
+    resendAfter: await loginCodeWait(participant.id) }
 }
 
 /** Safe metadata only; the code and challenge secret never appear in page data. */
 export async function getPortalLoginState(): Promise<LoginState | null> {
   const row = await pendingChallenge(await challengeToken(), 'login')
   return row ? {
-    codeSent: true, email: row.email, attemptsRemaining: 6 - row.attempts,
-    resendAfter: 60,
+    codeSent: true, email: row.email, attemptsRemaining: MAX_CODE_ATTEMPTS - row.attempts,
+    resendAfter: await loginCodeWait(row.participant_id),
   } : null
 }
 
 export async function verifyLoginCode(_prev: LoginState, form: FormData): Promise<LoginState> {
-  if (!await authRateLimit('code-ip', await getClientIp() ?? 'unknown', 60, 300)) {
-    return { error: 'Too many code attempts. Please wait five minutes and sign in again.' }
-  }
+  const ipWait = await authRateLimitWait('code-ip', await getClientIp() ?? 'unknown', 60, 300)
+  if (ipWait) return { error: `Too many code attempts. Please wait ${waitText(ipWait)} and sign in again.` }
   const result = await consumeLoginCode(await challengeToken(), String(form.get('code') ?? '').trim())
   if (!result.ok) {
     if (!result.remaining) {
       ;(await cookies()).delete(CHALLENGE_COOKIE)
-      return { error: 'This code expired, was already used, or reached six incorrect attempts. Sign in again to request a new code.' }
+      return { error: `This code expired, was already used, or reached ${MAX_CODE_ATTEMPTS} incorrect attempts. Sign in again to request a new code.` }
     }
     return { codeSent: true, attemptsRemaining: result.remaining,
       error: `Incorrect code. ${result.remaining} attempt${result.remaining === 1 ? '' : 's'} remaining.` }
@@ -144,8 +147,10 @@ export async function resendLoginCode(): Promise<LoginState> {
     await invalidateChallenge(token)
     return { error: 'Your sign-in expired. Please sign in again.' }
   }
-  if (!await reserveAuthEmail(current.participant_id)) {
-    return { codeSent: true, error: 'Please wait at least 60 seconds between emails. Limit: five emails per hour.', resendAfter: 60 }
+  const wait = await reserveLoginCodeEmail(current.participant_id)
+  if (wait) {
+    return { codeSent: true, email: current.email, attemptsRemaining: MAX_CODE_ATTEMPTS - current.attempts,
+      error: codeWaitError(wait), resendAfter: wait }
   }
   const next = await createChallenge({ id: current.participant_id, email: current.email },
     'login', current.credential_version, current.next_path)
@@ -156,21 +161,22 @@ export async function resendLoginCode(): Promise<LoginState> {
     return { error: 'We could not send a new code. Please sign in again later.' }
   }
   await setChallengeCookie(next.token)
-  return { codeSent: true, email: current.email, attemptsRemaining: 6, resendAfter: 60,
+  return { codeSent: true, email: current.email, attemptsRemaining: MAX_CODE_ATTEMPTS,
+    resendAfter: await loginCodeWait(current.participant_id),
     message: 'A new code was sent. Only the newest code will work.' }
 }
 
 export async function requestPasswordSetup(_prev: LoginState, form: FormData): Promise<LoginState> {
   const email = emailOf(form)
-  const message = 'If this email is registered, check your inbox for a password setup link. Wait at least 60 seconds between requests; maximum five emails per hour. Use your own email, not a shared office inbox.'
+  // Same reply whether or not the email is registered or limited, so it never reveals accounts.
+  const message = 'If this email is registered, check your inbox for a password setup link. If you don\'t see it, check your spam or junk folder. You can request up to five password emails per hour. Use your own email, not a shared office inbox.'
   if (!email || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return { error: 'Please enter a valid registered email address.' }
   }
-  if (!await authRateLimit('setup-ip', await getClientIp() ?? 'unknown', 10, 3600)) {
-    return { error: 'Too many requests. Please try again in one hour.' }
-  }
+  const setupWait = await authRateLimitWait('setup-ip', await getClientIp() ?? 'unknown', 10, 3600)
+  if (setupWait) return { error: `Too many requests. Please try again in ${waitText(setupWait)}.` }
   const participant = await getParticipantByEmail(email)
-  if (!participant?.is_active || !await reserveAuthEmail(participant.id)) return { message }
+  if (!participant?.is_active || await reservePasswordEmail(participant.id)) return { message }
   const challenge = await createChallenge({ id: participant.id, email }, 'password', null)
   const sent = await sendEmail('portal_password_setup', email, {
     setupUrl: `https://patientpipeline.app/login?setup=${encodeURIComponent(challenge.token)}`,
@@ -188,16 +194,46 @@ export async function setPortalPassword(_prev: LoginState, form: FormData): Prom
     return { error: `Use a password between ${MIN_PORTAL_PASSWORD_LENGTH} and ${MAX_PORTAL_PASSWORD_LENGTH} characters.` }
   }
   if (password !== confirm) return { error: 'Passwords do not match.' }
-  if (!await authRateLimit('set-password-ip', await getClientIp() ?? 'unknown', 10, 900)) {
-    return { error: 'Too many attempts. Please try again in 15 minutes.' }
-  }
+  const setWait = await authRateLimitWait('set-password-ip', await getClientIp() ?? 'unknown', 10, 900)
+  if (setWait) return { error: `Too many attempts. Please try again in ${waitText(setWait)}.` }
   const token = String(form.get('token') ?? '')
   if (!await pendingChallenge(token, 'password')) return { error: 'This link is invalid or expired. Request a new password link.' }
   const saved = await savePortalPassword(token, await hashPortalPassword(password))
   if (!saved) return { error: 'This link is invalid or expired. Request a new password link.' }
   await clearSessionCookie()
-  ;(await cookies()).delete(CHALLENGE_COOKIE)
-  return { passwordSet: true, message: 'Your password is set. Sign in with your email and password, then enter the code we send you.' }
+  const sentCode = await sendFirstLoginCode(saved).catch((error: unknown): LoginState => {
+    // The password is already saved; never report it as failed.
+    console.error('First sign-in code after password setup failed', error)
+    return { passwordSet: true, email: saved.email, message: PASSWORD_SET_MESSAGE }
+  })
+  if (!sentCode.codeSent) (await cookies()).delete(CHALLENGE_COOKIE)
+  return sentCode
+}
+
+const PASSWORD_SET_MESSAGE = 'Your password is set. Sign in with your email and password, then enter the code we send you.'
+/**
+ * Saving a password never grants access: email the first sign-in code right away
+ * so the person goes straight to code entry. This first code is always allowed.
+ */
+async function sendFirstLoginCode(saved: SavedPassword): Promise<LoginState> {
+  const fallback: LoginState = { passwordSet: true, email: saved.email, message: PASSWORD_SET_MESSAGE }
+  const participant = await getParticipantById(saved.participantId)
+  if (!participant?.is_active || participant.email.toLowerCase() !== saved.email) return fallback
+  if (!participant.is_demo) {
+    const block = await billingBlockForOwner(accessOwnerId(participant))
+    if (block) return { ...fallback, message: undefined, error: 'There is a billing issue on this account, so access is paused.', billing: block }
+  }
+  const created = await createChallenge({ id: saved.participantId, email: saved.email }, 'login', saved.version)
+  const sent = await sendEmail('portal_login_code', saved.email, { code: created.code! })
+  if (!sent.ok) {
+    await invalidateChallenge(created.token)
+    return fallback
+  }
+  await recordLoginCodeEmail(saved.participantId)
+  await setChallengeCookie(created.token)
+  return { codeSent: true, email: saved.email, attemptsRemaining: MAX_CODE_ATTEMPTS,
+    resendAfter: await loginCodeWait(saved.participantId),
+    message: 'Your password is set. We emailed you a sign-in code.' }
 }
 
 export async function logout() {

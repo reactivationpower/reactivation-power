@@ -1,6 +1,8 @@
 import { randomInt, randomUUID, timingSafeEqual } from 'node:crypto'
 import { pool, type PoolClient } from '@workspace/db'
-import { authDigest, authToken, CODE_LIFETIME_MS, MAX_CODE_ATTEMPTS } from './portal-password'
+import {
+  authDigest, authToken, CODE_LIFETIME_MS, LOGIN_CODE_RESEND_SECONDS, MAX_CODE_ATTEMPTS,
+} from './portal-password'
 
 export interface AuthSubject { id: string; email: string }
 export interface Challenge {
@@ -26,23 +28,66 @@ export async function authTransaction<T>(fn: (client: PoolClient) => Promise<T>)
   } finally { client.release(discard) }
 }
 
-/** Durable counters: concurrent requests / multiple servers share the limit. */
-export async function authRateLimit(scope: string, value: string, max: number, windowSeconds: number): Promise<boolean> {
+const REMAINING_SQL = `GREATEST(0, CEIL(EXTRACT(EPOCH FROM (window_start
+  + COALESCE(window_seconds, 3600) * interval '1 second' - statement_timestamp()))))::int`
+
+/**
+ * Durable counters: concurrent requests / multiple servers share the limit.
+ * Returns 0 when allowed, otherwise the whole seconds left in the window.
+ */
+export async function authRateLimitWait(scope: string, value: string, max: number, windowSeconds: number): Promise<number> {
   if (!Number.isSafeInteger(windowSeconds) || windowSeconds <= 0 || windowSeconds > 2_147_483_647) {
     throw new Error('Invalid authentication rate-limit window')
   }
-  const result = await pool.query(
+  const result = await pool.query<{ attempts: number; remaining: number }>(
     `INSERT INTO portal_auth_limits (key, window_seconds) VALUES ($1, $2)
      ON CONFLICT (key) DO UPDATE SET
        attempts = CASE WHEN portal_auth_limits.window_start <= statement_timestamp() - ($2::int * interval '1 second') THEN 1 ELSE portal_auth_limits.attempts + 1 END,
        window_seconds = CASE WHEN portal_auth_limits.window_start <= statement_timestamp() - ($2::int * interval '1 second') THEN $2::int ELSE GREATEST(COALESCE(portal_auth_limits.window_seconds, 3600), $2::int) END,
        window_start = CASE WHEN portal_auth_limits.window_start <= statement_timestamp() - ($2::int * interval '1 second') THEN statement_timestamp() ELSE portal_auth_limits.window_start END
-     RETURNING attempts`, [authDigest(`${scope}:${value}`), windowSeconds])
-  return result.rows[0].attempts <= max
+     RETURNING attempts, ${REMAINING_SQL} AS remaining`, [authDigest(`${scope}:${value}`), windowSeconds])
+  const row = result.rows[0]
+  return row.attempts <= max ? 0 : Math.max(1, Number(row.remaining))
 }
-export async function reserveAuthEmail(subjectId: string): Promise<boolean> {
-  if (!await authRateLimit('email-minute', subjectId, 1, 60)) return false
-  return authRateLimit('email-hour', subjectId, 5, 3600)
+export async function authRateLimit(scope: string, value: string, max: number, windowSeconds: number): Promise<boolean> {
+  return await authRateLimitWait(scope, value, max, windowSeconds) === 0
+}
+
+interface EmailLimit { scope: string; max: number; windowSeconds: number }
+/** Sign-in codes and password emails have separate per-person counters. */
+export const LOGIN_CODE_LIMITS: readonly EmailLimit[] = [
+  { scope: 'login-code-gap', max: 1, windowSeconds: LOGIN_CODE_RESEND_SECONDS },
+  { scope: 'login-code-hour', max: 10, windowSeconds: 3600 },
+]
+export const PASSWORD_EMAIL_LIMITS: readonly EmailLimit[] = [
+  { scope: 'password-email-gap', max: 1, windowSeconds: 10 },
+  { scope: 'password-email-hour', max: 5, windowSeconds: 3600 },
+]
+/** 0 = reserved; otherwise seconds to wait. A blocked short gap never uses up the hourly allowance. */
+async function reserveEmail(limits: readonly EmailLimit[], subjectId: string): Promise<number> {
+  for (const limit of limits) {
+    const wait = await authRateLimitWait(limit.scope, subjectId, limit.max, limit.windowSeconds)
+    if (wait) return wait
+  }
+  return 0
+}
+export const reserveLoginCodeEmail = (subjectId: string) => reserveEmail(LOGIN_CODE_LIMITS, subjectId)
+export const reservePasswordEmail = (subjectId: string) => reserveEmail(PASSWORD_EMAIL_LIMITS, subjectId)
+/** Counts a code that was always allowed (first code after password setup). */
+export async function recordLoginCodeEmail(subjectId: string) {
+  for (const limit of LOGIN_CODE_LIMITS) await authRateLimitWait(limit.scope, subjectId, limit.max, limit.windowSeconds)
+}
+/** Read-only: seconds until another sign-in code may be sent (0 = now). */
+export async function loginCodeWait(subjectId: string): Promise<number> {
+  const keys = LOGIN_CODE_LIMITS.map(l => authDigest(`${l.scope}:${subjectId}`))
+  const result = await pool.query<{ key: string; attempts: number; remaining: number }>(
+    `SELECT key, attempts, ${REMAINING_SQL} AS remaining FROM portal_auth_limits WHERE key = ANY($1::text[])`, [keys])
+  let wait = 0
+  for (const row of result.rows) {
+    const limit = LOGIN_CODE_LIMITS[keys.indexOf(row.key)]
+    if (row.attempts >= limit.max && row.remaining > 0) wait = Math.max(wait, Number(row.remaining))
+  }
+  return wait
 }
 export async function createChallenge(
   subject: AuthSubject, purpose: 'login' | 'password', version: string | null, nextPath = '',
@@ -75,7 +120,7 @@ export async function pendingChallenge(token: string, purpose: 'login' | 'passwo
 }
 export type CodeResult = { ok: true; challenge: Challenge } | { ok: false; remaining: number }
 
-/** Lock + consume in one transaction: six wrong guesses invalidate the code. */
+/** Lock + consume in one transaction: MAX_CODE_ATTEMPTS wrong guesses invalidate the code. */
 export async function consumeLoginCode(token: string, code: string): Promise<CodeResult> {
   if (!/^[\w-]{43}$/.test(token)) return { ok: false, remaining: 0 }
   return authTransaction(async client => {
@@ -105,28 +150,30 @@ export async function consumeLoginCode(token: string, code: string): Promise<Cod
   })
 }
 
-export async function savePortalPassword(token: string, passwordHash: string): Promise<boolean> {
-  if (!/^[\w-]{43}$/.test(token)) return false
+export interface SavedPassword { participantId: string; email: string; version: string }
+export async function savePortalPassword(token: string, passwordHash: string): Promise<SavedPassword | null> {
+  if (!/^[\w-]{43}$/.test(token)) return null
   return authTransaction(async client => {
     const id = authDigest(token)
     // Lock the participant before challenges to match createChallenge's order.
     const candidate = await client.query<Challenge>('SELECT * FROM portal_auth_challenges WHERE id = $1', [id])
     const target = candidate.rows[0]
-    if (!target) return false
+    if (!target) return null
     const person = await client.query(`SELECT email FROM participants WHERE id = $1 AND is_active = true FOR UPDATE`, [target.participant_id])
-    if (person.rows[0]?.email?.toLowerCase() !== target.email) return false
+    if (person.rows[0]?.email?.toLowerCase() !== target.email) return null
     const result = await client.query<Challenge>(`SELECT * FROM portal_auth_challenges WHERE id = $1
       AND purpose = 'password' AND consumed_at IS NULL AND expires_at > statement_timestamp() FOR UPDATE`, [id])
-    if (!result.rows[0]) return false
+    if (!result.rows[0]) return null
+    const version = randomUUID()
     await client.query(`INSERT INTO portal_auth_credentials (participant_id, email, password_hash, version)
       VALUES ($1, $2, $3, $4)
       ON CONFLICT (participant_id) DO UPDATE SET email = EXCLUDED.email, password_hash = EXCLUDED.password_hash,
-      version = EXCLUDED.version, updated_at = statement_timestamp()`, [target.participant_id, target.email, passwordHash, randomUUID()])
+      version = EXCLUDED.version, updated_at = statement_timestamp()`, [target.participant_id, target.email, passwordHash, version])
     await client.query(`UPDATE portal_auth_challenges SET consumed_at = statement_timestamp()
       WHERE participant_id = $1 AND consumed_at IS NULL`, [target.participant_id])
     // Resetting a password retires the participant's existing portal sessions.
     await client.query(`UPDATE auth_idle_sessions SET revoked_at = statement_timestamp()
       WHERE kind = 'portal' AND subject_id = $1 AND revoked_at IS NULL`, [target.participant_id])
-    return true
+    return { participantId: target.participant_id, email: target.email, version }
   })
 }

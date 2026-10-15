@@ -64,7 +64,7 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('authentication retention (Postgre
         expect((await cleanupAuthRecords()).challengesDeleted).toBe(1)
         expect(await pendingChallenge(challenge.token, purpose)).toBeNull()
         expect(await consumeLoginCode(challenge.token, challenge.code ?? '123456')).toEqual({ ok: false, remaining: 0 })
-        expect(await savePortalPassword(challenge.token, 'not-written')).toBe(false)
+        expect(await savePortalPassword(challenge.token, 'not-written')).toBeNull()
       }
     }
     const live = await createChallenge(subject, 'login', version)
