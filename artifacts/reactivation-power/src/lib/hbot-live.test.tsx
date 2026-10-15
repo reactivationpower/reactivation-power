@@ -4,7 +4,6 @@ import { afterEach, expect, it, vi } from 'vitest'
 import live from '../../../api-server/content/flows/hbot.json'
 import general from '../../../api-server/content/flows/general.json'
 import { CONCERN_OPTIONS, suggestNicheForService, SERVICE_GROUPS } from '@workspace/niche-catalog'
-import { HBOT_CONCERN_OPTIONS, hbotDraftSteps } from './hbot-draft'
 
 const setSelectedNiche = vi.fn()
 vi.mock('@/app/actions/reactivation', () => ({ setSelectedNiche: (...a) => setSelectedNiche(...a) }))
@@ -34,23 +33,23 @@ const view = (initialStepKey = null) => render(
 )
 
 it('publishes the approved eight concerns, catalog entry, and import matching', () => {
-  expect(CONCERN_OPTIONS.HBOT).toEqual(HBOT_CONCERN_OPTIONS)
+  expect(CONCERN_OPTIONS.HBOT.map((c) => c.label)).toEqual([
+    'Fatigue / low energy', 'Brain fog / concentration', 'Ongoing pain / discomfort',
+    'Sleep problems', 'Slow healing / lingering injury', 'Headaches / migraines',
+    'Numbness / tingling', 'Recovery after activity',
+  ])
   expect(SERVICE_GROUPS.find((g) => g.id === 'chiropractic').services).toContainEqual({ label: 'HBOT', niche: 'HBOT' })
   for (const service of ['HBOT Session 8', 'Hyperbaric Oxygen Therapy', 'Hyper-baric care']) {
     expect(suggestNicheForService(service, [niche])).toEqual(niche)
   }
 })
 
-it('preserves approved ordinary caller wording and removes preview-only language', () => {
-  const pairs = {
-    open: 'open', open_status: 'opening_question', permission_well: 'permission_questions',
-    digging_in_well: 'digging_in', recommend: 'recommendation', exit_healthy: 'lapsed_commitment',
-    lapsed_felt_fine: 'lapsed_felt_fine', lapsed_cost: 'lapsed_cost', lapsed_busy: 'lapsed_busy',
-    lapsed_wait_pain: 'lapsed_wait_pain', lapsed_moved: 'lapsed_moved',
-  }
-  for (const [draftKey, liveKey] of Object.entries(pairs)) {
-    expect(live.steps.find((s) => s.step_key === liveKey).content)
-      .toBe(hbotDraftSteps.find((s) => s.step_key === draftKey).content)
+it('preserves the eight topics and exact sleep wording in every live questions variant', () => {
+  for (const key of ['digging_in', 'digging_in_returning', 'digging_in_fully_back']) {
+    const body = live.steps.find((s) => s.step_key === key).content
+    expect(body).toContain("How's your sleep been... good, average, or could be better?")
+    expect(body).not.toContain("How's your sleep been?")
+    expect(body).toContain('(Tap their answer below.)')
   }
   expect(JSON.stringify(live)).not.toMatch(/This preview|Draft for Review|hbot-draft-review/)
 })

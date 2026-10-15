@@ -50,7 +50,7 @@ import * as leadStore from "../lib/lead-followup/store";
 import { loadLeadAnalytics } from "../lib/lead-followup/analytics";
 import { leadWebhookUrl } from "../lib/lead-followup/webhook-url";
 import { parseInactiveCount, parsePatientValue, parseCalculatorScenario, scenarioEstimates } from '@workspace/shared/opportunity';
-import { publicServiceName } from "@workspace/niche-catalog";
+import { HBOT_NICHE_NAME, publicServiceName } from "@workspace/niche-catalog";
 import { DEFAULT_TIMEZONE, isUsTimezone, timezoneLabel } from '@workspace/shared/us-timezones';
 import { bookingThankYouHref, validatedBookingFunnel, WEBSITE_CONFIRMATION_PATH } from '@workspace/shared/booking-funnel';
 import { readBookingConfirmation } from '../lib/booking-confirmation';
@@ -276,7 +276,8 @@ async function leadCallContext(ownerId: string, participant: { role: string } & 
 /** Niche options for a campaign form: the owner's enabled HEALTHCARE niches. */
 async function campaignNicheOptions(ownerId: string) {
   const niches = await getOwnerNiches(ownerId, ["healthcare"]);
-  return niches.map((n) => ({ id: n.id, name: n.name }));
+  // HBOT currently has a reactivation script only, never a generic lead fallback.
+  return niches.filter((n) => n.name !== HBOT_NICHE_NAME).map((n) => ({ id: n.id, name: n.name }));
 }
 
 add("/portal/campaigns", "portal", async () => {
@@ -546,9 +547,7 @@ add("/portal/dialer/script", "portal", async (req) => {
     participant.role === "owner" ? Promise.resolve(participant) : getParticipantById(ownerId),
   ]);
   const flow = await getScriptFlow("reactivation", niches.map((n) => n.id));
-  // HBOT is now a published niche. Practice and live calls use the same DB flow.
-  const hbotDraftAvailable = false;
-  return { screen, from, course, participant, courseSlug, backHref, backLabel, ownerId, sectors, niches, flow, owner, hbotDraftAvailable };
+  return { screen, from, course, participant, courseSlug, backHref, backLabel, ownerId, sectors, niches, flow, owner };
 });
 
 add("/portal/settings", "portal", async () => {

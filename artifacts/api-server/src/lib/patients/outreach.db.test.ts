@@ -45,7 +45,8 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('service-aware calling transaction
     await expect(log(lease.token)).rejects.toThrow('expired')
     expect(replacement.token).not.toBe(lease.token)
     await expect(claimPatient(callerId, callerId, contactId, enabled())).rejects.toThrow('not found')
-  })
+  // Multiple remote round trips verify locking, not a five-second speed target.
+  }, 30000)
   it('logs once atomically, stores service context, and preserves unrelated callbacks', async () => {
     const claim = await claimPatient(ownerId, ownerId, contactId, enabled())
     const other = await pool.query(`INSERT INTO follow_ups(contact_id,due_at,reason,service_id,call_context)

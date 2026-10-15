@@ -8,3 +8,4 @@
 export * from './concern-options.ts'
 export * from './niche-match.ts'
 export * from './service-catalog.ts'
+export * from './hbot.ts'

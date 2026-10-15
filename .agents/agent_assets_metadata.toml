@@ -1740,3 +1740,31 @@ mtime_ms = 1791734996814
 storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/c259268b-324f-4370-a886-6b7488d87cab/24647bd0-2bbc-473c-9309-263f0a2ccf5a"
 storage_version_token = "1791735003397982"
 content_type = "image/jpeg"
+
+[[outputs]]
+id = "XiIEhzvk3ggyYVCa2PilU"
+uri = "file://.local/research/hbot/hbot-review-packet.html"
+type = "html"
+title = "Hyperbaric Reactivation — Final Research Review Packet"
+description = "Complete research and 64-screen script manuscript, with exact sleep wording, concern mapping, safety routes and approval checklists. Not clinically approved or ready for patient use; no HBOT feature implemented."
+logical_id = "7052d0f2-7f9c-4205-9d2c-d822b99d613a"
+content_hash = "sha256:d5d04f2e5142184f6bd4f4f741eda299c3f0a3a66634f4ad31c918153ed58592"
+size = 95741
+mtime_ms = 1791928610093
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/7052d0f2-7f9c-4205-9d2c-d822b99d613a/a977857d-2a28-4bae-af53-31beb5aa0fab"
+storage_version_token = "1791928628939597"
+content_type = "text/html"
+
+[[outputs]]
+id = "EXWi24tqd_dSnbbTT8KHD"
+uri = "file://generated-artifacts/onboarding/patient-pipeline-live-onboarding.pdf"
+type = "pdf"
+title = "Patient Pipeline — Live Client Onboarding"
+description = "Two-page onboarding guide: Reactivation first, then Lead Follow-Up, with a final responsibilities checklist."
+logical_id = "931d0b14-cce0-48ce-8126-079af71760b9"
+content_hash = "sha256:60a6c8dd0ce1deb75a8fc7b3065743e78dee427f0630ff8d66885ad707ba4306"
+size = 54859
+mtime_ms = 1792002146236
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/931d0b14-cce0-48ce-8126-079af71760b9/2abb0fdc-dd1f-4aa1-9b09-ef19b19828da"
+storage_version_token = "1792002164914825"
+content_type = "application/pdf"

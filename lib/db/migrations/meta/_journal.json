@@ -288,6 +288,13 @@
       "when": 1791910000000,
       "tag": "0040_reseller_program",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1791988800000,
+      "tag": "0041_hbot_reactivation",
+      "breakpoints": true
     }
   ]
 }

@@ -50,3 +50,4 @@
 - [Reseller business policy](reseller-business-policy.md) — external company selling, collected-money 20%, owner-approved discounts, external wires and durable termination/clawback boundaries.
 - [HBOT script review](hbot-script-review.md) — interactive chiropractic-demo review is required; testing a draft is not approval for patient use.
 - [Supabase egress diagnosis](egress-diagnosis.md) — use the billed service breakdown; API script downloads do not explain a direct-pooler spike.
+- [HBOT caller boundaries](hbot-approval-boundary.md) — owner authorized regular Chiro caller choices; keep clinical-review routes, no efficacy promises, and exact sleep wording.

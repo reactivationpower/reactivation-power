@@ -12,14 +12,6 @@ import { NicheSelect } from '@/components/reactivation/niche-select'
 import { ScriptFlowPlayer } from '@/components/reactivation/script-flow-player'
 import { PracticeLogPreview } from '@/components/reactivation/practice-log-preview'
 import { CONCERN_OPTIONS } from '@workspace/niche-catalog'
-import {
-  HBOT_CONCERN_OPTIONS,
-  HBOT_DRAFT_NICHE_ID,
-  HBOT_DRAFT_SCREENS,
-  hbotDraftChoices,
-  hbotDraftSteps,
-  withHbotDraft,
-} from '@/lib/hbot-draft'
 import type { Niche, ScriptFlowChoice, ScriptFlowStep } from '@workspace/shared/types'
 
 const FONT_SIZES = [16, 18, 20, 24, 28, 32, 36, 40]
@@ -36,12 +28,10 @@ interface Props {
   isProvider?: boolean
   /** Optional deep link: open the player at this step (review/debug use). */
   initialStepKey?: string | null
-  /** Practice-script page only: backend says the review-only HBOT draft may be shown. */
-  hbotDraftAvailable?: boolean
 }
 
 export function ScriptViewer({
-  niches: realNiches,
+  niches,
   steps,
   choices,
   initialNicheId,
@@ -50,13 +40,7 @@ export function ScriptViewer({
   owner = null,
   isProvider = false,
   initialStepKey = null,
-  hbotDraftAvailable = false,
 }: Props) {
-  const niches = useMemo(
-    () => withHbotDraft(realNiches, hbotDraftAvailable),
-    [realNiches, hbotDraftAvailable],
-  )
-  const [draftScreen, setDraftScreen] = useState<string | null>(null)
   // Only honor the saved niche if it belongs to this account's sector(s);
   // otherwise fall back to the first available niche.
   const validInitial =
@@ -93,17 +77,8 @@ export function ScriptViewer({
   function handleNicheChange(id: string | null) {
     if (!id) return
     setNicheId(id)
-    // The synthetic review draft is local only: never persisted.
-    if (id === HBOT_DRAFT_NICHE_ID) return
     void setSelectedNiche(id)
   }
-
-  const isDraft = hbotDraftAvailable && nicheId === HBOT_DRAFT_NICHE_ID
-  const draftEntry =
-    draftScreen ??
-    (initialStepKey && hbotDraftSteps.some((x) => x.step_key === initialStepKey)
-      ? initialStepKey
-      : null)
 
   return (
     <div className="flex flex-col gap-4">
@@ -147,48 +122,17 @@ export function ScriptViewer({
         </div>
       </div>
 
-      {isDraft && (
-        <div className="flex flex-col gap-3">
-          <div
-            role="note"
-            data-testid="hbot-draft-warning"
-            className="rounded-md border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-foreground"
-          >
-            <strong>Review draft only.</strong> This HBOT script is not clinically
-            approved. Do not use it for patient calls or treatment booking.
-          </div>
-          <label className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-            Jump to screen
-            <select
-              data-testid="select-hbot-draft-screen"
-              value={draftScreen ?? ''}
-              onChange={(e) => setDraftScreen(e.target.value || null)}
-              className="h-9 rounded-md border border-input bg-card px-2 text-foreground"
-            >
-              <option value="">Start of script</option>
-              {HBOT_DRAFT_SCREENS.map((sc) => (
-                <option key={sc.key} value={sc.key}>
-                  {sc.title}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-      )}
-
       <ScriptFlowPlayer
-        key={isDraft ? `${nicheId}:${draftScreen ?? ''}` : nicheId}
-        steps={isDraft ? hbotDraftSteps : steps}
-        choices={isDraft ? hbotDraftChoices : choices}
+        key={nicheId}
+        steps={steps}
+        choices={choices}
         nicheId={nicheId || null}
         sector={niches.find((n) => n.id === nicheId)?.sector ?? null}
         extras={extras}
         fontSize={FONT_SIZES[sizeIndex]}
-        initialStepKey={isDraft ? draftEntry : initialStepKey}
+        initialStepKey={initialStepKey}
         concernOptions={
-          isDraft
-            ? HBOT_CONCERN_OPTIONS
-            : CONCERN_OPTIONS[
+          CONCERN_OPTIONS[
             niches.find((n) => n.id === nicheId)?.name ?? ''
           ] ?? undefined
         }

@@ -21,6 +21,7 @@ import {
   type WebhookFieldMapping,
 } from '@workspace/shared/lead-webhooks'
 import { getOwnerNiches } from '@/lib/data/reactivation'
+import { HBOT_NICHE_NAME } from '@workspace/niche-catalog'
 import { leadWebhookUrl } from '@/lib/lead-followup/webhook-url'
 import { TEST_HEADER } from '@/routes/webhooks-leads'
 import { leadFollowUpContextOrError } from '@/lib/lead-followup/access'
@@ -38,7 +39,8 @@ import * as store from '@/lib/lead-followup/store'
  */
 async function resolveCampaignNiche(ownerId: string, nicheId: string) {
   const niches = await getOwnerNiches(ownerId, ['healthcare'])
-  return niches.find((n) => n.id === nicheId) ?? null
+  // HBOT is a former-patient caller service, not an acquisition campaign.
+  return niches.find((n) => n.id === nicheId && n.name !== HBOT_NICHE_NAME) ?? null
 }
 
 export async function createCampaign(draft: CampaignDraft) {

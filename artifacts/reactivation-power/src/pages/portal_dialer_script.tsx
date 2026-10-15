@@ -6,6 +6,7 @@ import { ScriptViewer } from '@/components/reactivation/script-viewer'
 import { usePageData } from '@/hooks/use-page-data'
 import { PageError, PageLoading } from '@/components/page-status'
 import NotFound from '@/pages/not-found'
+import { HBOT_NICHE_NAME } from '@workspace/niche-catalog'
 
 export default function PracticeScriptPage() {
   const search = new URLSearchParams(useSearch())
@@ -44,13 +45,14 @@ export default function PracticeScriptPage() {
           niches={niches}
           steps={flow.steps}
           choices={flow.choices}
-          initialNicheId={participant.selected_niche_id ?? null}
+          initialNicheId={search.get('service') === 'hbot' || search.get('draft') === 'hbot'
+            ? niches.find((n) => n.name === HBOT_NICHE_NAME)?.id ?? participant.selected_niche_id ?? null
+            : participant.selected_niche_id ?? null}
           callerName={participant.first_name}
           practiceName={owner?.practice_name ?? null}
           owner={owner ?? null}
           isProvider={participant.role === 'owner'}
           initialStepKey={screen ?? null}
-          hbotDraftAvailable={data.hbotDraftAvailable === true}
         />
       </div>
     </div>
