@@ -3,6 +3,9 @@ import { redirect } from 'next/navigation'
 import { pool } from '@workspace/db'
 import { getAdminClient } from '@/lib/supabase/admin'
 import { clearSessionCookie, getClientIp, setSessionCookie } from '@/lib/auth/session'
+import { decodeSession, SESSION_COOKIE_NAME } from '@/lib/auth/token'
+import { forgetDevice, isRememberedDevice, rememberDevice } from '@/lib/auth/remembered-device'
+import type { Participant } from '@workspace/shared/types'
 import { accessOwnerId, getParticipantByEmail, getParticipantById } from '@/lib/data/participants'
 import { billingBlockForOwner } from '@/lib/billing/dunning'
 import { resolveLoginDestination } from '@/lib/auth/login-destination'
@@ -50,7 +53,39 @@ async function passwordAttemptWait(email: string) {
   return Math.max(...waits)
 }
 
-/** Password verification does not grant a session. Both roles require a code. */
+/** Starts a portal session after every account and billing check has passed. */
+async function startPortalSession(participant: Participant, credentialVersion: string,
+  nextPath: string, emailCode: boolean): Promise<LoginState> {
+  const supabase = getAdminClient()
+  const ip = await getClientIp()
+  const { data: session, error } = await supabase.from('sessions').insert({
+    participant_id: participant.id, ip_address: ip,
+    user_agent: (await headers()).get('user-agent'),
+  }).select('id').single()
+  if (error || !session) return { error: 'Could not start your session. Please sign in again.' }
+  await setSessionCookie({
+    participantId: participant.id, sessionId: session.id, issuedAt: Date.now(), credentialVersion,
+  })
+  if (emailCode) {
+    // A correct code remembers this browser for 48 hours. Failing to remember must not block sign-in.
+    await rememberDevice(participant.id, credentialVersion).catch((failure: unknown) => {
+      console.error('Could not remember this computer after a correct code', failure)
+    })
+  }
+  await logEvent({
+    participantId: participant.id, sessionId: session.id, eventType: 'login', ipAddress: ip,
+    metadata: emailCode
+      ? { authentication: 'password_and_email_code', emailCode: true }
+      : { authentication: 'password_and_remembered_computer', emailCode: false },
+  })
+  redirect(resolveLoginDestination(nextPath))
+}
+
+/**
+ * Password verification alone does not grant a session. Both roles need a
+ * code, unless this browser entered a correct code for this same person and
+ * password in the last 48 hours.
+ */
 export async function login(_prev: LoginState, form: FormData): Promise<LoginState> {
   const email = emailOf(form), password = String(form.get('password') ?? '')
   if (!email || !password) return { error: 'Please enter your email and password.' }
@@ -72,6 +107,10 @@ export async function login(_prev: LoginState, form: FormData): Promise<LoginSta
   if (!participant.is_demo) {
     const block = await billingBlockForOwner(accessOwnerId(participant))
     if (block) return { error: 'There is a billing issue on this account, so access is paused.', billing: block }
+  }
+  if (await isRememberedDevice(participant.id, row.version)) {
+    ;(await cookies()).delete(CHALLENGE_COOKIE)
+    return startPortalSession(participant, row.version, String(form.get('next') ?? ''), false)
   }
   const emailWait = await reserveLoginCodeEmail(participant.id)
   if (emailWait) return { error: codeWaitError(emailWait) }
@@ -117,22 +156,7 @@ export async function verifyLoginCode(_prev: LoginState, form: FormData): Promis
     const block = await billingBlockForOwner(accessOwnerId(participant))
     if (block) return { error: 'Access is paused for a billing issue.', billing: block }
   }
-  const supabase = getAdminClient()
-  const ip = await getClientIp()
-  const { data: session, error } = await supabase.from('sessions').insert({
-    participant_id: participant.id, ip_address: ip,
-    user_agent: (await headers()).get('user-agent'),
-  }).select('id').single()
-  if (error || !session) return { error: 'Could not start your session. Please sign in again.' }
-  await setSessionCookie({
-    participantId: participant.id, sessionId: session.id, issuedAt: Date.now(),
-    credentialVersion: result.challenge.credential_version!,
-  })
-  await logEvent({
-    participantId: participant.id, sessionId: session.id, eventType: 'login',
-    ipAddress: ip, metadata: { authentication: 'password_and_email_code' },
-  })
-  redirect(resolveLoginDestination(result.challenge.next_path))
+  return startPortalSession(participant, result.challenge.credential_version!, result.challenge.next_path, true)
 }
 
 export async function resendLoginCode(): Promise<LoginState> {
@@ -237,6 +261,9 @@ async function sendFirstLoginCode(saved: SavedPassword): Promise<LoginState> {
 }
 
 export async function logout() {
+  // Only a manual log out forgets this computer; inactivity logout does not.
+  const current = decodeSession((await cookies()).get(SESSION_COOKIE_NAME)?.value ?? '')
+  if (current) await forgetDevice(current.participantId)
   await clearSessionCookie()
   ;(await cookies()).delete(CHALLENGE_COOKIE)
   redirect('/login')

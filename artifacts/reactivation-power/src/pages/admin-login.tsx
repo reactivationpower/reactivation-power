@@ -56,7 +56,7 @@ export default function AdminLoginPage() {
         </div>
         <div className="rounded-lg border border-border bg-card p-6 shadow-sm">
           {searchParams.get('reason') === 'inactivity' && (
-            <p role="status" className="mb-4 text-sm text-muted-foreground">You were signed out after five minutes of inactivity. Please sign in again.</p>
+            <p role="status" className="mb-4 text-sm text-muted-foreground">You were signed out after 30 minutes of inactivity. Please sign in again.</p>
           )}
           {token ? (
             <>

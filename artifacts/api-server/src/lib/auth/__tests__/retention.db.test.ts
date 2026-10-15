@@ -40,7 +40,7 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('authentication retention (Postgre
         return client
       } catch (error) { client.release(); throw error }
     }
-    for (const table of ['portal_auth_challenges', 'portal_auth_credentials', 'portal_auth_limits', 'auth_idle_sessions']) {
+    for (const table of ['portal_auth_challenges', 'portal_auth_credentials', 'portal_auth_limits', 'auth_idle_sessions', 'portal_auth_devices']) {
       await pool.query(`CREATE TABLE ${table} (LIKE public.${table} INCLUDING ALL)`)
     }
     await pool.query('CREATE TABLE participants (id uuid PRIMARY KEY, email text, is_active boolean)')
@@ -129,5 +129,21 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('authentication retention (Postgre
     }
     expect((await pool.query('SELECT * FROM sessions')).rows).toEqual([{ id: 'history' }])
     expect((await pool.query('SELECT * FROM activity_events')).rows).toEqual([{ id: 'history' }])
+  }, 20_000)
+  it('deletes remembered computers a day after they expire or are revoked, keeping live ones', async () => {
+    const insert = async (expires: string, revoked: string | null) => {
+      const id = randomUUID()
+      await pool.query(`INSERT INTO portal_auth_devices (id, participant_id, credential_version, expires_at, revoked_at)
+        VALUES ($1, $2, $3, statement_timestamp() + $4::interval, statement_timestamp() + $5::interval)`,
+      [id, subject.id, version, expires, revoked])
+      return id
+    }
+    const live = await insert('2 days', null)
+    const recentlyExpired = await insert('-1 hour', null)
+    await insert('-2 days', null)
+    await insert('1 day', '-2 days')
+    expect((await cleanupAuthRecords()).rememberedDevicesDeleted).toBe(2)
+    const left = (await pool.query('SELECT id FROM portal_auth_devices ORDER BY id')).rows.map(r => r.id)
+    expect(left.sort()).toEqual([live, recentlyExpired].sort())
   }, 20_000)
 })

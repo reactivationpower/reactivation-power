@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import { decodeSession, SESSION_COOKIE_NAME } from '@/lib/auth/token'
 import { decodeAdminSession, ADMIN_COOKIE_NAME } from '@/lib/auth/admin-token'
-import { readIdleSession, revokeIdleSession, type SessionKind } from '@/lib/auth/idle-session'
+import { IDLE_TIMEOUT_MS, readIdleSession, revokeIdleSession, type SessionKind } from '@/lib/auth/idle-session'
 import { portalCredentialIsCurrent } from '@/lib/auth/session'
 import { readDemoSession } from '@/lib/auth/demo-session'
 
@@ -35,7 +35,7 @@ router.all('/session/:kind', async (req, res): Promise<void> => {
     res.json({ ok: true }); return
   }
   const age = req.body?.interactionAgeMs
-  if (req.method === 'POST' && (!expected || !Number.isFinite(age) || age < 0 || age >= 300000)) {
+  if (req.method === 'POST' && (!expected || !Number.isFinite(age) || age < 0 || age >= IDLE_TIMEOUT_MS)) {
     res.status(400).json({ error: 'Invalid activity' }); return
   }
   const state = ('participantId' in payload && !payload.credentialVersion ? await readDemoSession(payload) : null)

@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { pool } from '@workspace/db'
-import { createIdleSession, readIdleSession, revokeIdleSession } from '../idle-session'
+import { createIdleSession, IDLE_TIMEOUT_MS, readIdleSession, revokeIdleSession } from '../idle-session'
 import { decodeAdminSession, encodeAdminSession } from '../admin-token'
 import { decodeSession, encodeSession } from '../token'
 import { getSessionFromRequest } from '../session'
@@ -23,9 +23,9 @@ afterAll(async () => {
 })
 
 describe.skipIf(!process.env.SUPABASE_DB_URL)('durable per-session inactivity', () => {
-  it('rejects at the exact five-minute boundary and cannot be revived by late activity', async () => {
+  it('rejects at the exact 30-minute boundary and cannot be revived by late activity', async () => {
     const id = await fresh()
-    await pool.query(`UPDATE auth_idle_sessions SET last_interaction_at = statement_timestamp() - interval '5 minutes' WHERE id = $1`, [id])
+    await pool.query(`UPDATE auth_idle_sessions SET last_interaction_at = statement_timestamp() - interval '30 minutes' WHERE id = $1`, [id])
     expect(await readIdleSession(id, 'portal', subject)).toBeNull()
     expect(await readIdleSession(id, 'portal', subject, 0)).toBeNull()
     const replay = encodeSession({ participantId: subject, sessionId: id, issuedAt: Date.now() })
@@ -33,12 +33,12 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('durable per-session inactivity', 
   })
   it('extends a live session only through human activity, not read-only polling', async () => {
     const id = await fresh()
-    await pool.query(`UPDATE auth_idle_sessions SET last_interaction_at = statement_timestamp() - interval '4 minutes' WHERE id = $1`, [id])
+    await pool.query(`UPDATE auth_idle_sessions SET last_interaction_at = statement_timestamp() - interval '29 minutes' WHERE id = $1`, [id])
     const before = await readIdleSession(id, 'portal', subject)
     expect(before).not.toBeNull()
     for (let i = 0; i < 3; i++) expect((await readIdleSession(id, 'portal', subject))?.deadline).toBe(before!.deadline)
     const updated = await readIdleSession(id, 'portal', subject, 1000)
-    expect(updated!.deadline - before!.deadline).toBeGreaterThan(230_000)
+    expect(updated!.deadline - before!.deadline).toBeGreaterThan(29 * 60_000 - 5_000)
     // A late older interaction must not move the timestamp backwards.
     expect((await readIdleSession(id, 'portal', subject, 60_000))?.deadline).toBe(updated!.deadline)
   })
@@ -56,6 +56,15 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('durable per-session inactivity', 
     expect(decodeSession(token)).not.toBeNull()
     expect(await getSessionFromRequest({ cookies: { tp_session: token } } as unknown as Request)).toBeNull()
   })
+  it('stays signed in after 29 idle minutes, with the deadline 30 minutes after the last activity', async () => {
+    const id = await fresh()
+    await pool.query(`UPDATE auth_idle_sessions SET last_interaction_at = statement_timestamp() - interval '29 minutes' WHERE id = $1`, [id])
+    const state = await readIdleSession(id, 'portal', subject)
+    expect(state).not.toBeNull()
+    expect(state!.deadline - state!.serverNow).toBeGreaterThan(55_000)
+    expect(state!.deadline - state!.serverNow).toBeLessThanOrEqual(60_000)
+    expect(IDLE_TIMEOUT_MS).toBe(30 * 60_000)
+  })
   it('keeps absolute expiration as an upper limit', async () => {
     const id = await fresh()
     await pool.query(`UPDATE auth_idle_sessions SET expires_at = statement_timestamp() - interval '1 second' WHERE id = $1`, [id])
@@ -63,7 +72,7 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('durable per-session inactivity', 
   })
   it('automatic demo re-sign-in inherits idle and absolute deadlines', async () => {
     const old = await fresh()
-    await pool.query(`UPDATE auth_idle_sessions SET last_interaction_at = statement_timestamp() - interval '4 minutes', expires_at = statement_timestamp() + interval '30 seconds' WHERE id = $1`, [old])
+    await pool.query(`UPDATE auth_idle_sessions SET last_interaction_at = statement_timestamp() - interval '29 minutes', expires_at = statement_timestamp() + interval '30 seconds' WHERE id = $1`, [old])
     const before = await readIdleSession(old, 'portal', subject)
     const next = randomUUID(); ids.push(next)
     await createIdleSession(next, 'portal', randomUUID(), Date.now() + 86400_000, old)

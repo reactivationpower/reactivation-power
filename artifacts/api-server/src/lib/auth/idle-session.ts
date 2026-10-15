@@ -1,6 +1,8 @@
 import { pool } from '@workspace/db'
 
-export const IDLE_TIMEOUT_MS = 5 * 60 * 1000
+export const IDLE_TIMEOUT_MS = 30 * 60 * 1000
+/** Same limit for SQL. Keep in lockstep with IDLE_TIMEOUT_MS. */
+export const IDLE_INTERVAL_SQL = `interval '${IDLE_TIMEOUT_MS / 1000} seconds'`
 export type SessionKind = 'portal' | 'admin'
 export interface IdleState {
   sessionId: string
@@ -17,7 +19,7 @@ export async function createIdleSession(id: string, kind: SessionKind, subjectId
        SELECT $1, $2, $3, LEAST(expires_at, $4), last_interaction_at
        FROM auth_idle_sessions WHERE id = $5 AND kind = $2
        AND revoked_at IS NULL AND expires_at > statement_timestamp()
-       AND last_interaction_at > statement_timestamp() - interval '5 minutes'
+       AND last_interaction_at > statement_timestamp() - ${IDLE_INTERVAL_SQL}
        RETURNING id`, [id, kind, subjectId, new Date(expiresAt), inheritFrom])
     if (!result.rowCount) throw new Error('Session expired')
     return
@@ -40,17 +42,17 @@ export async function readIdleSession(
 ): Promise<IdleState | null> {
   const condition = `id = $1 AND kind = $2 AND subject_id = $3
     AND revoked_at IS NULL AND expires_at > statement_timestamp()
-    AND last_interaction_at > statement_timestamp() - interval '5 minutes'`
+    AND last_interaction_at > statement_timestamp() - ${IDLE_INTERVAL_SQL}`
   const result = interactionAgeMs === undefined
     ? await pool.query(
-      `SELECT id, LEAST(expires_at, last_interaction_at + interval '5 minutes') AS deadline,
+      `SELECT id, LEAST(expires_at, last_interaction_at + ${IDLE_INTERVAL_SQL}) AS deadline,
        statement_timestamp() AS now FROM auth_idle_sessions WHERE ${condition}`, [id, kind, subjectId])
     : await pool.query(
       `UPDATE auth_idle_sessions
        SET last_interaction_at = GREATEST(last_interaction_at,
          statement_timestamp() - ($4::double precision * interval '1 millisecond'))
        WHERE ${condition}
-       RETURNING id, LEAST(expires_at, last_interaction_at + interval '5 minutes') AS deadline,
+       RETURNING id, LEAST(expires_at, last_interaction_at + ${IDLE_INTERVAL_SQL}) AS deadline,
        statement_timestamp() AS now`, [id, kind, subjectId, interactionAgeMs])
   const row = result.rows[0]
   return row ? { sessionId: row.id, deadline: new Date(row.deadline).getTime(), serverNow: new Date(row.now).getTime() } : null

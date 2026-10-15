@@ -15,7 +15,7 @@ let base = ''
 async function cookie(kind: 'portal' | 'admin', expired = true) {
   const id = randomUUID(); ids.push(id)
   await createIdleSession(id, kind, subject, Date.now() + 86400_000)
-  if (expired) await pool.query(`UPDATE auth_idle_sessions SET last_interaction_at = statement_timestamp() - interval '5 minutes' WHERE id = $1`, [id])
+  if (expired) await pool.query(`UPDATE auth_idle_sessions SET last_interaction_at = statement_timestamp() - interval '30 minutes' WHERE id = $1`, [id])
   return { id, value: kind === 'portal'
     ? `tp_session=${encodeSession({ sessionId: id, participantId: subject, issuedAt: Date.now() })}`
     : `tp_admin=${encodeAdminSession({ userId: subject, email: 'idle@example.invalid', name: null, role: 'super_admin' }, id)}` }
@@ -78,6 +78,18 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('idle enforcement across the prote
     expect((await request('/session/portal', other.value)).status).toBe(200)
     expect((await request('/session/portal', other.value, 'DELETE', undefined, { 'X-Session-Id': current.id })).status).toBe(401)
     expect(await readIdleSession(other.id, 'portal', subject)).not.toBeNull()
+  })
+  it('accepts human activity up to 30 minutes old and rejects older reports', async () => {
+    const live = await cookie('portal', false)
+    const post = (interactionAgeMs: number) => request('/session/portal', live.value, 'POST', { interactionAgeMs }, { 'X-Session-Id': live.id })
+    expect((await post(30 * 60_000)).status).toBe(400)
+    // Older than the former five-minute limit, still within 30 minutes.
+    const accepted = await post(10 * 60_000)
+    expect(accepted.status).toBe(200)
+    const body = await accepted.json() as { deadline: number; serverNow: number }
+    // A fresh session never moves backwards; the full 30 minutes remain.
+    expect(body.deadline - body.serverNow).toBeGreaterThan(29 * 60_000)
+    expect(body.deadline - body.serverNow).toBeLessThanOrEqual(30 * 60_000)
   })
   it('keeps public login, health, signing and checkout independent of idle cookies', async () => {
     const expired = await cookie('portal')

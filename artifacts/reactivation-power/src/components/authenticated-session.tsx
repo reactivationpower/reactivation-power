@@ -1,18 +1,24 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { flushSync } from 'react-dom'
 import { apiUrl } from '@/lib/api'
 import { queryClient } from '@/lib/query-client'
 import { clearManagedUploads } from '@/lib/upload-manager'
+import { Button } from '@/components/ui/button'
 
 type Kind = 'portal' | 'admin'
 type State = { sessionId: string; deadline: number; serverNow: number; inactivityExempt?: boolean }
 type Shared = { sessionId: string; deadline: number; revoked?: boolean; inactivity?: boolean }
 const PREFIX = 'patient-pipeline-session:'
 const THROTTLE_MS = 10_000
+/** "Still there?" appears this long before the inactivity logout. */
+export const WARNING_MS = 60_000
 
 /** Mount before protected children, including on browser Back / BFCache restore. */
 export function AuthenticatedSession({ kind, children }: { kind: Kind; children: ReactNode }) {
   const [visible, setVisible] = useState(false)
+  /** Whole seconds left while the "Still there?" warning shows; null when hidden. */
+  const [warning, setWarning] = useState<number | null>(null)
+  const staySignedIn = useRef<() => void>(() => {})
   useEffect(() => {
     const originalFetch = window.fetch
     const request = originalFetch.bind(window)
@@ -25,11 +31,23 @@ export function AuthenticatedSession({ kind, children }: { kind: Kind; children:
     let sentHuman = 0
     let inactivityExempt = false
     let activityTimer: ReturnType<typeof setTimeout> | undefined
+    let shownWarning: number | null = null
     const controller = new AbortController()
     const channel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel(`${PREFIX}${kind}`) : null
     const url = apiUrl(`/session/${kind}`)
     const storageKey = () => `${PREFIX}${kind}:${state?.sessionId}`
     let login = kind === 'admin' ? '/admin-login' : '/login'
+    const showWarning = (seconds: number | null) => {
+      if (disposed || seconds === shownWarning) return
+      shownWarning = seconds
+      setWarning(seconds)
+    }
+    /** Follows the shared deadline, so staying signed in from any tab closes it everywhere. */
+    const updateWarning = () => {
+      if (!state || ended || inactivityExempt) { showWarning(null); return }
+      const left = state.deadline - Date.now()
+      showWarning(left > 0 && left <= WARNING_MS ? Math.ceil(left / 1000) : null)
+    }
     const hide = () => {
       if (!disposed) flushSync(() => setVisible(false))
     }
@@ -50,6 +68,7 @@ export function AuthenticatedSession({ kind, children }: { kind: Kind; children:
     function finish(inactivity = true) {
       if (ended || disposed) return
       ended = true
+      showWarning(null)
       hide()
       controller.abort()
       void queryClient.cancelQueries()
@@ -78,7 +97,7 @@ export function AuthenticatedSession({ kind, children }: { kind: Kind; children:
       if (!body.sessionId || !Number.isFinite(body.deadline) || !Number.isFinite(body.serverNow)) {
         finish(); return false
       }
-      // A response received after sleep is not a fresh five-minute allowance.
+      // A response received after sleep is not a fresh 30-minute allowance.
       // Translate relative to request start, conservatively including transit
       // and suspension time rather than relative to response receipt.
       const deadline = requestedAt + body.deadline - body.serverNow
@@ -86,6 +105,7 @@ export function AuthenticatedSession({ kind, children }: { kind: Kind; children:
       login = kind === 'admin' ? '/admin-login' : inactivityExempt ? '/demo' : '/login'
       state = { sessionId: body.sessionId, deadline: state?.sessionId === body.sessionId ? Math.max(state.deadline, deadline) : deadline }
       publish(state)
+      updateWarning()
       return Date.now() < state.deadline
     }
     async function check() {
@@ -148,6 +168,14 @@ export function AuthenticatedSession({ kind, children }: { kind: Kind; children:
         activityTimer = setTimeout(() => void sendActivity(), delay)
       }
     }
+    // The "Stay signed in" button is real activity: send it now, not after the throttle.
+    staySignedIn.current = () => {
+      if (!state || ended || disposed || inactivityExempt) return
+      lastHuman = Date.now()
+      if (activityTimer) clearTimeout(activityTimer)
+      activityTimer = undefined
+      void sendActivity()
+    }
     const resume = () => {
       if (inactivityExempt) return
       hide()
@@ -160,7 +188,10 @@ export function AuthenticatedSession({ kind, children }: { kind: Kind; children:
       const value = event.data
       if (!state || value?.sessionId !== state.sessionId) return
       if (value.revoked) finish(value.inactivity ?? true)
-      else if (Number.isFinite(value.deadline)) state.deadline = Math.max(state.deadline, value.deadline)
+      else if (Number.isFinite(value.deadline)) {
+        state.deadline = Math.max(state.deadline, value.deadline)
+        updateWarning()
+      }
     }
     const onExpiredResponse = () => finish()
     const onPageHide = () => { if (!inactivityExempt) hide() }
@@ -207,11 +238,14 @@ export function AuthenticatedSession({ kind, children }: { kind: Kind; children:
     const tick = setInterval(() => {
       if (!state || ended) return
       sharedState()
-      if (!ended && Date.now() >= state.deadline) { hide(); void check() }
+      if (ended) return
+      updateWarning()
+      if (Date.now() >= state.deadline) { hide(); void check() }
     }, 250)
     void check()
     return () => {
       disposed = true
+      staySignedIn.current = () => {}
       controller.abort()
       channel?.close()
       clearInterval(tick)
@@ -226,5 +260,42 @@ export function AuthenticatedSession({ kind, children }: { kind: Kind; children:
       document.removeEventListener('visibilitychange', resume)
     }
   }, [kind])
-  return visible ? children : <div role="status" className="p-6 text-sm text-muted-foreground">Checking your session…</div>
+  if (!visible) return <div role="status" className="p-6 text-sm text-muted-foreground">Checking your session…</div>
+  return (
+    <>
+      {children}
+      {warning !== null && <StillThereDialog seconds={warning} onStay={() => staySignedIn.current()} />}
+    </>
+  )
+}
+
+function StillThereDialog({ seconds, onStay }: { seconds: number; onStay: () => void }) {
+  const button = useRef<HTMLButtonElement>(null)
+  useEffect(() => {
+    const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null
+    button.current?.focus()
+    return () => previous?.focus()
+  }, [])
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4">
+      <div role="alertdialog" aria-modal="true" aria-labelledby="still-there-title"
+        aria-describedby="still-there-text"
+        onKeyDown={event => {
+          if (event.key === 'Escape') onStay()
+          // Keep keyboard focus inside the box.
+          if (event.key === 'Tab') { event.preventDefault(); button.current?.focus() }
+        }}
+        className="w-full max-w-sm rounded-lg border bg-card p-6 text-card-foreground shadow-lg">
+        <h2 id="still-there-title" className="text-lg font-semibold">Still there?</h2>
+        <p id="still-there-text" className="mt-2 text-sm text-muted-foreground">
+          For your security, you will be signed out in{' '}
+          <span className="font-semibold text-foreground" aria-live="off">
+            {seconds} second{seconds === 1 ? '' : 's'}
+          </span>{' '}
+          because there has been no activity.
+        </p>
+        <Button ref={button} type="button" className="mt-5 w-full" onClick={onStay}>Stay signed in</Button>
+      </div>
+    </div>
+  )
 }

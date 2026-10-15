@@ -47,6 +47,7 @@ export default defineConfig({
     "portal_auth_credentials",
     "portal_auth_challenges",
     "portal_auth_limits",
+    "portal_auth_devices",
     "patient_sources",
     "contact_services",
     "patient_call_leases",

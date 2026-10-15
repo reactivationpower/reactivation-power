@@ -1,4 +1,4 @@
-import { integer, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
+import { index, integer, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
 import { createInsertSchema } from 'drizzle-zod'
 
 export const portalCredentialsTable = pgTable('portal_auth_credentials', {
@@ -36,3 +36,18 @@ export const insertPortalChallengeSchema = createInsertSchema(portalChallengesTa
 export const insertPortalAuthLimitSchema = createInsertSchema(portalAuthLimitsTable)
 export type PortalCredential = typeof portalCredentialsTable.$inferSelect
 export type PortalChallenge = typeof portalChallengesTable.$inferSelect
+
+/**
+ * A browser that entered a correct email code. For 48 hours (fixed, from the
+ * code entry) the same person on that browser skips the code. The id is a
+ * digest of the browser's secret; it is bound to one password revision.
+ */
+export const portalRememberedDevicesTable = pgTable('portal_auth_devices', {
+  id: text('id').primaryKey(),
+  participantId: uuid('participant_id').notNull(),
+  credentialVersion: uuid('credential_version').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  revokedAt: timestamp('revoked_at', { withTimezone: true }),
+}, table => [index('portal_devices_participant').on(table.participantId)]).enableRLS()
+export type PortalRememberedDevice = typeof portalRememberedDevicesTable.$inferSelect

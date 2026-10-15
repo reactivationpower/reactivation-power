@@ -1,4 +1,5 @@
 import { pool, type PoolClient } from '@workspace/db'
+import { IDLE_INTERVAL_SQL } from './idle-session'
 
 /**
  * Keep retired security state for a day; never touch analytics sessions/activity.
@@ -18,10 +19,14 @@ export async function cleanupAuthRecords(conn: Pick<PoolClient, 'query'> = pool)
   const sessions = await conn.query(`DELETE FROM auth_idle_sessions
     WHERE expires_at <= statement_timestamp() - interval '1 day'
        OR revoked_at <= statement_timestamp() - interval '1 day'
-       OR last_interaction_at + interval '5 minutes' <= statement_timestamp() - interval '1 day'`)
+       OR last_interaction_at + ${IDLE_INTERVAL_SQL} <= statement_timestamp() - interval '1 day'`)
+  const devices = await conn.query(`DELETE FROM portal_auth_devices
+    WHERE expires_at <= statement_timestamp() - interval '1 day'
+       OR revoked_at <= statement_timestamp() - interval '1 day'`)
   return {
     challengesDeleted: challenges.rowCount ?? 0,
     rateLimitsDeleted: limits.rowCount ?? 0,
     idleSessionsDeleted: sessions.rowCount ?? 0,
+    rememberedDevicesDeleted: devices.rowCount ?? 0,
   }
 }

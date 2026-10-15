@@ -8,10 +8,18 @@ import {
 } from '@/lib/auth/portal-challenges'
 import { decodeSession } from '@/lib/auth/token'
 import { getSessionFromRequest } from '@/lib/auth/session'
+import { rememberedDeviceCookieName } from '@/lib/auth/remembered-device'
 import type { Request } from 'express'
 
 const mail = vi.hoisted(() => ({ send: vi.fn(async () => ({ ok: true, logId: 'fake-log' })) }))
 vi.mock('@/lib/mail/send', () => ({ sendEmail: mail.send }))
+// Only participants listed here are billing-blocked; everyone else passes.
+const billing = vi.hoisted(() => ({ blocked: new Set<string>() }))
+vi.mock('@/lib/billing/dunning', async importOriginal => ({
+  ...await importOriginal<typeof import('@/lib/billing/dunning')>(),
+  billingBlockForOwner: async (id: string) => billing.blocked.has(id)
+    ? { reason: 'card_declined', status: 'past_due', email: 'billing@example.invalid' } : null,
+}))
 const { default: app } = await import('@/app')
 process.env.SESSION_SECRET ||= 'portal-login-test-secret'
 const subjects: string[] = [], limitKeys = new Set<string>()
@@ -35,6 +43,7 @@ afterAll(async () => {
   await new Promise<void>(resolve => server ? server.close(() => resolve()) : resolve())
   if (subjects.length) {
     await pool.query('DELETE FROM auth_idle_sessions WHERE subject_id = ANY($1::text[])', [subjects])
+    await pool.query('DELETE FROM portal_auth_devices WHERE participant_id = ANY($1::uuid[])', [subjects])
     await pool.query('DELETE FROM portal_auth_challenges WHERE participant_id = ANY($1::uuid[])', [subjects])
     await pool.query('DELETE FROM portal_auth_credentials WHERE participant_id = ANY($1::uuid[])', [subjects])
     await pool.query('DELETE FROM participants WHERE id = ANY($1::uuid[])', [subjects])
@@ -42,11 +51,11 @@ afterAll(async () => {
   if (limitKeys.size) await pool.query('DELETE FROM portal_auth_limits WHERE key = ANY($1::text[])', [[...limitKeys]])
   await pool.end()
 })
-async function subject(role: 'owner' | 'staff' = 'owner', withPassword = true) {
+async function subject(role: 'owner' | 'staff' = 'owner', withPassword = true, isDemo = true) {
   const id = randomUUID(), email = `mfa-${id}@example.invalid`
   subjects.push(id)
   await pool.query(`INSERT INTO participants (id, email, first_name, last_name, role, is_active, is_demo)
-    VALUES ($1, $2, 'MFA', 'Test', $3, true, true)`, [id, email, role])
+    VALUES ($1, $2, 'MFA', 'Test', $3, true, $4)`, [id, email, role, isDemo])
   const version = randomUUID()
   if (withPassword) await pool.query(`INSERT INTO portal_auth_credentials (participant_id, email, password_hash, version)
     VALUES ($1, $2, $3, $4)`, [id, email, await hashPortalPassword(password), version])
@@ -129,12 +138,12 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('owner and caller password plus em
       [authDigest(auth.cookie.split('=')[1])])
     expect((await invoke('verifyLoginCode', { code: auth.code }, auth.cookie)).result.error).toBeTruthy()
   })
-  it('requires a new password-and-code login after five-minute inactivity', async () => {
+  it('requires a new password-and-code login after 30-minute inactivity', async () => {
     const person = await subject(), auth = await begin(person)
     const verified = await invoke('verifyLoginCode', { code: auth.code }, auth.cookie)
     const signed = cookieOf(verified.response, 'tp_session').split('=')[1]
     const payload = decodeSession(signed)!
-    await pool.query(`UPDATE auth_idle_sessions SET last_interaction_at = statement_timestamp() - interval '5 minutes'
+    await pool.query(`UPDATE auth_idle_sessions SET last_interaction_at = statement_timestamp() - interval '30 minutes'
       WHERE id = $1`, [payload.sessionId])
     expect(await getSessionFromRequest({ cookies: { tp_session: signed } } as unknown as Request)).toBeNull()
     expect((await invoke('verifyLoginCode', { code: auth.code }, auth.cookie)).result.error).toBeTruthy()
@@ -270,5 +279,118 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('owner and caller password plus em
     expect(result.result.error).toContain('could not send')
     expect(cookieOf(result.response, 'tp_login_challenge')).toBe('')
     expect(cookieOf(result.response, 'tp_session')).toBe('')
+  })
+})
+
+/** Sign in with a code and return the session and remembered-computer cookies. */
+async function signInWithCode(person: { id: string; email: string }) {
+  const auth = await begin(person)
+  const verified = await invoke('verifyLoginCode', { code: auth.code }, auth.cookie)
+  expect(verified.redirect).toBeTruthy()
+  return { session: cookieOf(verified.response, 'tp_session'),
+    device: cookieOf(verified.response, rememberedDeviceCookieName(person.id)) }
+}
+const loginEvents = async (id: string) => (await pool.query(
+  `SELECT metadata FROM activity_events WHERE participant_id = $1 AND event_type = 'login' ORDER BY created_at`, [id],
+)).rows.map(r => r.metadata as { authentication: string; emailCode: boolean })
+const liveDevices = async (id: string) => Number((await pool.query(
+  'SELECT count(*) FROM portal_auth_devices WHERE participant_id = $1 AND revoked_at IS NULL', [id])).rows[0].count)
+
+describe.skipIf(!process.env.SUPABASE_DB_URL)('remembered computer for 2 days after a correct code', { timeout: 30_000 }, () => {
+  it('skips the code on the same browser within 48 hours and records whether a code was used', async () => {
+    const person = await subject('staff'), first = await signInWithCode(person)
+    expect(first.device).toBeTruthy()
+    const row = (await pool.query(`SELECT credential_version,
+      EXTRACT(EPOCH FROM (expires_at - created_at)) AS seconds FROM portal_auth_devices WHERE participant_id = $1`, [person.id])).rows
+    expect(row).toHaveLength(1)
+    expect(row[0].credential_version).toBe(person.version)
+    expect(Math.abs(Number(row[0].seconds) - 48 * 3600)).toBeLessThan(1)
+    mail.send.mockClear()
+    const again = await invoke('login', { email: person.email, password, next: '/portal/settings' }, first.device)
+    expect(again.redirect).toBe('/portal/settings')
+    expect(again.result).toBeNull()
+    expect(mail.send).not.toHaveBeenCalled()
+    const session = cookieOf(again.response, 'tp_session')
+    expect(await getSessionFromRequest({ cookies: { tp_session: session.split('=')[1] } } as unknown as Request)).not.toBeNull()
+    // Signing in again does not restart the 48 hours.
+    expect(cookieOf(again.response, rememberedDeviceCookieName(person.id))).toBe('')
+    expect(await loginEvents(person.id)).toEqual([
+      { authentication: 'password_and_email_code', emailCode: true },
+      { authentication: 'password_and_remembered_computer', emailCode: false },
+    ])
+    // A wrong password is still refused on a remembered computer.
+    const denied = await invoke('login', { email: person.email, password: 'wrong password here' }, first.device)
+    expect(denied.result.error).toContain('Incorrect email or password')
+    expect(cookieOf(denied.response, 'tp_session')).toBe('')
+  })
+  it('asks for a code again after 48 hours, without the cookie, or for another person on the same computer', async () => {
+    const one = await subject(), two = await subject(), first = await signInWithCode(one)
+    const [, value] = first.device.split('=')
+    // Another account on this computer needs its own code, even with one's secret under its name.
+    for (const cookie of [first.device, `${rememberedDeviceCookieName(two.id)}=${value}`]) {
+      expect((await invoke('login', { email: two.email, password }, cookie)).result.codeSent).toBe(true)
+      await expireLimit('login-code-gap', two.id)
+    }
+    // A different browser (no cookie) needs a code.
+    await expireLimit('login-code-gap', one.id)
+    expect((await invoke('login', { email: one.email, password })).result.codeSent).toBe(true)
+    await expireLimit('login-code-gap', one.id)
+    // A tampered signature is ignored.
+    expect((await invoke('login', { email: one.email, password }, first.device.slice(0, -2) + 'xx')).result.codeSent).toBe(true)
+    await expireLimit('login-code-gap', one.id)
+    await pool.query('UPDATE portal_auth_devices SET expires_at = statement_timestamp() WHERE participant_id = $1', [one.id])
+    const expired = await invoke('login', { email: one.email, password }, first.device)
+    expect(expired.result.codeSent).toBe(true)
+    expect(cookieOf(expired.response, 'tp_session')).toBe('')
+  })
+  it('manual log out forgets this computer, but an inactivity logout does not', async () => {
+    const person = await subject(), first = await signInWithCode(person)
+    const payload = decodeSession(first.session.split('=')[1])!
+    // Inactivity: the session idles out and the browser's guard ends it.
+    await pool.query(`UPDATE auth_idle_sessions SET last_interaction_at = statement_timestamp() - interval '30 minutes'
+      WHERE id = $1`, [payload.sessionId])
+    const idleEnd = await fetch(base.replace('/actions/auth/', '/session/portal'), {
+      method: 'DELETE', headers: { cookie: `${first.session}; ${first.device}`, 'X-Session-Id': payload.sessionId },
+    })
+    expect(idleEnd.status).toBe(200)
+    expect(cookieOf(idleEnd, rememberedDeviceCookieName(person.id))).toBe('')
+    expect(idleEnd.headers.getSetCookie().some(c => c.startsWith(rememberedDeviceCookieName(person.id)))).toBe(false)
+    expect(await liveDevices(person.id)).toBe(1)
+    const back = await invoke('login', { email: person.email, password }, first.device)
+    expect(back.redirect).toBeTruthy()
+    const session = cookieOf(back.response, 'tp_session')
+    // Manual log out clears the cookie and revokes the record.
+    const out = await invoke('logout', {}, `${session}; ${first.device}`)
+    expect(out.response.headers.getSetCookie().some(c => c.startsWith(`${rememberedDeviceCookieName(person.id)}=;`))).toBe(true)
+    expect(await liveDevices(person.id)).toBe(0)
+    mail.send.mockClear()
+    await expireLimit('login-code-gap', person.id)
+    expect((await invoke('login', { email: person.email, password }, first.device)).result.codeSent).toBe(true)
+    expect(mail.send).toHaveBeenCalledTimes(1)
+  })
+  it('a password change or reset forgets every remembered computer', async () => {
+    const person = await subject(), first = await signInWithCode(person)
+    await pool.query(`INSERT INTO portal_auth_devices (id, participant_id, credential_version, expires_at)
+      VALUES ($1, $2, $3, statement_timestamp() + interval '1 day')`, [`other-${randomUUID()}`, person.id, person.version])
+    expect(await liveDevices(person.id)).toBe(2)
+    const setup = await createChallenge(person, 'password', null)
+    const changed = password + ' changed'
+    expect((await invoke('setPortalPassword', { token: setup.token, password: changed, confirm: changed })).result.codeSent).toBe(true)
+    expect(await liveDevices(person.id)).toBe(0)
+    await expireLimit('login-code-gap', person.id)
+    expect((await invoke('login', { email: person.email, password: changed }, first.device)).result.codeSent).toBe(true)
+  })
+  it('a deactivated or billing-blocked account cannot get in on a remembered computer', async () => {
+    const person = await subject('owner', true, false), first = await signInWithCode(person)
+    billing.blocked.add(person.id)
+    try {
+      const blocked = await invoke('login', { email: person.email, password }, first.device)
+      expect(blocked.result.billing).toBeTruthy()
+      expect(cookieOf(blocked.response, 'tp_session')).toBe('')
+    } finally { billing.blocked.delete(person.id) }
+    await pool.query('UPDATE participants SET is_active = false WHERE id = $1', [person.id])
+    const inactive = await invoke('login', { email: person.email, password }, first.device)
+    expect(inactive.result.error).toContain('Incorrect email or password')
+    expect(cookieOf(inactive.response, 'tp_session')).toBe('')
   })
 })

@@ -23,6 +23,7 @@ describe('portal password and email-code form', () => {
     type('Password', 'a long test password')
     fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
     await screen.findByLabelText('Sign-in code')
+    expect(screen.getByText(/this computer and browser won't need a code for 2 days/)).toBeTruthy()
     const form = actions.login.mock.calls[0][1] as FormData
     expect(form.get('email')).toBe('caller@example.invalid')
     expect(form.get('password')).toBe('a long test password')

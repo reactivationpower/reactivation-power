@@ -295,6 +295,13 @@
       "when": 1791988800000,
       "tag": "0041_hbot_reactivation",
       "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1792091569283,
+      "tag": "0042_remembered_devices",
+      "breakpoints": true
     }
   ]
 }

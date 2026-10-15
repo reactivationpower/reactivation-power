@@ -47,7 +47,7 @@ export default function LoginPage() {
             className="h-auto w-full max-w-xs sm:max-w-sm"
           />
           <p className="mt-2 text-sm text-muted-foreground text-pretty">
-            Sign in with your email, password, and a single-use email code.
+            Sign in with your email, password, and a single-use email code. After that, this computer won&apos;t need a code for 2 days.
           </p>
         </div>
         {billingNotice ? (
@@ -57,7 +57,7 @@ export default function LoginPage() {
         ) : null}
         <div className="rounded-xl border bg-card p-6 shadow-sm">
           {search.get('reason') === 'inactivity' && (
-            <p role="status" className="mb-4 text-sm text-muted-foreground">You were signed out after five minutes of inactivity. Please sign in again.</p>
+            <p role="status" className="mb-4 text-sm text-muted-foreground">You were signed out after 30 minutes of inactivity. Please sign in again.</p>
           )}
           <LoginForm next={next} email={prefillEmail} setupToken={setupToken} pendingLogin={pendingLogin} />
         </div>

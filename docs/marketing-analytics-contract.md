@@ -54,7 +54,7 @@ effort and missing/blocked tracking reduces totals.
 Detailed events default to 180-day retention. Non-identifying aggregates may be
 kept longer; conversion/audit and legal financial records have separate retention.
 Behavioral removal must not delete billing records. Administrative analytics
-requests must never refresh the five-minute human-activity timer.
+requests must never refresh the 30-minute human-activity timer.
 
 ## Recovery and aggregation details
 

@@ -3,6 +3,7 @@ import { pool, type PoolClient } from '@workspace/db'
 import {
   authDigest, authToken, CODE_LIFETIME_MS, LOGIN_CODE_RESEND_SECONDS, MAX_CODE_ATTEMPTS,
 } from './portal-password'
+import { revokeAllDevices } from './remembered-device'
 
 export interface AuthSubject { id: string; email: string }
 export interface Challenge {
@@ -174,6 +175,8 @@ export async function savePortalPassword(token: string, passwordHash: string): P
     // Resetting a password retires the participant's existing portal sessions.
     await client.query(`UPDATE auth_idle_sessions SET revoked_at = statement_timestamp()
       WHERE kind = 'portal' AND subject_id = $1 AND revoked_at IS NULL`, [target.participant_id])
+    // It also makes every remembered computer ask for a code again.
+    await revokeAllDevices(client, target.participant_id)
     return { participantId: target.participant_id, email: target.email, version }
   })
 }

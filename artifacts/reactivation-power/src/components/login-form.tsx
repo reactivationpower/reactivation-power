@@ -83,6 +83,7 @@ export function LoginForm({ next, email, setupToken, pendingLogin }: {
             Enter the six-digit code sent to {address || state.email || 'your registered email'}.
             It expires in five minutes and can only be used once.
             If you don't see it in a minute, check your spam or junk folder.
+            After you enter it, this computer and browser won't need a code for 2 days.
           </p>
           <div className="flex flex-col gap-2">
             <Label htmlFor="code">Sign-in code</Label>
