@@ -1,0 +1,93 @@
+/* Compact precision — tight rhythm, hairline dividers, aligned numerics */
+
+.cp-root {
+  font-feature-settings: 'ss01', 'cv11';
+}
+
+.cp-focus:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.cp-nav {
+  transition:
+    background-color 140ms ease,
+    color 140ms ease;
+}
+
+/* Metrics strip: hairline dividers between cells instead of separate boxes */
+.cp-metric {
+  border-top: 1px solid var(--border);
+}
+.cp-metric:first-child {
+  border-top: 0;
+}
+@media (min-width: 640px) {
+  .cp-metric:nth-child(2) {
+    border-top: 0;
+  }
+  .cp-metric:nth-child(odd) {
+    border-right: 1px solid var(--border);
+  }
+}
+@media (min-width: 1280px) {
+  .cp-metric {
+    border-top: 0;
+    border-right: 1px solid var(--border);
+  }
+  .cp-metric:last-child {
+    border-right: 0;
+  }
+}
+
+/* Row treatment: fixed 40px line height, quiet hover */
+.cp-row {
+  min-height: 2.5rem;
+  transition: background-color 140ms ease;
+}
+.cp-row:hover {
+  background-color: color-mix(in oklch, var(--muted) 60%, transparent);
+}
+
+/* Video table: title fluid, numeric columns fixed and right-aligned */
+.cp-video-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 5.5rem 5.5rem 5.5rem;
+  column-gap: 0.75rem;
+  align-items: center;
+  height: 2.5rem;
+}
+.cp-video-grid[role='row'] {
+  height: 1.75rem;
+}
+
+@media (max-width: 639px) {
+  .cp-video-grid {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'title time'
+      'starts completed';
+    height: auto;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    row-gap: 0.125rem;
+  }
+  .cp-video-grid > :nth-child(1) {
+    grid-area: title;
+  }
+  .cp-video-grid > :nth-child(2) {
+    grid-area: starts;
+    text-align: left;
+    padding-left: 1.625rem;
+  }
+  .cp-video-grid > :nth-child(3) {
+    grid-area: completed;
+    text-align: left;
+  }
+  .cp-video-grid > :nth-child(4) {
+    grid-area: time;
+  }
+  .cp-video-grid > .cp-cell {
+    font-size: 11.5px;
+  }
+}

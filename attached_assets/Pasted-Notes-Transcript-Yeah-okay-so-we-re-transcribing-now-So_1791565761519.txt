@@ -1,0 +1,101 @@
+Notes
+
+Transcript
+
+Yeah, okay, so we're transcribing now. So we were talking about text messaging. It would have to be a text, definitely through Kyrothen's preseason pre-warmed one because you're not gonna have to send stop to unsubscribe everyone. Now the cool thing is you could go after every single person in there, right? Like even the old people that spoke to you about adding Kyrothen that never signed up at all.
+
+Right, right. You know, and what, what you had said, some messaging that you just ripped off the top of your head. Like, it should be like, you know, check out this quick 4-minute video on how you can reactivate your old patients and Uh, you know, if you're running current— currently running advertisements, you could, you know, increase your both booked and show rates for those, those leads if your team's calling, right?
+
+Something like that. And then you could have a link, but we need to have, um, like an advertising source
+
+Tracking similar to an affiliate.
+
+Where let's say it's the— isn't it like
+
+The website forward slash strategy-call? No, it's, uh, the website is— no, no, no, I'm saying it's website slash strategy-call, right? For the landing page. For the landing page. We could send them to that page, but maybe we could have another URL extension on it. So it could be like forward slash, um, CT doc.
+
+Yes, ct/ct.
+
+Right, cttxt. And that means— and if we have somebody come in with that, it processes that, it stores it.
+
+And then when they submit their info, it then adds the attribution
+
+You'll have like an analytics page that shows like where your inbound leads are coming from, right? Right. You can track on the new leads tracker that in the admin. Yeah, that it just finished. And you can also track like what would end up closing sales and what's driving revenue and how much revenue. Stuff like that. Okay, you can have that all on a, on a page.
+
+And then each one of your different marketing channels, you could have its own extension of that URL. If you don't wanna do like CT text and like FB ads, right, you could do like an 8-digit string.
+
+And each one that you generate, you could have like a page on your backend of the admin.
+
+And it would be in your landing page thing, right? And you just go to the landing page that you want to use, you make sure the strategy-call is in there, you hit add or generate link, and you type in the source of the Facebook ads. You hit generate, it would give you that unique link, and it would store that in Supabase and then when somebody goes to that page, it knows that it's that without putting FB ads in the URL or without putting CT text in the URL.
+
+And maybe it's like a Random 5-digit number, letters and numbers, you know, like a— Is that something that Mohammed knows how to do, or— I would do that in Replic. No Mohammed. So then as far as the texting goes to this, what I'm going to call the Kyrothen databases,
+
+Obviously, we don't just want to send one text. We want to Well, Andrew had just said an opening line about watch the 4-minute video. But one approach that I came in here with the other morning, which was, I want to solve a problem that your office has. It's reactivation. This has been 25 years in the making. I've been tinkering with it for years, and finally I've been able to pull all of my thoughts into one website to solve your problem, which is the same problem that everybody else has: the inability to reactivate old patients ethically.
+
+That's something that you've said over and over again. 100%. I don't even think ethically is a— just reactivate things. Oh, it is a big deal. Compliantly. Compliantly. Yeah, nobody cares about that. Just— I'm just telling you, they just want to get people back in. I see people— I ask people all the time, you want to pay for HIPAA compliance? For texting, how much is it? $3.50 a month.
+
+No, I don't think— I say I'm not the police, I don't care. Right. You know, they don't care. They're trying to scale. And that could be more of the— but what you were just saying, that could be more of kind of like the organic content creation. Well, you know, there's different directions you can go with it, right? And that, that Specific thing was based on an Instagram post that I saw.
+
+I felt like it had some of your similar sentiment, and there are some of your doctors that I've heard you talk to that would resonate with something like that. It's a little more low-key, something I've been working on, something I wanted to promote to you. It's, it's a gentle way. There's other ways, but that was just something I wanted to put in this transcription so that we had that as well.
+
+As a, as a different path, because you're going to hit some people with some things. And that was something that resonated with me the other day that you express often.
+
+That would be nice to have at least in one of the messages, even if we're split testing them or something like that. But some of your people will go for something softer, right?
+
+I have a solution to your problem is what I call that. Okay.
+
+So I already have the email string built out. I think I already have the text message string built out, but it resulted in a 13%.
+
+thing. So I don't know that it's because they send a stop to unsubscribe. That's it. That's the biggest trigger because it's the— was it because first text? Gotcha.
+
+Once you get through that first text, you're good to go. You can spam everybody that you texted before. I got you. Okay, so one is there's no way to filter for that text and email.
+
+Go live.
+
+How many at a time, not how many texts, but how many texts combined with emails combined with other emails to other sources.
+
+would be good practices during one week.
+
+Because Jacob's calendar is only open so much. It's— his calendar's wide open. No, I know, but, but how many slots would— how many realistically you probably can take? Like 20. a week.
+
+15, 20, like 4 a day.
+
+20, 20 a week.
+
+Calls, 20 calls.
+
+Yeah, 4 phone calls per day, 5 days a week. How many emails can go out and how many texts can go out and how many You know, the other things? All of them until we need to slow it down. All of them. Okay. Because if he needs to, he can just click and drag to block off time for other stuff. Yeah. Because it'll read his availability. Would a new caller that— or new customer Coming into the system in any of these ways though be frustrated if they couldn't book a call with Jacob for 3 weeks?
+
+Like, what would be that next step? I don't think you're going to have— I don't think that's going to be something we need to worry about. And I appreciate that.
+
+Okay, so my action steps to get the text and emails to go live.
+
+Through the CT database is one, I need to get the new links.
+
+And the new link tracking setup in Replit. Once I get that new link, I need to basically have it take the current emails and text messages and have it replace the hyperlink on the schedule a call buttons to be specific for the Kyrothen doctors so we can start tracking that.
+
+So I need to have those links created. I need to have it update the links and all of the buttons.
+
+Where the, you know, click to schedule your call takes them. Why? Well, so that we can track it. It'll just know it. It'll just know that it came from that link.
+
+Okay. Well, like imagine like when you're on a site, it like stores it to your cookies essentially. Yeah. So it just knows it's you. Okay. And then I need to then make sure that Muhammad Because he's already loaded everything in, but I think he loaded it in, in patient pipeline.
+
+But we're going to be sending this through Kyrothen. So he's going to need to take all of the new text messages and all the new emails. And well, we don't— do you think— yeah, probably send the emails through Kyrothen as well because it's going to have a higher reach. Yeah, you could. Yeah, I would just go gentler with the emails for the moment.
+
+Just until you get it all squared away, you know, just on the odd chance.
+
+So you're saying do it the way Muhammad did it before but go slower, or do it the new way and have Muhammad do it the new way with Kyrothen and just slow it down a little bit? Because you don't want to impact your Kyrothen stuff too. Send one out, send 2 out, send 3 out, but you don't need to like if you're going to commit a crime, commit one crime. You don't need to drive 180 miles an hour, just drive like 75.
+
+One email but to an unlimited amount of customers? Exactly. Or is that one email to all of them? One email to 50% and then— No, no, no, to all of them everybody in your database, you get emailed. And you expect it to get shut down? No. Okay. No, I would not expect it to. Not going this route. Correct. Because you guys already sent out emails.
+
+We send out emails every day. Yeah.
+
+Okay, so that's the text and email.
+
+Next most important in your opinion?
+
+Next most important in your opinion?
+
+Is that raw cookie dough?
+
+Raw cookie dough is next, next most important on my list. Whole package.

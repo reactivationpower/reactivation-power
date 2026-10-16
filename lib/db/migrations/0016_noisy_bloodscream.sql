@@ -1,0 +1,1 @@
+ALTER TABLE "payment_link_terms" ADD COLUMN "billing_anchor" text DEFAULT 'thirty_days' NOT NULL;

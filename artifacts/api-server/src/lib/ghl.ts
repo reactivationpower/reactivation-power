@@ -1,0 +1,254 @@
+
+/**
+ * GoHighLevel API v2 helpers (services.leadconnectorhq.com).
+ * Auth: Private Integration token (sub-account) via GHL_API_TOKEN.
+ * Required scopes: contacts.write, contacts/notes.write (implied by
+ * contacts.write in private integrations), calendars.read,
+ * calendars/events.write.
+ */
+
+const GHL_BASE = 'https://services.leadconnectorhq.com'
+const GHL_VERSION = '2021-07-28'
+
+export function ghlConfigured(): boolean {
+  return Boolean(
+    process.env.GHL_API_TOKEN &&
+      process.env.GHL_LOCATION_ID &&
+      process.env.GHL_CALENDAR_ID,
+  )
+}
+
+async function ghlFetch(path: string, init?: RequestInit) {
+  const token = process.env.GHL_API_TOKEN
+  if (!token) throw new Error('GHL_API_TOKEN is not set')
+  const res = await fetch(`${GHL_BASE}${path}`, {
+    ...init,
+    signal: init?.signal ?? AbortSignal.timeout(15_000),
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Version: GHL_VERSION,
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      ...init?.headers,
+    },
+  })
+  const text = await res.text()
+  let json: unknown = null
+  try {
+    json = text ? JSON.parse(text) : null
+  } catch {
+    // non-JSON response body
+  }
+  if (!res.ok) {
+    const message =
+      (json as { message?: string | string[] } | null)?.message ?? text
+    const error = new Error(
+      `GHL ${init?.method ?? 'GET'} ${path} failed (${res.status}): ${
+        Array.isArray(message) ? message.join('; ') : message
+      }`,
+    )
+    Object.assign(error, { status: res.status })
+    throw error
+  }
+  return json
+}
+
+export interface GhlUpsertInput {
+  firstName: string
+  lastName: string
+  email: string
+  phone: string
+  companyName?: string
+  postalCode?: string
+  city?: string
+  state?: string
+  timezone?: string
+  tags?: string[]
+  source?: string
+}
+
+/**
+ * Upsert a contact (matched by email/phone). Returns the GHL contact id.
+ */
+export async function upsertGhlContact(
+  input: GhlUpsertInput,
+): Promise<string> {
+  const locationId = process.env.GHL_LOCATION_ID
+  if (!locationId) throw new Error('GHL_LOCATION_ID is not set')
+  const body: Record<string, unknown> = {
+    locationId,
+    firstName: input.firstName,
+    lastName: input.lastName,
+    email: input.email,
+    phone: input.phone,
+    country: 'US',
+  }
+  if (input.companyName) body.companyName = input.companyName
+  if (input.postalCode) body.postalCode = input.postalCode
+  if (input.city) body.city = input.city
+  if (input.state) body.state = input.state
+  if (input.timezone) body.timezone = input.timezone
+  if (input.tags?.length) body.tags = input.tags
+  if (input.source) body.source = input.source
+
+  const json = (await ghlFetch('/contacts/upsert', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  })) as { contact?: { id?: string } }
+  const id = json?.contact?.id
+  if (!id) throw new Error('GHL upsert returned no contact id')
+  return id
+}
+
+/** Fetch a contact's full name (for appointment titles). */
+export async function getGhlContactName(
+  contactId: string,
+): Promise<string | null> {
+  const json = (await ghlFetch(
+    `/contacts/${encodeURIComponent(contactId)}`,
+  )) as {
+    contact?: { firstName?: string; lastName?: string; contactName?: string }
+  }
+  const c = json?.contact
+  if (!c) return null
+  const name =
+    [c.firstName, c.lastName].filter(Boolean).join(' ').trim() ||
+    c.contactName?.trim() ||
+    ''
+  return name || null
+}
+
+// Cache custom-field IDs per fieldKey so each booking doesn't re-fetch
+const customFieldIdCache = new Map<string, string>()
+
+/** Resolve a location custom field's ID by its fieldKey. */
+async function getGhlCustomFieldId(fieldKey: string): Promise<string | null> {
+  const cached = customFieldIdCache.get(fieldKey)
+  if (cached) return cached
+  const locationId = process.env.GHL_LOCATION_ID
+  if (!locationId) throw new Error('GHL_LOCATION_ID is not set')
+  const json = (await ghlFetch(
+    `/locations/${encodeURIComponent(locationId)}/customFields`,
+  )) as { customFields?: Array<{ id?: string; fieldKey?: string }> }
+  const match = (json?.customFields ?? []).find(
+    (f) => f.fieldKey === fieldKey,
+  )
+  if (match?.id) {
+    customFieldIdCache.set(fieldKey, match.id)
+    return match.id
+  }
+  return null
+}
+
+/** Set a custom field value on a contact, looked up by fieldKey. */
+export async function setGhlContactCustomField(
+  contactId: string,
+  fieldKey: string,
+  value: string,
+): Promise<void> {
+  const fieldId = await getGhlCustomFieldId(fieldKey)
+  if (!fieldId) throw new Error(`GHL custom field not found: ${fieldKey}`)
+  await ghlFetch(`/contacts/${encodeURIComponent(contactId)}`, {
+    method: 'PUT',
+    body: JSON.stringify({
+      customFields: [{ id: fieldId, value }],
+    }),
+  })
+}
+
+/** Add a note to a contact. */
+export async function addGhlContactNote(
+  contactId: string,
+  noteBody: string,
+): Promise<void> {
+  await ghlFetch(`/contacts/${encodeURIComponent(contactId)}/notes`, {
+    method: 'POST',
+    body: JSON.stringify({ body: noteBody.slice(0, 5000) }),
+  })
+}
+
+/**
+ * Fetch free slots for the configured calendar between two instants,
+ * localized to the given IANA timezone. Returns a map of
+ * "YYYY-MM-DD" -> ISO slot strings (with offsets) in that timezone.
+ */
+export async function getGhlFreeSlots(params: {
+  startMs: number
+  endMs: number
+  timezone: string
+}): Promise<Record<string, string[]>> {
+  const calendarId = process.env.GHL_CALENDAR_ID
+  if (!calendarId) throw new Error('GHL_CALENDAR_ID is not set')
+
+  // GHL caps each free-slots request at 31 days, so chunk the window
+  // into <=30-day ranges and fetch them in parallel.
+  const CHUNK_MS = 30 * 24 * 60 * 60 * 1000
+  const ranges: Array<{ start: number; end: number }> = []
+  for (let start = params.startMs; start < params.endMs; start += CHUNK_MS) {
+    ranges.push({ start, end: Math.min(start + CHUNK_MS, params.endMs) })
+  }
+
+  const results = await Promise.all(
+    ranges.map((range) => {
+      const qs = new URLSearchParams({
+        startDate: String(range.start),
+        endDate: String(range.end),
+        timezone: params.timezone,
+      })
+      return ghlFetch(
+        `/calendars/${encodeURIComponent(calendarId)}/free-slots?${qs.toString()}`,
+      ) as Promise<Record<string, unknown>>
+    }),
+  )
+
+  const out: Record<string, string[]> = {}
+  for (const json of results) {
+    for (const [key, value] of Object.entries(json ?? {})) {
+      // Keys are dates like "2026-08-21"; skip metadata keys (e.g. traceId)
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(key)) continue
+      const slots = (value as { slots?: unknown })?.slots
+      if (Array.isArray(slots)) {
+        const clean = slots.filter((s): s is string => typeof s === 'string')
+        out[key] = out[key] ? [...out[key], ...clean] : clean
+      }
+    }
+  }
+  return out
+}
+
+/**
+ * Book an appointment on the configured calendar for a contact,
+ * marked confirmed. startTime must be an ISO string with offset.
+ */
+export async function bookGhlAppointment(params: {
+  contactId: string
+  startTime: string
+  title?: string
+}): Promise<string> {
+  const locationId = process.env.GHL_LOCATION_ID
+  const calendarId = process.env.GHL_CALENDAR_ID
+  if (!locationId || !calendarId)
+    throw new Error('GHL_LOCATION_ID / GHL_CALENDAR_ID is not set')
+
+  const json = (await ghlFetch('/calendars/events/appointments', {
+    method: 'POST',
+    body: JSON.stringify({
+      calendarId,
+      locationId,
+      contactId: params.contactId,
+      startTime: params.startTime,
+      appointmentStatus: 'confirmed',
+      title: params.title ?? 'Reactivation Power Strategy Call',
+      ignoreFreeSlotValidation: false,
+    }),
+  }).catch(error => {
+    // Definite validation/permission rejection is safe to retry; a timeout or
+    // server error may have committed an appointment and must be reconciled.
+    if (error?.status >= 400 && error.status < 500 && error.status !== 408)
+      Object.assign(error, { bookingRejected: true })
+    throw error
+  })) as { id?: string; event?: { id?: string } }
+  const id = json?.id ?? json?.event?.id
+  if (!id) throw new Error('Provider booking response did not contain an appointment ID')
+  return id
+}

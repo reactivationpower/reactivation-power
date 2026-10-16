@@ -1,0 +1,34 @@
+// @ts-nocheck
+
+import { DemoEntryForm } from '@/components/demo/demo-entry-form'
+
+
+
+export default function DemoPage() {
+  return (
+    <main className="flex min-h-svh items-center justify-center bg-card px-4 py-8">
+      <div className="w-full max-w-md">
+        <div className="mb-6 flex flex-col items-center text-center">
+          <img
+            src="/images/patient-pipeline-logo.png"
+            alt="Patient Pipeline"
+            width={2172}
+            height={724}
+            priority
+            className="h-auto w-full max-w-xs sm:max-w-sm"
+          />
+          <p className="mt-2 text-sm text-muted-foreground text-pretty">
+            Sales demo &middot; two sample practices
+          </p>
+        </div>
+        <div className="rounded-xl border bg-card p-6 shadow-sm">
+          <DemoEntryForm />
+        </div>
+        <p className="mt-6 text-center text-xs text-muted-foreground text-pretty">
+          Everything inside is sample data. Nothing you do here affects a real
+          account.
+        </p>
+      </div>
+    </main>
+  )
+}

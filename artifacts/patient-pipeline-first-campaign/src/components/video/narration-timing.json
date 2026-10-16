@@ -1,0 +1,68 @@
+{
+  "opening": {
+    "startMs": 0,
+    "durationMs": 26000,
+    "voiceStartMs": 650,
+    "voiceDurationMs": 24111
+  },
+  "preparation": {
+    "startMs": 26000,
+    "durationMs": 27500,
+    "voiceStartMs": 650,
+    "voiceDurationMs": 25548
+  },
+  "openCampaigns": {
+    "startMs": 53500,
+    "durationMs": 27000,
+    "voiceStartMs": 650,
+    "voiceDurationMs": 25391
+  },
+  "enterOffer": {
+    "startMs": 80500,
+    "durationMs": 47000,
+    "voiceStartMs": 650,
+    "voiceDurationMs": 45166
+  },
+  "priceAndSave": {
+    "startMs": 127500,
+    "durationMs": 34500,
+    "voiceStartMs": 650,
+    "voiceDurationMs": 32914
+  },
+  "findForm": {
+    "startMs": 162000,
+    "durationMs": 37500,
+    "voiceStartMs": 650,
+    "voiceDurationMs": 35709
+  },
+  "connectForm": {
+    "startMs": 199500,
+    "durationMs": 61000,
+    "voiceStartMs": 650,
+    "voiceDurationMs": 59481
+  },
+  "testForm": {
+    "startMs": 260500,
+    "durationMs": 50000,
+    "voiceStartMs": 650,
+    "voiceDurationMs": 48196
+  },
+  "practiceScript": {
+    "startMs": 310500,
+    "durationMs": 27000,
+    "voiceStartMs": 650,
+    "voiceDurationMs": 25156
+  },
+  "findLeads": {
+    "startMs": 337500,
+    "durationMs": 32000,
+    "voiceStartMs": 650,
+    "voiceDurationMs": 30198
+  },
+  "checklist": {
+    "startMs": 369500,
+    "durationMs": 36000,
+    "voiceStartMs": 650,
+    "voiceDurationMs": 34038
+  }
+}

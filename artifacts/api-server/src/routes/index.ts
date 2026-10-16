@@ -1,0 +1,40 @@
+import { Router, type IRouter } from "express";
+import healthRouter from "./health";
+import actionsRouter from "./actions";
+import pagesRouter from "./pages";
+import adminEmailsRouter from "./admin-emails";
+import adminMarketingTextsRouter from "./admin-marketing-texts";
+import cronRouter from "./cron";
+import mediaRouter from "./media";
+import publicMediaRouter from "./public-media";
+import progressRouter from "./progress";
+import templatesRouter from "./templates";
+import uploadRouter from "./upload";
+import configRouter from "./config";
+import webhooksResendRouter from "./webhooks-resend";
+import webhooksStripeRouter from "./webhooks-stripe";
+import agreementsRouter from "./agreements";
+import sessionRouter from './session';
+import patientTextingWebhooks from './webhooks-patient-texting';
+
+const router: IRouter = Router();
+router.use(sessionRouter);
+router.use(patientTextingWebhooks);
+
+router.use(healthRouter);
+router.use(actionsRouter);
+router.use(pagesRouter);
+router.use(adminEmailsRouter);
+router.use(adminMarketingTextsRouter);
+router.use(cronRouter);
+router.use(mediaRouter);
+router.use(publicMediaRouter);
+router.use(agreementsRouter);
+router.use(progressRouter);
+router.use(templatesRouter);
+router.use(uploadRouter);
+router.use(configRouter);
+router.use(webhooksResendRouter);
+router.use(webhooksStripeRouter);
+
+export default router;

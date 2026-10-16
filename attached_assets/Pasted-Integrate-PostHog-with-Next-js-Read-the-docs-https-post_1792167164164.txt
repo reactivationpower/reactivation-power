@@ -1,0 +1,68 @@
+Integrate PostHog with Next.js
+[Read the docs](https://posthog.com/docs/libraries/next-js)
+Automated installation
+AI setup wizard
+Try using the AI setup wizard to automatically install PostHog.
+
+Run the following command from the root of your Next.js project.
+
+npx -y @posthog/wizard@latest
+OR
+Manual installation
+1. Install the package
+required
+Install the PostHog JavaScript library using your package manager:
+
+npm
+yarn
+pnpm
+bun
+npm install posthog-js
+2. Add environment variables
+required
+Add your PostHog project token and host to your .env.local file and to your hosting provider (e.g. Vercel, Netlify). These values need to start with NEXT_PUBLIC_ to be accessible on the client-side.
+
+NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN=phc_si4xCLsEb88Cm5DpDvGh3L5b59xSoBigXafqxURkHRbd
+NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com
+API host:
+https://us.i.posthog.com
+3. Initialize PostHog
+required
+Choose the integration method based on your Next.js version and router type.
+
+Next.js 15.3+
+App router
+Pages router
+If you're using Next.js 15.3+, you can use instrumentation-client.ts for a lightweight, fast integration:
+
+import posthog from 'posthog-js'
+
+posthog.init(process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN!, {
+    api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
+    defaults: '2026-05-30'
+})
+Defaults option
+The defaults option automatically configures PostHog with recommended settings for new projects. See [SDK defaults](https://posthog.com/docs/libraries/js#sdk-defaults) for details.
+
+4. Accessing PostHog on the client
+recommended
+Next.js 15.3+
+App/Pages router
+Once initialized in instrumentation-client.ts, import posthog from posthog-js anywhere and call the methods you need:
+
+'use client'
+
+import posthog from 'posthog-js'
+
+export default function CheckoutPage() {
+    function handlePurchase() {
+        posthog.capture('purchase_completed', { amount: 99 })
+    }
+
+    return <button onClick={handlePurchase}>Complete purchase</button>
+}
+5. Watch session recordings
+recommended
+Visit your site or app and interact with it for at least 10 seconds to generate a recording. Navigate between pages, click buttons, and fill out forms to capture meaningful interactions.
+
+[Watch your first recording →](https://app.posthog.com/replay/home)

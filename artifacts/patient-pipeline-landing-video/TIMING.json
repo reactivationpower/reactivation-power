@@ -1,0 +1,65 @@
+{
+  "totalMs": 145999,
+  "mixFile": "public/audio/landing-composite-reactivation-120.mp3",
+  "narrationTempo": 1.2,
+  "pitchPreserved": true,
+  "musicTempo": 1,
+  "scenes": [
+    {
+      "key": "opportunity",
+      "startMs": 0,
+      "durationMs": 29900,
+      "voiceoverDelayMs": 250,
+      "voiceoverFile": "artifacts/patient-pipeline-landing-video/public/audio/vo-opportunity-three-months.mp3"
+    },
+    {
+      "key": "introduction",
+      "startMs": 29900,
+      "durationMs": 12750,
+      "voiceoverDelayMs": 250,
+      "voiceoverFile": "artifacts/patient-pipeline-landing-video/public/audio/vo-introduction-final.mp3"
+    },
+    {
+      "key": "niches",
+      "durationMs": 11100,
+      "voiceoverDelayMs": 250,
+      "voiceoverFile": "artifacts/patient-pipeline-landing-video/public/audio/vo-niches-base.mp3",
+      "startMs": 42650
+    },
+    {
+      "key": "reactivation",
+      "startMs": 53750,
+      "durationMs": 21000,
+      "voiceoverDelayMs": 250,
+      "voiceoverFile": "artifacts/patient-pipeline-landing-video/public/audio/vo-reactivation-final.mp3"
+    },
+    {
+      "key": "lead",
+      "startMs": 74750,
+      "durationMs": 16083,
+      "voiceoverDelayMs": 250,
+      "voiceoverFile": "artifacts/patient-pipeline-landing-video/public/audio/vo-lead-final.mp3"
+    },
+    {
+      "key": "workflow",
+      "startMs": 90833,
+      "durationMs": 11750,
+      "voiceoverDelayMs": 250,
+      "voiceoverFile": "artifacts/patient-pipeline-landing-video/public/audio/vo-workflow-owner-team.mp3"
+    },
+    {
+      "key": "revenue",
+      "startMs": 102583,
+      "durationMs": 28583,
+      "voiceoverDelayMs": 250,
+      "voiceoverFile": "artifacts/patient-pipeline-landing-video/public/audio/vo-revenue-monthly.mp3"
+    },
+    {
+      "key": "invitation",
+      "startMs": 131166,
+      "durationMs": 14833,
+      "voiceoverDelayMs": 250,
+      "voiceoverFile": "artifacts/patient-pipeline-landing-video/public/audio/vo-invitation-final.mp3"
+    }
+  ]
+}

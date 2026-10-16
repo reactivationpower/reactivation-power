@@ -1,0 +1,41 @@
+/* Styles specific to the CalculatorUp variant's combined calculator. */
+
+/*
+ * Product cards: no hover lift. The shared .dph-panel:hover rule nudges the
+ * hovered card up 2px, which makes the two "Explore" buttons look misaligned
+ * whenever the cursor rests on one card. Keep the shadow change, drop the move.
+ */
+.dph .dph-panel:hover {
+  transform: none;
+}
+
+.dph .dph-combo {
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.04), 0 24px 48px -28px rgb(15 23 42 / 0.3);
+}
+
+.dph .dph-combo-total {
+  background: hsl(var(--primary));
+  background-image:
+    radial-gradient(36rem 18rem at 100% 0%, color-mix(in oklch, hsl(var(--accent)) 45%, transparent), transparent 70%);
+}
+
+/* Navy-toned slider for the Lead Follow-Up half */
+.dph .range-slider.dph-range-navy {
+  background: linear-gradient(
+    to right,
+    hsl(var(--primary)) 0%,
+    hsl(var(--primary)) var(--range-pct),
+    hsl(var(--input)) var(--range-pct),
+    hsl(var(--input)) 100%
+  );
+}
+.dph .range-slider.dph-range-navy:focus-visible {
+  box-shadow: 0 0 0 3px hsl(var(--primary) / 0.3);
+}
+.dph .range-slider.dph-range-navy::-webkit-slider-thumb {
+  border-color: hsl(var(--primary));
+}
+.dph .range-slider.dph-range-navy::-moz-range-thumb {
+  border-color: hsl(var(--primary));
+}

@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mohammed — Patient Pipeline GHL walkthrough email setup</title>
+<style>
+body{margin:0;background:#f3f5f6;color:#183042;font:16px/1.6 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}main{max-width:900px;margin:32px auto;background:#fff;padding:44px;border-radius:12px}h1{font-size:30px;line-height:1.2;margin:0 0 14px}h2{font-size:23px;line-height:1.3;margin-top:36px;padding-bottom:8px;border-bottom:2px solid #dcebe8}h3{font-size:18px;margin-top:24px}a{color:#087c71;overflow-wrap:anywhere}.note{background:#eff7f5;border-left:4px solid #087c71;padding:15px 18px;margin:20px 0}.warning{background:#fff6e8;border-left:4px solid #c7892b;padding:15px 18px;margin:20px 0}code{background:#eef1f3;border-radius:4px;padding:2px 5px;font-size:14px}table{width:100%;border-collapse:collapse;margin:18px 0}th,td{padding:12px;border:1px solid #dce3e6;text-align:left;vertical-align:top}th{background:#eff7f5}.email{border:1px solid #dce3e6;border-radius:8px;padding:20px;background:#fafcfc}.email p:last-child{margin-bottom:0}li{margin:7px 0}.meta{color:#526b78;font-size:14px}.checklist{list-style:none;padding-left:0}.checklist li:before{content:"□ ";font-weight:700}@media(max-width:640px){main{margin:0;padding:24px;border-radius:0}table{font-size:14px}th,td{padding:8px}}@media print{body{background:#fff;font-size:11pt}main{margin:0;padding:0;max-width:none}h2,h3{break-after:avoid}.email,.note,.warning,tr{break-inside:avoid}a{color:#183042}button{display:none}}button{background:#087c71;color:#fff;border:0;border-radius:6px;padding:10px 18px;font:inherit;cursor:pointer}
+</style>
+</head>
+<body><main>
+<p class="meta">Patient Pipeline · Setup handoff for Mohammed · October 6, 2026</p>
+<h1>Send the full walkthrough to every new website inquiry</h1>
+<p><strong>Goal:</strong> Every eligible person who submits their information receives the full product walkthrough, whether or not they choose an appointment. Unbooked prospects get a clear invitation to schedule. Booked prospects get preparation information, not repeated invitations to book.</p>
+<button type="button" onclick="window.print()">Print / save as PDF</button>
+<div class="warning"><strong>This is a setup guide, not a claim that GHL has already been configured.</strong> Website integration behavior has been checked in the application code; the live GHL workflows have not been inspected or changed. Start by checking the existing welcome and booking workflows. Edit them where appropriate instead of creating duplicate email sequences. The new walkthrough page and video placement must be published before these email links are activated.</div>
+
+<h2>1. Links and assets</h2>
+<table>
+<tr><th>Purpose</th><th>Use this link</th></tr>
+<tr><td>Full product walkthrough — use in emails</td><td><a href="https://patientpipeline.app/walkthrough">https://patientpipeline.app/walkthrough</a><br>Approximately 4 minutes. No login or extra form required.</td></tr>
+<tr><td>Schedule a strategy call</td><td><a href="https://patientpipeline.app/schedule-a-call">https://patientpipeline.app/schedule-a-call</a><br>The website collects practice information before displaying its calendar.</td></tr>
+<tr><td>Landing page</td><td><a href="https://patientpipeline.app/">https://patientpipeline.app/</a><br>Short introduction near the top; full walkthrough farther down.</td></tr>
+<tr><td>Optional email thumbnail</td><td><a href="https://patientpipeline.app/videos/patient-pipeline-walkthrough.jpg">https://patientpipeline.app/videos/patient-pipeline-walkthrough.jpg</a><br>Upload this image to GHL's media library and link it to the walkthrough page. Add a play icon in GHL if desired.</td></tr>
+</table>
+<p>Use a linked thumbnail and a <strong>Watch the full walkthrough</strong> button, plus a normal text link. Do not attach the MP4 or depend on a video playing inside the email. Use the longer walkthrough, not the short landing-page introduction.</p>
+<p>The booking link above is the supported public entry point. It may ask an existing lead for their information again; test the experience. Do not invent a GHL personalized calendar link, contact-ID URL, or bypass link unless the current system actually supports it.</p>
+
+<h2>2. Check the existing GHL setup first</h2>
+<ol>
+<li>Open the GHL location used by the Patient Pipeline website and find its existing lead/welcome workflows and strategy-call calendar. Confirm the exact calendar used by the website with the owner or technical team; do not substitute another calendar.</li>
+<li>The website creates or updates the GHL contact through the API and applies the existing tags <code>healthcare-funnel</code> and <code>reactivation-power-lead</code>. These are legacy technical names; keep them unchanged. Customer-facing emails should say <strong>Patient Pipeline</strong>.</li>
+<li>Use <strong>Contact Tag → Added → healthcare-funnel</strong> for new inquiry enrollment, filtered to this funnel. Do not rely on GHL's <strong>Form Submitted</strong> trigger: the website uses its own form, not a native GHL form. “Contact Created” alone also misses existing contacts.</li>
+<li>The website books appointments through the API with status <strong>Confirmed</strong>. Booking automation must use <strong>Appointment Status</strong>, filtered to the correct strategy-call calendar and Confirmed status. Include API-created appointments; do not restrict the trigger to customer/widget bookings. If other supported booking methods create New status first, cover that event too, with duplicate protection.</li>
+<li>Check that the current sender address/domain is authenticated, replies reach the right team, unsubscribe handling works, and email DND/opt-out is respected. Do not override suppression to force the walkthrough email.</li>
+</ol>
+<div class="note"><strong>Important:</strong> A tag trigger reacts to a new tag addition, not every submission by a contact who already has that tag. This guide sends the initial welcome once per contact. Existing tagged contacts do not automatically enroll when a workflow is published. Do not mass-enroll historical leads. If repeat submissions should restart the sequence later, that needs an explicit event and separate approval.</div>
+
+<h2>3. Workflow A — Thank you + walkthrough</h2>
+<p><strong>Name:</strong> Patient Pipeline — Inquiry Welcome + Walkthrough</p>
+<ol>
+<li>Edit the existing funnel welcome workflow if it already serves this purpose; otherwise create this one. Use the Contact Tag trigger above. Disable repeat enrollment for this welcome.</li>
+<li>Check a new tracking tag, <code>pp-walkthrough-welcome-sent</code>. If present, end. Ensure no other workflow is sending a duplicate initial welcome.</li>
+<li>Send the thank-you email promptly, regardless of booking status. Use the universal copy below so a booking made while the email is queued does not make the message incorrect.</li>
+<li>After the email action completes successfully, add <code>pp-walkthrough-welcome-sent</code>. This means the send action completed, not that the email was delivered or the video watched. Check failed send actions separately.</li>
+<li>If the person is eligible for follow-up and has no active strategy-call booking, add them to Workflow C below. Workflow C must recheck booking status on entry.</li>
+</ol>
+<div class="email">
+<p><strong>Subject:</strong> Your Patient Pipeline walkthrough</p>
+<p>Hi {{contact.first_name}},</p>
+<p>Thanks for telling us about your practice.</p>
+<p>This four-minute walkthrough shows how your team can reconnect with past patients and follow up with incoming campaign leads using guided scripts and an organized follow-up process.</p>
+<p><a href="https://patientpipeline.app/walkthrough"><strong>Watch the full walkthrough</strong></a></p>
+<p>If you haven’t chosen a time to speak with us yet, you can <a href="https://patientpipeline.app/schedule-a-call">schedule your strategy call here</a>.</p>
+<p>If you’ve already booked, you’re all set. Watch whenever it’s convenient, and bring your questions—we can show you anything you’d like to explore in more detail.</p>
+<p>Questions before then? Reply to this email.<br>The Patient Pipeline Team</p>
+</div>
+<p>Use GHL's merge-field picker to insert the first name and set a sensible fallback for missing names. Keep the existing appropriate business footer and unsubscribe link.</p>
+
+<h2>4. Workflow B — Booked: stop invitations and prepare for the call</h2>
+<p><strong>Name:</strong> Patient Pipeline — Strategy Call Booked</p>
+<ol>
+<li>Modify the existing booking-confirmation workflow wherever possible. Use the <strong>Appointment Status</strong> trigger described above; enroll the primary contact only.</li>
+<li>Immediately add a new state tag, <code>pp-strategy-call-booked</code>, and remove the contact from <strong>Workflow C only</strong>. Do not remove them from Workflow A before their initial walkthrough email can be sent.</li>
+<li>Add the walkthrough link to the existing confirmation email. Keep the appointment's date, time, timezone, meeting/join details, and legitimate reschedule/cancel links. Do not create a second competing confirmation email.</li>
+<li>Use appointment-context merge fields from GHL's picker. The website also attempts to update <code>{{contact.appointment_date_and_time}}</code> after creating the appointment; that update can lag or fail, so do not treat the field as the booking signal or send blank/stale details. Test which fields resolve in the actual workflow.</li>
+<li>Include the walkthrough link in the existing pre-call reminder as an optional preparation step; preserve its appointment-relative timing. Do not require viewing to attend.</li>
+<li>Protect against duplicate confirmations for the same appointment if multiple triggers fire. Do not use a permanent “confirmation sent” tag that would block a later legitimate appointment or reschedule. Use the existing appointment workflow's repeat/enrollment behavior and verify it.</li>
+</ol>
+<div class="email">
+<p><strong>Suggested preparation copy for the confirmation email:</strong></p>
+<p>Before we meet, this four-minute walkthrough will show you how Patient Pipeline works.</p>
+<p><a href="https://patientpipeline.app/walkthrough"><strong>Watch the full walkthrough</strong></a></p>
+<p>Bring your questions about how it would fit your office. During our call, we can show you the specific features or workflows you want to explore.</p>
+</div>
+<p><strong>Cancellations and reschedules:</strong> Preserve existing calendar automations. Treat <code>pp-strategy-call-booked</code> as a derived state marker, not the permanent source of truth. A canceled appointment should not automatically restart this sales sequence. If updating the marker, check for another active appointment first; a cancellation during rescheduling must not trigger “you haven’t booked” emails. Completed or no-show appointments should not automatically receive fresh booking invitations from this sequence.</p>
+
+<h2>5. Workflow C — One follow-up for unbooked inquiries</h2>
+<p><strong>Name:</strong> Patient Pipeline — Unbooked Walkthrough Follow-Up</p>
+<ol>
+<li>Enroll only from Workflow A after the initial welcome action. Disable repeat enrollment for this initial sequence.</li>
+<li>On entry, exit if the contact has an active strategy-call booking, the booked marker, a reply needing staff attention, email DND/unsubscribe, or the follow-up-sent tag.</li>
+<li>Wait <strong>24 hours</strong>.</li>
+<li>Immediately before sending, repeat those checks. Configure stop-on-response for this follow-up workflow and verify replies are recognized by the connected mailbox.</li>
+<li>Send the single follow-up below, add <code>pp-walkthrough-followup-sent</code> after successful send, and end. Do not add more emails or SMS to this new sequence without approval.</li>
+</ol>
+<div class="email">
+<p><strong>Subject:</strong> Would you like to see how this fits your practice?</p>
+<p>Hi {{contact.first_name}},</p>
+<p>In case you haven’t had a chance yet, here’s the <a href="https://patientpipeline.app/walkthrough">Patient Pipeline walkthrough</a>.</p>
+<p>If you’d like to discuss how Reactivation and Lead Follow-Up could fit your office, <a href="https://patientpipeline.app/schedule-a-call"><strong>choose a time for a strategy call</strong></a>.</p>
+<p>Or reply with a question, and our team can help.<br>The Patient Pipeline Team</p>
+</div>
+<p>Use the calendar's actual active appointment state where supported, plus the marker populated by Workflow B. Do not use an email open, link click, opportunity stage, or the appointment-date text field as proof of booking. If GHL's available conditions cannot check the correct calendar state, test the marker workflow carefully and flag that limitation before activating reminders.</p>
+
+<h2>6. Test before activating for real leads</h2>
+<p>Build in draft, then test with designated staff-owned addresses and phones. Tag triggers require an active workflow to fire; use a controlled test copy with an additional test-contact filter, or test actions manually before enabling the production trigger. Do not leave both test and production workflows sending to the same contacts. Do not bulk-message the existing database.</p>
+<ul class="checklist">
+<li>Publish the updated website first. Open the walkthrough link signed out on desktop and mobile; confirm video playback, sound, seeking, poster, and scheduling link.</li>
+<li>Submit a brand-new test contact through the actual website and do not book. Confirm correct GHL tags, one initial welcome, correct walkthrough link, and one follow-up after the wait. A temporary shorter wait is acceptable in a test copy only.</li>
+<li>Submit a test contact and book immediately through the website. Confirm the API-created Confirmed appointment triggers Workflow B, the welcome still arrives once, confirmation details are correct, and no unbooked reminder arrives.</li>
+<li>Book after the initial welcome but before the 24-hour wait ends. Confirm pending unbooked follow-up is stopped.</li>
+<li>Test an existing contact without the funnel tag, and a contact already carrying it. Verify expected one-time enrollment; never remove live customers' tags just to force testing.</li>
+<li>Submit twice, reschedule, and cancel. Confirm no duplicate initial welcomes, duplicate confirmations, or inappropriate booking invitations. Also test an unrelated calendar appointment: it must not count as a Patient Pipeline strategy-call booking.</li>
+<li>Test missing first name, a reply, email DND, and unsubscribe. Check suppression and merge-field behavior without overriding it.</li>
+<li>Restore production wait times, remove test-only conditions from the intended production workflows, ensure old competing send actions are disabled, then activate the final workflows.</li>
+</ul>
+<p><strong>Return to the owner:</strong> Workflow names/links, trigger and calendar screenshots, email previews, test-contact results, and confirmation that duplicate sends and unbooked reminders are prevented after booking. Keep actual personal information out of shared screenshots.</p>
+
+<h2>7. Sales-team use</h2>
+<p>At the start of the call ask: “Did you get a chance to watch the walkthrough?” and “Are you mainly looking to bring past patients back, improve lead follow-up, or both?”</p>
+<p>If they watched it, move straight to questions and targeted live demonstrations. If they did not, use the four-minute recording as the consistent baseline demo, then show the relevant functionality live. Receiving or clicking the email is <strong>not</strong> proof that someone watched the video.</p>
+<p>Track initial-email sends, walkthrough-link clicks, and actual strategy-call bookings separately. Do not report link clicks as completed video views.</p>
+
+<h2>Official GHL references</h2>
+<ul>
+<li><a href="https://help.gohighlevel.com/support/solutions/articles/155000002482-workflow-trigger-contact-tag">Contact Tag trigger: tag additions, enrollment, and overlap behavior</a></li>
+<li><a href="https://help.gohighlevel.com/support/solutions/articles/155000002619-workflow-trigger-appointment-status">Appointment Status trigger: calendar, Confirmed status, and API source filters</a></li>
+</ul>
+<p class="meta">Technical integration names above are intentional. Customer-facing branding remains Patient Pipeline. No GHL workflows, live submissions, or outbound emails were changed while preparing this handoff.</p>
+</main></body></html>

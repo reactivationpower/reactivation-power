@@ -1,0 +1,21 @@
+Patient Pipeline first-campaign video — browser capture inventory
+
+Captured (authentic seeded-demo UI; 1280×720 PNG):
+- pp-welcome.png
+- pp-campaigns.png
+- pp-editor-offer.png
+- pp-editor-price.png
+- pp-campaign-detail.png
+- pp-connect-closed.png
+- pp-connect-options.png
+- pp-practice-open.png
+- pp-practice-next.png
+- pp-lead-due.png
+- pp-all-leads.png
+
+Not captured / gaps:
+- pp-connect-facebook.png and pp-connect-fields.png not captured: seeded campaigns have no saved lead-source choice; selecting one would write to the database. The expanded unselected source chooser is captured as pp-connect-options.png.
+- pp-connect-waiting.png and pp-connect-internal.png not captured: the receipt and internal-test disclosure are only shown after a source is selected; no source was selected and no internal test was sent.
+- pp-lead-call.png not captured: opening Call Now claims a lead-call lease (database write); no call session was started.
+
+Privacy and integrity: isolated Chrome CDP tab; authenticated using DEMO_PASSWORD without logging it; browser-only masking/redaction; no campaign was created or saved; no lead source was changed; no internal test was sent; no external receipt or lead was fabricated. No call lease was claimed.

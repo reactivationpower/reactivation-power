@@ -1,0 +1,1089 @@
+{
+  "niche": {
+    "name": "HVAC",
+    "sector": "home_services",
+    "is_active": true,
+    "sort_order": 22
+  },
+  "steps": [
+    {
+      "step_key": "open",
+      "title": "The open",
+      "content": "Hi, this is {{caller_name}} with {{practice_name}}. Is {{contact_first_name}} available, please?\n\nHi {{contact_first_name}}. We're updating our service records on customers we haven't seen in a while, and yours came up. {{asked_by_provider}} I wanted to check that your heating and cooling is still doing what it should. Do you have a quick minute?",
+      "sort_order": 0
+    },
+    {
+      "step_key": "opening_question",
+      "title": "The opening question",
+      "content": "So {{contact_first_name}}, how has the system been since we were last out? I usually hear one of three things. Still running great, starting to act up a little, or real problems. Which one is closest for you?\n\n(Click the one you hear.)",
+      "sort_order": 1
+    },
+    {
+      "step_key": "resp_great",
+      "title": "Still running great",
+      "content": "That's great to hear, {{contact_first_name}}. That's what we like to hear.\n\nWhile I have you, when was the system last looked at or serviced?\n\n(Let them answer. Click the closest one: recent, a while, or not sure.)",
+      "sort_order": 2
+    },
+    {
+      "step_key": "resp_acting_up",
+      "title": "Starting to act up",
+      "content": "I appreciate you telling me that, {{contact_first_name}}. That does happen over time. The good news is you caught it while it's still small. Small things are a lot easier to fix than big ones.\n\n(Let them respond.)",
+      "sort_order": 3
+    },
+    {
+      "step_key": "resp_problems",
+      "title": "Real problems",
+      "content": "I'm sorry to hear that, {{contact_first_name}}. That's frustrating, and I'm glad we called when we did. What's been going on?\n\n(Let them answer. Listen. Do not book anything yet.)\n\n(Gas smell, burning smell, sparking, or a carbon monoxide alarm: press the URGENT button.)",
+      "sort_order": 4
+    },
+    {
+      "step_key": "svc_recent",
+      "title": "Serviced recently",
+      "content": "That's great, {{contact_first_name}}. Most people don't keep up with it, and it's why yours is still running well.\n\nOne more thing. Even with everything running well, have you noticed any small early signs? A room that never feels right, a new noise, or bills going up.\n\n(Let them answer.)",
+      "sort_order": 5
+    },
+    {
+      "step_key": "svc_while",
+      "title": "It’s been a while",
+      "content": "About how long would you say?\n\n(Let them answer.)\n\nThat's common. These systems just do their job, so time gets away from you.\n\nCan I share why I ask?\n\n(Wait for the yes.)\n\nThe longer a system goes without a look, the more likely something small is waiting to be found. A worn part, a dirty coil, something simple. Caught now, those are quick, cheap fixes. A freshly serviced system also runs better, so it costs less every month. Left alone, that small stuff turns into the big breakdown. Usually on the hottest or coldest day of the year.\n\nDoes that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nSince it's been a while, I'd suggest we give the system a full check and service. Then you know it's running the way it should. If it all looks great, that's good news too.\n\nDoes that sound reasonable?\n\n(Wait for the yes.)\n\nGreat, let me see what we have available.\n\n(Things to note for the visit: tune-up, maintenance agreement, system check.)",
+      "sort_order": 6
+    },
+    {
+      "step_key": "svc_unknown",
+      "title": "Doesn’t know when it was serviced",
+      "content": "No problem, most people don't keep track of that. These systems are out of sight, out of mind until something goes wrong.\n\nCan I share why I ask?\n\n(Wait for the yes.)\n\nTwo reasons. A serviced system runs better, so it costs you less every month. And the bigger one. When a technician catches a small problem early, it's usually a quick, cheap fix. The small stuff nobody catches is what turns into the big breakdown. That always seems to happen on the hottest or coldest day of the year.\n\nDoes that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nSince nobody's sure where the system stands, I'd suggest we give it a full check. Then you know what shape it's in. If it all looks great, that's good news too.\n\nDoes that sound reasonable?\n\n(Wait for the yes.)\n\nGreat, let me see what we have available.",
+      "sort_order": 7
+    },
+    {
+      "step_key": "maint_rec",
+      "title": "Maintenance plan",
+      "content": "That's great that you're staying on top of it. You're ahead of most people.\n\nCan I share a thought?\n\n(Wait for the yes.)\n\nThe hardest part of maintenance isn't the service. It's remembering to schedule it. Life gets busy, a season slips by, and something small gets missed. With a maintenance plan you never have to remember. We remember for you. It stays on a regular schedule, and small things get caught while they're still cheap to fix. A regularly serviced system also costs less to run.\n\nDoes that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nSince you're already taking care of the system, let us handle the regular maintenance from here. That way it's off your plate.\n\nDoes that sound reasonable?\n\n(Wait for the yes.)\n\nGreat, let me see what we have available.\n\n(Things to note for the visit: tune-up, maintenance agreement, system check.)",
+      "sort_order": 8
+    },
+    {
+      "step_key": "transition",
+      "title": "The transition",
+      "content": "Well {{contact_first_name}}, I'm glad we connected today. Can I ask you a few quick questions so I can update your service records?\n\n(Wait for the yes.)",
+      "sort_order": 9
+    },
+    {
+      "step_key": "digging_in",
+      "title": "Questions: update the records",
+      "content": "Can I ask you a few quick things while I have you, {{contact_first_name}}?\n\n(Ask one at a time. Note which ones come up. Do not dig into any single one yet.)\n\nIs the heating and cooling keeping up with what you set?\n\nAny rooms that are always hotter or colder than the rest?\n\nHow about dust, allergies, or humidity in the house?\n\nAny new noises or smells when it kicks on?\n\nHave the bills been higher than last year?\n\nHow old is the system, roughly?\n\nAnd how's the thermostat, is it doing what you tell it?\n\nSo it sounds like the big ones are (the ones they named). Is that right?\n\nOf those, which one bothers you the most?\n\n(Tap the chip and click the button for the one they name.)",
+      "sort_order": 10
+    },
+    {
+      "step_key": "f_comfort",
+      "title": "Focus: not heating or cooling right",
+      "content": "That's one of the most common things we hear, {{contact_first_name}}. The frustrating part is you're still paying full price for comfort you're not getting.\n\nIs it the whole house, or worse in certain rooms?\n\n(Let them answer.)\n\nDoes it struggle more on the really hot or really cold days?\n\n(Note their answers. This tells the technician where to start.)",
+      "sort_order": 11
+    },
+    {
+      "step_key": "f_rooms",
+      "title": "Focus: hot and cold rooms",
+      "content": "That's a common one, {{contact_first_name}}. People live with it for years thinking that's just how the house is. It usually isn't. Most of the time it's an airflow problem, and those are very fixable.\n\nWhich rooms are the problem ones?\n\n(Let them answer.)\n\nIs it worse in summer, winter, or both?\n\n(Note their answers for the technician.)",
+      "sort_order": 12
+    },
+    {
+      "step_key": "f_air",
+      "title": "Focus: air quality and humidity",
+      "content": "I'm glad you brought that up, {{contact_first_name}}. The system isn't just about temperature. It's the air your family breathes all day.\n\nIs it more the dust and allergies, or how the air feels?\n\n(Let them answer. Sticky in summer or dry in winter means humidity.)\n\n(Note their answers. Filters, humidity, and ducts each have a different fix.)",
+      "sort_order": 13
+    },
+    {
+      "step_key": "f_noise",
+      "title": "Focus: noises and smells",
+      "content": "I'm glad you mentioned that, {{contact_first_name}}. A new noise or smell means something changed. Caught early, it's usually a small, cheap part. Ignored, it's how the big breakdowns start.\n\nWhat does it sound like?\n\n(Let them answer.)\n\nWhen do you notice it, when it first kicks on or the whole time?\n\n(Burning smell or sparking: press the URGENT button.)",
+      "sort_order": 14
+    },
+    {
+      "step_key": "f_bills",
+      "title": "Focus: higher bills",
+      "content": "That's a useful thing to know, {{contact_first_name}}. When bills go up and nothing else changed, the system is working harder to do the same job. You're paying for that extra effort every month.\n\nAbout how much higher would you say they are?\n\n(Let them answer. Note it. The visit usually pays for itself here.)",
+      "sort_order": 15
+    },
+    {
+      "step_key": "f_age",
+      "title": "Focus: older system",
+      "content": "That's a smart thing to think about, {{contact_first_name}}. Age alone isn't the problem. It's not knowing what shape it's in. Some fifteen-year-old systems have years left. Some have a part about to let go in the middle of July.\n\nKnowing ahead of time is what turns an emergency into a planned decision. Has anyone taken a real look at where it stands?\n\n(Let them answer.)",
+      "sort_order": 16
+    },
+    {
+      "step_key": "f_thermostat",
+      "title": "Focus: thermostat",
+      "content": "Thermostat trouble is tricky, {{contact_first_name}}. Sometimes it's the thermostat, and sometimes it's the system not responding. Either way, you're not getting the comfort you're asking for.\n\nWhat's it doing?\n\n(Let them answer. Not holding the temperature, hard to program, or not matching how the house feels.)\n\n(Note their answer for the technician.)",
+      "sort_order": 17
+    },
+    {
+      "step_key": "making_it_real",
+      "title": "Making it real",
+      "content": "(Three questions about the problem they named, in order.)\n\nHow long has that been going on, like a couple weeks, or since last season?\n\n(Let them answer. If it fits, you can say \"Got it.\")\n\nIs it something you notice like 1 to 2 times a month, or is it more often than that?\n\n(Let them answer. If it fits, you can say \"I see.\" or \"I understand.\")\n\nWhen it's at its worst, does it ever interfere with comfort at home, having people over, or the bill?\n\n(Let them answer. If they name an effect on comfort, guests, or the bill, reflect only what they said. If not, you can say \"Got it, thank you.\")",
+      "sort_order": 18
+    },
+    {
+      "step_key": "review",
+      "title": "Review and bridge",
+      "content": "{{contact_first_name}}, let me make sure I have this right.\n\n(Read back their three answers: how long, how often, what it gets in the way of.)\n\nSo it started a while back, and it happens more than once in a while. At its worst it gets in the way of what you mentioned. Did I get that right?\n\n(Say what they named: comfort at home, having people over, or the bill. Let them answer. If they correct you, take the correction and move on.)\n\nIt sounds like you'd really like the system to be something you never have to think about. Is that fair to say?\n\n(Wait for the yes.)",
+      "sort_order": 19
+    },
+    {
+      "step_key": "recommendation",
+      "title": "Recommendation",
+      "content": "{{contact_first_name}}, that's worth getting looked at instead of just living with it. Here's how this works. One of our technicians comes out and takes a look at {{main_concern}}. While they're there, they give the whole system a once-over. If anything else is going on, you'll know before it becomes a problem. If it all checks out, we'll tell you that too. Does that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get a technician out to take that look. Does that sound reasonable?\n\n(Say \"reasonable\", not \"good\". Click what you hear.)",
+      "sort_order": 20
+    },
+    {
+      "step_key": "uncover",
+      "title": "Uncover the real concern",
+      "content": "Okay, {{contact_first_name}}. I'm not going to push you on it. What's the part giving you pause?\n\n(Let them answer. Then tap what you hear.)",
+      "sort_order": 21
+    },
+    {
+      "step_key": "obj_price",
+      "title": "Objection: cost",
+      "content": "I understand, {{contact_first_name}}. Is it the cost of the visit itself, or the worry it'll turn into a big repair bill?\n\n(Let them answer. Do not quote prices or discounts. The office handles that.)\n\nThe first step is having a technician take a look at {{main_concern}}. You're not committing to anything, and you'll hear what any work would cost before it happens. The small stuff nobody catches is what gets expensive later. A look now is the cheap version.\n\nThe other side of it is what that's already costing you, the things you mentioned a minute ago. That's the part I'd hate to see keep adding up.\n\nWould it be okay to at least get the look on the calendar?",
+      "sort_order": 22
+    },
+    {
+      "step_key": "obj_think",
+      "title": "Objection: “I need to think about it”",
+      "content": "That's fair, {{contact_first_name}}. Usually when someone says that, there's one specific thing on their mind. What's the part you'd want to think over?\n\n(Let them answer. If they name cost, time, or another reason, tap that button.)\n\nOkay. I'm not trying to rush you. The one thing I'd say is that {{main_concern}} has been going on for a while now. It's had time to sort itself out on its own, and it hasn't. The visit is how you get the information you'd be thinking with. You can think it over just as easily after you know what the technician found.\n\nWould it be easier to think it over once you have the answers?",
+      "sort_order": 23
+    },
+    {
+      "step_key": "obj_spouse",
+      "title": "Objection: “I need to talk to my spouse”",
+      "content": "Of course. Is it more about the money side, or do you two just make these decisions together?\n\n(Let them answer. If it's money, use the cost answer.)\n\nThat's fair, and I'm not asking you to commit to anything they'd need to weigh in on. Right now, all you can tell them is that {{main_concern}} is still going on. After the visit, you can tell them what the technician found and what it would take. That's an easier conversation to have. And if they'd rather be home for it, we'll schedule around that.\n\nCan we pencil it in, and you can move it after you two talk?",
+      "sort_order": 24
+    },
+    {
+      "step_key": "obj_busy",
+      "title": "Objection: too busy",
+      "content": "I hear you, {{contact_first_name}}. Is it finding a time to be home, or the thought of one more thing on the list?\n\n(Let them answer.)\n\nThis is the one thing on the list you don't have to do yourself. Our technician does the work, you point at {{main_concern}}, and we schedule it around you, not the other way around. Waiting doesn't make it go away. It usually makes it a bigger job on a worse day.\n\nIs there a day of the week that's usually easier for you?",
+      "sort_order": 25
+    },
+    {
+      "step_key": "not_interested",
+      "title": "“Not interested”",
+      "content": "No problem at all, {{contact_first_name}}. I'm not calling to sell you anything today. We're updating our records on customers we haven't seen in a while. {{practice_name}} just wanted to make sure the system is still treating you right. Can I ask one quick question?\n\n(Wait for the yes.)\n\nIs everything still running the way it should?\n\n(A real question, asked warmly, re-opens most of these calls. Click what you hear.)",
+      "sort_order": 26
+    },
+    {
+      "step_key": "scheduling",
+      "title": "Scheduling",
+      "content": "Great, {{contact_first_name}}. We have time this week on (day) and (day). Do mornings or afternoons work better for you?\n\n(Let them answer.)\n\nPerfect. I have a (time) and a (time). Which is better?\n\n(Let them answer.)\n\nGreat, I've got you down for (day) at (time).\n\n(Have two days and two times ready before the call, both within 48 hours. Click what happens next.)",
+      "sort_order": 27
+    },
+    {
+      "step_key": "confirm",
+      "title": "Confirming the appointment",
+      "content": "Perfect, {{contact_first_name}}. Let me confirm a couple of quick things. The best number to reach you is the one I called, right?\n\n(Let them answer.)\n\nAnd the address we have on file is still current?\n\n(Let them answer.)\n\nWill you be home for the visit, or should the technician plan to meet someone else?\n\n(Confirm phone, address, and who'll be there. Click what happens next.)",
+      "sort_order": 28
+    },
+    {
+      "step_key": "final_discovery",
+      "title": "Final discovery",
+      "content": "One last thing, {{contact_first_name}}. Is there anything else around the house you'd like the technician to look at while they're out? Even little stuff you've been putting off.\n\n(Note anything they mention for the visit.)",
+      "sort_order": 29
+    },
+    {
+      "step_key": "close_appt",
+      "title": "Close: appointment set",
+      "content": "{{contact_first_name}}, you're all set. Our technician will take a good look at everything. If it all checks out, that's what we'll tell you. Thanks for your time today, and we'll see you soon.\n\n(Add your notes and press the green \"Scheduled\" button below.)",
+      "sort_order": 30
+    },
+    {
+      "step_key": "close_callback",
+      "title": "Close: callback set",
+      "content": "No problem at all, {{contact_first_name}}. When would be a better time for me to call you back?\n\n(Pin down a real day and time. Do not settle for \"sometime\".)\n\nPerfect, I'll call you then. Thanks, and have a great rest of your day.\n\n(Add your notes, then press \"Spoke. Call back later\" below and pick the date they gave you.)",
+      "sort_order": 31
+    },
+    {
+      "step_key": "close_no",
+      "title": "Close: not now",
+      "content": "No problem at all, {{contact_first_name}}. I appreciate your time today. If anything ever comes up with the system, you know where we are. Have a great rest of your day.\n\n(Add your notes and log the call with the disposition that fits.)",
+      "sort_order": 32
+    },
+    {
+      "step_key": "voicemail",
+      "title": "Voicemail",
+      "content": "Hi {{contact_first_name}}, this is {{caller_name}} with {{practice_name}}. We're updating our service records on customers we haven't seen in a while, and yours came up. Nothing urgent. I just want to make sure your heating and cooling is still running the way it should. Could you call me back at (your office number) when you have a few minutes? Again, this is {{caller_name}} with {{practice_name}}. Thanks, and have a great day.\n\n(Press the \"Voicemail\" button below to log the call. The retry is scheduled automatically.)",
+      "sort_order": 33
+    },
+    {
+      "step_key": "gatekeeper",
+      "title": "Someone else answered",
+      "content": "Oh hi. This is {{caller_name}} with {{practice_name}}. We're updating our service records, and I was hoping to catch {{contact_first_name}} for a quick minute. Are they around?\n\n(If they ask what it's about: \"We take care of the system at the house, and we're checking in on our customers.\" Keep it brief. No pitch.)",
+      "sort_order": 34
+    },
+    {
+      "step_key": "why_calling",
+      "title": "“Why are you calling?” / “Is this sales?”",
+      "content": "That's a fair question, {{contact_first_name}}, and no, I'm not selling anything today. We're updating our service records on customers we haven't seen in a while. {{practice_name}} asked me to check that the system is still treating you right. That's really it. So, how has it been holding up?\n\n(Stay relaxed. Click what you hear.)",
+      "sort_order": 35
+    },
+    {
+      "step_key": "recovery",
+      "title": "Service recovery: they weren’t happy",
+      "content": "I'm really sorry to hear that, {{contact_first_name}}, and I'm glad you told me. Can I ask what happened?\n\n(Listen fully. Do not interrupt or defend. Let them get it all out.)\n\nThank you for telling me that. I'm going to make sure {{practice_name}} hears about it personally.\n\nI know we can't undo that. I'd like the chance to make it right. Would you be open to letting us take another look? If you're not happy this time, you won't hear from us again.\n\n(A real apology plus a low-risk offer wins back more customers than any discount.)",
+      "sort_order": 36
+    },
+    {
+      "step_key": "competitor",
+      "title": "They use another company now",
+      "content": "That's fair, {{contact_first_name}}. I'm glad you've got someone taking care of it. Just for our records, was there anything about your experience with us that made you switch?\n\n(Listen. If there was a problem, treat it as service recovery.)\n\nI appreciate the honesty. If anything changes, or you'd like a second opinion on a big repair, we're here. Have a great day.",
+      "sort_order": 37
+    },
+    {
+      "step_key": "replaced",
+      "title": "They replaced the system",
+      "content": "Congratulations on the new system, {{contact_first_name}}. Can I ask who put it in for you?\n\n(If it was us, celebrate it. If not, stay warm.)\n\nEven a brand-new system needs regular maintenance to keep the warranty valid and run its best. Most manufacturers require it. Is anyone taking care of that for you yet?\n\n(A new system is a maintenance-plan conversation, not a lost customer.)",
+      "sort_order": 38
+    },
+    {
+      "step_key": "property",
+      "title": "Moved, renting, or property changes",
+      "content": "Thanks for letting me know, {{contact_first_name}}. Just so I update our records right, did you move, or is the property rented out now?\n\n(Moved: wish them well, ask if the new owner might want our info, and log the call.)\n\n(Landlord: they still own the system. Keep going about keeping it in good shape between tenants.)",
+      "sort_order": 39
+    },
+    {
+      "step_key": "wrong_number",
+      "title": "Wrong number",
+      "content": "I apologize for the confusion. I was trying to reach {{contact_first_name}}. Sorry to bother you, and have a great day.\n\n(Log the call with a note that the number is wrong so we don't call it again.)",
+      "sort_order": 40
+    },
+    {
+      "step_key": "dnc",
+      "title": "“Don’t call me again”",
+      "content": "I understand, and I'll take care of that right now. You won't hear from us again. Thank you for your time, and have a good day.\n\n(Press the \"Do Not Call\" button below right away. This is a legal requirement.)",
+      "sort_order": 41
+    },
+    {
+      "step_key": "urgent",
+      "title": "URGENT: safety first",
+      "content": "{{contact_first_name}}, stop me right there. Your safety comes first.\n\nIf you smell gas or your carbon monoxide alarm is going off, please hang up with me now. Get everyone out of the house. Then call your gas company's emergency line or 911. Everything else can wait.\n\nIf it's a burning smell or sparking, turn the system off at the thermostat and the breaker. We'll get a technician out to you as an emergency call today.\n\n(Follow your company's emergency dispatch procedure. Do not continue this script.)",
+      "sort_order": 42
+    }
+  ],
+  "choices": [
+    {
+      "from_step_key": "competitor",
+      "label": "They had a bad experience: service recovery",
+      "to_step_key": "recovery",
+      "variant": "caution",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "competitor",
+      "label": "They’re open to a second opinion: continue",
+      "to_step_key": "opening_question",
+      "variant": "positive",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "competitor",
+      "label": "Wrap up warmly and log the call",
+      "to_step_key": "close_no",
+      "variant": "default",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "confirm",
+      "label": "Details confirmed: final discovery",
+      "to_step_key": "final_discovery",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "confirm",
+      "label": "They hesitate: something’s wrong",
+      "to_step_key": "uncover",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "confirm",
+      "label": "“Actually, let me check with my spouse”",
+      "to_step_key": "obj_spouse",
+      "variant": "objection",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "digging_in",
+      "label": "“It’s not heating or cooling right”",
+      "to_step_key": "f_comfort",
+      "variant": "caution",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "digging_in",
+      "label": "“Some rooms are always hot or cold”",
+      "to_step_key": "f_rooms",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "digging_in",
+      "label": "Dust, allergies, or humidity",
+      "to_step_key": "f_air",
+      "variant": "caution",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "digging_in",
+      "label": "New noises or smells",
+      "to_step_key": "f_noise",
+      "variant": "caution",
+      "sort_order": 3
+    },
+    {
+      "from_step_key": "digging_in",
+      "label": "“The bills have gone up”",
+      "to_step_key": "f_bills",
+      "variant": "caution",
+      "sort_order": 4
+    },
+    {
+      "from_step_key": "digging_in",
+      "label": "Older system / worried about a breakdown",
+      "to_step_key": "f_age",
+      "variant": "caution",
+      "sort_order": 5
+    },
+    {
+      "from_step_key": "digging_in",
+      "label": "Thermostat trouble",
+      "to_step_key": "f_thermostat",
+      "variant": "caution",
+      "sort_order": 6
+    },
+    {
+      "from_step_key": "digging_in",
+      "label": "Nothing came up: everything really is fine",
+      "to_step_key": "maint_rec",
+      "variant": "positive",
+      "sort_order": 7
+    },
+    {
+      "from_step_key": "digging_in",
+      "label": "Wants to schedule later: set a callback",
+      "to_step_key": "close_callback",
+      "variant": "caution",
+      "sort_order": 8
+    },
+    {
+      "from_step_key": "digging_in",
+      "label": "URGENT safety issue",
+      "to_step_key": "urgent",
+      "variant": "negative",
+      "sort_order": 9
+    },
+    {
+      "from_step_key": "f_age",
+      "label": "Continue: make it real",
+      "to_step_key": "making_it_real",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "f_age",
+      "label": "Wants to schedule later: set a callback",
+      "to_step_key": "close_callback",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "f_air",
+      "label": "Continue: make it real",
+      "to_step_key": "making_it_real",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "f_air",
+      "label": "Wants to schedule later: set a callback",
+      "to_step_key": "close_callback",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "f_bills",
+      "label": "Continue: make it real",
+      "to_step_key": "making_it_real",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "f_bills",
+      "label": "Wants to schedule later: set a callback",
+      "to_step_key": "close_callback",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "f_comfort",
+      "label": "Continue: make it real",
+      "to_step_key": "making_it_real",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "f_comfort",
+      "label": "Wants to schedule later: set a callback",
+      "to_step_key": "close_callback",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "f_noise",
+      "label": "Continue: make it real",
+      "to_step_key": "making_it_real",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "f_noise",
+      "label": "Wants to schedule later: set a callback",
+      "to_step_key": "close_callback",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "f_noise",
+      "label": "URGENT safety issue",
+      "to_step_key": "urgent",
+      "variant": "negative",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "f_rooms",
+      "label": "Continue: make it real",
+      "to_step_key": "making_it_real",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "f_rooms",
+      "label": "Wants to schedule later: set a callback",
+      "to_step_key": "close_callback",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "f_thermostat",
+      "label": "Continue: make it real",
+      "to_step_key": "making_it_real",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "f_thermostat",
+      "label": "Wants to schedule later: set a callback",
+      "to_step_key": "close_callback",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "final_discovery",
+      "label": "Nothing else: close the appointment",
+      "to_step_key": "close_appt",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "final_discovery",
+      "label": "They mention something: note it and close",
+      "to_step_key": "close_appt",
+      "variant": "positive",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "gatekeeper",
+      "label": "Customer came to the phone",
+      "to_step_key": "opening_question",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "gatekeeper",
+      "label": "Not available: leave a message",
+      "to_step_key": "voicemail",
+      "variant": "default",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "gatekeeper",
+      "label": "This person handles the house: continue with them",
+      "to_step_key": "opening_question",
+      "variant": "caution",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "maint_rec",
+      "label": "“Yes, tell me more / let’s set it up”",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "maint_rec",
+      "label": "Hesitant or soft no",
+      "to_step_key": "uncover",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "maint_rec",
+      "label": "Wants to schedule later: set a callback",
+      "to_step_key": "close_callback",
+      "variant": "caution",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "maint_rec",
+      "label": "Not interested in a plan: wrap up warmly",
+      "to_step_key": "close_no",
+      "variant": "objection",
+      "sort_order": 3
+    },
+    {
+      "from_step_key": "making_it_real",
+      "label": "Continue to the review",
+      "to_step_key": "review",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "not_interested",
+      "label": "They engaged: ask the opening question",
+      "to_step_key": "opening_question",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "not_interested",
+      "label": "Still not interested: wrap up warmly",
+      "to_step_key": "close_no",
+      "variant": "negative",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "not_interested",
+      "label": "“Don’t call me again”",
+      "to_step_key": "dnc",
+      "variant": "negative",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "obj_busy",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_busy",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_busy",
+      "label": "Genuinely can’t now: set a callback",
+      "to_step_key": "close_callback",
+      "variant": "caution",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "obj_price",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_price",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_spouse",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_spouse",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_think",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_think",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_think",
+      "label": "It’s really about cost",
+      "to_step_key": "obj_price",
+      "variant": "objection",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "obj_think",
+      "label": "It’s really about their spouse",
+      "to_step_key": "obj_spouse",
+      "variant": "objection",
+      "sort_order": 3
+    },
+    {
+      "from_step_key": "open",
+      "label": "Customer is on the line: continue",
+      "to_step_key": "opening_question",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "open",
+      "label": "Voicemail",
+      "to_step_key": "voicemail",
+      "variant": "default",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "open",
+      "label": "Someone else answered",
+      "to_step_key": "gatekeeper",
+      "variant": "default",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "open",
+      "label": "“Why are you calling?” / “Is this sales?”",
+      "to_step_key": "why_calling",
+      "variant": "objection",
+      "sort_order": 3
+    },
+    {
+      "from_step_key": "open",
+      "label": "“I wasn’t happy with you last time”",
+      "to_step_key": "recovery",
+      "variant": "objection",
+      "sort_order": 4
+    },
+    {
+      "from_step_key": "open",
+      "label": "“Not interested”",
+      "to_step_key": "not_interested",
+      "variant": "objection",
+      "sort_order": 5
+    },
+    {
+      "from_step_key": "open",
+      "label": "“I’m too busy right now”",
+      "to_step_key": "obj_busy",
+      "variant": "objection",
+      "sort_order": 6
+    },
+    {
+      "from_step_key": "open",
+      "label": "“We use someone else now”",
+      "to_step_key": "competitor",
+      "variant": "negative",
+      "sort_order": 7
+    },
+    {
+      "from_step_key": "open",
+      "label": "“We replaced the system”",
+      "to_step_key": "replaced",
+      "variant": "negative",
+      "sort_order": 8
+    },
+    {
+      "from_step_key": "open",
+      "label": "Moved, renting, or property changes",
+      "to_step_key": "property",
+      "variant": "negative",
+      "sort_order": 9
+    },
+    {
+      "from_step_key": "open",
+      "label": "Wrong number",
+      "to_step_key": "wrong_number",
+      "variant": "negative",
+      "sort_order": 10
+    },
+    {
+      "from_step_key": "open",
+      "label": "“Don’t call me again”",
+      "to_step_key": "dnc",
+      "variant": "negative",
+      "sort_order": 11
+    },
+    {
+      "from_step_key": "open",
+      "label": "URGENT safety issue",
+      "to_step_key": "urgent",
+      "variant": "negative",
+      "sort_order": 12
+    },
+    {
+      "from_step_key": "opening_question",
+      "label": "“Still running great”",
+      "to_step_key": "resp_great",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "opening_question",
+      "label": "“Starting to act up a little”",
+      "to_step_key": "resp_acting_up",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "opening_question",
+      "label": "“We’re having real problems”",
+      "to_step_key": "resp_problems",
+      "variant": "negative",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "property",
+      "label": "Landlord: still responsible, continue",
+      "to_step_key": "opening_question",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "property",
+      "label": "Moved away: update records and wrap up",
+      "to_step_key": "close_no",
+      "variant": "default",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“Yes, that sounds reasonable”",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "Hesitant or soft no",
+      "to_step_key": "uncover",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "Cost concern",
+      "to_step_key": "obj_price",
+      "variant": "objection",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“I need to think about it”",
+      "to_step_key": "obj_think",
+      "variant": "objection",
+      "sort_order": 3
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“I need to talk to my spouse”",
+      "to_step_key": "obj_spouse",
+      "variant": "objection",
+      "sort_order": 4
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“I don’t have time right now”",
+      "to_step_key": "obj_busy",
+      "variant": "objection",
+      "sort_order": 5
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "Wants to schedule later: set a callback",
+      "to_step_key": "close_callback",
+      "variant": "caution",
+      "sort_order": 6
+    },
+    {
+      "from_step_key": "recovery",
+      "label": "They’ll give us another chance: schedule",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "recovery",
+      "label": "Softening but not ready: set a callback",
+      "to_step_key": "close_callback",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "recovery",
+      "label": "Still upset: wrap up graciously",
+      "to_step_key": "close_no",
+      "variant": "negative",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "recovery",
+      "label": "“Don’t call me again”",
+      "to_step_key": "dnc",
+      "variant": "negative",
+      "sort_order": 3
+    },
+    {
+      "from_step_key": "replaced",
+      "label": "They engaged: continue the conversation",
+      "to_step_key": "opening_question",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "replaced",
+      "label": "Wrap up warmly and log the call",
+      "to_step_key": "close_no",
+      "variant": "default",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "resp_acting_up",
+      "label": "Continue to the transition",
+      "to_step_key": "transition",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "resp_great",
+      "label": "“Pretty recently”",
+      "to_step_key": "svc_recent",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "resp_great",
+      "label": "“It’s been a while”",
+      "to_step_key": "svc_while",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "resp_great",
+      "label": "Doesn’t know / not sure",
+      "to_step_key": "svc_unknown",
+      "variant": "caution",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "resp_problems",
+      "label": "Continue to the transition",
+      "to_step_key": "transition",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "resp_problems",
+      "label": "URGENT safety issue",
+      "to_step_key": "urgent",
+      "variant": "negative",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "review",
+      "label": "They said yes: recommendation",
+      "to_step_key": "recommendation",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "scheduling",
+      "label": "Time selected: confirm the appointment",
+      "to_step_key": "confirm",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "scheduling",
+      "label": "“None of those times work”: set a callback",
+      "to_step_key": "close_callback",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "scheduling",
+      "label": "Cost concern came up",
+      "to_step_key": "obj_price",
+      "variant": "objection",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "scheduling",
+      "label": "“I need to talk to my spouse”",
+      "to_step_key": "obj_spouse",
+      "variant": "objection",
+      "sort_order": 3
+    },
+    {
+      "from_step_key": "svc_recent",
+      "label": "“Yes, something small”",
+      "to_step_key": "transition",
+      "variant": "caution",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "svc_recent",
+      "label": "“No, everything really is great”",
+      "to_step_key": "maint_rec",
+      "variant": "positive",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "svc_unknown",
+      "label": "“Yes, let’s take a look”",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "svc_unknown",
+      "label": "Hesitant or soft no",
+      "to_step_key": "uncover",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "svc_unknown",
+      "label": "Wants to schedule later: set a callback",
+      "to_step_key": "close_callback",
+      "variant": "caution",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "svc_while",
+      "label": "“Yes, let’s take a look”",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "svc_while",
+      "label": "Hesitant or soft no",
+      "to_step_key": "uncover",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "svc_while",
+      "label": "Wants to schedule later: set a callback",
+      "to_step_key": "close_callback",
+      "variant": "caution",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "transition",
+      "label": "They said okay: dig in",
+      "to_step_key": "digging_in",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "They’re ready: schedule",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "Cost concern",
+      "to_step_key": "obj_price",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I need to think about it”",
+      "to_step_key": "obj_think",
+      "variant": "objection",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I need to talk to my spouse”",
+      "to_step_key": "obj_spouse",
+      "variant": "objection",
+      "sort_order": 3
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I don’t have time right now”",
+      "to_step_key": "obj_busy",
+      "variant": "objection",
+      "sort_order": 4
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "They want to pass for now: wrap up warmly",
+      "to_step_key": "close_no",
+      "variant": "negative",
+      "sort_order": 5
+    },
+    {
+      "from_step_key": "urgent",
+      "label": "Handled: continue the conversation",
+      "to_step_key": "opening_question",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "urgent",
+      "label": "Escalated: wrap up and log the call",
+      "to_step_key": "close_no",
+      "variant": "default",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "why_calling",
+      "label": "Satisfied: ask the opening question",
+      "to_step_key": "opening_question",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "why_calling",
+      "label": "“Not interested”",
+      "to_step_key": "not_interested",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "why_calling",
+      "label": "“Don’t call me again”",
+      "to_step_key": "dnc",
+      "variant": "negative",
+      "sort_order": 2
+    }
+  ]
+}

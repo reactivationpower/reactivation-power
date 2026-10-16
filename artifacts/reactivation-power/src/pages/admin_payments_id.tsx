@@ -1,0 +1,559 @@
+// @ts-nocheck
+import { Link, useParams } from 'wouter'
+import {
+  ArrowLeft,
+  CalendarClock,
+  Check,
+  CircleDashed,
+  CreditCard,
+  ExternalLink,
+  Link2,
+  Users,
+} from 'lucide-react'
+
+import { PaymentDetailActions } from '@/components/admin/payment-detail-actions'
+import { AgreementCard } from '@/components/admin/agreement-card'
+import { BillingPanel } from '@/components/admin/billing-panel'
+import { StatusPill, TypePill, linkStatus } from '@/components/admin/payments-manager'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { usePageData } from '@/hooks/use-page-data'
+import { PageError, PageLoading } from '@/components/page-status'
+import NotFound from '@/pages/not-found'
+import { SendCardLinkButton } from '@/components/admin/send-card-link-button'
+
+
+function formatUsd(cents: number): string {
+  return (cents / 100).toLocaleString('en-US', {
+    style: 'currency',
+    currency: 'USD',
+  })
+}
+
+function formatDay(iso: string | null): string {
+  if (!iso) return '—'
+  return new Date(iso).toLocaleDateString('en-US', { dateStyle: 'medium' })
+}
+
+function formatWhen(iso: string | null): string {
+  if (!iso) return '—'
+  return new Date(iso).toLocaleString('en-US', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  })
+}
+
+function Field({
+  label,
+  children,
+  mono = false,
+}: {
+  label: string
+  children: React.ReactNode
+  mono?: boolean
+}) {
+  return (
+    <div className="flex flex-col gap-0.5">
+      <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        {label}
+      </dt>
+      <dd className={`text-sm text-foreground ${mono ? 'font-mono text-xs' : ''}`}>
+        {children}
+      </dd>
+    </div>
+  )
+}
+
+export default function PaymentDetailPage() {
+  const params = useParams()
+
+  const { id } = params
+  const { data, loading, error, notFound } = usePageData<any>(
+    `/admin/payments/${id}`,
+  )
+  if (loading) return <PageLoading />
+  if (notFound) return <NotFound />
+  if (error) return <PageError error={error} />
+  const { link, accounts, customer, cards, history = [], isPaid, owner, staffAccounts, agreement } = data
+  const isSubscription = link.type === 'subscription'
+  const status = linkStatus(link)
+
+  const activity: {
+    label: string
+    at: string | null
+    done: boolean
+    detail?: string
+  }[] = [
+    {
+      label: isSubscription ? 'Subscription link created' : 'Payment link created',
+      at: link.created_at,
+      done: true,
+      detail: isSubscription
+        ? `${formatUsd(link.monthly_cents)}/mo · ${
+            link.setup_fee_cents > 0 ? `${formatUsd(link.setup_fee_cents)} setup` : 'setup waived'
+          }${link.rep_name ? ` · by ${link.rep_name}` : ''}`
+        : `${formatUsd(link.amount_cents)} · Reactivation Power Access${link.rep_name ? ` · by ${link.rep_name}` : ''}`,
+    },
+    ...(isSubscription
+      ? [
+          {
+            label: link.setup_paid_at
+              ? link.setup_fee_cents > 0
+                ? 'Setup fee paid · primary card saved'
+                : 'Primary card saved'
+              : 'Awaiting primary card',
+            at: link.setup_paid_at,
+            done: Boolean(link.setup_paid_at),
+            detail: link.setup_fee_cents > 0 ? formatUsd(link.setup_fee_cents) : 'Setup fee waived',
+          },
+          {
+            label: link.completed_at ? 'Backup card saved · subscription started' : 'Awaiting backup card',
+            at: link.completed_at,
+            done: Boolean(link.completed_at),
+            detail: link.completed_at
+              ? `First charge ${formatDay(link.next_payment_at)}`
+              : 'Second card must differ from the primary',
+          },
+        ]
+      : [
+          {
+            label: isPaid ? 'Payment received' : 'Awaiting payment',
+            at: isPaid ? link.paid_at : null,
+            done: isPaid,
+            detail: isPaid ? formatUsd(link.amount_cents) : 'Link is still open',
+          },
+        ]),
+    {
+      label: link.provisioned_at
+        ? 'Portal accounts created'
+        : 'Portal accounts pending',
+      at: link.provisioned_at,
+      done: Boolean(link.provisioned_at),
+      detail: link.provisioned_at
+        ? `${accounts.length} account${accounts.length === 1 ? '' : 's'}`
+        : isPaid
+          ? 'Use "Create accounts now" to provision'
+          : 'Created automatically after payment',
+    },
+  ]
+
+  return (
+    <div className="flex flex-col gap-6">
+      {/* ── Header ──────────────────────────────────────────── */}
+      <div>
+        <Link
+          href="/admin/payments"
+          className="mb-3 inline-flex items-center gap-1 text-sm text-primary hover:underline"
+        >
+          <ArrowLeft className="size-4" />
+          Payments
+        </Link>
+        {customer?.id ? (
+          <Link
+            href={`/admin/customers/${customer.id}`}
+            className="mb-3 ml-4 inline-flex items-center gap-1 text-sm text-primary hover:underline"
+          >
+            View customer
+          </Link>
+        ) : null}
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-3">
+              <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+                {link.name}
+              </h1>
+              <StatusPill status={status} />
+              <TypePill type={link.type} />
+            </div>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {customer?.business_name ? `${customer.business_name} · ` : ''}
+              {link.email}
+              {link.phone ? ` · ${link.phone}` : ''}
+            </p>
+          </div>
+          <div className="text-right">
+            {isSubscription ? (
+              <>
+                <p className="text-2xl font-semibold tabular-nums tracking-tight">
+                  {formatUsd(link.monthly_cents)}
+                  <span className="text-sm font-normal text-muted-foreground">/mo</span>
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {link.setup_fee_cents > 0 ? `${formatUsd(link.setup_fee_cents)} setup` : 'Setup fee waived'}
+                  {link.setup_paid_at ? ` · paid ${formatWhen(link.setup_paid_at)}` : ' · not yet paid'}
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="text-2xl font-semibold tabular-nums tracking-tight">
+                  {formatUsd(link.amount_cents)}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {isPaid ? `Paid ${formatWhen(link.paid_at)}` : 'Not yet paid'}
+                </p>
+              </>
+            )}
+          </div>
+        </div>
+        <div className="mt-4">
+          <PaymentDetailActions link={link} hasAccounts={accounts.length > 0} hasAgreement={Boolean(agreement)} />
+        </div>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+        {/* ── Left column: record ─────────────────────────────── */}
+        <div className="flex flex-col gap-6">
+          {data.agreementAccess ? <AgreementCard linkId={link.id} agreement={agreement ?? null} offerType={link.type} enrollmentFlow={link.enrollment_flow} /> : <p className="text-sm text-muted-foreground">Agreement access is restricted to its assigned representative and administrators.</p>}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Contact</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <dl className="grid gap-4 sm:grid-cols-2">
+                <Field label="Name">{link.name}</Field>
+                <Field label="Email">
+                  <a
+                    href={`mailto:${link.email}`}
+                    className="hover:underline"
+                  >
+                    {link.email}
+                  </a>
+                </Field>
+                <Field label="Phone">
+                  {link.phone ? (
+                    <a href={`tel:${link.phone}`} className="hover:underline">
+                      {link.phone}
+                    </a>
+                  ) : (
+                    <span className="text-muted-foreground">—</span>
+                  )}
+                </Field>
+                <Field label="Business">
+                  {customer?.business_name || <span className="text-muted-foreground">—</span>}
+                </Field>
+                <div className="sm:col-span-2">
+                  <Field label="Business address">
+                    {customer?.business_address || <span className="text-muted-foreground">—</span>}
+                  </Field>
+                </div>
+                <Field label="Owner">
+                  {customer?.owner_name || <span className="text-muted-foreground">—</span>}
+                </Field>
+                <Field label="Owner phone">
+                  {customer?.owner_phone ? (
+                    <a href={`tel:${customer.owner_phone}`} className="hover:underline">
+                      {customer.owner_phone}
+                    </a>
+                  ) : (
+                    <span className="text-muted-foreground">—</span>
+                  )}
+                </Field>
+                <Field label="Rep">
+                  {link.rep_name || <span className="text-muted-foreground">—</span>}
+                </Field>
+                <Field label="Stripe customer" mono>
+                  {customer?.stripe_customer_id || <span className="font-sans text-sm text-muted-foreground">Not created yet</span>}
+                </Field>
+              </dl>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Order</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <dl className="grid gap-4 sm:grid-cols-2">
+                <Field label="Product">Reactivation Power Access</Field>
+                <Field label="Offer">
+                  <TypePill type={link.type} />
+                </Field>
+                {isSubscription ? (
+                  <>
+                    <Field label="Setup fee">
+                      <span className="font-medium tabular-nums">
+                        {link.setup_fee_cents > 0 ? formatUsd(link.setup_fee_cents) : 'Waived'}
+                      </span>
+                    </Field>
+                    <Field label="Monthly">
+                      <span className="font-medium tabular-nums">{formatUsd(link.monthly_cents)}</span>
+                    </Field>
+                  </>
+                ) : (
+                  <Field label="Amount">
+                    <span className="font-medium tabular-nums">
+                      {formatUsd(link.amount_cents)}
+                    </span>
+                  </Field>
+                )}
+                <Field label="Status">
+                  <StatusPill status={status} />
+                </Field>
+                <Field label={isSubscription ? 'Setup paid' : 'Payment date'}>
+                  {formatWhen(isSubscription ? link.setup_paid_at : link.paid_at)}
+                </Field>
+                <div className="sm:col-span-2">
+                  <Field label="Payment link">
+                    <span className="inline-flex max-w-full items-center gap-1.5">
+                      <Link2 className="size-3.5 shrink-0 text-muted-foreground" />
+                      <a
+                        href={`/pay/${link.token}`}
+                        target="_blank"
+                        rel="noopener"
+                        className="truncate font-mono text-xs hover:underline"
+                      >
+                        /pay/{link.token}
+                      </a>
+                      <ExternalLink className="size-3 shrink-0 text-muted-foreground" />
+                    </span>
+                  </Field>
+                </div>
+              </dl>
+            </CardContent>
+          </Card>
+
+          {isSubscription ? (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <CalendarClock className="size-4 text-muted-foreground" />
+                  Subscription
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {!link.stripe_subscription_id ? (
+                  <p className="text-sm text-muted-foreground">
+                    {link.setup_paid_at
+                      ? 'Setup fee paid. The subscription starts once the backup card is added.'
+                      : 'The subscription is created after checkout — setup fee plus two cards on file.'}
+                  </p>
+                ) : (
+                  <dl className="grid gap-4 sm:grid-cols-2">
+                    <Field label="Status">
+                      <Badge variant={link.subscription_status === 'trialing' || link.subscription_status === 'active' ? 'default' : 'outline'}>
+                        {link.subscription_status === 'trialing'
+                          ? 'Active · in 30-day window'
+                          : (link.subscription_status ?? 'unknown')}
+                      </Badge>
+                    </Field>
+                    <Field label="Next payment">
+                      <span className="font-medium">{formatDay(link.next_payment_at)}</span>
+                      <span className="text-muted-foreground"> · {formatUsd(link.monthly_cents)}</span>
+                    </Field>
+                    <Field label="Agreement start">{formatDay(link.agreement_start)}</Field>
+                    <Field label="Agreement end">{formatDay(link.agreement_end)}</Field>
+                    <div className="sm:col-span-2">
+                      <Field label="Stripe subscription" mono>
+                        {link.stripe_subscription_id}
+                      </Field>
+                    </div>
+                  </dl>
+                )}
+              </CardContent>
+            </Card>
+          ) : null}
+
+          {customer && (isPaid || history.length > 0) ? (
+            <BillingPanel link={link} customer={customer} history={history} />
+          ) : null}
+
+          {isSubscription ? (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <CreditCard className="size-4 text-muted-foreground" />
+                  Cards on file ({cards.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {cards.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No cards yet — they are saved during checkout.</p>
+                ) : (
+                  <ul className="divide-y divide-border rounded-md border border-border">
+                    {cards.map((c) => (
+                      <li key={c.id} className="flex items-center justify-between gap-4 px-4 py-2.5">
+                        <span className="flex items-center gap-2 text-sm font-medium capitalize">
+                          <CreditCard className="size-4 text-muted-foreground" />
+                          {c.brand} •••• {c.last4}
+                          {c.exp_month && c.exp_year ? (
+                            <span className="text-xs font-normal text-muted-foreground">
+                              exp {String(c.exp_month).padStart(2, '0')}/{String(c.exp_year).slice(-2)}
+                            </span>
+                          ) : null}
+                        </span>
+                        <Badge variant={c.rank === 'primary' ? 'default' : 'secondary'}>
+                          {c.rank === 'primary' ? 'Primary' : 'Secondary'}
+                        </Badge>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {customer ? (
+                  <div className="mt-4 border-t border-border pt-4">
+                    <p className="mb-2 text-xs text-muted-foreground">
+                      Emails the customer a secure link to add a new card. It becomes their primary card; earlier cards stay on file.
+                    </p>
+                    <SendCardLinkButton linkId={link.id} />
+                  </div>
+                ) : null}
+              </CardContent>
+            </Card>
+          ) : null}
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">
+                Staff on this order ({link.staff.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {link.staff.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  No staff members were added to this order.
+                </p>
+              ) : (
+                <ul className="divide-y divide-border rounded-md border border-border">
+                  {link.staff.map((s, i) => (
+                    <li
+                      key={i}
+                      className="flex items-center justify-between gap-4 px-4 py-2.5"
+                    >
+                      <span className="min-w-0 truncate text-sm font-medium">
+                        {s.name || '—'}
+                      </span>
+                      <span className="min-w-0 truncate text-xs text-muted-foreground">
+                        {s.email || 'No email'}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* ── Right column: accounts + activity ───────────────── */}
+        <div className="flex flex-col gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Users className="size-4 text-muted-foreground" />
+                Portal accounts
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                The buyer is the viewer; staff sit underneath and inherit their
+                access.
+              </p>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-2">
+              {accounts.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  {isPaid
+                    ? 'No accounts yet — use "Create accounts now" above to retry.'
+                    : 'Accounts are created once this payment is completed.'}
+                </p>
+              ) : (
+                <>
+                  {owner ? <AccountRow account={owner} /> : null}
+                  {staffAccounts.map((a) => (
+                    <AccountRow key={a.id} account={a} nested />
+                  ))}
+                </>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Activity</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ol className="flex flex-col">
+                {activity.map((item, i) => (
+                  <li key={i} className="flex gap-3">
+                    <div className="flex flex-col items-center">
+                      <span
+                        className={`flex size-5 shrink-0 items-center justify-center rounded-full ${
+                          item.done
+                            ? 'bg-success/15 text-success'
+                            : 'bg-muted text-muted-foreground'
+                        }`}
+                      >
+                        {item.done ? (
+                          <Check className="size-3" />
+                        ) : (
+                          <CircleDashed className="size-3" />
+                        )}
+                      </span>
+                      {i < activity.length - 1 ? (
+                        <span className="my-1 w-px flex-1 bg-border" />
+                      ) : null}
+                    </div>
+                    <div className="flex min-w-0 flex-1 flex-col pb-4">
+                      <div className="flex items-baseline justify-between gap-3">
+                        <span
+                          className={`text-sm font-medium ${
+                            item.done ? 'text-foreground' : 'text-muted-foreground'
+                          }`}
+                        >
+                          {item.label}
+                        </span>
+                        <span className="shrink-0 text-xs text-muted-foreground">
+                          {item.at ? formatWhen(item.at) : ''}
+                        </span>
+                      </div>
+                      {item.detail ? (
+                        <span className="text-xs text-muted-foreground">
+                          {item.detail}
+                        </span>
+                      ) : null}
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function AccountRow({
+  account,
+  nested = false,
+}: {
+  account: {
+    id: string
+    first_name: string
+    last_name: string
+    email: string
+    role: 'owner' | 'staff'
+    is_active: boolean
+  }
+  nested?: boolean
+}) {
+  return (
+    <Link
+      href={`/admin/participants/${account.id}`}
+      className={`flex items-center justify-between gap-4 rounded-md border border-border px-4 py-3 transition-colors hover:bg-accent ${
+        nested ? 'ml-6' : ''
+      }`}
+    >
+      <div className="min-w-0">
+        <p className="truncate text-sm font-medium">
+          {account.first_name} {account.last_name}
+        </p>
+        <p className="truncate text-xs text-muted-foreground">
+          {account.email}
+        </p>
+      </div>
+      <div className="flex shrink-0 items-center gap-2">
+        <Badge variant={account.role === 'owner' ? 'default' : 'secondary'}>
+          {account.role === 'owner' ? 'Viewer' : 'Staff'}
+        </Badge>
+        {!account.is_active ? <Badge variant="outline">Disabled</Badge> : null}
+      </div>
+    </Link>
+  )
+}

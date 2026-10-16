@@ -1,0 +1,13 @@
+{
+  "opening": "public/audio/conversation_opening.mp3",
+  "preparation": "public/audio/conversation_preparation.mp3",
+  "openCampaigns": "public/audio/conversation_openCampaigns.mp3",
+  "enterOffer": "public/audio/conversation_enterOffer.mp3",
+  "priceAndSave": "public/audio/conversation_priceAndSave.mp3",
+  "findForm": "public/audio/conversation_findForm.mp3",
+  "connectForm": "public/audio/conversation_connectForm.mp3",
+  "testForm": "public/audio/conversation_testForm.mp3",
+  "practiceScript": "public/audio/conversation_practiceScript.mp3",
+  "findLeads": "public/audio/conversation_findLeads.mp3",
+  "checklist": "public/audio/conversation_closing_final.mp3"
+}

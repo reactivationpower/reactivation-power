@@ -1,0 +1,1 @@
+ALTER TABLE "payment_link_terms" ADD COLUMN "enrollment_stripe_mode" text;

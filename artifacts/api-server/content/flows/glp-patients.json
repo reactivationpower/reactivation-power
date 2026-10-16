@@ -1,0 +1,519 @@
+{
+  "niche": {
+    "name": "GLP Patients",
+    "sector": "healthcare",
+    "is_active": true,
+    "sort_order": 19
+  },
+  "steps": [
+    {
+      "step_key": "opening_question",
+      "title": "The Opening Question",
+      "content": "So {{contact_first_name}}, how have things been since you finished the program with us? I usually hear one of three things. Still keeping the weight off, a little starting to creep back, or pretty much back to where you started. Which one is closest for you?\n\n(Only three answers. Tap the one you hear.)",
+      "sort_order": 1
+    },
+    {
+      "step_key": "resp_doing_great",
+      "title": "Doing Well: Kept It Off",
+      "content": "That's great to hear, {{contact_first_name}}. That's exactly what we hope for when someone finishes a program with us. {{provider_name}} will be glad to know you're still doing well.\n\n(Let them respond, then continue.)\n\n(Do not pitch anything yet. The file questions come next.)",
+      "sort_order": 2
+    },
+    {
+      "step_key": "resp_coming_back",
+      "title": "Weight Creeping Back",
+      "content": "Thanks for telling me, {{contact_first_name}}. What you're describing is not a failure, and it's not about willpower. It's how these medications work. They quiet the appetite while you're on them. When the medication stops, the appetite comes back.\n\n(Let them answer. Many people feel ashamed of this. Take that off their shoulders first.)\n\n(Do not pitch anything yet. The file questions come next.)",
+      "sort_order": 3
+    },
+    {
+      "step_key": "resp_fully_back",
+      "title": "Weight Fully Back",
+      "content": "Thank you for being honest with me, {{contact_first_name}}. You did not fail. The weight coming back after stopping is the most common thing there is. The medication was doing a real job, and when it stopped, the appetite came back. That's how they work.\n\n(Let them answer. Stay warm. No judgment.)\n\nEverything you did before still counts. You know the program, and you know how your body responds.\n\n(Do not pitch anything yet. The file questions come next.)",
+      "sort_order": 4
+    },
+    {
+      "step_key": "booked_wrap",
+      "title": "Booked: Wrap Up",
+      "content": "Perfect, you're all set for (day) at (time), {{contact_first_name}}.\n\nWe'll take a fresh look at where things stand and the right plan from here. All you have to do is show up.\n\nWe look forward to seeing you.",
+      "sort_order": 5
+    },
+    {
+      "step_key": "transition_still",
+      "title": "The Transition: Ask Permission",
+      "content": "{{contact_first_name}}, while I have you, I'd like to get your file up to date. Can I ask you a few quick questions?\n\n(Wait for the yes.)",
+      "sort_order": 6
+    },
+    {
+      "step_key": "transition",
+      "title": "The Transition: Ask Permission",
+      "content": "{{contact_first_name}}, while I have you, I'd like to get your file up to date. Can I ask you a few quick questions?\n\n(Wait for the yes.)",
+      "sort_order": 7
+    },
+    {
+      "step_key": "digging_in_still",
+      "title": "The Questions: Update the File",
+      "content": "(Ask these in order. Write down everything they mention. Never give medical advice or discuss the medication on the call.)\n\n{{contact_first_name}}, I'm going to run through a few things people often notice. Just say yes if you get them at all, even if they're mild or come and go.\n\nIs the weight still holding steady?\n\nHow's your appetite been, steady or creeping back?\n\nAre the eating habits you built during the program still mostly in place?\n\nHow's your energy through the day, any dips?\n\nHow about your strength and muscle tone, has that been harder to hold onto?\n\nHow have you been sleeping?\n\nAny joint aches?\n\nAnd how about stress or anxiety, any more than usual?\n\n(Read back what they mentioned, then ask:)\n\n{{contact_first_name}}, of those, which one bothers you the most?\n\n(Tap their answer below. If nothing came up, use the check-in close. That's still a great call.)",
+      "sort_order": 8
+    },
+    {
+      "step_key": "digging_in",
+      "title": "The Questions: Update the File",
+      "content": "(Ask these in order. Write down everything they mention. Never give medical advice or discuss the medication on the call.)\n\n{{contact_first_name}}, I'm going to run through a few things people often notice. Just say yes if you get them at all, even if they're mild or come and go.\n\nYou said some of the weight has come back. About how much are we talking?\n\nHas the appetite come back too?\n\nAre the eating habits you built during the program still mostly in place?\n\nHow's your energy through the day, any dips?\n\nHow about your strength and muscle tone, has that been harder to hold onto?\n\nHow have you been sleeping?\n\nAny joint aches?\n\nAnd how about stress or anxiety, any more than usual?\n\n(Read back what they mentioned, then ask:)\n\n{{contact_first_name}}, of those, which one bothers you the most?\n\n(Tap their answer below. If getting back on track is the whole story, use the close.)",
+      "sort_order": 9
+    },
+    {
+      "step_key": "review",
+      "title": "The Review",
+      "content": "{{contact_first_name}}, let me make sure I have this right.\n\n(Read back their three answers: how long, how often, what it gets in the way of.)\n\nSo it's been going on a while now, and it comes up more often than not. At its worst it gets in the way of what you mentioned. Did I get that right?\n\n(Say what they named: work, home, or your own time. Let them answer. If they correct you, take the correction and move on.)\n\nAnd it sounds like you'd like to get back to how you felt when things were going well. Is that fair to say?\n\n(Most people say yes. Tap what you hear.)",
+      "sort_order": 9
+    },
+    {
+      "step_key": "making_it_real",
+      "title": "Making It Real",
+      "content": "{{contact_first_name}}, I'd like to ask a few quick questions about {{main_concern}} so your file is up to date. It'll only take a minute.\n\n(Ask these three questions in order. Write down the answers. Pause after each.)\n\nHow long has it been bothering you, like a month or two, or longer than that?\n\n(Let them answer. If it fits, you can say \"Got it.\")\n\nIs it something you notice like a few days a month, or is it most days?\n\n(Let them answer. If it fits, you can say \"I see.\" or \"I understand.\")\n\nWhen it's at its worst, does it ever interfere with work, at home, or relaxing and doing your own thing?\n\n(Let them answer. If they name an impact, reflect only what they said about work, home, or their own time. If not, you can say \"Got it, thank you.\")",
+      "sort_order": 10
+    },
+    {
+      "step_key": "bridge_no",
+      "title": "They Hesitate: Find Out Why",
+      "content": "{{contact_first_name}}, you said {{main_concern}} is something you'd like to feel better about. I don't want to assume anything. Is it the timing, or is something else holding you back?\n\n(Stay easy about it. No pressure. Do not repeat the concern back at them. Let them answer.)",
+      "sort_order": 11
+    },
+    {
+      "step_key": "recommendation",
+      "title": "The Recommendation",
+      "content": "{{contact_first_name}}, that's worth getting looked at instead of just dealing with it. Can I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you in so {{provider_name}} can take a look at {{main_concern}}. If we can help, we'll walk you through the options. If it's not the right fit, we'll say so. Either way you'll know where you stand. Does that sound reasonable?\n\n(Tap what you hear.)",
+      "sort_order": 11
+    },
+    {
+      "step_key": "cadence_close",
+      "title": "Nothing Found: The Check-In Close",
+      "content": "{{contact_first_name}}, I'm glad everything is going so well.\n\nThere is one thing I want to mention. With these medications, keeping your results is about staying dialed in. The dose, how you're handling it, and protecting your muscle as the weight comes off. Your body today isn't the body we set things up for months ago. Does that make sense?\n\n(Wait for the yes. If they hesitate, use the button below to find out why.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nMy recommendation is a quick check-in. That way we make sure everything is set right for where your body is today. Does that sound reasonable?\n\n(Wait for the yes.)\n\nLet's get you on the schedule. We have (day) at (time) or (day) at (time). Which is better for you?",
+      "sort_order": 12
+    },
+    {
+      "step_key": "uncover",
+      "title": "Uncover the Real Concern",
+      "content": "Okay, {{contact_first_name}}. I'm not going to push you on it. What's the part giving you pause?\n\n(Let them answer. Then tap what you hear.)",
+      "sort_order": 12
+    },
+    {
+      "step_key": "comeback_close",
+      "title": "Getting Back On Track: The Close",
+      "content": "{{contact_first_name}}, thank you for that. Your file is up to date.\n\nThe good news is nothing about where you are today keeps you from getting back on track. With the right supervision, the restart is straightforward. Does that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you back on the program now, picking up where you left off. That's the fastest way to feel in control again. Does that sound reasonable?\n\n(Wait for the yes.)\n\nLet's get you back on the schedule. We have (day) at (time) or (day) at (time). Which is better for you?",
+      "sort_order": 13
+    },
+    {
+      "step_key": "obj_gained_back",
+      "title": "Objection: “I gained it back as soon as I stopped”",
+      "content": "I understand, {{contact_first_name}}, and that's the most common thing I hear.\n\nCan I ask, did it come back gradually once you stopped, or all at once?\n\n(Let them answer.)\n\nThat's the medication doing what it does. It quiets the appetite while you're on it, and the appetite comes back when you stop. That's not willpower, and it's not you failing. What it tells us is that the stopping plan matters as much as the starting plan for {{main_concern}}.\n\n{{provider_name}} can look at where things stand now and talk through what keeps it off this time.\n\nWould it help to have a plan for the part that didn't get planned last time?",
+      "sort_order": 100
+    },
+    {
+      "step_key": "obj_embarrassed",
+      "title": "Objection: “I’m embarrassed I gained it back”",
+      "content": "Please don't be, {{contact_first_name}}. Nobody here is keeping score.\n\nCan I ask, was it one thing that knocked you off, or did it just drift back?\n\n(Let them answer. Stay warm.)\n\nThe appetite the medication was quieting comes back when it stops. That's how it works, and it happens to most people. The only thing embarrassment does is keep people away until it's a bigger job than it needs to be.\n\n{{provider_name}} would rather see you now than a year from now. We'd take a look at {{main_concern}} and figure out the shortest path back.\n\nWould it feel better to just get that first step done?",
+      "sort_order": 101
+    },
+    {
+      "step_key": "obj_side_effects",
+      "title": "Objection: Side effects or a bad experience",
+      "content": "(Never give medical advice or discuss the medication on the call.)\n\nI understand, {{contact_first_name}}, and I'm glad you told me.\n\nCan I ask, was it something that settled down, or something that made you stop?\n\n(Let them answer. Do not comment on the medication or the dose. Just listen.)\n\nThat's the sort of thing {{provider_name}} would want to hear directly from you, not through me. Dose, timing, and the medication itself can all be adjusted. There are other approaches to {{main_concern}} if this one wasn't right for you. What you shouldn't do is carry a bad experience around and let it decide for you.\n\nWould it be worth one conversation to see what your options are?",
+      "sort_order": 102
+    },
+    {
+      "step_key": "obj_other_option",
+      "title": "Objection: “I’m considering another option”",
+      "content": "That's fair. Can I ask what you're looking at, like a different medication, another program, or going it alone?\n\n(Let them answer. Do not knock the other option.)\n\nThose can all make sense, and some people do well combining them. The part that's hard to compare from home is what would move {{main_concern}} for you. {{provider_name}} already knows your history and how you responded, so you're not starting over here.\n\nCome in, get a straight answer on where things stand, and then compare. If the other option turns out to be the better fit, you'll be choosing it for a reason.\n\nIs that a fair way to decide?",
+      "sort_order": 120
+    },
+    {
+      "step_key": "obj_cost",
+      "title": "Objection: Cost",
+      "content": "I understand, {{contact_first_name}}. Is it the cost of the visit itself, or the thought of paying for the medication month after month?\n\n(Let them answer. Do not quote prices, packages, or discounts. The office handles that.)\n\nThis first visit is one appointment, not a program. You'll hear what anything past that costs before you decide on it. And since you've been here before, we're not starting from scratch, and starting from scratch is the expensive part.\n\nThe other side of it is what {{main_concern}} is already costing you, the things you mentioned a minute ago. That's the part I'd hate to see keep adding up.\n\nCan we at least get the look on the calendar?",
+      "sort_order": 121
+    },
+    {
+      "step_key": "obj_time",
+      "title": "Objection: “I don’t have time”",
+      "content": "I hear you, {{contact_first_name}}. Is it finding time for the first visit, or the worry about regular check-ins like before?\n\n(Let them answer.)\n\nRight now we're only talking about one visit. {{provider_name}} looks at {{main_concern}} and tells you what it would take from there. Sometimes that’s a short plan to steady things. Sometimes it’s more, and you’ll hear that up front so you can decide. Nobody is signing you up for a program on the phone.\n\nWe'll fit that first visit around your schedule, not the other way around.\n\nCould you find a short window for that?",
+      "sort_order": 122
+    },
+    {
+      "step_key": "obj_spouse",
+      "title": "Objection: “I need to talk to my spouse”",
+      "content": "Of course. Is it more about the money side, or do you two just make these decisions together?\n\n(Let them answer. If it's money, use the cost answer.)\n\nThat's fair, and I'm not asking you to commit to anything they'd need to weigh in on. Right now, all you can tell them is that {{main_concern}} is on your mind. After the visit, you can tell them what's going on and what it would take. That's an easier conversation to have. And if they'd like to come along, they're welcome.\n\nCan we pencil it in, and you can move it after you two talk?",
+      "sort_order": 123
+    },
+    {
+      "step_key": "obj_think",
+      "title": "Objection: “I need to think about it”",
+      "content": "That's fair, {{contact_first_name}}. Usually when someone says that, there's one specific thing on their mind. What's the part you'd want to think over?\n\n(Let them answer. If they name cost, time, or another reason, tap that button.)\n\nOkay. I'm not trying to rush you. The one thing I'd say is that {{main_concern}} is on your mind. It's been that way for a while, and it hasn't sorted itself out on its own. The visit is how you get the information you'd be thinking with. You can think it over just as easily after you know what's going on.\n\nWould it be easier to think it over once you have the answers?",
+      "sort_order": 130
+    },
+    {
+      "step_key": "obj_send_info",
+      "title": "Objection: “Just send me some info”",
+      "content": "I can do that, {{contact_first_name}}. What would you want it to cover, so I send the right thing?\n\n(Let them answer. If they name cost, time, or another reason, tap that button.)\n\nI'll be straight with you, though. Anything I send is going to be general. It can't tell you what's realistic for {{main_concern}} specifically. That takes {{provider_name}} looking at where you are now, and that's one short visit.\n\nLet's do both. I'll send the information, and we'll put a time on the calendar. If what I send answers your question, you can call and cancel, no problem.\n\nDoes doing both work for you?",
+      "sort_order": 131
+    }
+  ],
+  "choices": [
+    {
+      "from_step_key": "bridge_no",
+      "label": "They’re okay to move forward",
+      "to_step_key": "recommendation",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "bridge_no",
+      "label": "Another reason: find out what it is",
+      "to_step_key": "uncover",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "cadence_close",
+      "label": "They picked a time",
+      "to_step_key": "booked_wrap",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "cadence_close",
+      "label": "Hesitant or soft no",
+      "to_step_key": "uncover",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "comeback_close",
+      "label": "They picked a time",
+      "to_step_key": "booked_wrap",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "comeback_close",
+      "label": "Hesitant or soft no",
+      "to_step_key": "uncover",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "digging_in",
+      "label": "They named a concern beyond getting back on track",
+      "to_step_key": "making_it_real",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "digging_in",
+      "label": "Getting back on track is the whole story",
+      "to_step_key": "comeback_close",
+      "variant": "positive",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "digging_in_still",
+      "label": "They named a concern: make it real",
+      "to_step_key": "making_it_real",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "digging_in_still",
+      "label": "Nothing new: the check-in close",
+      "to_step_key": "cadence_close",
+      "variant": "positive",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "making_it_real",
+      "label": "Continue: the review",
+      "to_step_key": "review",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_cost",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_cost",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_embarrassed",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_embarrassed",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_gained_back",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_gained_back",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_other_option",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_other_option",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_send_info",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_send_info",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_side_effects",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_side_effects",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_spouse",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_spouse",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_think",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_think",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_time",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_time",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "opening_question",
+      "label": "“Still keeping the weight off”",
+      "to_step_key": "resp_doing_great",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "opening_question",
+      "label": "“A little has started to creep back”",
+      "to_step_key": "resp_coming_back",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "opening_question",
+      "label": "“Pretty much back to where I was”",
+      "to_step_key": "resp_fully_back",
+      "variant": "negative",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“Yes, that sounds reasonable”",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "Hesitant or soft no",
+      "to_step_key": "uncover",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "resp_coming_back",
+      "label": "Continue: update their file",
+      "to_step_key": "transition",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "resp_doing_great",
+      "label": "Continue: update their file",
+      "to_step_key": "transition_still",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "resp_fully_back",
+      "label": "Continue: update their file",
+      "to_step_key": "transition",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "review",
+      "label": "They said yes: make the recommendation",
+      "to_step_key": "recommendation",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "review",
+      "label": "Not quite / they hesitate",
+      "to_step_key": "bridge_no",
+      "variant": "negative",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "transition",
+      "label": "They said okay: start the questions",
+      "to_step_key": "digging_in",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "transition_still",
+      "label": "They said okay: start the questions",
+      "to_step_key": "digging_in_still",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "They’re ready: schedule",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I gained it back as soon as I stopped”",
+      "to_step_key": "obj_gained_back",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I’m embarrassed I gained it back”",
+      "to_step_key": "obj_embarrassed",
+      "variant": "objection",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "Side effects or a bad experience before",
+      "to_step_key": "obj_side_effects",
+      "variant": "objection",
+      "sort_order": 3
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "Cost or insurance",
+      "to_step_key": "obj_cost",
+      "variant": "objection",
+      "sort_order": 4
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I don’t have time”",
+      "to_step_key": "obj_time",
+      "variant": "objection",
+      "sort_order": 5
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I need to talk to my spouse”",
+      "to_step_key": "obj_spouse",
+      "variant": "objection",
+      "sort_order": 6
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I’m considering another option”",
+      "to_step_key": "obj_other_option",
+      "variant": "objection",
+      "sort_order": 7
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I need to think about it”",
+      "to_step_key": "obj_think",
+      "variant": "objection",
+      "sort_order": 8
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“Just send me some info”",
+      "to_step_key": "obj_send_info",
+      "variant": "objection",
+      "sort_order": 9
+    }
+  ]
+}

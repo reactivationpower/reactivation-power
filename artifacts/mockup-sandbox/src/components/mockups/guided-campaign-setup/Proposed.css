@@ -1,0 +1,20 @@
+/* Scoped to .guided-setup so these rules never leak into other mockup groups.
+   Goal: keep every card's title on one baseline and every description top aligned,
+   even though "Connect Your Campaigns" is longer than the other headings and its
+   description runs a line longer. Same card layout as production, copy only. */
+.guided-setup .welcome-card { justify-content: flex-start; }
+.guided-setup .welcome-card-bottom { margin-top: 12px; flex: 1; align-items: flex-start; }
+.guided-setup .welcome-arrow { align-self: flex-end; }
+.guided-setup .welcome-card-copy { min-width: 0; flex: 1; }
+.guided-setup .welcome-card-title { display: block; white-space: nowrap; font-size: clamp(18px, 2.05vw, 21px); }
+.guided-setup .welcome-card-description { min-height: calc(3 * 1.55em); }
+
+/* Tablet: two columns are narrower, so the title steps down via the clamp above
+   and descriptions reserve a fourth line so the arrows still share a baseline. */
+@media (max-width: 900px) and (min-width: 701px) {
+  .guided-setup .welcome-card-description { min-height: calc(4 * 1.55em); }
+}
+@media (max-width: 700px) {
+  .guided-setup .welcome-card-title { white-space: normal; font-size: 21px; }
+  .guided-setup .welcome-card-description { min-height: 0; }
+}

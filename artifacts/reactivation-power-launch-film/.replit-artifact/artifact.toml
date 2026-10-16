@@ -1,0 +1,29 @@
+kind = "video"
+videoAspectRatio = "16:9"
+previewPath = "/reactivation-power-launch-film/"
+title = "Reactivation Power — Two Products, One Launch Offer"
+description = "Narrated landscape sales film demonstrating Reactivation and Lead Follow-Up for practice owners."
+version = "1.0.0"
+id = "artifacts/reactivation-power-launch-film"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/reactivation-power-launch-film/" ]
+localPort = 21084
+
+[services.development]
+run = "pnpm --filter @workspace/reactivation-power-launch-film run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/reactivation-power-launch-film", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/reactivation-power-launch-film/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21084"
+BASE_PATH = "/reactivation-power-launch-film/"

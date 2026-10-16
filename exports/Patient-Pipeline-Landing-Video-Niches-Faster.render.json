@@ -1,0 +1,74 @@
+{
+  "artifact": "artifacts/patient-pipeline-landing-video",
+  "canonicalDurationSeconds": 147.736,
+  "mode": "encode-verified-existing-capture",
+  "captureDirectory": "exports/.landing-capture/2026-10-01T18-31-20-095Z-11381",
+  "frameCount": 1758,
+  "firstCapturedFrameSeconds": 0.10526609420776367,
+  "lastCapturedFrameSeconds": 145.78683614730835,
+  "finalHoldVerifiedAgainstCanonicalEndScreenshot": true,
+  "finalFrameSSIM": 1,
+  "narrationTempo": 1.1,
+  "musicTempo": 1,
+  "pitchPreserved": true,
+  "sceneTimings": [
+    {
+      "key": "opportunity",
+      "startMs": 0,
+      "durationMs": 21091,
+      "voiceoverDelayMs": 250,
+      "voiceoverFile": "artifacts/patient-pipeline-landing-video/public/audio/vo-opportunity-final.mp3"
+    },
+    {
+      "key": "introduction",
+      "startMs": 21091,
+      "durationMs": 13909,
+      "voiceoverDelayMs": 250,
+      "voiceoverFile": "artifacts/patient-pipeline-landing-video/public/audio/vo-introduction-final.mp3"
+    },
+    {
+      "key": "niches",
+      "durationMs": 12100,
+      "voiceoverDelayMs": 250,
+      "voiceoverFile": "artifacts/patient-pipeline-landing-video/public/audio/vo-niches-base.mp3",
+      "startMs": 35000
+    },
+    {
+      "key": "reactivation",
+      "startMs": 47100,
+      "durationMs": 22909,
+      "voiceoverDelayMs": 250,
+      "voiceoverFile": "artifacts/patient-pipeline-landing-video/public/audio/vo-reactivation-final.mp3"
+    },
+    {
+      "key": "lead",
+      "startMs": 70009,
+      "durationMs": 17545,
+      "voiceoverDelayMs": 250,
+      "voiceoverFile": "artifacts/patient-pipeline-landing-video/public/audio/vo-lead-final.mp3"
+    },
+    {
+      "key": "workflow",
+      "startMs": 87554,
+      "durationMs": 12818,
+      "voiceoverDelayMs": 250,
+      "voiceoverFile": "artifacts/patient-pipeline-landing-video/public/audio/vo-workflow-owner-team.mp3"
+    },
+    {
+      "key": "revenue",
+      "startMs": 100372,
+      "durationMs": 31182,
+      "voiceoverDelayMs": 250,
+      "voiceoverFile": "artifacts/patient-pipeline-landing-video/public/audio/vo-revenue-monthly.mp3"
+    },
+    {
+      "key": "invitation",
+      "startMs": 131554,
+      "durationMs": 16182,
+      "voiceoverDelayMs": 250,
+      "voiceoverFile": "artifacts/patient-pipeline-landing-video/public/audio/vo-invitation-final.mp3"
+    }
+  ],
+  "recordingStopSignalObserved": false,
+  "recoveryReason": "The full canonical playback and every representative checkpoint were captured. The exporter incorrectly rejected the naturally ended audio before the player final timer signalled stop. Reused the unchanged completed footage; final static hold independently verified by SSIM against canonical-end screenshot. Runtime guard fixed; no fabricated stop-signal claim."
+}

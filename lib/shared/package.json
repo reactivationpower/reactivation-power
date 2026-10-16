@@ -1,0 +1,33 @@
+{
+  "name": "@workspace/shared",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./lead-terms": "./src/lead-terms.ts",
+    "./marketing-analytics": "./src/marketing-analytics.ts",
+    ".": "./src/index.ts",
+    "./analytics-types": "./src/analytics-types.ts",
+    "./call-time": "./src/call-time.ts",
+    "./csv-patients": "./src/csv-patients.ts",
+    "./campaign-tokens": "./src/campaign-tokens.ts",
+    "./booking-funnel": "./src/booking-funnel.ts",
+    "./email-templates": "./src/email-templates.ts",
+    "./marketing-texts": "./src/marketing-texts.ts",
+    "./format": "./src/format.ts",
+    "./lazy-time": "./src/lazy-time.ts",
+    "./lead-followup": "./src/lead-followup.ts",
+    "./lead-requested-time": "./src/lead-requested-time.ts",
+    "./lead-validation": "./src/lead-validation.ts",
+    "./lead-webhooks": "./src/lead-webhooks.ts",
+    "./notes-text": "./src/notes-text.ts",
+    "./opportunity": "./src/opportunity.ts",
+    "./phone": "./src/phone.ts",
+    "./sales-leads": "./src/sales-leads.ts",
+    "./script-merge": "./src/script-merge.ts",
+    "./types": "./src/types.ts",
+    "./us-timezones": "./src/us-timezones.ts",
+    "./sales-automation": "./src/sales-automation.ts",
+    "./booking-window": "./src/booking-window.ts"
+  }
+}

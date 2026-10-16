@@ -1,0 +1,519 @@
+{
+  "niche": {
+    "name": "Body Waxing",
+    "sector": "healthcare",
+    "is_active": true,
+    "sort_order": 17
+  },
+  "steps": [
+    {
+      "step_key": "opening_question",
+      "title": "The Opening Question",
+      "content": "So {{contact_first_name}}, how have things been since your last wax with us? I usually hear one of three things. Still pretty smooth, some of it starting to come back, or pretty much back to shaving. Which one is closest for you?\n\n(Only three answers. Tap the one you hear.)",
+      "sort_order": 1
+    },
+    {
+      "step_key": "resp_doing_great",
+      "title": "Still Smooth",
+      "content": "That's great to hear, {{contact_first_name}}. That's the payoff of regular visits. The hair comes in finer and slower every time. Is it nice to have it last this long?\n\n(Let them answer. This is their win.)\n\n(Do not offer anything yet. Update the file first.)",
+      "sort_order": 2
+    },
+    {
+      "step_key": "resp_coming_back",
+      "title": "Some of It Coming Back",
+      "content": "That happens, {{contact_first_name}}. That's just what hair does when the waxing routine gets interrupted. The good news is you haven't lost the progress. Getting back on schedule brings that finer growth back faster than starting from scratch. Your notes say you were really happy staying ahead of it. Does that sound right?\n\n(Let them confirm. Stay warm. This is routine, not a problem.)\n\n(Do not offer anything yet. Update the file first.)",
+      "sort_order": 3
+    },
+    {
+      "step_key": "resp_fully_back",
+      "title": "Back to Shaving",
+      "content": "I understand, {{contact_first_name}}. Life gets busy, and the razor is right there in the shower. Please don't feel bad. A lot of our clients take a break and come back. What made you switch to waxing in the first place?\n\n(Let them answer. Shaving has probably reminded them of the stubble and the ingrowns.)\n\n(Do not offer anything yet. Update the file first.)",
+      "sort_order": 4
+    },
+    {
+      "step_key": "other_areas_bonus",
+      "title": "One More Thing: Other Areas",
+      "content": "Perfect, you're all set for (day) at (time).\n\n(If you already covered other areas during the file update, skip the question. Confirm the appointment and end the call.)\n\nOne quick thing while I have you, {{contact_first_name}}. Is there another area you've thought about adding, anywhere you're still shaving or plucking between visits?\n\n(Let them answer.)\n\n(If yes, read the next line.)\n\nGreat, I'll make a note so we can fit it into the same visit if you'd like. It's usually just a few extra minutes. No commitment, we'll talk it through when you're in.\n\n(If no, read the next line.)\n\nNo problem. I always ask, because it's easier to add an area to a visit you're already making. We'll see you (day) at (time), {{contact_first_name}}. Have a great day.\n\n(Either way, end the call with the appointment confirmed.)",
+      "sort_order": 5
+    },
+    {
+      "step_key": "transition_still",
+      "title": "Ask Permission for the Questions",
+      "content": "{{contact_first_name}}, I'm updating your file anyway. Can I ask you a few quick questions so it's up to date?\n\n(Wait for the yes.)",
+      "sort_order": 6
+    },
+    {
+      "step_key": "transition",
+      "title": "Ask Permission for the Questions",
+      "content": "{{contact_first_name}}, we'll come back to getting you on the schedule in a moment. First, can I ask you a few quick questions so your file is up to date?\n\n(Wait for the yes.)",
+      "sort_order": 7
+    },
+    {
+      "step_key": "digging_in_still",
+      "title": "The Questions: Update the File",
+      "content": "(Write down everything they mention. You'll recap it in a moment.)\n\n{{contact_first_name}}, I'm going to ask about a few areas and how your waxing routine is going. Just let me know what applies to you.\n\nFirst, your routine. Are you still coming in every four to six weeks, or has the gap slipped a little?\n\nHow has your skin been between visits, any irritation or ingrowns?\n\nNext, a few spots people are often still shaving or plucking. Your brows?\n\nYour lip or anywhere else on your face?\n\nYour underarms?\n\nYour legs?\n\nYour back?\n\nIs there another service you've been curious about?\n\n(Recap what you wrote down, then ask:)\n\n{{contact_first_name}}, of those, which one would you most like to take care of?\n\n(Tap their answer below. If nothing came up, that's still a good call. Use the second button.)",
+      "sort_order": 8
+    },
+    {
+      "step_key": "digging_in",
+      "title": "The Questions: Update the File",
+      "content": "(Write down everything they mention. You'll recap it in a moment.)\n\n{{contact_first_name}}, I'm going to ask about a few areas and how your waxing routine is going. Just let me know what applies to you.\n\nFirst, your routine slipped a little. When did that start?\n\nHow has your skin been since, any irritation or ingrowns from shaving?\n\nNext, a few spots people are often still shaving or plucking. Your brows?\n\nYour lip or anywhere else on your face?\n\nYour underarms?\n\nYour legs?\n\nYour back?\n\nIs there another service you've been curious about?\n\n(Recap what you wrote down, including the routine, then ask:)\n\n{{contact_first_name}}, between the schedule and anything else you mentioned, which one would you most like to take care of?\n\n(Tap their answer below. If getting back on schedule is the whole story, use the second button.)",
+      "sort_order": 9
+    },
+    {
+      "step_key": "review",
+      "title": "The Review",
+      "content": "{{contact_first_name}}, let me make sure I have this right.\n\n(Read back their three answers: how long, how often, what it gets in the way of.)\n\nSo it's been on your mind a while, and you notice it most times you look in the mirror. At its worst it gets in the way of what you mentioned. Did I get that right?\n\n(Say what they named: photos, going out, or feeling put together. Let them answer. If they correct you, take the correction and move on.)\n\nAnd it sounds like you'd like to get back to not having to think about it. Is that fair to say?\n\n(Most people say yes. Tap what you hear.)",
+      "sort_order": 9
+    },
+    {
+      "step_key": "making_it_real",
+      "title": "Making It Real",
+      "content": "{{contact_first_name}}, I'd like to ask a few quick questions about {{main_concern}} so your file is up to date. It'll only take a minute.\n\n(Ask these three questions in order. Pause after each and let them answer.)\n\nHow long has it been bothering you, like a few weeks, or more like months?\n\n(Let them answer. If it fits, you can say \"Got it.\")\n\nIs it something you notice now and then, or every time you look in the mirror?\n\n(Let them answer. If it fits, you can say \"I see.\" or \"I understand.\")\n\nWhen it's at its worst, does it ever interfere with photos, going out, or feeling put together?\n\n(Let them answer. If they name an impact, reflect only what they said; if they mention going out, you might say \"It comes up when you're going out.\" If none, you can say \"Got it, thank you.\")",
+      "sort_order": 10
+    },
+    {
+      "step_key": "bridge_no",
+      "title": "They Hesitate: Find Out Why",
+      "content": "{{contact_first_name}}, you said {{main_concern}} is something you'd like to feel better about. I don't want to assume anything. Is it the timing, or is something else holding you back?\n\n(Stay easy about it. No pressure. Do not repeat the concern back at them. Let them answer.)",
+      "sort_order": 11
+    },
+    {
+      "step_key": "recommendation",
+      "title": "The Recommendation",
+      "content": "{{contact_first_name}}, that's worth getting looked at instead of just dealing with it. Can I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you in so {{provider_name}} can take a look and talk through {{main_concern}}. If we can help, we'll walk you through the options. If it's not the right fit, we'll say so. Either way you'll know where you stand. Does that sound reasonable?\n\n(Tap what you hear.)",
+      "sort_order": 11
+    },
+    {
+      "step_key": "cadence_close",
+      "title": "Nothing Found: Protect the Routine",
+      "content": "{{contact_first_name}}, I'm glad everything is still feeling smooth.\n\nOne thing before I let you go. Waxing works best every four to six weeks, right when the new growth is the perfect length. Staying on that schedule keeps the hair coming in finer, and each visit gets more comfortable. Once the gap stretches, the hair goes back to coming in coarse. Does that make sense?\n\n(Wait for the yes. If they hesitate, use the second button.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get your next visit on the books now. That way you never lose the progress you've made. Does that sound reasonable?\n\n(Wait for the yes.)\n\nOkay, let's find you a time. I have (day) at (time) or (day) at (time). Which is better for you?",
+      "sort_order": 12
+    },
+    {
+      "step_key": "uncover",
+      "title": "Uncover the Real Concern",
+      "content": "Okay, {{contact_first_name}}. I'm not going to push you on it. What's the part giving you pause?\n\n(Let them answer. Then tap what you hear.)",
+      "sort_order": 12
+    },
+    {
+      "step_key": "comeback_close",
+      "title": "Getting Back on Schedule Is the Whole Story: The Close",
+      "content": "{{contact_first_name}}, thank you for that. Your file is up to date.\n\nThe nice thing is getting back is easy. We're not starting over, just picking up where you left off. And the growth you have right now is probably about the perfect length for a wax. Any longer and it gets less comfortable, so this is a good window. Does that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you in while you're in that window. One visit and you're back to weeks of smooth instead of hours. Does that sound reasonable?\n\n(Wait for the yes.)\n\nOkay, let's get you back on the books. I have (day) at (time) or (day) at (time). Which is better for you?",
+      "sort_order": 13
+    },
+    {
+      "step_key": "obj_fell_out",
+      "title": "Objection: “I fell out of the habit”",
+      "content": "That happens, {{contact_first_name}}. Life gets busy and the routine goes first.\n\nCan I ask, was it one thing that got in the way, or did it just drift?\n\n(Let them answer.)\n\nEither way, that's how it goes for most people. With waxing, regular is what makes it easy. Every visit on schedule, the hair comes in finer and the visit gets quicker. A long gap resets that a little, but not all the way.\n\n{{provider_name}} would rather get you back on track now than after another few months. The first step is one visit, with {{main_concern}} as the focus.\n\nWould it feel good to just get that first one done?",
+      "sort_order": 100
+    },
+    {
+      "step_key": "obj_hurt_more",
+      "title": "Objection: “Doesn’t it hurt more after a break?”",
+      "content": "That's a fair question, {{contact_first_name}}, and I'd rather you ask it.\n\nCan I ask, is that from a rough first visit before, or something you've heard?\n\n(Let them answer. Do not promise it won't hurt.)\n\nThe first one back is the one that takes the most, because the hair is thicker after a gap. Our team knows that and works around it, with the right wax and the right pace. After that it gets easier every time, and that's the part you already know from before. Waiting longer only makes the first one back harder, not easier.\n\n{{provider_name}} will walk through {{main_concern}} with you before anything starts.\n\nWould it help to get that first one behind you?",
+      "sort_order": 101
+    },
+    {
+      "step_key": "obj_shaving_easier",
+      "title": "Objection: “I’ve just been shaving, it’s easier”",
+      "content": "I understand, {{contact_first_name}}. Quick is hard to argue with.\n\nCan I ask, is it working for you, or is it the stubble and ingrowns again?\n\n(Let them answer. Do not knock shaving.)\n\nShaving is quick, and that's its whole advantage. What it can't do is last. The stubble, the bumps, and the ingrowns are usually what brought people to waxing in the first place. One wax buys weeks of smooth. One shave buys a day.\n\n{{provider_name}} can take a look at {{main_concern}} and get you back to the easy version.\n\nWould it be worth trading the daily shave for one visit a month?",
+      "sort_order": 102
+    },
+    {
+      "step_key": "obj_other_option",
+      "title": "Objection: “I’m considering another option”",
+      "content": "That's fair. Can I ask what you're looking at, like shaving, a home kit, or another salon?\n\n(Let them answer. Do not knock the other option.)\n\nThose can all make sense, and some people do well combining them. The part that's hard to compare from home is what would move {{main_concern}} for you. {{provider_name}} already knows your skin and what wax it handles best, so you're not starting over here.\n\nCome in, get a straight answer on where things stand, and then compare. If the other option turns out to be the better fit, you'll be choosing it for a reason.\n\nIs that a fair way to decide?",
+      "sort_order": 120
+    },
+    {
+      "step_key": "obj_cost",
+      "title": "Objection: Cost",
+      "content": "I understand, {{contact_first_name}}. Is it the cost of the visit itself, or the thought of keeping it up month after month?\n\n(Let them answer. Do not quote prices, packages, or discounts. The office handles that.)\n\nThis first visit is one appointment. One wax buys weeks of smooth, while shaving is back by dinnertime. Add up razors, creams, and the shower time, and the gap is smaller than it feels. The longer you keep it up, the finer the hair comes in and the quicker visits get.\n\nThe other side of it is what {{main_concern}} is already costing you, the things you mentioned a minute ago. That's the part I'd hate to see keep adding up.\n\nCan we at least get the first one on the calendar?",
+      "sort_order": 121
+    },
+    {
+      "step_key": "obj_time",
+      "title": "Objection: “I don’t have time”",
+      "content": "I hear you, {{contact_first_name}}. Is it finding time for the first visit, or the worry about keeping up a regular schedule?\n\n(Let them answer.)\n\nRight now we're only talking about one visit. {{provider_name}} looks at {{main_concern}} and tells you what it would take from there. Sometimes that’s every four weeks. Sometimes it’s less often, and you’ll hear that up front so you can decide. Nobody is booking you into a standing appointment on the phone.\n\nWe'll fit that first visit around your schedule, not the other way around.\n\nCould you find a short window for that?",
+      "sort_order": 122
+    },
+    {
+      "step_key": "obj_spouse",
+      "title": "Objection: “I need to talk to my spouse”",
+      "content": "Of course. Is it more about the money side, or do you two just make these decisions together?\n\n(Let them answer. If it's money, use the cost answer.)\n\nThat's fair, and I'm not asking you to commit to anything they'd need to weigh in on. Right now, all you can tell them is that {{main_concern}} is on your mind. After the visit, you can tell them what's going on and what it would take. That's an easier conversation to have. And if they'd like to come along, they're welcome.\n\nCan we pencil it in, and you can move it after you two talk?",
+      "sort_order": 123
+    },
+    {
+      "step_key": "obj_think",
+      "title": "Objection: “I need to think about it”",
+      "content": "That's fair, {{contact_first_name}}. Usually when someone says that, there's one specific thing on their mind. What's the part you'd want to think over?\n\n(Let them answer. If they name cost, time, or another reason, tap that button.)\n\nOkay. I'm not trying to rush you. The one thing I'd say is that {{main_concern}} is on your mind. It's been that way for a while, and it hasn't sorted itself out on its own. The visit is how you get the information you'd be thinking with. You can think it over just as easily after you know what's going on.\n\nWould it be easier to think it over once you have the answers?",
+      "sort_order": 130
+    },
+    {
+      "step_key": "obj_send_info",
+      "title": "Objection: “Just send me some info”",
+      "content": "I can do that, {{contact_first_name}}. What would you want it to cover, so I send the right thing?\n\n(Let them answer. If they name cost, time, or another reason, tap that button.)\n\nI'll be straight with you, though. Anything I send is going to be general. It can't tell you what's realistic for {{main_concern}} specifically. That takes {{provider_name}} seeing the area, and that's one short visit.\n\nLet's do both. I'll send the information, and we'll put a time on the calendar. If what I send answers your question, you can call and cancel, no problem.\n\nDoes doing both work for you?",
+      "sort_order": 131
+    }
+  ],
+  "choices": [
+    {
+      "from_step_key": "bridge_no",
+      "label": "They’re okay to move forward",
+      "to_step_key": "recommendation",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "bridge_no",
+      "label": "Another reason: dig deeper",
+      "to_step_key": "uncover",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "cadence_close",
+      "label": "They picked a time: ask about other areas",
+      "to_step_key": "other_areas_bonus",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "cadence_close",
+      "label": "Hesitant or soft no",
+      "to_step_key": "uncover",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "comeback_close",
+      "label": "They picked a time: ask about other areas",
+      "to_step_key": "other_areas_bonus",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "comeback_close",
+      "label": "Hesitant or soft no",
+      "to_step_key": "uncover",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "digging_in",
+      "label": "They named something beyond getting back on schedule",
+      "to_step_key": "making_it_real",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "digging_in",
+      "label": "Getting back on schedule is the whole story: go to the close",
+      "to_step_key": "comeback_close",
+      "variant": "positive",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "digging_in_still",
+      "label": "They named a concern",
+      "to_step_key": "making_it_real",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "digging_in_still",
+      "label": "Nothing found: protect the routine",
+      "to_step_key": "cadence_close",
+      "variant": "positive",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "making_it_real",
+      "label": "Continue to the review",
+      "to_step_key": "review",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_cost",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_cost",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_fell_out",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_fell_out",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_hurt_more",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_hurt_more",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_other_option",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_other_option",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_send_info",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_send_info",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_shaving_easier",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_shaving_easier",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_spouse",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_spouse",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_think",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_think",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_time",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_time",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "opening_question",
+      "label": "“Still pretty smooth”",
+      "to_step_key": "resp_doing_great",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "opening_question",
+      "label": "“Some of it’s starting to come back”",
+      "to_step_key": "resp_coming_back",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "opening_question",
+      "label": "“Pretty much back to shaving”",
+      "to_step_key": "resp_fully_back",
+      "variant": "negative",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“Yes, that sounds reasonable”",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "Hesitant or soft no",
+      "to_step_key": "uncover",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "resp_coming_back",
+      "label": "Continue: update their file",
+      "to_step_key": "transition",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "resp_doing_great",
+      "label": "Continue: update their file",
+      "to_step_key": "transition_still",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "resp_fully_back",
+      "label": "Continue: update their file",
+      "to_step_key": "transition",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "review",
+      "label": "They said yes: make the recommendation",
+      "to_step_key": "recommendation",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "review",
+      "label": "Not quite / they hesitate",
+      "to_step_key": "bridge_no",
+      "variant": "negative",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "transition",
+      "label": "They said okay: ask the questions",
+      "to_step_key": "digging_in",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "transition_still",
+      "label": "They said okay: ask the questions",
+      "to_step_key": "digging_in_still",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "They’re ready: schedule",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I fell out of the habit”",
+      "to_step_key": "obj_fell_out",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“Doesn’t it hurt more after a break?”",
+      "to_step_key": "obj_hurt_more",
+      "variant": "objection",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I’ve just been shaving, it’s easier”",
+      "to_step_key": "obj_shaving_easier",
+      "variant": "objection",
+      "sort_order": 3
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "Cost",
+      "to_step_key": "obj_cost",
+      "variant": "objection",
+      "sort_order": 4
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I don’t have time”",
+      "to_step_key": "obj_time",
+      "variant": "objection",
+      "sort_order": 5
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I need to talk to my spouse”",
+      "to_step_key": "obj_spouse",
+      "variant": "objection",
+      "sort_order": 6
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I'm considering another option”",
+      "to_step_key": "obj_other_option",
+      "variant": "objection",
+      "sort_order": 7
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I need to think about it”",
+      "to_step_key": "obj_think",
+      "variant": "objection",
+      "sort_order": 8
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“Just send me some info”",
+      "to_step_key": "obj_send_info",
+      "variant": "objection",
+      "sort_order": 9
+    }
+  ]
+}

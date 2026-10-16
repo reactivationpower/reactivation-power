@@ -1,0 +1,29 @@
+kind = "video"
+videoAspectRatio = "16:9"
+previewPath = "/patient-pipeline-walkthrough/"
+title = "Patient Pipeline — Product Walkthrough"
+description = "Detailed 16:9 narrated walkthrough of service-aware Reactivation and campaign-aware Lead Follow-Up for practice teams."
+version = "1.0.0"
+id = "artifacts/patient-pipeline-walkthrough"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/patient-pipeline-walkthrough/" ]
+localPort = 25001
+
+[services.development]
+run = "pnpm --filter @workspace/patient-pipeline-walkthrough run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/patient-pipeline-walkthrough", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/patient-pipeline-walkthrough/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "25001"
+BASE_PATH = "/patient-pipeline-walkthrough/"

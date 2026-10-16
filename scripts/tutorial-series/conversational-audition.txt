@@ -1,0 +1,13 @@
+[warmly] Okay, let's put your offer into Patient Pipeline together. I've got a forty-nine-dollar back pain special in mind for our example, but you'll use whatever your own ad is offering.
+
+We're going to start in Lead Follow-Up. If you're on the welcome page, that's the option you want, rather than Reactivation. Once you're in there, open Campaigns, and we'll create a new one.
+
+Now, before we fill anything in, let me explain what we're setting up here. This campaign is how Patient Pipeline knows which offer someone responded to. So when your caller picks up the phone, they're talking about the right offer—not giving everyone the same conversation.
+
+Go ahead and click New Campaign. That brings us to the offer details, and the first thing I want you to look at is Service type.
+
+I'm choosing Chiropractic because that matches the back pain offer we're using. Yours might be different, and that's completely fine. Just choose the service your ad is actually promoting, because that's what helps Patient Pipeline choose the right call script.
+
+Now that we've got that selected, let's give the campaign a name your team will recognize. I'll type Back Pain Relief, forty-nine-dollar New Patient Special.
+
+You don't have to use that wording. The important thing is that when someone on your team sees this name later, they'll know exactly which offer the person asked about. Take a moment to enter yours, and then we'll add what the offer includes.

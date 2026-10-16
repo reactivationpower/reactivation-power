@@ -1,0 +1,1798 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "O5gjU6L4x5fCnhiadR-B0"
+uri = "file://exports/Reactivation-Power-Service-Agreement.pdf"
+type = "pdf"
+title = "Current Startup Subscription Agreement — Unsigned Copy"
+description = "Blank reference copy of the current subscription agreement. Default terms: 12 months, $475 setup, $475 per month; customer details and signing dates remain blank. Individual agreements can use custom terms."
+logical_id = "406937ad-a923-4d75-ba97-d94e614f5fb8"
+content_hash = "sha256:06a5d70370039e498a58267b0dcf85044eeef0591a557c184f1cedfe3cad3013"
+size = 6166
+mtime_ms = 1790085160453
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/406937ad-a923-4d75-ba97-d94e614f5fb8/57e8e8bb-dcb1-4257-85a2-6f4580b29a19"
+storage_version_token = "1790876413820443"
+content_type = "application/pdf"
+
+[[outputs]]
+id = "nAOeCrx5YTQiaAHhGffXq"
+uri = "file://screenshots/homepage-logo-only-mockup.png"
+type = "image"
+title = "Current homepage — logo swap only"
+description = "Screenshot of the live homepage with only the top-left logo replaced by your uploaded Pipeline Power logo. All pixels outside the logo area are unchanged."
+logical_id = "10115b70-2069-4a30-a347-bdde013295b9"
+content_hash = "sha256:d46ce93bf49d295304701ddc1c3da6d8b036567d2957efb9920cf5bbc87cc275"
+size = 320472
+mtime_ms = 1790624421180
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/10115b70-2069-4a30-a347-bdde013295b9/c3956202-8204-412e-9723-b18b973c04e4"
+storage_version_token = "1790624426757605"
+content_type = "image/png"
+
+[[outputs]]
+id = "6xFeepSBwhEseWx-Ut3ID"
+uri = "file://attached_assets/products-larger-headings-mockup.png"
+type = "image"
+title = "Product section — larger headings, no icons"
+description = "Static visual concept only: larger product headings and tagline, with the two decorative icons removed. No website code or existing mockups changed. AI-rendered small body text is illustrative, not proposed copy."
+logical_id = "d6c74552-f7de-4e0f-bd84-1e9c29eea836"
+content_hash = "sha256:fac8cce9f78562e629919994309f13ace8cfe581ddd8f2bc0b96bb5e0c981dc4"
+size = 809857
+mtime_ms = 1790629700908
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/d6c74552-f7de-4e0f-bd84-1e9c29eea836/3454c7a4-d620-4dea-a49b-07daabed3849"
+storage_version_token = "1790629711704145"
+content_type = "image/png"
+
+[[outputs]]
+id = "IIbXPjmm_rprwj6jOMNVv"
+uri = "file://attached_assets/current-mobile-single-row-preview.jpg"
+type = "image"
+title = "Current mobile preview"
+description = "Actual website preview at 390px phone width, showing the single-row navigation and script selector. Not yet republished."
+logical_id = "ead071d7-8f86-4c5d-bb12-a1c7073d6e0a"
+content_hash = "sha256:a6fb23417b72501b587a634fb2153a54f417b71d90dcb90f65b9714ad4e9f918"
+size = 100283
+mtime_ms = 1790636505134
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/ead071d7-8f86-4c5d-bb12-a1c7073d6e0a/d3bf6e4c-1f53-4a7c-a761-b17eac9bf7ce"
+storage_version_token = "1790636514086090"
+content_type = "image/jpeg"
+
+[[outputs]]
+id = "s837DjUkpgtWqNsG-Mp2P"
+uri = "file://attached_assets/proposed-header-desktop.jpg"
+type = "image"
+title = "Proposed header — desktop"
+description = "Logo and larger call button above a single navigation row. Mockup only; website unchanged."
+logical_id = "8f34deba-bb8c-44cb-8856-7ba3e9ae61a0"
+content_hash = "sha256:ca84021e5d3fb35a4a2063c5d78d4e75a6f4176a60267bd14ba0fa27da2f6024"
+size = 92585
+mtime_ms = 1790637397365
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/8f34deba-bb8c-44cb-8856-7ba3e9ae61a0/36b1fe44-2729-41a1-9303-149532bc4bf7"
+storage_version_token = "1790637404293462"
+content_type = "image/jpeg"
+
+[[outputs]]
+id = "h0xQ1o4sV1sXXX51umJeV"
+uri = "file://attached_assets/proposed-header-mobile.jpg"
+type = "image"
+title = "Proposed header — mobile"
+description = "Four navigation links on one line. Client Login remains in the footer on mobile. Mockup only."
+logical_id = "c9105f07-794f-4166-a868-594c44f4a5f2"
+content_hash = "sha256:8bb070b234a930bfd3996bb0c52c767fd5788da48cb7aeebcfcdc34480db94ec"
+size = 44790
+mtime_ms = 1790637399353
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/c9105f07-794f-4166-a868-594c44f4a5f2/aa8cafc9-a1a9-4789-8ace-0a1ee1a8ef88"
+storage_version_token = "1790637404912122"
+content_type = "image/jpeg"
+
+[[outputs]]
+id = "cxLvZv_DJBUSK2hgZ6cfL"
+uri = "file://attached_assets/lead-all-leads-table.png"
+type = "image"
+title = "All Leads"
+description = "All lead records remain searchable outside the daily calling queue."
+logical_id = "b441492b-3061-4ae4-9255-eb15152934e7"
+content_hash = "sha256:da0b67184fb4cbb27327a91e9407404d764c6cbd81f237b069166d762511e260"
+size = 436431
+mtime_ms = 1790688991727
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/b441492b-3061-4ae4-9255-eb15152934e7/b725e92c-a777-46bb-a213-c5e4cffd1999"
+storage_version_token = "1790689273867528"
+content_type = "image/png"
+
+[[outputs]]
+id = "yuhN79pZkFI1G23EVqDV4"
+uri = "file://attached_assets/lead-day5-script.png"
+type = "image"
+title = "Day-five calling script"
+description = "Actual script with automatic “a few days ago” wording and the original submission date. Synthetic demonstration lead."
+logical_id = "007b857e-7826-4892-8924-74f1e13f0ae3"
+content_hash = "sha256:9d7aee0dcda814902a8be0c634fe14a6876f920c2df33d50676e1039fb6b992e"
+size = 153456
+mtime_ms = 1790689226563
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/007b857e-7826-4892-8924-74f1e13f0ae3/6b3733bf-c207-4031-9680-b8a057600b0d"
+storage_version_token = "1790689274457063"
+content_type = "image/png"
+
+[[outputs]]
+id = "4VzlA3q6v8rjzpHlGgozC"
+uri = "file://attached_assets/lead-two-month-script.png"
+type = "image"
+title = "Two-month check-in script"
+description = "Actual long-term follow-up opening with a warning to confirm current offer terms. Synthetic demonstration lead."
+logical_id = "71e47e51-d0a5-4f1b-ad0a-1bd8d2fc6508"
+content_hash = "sha256:37290d89b3438025f5bc821d1e19b2af26de0dbd024f61675d9a3fc1aaed743f"
+size = 178673
+mtime_ms = 1790689234023
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/71e47e51-d0a5-4f1b-ad0a-1bd8d2fc6508/a1285a29-d572-41a6-ad7a-e410e4f5912e"
+storage_version_token = "1790689274968256"
+content_type = "image/png"
+
+[[outputs]]
+id = "cddp_wmqPsQGGx0oQ3TJH"
+uri = "file://attached_assets/generated_images/proposed-calls-now-review.png"
+type = "image"
+title = "Proposed Calls Now layout"
+description = "Static visual proposal only: restored lead details, green/pink appointment labels, Call Now buttons, and Coming Up with next-call times. No app code changed."
+logical_id = "14ff9aef-277c-4841-bd97-4071be1b9609"
+content_hash = "sha256:0f09f247cb4b8b429915d89ff7e480a3a5051f774f29c9c9dc741b898a2cee3a"
+size = 975414
+mtime_ms = 1790689983875
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/14ff9aef-277c-4841-bd97-4071be1b9609/c0e4d53d-046f-47a5-a9f5-0fa346184121"
+storage_version_token = "1790689995046244"
+content_type = "image/png"
+
+[[outputs]]
+id = "jvxGLCIRONsKRyIcTGAoC"
+uri = "file://attached_assets/generated_images/proposed-call-timing-team.png"
+type = "image"
+title = "Proposed call timing and team coordination"
+description = "Static proposal showing last-call details, scheduled attempts, and an in-progress indicator. Sample data only; no code or app changes."
+logical_id = "2d280863-0527-416a-8ec7-8e875f98d486"
+content_hash = "sha256:0fd67e9fb7281bcd3ba3dddf568d1283a7cff0ca4ebc8c0f4b418898bb811795"
+size = 984872
+mtime_ms = 1790690788358
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/2d280863-0527-416a-8ec7-8e875f98d486/364b962e-3da6-4edd-b3dc-cfce03fcabff"
+storage_version_token = "1790690801186829"
+content_type = "image/png"
+
+[[outputs]]
+id = "WrrrhrYWPX6IY1X3oK2Yw"
+uri = "file://attached_assets/generated_images/retry-versus-requested-callback.png"
+type = "image"
+title = "Automatic retry vs. requested callback"
+description = "Static comparison showing the queue labels and different script openings. Illustrative wording and sample data only; no code or app changes."
+logical_id = "c1e782f6-04c9-48d9-b639-14ff99c3fc3c"
+content_hash = "sha256:6b80d854afc196d7dad9cb3f2f4ec6c2544ab970167ef37e56b7e402b41061f9"
+size = 1056227
+mtime_ms = 1790691385758
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/c1e782f6-04c9-48d9-b639-14ff99c3fc3c/e22510a5-754d-4147-9efe-f9032cf24b2e"
+storage_version_token = "1790691399337595"
+content_type = "image/png"
+
+[[outputs]]
+id = "ugW0lNLlRcIUQeZTj_4mT"
+uri = "file://documents/Lead_Follow_Up_First_Campaign_Guide.docx"
+type = "word_document"
+title = "Lead Follow-Up: First Campaign Guide"
+description = "Downloadable Word document with beginner-friendly setup instructions, connection testing, and a first-campaign checklist."
+logical_id = "fc6f2130-d4cb-4da8-a124-5f4286360f06"
+content_hash = "sha256:73b31e4c6cc84370a62660298f8a6109e2359ac8ee868148bda57e6412a30350"
+size = 5117
+mtime_ms = 1790702240650
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/fc6f2130-d4cb-4da8-a124-5f4286360f06/001bbb72-fa26-4512-8337-4002b63cab4f"
+storage_version_token = "1790702244785333"
+content_type = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+
+[[outputs]]
+id = "5SNJfBV7ajccePYfQSi2B"
+uri = "file://artifacts/reactivation-power-launch-film/public/audio/vo_1.mp3"
+type = "audio"
+title = "scene 1 narration"
+description = "Text-to-speech audio: Past patients who haven’t been back. New inquiries that need a real follow-up."
+logical_id = "87ba3005-aef5-4e5d-877a-040ffacaf826"
+
+[[outputs]]
+id = "6FToVP3HpWWOooblLsO3d"
+uri = "file://artifacts/reactivation-power-launch-film/public/audio/vo_3.mp3"
+type = "audio"
+title = "scene 3 narration"
+description = "Text-to-speech audio: Lead Follow-Up starts with the campaign they responded to, so your first call matches the offer they saw. Your team can track the next attempt, not lose it in a spreadsheet."
+logical_id = "f8b36c3a-1844-4eec-b114-c9d3dd5c2e4d"
+
+[[outputs]]
+id = "vcuholzfAoK49sdFnV-79"
+uri = "file://artifacts/reactivation-power-launch-film/public/audio/vo_4.mp3"
+type = "audio"
+title = "scene 4 narration"
+description = "Text-to-speech audio: One product for the people who already know your practice. One for the people who just raised their hand. Your people make the calls, with guidance for each conversation."
+logical_id = "056f5384-9e69-4f5b-a959-c1630e031019"
+
+[[outputs]]
+id = "E80wTw0qAK7jsaBtmfPeP"
+uri = "file://artifacts/reactivation-power-launch-film/public/audio/vo_5.mp3"
+type = "audio"
+title = "scene 5 narration"
+description = "Text-to-speech audio: For our launch, Reactivation and Lead Follow-Up are included together for one price. Schedule a call to see how both would work for your practice."
+logical_id = "5210accb-165f-4865-aa25-0f48163f5bad"
+
+[[outputs]]
+id = "3cq9jT3biaR7rtle3sO-R"
+uri = "file://artifacts/reactivation-power-launch-film/public/audio/vo_2.mp3"
+type = "audio"
+title = "scene 2 narration"
+description = "Text-to-speech audio: Reactivation helps your team reconnect with past patients. If someone says, I’m feeling fine, the conversation adapts instead of pushing a generic pitch."
+logical_id = "e7abf8c3-e69a-4084-8c68-395082b5c098"
+
+[[outputs]]
+id = "lnVXtGqt3tzbwGMhsip2D"
+uri = "file://artifacts/reactivation-power-launch-film/public/audio/bg_music.mp3"
+type = "audio"
+title = "launch music"
+description = "Generated music: Polished human-centered B2B software launch film instrumental, warm piano and restrained synth pulse, 100 BPM, optimistic but credible; quiet intro, momentum in the middle, clear war…"
+logical_id = "1b6c4a3a-c85e-464c-9043-165c0f74dfb0"
+
+[[outputs]]
+id = "Fzij4SrGBzwHs4sek4Tjf"
+uri = "file://artifacts/reactivation-power-launch-film/public/audio/bg_music_2.mp3"
+type = "audio"
+title = "49 second launch music"
+description = "Generated music: Polished human-centered B2B software launch film instrumental, warm piano and restrained synth pulse, 100 BPM, optimistic but credible; quiet intro, momentum as two workflows appear,…"
+logical_id = "5ef113f5-a16f-4e02-b983-3d25f3ff0b0b"
+
+[[outputs]]
+id = "WsuKG2bFjC7dVt6oevaRy"
+uri = "file://artifacts/reactivation-power-launch-film/public/audio/vo_1_new.mp3"
+type = "audio"
+title = "walkthrough update scene 1"
+description = "Text-to-speech audio: Past patients who haven’t been back. New inquiries that need a real follow-up."
+logical_id = "48597040-585c-4202-b56d-e8fda4010351"
+
+[[outputs]]
+id = "b6eOMqY4ICRYSl1OjGZiY"
+uri = "file://artifacts/reactivation-power-launch-film/public/audio/vo_3_new.mp3"
+type = "audio"
+title = "walkthrough update scene 3"
+description = "Text-to-speech audio: Lead Follow-Up carries the campaign into the conversation. Once you log the outcome, the software schedules the next attempt automatically."
+logical_id = "1099dea9-e5d4-43ce-a52c-79254b9fc72d"
+
+[[outputs]]
+id = "JIC2mL_JTVwiDku1n2c0u"
+uri = "file://artifacts/reactivation-power-launch-film/public/audio/vo_4_new.mp3"
+type = "audio"
+title = "walkthrough update scene 4"
+description = "Text-to-speech audio: Log the outcome; the software schedules the next call and brings it back when due. More chances to connect, without a separate spreadsheet or CRM entry."
+logical_id = "23ce6d01-8717-4780-9523-86f341a6a209"
+
+[[outputs]]
+id = "qK3E3EOEHsYOz6_7OeAR4"
+uri = "file://artifacts/reactivation-power-launch-film/public/audio/vo_5_new.mp3"
+type = "audio"
+title = "walkthrough update scene 5"
+description = "Text-to-speech audio: For our launch, Reactivation and Lead Follow-Up are included together for one price. Schedule a call to see how both would work for your practice."
+logical_id = "6bd33e3d-5b3f-4df7-af99-9073d2c4ba55"
+
+[[outputs]]
+id = "gY53FAVV4tL-HVmkA5nkl"
+uri = "file://artifacts/reactivation-power-launch-film/public/audio/vo_2_new.mp3"
+type = "audio"
+title = "walkthrough update scene 2"
+description = "Text-to-speech audio: Reactivation helps your team reconnect with past patients. If someone says, ‘I’m feeling fine,’ the conversation adapts instead of pushing a generic pitch."
+logical_id = "920f9811-fbd0-41ed-9eae-dea7bce57cf7"
+
+[[outputs]]
+id = "pO-HwDSEwr5CFGHJvucE3"
+uri = "file://artifacts/reactivation-power-launch-film/public/audio/vo_4_new_2.mp3"
+type = "audio"
+title = "short video revision scene 4"
+description = "Text-to-speech audio: Log the outcome; software schedules the next call. More chances to connect, with no spreadsheet or CRM re-entry."
+logical_id = "e8ed3670-7e38-40a2-9b66-6545ed083e39"
+
+[[outputs]]
+id = "TYFLx9Qpz94EaJk5c2drO"
+uri = "file://artifacts/reactivation-power-launch-film/public/audio/vo_5_new_2.mp3"
+type = "audio"
+title = "short video revision scene 5"
+description = "Text-to-speech audio: For our launch, Reactivation and Lead Follow-Up come together for one price. Schedule a call to see both in action."
+logical_id = "8cf630c9-539c-41ee-8826-191e582c36cf"
+
+[[outputs]]
+id = "XzlOohHul-9GtB5O4Cad0"
+uri = "file://artifacts/patient-pipeline-walkthrough/public/audio/bg_music.mp3"
+type = "audio"
+title = "product walkthrough background"
+description = "Generated music: Warm, modern instrumental underscore for a 112-second B2B healthcare-office software product walkthrough. Soft felt piano, restrained marimba/plucked notes and subtle electronic puls…"
+logical_id = "1b496ef1-4df0-4631-a3dc-a07b138398cf"
+
+[[outputs]]
+id = "pHEiM21WLhYHk4n8hSX3d"
+uri = "file://artifacts/patient-pipeline-walkthrough/public/audio/vo_1.mp3"
+type = "audio"
+title = "walkthrough scene 1 narration"
+description = "Text-to-speech audio: Patient Pipeline guides your team through two conversations: reconnecting with former patients and following up with new inquiries."
+logical_id = "6e265fb1-268a-4b3f-87ec-6a9978e2e1be"
+
+[[outputs]]
+id = "PT2ur9Ge6mO0curBlTQKN"
+uri = "file://artifacts/patient-pipeline-walkthrough/public/audio/vo_2.mp3"
+type = "audio"
+title = "walkthrough scene 2 narration"
+description = "Text-to-speech audio: In Reactivation, a team member opens the call screen and starts with a simple check-in. The patient’s answer determines what the caller sees next."
+logical_id = "1771df74-f542-4f39-8706-0e04d3e2cd5b"
+
+[[outputs]]
+id = "9_rsPFt6AOjJTaSJ0GXYU"
+uri = "file://artifacts/patient-pipeline-walkthrough/public/audio/vo_7.mp3"
+type = "audio"
+title = "walkthrough scene 7 narration"
+description = "Text-to-speech audio: Reactivation for people who know your practice. Lead Follow-Up for new inquiries. Your people make the calls; the software organizes the next ones. See how Patient Pipeline coul…"
+logical_id = "665b005e-2321-4ab2-9fce-565c4d29d0b2"
+
+[[outputs]]
+id = "_Tu0bH41a4vETsxj2kE9j"
+uri = "file://artifacts/patient-pipeline-walkthrough/public/audio/vo_4.mp3"
+type = "audio"
+title = "walkthrough scene 4 narration"
+description = "Text-to-speech audio: Another answer changes the route. “Pretty much back to where I was” brings up a different response, asking what brought it back. The caller listens before moving on."
+logical_id = "9f23921a-4f9f-4d12-8934-ef9d7539976e"
+
+[[outputs]]
+id = "UStUkHzirp5MUwqeyFkVC"
+uri = "file://artifacts/patient-pipeline-walkthrough/public/audio/vo_3.mp3"
+type = "audio"
+title = "walkthrough scene 3 narration"
+description = "Text-to-speech audio: When a patient says, “I was feeling fine. Didn’t think I needed it,” the caller selects that answer. The next screen acknowledges how they feel instead of repeating the opening."
+logical_id = "11c50f2e-0f1f-4b3e-ae16-13b5a6b717df"
+
+[[outputs]]
+id = "INYKJNW5I0hxahRBKAwTy"
+uri = "file://artifacts/patient-pipeline-walkthrough/public/audio/vo_5.mp3"
+type = "audio"
+title = "walkthrough scene 5 narration"
+description = "Text-to-speech audio: The structure stays familiar, but later questions fit the service. Chiropractic explores daily impact. ChiroThin focuses on weight change and habits. SoftWave or shock wave foll…"
+logical_id = "95e869ae-053a-470e-81b0-2a2344d894ae"
+
+[[outputs]]
+id = "msVNrbAI0BwjMe40Ja8_l"
+uri = "file://artifacts/patient-pipeline-walkthrough/public/audio/vo_6.mp3"
+type = "audio"
+title = "walkthrough scene 6 narration"
+description = "Text-to-speech audio: Lead Follow-Up begins with a new inquiry. The campaign and request stay in view, so the first call matches the offer the person saw. Log the outcome, and the software schedules …"
+logical_id = "fe103a6d-fdfa-46a4-93c5-27c8df9de60e"
+
+[[outputs]]
+id = "7ri11L7juuyz_kWHX1mgj"
+uri = "file://artifacts/patient-pipeline-walkthrough/public/audio/vo_5_short.mp3"
+type = "audio"
+title = "walkthrough service comparison narration"
+description = "Text-to-speech audio: The structure stays familiar, but later questions fit the service. Chiropractic explores daily impact. ChiroThin focuses on weight change and habits. SoftWave or shock wave foll…"
+logical_id = "8b71c0ae-6f57-46fa-9a05-4fb2591f4866"
+
+[[outputs]]
+id = "0G-AO8uNhSUWdcqe7r6Qu"
+uri = "file://artifacts/patient-pipeline-walkthrough/public/audio/vo_rev_08.mp3"
+type = "audio"
+title = "professional walkthrough part 8"
+description = "Text-to-speech audio: The structure stays familiar, but later questions fit the service: Chiropractic, ChiroThin, decompression, and SoftWave or shock wave all call for different context."
+logical_id = "da45c75c-16c3-4139-a197-eee90153976a"
+
+[[outputs]]
+id = "Uqo1T-edSLUBY7pnEJHzh"
+uri = "file://artifacts/patient-pipeline-walkthrough/public/audio/vo_rev_01.mp3"
+type = "audio"
+title = "professional walkthrough part 1"
+description = "Text-to-speech audio: Your next patient may already know your practice. Reconnecting with someone who has trusted you before can be much more cost-effective than finding a new patient through paid ad…"
+logical_id = "88635940-21db-42bd-8033-911ebdc3a327"
+
+[[outputs]]
+id = "LuqTQ_uLBT836yeNmv74F"
+uri = "file://artifacts/patient-pipeline-walkthrough/public/audio/vo_rev_03.mp3"
+type = "audio"
+title = "professional walkthrough part 3"
+description = "Text-to-speech audio: You or your staff can complete the training at your own pace. Then open the practice script and rehearse the same kind of response buttons you’ll use on a real call. Your team c…"
+logical_id = "ad074805-cae5-445a-a46b-7a858c5837b2"
+
+[[outputs]]
+id = "3unF-OsGzrb5s0YcIY-JU"
+uri = "file://artifacts/patient-pipeline-walkthrough/public/audio/vo_rev_05.mp3"
+type = "audio"
+title = "professional walkthrough part 5"
+description = "Text-to-speech audio: Here is the full caller screen. The contact and service stay in view, while the script gives your staff the exact next step. There’s no need to hunt for a separate document. The…"
+logical_id = "a6adf191-636d-44ad-b0e1-45611044ceec"
+
+[[outputs]]
+id = "ZVkaaaID5GiXIibOOY5eM"
+uri = "file://artifacts/patient-pipeline-walkthrough/public/audio/vo_rev_07.mp3"
+type = "audio"
+title = "professional walkthrough part 7"
+description = "Text-to-speech audio: At the opening question, ‘Pretty much back to where I was’ goes another way. Click that button and the next screen responds to the setback, asking what brought it back. The call…"
+logical_id = "246ead35-715c-4df0-8aec-f3ee0ed50c57"
+
+[[outputs]]
+id = "MP8Apfo1o3IJoY25vM-qb"
+uri = "file://artifacts/patient-pipeline-walkthrough/public/audio/vo_rev_06.mp3"
+type = "audio"
+title = "professional walkthrough part 6"
+description = "Text-to-speech audio: A little later, if the patient explains, ‘I was feeling fine. Didn’t think I needed it,’ the caller simply chooses that answer. The next screen recognizes their reason and gives…"
+logical_id = "234ebd3c-5f6b-4031-9796-4e66103cf9dd"
+
+[[outputs]]
+id = "QGcBkdCawacEotO97vJin"
+uri = "file://artifacts/patient-pipeline-walkthrough/public/audio/vo_rev_02.mp3"
+type = "audio"
+title = "professional walkthrough part 2"
+description = "Text-to-speech audio: Start with the contacts you already have. Open Contacts, choose Upload Contacts, and select your export. A niche column keeps each person connected to the right service and the …"
+logical_id = "1ebaea87-b51c-4dcc-ad05-7ba420657ec7"
+
+[[outputs]]
+id = "mf_i-ccnA1oqKhW4ZbFHV"
+uri = "file://artifacts/patient-pipeline-walkthrough/public/audio/vo_rev_04.mp3"
+type = "audio"
+title = "professional walkthrough part 4"
+description = "Text-to-speech audio: When your team is ready, the dialer puts due calls in one place. Each row has a name, a safe-to-display sample number, and the patient’s service—Chiropractic, ChiroThin, decompr…"
+logical_id = "1830f5fe-27da-4bd2-8796-6a0e9c55782f"
+
+[[outputs]]
+id = "-uyF_kUs7Cq1Ez_20xqT2"
+uri = "file://artifacts/patient-pipeline-walkthrough/public/audio/vo_rev_09.mp3"
+type = "audio"
+title = "professional walkthrough part 9"
+description = "Text-to-speech audio: New inquiries have a separate workflow. Calls Due Now shows who is ready, and which campaign or offer brought them in. Click Call Now and that same campaign context appears on t…"
+logical_id = "8f9a3514-b1f1-4d29-b30b-4bc0bd27db69"
+
+[[outputs]]
+id = "Ts7uoBC-K7hv0-0O-pz0p"
+uri = "file://artifacts/patient-pipeline-walkthrough/public/audio/bg_music_rev.mp3"
+type = "audio"
+title = "patient pipeline professional walkthrough underscore"
+description = "Generated music: Confident polished corporate product demonstration underscore for a healthcare office software walkthrough. Modern warm piano, soft guitar, understated electronic pulse and light per…"
+logical_id = "db4af096-5a96-42ff-8f43-c0d9eafdff61"
+
+[[outputs]]
+id = "gfxGxLS4gjnafgdnv8dvf"
+uri = "file://artifacts/patient-pipeline-walkthrough/public/audio/vo_rev_10.mp3"
+type = "audio"
+title = "professional walkthrough part 10"
+description = "Text-to-speech audio: After the call, your team records what happened right on this screen. For an eligible follow-up, the software schedules the next attempt and brings it back when it’s due. That m…"
+logical_id = "751d5eeb-e089-486f-8379-1ed733f0c64a"
+
+[[outputs]]
+id = "2B70jsMSxDxNc0_fH2NB1"
+uri = "file://artifacts/patient-pipeline-walkthrough/public/audio/vo_rev_11.mp3"
+type = "audio"
+title = "professional walkthrough part 11"
+description = "Text-to-speech audio: Your team makes the calls. Patient Pipeline makes it easier to start, easier to stay on track, and easier to follow the conversation. See what it could do for your practice."
+logical_id = "b1a7dce8-ab00-4833-a83e-d84b8f9c6962"
+
+[[outputs]]
+id = "EYbuodMeyZHPLw0kgYvIh"
+uri = "file://artifacts/patient-pipeline-walkthrough/public/audio/vo_rev_04_2.mp3"
+type = "audio"
+title = "professional walkthrough part 4"
+description = "Text-to-speech audio: When your team is ready, the dialer puts due calls in one place. Each row has a name, a phone number, and the patient’s service. There are tailored scripts for Chiropractic, Chi…"
+logical_id = "05138ece-3b00-408c-9ad7-95d5c7d68828"
+
+[[outputs]]
+id = "lo3zlnmjbx0gHuve6pJ2e"
+uri = "file://artifacts/patient-pipeline-walkthrough/public/audio/vo_rev_09_2.mp3"
+type = "audio"
+title = "professional walkthrough part 9"
+description = "Text-to-speech audio: New inquiries have a separate workflow. The lead queue shows who is ready, and which campaign or offer brought them in. Click Call Now and that same campaign context appears on …"
+logical_id = "332b3db0-de95-4854-9638-b525859df8c9"
+
+[[outputs]]
+id = "w3ZVlcSod2EXHqs8l4wiY"
+uri = "file://artifacts/patient-pipeline-walkthrough/public/audio/vo_cursorfix_04.mp3"
+type = "audio"
+title = "revised professional walkthrough scene 4"
+description = "Text-to-speech audio: When your team is ready, the dialer puts due calls in one place. Each row shows the name, phone number, and service, so the caller knows which conversation to have. Let's open o…"
+logical_id = "04fce841-649d-4256-88f8-1852889b7dc0"
+
+[[outputs]]
+id = "pOm_VNbXvsBmXaNkoIeDz"
+uri = "file://artifacts/patient-pipeline-walkthrough/public/audio/vo_cursorfix_08.mp3"
+type = "audio"
+title = "revised professional walkthrough scene 8"
+description = "Text-to-speech audio: The Chiropractic family includes Chiropractic, spinal decompression, neuropathy, joint pain, SoftWave or shock wave, acupuncture, massage therapy, and gut health. Many offices a…"
+logical_id = "0baf6c8b-bb79-4d51-957d-fada2175efd2"
+
+[[outputs]]
+id = "R3BNrJMxDi_94LwcCDW1s"
+uri = "file://artifacts/patient-pipeline-walkthrough/public/audio/vo_cursorfix_04_final.mp3"
+type = "audio"
+title = "complete Calls Due Today narration"
+description = "Text-to-speech audio: When your team is ready, the dialer puts due calls in one place. Each row shows the name, phone number, and service, so the caller knows which conversation to have. Prior calls …"
+logical_id = "b274d3cb-0af9-436c-b0df-009ad6071d8a"
+
+[[outputs]]
+id = "D5YHpySyeGRLl9HKyQN9g"
+uri = "file://artifacts/patient-pipeline-walkthrough/public/audio/vo_two_products_01.mp3"
+type = "audio"
+title = "Patient Pipeline two-product scene 1"
+description = "Text-to-speech audio: Patient Pipeline has two separate products. Reactivation reconnects with people who already know your practice. Lead Follow-Up handles new inquiries from your ads. We'll start w…"
+logical_id = "bb132115-198a-4f30-bd6a-6701ccb2ed62"
+
+[[outputs]]
+id = "M-wM5AS5oHt-qqElKpp5Q"
+uri = "file://artifacts/patient-pipeline-walkthrough/public/audio/vo_two_products_09.mp3"
+type = "audio"
+title = "Patient Pipeline two-product scene 9"
+description = "Text-to-speech audio: Now let's look at Patient Pipeline's Lead Follow-Up software. Connect your ad forms to their campaign webhooks, and valid new responses automatically appear in the lead queue, t…"
+logical_id = "8deac25a-4d45-4cfa-aeda-f1f3053cf249"
+
+[[outputs]]
+id = "B-yRfA9tRhYaBkDNgfHWs"
+uri = "file://artifacts/patient-pipeline-walkthrough/public/audio/vo_two_products_01_final.mp3"
+type = "audio"
+title = "Patient Pipeline two-product introduction"
+description = "Text-to-speech audio: Patient Pipeline has two separate products: Reactivation for people who know your practice, and Lead Follow-Up for new ad inquiries. We'll start with Reactivation. Your next pat…"
+logical_id = "083e2a78-cec8-471b-9404-dbbb51f5456c"
+
+[[outputs]]
+id = "uqipMJK0tKcyIAAdSfsI_"
+uri = "file://artifacts/patient-pipeline-walkthrough/public/audio/vo_reactivation_cost_01.mp3"
+type = "audio"
+title = "Patient Pipeline reactivation cost intro"
+description = "Text-to-speech audio: Patient Pipeline has two separate products: Reactivation for former patients, and Lead Follow-Up for new ad inquiries. First, Reactivation. Reactivating a former patient is ofte…"
+logical_id = "09c8a11a-6255-48a2-a47e-dc35c56134a3"
+
+[[outputs]]
+id = "3BkJQDT5YdeJCdMAOCfvP"
+uri = "file://artifacts/patient-pipeline-walkthrough/public/audio/vo_csv_upload_02.mp3"
+type = "audio"
+title = "Patient Pipeline CSV import walkthrough"
+description = "Text-to-speech audio: Start with a CSV of the contacts you already have. Open Upload Contacts and drag your file into the upload box. You can include a Niche column to connect each person with the ri…"
+logical_id = "f82788b4-ea57-44d0-afe3-4f441df38df8"
+
+[[outputs]]
+id = "9DfLXyjxSuhKPuAepKTix"
+uri = "file://attached_assets/generated_audio/patient_pipeline_voice_midwestern.mp3"
+type = "audio"
+title = "Voice C — Midwestern Professional"
+description = "Warm, restrained American female broadcast voice. 16-second sample."
+logical_id = "2aa7d1bc-c527-42ee-b4fc-4c175394be61"
+content_hash = "sha256:3e131e95e8c76928c2f083b3ece0f5a95db347ce432cba0bccf7a16a4449f8b3"
+size = 260432
+mtime_ms = 1790786550394
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/2aa7d1bc-c527-42ee-b4fc-4c175394be61/7f225939-93b0-4484-878d-09b202cad023"
+storage_version_token = "1790786865020380"
+content_type = "audio/mpeg"
+
+[[outputs]]
+id = "mv7x2PSmTx7cL5o3SbgL3"
+uri = "file://attached_assets/generated_audio/patient_pipeline_voice_matilda.mp3"
+type = "audio"
+title = "Voice A — Matilda"
+description = "Professional American female voice with a clear alto tone. 15-second sample."
+logical_id = "1eb6e9bb-3907-488c-ad49-53989aeae588"
+content_hash = "sha256:6bb15bace9f91ed8e482d8340c78f4535088dcb52afa5c1aef995f8062b50207"
+size = 234519
+mtime_ms = 1790786550982
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/1eb6e9bb-3907-488c-ad49-53989aeae588/b12ebcdb-83ac-4dd8-b33a-d2c39d1fe13d"
+storage_version_token = "1790786863401691"
+content_type = "audio/mpeg"
+
+[[outputs]]
+id = "q67wDuKt6DDmUet4sZ0p2"
+uri = "file://attached_assets/generated_audio/patient_pipeline_voice_brian.mp3"
+type = "audio"
+title = "Voice B — Brian"
+description = "Deep, resonant American male voice with a measured delivery. 13-second sample."
+logical_id = "aab0bafe-f236-499b-8076-bfaaa938db74"
+content_hash = "sha256:0acfb011a0b79d36b196e74d05e2ddb7521d16eb34c3a9a2b405d3c233b246f0"
+size = 209859
+mtime_ms = 1790786551666
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/aab0bafe-f236-499b-8076-bfaaa938db74/0e9fb7dd-7e9f-4707-a521-452dd2e4607d"
+storage_version_token = "1790786864281079"
+content_type = "audio/mpeg"
+
+[[outputs]]
+id = "XGKVWpLiw2Vb6SxtYwndV"
+uri = "file://attached_assets/generated_audio/patient_pipeline_voice_jack_john.mp3"
+type = "audio"
+title = "New male voice sample — Jack John"
+description = "Early-to-mid-30s-sounding American male voice, clear and professional. Same passage as the previous samples."
+logical_id = "6549c8fb-8842-4d83-934b-4a4b88ac2883"
+content_hash = "sha256:44bc6c3a49e801585302023f820f7a2d4309449e01b95b75108ec5280836248a"
+size = 202336
+mtime_ms = 1790788398038
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/6549c8fb-8842-4d83-934b-4a4b88ac2883/9683faa9-7a15-47c7-b0f7-4c54a93bee21"
+storage_version_token = "1790788399390562"
+content_type = "audio/mpeg"
+
+[[outputs]]
+id = "PdQCS04mTAnFV6C_dNcaS"
+uri = "file://attached_assets/generated_audio/patient_pipeline_long_jack_john.mp3"
+type = "audio"
+title = "Longer sample — Jack John"
+description = "Training and Calls Due narration from the walkthrough; identical passage and settings to Matilda’s sample."
+logical_id = "742b140d-16dd-4f6e-83dc-b92d9d5909f7"
+content_hash = "sha256:522bc2ff4d4cef61073efc5c6166e1dfb74383ac9476fa378556a0a282b53292"
+size = 574737
+mtime_ms = 1790788520906
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/742b140d-16dd-4f6e-83dc-b92d9d5909f7/2b5a1648-119d-4fb0-b1e3-668ed041a9e1"
+storage_version_token = "1790788522942676"
+content_type = "audio/mpeg"
+
+[[outputs]]
+id = "_eNFRlUw03t-MjwB8XOUh"
+uri = "file://attached_assets/generated_audio/patient_pipeline_long_matilda.mp3"
+type = "audio"
+title = "Longer sample — Matilda"
+description = "Training and Calls Due narration from the walkthrough; identical passage and settings to Jack John’s sample."
+logical_id = "f7c3fead-4707-4c7d-acda-d98d95922b31"
+content_hash = "sha256:1b20d9e33149823bd08cae246fd147b7f7a145703c20099e4e740d4666e458d5"
+size = 553004
+mtime_ms = 1790788522278
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/f7c3fead-4707-4c7d-acda-d98d95922b31/eb4abc71-2a4d-46b1-9d20-c1df742e7ec9"
+storage_version_token = "1790788523483896"
+content_type = "audio/mpeg"
+
+[[outputs]]
+id = "jhqwcN3UHFnxCyDJk9zuA"
+uri = "file://artifacts/patient-pipeline-walkthrough/public/audio/vo_matilda_11.mp3"
+type = "audio"
+title = "Matilda walkthrough narration scene 11"
+description = "Text-to-speech audio: Your team makes the calls. Patient Pipeline makes it easier to start, easier to stay on track, and easier to follow the conversation. See what it could do for your practice."
+logical_id = "757911bc-69ea-4f61-bc23-2a73dfcd53e2"
+
+[[outputs]]
+id = "xARrsySkujWTq3UwR0qe2"
+uri = "file://artifacts/patient-pipeline-walkthrough/public/audio/vo_matilda_03.mp3"
+type = "audio"
+title = "Matilda walkthrough narration scene 3"
+description = "Text-to-speech audio: You or your staff can complete the training at your own pace. Then open the practice script and rehearse the same kind of response buttons you’ll use on a real call. Your team c…"
+logical_id = "3136a3ea-a289-4d79-8bcc-33f9f998e13c"
+
+[[outputs]]
+id = "r5vb8vP5R45YBDXTP3iS8"
+uri = "file://artifacts/patient-pipeline-walkthrough/public/audio/vo_matilda_05.mp3"
+type = "audio"
+title = "Matilda walkthrough narration scene 5"
+description = "Text-to-speech audio: Here is the full caller screen. The contact and service stay in view, while the script gives your staff the exact next step. There’s no need to hunt for a separate document. The…"
+logical_id = "6e6e2297-1670-4f8a-bc10-009e5c5c83f3"
+
+[[outputs]]
+id = "hsu0TD_RCNBYt3Ce3vcWU"
+uri = "file://artifacts/patient-pipeline-walkthrough/public/audio/vo_matilda_01.mp3"
+type = "audio"
+title = "Matilda walkthrough narration scene 1"
+description = "Text-to-speech audio: Patient Pipeline has two separate products: Reactivation for former patients, and Lead Follow-Up for new ad inquiries. First, Reactivation. Reactivating a former patient is ofte…"
+logical_id = "7caecef4-4bec-4b6a-9dae-491a09013427"
+
+[[outputs]]
+id = "kzRA8fVPNgvIOQ-N5sXqy"
+uri = "file://artifacts/patient-pipeline-walkthrough/public/audio/vo_matilda_07.mp3"
+type = "audio"
+title = "Matilda walkthrough narration scene 7"
+description = "Text-to-speech audio: At the opening question, ‘Pretty much back to where I was’ goes another way. Click that button and the next screen responds to the setback, asking what brought it back. The call…"
+logical_id = "f1e52cb5-a88d-448f-9e5c-ef9881df5952"
+
+[[outputs]]
+id = "-mkfNDVvh3t8Y3l_-uKsK"
+uri = "file://artifacts/patient-pipeline-walkthrough/public/audio/vo_matilda_06.mp3"
+type = "audio"
+title = "Matilda walkthrough narration scene 6"
+description = "Text-to-speech audio: A little later, if the patient explains, ‘I was feeling fine. Didn’t think I needed it,’ the caller simply chooses that answer. The next screen recognizes their reason and gives…"
+logical_id = "9194cdc0-371a-44ec-811d-aed46dc142ae"
+
+[[outputs]]
+id = "zjuGb18EJ6s_oIQVEYymV"
+uri = "file://artifacts/patient-pipeline-walkthrough/public/audio/vo_matilda_04.mp3"
+type = "audio"
+title = "Matilda walkthrough narration scene 4"
+description = "Text-to-speech audio: When your team is ready, the dialer puts due calls in one place. Each row shows the name, phone number, and service, so the caller knows which conversation to have. Prior calls …"
+logical_id = "924b5e44-c235-47c6-8413-d44c78f88de6"
+
+[[outputs]]
+id = "QUjLZUBYMRN9Bc85iEG5B"
+uri = "file://artifacts/patient-pipeline-walkthrough/public/audio/vo_matilda_08.mp3"
+type = "audio"
+title = "Matilda walkthrough narration scene 8"
+description = "Text-to-speech audio: The Chiropractic family includes Chiropractic, spinal decompression, neuropathy, joint pain, SoftWave or shock wave, acupuncture, massage therapy, and gut health. Many offices a…"
+logical_id = "bd7bcfaa-f9f4-4a86-bbaa-8258820f78e0"
+
+[[outputs]]
+id = "_aQf6yjcERX6GEZpvTE8K"
+uri = "file://artifacts/patient-pipeline-walkthrough/public/audio/vo_matilda_10.mp3"
+type = "audio"
+title = "Matilda walkthrough narration scene 10"
+description = "Text-to-speech audio: After the call, your team records what happened right on this screen. For an eligible follow-up, the software schedules the next attempt and brings it back when it’s due. That m…"
+logical_id = "8c0289fb-eb61-4cde-b717-d79d8a6403ce"
+
+[[outputs]]
+id = "sXVPuagZhce6PDDQ2aXcO"
+uri = "file://artifacts/patient-pipeline-walkthrough/public/audio/vo_matilda_02.mp3"
+type = "audio"
+title = "Matilda walkthrough narration scene 2"
+description = "Text-to-speech audio: Start with a CSV of the contacts you already have. Open Upload Contacts and drag your file into the upload box. You can include a Niche column to connect each person with the ri…"
+logical_id = "8211f861-816a-49e5-b660-cece52dc51d7"
+
+[[outputs]]
+id = "subQzQinl1r6evgKTEbNU"
+uri = "file://artifacts/patient-pipeline-walkthrough/public/audio/vo_matilda_09.mp3"
+type = "audio"
+title = "Matilda walkthrough narration scene 9"
+description = "Text-to-speech audio: Now let’s look at Patient Pipeline’s Lead Follow-Up software. Connect your ad forms to their campaign webhooks, and valid new responses automatically appear in the lead queue, t…"
+logical_id = "f46cdc42-a282-45f3-a4e0-9644fb39649e"
+
+[[outputs]]
+id = "dVJ_2NhHId0UCuHm3ep3U"
+uri = "file://artifacts/patient-pipeline-walkthrough/public/audio/vo_matilda_08_2.mp3"
+type = "audio"
+title = "Approved Matilda service-specific reactivation narration"
+description = "Text-to-speech audio: Reactivation in a chiropractic office isn’t one-size-fits-all. Patients may have come in for chiropractic care, spinal decompression, neuropathy, joint pain, SoftWave or shock w…"
+logical_id = "f9369696-5052-49a0-a1d4-f555258606c9"
+
+[[outputs]]
+id = "e4gHP5bjzhHhwCj5K7rst"
+uri = "file://Patient-Pipeline-Demo-Video.mp4"
+type = "video"
+title = "Patient Pipeline — Product Walkthrough (4:00)"
+description = "Completed 16:9 MP4 export of the original walkthrough. The new first-campaign tutorial is a separate artifact."
+logical_id = "505c5afa-75fa-4d85-ab53-c8ae083cc704"
+content_hash = "sha256:1cd11452ed9d679d608ccec8f607393a321f0a29d130892168b55c70c6a43705"
+size = 49513673
+mtime_ms = 1790796326744
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/505c5afa-75fa-4d85-ab53-c8ae083cc704/d700bbe5-b8db-447a-a1d1-8b7d7edcf11b"
+storage_version_token = "1790796433529111"
+content_type = "video/mp4"
+
+[[outputs]]
+id = "nwrFJGfwfP11npbi-vPzL"
+uri = "file://artifacts/patient-pipeline-first-campaign/public/audio/vo_01.mp3"
+type = "audio"
+title = "campaign tutorial chapter 1"
+description = "Text-to-speech audio: Let’s set up your first campaign in Patient Pipeline. You’ll add the offer, connect the form where new leads enter their details, then check that a real submission arrives. Savi…"
+logical_id = "cc7928c5-6eac-4373-81bf-5ab24a39a965"
+
+[[outputs]]
+id = "EC49dF6OShg2AXokHKEtd"
+uri = "file://artifacts/patient-pipeline-first-campaign/public/audio/vo_03.mp3"
+type = "audio"
+title = "campaign tutorial chapter 3"
+description = "Text-to-speech audio: Sign in and make sure you’re in Patient Pipeline, not Reactivation. Open Campaigns from the welcome screen, or from the top navigation. Then choose New Campaign. A campaign is t…"
+logical_id = "1e9208b2-caa1-4634-ac12-422e609ab1ff"
+
+[[outputs]]
+id = "bm5SPqlzMYoba7sqQnZyt"
+uri = "file://artifacts/patient-pipeline-first-campaign/public/audio/vo_09.mp3"
+type = "audio"
+title = "campaign tutorial chapter 9"
+description = "Text-to-speech audio: On the campaign page, open Practice script. Try the response buttons and read the next prompts. Confirm that the service, offer items, and price line match your ad. This is the …"
+logical_id = "5fb3ee44-5de5-4d05-adf8-76adeaa55bfb"
+
+[[outputs]]
+id = "tBa-oea8jDbdedNmBoLSY"
+uri = "file://artifacts/patient-pipeline-first-campaign/public/audio/vo_02.mp3"
+type = "audio"
+title = "campaign tutorial chapter 2"
+description = "Text-to-speech audio: Before you begin, have the service you’re promoting, a copy of the ad, the items included in the offer, and its real price. You’ll also need access to the form that collects a p…"
+logical_id = "4208a1b3-f875-4421-9dfa-248cacff3c4d"
+
+[[outputs]]
+id = "VKRZ8Tfc4oVvbnPXbOfVR"
+uri = "file://artifacts/patient-pipeline-first-campaign/public/audio/vo_10.mp3"
+type = "audio"
+title = "campaign tutorial chapter 10"
+description = "Text-to-speech audio: When you’re ready, open Calls Due Now. Under Ready to call, use Call Now beside a lead to open that person’s guided call screen. It does not dial the phone. To browse everyone, …"
+logical_id = "99d063f6-4ad6-455d-813e-fa7cdbeb80b7"
+
+[[outputs]]
+id = "l5gwivcA_iEZsJiPpwWpG"
+uri = "file://artifacts/patient-pipeline-first-campaign/public/audio/vo_06.mp3"
+type = "audio"
+title = "campaign tutorial chapter 6"
+description = "Text-to-speech audio: On the campaign page, open Continue setup if the connection steps are closed. Choose where the person actually types a name and phone number. For an Instant Form inside Facebook…"
+logical_id = "be64a982-4889-41c7-8991-b9689a286f4f"
+
+[[outputs]]
+id = "Oa0EQv-8iXnJPWYQYaU8X"
+uri = "file://artifacts/patient-pipeline-first-campaign/public/audio/vo_04.mp3"
+type = "audio"
+title = "campaign tutorial chapter 4"
+description = "Text-to-speech audio: Choose the service that matches your ad. This selects the relevant call script. Give the campaign a name your team can recognize—for example, Back Pain Relief, forty-nine-dollar…"
+logical_id = "5c84c1b7-b5f0-4d74-bf56-5cf7d18e64a9"
+
+[[outputs]]
+id = "KOi9ILUM8Xw7lnaDY1Ar8"
+uri = "file://artifacts/patient-pipeline-first-campaign/public/audio/vo_05.mp3"
+type = "audio"
+title = "campaign tutorial chapter 5"
+description = "Text-to-speech audio: Choose how the caller should talk about the price. ‘Normally X, now Y’ uses a regular and an offer price. ‘Just Y’ uses only the offer price. Or choose not to mention price in t…"
+logical_id = "9f735aa8-9875-4100-a839-759e7302738a"
+
+[[outputs]]
+id = "uvW637Apjcx4LH-MFqbri"
+uri = "file://artifacts/patient-pipeline-first-campaign/public/audio/vo_08.mp3"
+type = "audio"
+title = "campaign tutorial chapter 8"
+description = "Text-to-speech audio: Do not skip the real-form test. Open the same form a prospective patient would use, and submit it once with your own name and phone number. Return to this campaign’s connection …"
+logical_id = "97142094-c784-42a4-b4aa-b3bca1af200c"
+
+[[outputs]]
+id = "iR8Zk8yijq1Gd4EB1SJ6E"
+uri = "file://artifacts/patient-pipeline-first-campaign/public/audio/vo_07.mp3"
+type = "audio"
+title = "campaign tutorial chapter 7"
+description = "Text-to-speech audio: This campaign has a private connection address. Keep it private; anyone with it could add leads. Facebook cannot send an Instant Form straight to this address, so you need a con…"
+logical_id = "8f397046-0303-4297-b4f4-e5264f45ac2e"
+
+[[outputs]]
+id = "KU15GWkGBmkrVRjohe-pH"
+uri = "file://artifacts/patient-pipeline-first-campaign/public/audio/vo_11.mp3"
+type = "audio"
+title = "campaign checklist narration"
+description = "Text-to-speech audio: Your checklist: campaign created; service, offer and price checked against the ad; actual form connected; a test submitted through that form and visible in this campaign’s leads…"
+logical_id = "18eac695-c76b-47c3-8fc5-b226edf553a4"
+
+[[outputs]]
+id = "wx2nAMh-16SEi2b_z1LQL"
+uri = "file://artifacts/patient-pipeline-first-campaign/public/audio/vo_03_2.mp3"
+type = "audio"
+title = "Lead Follow-Up section tutorial correction"
+description = "Text-to-speech audio: Sign in to Patient Pipeline. Make sure that you’re in Lead Follow-Up, not Reactivation. Open Campaigns from the welcome screen, or from the top navigation. Then choose New Campa…"
+logical_id = "37a7f242-f5d8-4220-8858-9b78cf0522e5"
+
+[[outputs]]
+id = "xr6HT795I37A_k1O3t9LE"
+uri = "file://artifacts/patient-pipeline-first-campaign/public/audio/vo_01_connection.mp3"
+type = "audio"
+title = "opening form connection promise"
+description = "Text-to-speech audio: We'll show you how to connect it after we add the offer."
+logical_id = "8b55b1c0-5fbb-400e-aea4-5ebb7b691ba7"
+
+[[outputs]]
+id = "QNns6m5kKIFSKGrb56qnw"
+uri = "file://artifacts/patient-pipeline-first-campaign/public/audio/conversation_opening.mp3"
+type = "audio"
+title = "Revised narration — 24-second opening"
+description = "The new American voice and conversational opening script. This is the same narration take used in the updated tutorial, without background music."
+logical_id = "9fb021d8-c4b5-4f56-bc72-1c17af3fc17a"
+content_hash = "sha256:d34e5a55b7d0c9467de81b76fa39d276f5a30f303954a7648246a8d7b6620fef"
+size = 386238
+mtime_ms = 1790801221983
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/9fb021d8-c4b5-4f56-bc72-1c17af3fc17a/213be0fc-5d1b-4a18-bdeb-3da4ccc6d1c0"
+storage_version_token = "1790801776705737"
+content_type = "audio/mpeg"
+
+[[outputs]]
+id = "CPQddyhCH62P141D5FqJT"
+uri = "file://artifacts/patient-pipeline-first-campaign/public/audio/conversation_practiceScript.mp3"
+type = "audio"
+title = "Conversational American instructor: Give your team a practice run"
+description = "Text-to-speech audio: [warmly] Before your team starts calling, give the script a quick practice run. From the campaign page, open Practice script. Read the opening, try a response button, and see wh…"
+logical_id = "f28e2bde-4122-4d10-b9db-daea7da7d1fb"
+
+[[outputs]]
+id = "bHfhkHKWA-97ZD2d2BM25"
+uri = "file://artifacts/patient-pipeline-first-campaign/public/audio/conversation_openCampaigns.mp3"
+type = "audio"
+title = "Conversational American instructor: Find the campaign editor"
+description = "Text-to-speech audio: [warmly] Once you're signed in, make sure you're in Lead Follow-Up, rather than Reactivation. From here, open Campaigns. You can get there from the welcome screen, or from the n…"
+logical_id = "8545a225-8c7d-4f38-b4a9-5de919e6dc7d"
+
+[[outputs]]
+id = "y_pDLKuSettirzPMUoPcI"
+uri = "file://artifacts/patient-pipeline-first-campaign/public/audio/conversation_preparation.mp3"
+type = "audio"
+title = "Conversational American instructor: Have the actual ad beside you"
+description = "Text-to-speech audio: [warmly] Before we open the campaign, pull up the ad you're planning to run. That gives you something to check against as you choose the service and enter the offer. You'll want…"
+logical_id = "0a9cc7b3-00d2-416c-a8ae-6505ab873d9e"
+
+[[outputs]]
+id = "l-GsEss6lXQcVL9Gcavcj"
+uri = "file://artifacts/patient-pipeline-first-campaign/public/audio/conversation_findLeads.mp3"
+type = "audio"
+title = "Conversational American instructor: Find the people who need a call"
+description = "Text-to-speech audio: [warmly] When you're ready to work new leads, open Calls Due Now. In the Ready to call section, choose Call Now beside a lead. That opens the guided call screen. It doesn't dial…"
+logical_id = "d1041e9c-3bff-46c7-a5fc-780395bdffb0"
+
+[[outputs]]
+id = "cYYAraWpu5jRB9D1Nlg5X"
+uri = "file://artifacts/patient-pipeline-first-campaign/public/audio/conversation_priceAndSave.mp3"
+type = "audio"
+title = "Conversational American instructor: Choose how the price will sound"
+description = "Text-to-speech audio: [warmly] Now let's decide how the caller should explain the price. If you want to compare the regular price with the offer, choose Normally X, now Y. If you just want to state t…"
+logical_id = "9389abe4-028d-4561-9f6a-0bb87ad94f60"
+
+[[outputs]]
+id = "Gg2n2EA_NDPmP_mr6AYss"
+uri = "file://artifacts/patient-pipeline-first-campaign/public/audio/conversation_checklist.mp3"
+type = "audio"
+title = "Conversational American instructor: Know when the campaign is ready"
+description = "Text-to-speech audio: [warmly] Before you call it ready, take one last look at the campaign. Does the service, the offer, and the price match what your ad promises? [short pause] Then check the conne…"
+logical_id = "5d8db4e3-f15d-41bb-a5d4-e144bbc3a314"
+
+[[outputs]]
+id = "jB5p2MguzG_8Kbca1HNS8"
+uri = "file://artifacts/patient-pipeline-first-campaign/public/audio/conversation_findForm.mp3"
+type = "audio"
+title = "Conversational American instructor: Identify the form, not the ad placement"
+description = "Text-to-speech audio: [warmly] To show the connection steps, we're switching to a separate campaign that's already saved in this demo. If the setup instructions are closed, select Continue setup. [sh…"
+logical_id = "152b5777-a02d-40fb-9a84-450d3c5e3a90"
+
+[[outputs]]
+id = "fIedKBlu5y4MDbFbWH6IE"
+uri = "file://artifacts/patient-pipeline-first-campaign/public/audio/conversation_enterOffer.mp3"
+type = "audio"
+title = "Conversational American instructor: Enter a recognizable offer"
+description = "Text-to-speech audio: [warmly] Let's use a back pain offer as our example. Open the service menu, and choose Chiropractic. That tells Patient Pipeline which call script to use. [short pause] Next, gi…"
+logical_id = "bd34d4d7-9182-4790-b5a3-3fb9d9d398ea"
+
+[[outputs]]
+id = "v15vVDhbh_DhBjQIAcqLt"
+uri = "file://artifacts/patient-pipeline-first-campaign/public/audio/conversation_testForm.mp3"
+type = "audio"
+title = "Conversational American instructor: Check it from the patient's side"
+description = "Text-to-speech audio: [warmly] Now let's check the whole connection, from the patient's side. Open the same form a prospective patient would use, and submit it with your own name and phone number. Th…"
+logical_id = "fa1a6679-8ba0-4981-9eb8-984c6f996f6e"
+
+[[outputs]]
+id = "7p7tUKAdkztG4uZ5c-BD4"
+uri = "file://artifacts/patient-pipeline-first-campaign/public/audio/conversation_connectForm.mp3"
+type = "audio"
+title = "Conversational American instructor: Connect the actual source safely"
+description = "Text-to-speech audio: [warmly] This campaign has its own private connection address. Keep it private, because anyone who has it could add leads. We've hidden it in this tutorial. [short pause] Facebo…"
+logical_id = "468ed372-8c8d-48db-a615-eb227a834947"
+
+[[outputs]]
+id = "O9pAYZhqtPiyFLLGaY-WS"
+uri = "file://artifacts/patient-pipeline-first-campaign/public/audio/conversation_closing_final.mp3"
+type = "audio"
+title = "Conversational readiness check"
+description = "Text-to-speech audio: [warmly] Before you call it ready, take one last look at the campaign. Do the service, the offer, and the price match what your ad promises? [short pause] Then check the connect…"
+logical_id = "3a723562-8bd5-48a2-b767-ce3b27df504c"
+
+[[outputs]]
+id = "woS7y8aPr9y5ETJMJTcnf"
+uri = "file://exports/Patient-Pipeline-Setting-Up-Your-Campaign.mp4"
+type = "video"
+title = "Setting Up Your Campaign — Download MP4"
+description = "Completed 720p MP4, approximately 6 minutes 46 seconds and 20 MB. Includes the revised narration, corrected “Just Y” cursor click, offer-price entry demonstration, and background music."
+logical_id = "751f4858-09bc-4630-8a0f-18b79b2ff098"
+content_hash = "sha256:2b9fcc71123a6f6e3b0e0bf83b782ce09d38b87280b05203991ed9d491f1e6ca"
+size = 20073387
+mtime_ms = 1790811997259
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/751f4858-09bc-4630-8a0f-18b79b2ff098/f5965fc8-db3d-4208-bc28-41721d69a066"
+storage_version_token = "1790812101130095"
+content_type = "video/mp4"
+
+[[outputs]]
+id = "HAUnpbmOx191moBHFfIHL"
+uri = "file://exports/Patient-Pipeline-GoHighLevel-Beginner-Lesson-Review.pdf"
+type = "pdf"
+title = "GoHighLevel → Patient Pipeline: Beginner Lesson Draft"
+description = "15-page review copy with 31 narrated steps, on-screen directions, pause points, success checks, and 8 troubleshooting sections. Research-checked; live rehearsal still required."
+logical_id = "e77626fb-3a0f-426a-862b-c95d1fe22df1"
+content_hash = "sha256:a52d9a0fb8573c914aca32d4d333911cddc9bcd069ca8892d14c9c6c50a4405f"
+size = 73939
+mtime_ms = 1790813294168
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/e77626fb-3a0f-426a-862b-c95d1fe22df1/8118460a-a295-411f-8520-16487200de62"
+storage_version_token = "1790813363413459"
+content_type = "application/pdf"
+
+[[outputs]]
+id = "GZ4xCyodPY6BZFloYoh6W"
+uri = "file://exports/Patient-Pipeline-GoHighLevel-Beginner-Lesson-Review.html"
+type = "html"
+title = "Read the lesson draft as a web document"
+description = "The same script in a continuous, readable format, with linked sources and print-friendly styling."
+logical_id = "01627310-5517-4027-8b97-a6a933abad3c"
+content_hash = "sha256:3ffe413b696b82561578a926bf7dcf598a97b98cf299e4aa491f92917261a4e4"
+size = 46774
+mtime_ms = 1790813293884
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/01627310-5517-4027-8b97-a6a933abad3c/2d473975-fa68-40ec-b9b8-29737572d592"
+storage_version_token = "1790813364019755"
+content_type = "text/html"
+
+[[outputs]]
+id = "lBxcURYPyPdYbDeCmVNHF"
+uri = "file://attached_assets/generated_audio/tutorial_4de03aae7b83.mp3"
+type = "audio"
+title = "Patient Pipeline beginner lesson service"
+description = "Text-to-speech audio: [warmly] Click Service type to open the list. Choose the service your ad actually promotes. We're choosing Chiropractic for our back pain example. If your offer is for another s…"
+logical_id = "ea788d37-c427-493f-97f7-bddcd8435fa5"
+
+[[outputs]]
+id = "WEYWqc6TFKvNTViFPYBIZ"
+uri = "file://attached_assets/generated_audio/tutorial_e17e7ffef6aa.mp3"
+type = "audio"
+title = "Patient Pipeline beginner lesson campaigns"
+description = "Text-to-speech audio: [warmly] Let's start in Patient Pipeline. Choose Lead Follow-Up, rather than Reactivation. Then open Campaigns. On the Campaigns page, click New Campaign. A campaign is the offe…"
+logical_id = "329aef42-753f-4ae8-b544-0a0502b3abb5"
+
+[[outputs]]
+id = "QvfJgo5wSV1x2AnD5M_4t"
+uri = "file://attached_assets/generated_audio/tutorial_115131dd97c2.mp3"
+type = "audio"
+title = "Patient Pipeline beginner lesson public-form"
+description = "Text-to-speech audio: [warmly] Open the page where a visitor actually fills out this form. If your ad already links to a website page, use that published page. For a shared Go High Level form, click …"
+logical_id = "b0ddc01d-e176-4afa-be51-42c43cc07a24"
+
+[[outputs]]
+id = "Ueehs54O50OOWg6tLr6zT"
+uri = "file://attached_assets/generated_audio/tutorial_c2d0cb5a18c1.mp3"
+type = "audio"
+title = "Patient Pipeline beginner lesson intro"
+description = "Text-to-speech audio: [warmly] Let's connect your Go High Level form to Patient Pipeline, one step at a time. This lesson is for a form built in Go High Level, even if it's displayed on your website.…"
+logical_id = "91430c47-1947-458d-aede-18d4f3813fd6"
+
+[[outputs]]
+id = "LMwApyURrVOn9zwDY2loi"
+uri = "file://attached_assets/generated_audio/tutorial_d354d9f9b11c.mp3"
+type = "audio"
+title = "Patient Pipeline beginner lesson name"
+description = "Text-to-speech audio: [warmly] Now click Campaign name. Give this offer a name your team will recognize. We're typing Back Pain Relief, forty-nine-dollar New Patient Special. You can see the words ap…"
+logical_id = "3cff4f43-4d13-48dc-920a-7e921d9adcd9"
+
+[[outputs]]
+id = "IBC1wQ2v0717xIKCX05TW"
+uri = "file://attached_assets/generated_audio/tutorial_8f74d49f74c4.mp3"
+type = "audio"
+title = "Patient Pipeline beginner lesson save"
+description = "Text-to-speech audio: [warmly] Leave the expiration or limited-spots box blank unless your offer really has that restriction. Check your service, campaign name, included items, and price once more. N…"
+logical_id = "8d14f14c-450d-4914-90c6-40ef97861ed3"
+
+[[outputs]]
+id = "apoohMFe9igWNOrukEiCS"
+uri = "file://attached_assets/generated_audio/tutorial_e6311744fb53.mp3"
+type = "audio"
+title = "Patient Pipeline beginner lesson verify"
+description = "Text-to-speech audio: [warmly] After your real form submission, return to the same campaign in Patient Pipeline. Look for a recent Form submission received message. If it still says it's waiting, giv…"
+logical_id = "ad5fc387-1632-46de-9cc0-ca920699970d"
+
+[[outputs]]
+id = "DJ13w-rF7esWikTS4__-F"
+uri = "file://attached_assets/generated_audio/tutorial_6a28af680b65.mp3"
+type = "audio"
+title = "Patient Pipeline beginner lesson copy"
+description = "Text-to-speech audio: [warmly] In the campaign setup, choose Go High Level. Find this campaign's private connection address and click its Copy button. Don't copy the ordinary page address from the to…"
+logical_id = "de22e490-963d-4666-8fad-67ce08a99b8d"
+
+[[outputs]]
+id = "17_01ko4Lrx1xeOi2VWLR"
+uri = "file://attached_assets/generated_audio/tutorial_b3e2002b84ad.mp3"
+type = "audio"
+title = "Patient Pipeline beginner lesson internal"
+description = "Text-to-speech audio: [warmly] There are shortcuts that check only part of the connection. Patient Pipeline's internal test checks its own intake. A connector's test action checks a sending step. Nei…"
+logical_id = "edfa7471-a3c2-4620-8de6-512fdbe82902"
+
+[[outputs]]
+id = "5wB3hIWeVlX8yD9eD47ni"
+uri = "file://attached_assets/generated_audio/tutorial_7e2535f36f37.mp3"
+type = "audio"
+title = "Patient Pipeline beginner lesson duplicates"
+description = "Text-to-speech audio: [warmly] For a closer check, open Lead sources and look under Last twenty received. Match the delivery time to your test. New lead means a new entry was created. Updated lead ca…"
+logical_id = "4876350a-540b-45fe-b37a-725c57e739b0"
+
+[[outputs]]
+id = "H9Kv-QT-Ad6xDLTaDxFRi"
+uri = "file://attached_assets/generated_audio/tutorial_7e4b1c872432.mp3"
+type = "audio"
+title = "Patient Pipeline beginner lesson included"
+description = "Text-to-speech audio: [warmly] Under What's included in the offer, enter one item on each line. Our example has a consultation, an examination, and a review of findings. Click the first row and type …"
+logical_id = "3ee73b09-9503-43d5-92ab-c2286fca766b"
+
+[[outputs]]
+id = "wFHXlXdxeLWV4C-UvUBUL"
+uri = "file://attached_assets/generated_audio/tutorial_0d6eddd680bd.mp3"
+type = "audio"
+title = "Patient Pipeline beginner lesson troubleshoot"
+description = "Text-to-speech audio: [warmly] If the lead is missing, check in this order. First, find the submission under the correct form in Go High Level. Next, open your connection workflow's Execution Logs an…"
+logical_id = "1dd130f6-7d21-4c40-afb3-7ac9ac371c14"
+
+[[outputs]]
+id = "awVk-pyMElvkhYOw731Di"
+uri = "file://attached_assets/generated_audio/tutorial_3b6d3a62f3c2.mp3"
+type = "audio"
+title = "Patient Pipeline beginner lesson find-form"
+description = "Text-to-speech audio: [warmly] In Go High Level, check the practice name first. Click Sites, then Forms, and open the form used by your offer. Our example is Back Pain New Patient Form. Write down yo…"
+logical_id = "ee16d954-0768-4e65-8bc1-c8244857b4d8"
+
+[[outputs]]
+id = "gQZYsnzcG9qA6a4iD1NKi"
+uri = "file://attached_assets/generated_audio/tutorial_8c7ce057e719.mp3"
+type = "audio"
+title = "Patient Pipeline beginner lesson prepare"
+description = "Text-to-speech audio: [warmly] Before we start, have your actual offer beside you, and make sure you can sign in to the accounts this lesson uses. You'll need permission to edit the connection. Keep …"
+logical_id = "a3ced198-6c80-4227-bd0a-e6b01548a583"
+
+[[outputs]]
+id = "23F9VNkLyHQIz31cfGTuz"
+uri = "file://attached_assets/generated_audio/tutorial_9dc32a8d4cb2.mp3"
+type = "audio"
+title = "Patient Pipeline beginner lesson submit"
+description = "Text-to-speech audio: [warmly] Click the tab containing your actual form. Enter your own first name and phone number, plus any other required information. Review the phone carefully. Complete the req…"
+logical_id = "64100799-88a3-44ea-9e7b-54c09ef56963"
+
+[[outputs]]
+id = "wxNCGQx1EOcfmvIb-wjvm"
+uri = "file://attached_assets/generated_audio/tutorial_9816dd7f1961.mp3"
+type = "audio"
+title = "Patient Pipeline beginner lesson finish"
+description = "Text-to-speech audio: [warmly] Before you call this ready, check four things. Your campaign matches the offer. Your connection watches the right form and is turned on. You submitted that actual form …"
+logical_id = "8fd5ceb7-62b7-4ae3-8573-6300a87d29c1"
+
+[[outputs]]
+id = "XVn5IxRFRtAWyrgY-SEbK"
+uri = "file://attached_assets/generated_audio/tutorial_bd7ca03ad633.mp3"
+type = "audio"
+title = "Patient Pipeline save-action"
+description = "Text-to-speech audio: [warmly] For this basic connection, leave Headers and Custom Data empty. The standard Webhook action already sends the contact's name and phone, so you don't need to type code o…"
+logical_id = "80f712a4-145a-4853-b4b3-563a6123350f"
+
+[[outputs]]
+id = "4CzlIlwA0IBo36kzmTILx"
+uri = "file://attached_assets/generated_audio/tutorial_bd982d55fcc1.mp3"
+type = "audio"
+title = "Patient Pipeline workflow"
+description = "Text-to-speech audio: [warmly] Click your Go High Level browser tab. Check that you're in the right practice. Open Automation, then Workflows. Click Create Workflow and choose Start from scratch. We'…"
+logical_id = "2b621c85-414c-4ab5-93b9-a930479854a8"
+
+[[outputs]]
+id = "kWgMA96mqsHrCoGsIrFE4"
+uri = "file://attached_assets/generated_audio/tutorial_8dcfad78f715.mp3"
+type = "audio"
+title = "Patient Pipeline trigger"
+description = "Text-to-speech audio: [warmly] Click Add New Trigger. In the search box, type Form Submitted and select that trigger. A trigger tells Go High Level when to start. Now add the Form Is filter and selec…"
+logical_id = "42575010-d6ff-4ab7-a092-db0e55386880"
+
+[[outputs]]
+id = "ATzeJ9NdKH8P139C5tGb1"
+uri = "file://attached_assets/generated_audio/tutorial_640b490eb00f.mp3"
+type = "audio"
+title = "Patient Pipeline publish"
+description = "Text-to-speech audio: [warmly] Open the workflow's Settings tab. Turn on Allow Re-entry for this new connection workflow. That lets someone submit again after their previous run has finished. Return …"
+logical_id = "a3e0136b-040d-44e6-8329-a1db1f0219cb"
+
+[[outputs]]
+id = "wQmRg-E50fH4iL2pvI8Cm"
+uri = "file://attached_assets/generated_audio/tutorial_1998d73dd6a8.mp3"
+type = "audio"
+title = "Patient Pipeline webhook"
+description = "Text-to-speech audio: [warmly] Click the plus sign below your saved trigger. In the action search, type webhook. Choose the ordinary action called Webhook, not Custom Webhook and not an inbound webho…"
+logical_id = "c8e8307a-e1a0-45c0-9353-e9671c15cce3"
+
+[[outputs]]
+id = "txJbGYUwEqhV22andE4Zl"
+uri = "file://attached_assets/generated_audio/tutorial_b41bc6f4c96e.mp3"
+type = "audio"
+title = "Patient Pipeline destination"
+description = "Text-to-speech audio: [warmly] Name the action Send lead to Patient Pipeline. Open Method and choose POST. Then click inside URL and paste the campaign address you copied. On Windows, hold Control an…"
+logical_id = "2ad242d7-cbfc-4ca8-b557-0d754a109048"
+
+[[outputs]]
+id = "pBN4h3xxNWKvq4fUTF76-"
+uri = "file://attached_assets/generated_audio/tutorial_284d1948aa59.mp3"
+type = "audio"
+title = "Patient Pipeline price"
+description = "Text-to-speech audio: [warmly] For our example, we only want to say the offer price. Click the middle choice, Just Y. Then click Offer price and type 49. Look at the On the call preview: it now says …"
+logical_id = "410daa37-2012-4712-9289-793337c86d21"
+
+[[outputs]]
+id = "PVZnK2LdDsBYEkwrzdSAT"
+uri = "file://attached_assets/generated_audio/tutorial_1f470ad424ee.mp3"
+type = "audio"
+title = "Patient Pipeline Facebook via GHL submit"
+description = "Text-to-speech audio: [warmly] Now open the actual ad or its form preview and complete the same Instant Form a new lead would use. Use your own contact details and read the required consent informati…"
+logical_id = "3ddbeb0e-0308-47c7-b34b-f44679694924"
+
+[[outputs]]
+id = "4Q-twL1WwMF4wy252jSYg"
+uri = "file://attached_assets/generated_audio/tutorial_53ab41203007.mp3"
+type = "audio"
+title = "Patient Pipeline Facebook via GHL trace"
+description = "Text-to-speech audio: [warmly] Return to Go High Level and open Contacts. Find the new test person and match the phone number. Then open the connection workflow and its Execution Logs. Look for the s…"
+logical_id = "dfe0b5bc-59ff-409c-b84d-a34dc23dd421"
+
+[[outputs]]
+id = "BONeeUOWI8rvnXY3PMCa5"
+uri = "file://attached_assets/generated_audio/tutorial_7ec89af59cb7.mp3"
+type = "audio"
+title = "Patient Pipeline Facebook via GHL trigger"
+description = "Text-to-speech audio: [warmly] Click Add New Trigger and search for Facebook Lead Form Submitted. Choose that exact trigger. This is different from Form Submitted, which is for forms built inside Go …"
+logical_id = "30261cc6-9cf3-46a9-81c3-2d20fbf76707"
+
+[[outputs]]
+id = "miKZ6StXG3PQfCLVyRRGu"
+uri = "file://attached_assets/generated_audio/tutorial_19cc6c158676.mp3"
+type = "audio"
+title = "Patient Pipeline Facebook via GHL intro"
+description = "Text-to-speech audio: [warmly] This lesson is for Facebook or Instagram Instant Forms whose leads already arrive in Go High Level. We won't reconnect an integration that's working. Instead, we'll sen…"
+logical_id = "2556e19b-37fa-4ea3-ba6c-30452c2a585c"
+
+[[outputs]]
+id = "tbwlNU6oW0UoNDlhddouX"
+uri = "file://attached_assets/generated_audio/tutorial_0d4d7df28dc6.mp3"
+type = "audio"
+title = "Patient Pipeline Facebook via GHL identify"
+description = "Text-to-speech audio: [warmly] Before adding the new connection, find a recent lead from this exact Facebook or Instagram form in Go High Level. Check the name and phone. Write down the Facebook Page…"
+logical_id = "3ba4d599-7091-4790-9002-9e240fc9104f"
+
+[[outputs]]
+id = "uxDmHZx5Zx4uwFXkkJlSg"
+uri = "file://attached_assets/generated_audio/tutorial_98889ec92588.mp3"
+type = "audio"
+title = "Patient Pipeline Facebook via GHL troubleshoot"
+description = "Text-to-speech audio: [warmly] If your test is absent from Go High Level, check the existing Facebook integration, the Page and form selection, and the name and phone field mapping. The account owner…"
+logical_id = "125201f6-bce7-40a2-9ec8-4730b9d01400"
+
+[[outputs]]
+id = "1qKBuKECvqFhYW6ddR6ZZ"
+uri = "file://attached_assets/generated_audio/tutorial_e28747023878.mp3"
+type = "audio"
+title = "Patient Pipeline Zapier copy"
+description = "Text-to-speech audio: [warmly] In the campaign setup, choose Facebook or Instagram. Find this campaign's private connection address and click its Copy button. Don't copy the ordinary page address fro…"
+logical_id = "6040272e-7f45-4d36-9140-cdd2ed56182c"
+
+[[outputs]]
+id = "TtNrWTfB_Ny9z6xrnGG67"
+uri = "file://attached_assets/generated_audio/tutorial_1859f8b3f2f9.mp3"
+type = "audio"
+title = "Patient Pipeline Zapier zap-sample-check"
+description = "Text-to-speech audio: [warmly] Back in Zapier, click Test trigger and select the sample that matches the details you just entered. Make sure a usable name and phone are present. If Meta says a test a…"
+logical_id = "46c68eb6-9c72-4b8a-82f3-e0f5a2f72b06"
+
+[[outputs]]
+id = "XE4usDlIO17dYlMlHrh8I"
+uri = "file://attached_assets/generated_audio/tutorial_15cc6fc3d12a.mp3"
+type = "audio"
+title = "Patient Pipeline Zapier intro"
+description = "Text-to-speech audio: [warmly] This lesson connects a Facebook or Instagram Instant Form to Patient Pipeline without Go High Level. We'll use Zapier as the connector and follow one complete route. Yo…"
+logical_id = "e9ead460-5214-4f01-84b2-97819cd9f0b4"
+
+[[outputs]]
+id = "uj9LkcOOkab-k5ie-YIae"
+uri = "file://attached_assets/generated_audio/tutorial_ff65164b7a27.mp3"
+type = "audio"
+title = "Patient Pipeline Zapier zap-form"
+description = "Text-to-speech audio: [warmly] Open Page and select the Facebook Page for this offer. Next, open Form and choose the exact Instant Form used by the ad. Don't leave the form choice broad if it would s…"
+logical_id = "bb76bf43-125c-4b01-8f1f-a644ebdc7e61"
+
+[[outputs]]
+id = "fH-oMRfItS1OSLgyqgzCv"
+uri = "file://attached_assets/generated_audio/tutorial_e83f1d76f8fe.mp3"
+type = "audio"
+title = "Patient Pipeline Zapier zap-create"
+description = "Text-to-speech audio: [warmly] Open Zapier in another browser tab and sign in. Create a new Zap and give it a name such as Send Back Pain Form to Patient Pipeline. Click the Trigger step. Search for …"
+logical_id = "4b59cd06-137a-447c-8216-3444b20e553c"
+
+[[outputs]]
+id = "MRBqXbXq6of1tn91ZO2eY"
+uri = "file://attached_assets/generated_audio/tutorial_9126a12e2300.mp3"
+type = "audio"
+title = "Patient Pipeline Zapier access"
+description = "Text-to-speech audio: [warmly] Have the Facebook Page and published Instant Form for this offer ready. The Facebook account you connect must have the Page, ad account, and leads access Zapier needs. …"
+logical_id = "1512bf5a-62e0-4bc2-8f2e-16f17a480137"
+
+[[outputs]]
+id = "SXMD9d3p4cUlWL4wZ9N4p"
+uri = "file://attached_assets/generated_audio/tutorial_7fd32791afa3.mp3"
+type = "audio"
+title = "Patient Pipeline Zapier zap-sample"
+description = "Text-to-speech audio: [warmly] If Zapier doesn't have a useful sample, open Meta's Lead Ads Testing Tool in another tab. Select the same Page and Form. Click Preview Form, enter your own test details…"
+logical_id = "399e8cff-59b6-4794-aa1a-d4e3b7e6017c"
+
+[[outputs]]
+id = "tntk-aAecg1F3tSs1wB7Z"
+uri = "file://attached_assets/generated_audio/tutorial_ec7b3cb8b71b.mp3"
+type = "audio"
+title = "Patient Pipeline Zapier zap-account"
+description = "Text-to-speech audio: [warmly] In the trigger's account step, connect your Facebook account, or select the existing connection that owns the right access. Complete Facebook's sign-in and permission p…"
+logical_id = "64b9ad72-1945-4674-b880-a5415ea6c8f1"
+
+[[outputs]]
+id = "pvNqNBOsrGtjFtqkB0Bn-"
+uri = "file://attached_assets/generated_audio/tutorial_60a386e2e1d7.mp3"
+type = "audio"
+title = "Patient Pipeline Zapier zap-action"
+description = "Text-to-speech audio: [warmly] Click the plus below the Facebook Lead Ads trigger to add an action. Search for Webhooks by Zapier and select it. For the action event, choose POST, then continue. We'r…"
+logical_id = "04cbfc0c-1e26-490e-beb5-4e023ed37f21"
+
+[[outputs]]
+id = "KsNIx4zAOdEoEWVJ9ir2C"
+uri = "file://attached_assets/generated_audio/tutorial_0bdfd6ad1b66.mp3"
+type = "audio"
+title = "Patient Pipeline Zapier zap-url"
+description = "Text-to-speech audio: [warmly] Switch to Patient Pipeline, check your campaign name, and click Copy beside its private connection address. Return to the Zapier tab and click the URL box. Paste with C…"
+logical_id = "069d5f80-cb53-41d6-a24f-9268da912049"
+
+[[outputs]]
+id = "JAQ_b38wHJc7W-Yk0CLEV"
+uri = "file://attached_assets/generated_audio/tutorial_9266c1574e34.mp3"
+type = "audio"
+title = "Patient Pipeline Zapier zap-test"
+description = "Text-to-speech audio: [warmly] Continue to the action's test step and send the selected sample. This action test really sends information to the campaign, so use only your approved test details. Chec…"
+logical_id = "a8a98f72-2d51-4231-8e74-68542fe03f91"
+
+[[outputs]]
+id = "7La6VzGyzwWUobOi8tTyv"
+uri = "file://attached_assets/generated_audio/tutorial_c02ee7eaff4d.mp3"
+type = "audio"
+title = "Patient Pipeline Zapier zap-publish"
+description = "Text-to-speech audio: [warmly] Review the Zap from top to bottom. The trigger should be Facebook Lead Ads, New Lead, with your exact Page and Form. The action should be Webhooks by Zapier, POST, with…"
+logical_id = "b4bc4f04-ab4a-428c-9e75-ef4311e49311"
+
+[[outputs]]
+id = "BY_6Bj_6S6y5PmRvJLN3h"
+uri = "file://attached_assets/generated_audio/tutorial_b7e6e295b7e0.mp3"
+type = "audio"
+title = "Patient Pipeline Zapier zap-full-name"
+description = "Text-to-speech audio: [warmly] Your form may provide Full Name instead of separate first and last names. In that case, use full underscore name as the left-hand key, and choose the form's Full Name a…"
+logical_id = "756df736-f725-4a1b-b025-fc7201071e94"
+
+[[outputs]]
+id = "tSnfvLYSEDqAtU9JlOYH1"
+uri = "file://attached_assets/generated_audio/tutorial_49c626cad26e.mp3"
+type = "audio"
+title = "Patient Pipeline Zapier zap-map"
+description = "Text-to-speech audio: [warmly] Under Data, the left side names the information Patient Pipeline expects. The right side must use an answer from the Facebook trigger, not a name or phone you type your…"
+logical_id = "8136dd87-11b3-49c5-b055-114f61b36d71"
+
+[[outputs]]
+id = "LPsrn-lWDxmYfRKkq42d5"
+uri = "file://attached_assets/generated_audio/tutorial_76c0d60cc186.mp3"
+type = "audio"
+title = "Patient Pipeline Zapier troubleshoot"
+description = "Text-to-speech audio: [warmly] If no Zap run appears, check that the Zap is on, the Page and Form are correct, and Facebook leads access is still available. If a run appears but the action failed, op…"
+logical_id = "63ace683-7587-45f7-b8d9-aa29d28f9366"
+
+[[outputs]]
+id = "QTazvw9BSeM5samSc-r3S"
+uri = "file://attached_assets/generated_audio/tutorial_c1ef123f3fe9.mp3"
+type = "audio"
+title = "Patient Pipeline Zapier submit"
+description = "Text-to-speech audio: [warmly] After the Zap is on, submit the actual Instant Form again through the ad using your own name and phone. Don't just rerun the action test. Wait for the form's confirmati…"
+logical_id = "f5e2aeaa-47c8-4f31-8d90-f17ec756d92d"
+
+[[outputs]]
+id = "mX6mmsKkX63wlqGWU2Usf"
+uri = "file://attached_assets/generated_audio/patient-pipeline-desk-side-audition.mp3"
+type = "audio"
+title = "Conversational teaching — voice sample"
+description = "Sarah teaching the campaign setup in one connected take. This is a voice-style audition; the full three videos have not yet been regenerated or retimed."
+logical_id = "8961681e-98af-4610-a8c3-64a35b6c10f3"
+content_hash = "sha256:a3a264ff2cffb2c16b152eb79aefb8a816f97a3b75fe49b6a51697d40becd755"
+size = 1369278
+mtime_ms = 1790816415295
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/8961681e-98af-4610-a8c3-64a35b6c10f3/7e9f3586-7383-4c78-9313-c13aaee1b89b"
+storage_version_token = "1790816417337330"
+content_type = "audio/mpeg"
+
+[[outputs]]
+id = "0S2PePyNnVUN0-G5cPkUk"
+uri = "file://exports/patient-pipeline-ghl-conversational.mp4"
+type = "video"
+title = "1. GoHighLevel Form → Patient Pipeline"
+description = "13:53 • MP4 • Conversational narration with synchronized visuals."
+logical_id = "7a6581bf-0ab0-4c14-8cd2-f5f60127409c"
+content_hash = "sha256:4c84ce4091091dd38c7c841fee21d67d2a92074cb0e9fc3d408dc14557559aac"
+size = 32320094
+mtime_ms = 1790819103281
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/7a6581bf-0ab0-4c14-8cd2-f5f60127409c/ee11a1d0-443c-4ba7-9592-6aabc5f94ca3"
+storage_version_token = "1790820333608117"
+content_type = "video/mp4"
+
+[[outputs]]
+id = "E-tPUk5drhzRiqCT7Ab0F"
+uri = "file://exports/patient-pipeline-facebook-ghl-conversational.mp4"
+type = "video"
+title = "2. Facebook & Instagram → GoHighLevel → Patient Pipeline"
+description = "13:54 • MP4 • For Facebook and Instagram leads already arriving in GoHighLevel."
+logical_id = "787870d0-4371-47d8-9f00-8390dcf8eff0"
+content_hash = "sha256:e882f628e14db2a8ba6bdd8fec9fc4ac7d97610c9703568b12c5042d04394146"
+size = 32644137
+mtime_ms = 1790819417341
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/787870d0-4371-47d8-9f00-8390dcf8eff0/741859a7-42f4-4e18-98fb-58916d862b3c"
+storage_version_token = "1790820335509581"
+content_type = "video/mp4"
+
+[[outputs]]
+id = "qTao6UPXut0qDnvq8gfQi"
+uri = "file://exports/patient-pipeline-zapier-conversational.mp4"
+type = "video"
+title = "3. Facebook & Instagram → Zapier → Patient Pipeline"
+description = "16:02 • MP4 • Connect Facebook and Instagram forms without GoHighLevel."
+logical_id = "20d314b9-6a5f-4032-880d-48d119250657"
+content_hash = "sha256:488394a0ffd0115d3dbe4c79cc0f86d402c236c236855daebd7c0d4601db6952"
+size = 37594360
+mtime_ms = 1790819745169
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/20d314b9-6a5f-4032-880d-48d119250657/9978b25d-607e-4d17-8ca4-d33ea71868ea"
+storage_version_token = "1790820336647607"
+content_type = "video/mp4"
+
+[[outputs]]
+id = "ZGHecVVFhUqnanC34C_yG"
+uri = "file://artifacts/patient-pipeline-landing-video/public/audio/vo-introduction.mp3"
+type = "audio"
+title = "Patient Pipeline introduction narration"
+description = "Text-to-speech audio: That’s what Patient Pipeline is designed to help with. It brings Reactivation and Lead Follow-Up together, so your staff can approach each conversation with guidance that fits t…"
+logical_id = "3c665622-15e9-490b-a26d-40c94b48702f"
+
+[[outputs]]
+id = "bNCpIGBO7l1F619skSUWb"
+uri = "file://artifacts/patient-pipeline-landing-video/public/audio/vo-workflow.mp3"
+type = "audio"
+title = "Patient Pipeline workflow narration"
+description = "Text-to-speech audio: And it isn’t just about the script. Your team has an organized way to see who needs attention, record what happened, and keep follow-up moving instead of relying on memory."
+logical_id = "50b82a47-fcb4-4c15-92ae-d78c73769fcb"
+
+[[outputs]]
+id = "zqUeEhwItYL5RmQuQmGSk"
+uri = "file://artifacts/patient-pipeline-landing-video/public/audio/vo-lead.mp3"
+type = "audio"
+title = "Patient Pipeline lead narration"
+description = "Text-to-speech audio: For a new inquiry, the starting point is different. The conversation connects to the campaign or offer that caught their attention. Your team can follow up with that context, re…"
+logical_id = "0923ccae-29a0-4fbb-bc3c-751d0e1e4e97"
+
+[[outputs]]
+id = "flI-3b_mTETTaHCpfafJs"
+uri = "file://artifacts/patient-pipeline-landing-video/public/audio/vo-invitation.mp3"
+type = "audio"
+title = "Patient Pipeline invitation narration"
+description = "Text-to-speech audio: What could that look like in your practice? Let’s talk about your inactive patients, your incoming inquiries, and how your team handles follow-up today. Request a conversation, …"
+logical_id = "1be3a6a9-ccec-4af1-b3e3-424b88ae67a1"
+
+[[outputs]]
+id = "INXtfKYRwsCbRkMnoEN4A"
+uri = "file://artifacts/patient-pipeline-landing-video/public/audio/vo-reactivation.mp3"
+type = "audio"
+title = "Patient Pipeline reactivation narration"
+description = "Text-to-speech audio: With reactivation, the conversation starts with the care that patient received before. As they explain what’s happening now, your team selects their response, and the script fol…"
+logical_id = "84538c8f-e17b-4c5f-bab9-bc6963cec46d"
+
+[[outputs]]
+id = "wj5VapDBOjD7DbuMqnQRI"
+uri = "file://artifacts/patient-pipeline-landing-video/public/audio/vo-opportunity.mp3"
+type = "audio"
+title = "Patient Pipeline opportunity narration"
+description = "Text-to-speech audio: Your practice may already have opportunities that aren’t turning into appointments. Some are patients who haven’t been back in a while. Others are people who asked about care, b…"
+logical_id = "cae1aa59-32a8-4a71-9d73-6c813d21fc35"
+
+[[outputs]]
+id = "6yrHgXehhps_ktPfz5J6X"
+uri = "file://artifacts/patient-pipeline-landing-video/public/audio/vo-revenue.mp3"
+type = "audio"
+title = "Patient Pipeline revenue narration"
+description = "Text-to-speech audio: Now think about a small example. Five past patients return, and better follow-up helps three additional new patients get started. If each represents a thousand dollars in first-…"
+logical_id = "3df4a98d-5036-486c-b6f9-e560d22bc21b"
+
+[[outputs]]
+id = "6QV5pdYPz1dsXrfQq1QyO"
+uri = "file://artifacts/patient-pipeline-landing-video/public/audio/vo-workflow-final.mp3"
+type = "audio"
+title = "Final connected workflow narration"
+description = "Text-to-speech audio: And it isn’t just about the script. Your team has an organized way to see who needs attention, record what happened, and keep follow-up moving instead of relying on memory."
+logical_id = "bdac8379-3cb6-4a83-97a6-6b53aa84f7c4"
+
+[[outputs]]
+id = "Ur2X0TIYx1LvlMVs9aYwm"
+uri = "file://artifacts/patient-pipeline-landing-video/public/audio/vo-introduction-final.mp3"
+type = "audio"
+title = "Final connected introduction narration"
+description = "Text-to-speech audio: That’s what Patient Pipeline is designed to help with. It brings Reactivation and Lead Follow-Up together, so your staff can approach each conversation with guidance that fits t…"
+logical_id = "7b1520bc-c684-4dcc-88c8-42c5e16e6dd5"
+
+[[outputs]]
+id = "kw8tsv9AEh0tZcOQaXQgA"
+uri = "file://artifacts/patient-pipeline-landing-video/public/audio/vo-lead-final.mp3"
+type = "audio"
+title = "Final connected lead narration"
+description = "Text-to-speech audio: For a new inquiry, the starting point is different. The conversation connects to the campaign or offer that caught their attention. Your team can follow up with that context, re…"
+logical_id = "b9f30a90-3e66-482c-a4d3-b986da6038c3"
+
+[[outputs]]
+id = "xoCvu76yZp4KUgyweu0Jw"
+uri = "file://artifacts/patient-pipeline-landing-video/public/audio/vo-invitation-final.mp3"
+type = "audio"
+title = "Final connected invitation narration"
+description = "Text-to-speech audio: What could that look like in your practice? Let’s talk about your inactive patients, your incoming inquiries, and how your team handles follow-up today. Request a conversation, …"
+logical_id = "8ff969d0-c877-44f3-9d71-24efc945e728"
+
+[[outputs]]
+id = "GDJdOSZE00MGX0M8n5wZs"
+uri = "file://artifacts/patient-pipeline-landing-video/public/audio/vo-opportunity-final.mp3"
+type = "audio"
+title = "Final connected opportunity narration"
+description = "Text-to-speech audio: Your practice may already have opportunities that aren’t turning into appointments. Some are patients who haven’t been back in a while. Others are people who asked about care, b…"
+logical_id = "bb5e706c-e0b6-42bd-8a69-42a515905b3e"
+
+[[outputs]]
+id = "cJLr-1b48RgTnolz6v1Ms"
+uri = "file://artifacts/patient-pipeline-landing-video/public/audio/vo-reactivation-final.mp3"
+type = "audio"
+title = "Final connected reactivation narration"
+description = "Text-to-speech audio: With reactivation, the conversation starts with the care that patient received before. As they explain what’s happening now, your team selects their response, and the script fol…"
+logical_id = "97238ab9-6766-40d4-9ce3-04e73656ffdf"
+
+[[outputs]]
+id = "v_esQw2zLrDUyUpE5nKhb"
+uri = "file://artifacts/patient-pipeline-landing-video/public/audio/vo-revenue-final.mp3"
+type = "audio"
+title = "Final connected revenue narration"
+description = "Text-to-speech audio: Now think about a small example. Five past patients return, and better follow-up helps three additional new patients get started. If each represents a thousand dollars in first-…"
+logical_id = "710e68e1-50cf-42b1-8bb8-fa56dc01f5fe"
+
+[[outputs]]
+id = "-kRFuVSCOnRuDdHASUmyq"
+uri = "file://artifacts/patient-pipeline-landing-video/public/audio/vo-revenue-monthly.mp3"
+type = "audio"
+title = "Monthly incremental patient value"
+description = "Text-to-speech audio: Imagine a month where Patient Pipeline helps reactivate four additional patients, beyond your current reactivation efforts. Better lead follow-up also gets three additional new …"
+logical_id = "78180c0f-7ebf-45dd-a469-9547d83f4689"
+
+[[outputs]]
+id = "td4Vf79ODgWwpj0q3t9I_"
+uri = "file://artifacts/patient-pipeline-landing-video/public/audio/vo-workflow-owner-team.mp3"
+type = "audio"
+title = "You and your team follow-up"
+description = "Text-to-speech audio: And it isn’t just about the script. You and your team have an organized way to see who needs attention, record what happened, and keep follow-up moving instead of relying on mem…"
+logical_id = "f48f1da3-1fee-4188-88b2-2b807dc731c5"
+
+[[outputs]]
+id = "CobfhxuRbS_oD2QICMm64"
+uri = "file://exports/Patient-Pipeline-Landing-Video-Refined.mp4"
+type = "video"
+title = "Patient Pipeline — Revised Landing-Page Video"
+description = "2:29 landscape MP4, 1280×720. Starts Reactivation at the connected-call opening question, includes “you and your team,” eight complete follow-up rows and localized identifier masking. Preserves the $10,500 one-month incremental example. H.264 video and AAC audio; full playback capture and decoding verified."
+logical_id = "3b6dd2db-771d-4af3-8a09-6ce4a709385c"
+content_hash = "sha256:1f81d242ada30cbe69036bb3fe78eee6f5fc2956b8cd8a5c8d33575dcdb6e136"
+size = 8928177
+mtime_ms = 1790878308863
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/3b6dd2db-771d-4af3-8a09-6ce4a709385c/cbeca893-ae12-4299-b1f0-9bf65bc2417b"
+storage_version_token = "1790878379868614"
+content_type = "video/mp4"
+
+[[outputs]]
+id = "-4DQ-Rfxdnnp3Suma9-Iz"
+uri = "file://artifacts/patient-pipeline-landing-video/public/audio/vo-niches-base.mp3"
+type = "audio"
+title = "Patient Pipeline service-tailored reactivation niches"
+description = "Text-to-speech audio: Reactivation isn’t just for chiropractic. It covers a variety of niches, and your caller sees a script tailored to the specific service your office provided to that patient."
+logical_id = "74d1c2a7-5572-4c8f-8180-fcd592685593"
+
+[[outputs]]
+id = "pFtBxaAMqR-i8yYcIuLm2"
+uri = "file://exports/Patient-Pipeline-Landing-Video-Niches-Faster.mp4"
+type = "video"
+title = "Patient Pipeline — Updated Landing Video"
+description = "About 2:28, landscape MP4 (1280×720). Explains multiple supported niches and patient-service-specific scripts before the chiropractic call example. Narration is 1.10×—10% faster—with the same Matilda voice and preserved pitch; music tempo stays unchanged. Existing privacy masks, eight queue rows and the $10,500 one-month example are retained. Export checked by full decoding and representative-frame review."
+logical_id = "a8b14f6a-7d4a-4372-a23a-4d540b1f7ffb"
+content_hash = "sha256:aa26d81dce9cdfb7e01dfdd19f44871d1fcc5736c865df8ad94a050b3e6d3a32"
+size = 8982409
+mtime_ms = 1790879835067
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/a8b14f6a-7d4a-4372-a23a-4d540b1f7ffb/e95e61ae-5d63-4c35-8bc8-083e63a56b46"
+storage_version_token = "1790879931946628"
+content_type = "video/mp4"
+
+[[outputs]]
+id = "r30N2OOFWdYZaiXQYoO09"
+uri = "file://artifacts/patient-pipeline-landing-video/public/audio/vo-opportunity-three-months.mp3"
+type = "audio"
+title = "Patient Pipeline opening — three-month reactivation and prior trust"
+description = "Text-to-speech audio: Your practice already has opportunities that aren’t turning into appointments. Some are past patients who haven’t been in for three months or longer. They’ve already trusted you…"
+logical_id = "6d96f4f3-de16-4fc1-ac74-f8841878a4e1"
+
+[[outputs]]
+id = "mZWD0EmKzFshvzcbGQfS0"
+uri = "file://exports/Patient-Pipeline-Landing-Video-Reactivation-120.mp4"
+type = "video"
+title = "Patient Pipeline — Revised Opener & 1.20× Narration"
+description = "2:26 landscape MP4. Opens with “Your practice already has…” and defines past-patient reactivation as three months or longer, explaining prior trust and the qualified easier/lower-cost comparison on the same visual. Narration is another +0.1× faster, now 1.20×, with preserved Matilda voice and pitch. Niches, real caller screens, privacy masks and monthly financial example retained. Full playback, render and decoding verified."
+logical_id = "40a692d8-503b-49e2-8efd-ec17c3ff8e0b"
+content_hash = "sha256:b28b5f5a69c1d6439bf23517f8d730d9db54ed87371419cedf2616f9323f6ea3"
+size = 9148523
+mtime_ms = 1790880915863
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/40a692d8-503b-49e2-8efd-ec17c3ff8e0b/d61dbd37-258f-4a55-aaa0-dd8d0ea1d760"
+storage_version_token = "1790881012854807"
+content_type = "video/mp4"
+
+[[outputs]]
+id = "9KhjyJxB5CtQuvDOKfhOE"
+uri = "file://exports/Patient-Pipeline-Landing-Video-All-Chiro-Services.mp4"
+type = "video"
+title = "Download Patient Pipeline Landing Video"
+description = "Updated MP4 · 2:26 · Includes all 12 Chiro-family services, with the approved 1.20× narration."
+logical_id = "a0204a30-5e08-4913-b67f-cdef21198d0e"
+content_hash = "sha256:81884f453381451cec95329f0bab9b8bbeaac4872eb1adfd7fa820bc640bf381"
+size = 9180574
+mtime_ms = 1790881826493
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/a0204a30-5e08-4913-b67f-cdef21198d0e/ee2691fe-3430-471b-ab3a-07d9907320e9"
+storage_version_token = "1790883072508364"
+content_type = "video/mp4"
+
+[[outputs]]
+id = "UBSrHXoIfz6UkXcHwQ6iM"
+uri = "file://docs/Mohammed-GHL-Walkthrough-Setup.html"
+type = "html"
+title = "Mohammed’s GHL Walkthrough Email Setup Guide"
+description = "Shareable instructions with email copy, the existing website triggers, booked/unbooked workflow rules, and a launch test checklist. Open in a browser to print or save as PDF."
+logical_id = "63d12fff-22c5-49ed-ab29-26a058c1b770"
+content_hash = "sha256:9ffdfa7011a94a3f9a63f8d717cd4162a37bcc6f9afd5d9e200a8cdd12602762"
+size = 16622
+mtime_ms = 1791307544701
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/63d12fff-22c5-49ed-ab29-26a058c1b770/8d092bda-bc35-4df8-af69-94463fbbee38"
+storage_version_token = "1791307736557900"
+content_type = "text/html"
+
+[[outputs]]
+id = "D5HM2ZUpiFiGrJu08PENb"
+uri = "file://docs/Patient-Pipeline-Lawyer-Brief.pdf"
+type = "pdf"
+title = "Beyond Healthcare LLC — Patient Pipeline Lawyer Brief"
+description = "Updated seven-page factual handoff for drafting a NEW customer agreement: company identity, both product summaries and feature lists, technology stack, billing/cancellation behavior, patient-data issues, and decisions counsel needs from the owner. No proposed contract appendix."
+logical_id = "779770a2-b495-49e4-8fa1-3a6174464f8c"
+content_hash = "sha256:e82433fcb2ad67865e4db726b82c211ebdcfcaa98d872b8ef16963c7d6f431f3"
+size = 21325
+mtime_ms = 1791312518768
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/779770a2-b495-49e4-8fa1-3a6174464f8c/33fd1584-e58f-4478-9a5e-c7bef8a5c742"
+storage_version_token = "1791312622560334"
+content_type = "application/pdf"
+
+[[outputs]]
+id = "IdyELMqCRLtQe-B8PId0g"
+uri = "file://docs/Patient-Pipeline-Lawyer-Brief.docx"
+type = "word_document"
+title = "Lawyer Brief — Editable Word Version"
+description = "Send this editable version to your lawyer. Covers Patient Reactivation, Lead Follow-Up, the technical stack and legal/business questions without treating the internal template as the new agreement."
+logical_id = "27b4da5d-42da-4ca3-95e6-4022b48ba27f"
+content_hash = "sha256:63eb02d161acae595d902a2c328264c406e6113115bd41d6a0074af3f709bba0"
+size = 10312
+mtime_ms = 1791312518756
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/27b4da5d-42da-4ca3-95e6-4022b48ba27f/54bf281f-1a50-49a8-b3dd-4e910caf0e13"
+storage_version_token = "1791312623188673"
+content_type = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+
+[[outputs]]
+id = "ulOKUcq9oAAa_9cvWVRG5"
+uri = "file://docs/Patient-Pipeline-Updated-Lawyer-Synopsis.pdf"
+type = "pdf"
+title = "Updated Lawyer Synopsis — Patient Pipeline (PDF)"
+description = "New consolidated seven-page synopsis identifying Beyond Healthcare LLC, covering both product summaries and feature lists, technology stack, billing and cancellation, patient-data/HIPAA questions, and the information counsel needs to draft a new agreement."
+logical_id = "e3a88b41-e939-4ea6-8c46-352fa023c373"
+content_hash = "sha256:341021484aa852cfa6848bc8088b9514bb139fc651aafecc20234fa4743d8d1a"
+size = 21925
+mtime_ms = 1791314332650
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/e3a88b41-e939-4ea6-8c46-352fa023c373/56478d6d-bf0d-446a-8160-70b1c1006756"
+storage_version_token = "1791314354653855"
+content_type = "application/pdf"
+
+[[outputs]]
+id = "4E-usynkml-p6NJfhGtrW"
+uri = "file://docs/Patient-Pipeline-Updated-Lawyer-Synopsis.docx"
+type = "word_document"
+title = "Updated Lawyer Synopsis — Editable Word"
+description = "Editable copy of the complete updated synopsis for your lawyer. Clearly separates existing features, proposed functionality, software defaults and unresolved business/legal decisions."
+logical_id = "0caa80d2-3476-4fd1-a526-083678c6c76e"
+content_hash = "sha256:a1cfc42711f3192ec53cdc588620ea80b61efcfe24a0385a068abd4f9abf8511"
+size = 10458
+mtime_ms = 1791314332633
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/0caa80d2-3476-4fd1-a526-083678c6c76e/bfd2836f-c4c0-4475-84c9-466dfff6e0c8"
+storage_version_token = "1791314355350380"
+content_type = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+
+[[outputs]]
+id = "qW3XiGRXqYkgzVims31df"
+uri = "file://generated-artifacts/Patient-Pipeline-Emails-Replacement-pHEhLNyjVo37AFcd.zip"
+type = "unspecified"
+title = "Replacement marketing emails — all 68 templates"
+description = "Fresh GoHighLevel import ZIP. Every call button and linked logo uses https://patientpipeline.app/api/m/pHEhLNyjVo37AFcd. Includes subjects, preview text, and import instructions."
+logical_id = "1cb6b004-d5e1-491b-821e-ee972a6f9ab0"
+content_hash = "sha256:d8bc6a08ca671efafef87de7cb1cfd1a35a03b8c4ea8cd5c0d8cadcf0fcfd261"
+size = 202955
+mtime_ms = 1791577198876
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/1cb6b004-d5e1-491b-821e-ee972a6f9ab0/fe56f024-af73-4b9c-af4f-199425ce469e"
+storage_version_token = "1791577254935551"
+content_type = "application/octet-stream"
+
+[[outputs]]
+id = "4oZPQmZSZU6uNtnnp0Y4-"
+uri = "file://generated-artifacts/patient-texting/whitaker-transcript.html"
+type = "html"
+title = "Whitaker fictional texting — verified model transcript"
+description = "Actual 21-message simulation with 10 model-generated replies, original submission timestamp, handoff summary and pending appointment preferences. No SMS sent; provider commissioning remains blocked."
+logical_id = "d57b300d-eb50-4f57-8a6f-13cb23c99119"
+content_hash = "sha256:f109177aeb64a22f1674172285c959f3d67d67db0a98ca476a315e6585ae7ab4"
+size = 9389
+mtime_ms = 1791675302751
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/d57b300d-eb50-4f57-8a6f-13cb23c99119/2d3d0ba9-ab5d-4560-bc72-19b42c5ab723"
+storage_version_token = "1791675326345201"
+content_type = "text/html"
+
+[[outputs]]
+id = "_9Ga0gcVrj1QTL_hCv9D-"
+uri = "file://generated-artifacts/reluctant-patient/reluctant-patient-report.html"
+type = "html"
+title = "Reluctant Melissa — full conversation and assessment"
+description = "Separate fictional run: 10 patient turns, 9 actual AI replies, candid findings, handoff outcome, and remaining authorization."
+logical_id = "c89e9ef2-5129-477b-a5c9-85a697df9060"
+content_hash = "sha256:754b0ef1def3f525ff009c2def4160737f384db985f2075f1fbe0f8f6b6adb4c"
+size = 12588
+mtime_ms = 1791678418055
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/c89e9ef2-5129-477b-a5c9-85a697df9060/10cb38a7-52a4-4491-98a3-fd42cbcb602d"
+storage_version_token = "1791678430126328"
+content_type = "text/html"
+
+[[outputs]]
+id = "WZOke9tg7VS7nEvBv93pP"
+uri = "file://generated-artifacts/reluctant-patient/preserved-original.html"
+type = "html"
+title = "Preserved original Melissa conversation"
+description = "The complete prior 21-message transcript, saved before the simulation-only reset."
+logical_id = "0596a515-0964-48d0-87f6-acd4362d7dc1"
+content_hash = "sha256:ce998fef606ed2e9eac004375eae412feae8736f01460d809fd56d7ecfeaffc6"
+size = 6407
+mtime_ms = 1791678418055
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/0596a515-0964-48d0-87f6-acd4362d7dc1/a10265ef-f4ed-4d4f-9469-d689e5c4a1b1"
+storage_version_token = "1791678430673770"
+content_type = "text/html"
+
+[[outputs]]
+id = "v2IEWero-Z2ThexXgki5T"
+uri = "file://screenshots/booking-thank-you-both-products.jpg"
+type = "image"
+title = "New booking page — sliders lined up"
+description = "Lead Follow-Up slider labels now fit on one line and sit right above the bars, matching Reactivation."
+logical_id = "c259268b-324f-4370-a886-6b7488d87cab"
+content_hash = "sha256:be931850167ce6a2e6240ac7b336a0f815657633815e235598a4d1c08cf0ea81"
+size = 159718
+mtime_ms = 1791734996814
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/c259268b-324f-4370-a886-6b7488d87cab/24647bd0-2bbc-473c-9309-263f0a2ccf5a"
+storage_version_token = "1791735003397982"
+content_type = "image/jpeg"
+
+[[outputs]]
+id = "XiIEhzvk3ggyYVCa2PilU"
+uri = "file://.local/research/hbot/hbot-review-packet.html"
+type = "html"
+title = "Hyperbaric Reactivation — Final Research Review Packet"
+description = "Complete research and 64-screen script manuscript, with exact sleep wording, concern mapping, safety routes and approval checklists. Not clinically approved or ready for patient use; no HBOT feature implemented."
+logical_id = "7052d0f2-7f9c-4205-9d2c-d822b99d613a"
+content_hash = "sha256:d5d04f2e5142184f6bd4f4f741eda299c3f0a3a66634f4ad31c918153ed58592"
+size = 95741
+mtime_ms = 1791928610093
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/7052d0f2-7f9c-4205-9d2c-d822b99d613a/a977857d-2a28-4bae-af53-31beb5aa0fab"
+storage_version_token = "1791928628939597"
+content_type = "text/html"
+
+[[outputs]]
+id = "EXWi24tqd_dSnbbTT8KHD"
+uri = "file://generated-artifacts/onboarding/patient-pipeline-live-onboarding.pdf"
+type = "pdf"
+title = "Patient Pipeline — Live Client Onboarding"
+description = "Two-page onboarding guide: Reactivation first, then Lead Follow-Up, with a final responsibilities checklist."
+logical_id = "931d0b14-cce0-48ce-8126-079af71760b9"
+content_hash = "sha256:60a6c8dd0ce1deb75a8fc7b3065743e78dee427f0630ff8d66885ad707ba4306"
+size = 54859
+mtime_ms = 1792002146236
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/931d0b14-cce0-48ce-8126-079af71760b9/2abb0fdc-dd1f-4aa1-9b09-ef19b19828da"
+storage_version_token = "1792002164914825"
+content_type = "application/pdf"
+
+[[outputs]]
+id = "8sAZEWke4tr0FP9oxS9JB"
+uri = "file://screenshots/code-screen.png"
+type = "image"
+title = "Code screen with spam tip"
+description = "Sign-in code screen with the new spam/junk folder line."
+logical_id = "58498875-b423-4782-be6b-d680a85c47e2"
+content_hash = "sha256:190d49b4488eba4521bdd737d07c1c4673c6ded46f8eccf91a353b88410c792b"
+size = 91103
+mtime_ms = 1792089458375
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/58498875-b423-4782-be6b-d680a85c47e2/91716924-59df-4099-bd76-a6dec936b4eb"
+storage_version_token = "1792089512425888"
+content_type = "image/png"
+
+[[outputs]]
+id = "B0XzCNTTaOmzmGRCS6tns"
+uri = "file://screenshots/password-link-sent.png"
+type = "image"
+title = "Password link message with spam tip"
+description = "Message shown after asking for a password link, with the new spam/junk folder line."
+logical_id = "c772586c-2a18-48b4-b9ac-bd32eea834bf"
+content_hash = "sha256:54932e72b745f8923b3cc2a55e9fb7b9ff91573d9eb2615831987f11559ba82c"
+size = 101690
+mtime_ms = 1792089462655
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/c772586c-2a18-48b4-b9ac-bd32eea834bf/fc307827-1560-4af3-b691-01c7f26df5e5"
+storage_version_token = "1792089513044836"
+content_type = "image/png"

@@ -1,0 +1,22 @@
+// Thin client stubs for the server actions in artifacts/api-server/src/actions/admin.ts
+import { action } from '@/lib/api'
+
+export const createCourse = action<any>('admin', 'createCourse')
+export const updateCourse = action<any>('admin', 'updateCourse')
+export const deleteCourse = action<any>('admin', 'deleteCourse')
+export const createModule = action<any>('admin', 'createModule')
+export const updateModule = action<any>('admin', 'updateModule')
+export const deleteModule = action<any>('admin', 'deleteModule')
+export const moveModule = action<any>('admin', 'moveModule')
+export const createVideo = action<any>('admin', 'createVideo')
+export const updateVideo = action<any>('admin', 'updateVideo')
+export const deleteVideo = action<any>('admin', 'deleteVideo')
+export const moveVideo = action<any>('admin', 'moveVideo')
+export const addAttachment = action<any>('admin', 'addAttachment')
+export const deleteAttachment = action<any>('admin', 'deleteAttachment')
+export const createParticipant = action<any>('admin', 'createParticipant')
+export const updateParticipant = action<any>('admin', 'updateParticipant')
+export const deleteParticipant = action<any>('admin', 'deleteParticipant')
+export const setCourseAccess = action<any>('admin', 'setCourseAccess')
+export const setNicheAccess = action<any>('admin', 'setNicheAccess')
+export const setProductAccess = action<any>('admin', 'setProductAccess')

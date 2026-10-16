@@ -1,0 +1,173 @@
+// @ts-nocheck
+import { useParams } from 'wouter';
+import { Link } from "wouter";
+import { ArrowLeft, Phone } from 'lucide-react'
+import { DISPOSITION_LABELS } from '@workspace/shared/types'
+import { ContactEditor } from '@/components/reactivation/contact-editor'
+import { DeleteContactButton } from '@/components/reactivation/delete-contact-button'
+import { usePageData } from '@/hooks/use-page-data'
+import { nicheDisplayLabel } from '@/components/reactivation/niche-select'
+import { PageError, PageLoading } from '@/components/page-status'
+import NotFound from '@/pages/not-found'
+
+export default function ContactProfilePage() {
+  const params = useParams();
+
+  const { id } = params
+  const { data, loading, error, notFound } = usePageData<any>(`/portal/contacts/${id}`)
+  if (loading) return <PageLoading />
+  if (notFound) return <NotFound />
+  if (error) return <PageError error={error} />
+  const { contact, history, serviceHistory, stages, niches } = data
+  const timeline = [
+    ...history.map(call => ({ ...call, kind: 'call' })),
+    ...serviceHistory.map(event => ({ ...event, kind: 'service' })),
+  ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime() || b.id.localeCompare(a.id))
+
+  return (
+    <div className="mx-auto w-full max-w-4xl px-4 py-8">
+      <Link
+        href="/portal/contacts"
+        className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+      >
+        <ArrowLeft className="size-4" />
+        Back to Contacts
+      </Link>
+
+      <div className="mt-4 flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">
+            {contact.name}
+          </h1>
+          <p className="mt-1 text-muted-foreground">
+            {contact.phone}
+            {contact.email ? ` · ${contact.email}` : ''}
+            {contact.niche ? ` · ${nicheDisplayLabel(contact.niche.name)}` : ''}
+          </p>
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            {contact.stage && (
+              <span className="rounded-full bg-muted px-2.5 py-0.5 text-sm font-medium text-muted-foreground">
+                {contact.stage.name}
+              </span>
+            )}
+            {contact.do_not_call && (
+              <span className="rounded-full bg-destructive/10 px-2.5 py-0.5 text-sm font-medium text-destructive">
+                Do Not Call
+              </span>
+            )}
+            {contact.next_follow_up && !contact.do_not_call && (
+              <span className="rounded-full bg-accent/10 px-2.5 py-0.5 text-sm font-medium text-accent">
+                Next call:{' '}
+                {new Date(contact.next_follow_up.due_at).toLocaleString(
+                  undefined,
+                  {
+                    month: 'short',
+                    day: 'numeric',
+                    hour: 'numeric',
+                    minute: '2-digit',
+                  },
+                )}
+              </span>
+            )}
+          </div>
+        </div>
+        {!contact.do_not_call && (
+          <Link
+            href={`/portal/dialer/call/${contact.id}`}
+            className="flex items-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+          >
+            <Phone className="size-4" />
+            Start Call
+          </Link>
+        )}
+      </div>
+
+      <section className="mt-8">
+        <ContactEditor contact={contact} stages={stages} niches={niches} />
+      </section>
+
+      <section className="mt-10">
+        <h2 className="text-xl font-semibold text-foreground">
+          Patient History
+        </h2>
+        <p className="mt-1 text-sm text-muted-foreground">{history.length} call attempts · {serviceHistory.length} service status changes</p>
+        {timeline.length === 0 ? (
+          <p className="mt-4 text-muted-foreground">
+            No patient history yet.
+          </p>
+        ) : (
+          <ul className="mt-4 flex flex-col gap-3">
+            {timeline.map((call) => call.kind === 'service' ? (
+              <li key={`service-${call.id}`} className="rounded-lg border border-border bg-muted/30 p-4"
+                data-testid="history-service-reopened">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="font-medium text-foreground">Service reopened · {call.service_label_snapshot}</span>
+                  <span className="text-sm text-muted-foreground">
+                    {call.actor_name_snapshot} · {new Date(call.created_at).toLocaleString(undefined, {
+                      month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit',
+                    })}
+                  </span>
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">Declined → Reopened (cooling) · Service status change, not a call attempt</p>
+                <p className="mt-2 whitespace-pre-wrap break-words text-sm text-muted-foreground">Reason: {call.reason}</p>
+              </li>
+            ) : (
+              <li
+                key={call.id}
+                className="rounded-lg border border-border bg-card p-4"
+              >
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-medium text-foreground">
+                      {DISPOSITION_LABELS[call.disposition]}
+                      {call.service_label_snapshot ? ` · ${call.service_label_snapshot}` : ''}
+                      {call.call_context ? ` · ${call.call_context}` : ''}
+                    </span>
+                    {call.voicemail_left && (
+                      <span className="rounded bg-muted px-1.5 py-0.5 text-xs font-medium text-muted-foreground">
+                        Voicemail left
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-sm text-muted-foreground">
+                    {call.caller
+                      ? `${call.caller.first_name} ${call.caller.last_name} · `
+                      : ''}
+                    {new Date(call.created_at).toLocaleString(undefined, {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                      hour: 'numeric',
+                      minute: '2-digit',
+                    })}
+                  </span>
+                </div>
+                {call.notes && (
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                    {call.notes}
+                  </p>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section className="mt-10 flex flex-col gap-3 rounded-lg border border-destructive/30 bg-destructive/5 p-5 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="text-sm font-semibold text-foreground">
+            Delete this contact
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Removes {contact.name} and their call history for good. Use this if
+            they were added by mistake.
+          </p>
+        </div>
+        <DeleteContactButton
+          contactId={contact.id}
+          contactName={contact.name}
+        />
+      </section>
+    </div>
+  )
+}

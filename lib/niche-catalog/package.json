@@ -1,0 +1,12 @@
+{
+  "name": "@workspace/niche-catalog",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./concern-options": "./src/concern-options.ts",
+    "./niche-match": "./src/niche-match.ts",
+    "./service-catalog": "./src/service-catalog.ts"
+  }
+}

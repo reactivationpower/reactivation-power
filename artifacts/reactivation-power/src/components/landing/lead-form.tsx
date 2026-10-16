@@ -1,0 +1,675 @@
+// @ts-nocheck
+
+import { useActionState, useEffect, useId, useReducer, useRef, useState } from 'react'
+import {
+  lookupZip,
+  submitHealthcareLead,
+  type LeadState,
+} from '@/app/actions/leads'
+import { useOpportunity } from '@/components/landing/opportunity-context'
+import { ServicesMultiSelect } from '@/components/landing/services-multi-select'
+import { getCurrentTerms } from '@/app/actions/lead-terms'
+import { nextAccepted, termsId } from '@/components/landing/terms-state'
+import type { CurrentLeadTerms } from '@workspace/shared/lead-terms'
+import { Button } from '@/components/ui/button'
+import { BEST_TIMES, readLeadFields, validateLeadFields } from '@workspace/shared/lead-validation'
+import { onBackForwardRestore } from '@/lib/api'
+import type { CalculatorScenario } from '@workspace/shared/opportunity'
+import { validatedBookingFunnel } from '@workspace/shared/booking-funnel'
+import { track, flush } from '@/lib/marketing-tracker'
+
+const initialState: LeadState = {}
+
+/** Red asterisk for sighted users; the input's `required` attr covers AT. */
+function RequiredMark() {
+  return (
+    <span className="text-destructive" aria-hidden="true">
+      {' '}
+      *
+    </span>
+  )
+}
+
+/** Format a raw digit string as (xxx) xxx-xxxx while typing */
+function formatPhone(raw: string): string {
+  const d = raw.replace(/\D/g, '').slice(0, 10)
+  if (d.length === 0) return ''
+  if (d.length <= 3) return `(${d}`
+  if (d.length <= 6) return `(${d.slice(0, 3)}) ${d.slice(3)}`
+  return `(${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6)}`
+}
+
+/** Show a digit string with thousands separators ("1800" -> "1,800") */
+function formatCount(digits: string): string {
+  return digits ? Number(digits).toLocaleString('en-US') : ''
+}
+
+const inputBase =
+  'h-11 rounded-md border bg-card px-3 text-base text-foreground outline-none transition-colors focus:border-accent focus:ring-2 focus:ring-ring/30'
+
+function inputClass(hasError: boolean): string {
+  return `${inputBase} ${hasError ? 'border-destructive ring-2 ring-destructive/20' : 'border-input'}`
+}
+
+export function LeadForm({ scheduleMode = false, calculatorScenario, funnelSource }: {
+  scheduleMode?: boolean
+  calculatorScenario?: CalculatorScenario
+  funnelSource?: 'main-website'
+}) {
+  const [state, formAction, pending] = useActionState(
+    submitHealthcareLead,
+    initialState,
+  )
+  // Unique per instance — this form renders twice on the page (popup + inline)
+  const uid = useId()
+  const formRef = useRef<HTMLFormElement>(null)
+  const started = useRef(false)
+  useEffect(() => {
+    if (state.fieldErrors) track('form_validation', { category: 'validation', control: 'lead-form' })
+    if (state.error) track('request_error', { category: 'unavailable', control: 'lead-form' })
+  }, [state])
+
+  // Terms acceptance: fetched per mounted form. Loading/error block submit.
+  const [termsStatus, setTermsStatus] = useState<'loading' | 'error' | 'ready'>('loading')
+  const [terms, setTerms] = useState<CurrentLeadTerms | null>(null)
+  const [accepted, setAccepted] = useState(false)
+  const [termsChanged, setTermsChanged] = useState(false)
+  const termsRef = useRef<CurrentLeadTerms | null>(null)
+  const termsRequest = useRef(0)
+  // One id per submission attempt. Retrying after an error reuses it so the
+  // server can recognize a duplicate; coming back with the browser Back button
+  // after a successful submit gets a fresh one, so a corrected resend counts
+  // as a new submission rather than a retry of the first.
+  const [submissionId, setSubmissionId] = useState(() => crypto.randomUUID())
+  useEffect(() => onBackForwardRestore(() => setSubmissionId(crypto.randomUUID())), [])
+  const applyTerms = (next: CurrentLeadTerms) => {
+    const previous = termsRef.current
+    if (previous && termsId(previous) !== termsId(next)) setTermsChanged(true)
+    setAccepted((a) => nextAccepted(previous, next, a))
+    termsRef.current = next
+    setTerms(next)
+    setTermsStatus('ready')
+  }
+  const applyTermsRef = useRef(applyTerms)
+  applyTermsRef.current = applyTerms
+  const loadTerms = (silent: boolean) => {
+    const request = ++termsRequest.current
+    if (!silent) setTermsStatus('loading')
+    getCurrentTerms().then((t) => {
+      if (request === termsRequest.current) applyTermsRef.current(t)
+    }, () => { if (request === termsRequest.current) setTermsStatus('error') })
+  }
+  const loadTermsRef = useRef(loadTerms)
+  loadTermsRef.current = loadTerms
+  useEffect(() => {
+    loadTermsRef.current(false)
+    const refresh = () => loadTermsRef.current(true)
+    const timer = window.setInterval(refresh, 60000)
+    window.addEventListener('focus', refresh)
+    return () => { ++termsRequest.current; window.clearInterval(timer); window.removeEventListener('focus', refresh) }
+  }, [])
+  // Server says terms are stale/missing: adopt its version and always uncheck
+  useEffect(() => {
+    if (!state.terms) return
+    ++termsRequest.current
+    termsRef.current = state.terms
+    setTerms(state.terms)
+    setTermsStatus('ready')
+    setAccepted(false)
+    setTermsChanged(true)
+  }, [state.terms])
+  const activeTerms = terms && terms.active ? terms.version : null
+
+  const [phone, setPhone] = useState('')
+  const [zip, setZip] = useState('')
+  const [zipPlace, setZipPlace] = useState<{
+    city: string
+    state: string
+  } | null>(null)
+
+  // Slider values from the hero calculator, when this page has one
+  const calc = useOpportunity()
+  const [inactive, setInactive] = useState(() =>
+    calculatorScenario ? String(calculatorScenario.inactivePatients) : calc ? String(calc.inactiveCount) : '',
+  )
+  // Set once the visitor types in the count field — even retyping the same
+  // number counts, because they've now confirmed it
+  const [inactiveEdited, setInactiveEdited] = useState(false)
+  const [productInterest, setProductInterest] = useState('')
+  const [yearsInPractice, setYearsInPractice] = useState('')
+  const [bestTime, setBestTime] = useState('')
+  // Follow the slider if the visitor moves it after this form has mounted
+  const sliderCount = calculatorScenario?.inactivePatients ?? calc?.inactiveCount
+  useEffect(() => {
+    if (sliderCount !== undefined) setInactive(String(sliderCount))
+  }, [sliderCount])
+
+  // Errors shown to the visitor. Seeded by the instant client check on submit;
+  // replaced by the server's verdict if the server disagrees.
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  // Bumped every time a fresh batch of errors lands so we scroll to the first.
+  const [errorRound, setErrorRound] = useState(0)
+  const v = state.values ?? {}
+
+  // React resets the form's fields when an action settles. That puts selects
+  // back to their first option even though their React state did not change,
+  // so render once more afterwards to show the kept choices again.
+  const [, resync] = useReducer((n: number) => n + 1, 0)
+  // Restore controlled values after a failed submit (or a Back-button return)
+  // so nothing resets
+  useEffect(() => {
+    if (state.values) {
+      resync()
+      if (state.values.phone) setPhone(formatPhone(state.values.phone))
+      if (state.values.zip) setZip(state.values.zip)
+      if (state.values.inactivePatients)
+        setInactive(state.values.inactivePatients)
+      if (state.values.productInterest !== undefined)
+        setProductInterest(state.values.productInterest)
+      if (state.values.yearsInPractice !== undefined)
+        setYearsInPractice(state.values.yearsInPractice)
+      if (state.values.bestTime !== undefined)
+        setBestTime(state.values.bestTime)
+    }
+  }, [state.values])
+
+  useEffect(() => {
+    if (!state.fieldErrors) return
+    setErrors(state.fieldErrors)
+    setErrorRound((n) => n + 1)
+  }, [state.fieldErrors])
+
+  // Scroll to and focus the first invalid field (mobile especially)
+  useEffect(() => {
+    if (errorRound === 0 || !formRef.current) return
+    const firstBad = formRef.current.querySelector<HTMLElement>(
+      '[aria-invalid="true"]',
+    )
+    if (firstBad) {
+      firstBad.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      firstBad.focus({ preventScroll: true })
+    }
+  }, [errorRound])
+
+  // Check every rule before the request leaves the browser. Returning early
+  // with preventDefault stops React from running the server action.
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    const form = e.currentTarget
+    form.elements.namedItem('deviceTimezone').value = Intl.DateTimeFormat().resolvedOptions().timeZone ?? ''
+    form.elements.namedItem('actualSourcePath').value = window.location.pathname
+    form.elements.namedItem('utmContext').value = JSON.stringify(Object.fromEntries(
+      [...new URLSearchParams(window.location.search)].filter(([key]) => /^utm_(source|medium|campaign|term|content)$/.test(key)),
+    ))
+    const found = validateLeadFields(readLeadFields(new FormData(e.currentTarget)))
+    if (termsStatus !== 'ready') {
+      e.preventDefault()
+      found.termsAccepted = 'Terms of Service could not be loaded. Retry before submitting.'
+    } else if (activeTerms && !accepted) found.termsAccepted = 'Please review and accept the Terms of Service.'
+    if (scheduleMode && !productInterest)
+      found.productInterest = 'Select how we can help your practice.'
+    if (Object.keys(found).length > 0) {
+      track('form_validation', { category: 'validation', control: 'lead-form' })
+      e.preventDefault()
+      setErrors(found)
+      setErrorRound((n) => n + 1)
+      return
+    }
+    setErrors({})
+    track('form_attempt', { control: 'lead-form' })
+    void flush()
+  }
+
+  // Drop a field's error as soon as the visitor starts fixing it
+  function clearError(name: string) {
+    if (!name || !(name in errors)) return
+    setErrors((prev) => {
+      const next = { ...prev }
+      delete next[name]
+      return next
+    })
+  }
+
+  // Auto-populate city/state once the zip has 5 digits
+  useEffect(() => {
+    const clean = zip.replace(/\D/g, '')
+    if (clean.length !== 5) {
+      setZipPlace(null)
+      return
+    }
+    let cancelled = false
+    void lookupZip(clean).then((place) => {
+      if (!cancelled) setZipPlace(place)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [zip])
+
+  return (
+    <form
+      ref={formRef}
+      onFocus={() => { if (!started.current) { started.current = true; track('form_start', { control: 'lead-form' }) } }}
+      action={formAction}
+      onSubmit={handleSubmit}
+      onInput={(e) => clearError((e.target as HTMLInputElement).name)}
+      noValidate
+      className="flex flex-col gap-4"
+    >
+      <input type="hidden" name="deviceTimezone" defaultValue="" />
+      <input type="hidden" name="actualSourcePath" defaultValue="" />
+      <input type="hidden" name="utmContext" defaultValue="" />
+      <input type="hidden" name="termsVersion" value={activeTerms?.id ?? ''} />
+      <input type="hidden" name="marketingSubmissionId" value={submissionId} />
+      {calculatorScenario && !scheduleMode && (
+        <>
+          <input type="hidden" name="calculatorScenario" value="combined" />
+          <input type="hidden" name="productInterest" value="both" />
+          <input type="hidden" name="additionalPatientsPerMonth" value={calculatorScenario.additionalPatientsPerMonth} />
+          <input type="hidden" name="newPatientValue" value={calculatorScenario.newPatientValue} />
+        </>
+      )}
+      {scheduleMode && (
+        <>
+          {validatedBookingFunnel(funnelSource) && (
+            <input type="hidden" name="funnelSource" value={funnelSource} />
+          )}
+          <input type="hidden" name="leadSource" value="schedule-a-call" />
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor={`${uid}-interest`} className="text-sm font-medium text-foreground">
+              What can we help with?<RequiredMark />
+            </label>
+            <select
+              id={`${uid}-interest`}
+              name="productInterest"
+              data-testid="select-product-interest"
+              required
+              value={productInterest}
+              onChange={(e) => {
+                setProductInterest(e.target.value)
+                clearError('productInterest')
+              }}
+              aria-invalid={errors.productInterest ? 'true' : undefined}
+              className={inputClass(Boolean(errors.productInterest))}
+            >
+              <option value="" disabled>Select one</option>
+              <option value="reactivation">Reactivation</option>
+              <option value="lead-follow-up">Lead Follow-Up</option>
+              <option value="both">Both</option>
+            </select>
+            {errors.productInterest && <p className="text-xs font-medium text-destructive">{errors.productInterest}</p>}
+          </div>
+        </>
+      )}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="flex flex-col gap-1.5">
+          <label
+            htmlFor={`${uid}-first-name`}
+            className="text-sm font-medium text-foreground"
+          >
+            First name
+            <RequiredMark />
+          </label>
+          <input
+            id={`${uid}-first-name`}
+            name="firstName"
+            required
+            autoComplete="given-name"
+            placeholder={scheduleMode ? 'First name' : undefined}
+            defaultValue={v.firstName ?? ''}
+            aria-invalid={errors.firstName ? 'true' : undefined}
+            className={inputClass(Boolean(errors.firstName))}
+          />
+          {errors.firstName && (
+            <p className="text-xs font-medium text-destructive">
+              {errors.firstName}
+            </p>
+          )}
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <label
+            htmlFor={`${uid}-last-name`}
+            className="text-sm font-medium text-foreground"
+          >
+            Last name
+            <RequiredMark />
+          </label>
+          <input
+            id={`${uid}-last-name`}
+            name="lastName"
+            required
+            autoComplete="family-name"
+            placeholder={scheduleMode ? 'Last name' : undefined}
+            defaultValue={v.lastName ?? ''}
+            aria-invalid={errors.lastName ? 'true' : undefined}
+            className={inputClass(Boolean(errors.lastName))}
+          />
+          {errors.lastName && (
+            <p className="text-xs font-medium text-destructive">
+              {errors.lastName}
+            </p>
+          )}
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <label
+          htmlFor={`${uid}-email`}
+          className="text-sm font-medium text-foreground"
+        >
+          Email address
+          <RequiredMark />
+        </label>
+        <input
+          id={`${uid}-email`}
+          name="email"
+          type="email"
+          required
+          autoComplete="email"
+          placeholder={scheduleMode ? 'you@example.com' : undefined}
+          defaultValue={v.email ?? ''}
+          aria-invalid={errors.email ? 'true' : undefined}
+          className={inputClass(Boolean(errors.email))}
+        />
+        {errors.email && (
+          <p className="text-xs font-medium text-destructive">
+            {errors.email}
+          </p>
+        )}
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="flex flex-col gap-1.5">
+          <label
+            htmlFor={`${uid}-phone`}
+            className="text-sm font-medium text-foreground"
+          >
+            Phone number
+            <RequiredMark />
+          </label>
+          <input
+            id={`${uid}-phone`}
+            name="phone"
+            type="tel"
+            required
+            inputMode="numeric"
+            autoComplete="tel"
+            placeholder="(555) 555-1234"
+            value={phone}
+            onChange={(e) => setPhone(formatPhone(e.target.value))}
+            maxLength={14}
+            aria-invalid={errors.phone ? 'true' : undefined}
+            className={inputClass(Boolean(errors.phone))}
+          />
+          {errors.phone && (
+            <p className="text-xs font-medium text-destructive">
+              {errors.phone}
+            </p>
+          )}
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <label
+            htmlFor={`${uid}-zip`}
+            className="text-sm font-medium text-foreground"
+          >
+            Zip code
+            <RequiredMark />
+          </label>
+          <input
+            id={`${uid}-zip`}
+            name="zip"
+            required
+            inputMode="numeric"
+            autoComplete="postal-code"
+            placeholder="12345"
+            value={zip}
+            onChange={(e) =>
+              setZip(e.target.value.replace(/\D/g, '').slice(0, 5))
+            }
+            maxLength={5}
+            aria-invalid={errors.zip ? 'true' : undefined}
+            className={inputClass(Boolean(errors.zip))}
+          />
+          {zipPlace && (
+            <p className="text-xs text-muted-foreground">
+              {zipPlace.city}, {zipPlace.state}
+            </p>
+          )}
+          {errors.zip && (
+            <p className="text-xs font-medium text-destructive">{errors.zip}</p>
+          )}
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <label
+          htmlFor={`${uid}-practice`}
+          className="text-sm font-medium text-foreground"
+        >
+          Practice name{' '}
+          <span className="font-normal text-muted-foreground">(optional)</span>
+        </label>
+        <input
+          id={`${uid}-practice`}
+          name="practiceName"
+          autoComplete="organization"
+          placeholder={scheduleMode ? 'Practice name' : undefined}
+          defaultValue={v.practiceName ?? ''}
+          className={inputClass(false)}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="flex flex-col gap-1.5">
+          <label
+            htmlFor={`${uid}-years`}
+            className="text-sm font-medium text-foreground"
+          >
+            How long in practice?
+            <RequiredMark />
+          </label>
+          <select
+            id={`${uid}-years`}
+            name="yearsInPractice"
+            required
+            value={yearsInPractice}
+            onChange={(e) => { setYearsInPractice(e.target.value); clearError('yearsInPractice') }}
+            aria-invalid={errors.yearsInPractice ? 'true' : undefined}
+            className={inputClass(Boolean(errors.yearsInPractice))}
+          >
+            <option value="" disabled>
+              Select one
+            </option>
+            <option value="Less than 1 year">Less than 1 year</option>
+            <option value="1-3 years">1&ndash;3 years</option>
+            <option value="4-7 years">4&ndash;7 years</option>
+            <option value="8-15 years">8&ndash;15 years</option>
+            <option value="16+ years">16+ years</option>
+          </select>
+          {errors.yearsInPractice && (
+            <p className="text-xs font-medium text-destructive">
+              {errors.yearsInPractice}
+            </p>
+          )}
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <label
+            htmlFor={`${uid}-inactive`}
+            className="text-sm font-medium text-foreground"
+          >
+            Inactive patient files
+            {productInterest !== 'lead-follow-up' && <RequiredMark />}
+          </label>
+          <input
+            id={`${uid}-inactive`}
+            name="inactivePatients"
+            required={productInterest !== 'lead-follow-up'}
+            inputMode="numeric"
+            autoComplete="off"
+            placeholder="e.g. 1,000"
+            value={formatCount(inactive)}
+            onChange={(e) => {
+              setInactive(e.target.value.replace(/\D/g, '').slice(0, 6))
+              setInactiveEdited(true)
+            }}
+            aria-invalid={errors.inactivePatients ? 'true' : undefined}
+            className={inputClass(Boolean(errors.inactivePatients))}
+          />
+          {errors.inactivePatients ? (
+            <p className="text-xs font-medium text-destructive">
+              {errors.inactivePatients}
+            </p>
+          ) : (
+            <p className="text-xs text-muted-foreground">
+              {calculatorScenario || calc
+                ? 'Carried over from your calculator — edit if needed.'
+                : productInterest === 'lead-follow-up'
+                  ? 'Optional for lead follow-up.'
+                  : 'Your best estimate is fine.'}
+            </p>
+          )}
+        </div>
+      </div>
+
+      {calculatorScenario || calc ? (
+        <>
+          <input type="hidden" name="patientValue" value={calculatorScenario?.patientValue ?? calc?.patientValue} />
+          <input
+            type="hidden"
+            name="inactiveAdjusted"
+            value={calculatorScenario ? inactiveEdited ? 'yes' : 'unknown' : calc?.inactiveTouched || inactiveEdited ? 'yes' : 'no'}
+          />
+          <input
+            type="hidden"
+            name="valueAdjusted"
+            value={calculatorScenario ? 'unknown' : calc?.valueTouched ? 'yes' : 'no'}
+          />
+        </>
+      ) : null}
+      {calculatorScenario && <><input type="hidden" name="additionalPatientsAdjusted" value="unknown" /><input type="hidden" name="newValueAdjusted" value="unknown" /></>}
+
+      <ServicesMultiSelect
+        defaultSelected={state.services ?? []}
+        error={errors.services}
+        onSelectionChange={() => clearError('services')}
+      />
+
+      <div className="flex flex-col gap-1.5">
+        <label
+          htmlFor={`${uid}-best-time`}
+          className="text-sm font-medium text-foreground"
+        >
+          Best time to connect with you{' '}
+          <span className="font-normal text-muted-foreground">(optional)</span>
+        </label>
+        <select
+          id={`${uid}-best-time`}
+          name="bestTime"
+          data-testid="select-best-time"
+          value={bestTime}
+          onChange={(e) => { setBestTime(e.target.value); clearError('bestTime') }}
+          aria-invalid={errors.bestTime ? 'true' : undefined}
+          className={inputClass(Boolean(errors.bestTime))}
+        >
+          <option value="">Select one</option>
+          {BEST_TIMES.map((time) => (
+            <option key={time} value={time}>{time}</option>
+          ))}
+        </select>
+        {errors.bestTime ? (
+          <p className="text-xs font-medium text-destructive">{errors.bestTime}</p>
+        ) : (
+          <p className="text-xs text-muted-foreground">Your local time.</p>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <label
+          className={`flex items-start gap-2.5 rounded-md border px-3 py-3 text-sm leading-relaxed ${
+            errors.consent
+              ? 'border-destructive bg-destructive/5'
+              : 'border-input bg-card'
+          }`}
+        >
+          <input
+            type="checkbox"
+            name="consent"
+            required
+            defaultChecked={v.consent === 'on'}
+            aria-invalid={errors.consent ? 'true' : undefined}
+            className="mt-0.5 size-4 shrink-0 accent-accent"
+          />
+          <span className="text-muted-foreground">
+            I consent to being contacted by text message and phone call for
+            marketing related to Patient Pipeline. Message and data rates
+            may apply. Reply STOP to opt out at any time.
+            <RequiredMark />
+          </span>
+        </label>
+        {errors.consent && (
+          <p className="text-xs font-medium text-destructive">
+            {errors.consent}
+          </p>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-1.5" data-testid="terms-block">
+        {termsStatus === 'loading' && <p className="text-xs text-muted-foreground" data-testid="terms-loading">Loading terms…</p>}
+        {termsStatus === 'error' && (
+          <p role="alert" className="text-sm font-medium text-destructive" data-testid="terms-error">
+            Terms of Service could not be loaded.{' '}
+            <button type="button" className="underline" onClick={() => loadTerms(false)} data-testid="button-retry-terms">Retry</button>
+          </p>
+        )}
+        {activeTerms && termsStatus === 'ready' && (
+          <>
+            {termsChanged && <p role="status" className="text-xs text-muted-foreground">Please review the current terms and check again.</p>}
+            <label className={`flex items-start gap-2.5 rounded-md border px-3 py-3 text-sm leading-relaxed ${errors.termsAccepted ? 'border-destructive bg-destructive/5' : 'border-input bg-card'}`}>
+              <input
+                type="checkbox"
+                name="termsAccepted"
+                required
+                checked={accepted}
+                onChange={(e) => { setAccepted(e.target.checked); clearError('termsAccepted') }}
+                aria-invalid={errors.termsAccepted ? 'true' : undefined}
+                data-testid="checkbox-terms"
+                className="mt-0.5 size-4 shrink-0 accent-accent"
+              />
+              <span className="text-muted-foreground">
+                {activeTerms.checkbox_wording}{' '}
+                <a href={`/terms/${activeTerms.id}`} target="_blank" rel="noopener noreferrer" className="underline" data-testid="link-terms">View terms</a>
+                <RequiredMark />
+              </span>
+            </label>
+            <p className="text-xs text-muted-foreground">Terms version: {activeTerms.label}</p>
+          </>
+        )}
+        {errors.termsAccepted && <p role="alert" className="text-xs font-medium text-destructive">{errors.termsAccepted}</p>}
+      </div>
+
+      {state.error ? (
+        <p role="alert" className="text-sm font-medium text-destructive">
+          {state.error}
+        </p>
+      ) : null}
+
+      {(errors.patientValue || errors.additionalPatientsPerMonth || errors.newPatientValue) && (
+        <p role="alert" className="text-sm font-medium text-destructive">
+          Calculator values are outside the allowed range. Adjust the calculator and try again.
+        </p>
+      )}
+
+      <Button
+        type="submit"
+        disabled={pending || termsStatus !== 'ready'}
+        className="h-12 bg-accent text-base font-semibold text-accent-foreground hover:bg-accent/90"
+      >
+        {pending ? 'Submitting…' : 'Get My Free Strategy Call'}
+      </Button>
+
+      <p className="text-center text-xs leading-relaxed text-muted-foreground">
+        Your information is never sold or shared. After submitting, you&apos;ll
+        pick a time for your call on the next page.
+      </p>
+    </form>
+  )
+}

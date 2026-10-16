@@ -1,0 +1,294 @@
+{
+  "niche": {
+    "name": "Acoustic Wave Therapy",
+    "sector": "healthcare",
+    "is_active": true,
+    "sort_order": 6
+  },
+  "steps": [
+    {
+      "step_key": "digging_in",
+      "title": "Questions: Where It Hurts",
+      "content": "(Write down every area they name.)\n\n{{contact_first_name}}, I'm going to run through a few things people often notice. Just say yes if you get them at all, even if they're mild or come and go.\n\nDo you have any nagging joint pain?\n\nAny heel or foot pain?\n\nAny tendon trouble?\n\nIs an old injury bothering you?\n\nDo you have any muscle knots?\n\nAny neck or back soreness?\n\nHave you cut back on any activities?\n\nOf those, which one bothers you the most?\n\n(Tap their answer below.)",
+      "sort_order": 10
+    },
+    {
+      "step_key": "recommendation",
+      "title": "The Recommendation",
+      "content": "{{contact_first_name}}, that's exactly what the {{offer_name}} is for. Can I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you in for the {{offer_name}}. Here's what it includes:\n\n{{offer_items}}\n\n{{price_line}}\n\n{{provider_name}} takes a look at {{main_concern}} and whether SoftWave/shock wave is a fit for it. If it can help, we'll walk you through the options. If it's not the right fit, we'll say so. Either way you'll know where you stand. Does that sound reasonable?\n\n(Tap what you hear.)",
+      "sort_order": 13
+    },
+    {
+      "step_key": "obj_tried_injections",
+      "title": "Objection: “I already tried injections”",
+      "content": "Okay, {{contact_first_name}}. That tells me you've been at this a while.\n\nHow long did the relief last after the injection?\n\n(Let them answer. Do not talk down the injection.)\n\nThat's the pattern most people describe. Injections calm the area down, and that's real relief. What they don't do is change the tissue underneath, so it wears off. SoftWave/shock wave works the other way. It gets the area healing instead of quieting it down for a while.\n\nA visit with {{provider_name}} tells you whether {{main_concern}} is the kind of thing it helps with. If it isn't, we'll say so.\n\nWould it be worth finding out if there's a way to make it last?",
+      "sort_order": 101
+    },
+    {
+      "step_key": "obj_skeptical",
+      "title": "Objection: “I’m not sure it works”",
+      "content": "That's a fair thing to wonder, {{contact_first_name}}, and I'd rather you ask than guess.\n\nIs it that you haven't heard of it before, or that you've tried things that didn't work?\n\n(Let them answer. Do not promise results on the call.)\n\nSoftWave/shock wave has been used on tendons and joints for years. It's the same idea as the shock wave treatment sports teams use. It doesn't work for everything, and that's what the visit is for. {{provider_name}} looks at {{main_concern}} and tells you straight whether it's a good match.\n\nIf it isn't a fit, you'll hear that before you spend anything more.\n\nWouldn't you rather have a straight answer than keep wondering?",
+      "sort_order": 102
+    },
+    {
+      "step_key": "obj_injections_surgery",
+      "title": "Objection: Injections or Surgery",
+      "content": "Okay. That tells me it's gotten bad enough that you want it handled.\n\nHas a doctor recommended that, or is it something you're looking into yourself?\n\n(Let them answer. Do not talk down injections or surgery.)\n\nBoth of those are real options, and sometimes they're the right call. They're also hard to undo once you've done them. A visit with {{provider_name}} doesn't rule anything out. It gives you a second look at {{main_concern}} before you commit to something permanent.\n\nIf SoftWave/shock wave isn't the answer here, we'll say so. Either way you'll walk into that decision knowing more than you do today.\n\nDoes it make sense to get that second look first?",
+      "sort_order": 103
+    }
+  ],
+  "choices": [
+    {
+      "from_step_key": "digging_in",
+      "label": "They named their biggest concern",
+      "to_step_key": "making_it_real",
+      "variant": "caution",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "digging_in",
+      "label": "Nothing specific: just curious about the offer",
+      "to_step_key": "recommendation",
+      "variant": "positive",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“Yes, that sounds reasonable”",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "Hesitant or soft no",
+      "to_step_key": "uncover",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“I already tried injections”",
+      "to_step_key": "obj_tried_injections",
+      "variant": "objection",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“I’m not sure it works”",
+      "to_step_key": "obj_skeptical",
+      "variant": "objection",
+      "sort_order": 3
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“I’m considering injections or surgery”",
+      "to_step_key": "obj_injections_surgery",
+      "variant": "objection",
+      "sort_order": 4
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“I’m considering another option”",
+      "to_step_key": "obj_other_option",
+      "variant": "objection",
+      "sort_order": 5
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“It’s the cost or insurance”",
+      "to_step_key": "obj_cost",
+      "variant": "objection",
+      "sort_order": 6
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“I’m worried about the time”",
+      "to_step_key": "obj_time",
+      "variant": "objection",
+      "sort_order": 7
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“I need to talk to my spouse”",
+      "to_step_key": "obj_spouse",
+      "variant": "objection",
+      "sort_order": 8
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“I need to think about it”",
+      "to_step_key": "obj_think",
+      "variant": "objection",
+      "sort_order": 9
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“Just send me some info”",
+      "to_step_key": "obj_send_info",
+      "variant": "objection",
+      "sort_order": 10
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "They’re ready to schedule",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I already tried injections”",
+      "to_step_key": "obj_tried_injections",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I’m not sure it works”",
+      "to_step_key": "obj_skeptical",
+      "variant": "objection",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I’m considering injections or surgery”",
+      "to_step_key": "obj_injections_surgery",
+      "variant": "objection",
+      "sort_order": 3
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I’m considering another option”",
+      "to_step_key": "obj_other_option",
+      "variant": "objection",
+      "sort_order": 4
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“It’s the cost or insurance”",
+      "to_step_key": "obj_cost",
+      "variant": "objection",
+      "sort_order": 5
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I’m worried about the time”",
+      "to_step_key": "obj_time",
+      "variant": "objection",
+      "sort_order": 6
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I need to talk to my spouse”",
+      "to_step_key": "obj_spouse",
+      "variant": "objection",
+      "sort_order": 7
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I need to think about it”",
+      "to_step_key": "obj_think",
+      "variant": "objection",
+      "sort_order": 8
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“Just send me some info”",
+      "to_step_key": "obj_send_info",
+      "variant": "objection",
+      "sort_order": 9
+    },
+    {
+      "from_step_key": "bridge_no",
+      "label": "They’re ready to move forward",
+      "to_step_key": "recommendation",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "bridge_no",
+      "label": "“I already tried injections”",
+      "to_step_key": "obj_tried_injections",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "bridge_no",
+      "label": "“I’m not sure it works”",
+      "to_step_key": "obj_skeptical",
+      "variant": "objection",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "bridge_no",
+      "label": "“It’s the cost or insurance”",
+      "to_step_key": "obj_cost",
+      "variant": "objection",
+      "sort_order": 3
+    },
+    {
+      "from_step_key": "bridge_no",
+      "label": "“I’m worried about the time”",
+      "to_step_key": "obj_time",
+      "variant": "objection",
+      "sort_order": 4
+    },
+    {
+      "from_step_key": "bridge_no",
+      "label": "“I need to talk to my spouse”",
+      "to_step_key": "obj_spouse",
+      "variant": "objection",
+      "sort_order": 5
+    },
+    {
+      "from_step_key": "bridge_no",
+      "label": "Another reason came up",
+      "to_step_key": "uncover",
+      "variant": "caution",
+      "sort_order": 6
+    },
+    {
+      "from_step_key": "obj_tried_injections",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_tried_injections",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_skeptical",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_skeptical",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_injections_surgery",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_injections_surgery",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    }
+  ]
+}

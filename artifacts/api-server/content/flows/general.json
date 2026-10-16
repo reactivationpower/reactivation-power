@@ -1,0 +1,367 @@
+{
+  "niche": null,
+  "steps": [
+    {
+      "step_key": "open",
+      "title": "The Open",
+      "content": "Hi, this is {{caller_name}} with {{provider_name}}'s office. Is {{contact_first_name}} available, please?\n\nHi {{contact_first_name}}. We're updating files for patients we haven't seen in a while, and yours came up. {{asked_by_provider}} Do you have a quick minute?",
+      "sort_order": 0
+    },
+    {
+      "step_key": "opening_question",
+      "title": "The Opening Question",
+      "content": "So {{contact_first_name}}, how have things been since you finished with us? I usually hear one of three things. Still feeling great, starting to come back a little, or pretty much back to where you started. Which one is closest for you?\n\n(Only three answers. Tap the one you hear.)",
+      "sort_order": 1
+    },
+    {
+      "step_key": "resp_doing_great",
+      "title": "Still Doing Great",
+      "content": "That's great to hear, {{contact_first_name}}. That's exactly what we hope for when someone finishes care with us. {{provider_name}} will be glad to know you're still doing well.\n\n(Let them respond, then continue.)",
+      "sort_order": 2
+    },
+    {
+      "step_key": "resp_coming_back",
+      "title": "Starting to Come Back",
+      "content": "Thanks for telling me, {{contact_first_name}}. That does happen over time. Your notes say you were doing really well when you finished. Does that sound right?\n\n(Let them confirm.)",
+      "sort_order": 3
+    },
+    {
+      "step_key": "resp_fully_back",
+      "title": "Fully Back",
+      "content": "I'm sorry to hear that, {{contact_first_name}}. That's frustrating. Your notes say you were doing really well when you finished. What do you think brought it back?\n\n(Let them answer. Be kind. Do not book yet.)",
+      "sort_order": 4
+    },
+    {
+      "step_key": "doing_well_variant",
+      "title": "Doing Well: Stay Ahead of It",
+      "content": "I'm glad you're still doing well, {{contact_first_name}}. Once things are going well, a regular check is what keeps a problem from coming back. Are you noticing any small early signs you'd like to stay ahead of?\n\n(Let them answer.)\n\n(No early signs: read the next line, then make the recommendation.)\n\nThe best way to protect your progress is a quick check now and then.",
+      "sort_order": 5
+    },
+    {
+      "step_key": "transition",
+      "title": "The Transition",
+      "content": "That's why I'm glad we connected today. Let me ask you a few quick questions so I can update your file. Is that okay?\n\n(Wait for the yes.)",
+      "sort_order": 6
+    },
+    {
+      "step_key": "digging_in",
+      "title": "Questions: Update the File",
+      "content": "{{contact_first_name}}, let me run through a few quick things so {{provider_name}} has the full picture. Okay?\n\n(Ask one at a time. Acknowledge briefly. Note which ones are present. Do not dig in yet.)\n\nIs the concern you originally came in for starting to come back?\n\nAny related symptoms?\n\nIs it getting in the way of everyday things?\n\nIs it affecting your sleep, energy, or comfort?\n\nIs it affecting you at work?\n\nIs it keeping you from hobbies or time with family?\n\nAre you frustrated or worried about where it's heading?\n\nIs there anything coming up where you'd like to feel your best?\n\nDo you wish you could get back to how you felt when you finished?\n\n(Recap what they said, then ask:)\n\nSo {{contact_first_name}}, it sounds like the biggest things are (recap). Is that right?\n\nOf everything we just talked about, which one bothers you the most?\n\n(Their answer drives the rest of the call.)",
+      "sort_order": 7
+    },
+    {
+      "step_key": "making_it_real",
+      "title": "Making It Real",
+      "content": "(Take the concern they named. Ask these three questions in order. Pause after each.)\n\nHow long has it been bothering you, like a week or two, or longer than that?\n\n(Let them answer. If it fits, you can say \"Got it.\")\n\nIs it something you experience like 1 to 2 times a month, or is it more often than that?\n\n(Let them answer. If it fits, you can say \"I see.\" or \"I understand.\")\n\nWhen it's at its worst, does it ever interfere with work, at home, or relaxing and doing your own thing?\n\n(Let them answer. If they name an impact, reflect only what they said about work, home, or their own time. If not, you can say \"Got it, thank you.\")",
+      "sort_order": 8
+    },
+    {
+      "step_key": "review",
+      "title": "The Review",
+      "content": "{{contact_first_name}}, let me make sure I have this right.\n\n(Read back their three answers: how long, how often, what it gets in the way of.)\n\nSo it's been going on a while, and it comes up more than once in a while. At its worst it gets in the way of what you mentioned. Did I get that right?\n\n(Say what they named: work, home, or your own time. Let them answer. If they correct you, take the correction and move on.)\n\nAnd it sounds like you'd really like to get back to feeling the way you did when you finished. Is that fair to say?\n\n(Most people say yes. Tap what you hear.)",
+      "sort_order": 9
+    },
+    {
+      "step_key": "recommendation",
+      "title": "The Recommendation",
+      "content": "{{contact_first_name}}, either way, it's worth a proper look instead of leaving it to chance. Can I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you in so {{provider_name}} can take a look. If we can help, we'll walk you through the options. If it's not the right fit, we'll say so. Either way you'll know where you stand. Does that sound reasonable?\n\n(Tap what you hear.)",
+      "sort_order": 10
+    },
+    {
+      "step_key": "uncover",
+      "title": "Uncover the Real Concern",
+      "content": "I understand, {{contact_first_name}}. What would keep you from {{pt_uncover_action}}?\n\n(Let them answer. Then tap what you hear.)",
+      "sort_order": 11
+    },
+    {
+      "step_key": "obj_taken_care_of",
+      "title": "Objection: “I thought it was taken care of”",
+      "content": "That's a fair thing to bring up. These things can come back over time. That's why a check-in makes sense, so we can see what's going on before it gets worse.\n\nDoes that make sense?\n\n(Wait for the yes.)\n\nIs there anything else on your mind?",
+      "sort_order": 12
+    },
+    {
+      "step_key": "obj_cost",
+      "title": "Objection: Cost or Insurance",
+      "content": "I understand, {{contact_first_name}}. This first visit is just a look. You're not committing to anything. {{pt_cost_ask}}\n\n(Let them answer. Do not quote prices, packages, or discounts. The office handles that.)\n\nWould it be okay to at least get you in for the look?",
+      "sort_order": 13
+    },
+    {
+      "step_key": "obj_other_option",
+      "title": "Objection: “I’m considering another option”",
+      "content": "That makes sense. That's something we can talk through at the visit, so you have all the information to decide.\n\nWould that work for you?",
+      "sort_order": 14
+    },
+    {
+      "step_key": "obj_time",
+      "title": "Objection: “I don’t have time”",
+      "content": "I understand, {{contact_first_name}}. Life gets busy. The first step is one visit, and we'll work around your schedule.\n\nDoes that sound fair?\n\n(Wait for the yes.)",
+      "sort_order": 15
+    },
+    {
+      "step_key": "obj_spouse",
+      "title": "Objection: “I need to talk to my spouse”",
+      "content": "That makes sense. Can I share a thought?\n\n(Wait for the yes.)\n\nMost people find it helps to come in for the look first. Then you both have real information to decide with, instead of guessing. Would that work for you both?\n\n(Wait for the yes.)",
+      "sort_order": 16
+    },
+    {
+      "step_key": "scheduling",
+      "title": "Scheduling",
+      "content": "Great, {{contact_first_name}}. We have time this week on (day) and (day). Do mornings or afternoons work better for you?\n\n(Let them answer.)\n\nPerfect. I have (time) and (time). Which is better?\n\n(Let them answer.)\n\nGreat, I've got you down for (day) at (time).\n\n(Have two days and two times ready before the call, both within 48 hours.)\n\n(Once booked, add your notes and press the green \"Scheduled\" button below to log the call.)",
+      "sort_order": 17
+    }
+  ],
+  "choices": [
+    {
+      "from_step_key": "digging_in",
+      "label": "They named their biggest concern",
+      "to_step_key": "making_it_real",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "doing_well_variant",
+      "label": "Noticing early signs: dig in",
+      "to_step_key": "transition",
+      "variant": "caution",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "doing_well_variant",
+      "label": "No signs: make the recommendation",
+      "to_step_key": "recommendation",
+      "variant": "positive",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "making_it_real",
+      "label": "Continue to the review",
+      "to_step_key": "review",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_cost",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_cost",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_other_option",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_other_option",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_spouse",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_spouse",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_taken_care_of",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_taken_care_of",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_time",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_time",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "open",
+      "label": "Patient is on the line: continue",
+      "to_step_key": "opening_question",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "opening_question",
+      "label": "“Still doing great”",
+      "to_step_key": "resp_doing_great",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "opening_question",
+      "label": "“Starting to come back”",
+      "to_step_key": "resp_coming_back",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "opening_question",
+      "label": "“Fully back”",
+      "to_step_key": "resp_fully_back",
+      "variant": "negative",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“Yes, that sounds reasonable”",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "Hesitant or soft no",
+      "to_step_key": "uncover",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“I thought it was taken care of for good”",
+      "to_step_key": "obj_taken_care_of",
+      "variant": "objection",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "Cost or insurance",
+      "to_step_key": "obj_cost",
+      "variant": "objection",
+      "sort_order": 3
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“I’m considering another option”",
+      "to_step_key": "obj_other_option",
+      "variant": "objection",
+      "sort_order": 4
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“I don’t have time”",
+      "to_step_key": "obj_time",
+      "variant": "objection",
+      "sort_order": 5
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“I need to talk to my spouse”",
+      "to_step_key": "obj_spouse",
+      "variant": "objection",
+      "sort_order": 6
+    },
+    {
+      "from_step_key": "resp_coming_back",
+      "label": "Continue to the transition",
+      "to_step_key": "transition",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "resp_doing_great",
+      "label": "Continue: stay ahead of it",
+      "to_step_key": "doing_well_variant",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "resp_fully_back",
+      "label": "Continue to the transition",
+      "to_step_key": "transition",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "review",
+      "label": "They said yes: make the recommendation",
+      "to_step_key": "recommendation",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "transition",
+      "label": "They said okay: dig in",
+      "to_step_key": "digging_in",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "They’re ready: schedule",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I thought it was taken care of for good”",
+      "to_step_key": "obj_taken_care_of",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "Cost or insurance",
+      "to_step_key": "obj_cost",
+      "variant": "objection",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I’m considering another option”",
+      "to_step_key": "obj_other_option",
+      "variant": "objection",
+      "sort_order": 3
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I don’t have time”",
+      "to_step_key": "obj_time",
+      "variant": "objection",
+      "sort_order": 4
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I need to talk to my spouse”",
+      "to_step_key": "obj_spouse",
+      "variant": "objection",
+      "sort_order": 5
+    }
+  ]
+}

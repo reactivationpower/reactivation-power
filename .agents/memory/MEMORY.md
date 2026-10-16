@@ -1,0 +1,55 @@
+- [Concurrent dynamic test imports](test-dynamic-imports.md) — mocked dynamic modules may execute real code in concurrent Vitest calls; retain disabled fixture boundaries.
+- [Patient texting boundaries](patient-texting-boundaries.md) — independent office billing; internal-sales separation; fictional model use has a non-resetting $1 authorization.
+- [Next.js port architecture](next-port-architecture.md) — actions via allow-listed RPC + per-page loaders; CRLF sources, headless H.264 limits, placeholder-grep first.
+- [Hosting direction](hosting-direction.md) — build in Replit, host on Vercel as-is (no Next.js rewrite); Preview shares prod DB, so gate side effects.
+- [Private video streaming](private-video-streaming.md) — cached Blob ranges can misreport totals and offsets; validate actual bytes, and distinguish protocol checks from real iPad playback.
+- [Supabase Postgres access & migrations](supabase-postgres-access.md) — SUPABASE_DB_URL pooler + relaxed TLS; never drizzle-kit push; MCP tools not mounted; ask for a reset DB password up front.
+- [Supabase admin accounts](supabase-admin-accounts.md) — admin roles live in auth app_metadata (kept after DDL access arrived); invite needs manual-link fallback; Base UI menu API.
+- [Transactional email via Resend](transactional-email.md) — send-only connector key, RESEND_FROM override, email_log in Supabase via drizzle, once-per-event mail needs an outbox not a log lookup.
+- [Outgoing email domain](outgoing-email-domain.md) — all future app links must use patientpipeline.app; sender-domain verification is a separate delivery requirement.
+- [Lead caller analytics interpretation](lead-caller-analytics.md) — confirmation work stays separate from acquisition close rates to avoid duplicate booking credit and penalizing confirmation callers.
+- [Lead Follow-Up cadence and portal queue](lead-followup-cadence.md) — nine anchored attempts, calendar confirmations, authentic source dates, legacy retry migration, and authenticated visual preview.
+- [Script flow content-as-code](script-flows.md) — player italics need whole-paragraph parens; apply pairs duplicate from+to by sort_order; lead family needs per-slug general in tests; confirm_requested third entry + wall-clock slots.
+- [Stripe modes & billing tables](stripe-modes-and-billing.md) — env keys are LIVE; workspace uses sandbox via Stripe integration, STRIPE_MODE overrides; billing tables in Supabase via drizzle.
+- [Stripe dunning & webhook verification](stripe-dunning.md) — access keyed on customers.billing_status; Stripe retries are a Dashboard setting; sandbox test recipe without Stripe CLI.
+- [Agreement e-sign flow constraints](agreements-esign.md) — edit/sign linearized in DB, one agreement per link, signed copy sent on completion, Stripe readiness keyed by client secret.
+- [One-off api-server scripts & test admins](api-server-scripts.md) — esbuild-bundle with pino externalized; create disposable admins via Supabase createUser, never ask for the owner's password.
+- [Web app unit tests](web-app-tests.md) — reactivation-power vitest uses its own config (vite.config throws without PORT); root `pnpm test` + validation `test`/`typecheck` registered.
+- [Shared workspace libs](shared-libs.md) — lib/shared + lib/niche-catalog are the only copies; `tsc --build` libs before artifact typecheck (stale dist = phantom missing exports); no DOM types in libs.
+- [Scheduled jobs on autoscale](scheduled-jobs.md) — day slot claimed in cron_runs by both in-process ticker and external cron route; external trigger still needed for on-time runs; off in dev.
+- [Two sales-demo practices](demo-practices.md) — keep resets isolated to one demo family; sample CSV entitlement and dedupe constraints.
+- [Stale dev process after failed restart](stale-dev-process.md) — EADDRINUSE in a workflow log = old build still serving; check listener start time vs dist mtime before debugging code.
+- [Campaign setup audience](campaign-setup-guidance.md) — self-service office setup is primary; agency handoff is secondary, and receipt claims must stay factual.
+- [Portal welcome intent](portal-welcome-intent.md) — beginner-friendly product entry, familiar top tabs, and explicit calling and tailored-script benefits.
+- [Public script previews](public-script-preview.md) — use actual two-screen branches; differentiate past-service scripting from campaign/offer scripting.
+- [Patient Pipeline video positioning](patient-pipeline-video.md) — use Patient Pipeline branding; keep short ads distinct from a detailed, privacy-safe product walkthrough.
+- [Generated audio paths](generated-audio-paths.md) — audio generation may suffix an existing requested filename even with overwrite; mix from the returned path and bust playback caches.
+- [Marketing launch positioning](marketing-launch-positioning.md) — approved combined launch offer; do not invent numeric terms or treat rebranding as a billing/domain migration.
+- [Publishing availability diagnostics](publishing-availability-diagnostics.md) — workspace warnings are not build evidence; reproduce artifact builds with their service environment.
+- [Portal calling decisions](portal-calling-decisions.md) — independent practice-owned accounts, direct Twilio billing, computer-only calling, no recording; umbrella accounts explicitly rejected.
+- [Twilio account feasibility](twilio-account-feasibility.md) — embedded signup/direct billing is not established; Connect has caller-ID limits, and HIPAA edition/BAA costs need confirmation.
+- [Legal company identity](legal-company-identity.md) — Beyond Healthcare LLC owns Patient Pipeline; counsel is drafting a new agreement, not merely approving the internal template.
+- [CSV patient workflow](csv-patient-workflow.md) — CSV-first matching; uncertain identities need review, and service imports must not silently restart outreach.
+- [Portal authentication policy](portal-authentication-policy.md) — email/password/code, 48h remembered browser, 30-minute idle logout with warning; both sales demo families exempt.
+- [Strategy-call marketing funnel](strategy-call-marketing.md) — marketing-only pages avoid site navigation; patients get a providers-only rejection, not a booking form.
+- [Lead source analytics](lead-source-analytics.md) — source-link generation, first/last touch, expandable contact sessions and reusable funnel/video analytics; discussion excludes outreach strategy.
+- [Affiliate business policy](affiliate-business-policy.md) — referral protection, no setup commissions, collected-money earnings, durable clawbacks, and monthly external wire payouts.
+- [Internal sales lead policy](internal-sales-lead-policy.md) — provider-sales CRM uses GoHighLevel, separate from patient queues; consented cadence, call logging, and timezone boundaries.
+- [Enrollment notification policy](enrollment-notification-policy.md) — recover alerts without retrying billing; historical card replacements are not new milestones; shared-link views do not prove identity.
+- [Structural merge integrity](merge-integrity.md) — clean syncs can mispair sibling tests; validate the merged tree and regenerate colliding migration metadata.
+- [Shared connection budget](connection-budget.md) — 15 sessions are shared across hosts, overlap and tests; nested pool borrowing can starve small pools.
+- [Customer enrollment boundaries](customer-enrollment-policy.md) — commercial identities, access records, and offers stay distinct; opening setup is not conversion.
+- [Saved inquiry booking](booking-handoff-policy.md) — preserve calendar design and identity protection; reconcile uncertain writes; no analytics consent popup or floating controls.
+- [Sales sync safety](sales-sync-policy.md) — keep durable fast sync separate from maintenance; contact uncertainty also constrains booking.
+- [Conversation previews](conversation-preview-policy.md) — frozen send evidence, with disclosed link/image restrictions; no manual or incoming-email scope.
+- [GoHighLevel reply shapes](ghl-api-shapes.md) — appointment lookup returns `appointment`; search is stale and upsert can merge: re-read matches, create via POST.
+- [RPC mutationFn args](rpc-mutation-args.md) — wrap RPC actions in an arrow for useMutation or react-query's context is sent as an extra server arg.
+- [Embedded video start hold](video-embedded-start.md) — videos start paused when iframed; framer JS tweens need skipAnimations, not getAnimations; top-level must still autoplay.
+- [Sales automation enable rules](sales-automation-readiness.md) — one shared rule list gates the server and the settings checklist; never add a separate check.
+- [Lead Terms rollout](lead-terms-rollout.md) — shared-DB publication is global; update every serving host before activating the attorney's first version.
+- [Reseller business policy](reseller-business-policy.md) — external company selling, collected-money 20%, owner-approved discounts, external wires and durable termination/clawback boundaries.
+- [HBOT script review](hbot-script-review.md) — interactive chiropractic-demo review is required; testing a draft is not approval for patient use.
+- [Supabase egress diagnosis](egress-diagnosis.md) — use the billed service breakdown; API script downloads do not explain a direct-pooler spike.
+- [HBOT caller boundaries](hbot-approval-boundary.md) — owner authorized regular Chiro caller choices; keep clinical-review routes, no efficacy promises, and exact sleep wording.
+- [React form-action reset](react-form-action-reset.md) — form actions reset fields on settle; selects need a re-render; Back restores need echoed values.
+- [PostHog replay](posthog-replay.md) — headless verification quirks only; rules live in replit.md.

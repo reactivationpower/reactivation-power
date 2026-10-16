@@ -1,0 +1,519 @@
+{
+  "niche": {
+    "name": "Teeth Whitening",
+    "sector": "healthcare",
+    "is_active": true,
+    "sort_order": 12
+  },
+  "steps": [
+    {
+      "step_key": "opening_question",
+      "title": "The Opening Question",
+      "content": "So {{contact_first_name}}, how have things been since your whitening with us? I usually hear one of three things. Still bright and white, a little staining coming back, or pretty much back to how it was. Which one is closest for you?\n\n(Only three answers. Tap the one you hear.)",
+      "sort_order": 1
+    },
+    {
+      "step_key": "resp_doing_great",
+      "title": "Still Bright",
+      "content": "That's great to hear, {{contact_first_name}}. That's exactly what we hope for when someone finishes treatment with us. {{provider_name}} will be glad to know you're still happy with the results.\n\n(Let them respond, then continue.)\n\n(Do not offer anything yet. Update the file first.)",
+      "sort_order": 2
+    },
+    {
+      "step_key": "resp_coming_back",
+      "title": "A Little Staining Coming Back",
+      "content": "That happens, {{contact_first_name}}, and you're right on track. Everyday life stains teeth for everyone. Coffee, tea, and wine all add a little over time. It's not the whitening failing. Your notes say you were really happy with the results. Does that sound right?\n\n(Let them confirm. Stay warm. This is routine, not a problem.)\n\n(Do not offer anything yet. Update the file first.)",
+      "sort_order": 3
+    },
+    {
+      "step_key": "resp_fully_back",
+      "title": "Pretty Much Back to Before",
+      "content": "I understand, {{contact_first_name}}, and please don't feel bad. Staining builds up. Every coffee and every glass of wine adds a little, and after enough time it settles back in. That's how teeth work for everyone, and it's easy to fix. Your notes say you were really happy with the results. What kept you from coming back in?\n\n(Let them answer. Stay warm. It's nothing they did wrong.)\n\n(Do not offer anything yet. Update the file first.)",
+      "sort_order": 4
+    },
+    {
+      "step_key": "sensitivity_bonus",
+      "title": "One More Thing: Sensitivity",
+      "content": "Perfect, you're all set for (day) at (time).\n\n(If you already asked about sensitivity during the file update, skip the question. Confirm the appointment and end the call.)\n\nOne quick thing while I have you, {{contact_first_name}}. Have you noticed any sensitivity to hot or cold, like with coffee or ice water?\n\n(Let them answer.)\n\n(If yes, read the next line.)\n\nI'm glad you told me. That's common, and there's a lot we can do about it. I'll make a note so {{provider_name}} can plan your visit around it and keep it comfortable.\n\n(If no, read the next line.)\n\nPerfect, that makes everything easy. We'll see you (day) at (time), {{contact_first_name}}. Have a great day.\n\n(Either way, end the call with the appointment confirmed.)",
+      "sort_order": 5
+    },
+    {
+      "step_key": "transition_still",
+      "title": "Ask Permission for the Questions",
+      "content": "{{contact_first_name}}, I'm updating your file anyway. Can I ask you a few quick questions so it's up to date?\n\n(Wait for the yes.)",
+      "sort_order": 6
+    },
+    {
+      "step_key": "transition",
+      "title": "Ask Permission for the Questions",
+      "content": "{{contact_first_name}}, we'll come back to the staining in a moment. First, can I ask you a few quick questions so your file is up to date?\n\n(Wait for the yes.)",
+      "sort_order": 7
+    },
+    {
+      "step_key": "digging_in_still",
+      "title": "The Questions: Update the File",
+      "content": "(Write down everything they mention. You'll recap it in a moment. Do not give dental advice on the call.)\n\nFirst, the brightness. Is it still as bright as day one, or have you noticed a little dulling in photos?\n\nHow about coffee, tea, or red wine, still enjoying those about the same?\n\nAny sensitivity to hot or cold?\n\nIs there anything else about your smile you've wished were different?\n\nAny big event coming up you'd want your smile ready for?\n\n(Recap what you wrote down, then ask:)\n\n{{contact_first_name}}, of those, which one would you most like to take care of?\n\n(Tap their answer below. If nothing came up, that's still a good call. Use the second button.)",
+      "sort_order": 8
+    },
+    {
+      "step_key": "digging_in",
+      "title": "The Questions: Update the File",
+      "content": "(Write down everything they mention. You'll recap it in a moment. Do not give dental advice on the call.)\n\nFirst, the staining. When did you start noticing it?\n\nHow about coffee, tea, or red wine, still enjoying those about the same?\n\nAny sensitivity to hot or cold?\n\nIs there anything else about your smile you've wished were different?\n\nAny big event coming up you'd want your smile ready for?\n\n(Recap what you wrote down, including the staining, then ask:)\n\n{{contact_first_name}}, between the staining and anything else you mentioned, which one would you most like to take care of?\n\n(Tap their answer below. If getting the brightness back is the whole story, use the second button.)",
+      "sort_order": 9
+    },
+    {
+      "step_key": "review",
+      "title": "The Review",
+      "content": "{{contact_first_name}}, let me make sure I have this right.\n\n(Read back their three answers: how long, how often, what it gets in the way of.)\n\nSo it's been on your mind a while, and it comes up most times there's a photo. At its worst it gets in the way of what you mentioned. Did I get that right?\n\n(Say what they named: photos, smiling around people, or feeling confident. Let them answer. If they correct you, take the correction and move on.)\n\nAnd it sounds like you'd like to feel good every time you catch your smile in a photo. Is that fair to say?\n\n(Most people say yes. Tap what you hear.)",
+      "sort_order": 9
+    },
+    {
+      "step_key": "making_it_real",
+      "title": "Making It Real",
+      "content": "{{contact_first_name}}, I'd like to ask a few quick questions about what you just told me. It'll only take a minute.\n\n(Ask these three questions in order. Pause after each and let them answer.)\n\nHow long has it been on your mind, like a few weeks, or longer than that?\n\n(Let them answer. If it fits, you can say \"Got it.\")\n\nIs it something that comes up now and then, or every time your smile is in a photo?\n\n(Let them answer. If it fits, you can say \"I see.\" or \"I understand.\")\n\nWhen it's at its worst, does it ever interfere with photos, smiling around people, or feeling confident?\n\n(Let them answer. If they name an impact, reflect only what they said about photos, smiling, or confidence. If not, you can say \"Got it, thank you.\")",
+      "sort_order": 10
+    },
+    {
+      "step_key": "bridge_no",
+      "title": "They Hesitate: Find Out Why",
+      "content": "{{contact_first_name}}, I don't want to assume anything. Is it the timing, or is something else holding you back?\n\n(Stay easy about it. No pressure. Let them answer.)",
+      "sort_order": 11
+    },
+    {
+      "step_key": "recommendation",
+      "title": "The Recommendation",
+      "content": "{{contact_first_name}}, that's worth getting looked at instead of just dealing with it. Can I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you in so {{provider_name}} can take a look at {{main_concern}}. If we can help, we'll walk you through the options. If it's not the right fit, we'll say so. Either way you'll know where you stand. Does that sound reasonable?\n\n(Say \"does that sound reasonable\", not \"does that sound good\". Tap what you hear.)",
+      "sort_order": 11
+    },
+    {
+      "step_key": "cadence_close",
+      "title": "Nothing Found: Stay Ahead of It",
+      "content": "{{contact_first_name}}, I'm glad your smile is still looking bright.\n\nOne thing before I let you go. Staining comes back so slowly that you never see it happening. Coffee, tea, and wine dull things a shade at a time. Because you see your own smile every day, you're usually the last one to notice. Does that make sense?\n\n(Wait for the yes. If they hesitate, use the second button.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you in for a quick touch-up. That way you stay ahead of the staining instead of chasing it. Does that sound reasonable?\n\n(Wait for the yes.)\n\nOkay, let's find you a time. I have (day) at (time) or (day) at (time). Which is better for you?",
+      "sort_order": 12
+    },
+    {
+      "step_key": "uncover",
+      "title": "Uncover the Real Concern",
+      "content": "Okay, {{contact_first_name}}. I'm not going to push you on it. What's the part giving you pause?\n\n(Let them answer. Then tap what you hear.)",
+      "sort_order": 12
+    },
+    {
+      "step_key": "comeback_close",
+      "title": "Brightness Is the Whole Story: The Close",
+      "content": "{{contact_first_name}}, the nice thing is the whitening you did before is still working underneath. What's settled in since is newer surface stain, and newer stain lifts much easier than years of buildup. So getting the brightness back is a smaller job than the first time. Does that make sense?\n\n(Wait for the yes.)\n\n{{contact_first_name}}, can I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you in for that touch-up now. Getting back to that bright smile is one visit away. Does that sound reasonable?\n\n(Wait for the yes.)\n\nOkay, let's get you back on the books. I have (day) at (time) or (day) at (time). Which is better for you?",
+      "sort_order": 13
+    },
+    {
+      "step_key": "obj_last_longer",
+      "title": "Objection: “I thought it would last longer”",
+      "content": "That's fair, {{contact_first_name}}. Most people hope it holds longer than it does.\n\nCan I ask, how long did it stay bright before you noticed it slipping?\n\n(Let them answer.)\n\nTeeth pick up stain again from coffee, tea, wine, and everyday foods. That's not the whitening failing, it's what teeth do. The first round does the heavy lifting. Keeping it bright after that is usually a quick touch-up, not the whole thing again.\n\n{{provider_name}} can look at {{main_concern}} and tell you what a touch-up would take and how to make it last longer.\n\nWould it help to know what it would take to keep it?",
+      "sort_order": 100
+    },
+    {
+      "step_key": "obj_embarrassed",
+      "title": "Objection: “I’m embarrassed it stained back up”",
+      "content": "Please don't be, {{contact_first_name}}. Staining builds up for everyone, one coffee at a time.\n\nCan I ask, is it the color itself, or catching yourself hiding your smile?\n\n(Let them answer. Stay warm.)\n\nNeither one is something you did wrong. That's how teeth behave once the routine stops. The only thing embarrassment does is keep people away until it's a bigger job than it needs to be.\n\n{{provider_name}} would rather see you now than a year from now. We'd take a look at {{main_concern}} and figure out the shortest path back to a smile you don't think about.\n\nWould it feel better to just get that first step done?",
+      "sort_order": 101
+    },
+    {
+      "step_key": "obj_sensitivity",
+      "title": "Objection: Sensitivity or a bad experience before",
+      "content": "I'm glad you told me, {{contact_first_name}}. That's important, and it changes how we'd approach it.\n\nCan I ask, was it during the whitening, or in the days after?\n\n(Let them answer. Do not give dental advice on the call.)\n\nThose point to different fixes. Strength, timing, and what goes on the teeth before and after can all be adjusted. There are also gentler options now that didn't exist a few years ago. None of that gets decided on the phone. {{provider_name}} would hear exactly what happened and what would need to change before you'd do it again for {{main_concern}}.\n\nWould it feel better to have that conversation before you decide?",
+      "sort_order": 102
+    },
+    {
+      "step_key": "obj_other_option",
+      "title": "Objection: “I’m considering another option”",
+      "content": "That's fair. Can I ask what you're looking at, like strips from the store, a kit online, or another office?\n\n(Let them answer. Do not knock the other option.)\n\nThose can all make sense, and some people do well combining them. The part that's hard to compare from home is what would move {{main_concern}} for you. {{provider_name}} already knows how your teeth responded and what strength was used, so you're not starting over here.\n\nCome in, get a straight answer on where things stand, and then compare. If the other option turns out to be the better fit, you'll be choosing it for a reason.\n\nIs that a fair way to decide?",
+      "sort_order": 120
+    },
+    {
+      "step_key": "obj_cost",
+      "title": "Objection: Cost",
+      "content": "I understand, {{contact_first_name}}. Is it the cost of the visit itself, or the thought of paying for the full treatment again?\n\n(Let them answer. Do not quote prices, packages, or discounts. The office handles that.)\n\nThis first visit is one appointment, not the full treatment. You'll hear what anything past that costs before you decide on it. And since you've been here before, we're not starting from scratch, and starting from scratch is the expensive part.\n\nThe other side of it is what {{main_concern}} is already costing you, the things you mentioned a minute ago. That's the part I'd hate to see keep adding up.\n\nCan we at least get the look on the calendar?",
+      "sort_order": 121
+    },
+    {
+      "step_key": "obj_time",
+      "title": "Objection: “I don’t have time”",
+      "content": "I hear you, {{contact_first_name}}. Is it finding time for the first visit, or the worry about coming back every few months?\n\n(Let them answer.)\n\nRight now we're only talking about one visit. {{provider_name}} looks at {{main_concern}} and tells you what it would take from there. Sometimes that’s a quick touch-up. Sometimes it’s a fresh round, and you’ll hear that up front so you can decide. Nobody is booking you into a schedule on the phone.\n\nWe'll fit that first visit around your schedule, not the other way around.\n\nCould you find a short window for that?",
+      "sort_order": 122
+    },
+    {
+      "step_key": "obj_spouse",
+      "title": "Objection: “I need to talk to my spouse”",
+      "content": "Of course. Is it more about the money side, or do you two just make these decisions together?\n\n(Let them answer. If it's money, use the cost answer.)\n\nThat's fair, and I'm not asking you to commit to anything they'd need to weigh in on. Right now, all you can tell them is that {{main_concern}} is on your mind. After the visit, you can tell them what's going on and what it would take. That's an easier conversation to have. And if they'd like to come along, they're welcome.\n\nCan we pencil it in, and you can move it after you two talk?",
+      "sort_order": 123
+    },
+    {
+      "step_key": "obj_think",
+      "title": "Objection: “I need to think about it”",
+      "content": "That's fair, {{contact_first_name}}. Usually when someone says that, there's one specific thing on their mind. What's the part you'd want to think over?\n\n(Let them answer. If they name cost, time, or another reason, tap that button.)\n\nOkay. I'm not trying to rush you. The one thing I'd say is that {{main_concern}} is on your mind. It's been that way for a while, and it hasn't sorted itself out on its own. The visit is how you get the information you'd be thinking with. You can think it over just as easily after you know what's going on.\n\nWould it be easier to think it over once you have the answers?",
+      "sort_order": 130
+    },
+    {
+      "step_key": "obj_send_info",
+      "title": "Objection: “Just send me some info”",
+      "content": "I can do that, {{contact_first_name}}. What would you want it to cover, so I send the right thing?\n\n(Let them answer. If they name cost, time, or another reason, tap that button.)\n\nI'll be straight with you, though. Anything I send is going to be general. It can't tell you what's realistic for {{main_concern}} specifically. That takes {{provider_name}} looking at your teeth, and that's one short visit.\n\nLet's do both. I'll send the information, and we'll put a time on the calendar. If what I send answers your question, you can call and cancel, no problem.\n\nDoes doing both work for you?",
+      "sort_order": 131
+    }
+  ],
+  "choices": [
+    {
+      "from_step_key": "bridge_no",
+      "label": "They’re okay to move forward",
+      "to_step_key": "recommendation",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "bridge_no",
+      "label": "Another reason: dig deeper",
+      "to_step_key": "uncover",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "cadence_close",
+      "label": "They picked a time: ask the sensitivity question",
+      "to_step_key": "sensitivity_bonus",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "cadence_close",
+      "label": "Hesitant or soft no",
+      "to_step_key": "uncover",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "comeback_close",
+      "label": "They picked a time: ask the sensitivity question",
+      "to_step_key": "sensitivity_bonus",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "comeback_close",
+      "label": "Hesitant or soft no",
+      "to_step_key": "uncover",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "digging_in",
+      "label": "They named something beyond the staining",
+      "to_step_key": "making_it_real",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "digging_in",
+      "label": "Getting the brightness back is the whole story: go to the close",
+      "to_step_key": "comeback_close",
+      "variant": "positive",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "digging_in_still",
+      "label": "They named a concern",
+      "to_step_key": "making_it_real",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "digging_in_still",
+      "label": "Nothing found: stay ahead of it",
+      "to_step_key": "cadence_close",
+      "variant": "positive",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "making_it_real",
+      "label": "Continue to the review",
+      "to_step_key": "review",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_cost",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_cost",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_embarrassed",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_embarrassed",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_last_longer",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_last_longer",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_other_option",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_other_option",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_send_info",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_send_info",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_sensitivity",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_sensitivity",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_spouse",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_spouse",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_think",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_think",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_time",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_time",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "opening_question",
+      "label": "“Still bright and white”",
+      "to_step_key": "resp_doing_great",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "opening_question",
+      "label": "“A little staining is coming back”",
+      "to_step_key": "resp_coming_back",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "opening_question",
+      "label": "“Pretty much back to how it was”",
+      "to_step_key": "resp_fully_back",
+      "variant": "negative",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“Yes, that sounds reasonable”",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "Hesitant or soft no",
+      "to_step_key": "uncover",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "resp_coming_back",
+      "label": "Continue: update their file",
+      "to_step_key": "transition",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "resp_doing_great",
+      "label": "Continue: update their file",
+      "to_step_key": "transition_still",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "resp_fully_back",
+      "label": "Continue: update their file",
+      "to_step_key": "transition",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "review",
+      "label": "They said yes: make the recommendation",
+      "to_step_key": "recommendation",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "review",
+      "label": "Not quite / they hesitate",
+      "to_step_key": "bridge_no",
+      "variant": "negative",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "transition",
+      "label": "They said okay: ask the questions",
+      "to_step_key": "digging_in",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "transition_still",
+      "label": "They said okay: ask the questions",
+      "to_step_key": "digging_in_still",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "They’re ready: schedule",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I thought it would last longer”",
+      "to_step_key": "obj_last_longer",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I’m embarrassed it stained back up”",
+      "to_step_key": "obj_embarrassed",
+      "variant": "objection",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "Sensitivity or a bad experience before",
+      "to_step_key": "obj_sensitivity",
+      "variant": "objection",
+      "sort_order": 3
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "Cost or insurance",
+      "to_step_key": "obj_cost",
+      "variant": "objection",
+      "sort_order": 4
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I don’t have time”",
+      "to_step_key": "obj_time",
+      "variant": "objection",
+      "sort_order": 5
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I need to talk to my spouse”",
+      "to_step_key": "obj_spouse",
+      "variant": "objection",
+      "sort_order": 6
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I'm considering another option”",
+      "to_step_key": "obj_other_option",
+      "variant": "objection",
+      "sort_order": 7
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I need to think about it”",
+      "to_step_key": "obj_think",
+      "variant": "objection",
+      "sort_order": 8
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“Just send me some info”",
+      "to_step_key": "obj_send_info",
+      "variant": "objection",
+      "sort_order": 9
+    }
+  ]
+}

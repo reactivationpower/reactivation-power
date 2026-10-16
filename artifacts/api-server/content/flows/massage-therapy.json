@@ -1,0 +1,519 @@
+{
+  "niche": {
+    "name": "Massage Therapy",
+    "sector": "healthcare",
+    "is_active": true,
+    "sort_order": 9
+  },
+  "steps": [
+    {
+      "step_key": "opening_question",
+      "title": "Opening Question",
+      "content": "So {{contact_first_name}}, how have you felt since your last massage with us? I usually hear one of three things. Still loose and relaxed, tension starting to return, or back to where you started. Which one is closest for you?\n\n(Only three answers. Tap the one you hear.)",
+      "sort_order": 1
+    },
+    {
+      "step_key": "resp_doing_great",
+      "title": "Still Feeling Good",
+      "content": "That's great to hear, {{contact_first_name}}. That's exactly what we hope for when someone finishes care with us. {{provider_name}} will be glad to know you're still doing well.\n\n(Let them respond, then continue.)",
+      "sort_order": 2
+    },
+    {
+      "step_key": "resp_coming_back",
+      "title": "Tension Starting to Return",
+      "content": "That happens, {{contact_first_name}}. Tension can build again when regular massages stop. Your notes say massage was helping before. Where are you noticing the tension now?\n\n(Let them answer. Stay warm. Do not book yet.)",
+      "sort_order": 3
+    },
+    {
+      "step_key": "resp_fully_back",
+      "title": "Tension Fully Back",
+      "content": "I'm sorry to hear that, {{contact_first_name}}. Tension often builds again when regular massages stop. Your notes say massage was helping before. What changed after you stopped coming in?\n\n(Let them answer. Stay warm. Do not book yet.)",
+      "sort_order": 4
+    },
+    {
+      "step_key": "focus_areas_bonus",
+      "title": "Confirm Focus Areas",
+      "content": "Perfect. You're set for (day) at (time).\n\n(If focus areas are already in the notes, skip the next question.)\n\nBefore we finish, is there anything you want your therapist to focus on?\n\n(Note their answer on the file.)\n\nWe'll see you on (day) at (time), {{contact_first_name}}.",
+      "sort_order": 5
+    },
+    {
+      "step_key": "transition_still",
+      "title": "Ask Permission",
+      "content": "{{contact_first_name}}, can I ask a few quick questions to update your massage notes?\n\n(Wait for the yes.)",
+      "sort_order": 6
+    },
+    {
+      "step_key": "transition",
+      "title": "Ask Permission",
+      "content": "{{contact_first_name}}, we'll come back to that tension. First, can I ask a few questions to update your massage notes?\n\n(Wait for the yes.)",
+      "sort_order": 7
+    },
+    {
+      "step_key": "digging_in_still",
+      "title": "Questions: Still Feeling Good",
+      "content": "(Ask in order. Write down even small concerns.)\n\n{{contact_first_name}}, I'm going to run through a few things people often notice. Just say yes if you get them at all, even if they're mild or come and go.\n\nAny neck or shoulder tension?\n\nAny low back tension?\n\nHave you had any headaches?\n\nHow has your sleep been?\n\nHow has your stress been?\n\nOf those, which one bothers you the most?\n\n(Tap their answer below.)",
+      "sort_order": 8
+    },
+    {
+      "step_key": "digging_in",
+      "title": "Questions: Tension Is Back",
+      "content": "(Ask in order. Write down every concern.)\n\n{{contact_first_name}}, I'm going to run through a few things people often notice. Just say yes if you get them at all, even if they're mild or come and go.\n\nAny neck or shoulder tension?\n\nAny low back tension?\n\nHave you had any headaches?\n\nHow has your sleep been?\n\nHow has your stress been?\n\nBetween {{complaint_reference}} and these concerns, which one bothers you the most?\n\n(Tap their answer below.)",
+      "sort_order": 9
+    },
+    {
+      "step_key": "review",
+      "title": "Review Their Answers",
+      "content": "{{contact_first_name}}, let me make sure I have this right.\n\n(Read back their three answers: how long, how often, what it gets in the way of.)\n\nSo it's been going on a while, and it comes up more than once in a while. At its worst it gets in the way of what you mentioned. Did I get that right?\n\n(Say what they named: work, home, or your own time. Let them answer. If they correct you, take the correction and move on.)\n\nIt sounds like you'd like to feel loose and comfortable again. Is that fair to say?\n\n(Tap what you hear.)",
+      "sort_order": 9
+    },
+    {
+      "step_key": "making_it_real",
+      "title": "Making It Real",
+      "content": "{{contact_first_name}}, I'd like to ask three questions about {{main_concern}}. This will help us update your massage notes.\n\n(Ask in order. Pause after each question.)\n\nHow long has it been bothering you, like a week or two, or longer than that?\n\n(Let them answer. If it fits, you can say \"Got it.\")\n\nIs it something you experience like 1 to 2 times a month, or is it more often than that?\n\n(Let them answer. If it fits, you can say \"I see.\" or \"I understand.\")\n\nWhen it's at its worst, does it ever interfere with work, at home, or relaxing and doing your own thing?\n\n(Let them answer. If they name an impact, reflect only what they said about work, home, or their own time. If not, you can say \"Got it, thank you.\")",
+      "sort_order": 10
+    },
+    {
+      "step_key": "bridge_no",
+      "title": "They Hesitate",
+      "content": "{{contact_first_name}}, you said {{main_concern}} has been bothering you. I don't want to assume anything. What's holding you back from booking a massage?\n\n(Stay easy. Let them answer.)",
+      "sort_order": 11
+    },
+    {
+      "step_key": "recommendation",
+      "title": "The Recommendation",
+      "content": "{{contact_first_name}}, that's worth getting looked at instead of just dealing with it. Can I make a recommendation?\n\n(Wait for the yes.)\n\nLet's get you in so {{provider_name}} can work on {{main_concern}}. If massage can help, we'll walk you through the options. If it's not the right fit, we'll say so. Either way you'll know where you stand. Does that sound reasonable?\n\n(Tap what you hear.)",
+      "sort_order": 11
+    },
+    {
+      "step_key": "cadence_close",
+      "title": "Nothing Found: Keep the Rhythm",
+      "content": "{{contact_first_name}}, I'm glad you're still feeling loose and relaxed. Regular massages can help keep tension from building again.\n\nCan I recommend booking your next massage now?\n\n(Wait for the answer.)\n\nWe have (day) at (time) or (day) at (time). Which works better?",
+      "sort_order": 12
+    },
+    {
+      "step_key": "uncover",
+      "title": "Uncover the Real Concern",
+      "content": "Okay, {{contact_first_name}}. I'm not going to push you on it. What's the part giving you pause?\n\n(Let them answer. Then tap what you hear.)",
+      "sort_order": 12
+    },
+    {
+      "step_key": "comeback_close",
+      "title": "Tension Is Back: Book a Massage",
+      "content": "{{contact_first_name}}, thank you. Your massage notes are up to date.\n\nTension can keep building when massage stops. Coming in now gives us a chance to work on it.\n\nCan I recommend booking a massage now?\n\n(Wait for the answer.)\n\nWe have (day) at (time) or (day) at (time). Which works better?",
+      "sort_order": 13
+    },
+    {
+      "step_key": "obj_fell_out_habit",
+      "title": "Objection: “I fell out of the habit”",
+      "content": "That happens, {{contact_first_name}}. Massage is usually the first thing to drop when life gets busy.\n\nCan I ask, was it one thing that got in the way, or did it just slide down the list?\n\n(Let them answer.)\n\nThat's how it goes for most people, and it's usually right when {{main_concern}} builds back up. The tension doesn't take a break because you did. Getting back in is one visit, not a commitment.\n\n{{provider_name}} can work on what's built up and tell you what it would take to keep it from coming back.\n\nCould we find one time that works and go from there?",
+      "sort_order": 100
+    },
+    {
+      "step_key": "obj_luxury",
+      "title": "Objection: “Massage feels like a luxury”",
+      "content": "That's fair, {{contact_first_name}}. A lot of people see it that way until it's the thing that helps.\n\nCan I ask, is it the money side, or feeling like it's something you should do without?\n\n(Let them answer. If it's money, use the cost answer.)\n\nA massage for {{main_concern}} isn't pampering. It's a way to deal with tension before it becomes a headache or a bad night's sleep. Or a visit somewhere more expensive. Your notes say it helped before, and that hasn't changed. One session is enough to tell whether it still does.\n\n{{provider_name}} would rather work on it now than after it's been there another year.\n\nWould one session feel manageable to start?",
+      "sort_order": 101
+    },
+    {
+      "step_key": "obj_living_with_it",
+      "title": "Objection: I’ve just been living with the tension",
+      "content": "I understand, {{contact_first_name}}. It's easy to get used to it.\n\nCan I ask, is it about the same as when you stopped, or has it crept up?\n\n(Let them answer.)\n\nTension you live with doesn't stay still. It usually spreads, and it's the reason people notice their sleep or their patience getting shorter without connecting the two. {{main_concern}} is the kind of thing a massage was built for. One session is often enough to remind you what normal felt like.\n\n{{provider_name}} can take a look at what's built up and where it's coming from.\n\nAre you open to one visit to see the difference?",
+      "sort_order": 102
+    },
+    {
+      "step_key": "obj_other_option",
+      "title": "Objection: “I’m considering another option”",
+      "content": "That's fair. Can I ask what you're looking at, like a chiropractor, a gym, or a different studio?\n\n(Let them answer. Do not knock the other option.)\n\nThose can all make sense, and some people do well combining them. The part that's hard to compare from home is what would move {{main_concern}} for you. {{provider_name}} already knows where you carry it and what worked last time, so you're not starting over here.\n\nCome in, get a straight answer on where things stand, and then compare. If the other option turns out to be the better fit, you'll be choosing it for a reason.\n\nIs that a fair way to decide?",
+      "sort_order": 120
+    },
+    {
+      "step_key": "obj_cost",
+      "title": "Objection: Cost",
+      "content": "I understand, {{contact_first_name}}. Is it the cost of the visit itself, or the thought of paying for a package again?\n\n(Let them answer. Do not quote prices, packages, or discounts. The office handles that.)\n\nThis first visit is one appointment, not a package. You'll hear what anything past that costs before you decide on it. And since you've been here before, we're not starting from scratch, and starting from scratch is the expensive part.\n\nThe other side of it is what {{main_concern}} is already costing you, the things you mentioned a minute ago. That's the part I'd hate to see keep adding up.\n\nCan we at least get the look on the calendar?",
+      "sort_order": 121
+    },
+    {
+      "step_key": "obj_time",
+      "title": "Objection: “I don’t have time”",
+      "content": "I hear you, {{contact_first_name}}. Is it finding an hour for the visit, or the worry about making it a regular thing?\n\n(Let them answer.)\n\nRight now we're only talking about one visit, and we'll match the length to your day. Thirty minutes on {{main_concern}} does more than nothing. {{provider_name}} can tell you what spacing makes sense from there. Nobody is booking you into a standing appointment on the phone.\n\nWe'll fit that first visit around your schedule, not the other way around.\n\nCould you find a short window for that?",
+      "sort_order": 122
+    },
+    {
+      "step_key": "obj_spouse",
+      "title": "Objection: “I need to talk to my spouse”",
+      "content": "Of course. Is it more about the money side, or do you two just make these decisions together?\n\n(Let them answer. If it's money, use the cost answer.)\n\nThat's fair, and I'm not asking you to commit to anything they'd need to weigh in on. Right now, all you can tell them is that {{main_concern}} is on your mind. After the visit, you can tell them what's going on and what it would take. That's an easier conversation to have. And if they'd like to come along, they're welcome.\n\nCan we pencil it in, and you can move it after you two talk?",
+      "sort_order": 123
+    },
+    {
+      "step_key": "obj_think",
+      "title": "Objection: “I need to think”",
+      "content": "That's fair, {{contact_first_name}}. Usually when someone says that, there's one specific thing on their mind. What's the part you'd want to think over?\n\n(Let them answer. If they name cost, time, or another reason, tap that button.)\n\nOkay. I'm not trying to rush you. The one thing I'd say is that {{main_concern}} is on your mind. It's been that way for a while, and it hasn't sorted itself out on its own. The visit is how you get the information you'd be thinking with. You can think it over just as easily after you know what's going on.\n\nWould it be easier to think it over once you have the answers?",
+      "sort_order": 130
+    },
+    {
+      "step_key": "obj_send_info",
+      "title": "Objection: “Send me information”",
+      "content": "I can do that, {{contact_first_name}}. What would you want it to cover, so I send the right thing?\n\n(Let them answer. If they name cost, time, or another reason, tap that button.)\n\nI'll be straight with you, though. Anything I send is going to be general. It can't tell you what's realistic for {{main_concern}} specifically. That takes {{provider_name}} getting hands on it, and that's one short visit.\n\nLet's do both. I'll send the information, and we'll put a time on the calendar. If what I send answers your question, you can call and cancel, no problem.\n\nDoes doing both work for you?",
+      "sort_order": 131
+    }
+  ],
+  "choices": [
+    {
+      "from_step_key": "bridge_no",
+      "label": "“I’m okay moving forward”",
+      "to_step_key": "recommendation",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "bridge_no",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "cadence_close",
+      "label": "They picked a time",
+      "to_step_key": "focus_areas_bonus",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "cadence_close",
+      "label": "Hesitant or soft no",
+      "to_step_key": "uncover",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "comeback_close",
+      "label": "They picked a time",
+      "to_step_key": "focus_areas_bonus",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "comeback_close",
+      "label": "Hesitant or soft no",
+      "to_step_key": "uncover",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "digging_in",
+      "label": "They named another concern",
+      "to_step_key": "making_it_real",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "digging_in",
+      "label": "Only the returning tension",
+      "to_step_key": "comeback_close",
+      "variant": "positive",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "digging_in_still",
+      "label": "They named a concern",
+      "to_step_key": "making_it_real",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "digging_in_still",
+      "label": "Nothing is bothering them",
+      "to_step_key": "cadence_close",
+      "variant": "positive",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "making_it_real",
+      "label": "Answers reviewed",
+      "to_step_key": "review",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_cost",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_cost",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_fell_out_habit",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_fell_out_habit",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_living_with_it",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_living_with_it",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_luxury",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_luxury",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_other_option",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_other_option",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_send_info",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_send_info",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_spouse",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_spouse",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_think",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_think",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "obj_time",
+      "label": "Resolved: back to scheduling",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "obj_time",
+      "label": "Another concern came up",
+      "to_step_key": "uncover",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "opening_question",
+      "label": "“Still feeling loose and relaxed”",
+      "to_step_key": "resp_doing_great",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "opening_question",
+      "label": "“The tension is starting to creep back”",
+      "to_step_key": "resp_coming_back",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "opening_question",
+      "label": "“Pretty much back to where I was”",
+      "to_step_key": "resp_fully_back",
+      "variant": "negative",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "“Yes, that sounds reasonable”",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "recommendation",
+      "label": "Hesitant or soft no",
+      "to_step_key": "uncover",
+      "variant": "caution",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "resp_coming_back",
+      "label": "They agreed to continue",
+      "to_step_key": "transition",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "resp_doing_great",
+      "label": "They agreed to continue",
+      "to_step_key": "transition_still",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "resp_fully_back",
+      "label": "They agreed to continue",
+      "to_step_key": "transition",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "review",
+      "label": "“Yes, that’s right”",
+      "to_step_key": "recommendation",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "review",
+      "label": "Not quite / they hesitate",
+      "to_step_key": "bridge_no",
+      "variant": "negative",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "transition",
+      "label": "“Yes, that’s okay”",
+      "to_step_key": "digging_in",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "transition_still",
+      "label": "“Yes, that’s okay”",
+      "to_step_key": "digging_in_still",
+      "variant": "default",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I’m ready to schedule”",
+      "to_step_key": "scheduling",
+      "variant": "positive",
+      "sort_order": 0
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I fell out of the habit / it’s been too long”",
+      "to_step_key": "obj_fell_out_habit",
+      "variant": "objection",
+      "sort_order": 1
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“It’s kind of a luxury / I feel guilty spending on it”",
+      "to_step_key": "obj_luxury",
+      "variant": "objection",
+      "sort_order": 2
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I’ve just been living with the tension”",
+      "to_step_key": "obj_living_with_it",
+      "variant": "objection",
+      "sort_order": 3
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "Cost or insurance",
+      "to_step_key": "obj_cost",
+      "variant": "objection",
+      "sort_order": 4
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I don’t have time”",
+      "to_step_key": "obj_time",
+      "variant": "objection",
+      "sort_order": 5
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I need to talk to my spouse”",
+      "to_step_key": "obj_spouse",
+      "variant": "objection",
+      "sort_order": 6
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I'm considering another option”",
+      "to_step_key": "obj_other_option",
+      "variant": "objection",
+      "sort_order": 7
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“I need to think about it”",
+      "to_step_key": "obj_think",
+      "variant": "objection",
+      "sort_order": 8
+    },
+    {
+      "from_step_key": "uncover",
+      "label": "“Just send me some info”",
+      "to_step_key": "obj_send_info",
+      "variant": "objection",
+      "sort_order": 9
+    }
+  ]
+}

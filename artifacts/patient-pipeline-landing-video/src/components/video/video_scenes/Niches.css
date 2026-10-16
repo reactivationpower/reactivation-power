@@ -1,0 +1,21 @@
+.niches-id { position:absolute; top:6%; left:6%; display:flex; align-items:center; gap:1.2vmin; font-size:2vmin; letter-spacing:.18em; color:#0b8f89; font-weight:600; }
+.niches-id i { width:1.2vmin; height:1.2vmin; border-radius:50%; background:#0b8f89; display:block; }
+.niches-title { position:absolute; top:13%; left:6%; width:88%; }
+.niches-title h1 { font-size:8.6vmin; line-height:1.04; }
+.niches-title h1 span { display:block; }
+.niches-title h1 span+span { color:#0b8f89; }
+.niches-family { position:absolute; left:6%; top:38%; font-size:1.9vmin; font-weight:600; letter-spacing:.09em; text-transform:uppercase; color:#526f79; }
+.niches-flow { position:absolute; left:6%; right:6%; top:43%; height:44%; }
+.niches-svg { position:absolute; inset:0; width:100%; height:100%; overflow:visible; }
+.niches-grid { position:absolute; left:0; top:0; width:64%; height:100%; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); grid-template-rows:repeat(6,minmax(0,1fr)); gap:1.1vmin; }
+.niche-chip { display:flex; align-items:center; gap:1.1vmin; padding:0 1.7vmin; border-radius:1.2vmin; background:#eaf0f5; border:1px solid #092a3b1c; font-family:'Space Grotesk',sans-serif; font-size:2.45vmin; line-height:1.15; font-weight:600; letter-spacing:-.03em; transition:background .5s,color .5s,border-color .5s; }
+.niche-chip i { width:1.1vmin; height:1.1vmin; border-radius:50%; background:#86a6ad; flex:none; transition:background .5s; }
+.niche-chip.on { background:#092a3b; color:#f8f5ed; border-color:#092a3b; }
+.niche-chip.on i { background:#78d6c7; }
+.niche-node { position:absolute; left:85%; top:22%; transform:translate(-50%,-50%); text-align:center; font-size:2.25vmin; color:#526f79; width:30%; line-height:1.25; background:#f8f5ed; padding:1.5vmin; }
+.niche-node b { display:block; font-family:'Space Grotesk',sans-serif; font-size:2.8vmin; color:#092a3b; margin-bottom:.7vmin; letter-spacing:-.03em; }
+.niche-script { position:absolute; right:0; top:78%; transform:translateY(-50%); width:30%; padding:3vmin; border-radius:2vmin; background:#092a3b; color:#f8f5ed; }
+.niche-script small { display:block; font-size:2vmin; letter-spacing:.16em; color:#78d6c7; margin-bottom:1.2vmin; }
+.niche-script h2 { font-size:3.5vmin; line-height:1.1; }
+.niche-script .ln { height:.8vmin; border-radius:1px; background:#ffffff2e; margin-top:1.4vmin; }
+.niches-foot { position:absolute; left:6%; right:6%; bottom:6%; height:.3vh; background:linear-gradient(90deg,#0b8f89,#729bc5); transform-origin:left; }

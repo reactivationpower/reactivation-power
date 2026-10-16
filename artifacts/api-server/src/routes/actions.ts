@@ -1,0 +1,366 @@
+import { Router, type IRouter, type Request, type Response } from "express";
+import { respondDatabaseUnavailable } from "../lib/database-unavailable";
+import { runWithRequestContext } from "../lib/request-context";
+import { isNotFoundSignal, isRedirectSignal } from "../shims/next-navigation";
+import { participantIfBillingAllows } from "../lib/data/participants";
+import { logger } from "../lib/logger";
+import * as adminAuth from "../actions/admin-auth";
+import * as adminTeam from "../actions/admin-team";
+import * as adminViewAs from "../actions/admin-view-as";
+import * as admin from "../actions/admin";
+import * as auth from "../actions/auth";
+import * as billing from "../actions/billing";
+import * as booking from "../actions/booking";
+import * as demo from "../actions/demo";
+import * as leads from "../actions/leads";
+import * as leadTerms from "../actions/lead-terms";
+import * as salesLeads from "../actions/sales-leads";
+import * as salesInbox from "../actions/sales-inbox";
+import * as appointmentMessages from "../actions/appointment-messages";
+import * as marketing from "../actions/marketing";
+import * as leadFollowUp from "../actions/lead-followup";
+import * as patientTexting from "../actions/patient-texting";
+import * as mail from "../actions/mail";
+import * as payments from "../actions/payments";
+import * as reactivation from "../actions/reactivation";
+import * as subscriptions from "../actions/subscriptions";
+import { getAdminSessionFromRequest, satisfies } from "../lib/auth/admin-session";
+import { SESSION_COOKIE_NAME, decodeSession } from "../lib/auth/token";
+import { getSessionFromRequest } from "../lib/auth/session";
+import * as agreements from "../actions/agreements";
+import * as commissions from "../actions/commissions";
+import * as customerBilling from "../actions/customer-billing";
+import * as cron from "../actions/cron";
+import * as leadNotifications from "../actions/lead-notifications";
+import * as enrollmentNotifications from "../actions/enrollment-notifications";
+import * as affiliates from "../actions/affiliates";
+import * as affiliateOnboarding from "../actions/affiliate-onboarding";
+import * as resellers from "../actions/resellers";
+import * as resellerOnboarding from "../actions/reseller-onboarding";
+import { affiliateSession, assertSameOrigin } from "../lib/affiliates/access";
+
+/**
+ * RPC bridge for the former Next.js server actions.
+ *
+ *   POST /api/actions/:module/:fn   body: { args: unknown[] }
+ *
+ * Args are JSON. A FormData argument is encoded by the client as
+ * { "__formData": [[name, value], ...] } and rebuilt here so the original
+ * action code (formData.get(...)) runs unchanged. Responses:
+ *   { ok: true, result }              normal return value
+ *   { ok: true, redirect: "/path" }   the action called redirect()
+ *   { ok: false, error }              thrown error
+ *
+ * Only actions listed in ACTIONS are callable, each behind a route-level auth
+ * requirement ("public" | "portal" | "admin" | "super_admin") enforced before
+ * the action runs. "admin" is any active admin (super admin or sales rep);
+ * "super_admin" is super admins only.
+ * In Next.js these functions were only reachable from proxy-protected pages;
+ * over HTTP every action must be gated explicitly. Actions additionally keep
+ * their own finer-grained checks (participant ownership, demo account, ...).
+ */
+type ActionFn = (...args: unknown[]) => Promise<unknown>;
+type ActionModule = Record<string, unknown>;
+
+const MODULES: Record<string, ActionModule> = {
+  resellers,
+  "reseller-onboarding": resellerOnboarding,
+  "lead-terms": leadTerms,
+  "patient-texting": patientTexting,
+  marketing,
+  "sales-leads": salesLeads,
+  "sales-inbox": salesInbox,
+  "appointment-messages": appointmentMessages,
+  affiliates,
+  "affiliate-onboarding": affiliateOnboarding,
+  "enrollment-notifications": enrollmentNotifications,
+  "lead-notifications": leadNotifications,
+  "admin-auth": adminAuth,
+  "admin-team": adminTeam,
+  "admin-view-as": adminViewAs,
+  admin,
+  auth,
+  billing,
+  booking,
+  commissions,
+  cron,
+  "customer-billing": customerBilling,
+  demo,
+  leads,
+  "lead-followup": leadFollowUp,
+  mail,
+  payments,
+  reactivation,
+  subscriptions,
+  agreements,
+};
+
+type Auth = "public" | "portal" | "affiliate" | "admin" | "super_admin" | "manage_services" | "reseller";
+
+// hint: Logic changed on both sides. Requires understanding intent of each change.
+/** Allow-list: module -> action -> required auth. Anything else is 404. */
+const ACTIONS: Record<string, Record<string, Auth>> = {
+  resellers: {
+    listCompanies: "super_admin", createCompany: "super_admin", savePrices: "super_admin",
+    getCompany: "super_admin", inviteMember: "super_admin", resendMemberInvite: "super_admin",
+    setMemberActive: "super_admin", terminateCompany: "super_admin", resolveCustomerConflict: "super_admin",
+    adjustLedger: "super_admin", recordPayout: "super_admin", retryPayoutNotification: "super_admin",
+    getWorkspace: "reseller", getProspect: "reseller", getSale: "reseller", createProspect: "reseller", updateProspect: "reseller",
+    logFollowup: "reseller", createOffer: "reseller", retryEnrollment: "reseller",
+    getAgreementForm: "reseller", previewAgreement: "reseller", previewEnrollmentEmail: "reseller",
+    sendAgreement: "reseller", updateAgreement: "reseller", resendAgreement: "reseller",
+  },
+  "reseller-onboarding": {
+    getMyOnboarding: "reseller", saveMyOnboarding: "reseller",
+    getAdminOnboarding: "super_admin", reviewOnboarding: "super_admin",
+    revealOnboardingWire: "super_admin", downloadOnboardingW9: "super_admin",
+  },
+  "lead-terms": {
+    getCurrentTerms: "public", getTermsVersion: "public",
+    getTermsAdmin: "super_admin", saveTermsDraft: "super_admin", publishTerms: "super_admin",
+    downloadTermsEvidence: "admin",
+  },
+  "patient-texting": {
+    getTextSettings: "portal", saveTextSettings: "portal", getTextConversation: "portal",
+    startTextSimulation: "portal", changeTextSimulation: "portal",
+    openTextConversation: "portal", takeTextConversation: "portal", saveTextEligibility: "portal",
+    saveTextConnection: "portal", revokeTextConnection: "portal",
+  },
+  "affiliate-onboarding": {
+    getMyOnboarding: "affiliate", saveMyOnboarding: "affiliate",
+    getAdminOnboarding: "super_admin", reviewOnboarding: "super_admin",
+    revealOnboardingWire: "super_admin", downloadOnboardingW9: "super_admin",
+    resendOnboardingInvitation: "super_admin",
+  },
+  marketing: {
+    getMarketingSetup: "admin", getMarketingReport: "admin", getMarketingActivity: "admin", getMarketingEvents: "admin",
+    saveMarketingSource: "super_admin", saveMarketingLink: "super_admin", saveMarketingPage: "super_admin",
+    saveMarketingSettings: "super_admin", getMarketingAudit: "super_admin", removeMarketingHistory: "super_admin",
+  },
+  "sales-inbox": {
+    listInbox: "admin", getConversation: "admin", refreshConversation: "admin",
+    sendMessage: "admin", getInboxSettings: "admin", saveInboxSettings: "admin",
+  },
+  "sales-leads": {
+    listSalesLeads: "admin", getSalesLead: "admin", createSalesLead: "admin",
+    updateSalesLead: "admin", addSalesNote: "admin", logSalesCall: "admin",
+    saveSalesSettings: "super_admin", saveSalesReplyPreference: "admin", verifySalesCapabilities: "super_admin",
+    previewSalesImport: "super_admin", startSalesImport: "super_admin", getSalesImport: "super_admin",
+    resumeSalesImport: "super_admin", resolveSalesMerge: "super_admin", convertSalesLead: "admin",
+    retrySalesSync: "admin", salesCadencePreview: "admin", getSalesMedia: "super_admin",
+  },
+  "appointment-messages": {
+    getAppointmentMessaging: "admin", saveAppointmentHost: "super_admin", saveAppointmentMessaging: "super_admin",
+  },
+  affiliates: {
+    applyAffiliate: "public", requestAffiliateAccess: "public", verifyAffiliateAccess: "public", captureAffiliateReferral: "public",
+    affiliateLogout: "affiliate", getAffiliateDashboard: "affiliate", logAffiliateNavigation: "affiliate",
+    listAffiliates: "super_admin", getAffiliatePayoutWorklist: "super_admin", getAffiliateProfile: "super_admin", getAffiliateAttributionCandidates: "super_admin", saveAffiliate: "super_admin",
+    getAffiliateAccessLink: "super_admin", resendAffiliateAccess: "super_admin", revokeAffiliateAccess: "super_admin",
+    assignAffiliate: "super_admin", setAffiliateCustomerRules: "super_admin", adjustAffiliateLedger: "super_admin",
+    calculateAffiliateHistory: "super_admin", recordAffiliateWire: "super_admin", retryAffiliatePayoutEmail: "super_admin",
+  },
+  "enrollment-notifications": {
+    listNotifications: "admin", markRead: "admin", claimDelivery: "admin", savePreferences: "admin",
+  },
+  "lead-notifications": { getLeadEmailSettings: "portal", saveLeadEmailSettings: "portal" },
+  "admin-auth": {
+    adminLogin: "public", completeAdminInvite: "public", adminLogout: "public",
+    getCurrentAdmin: "admin",
+  },
+  "admin-team": {
+    listTeam: "super_admin", inviteTeamMember: "super_admin", updateTeamMember: "super_admin",
+    setTeamMemberActive: "super_admin", getTeamInviteLink: "super_admin", resendTeamInvite: "super_admin",
+  },
+  mail: { listTransactionalTemplates: "super_admin", sendTestEmail: "super_admin", listEmailLog: "super_admin" },
+  "admin-view-as": { viewAsParticipant: "super_admin" },
+  cron: { listCronJobs: "super_admin", runCronJobNow: "super_admin" },
+  auth: {
+    login: "public", logout: "public",
+    verifyLoginCode: "public", resendLoginCode: "public",
+    requestPasswordSetup: "public", setPortalPassword: "public",
+  },
+  billing: {
+    // Admin billing actions on a customer record (each stamps the acting admin).
+    refundPayment: "admin", cancelSubscription: "admin", resumeSubscription: "admin",
+    changeBillingDate: "admin", retryCustomerPayment: "admin",
+  },
+  booking: { getAvailability: "public", bookStrategyCall: "public", requestSavedInquiryHelp: "public", checkSavedBooking: "public" },
+  "customer-billing": {
+    // Public, emailed-token billing page (works while access is paused).
+    requestBillingLink: "public", getBillingByToken: "public",
+    startCardUpdateByToken: "public", recordCardByToken: "public", payBalanceByToken: "public",
+    // Signed-in owner on /portal/billing.
+    getMyBilling: "portal", startMyCardUpdate: "portal", recordMyCard: "portal",
+    payMyBalance: "portal", cancelMyAgreement: "portal",
+    // Admin: email the customer an "add a new card" link.
+    sendCardUpdateLink: "admin",
+  },
+  commissions: {
+    // Reps are scoped to their own entries inside listCommissions.
+    listCommissions: "admin",
+    overrideCommission: "super_admin", setCommissionsPaid: "super_admin", generateMissingCommissions: "super_admin",
+  },
+  leads: { lookupZip: "public", submitHealthcareLead: "public" },
+  "lead-followup": {
+    // Each action also checks the account holds the Lead Follow-Up product.
+    createCampaign: "portal", updateCampaign: "portal", setCampaignStatus: "portal", importLeads: "portal",
+    regenerateWebhookUrl: "portal", saveWebhookFieldMapping: "portal", saveCampaignLeadSource: "portal", sendTestWebhook: "portal",
+    logLeadCall: "portal", claimLeadCall: "portal", renewLeadCall: "portal", releaseLeadCall: "portal", retryParkedLead: "portal",
+  },
+  demo: {
+    enterDemo: "public",
+    resetDemo: "portal",
+    refreshDemoIfStale: "portal",
+    switchDemoView: "portal",
+  },
+  payments: {
+    // Token-based public checkout flow.
+    startPaymentCheckout: "public",
+    confirmPayment: "public",
+    getPaymentLinkPublic: "public",
+    // Admin management (these also call requireAdmin() internally).
+    createPaymentLink: "admin",
+    retryCustomerEnrollment: "admin",
+    listPaymentLinks: "admin",
+    getPaymentDetail: "admin",
+    deletePaymentLink: "admin",
+    provisionAccountsNow: "admin",
+  },
+  subscriptions: {
+    // Token-based public two-card subscription checkout.
+    getSubscriptionCheckoutState: "public",
+    recordPrimaryCard: "public",
+    recordSecondaryCard: "public",
+  },
+  agreements: {
+    // Public signing page (agreement token in the URL is the credential).
+    getAgreementPublic: "public",
+    acknowledgeAgreementDisplay: "public",
+    getAgreementVersion: "public",
+    recordAgreementInitials: "public",
+    signAgreement: "public",
+    getAgreementCheckout: "public",
+    recordAgreementPrimaryCard: "public",
+    recordAgreementSecondaryCard: "public",
+    recordAgreementPaymentFailure: "public",
+    getEnrollmentCheckout: "public",
+    recordEnrollmentCard: "public",
+    replaceEnrollmentCard: "public",
+    confirmEnrollment: "public",
+    reconcileEnrollment: "public",
+    // Admin (each also calls requireAdmin()).
+    getAgreementSendForm: "admin",
+    previewEnrollmentEmail: "admin",
+    retryAgreementCompletion: "admin",
+    retryEnrollmentDelivery: "public",
+    previewAgreement: "admin",
+    sendAgreement: "admin",
+    updateAgreement: "admin",
+    resendAgreement: "admin",
+    listAgreements: "admin",
+    getAgreementDetail: "admin",
+    getAgreementForLink: "admin",
+  },
+  admin: {
+    createCourse: "super_admin", updateCourse: "super_admin", deleteCourse: "super_admin",
+    createModule: "super_admin", updateModule: "super_admin", deleteModule: "super_admin", moveModule: "super_admin",
+    createVideo: "super_admin", updateVideo: "super_admin", deleteVideo: "super_admin", moveVideo: "super_admin",
+    addAttachment: "super_admin", deleteAttachment: "super_admin",
+    createParticipant: "super_admin", updateParticipant: "super_admin", deleteParticipant: "super_admin",
+    setCourseAccess: "manage_services", setNicheAccess: "manage_services", setProductAccess: "manage_services",
+  },
+  reactivation: {
+    // Global niche / script management (admin area).
+    createNiche: "super_admin", updateNiche: "super_admin", deleteNiche: "super_admin",
+    updateMasterScript: "super_admin", saveScriptSection: "super_admin",
+    // Account-scoped (each action resolves the participant from the session).
+    createStage: "portal", moveStage: "portal", deleteStage: "portal",
+    createContact: "portal", updateContact: "portal", deleteContact: "portal",
+    bulkDeleteContacts: "portal", bulkAssignNiche: "portal", setDefaultNiche: "portal",
+    importContacts: "portal", setCallBatchSize: "portal", addMoreCalls: "portal",
+    listPatientImportReviews: "portal", resolvePatientImportReview: "portal",
+    setSelectedNiche: "portal", setPracticeName: "portal", setOfficePhone: "portal",
+    addTeamMember: "portal", setTeamMemberActive: "portal", updateTeamMember: "portal",
+    updateMyProfile: "portal", logCall: "portal",
+    claimPatientCall: "portal", renewPatientCall: "portal", releasePatientCall: "portal", reopenService: "portal",
+  },
+};
+
+async function isAuthorized(req: Request, auth: Auth): Promise<boolean> {
+  if (auth === "public") return true;
+  if (auth === "reseller") {
+    const session = await getAdminSessionFromRequest(req);
+    return Boolean(session && (session.role === 'super_admin' || session.role === 'reseller_manager' || session.role === 'reseller_salesperson'));
+  }
+  if (auth === "affiliate") return Boolean(await affiliateSession(req));
+  if (auth === "admin" || auth === "super_admin" || auth === "manage_services") {
+    const session = await getAdminSessionFromRequest(req);
+    return Boolean(session && satisfies(session.role, auth, session.canManageServices));
+  }
+  const session = await getSessionFromRequest(req);
+  if (!session) return false;
+  // Portal RPC is also closed to accounts shut off for billing.
+  const participant = await participantIfBillingAllows(session);
+  return Boolean(participant && participant !== "blocked");
+}
+
+function decodeArg(arg: unknown): unknown {
+  if (arg && typeof arg === "object" && "__formData" in arg) {
+    const fd = new FormData();
+    for (const [k, v] of (arg as { __formData: [string, string][] }).__formData) {
+      fd.append(k, v);
+    }
+    return fd;
+  }
+  return arg;
+}
+
+const router: IRouter = Router();
+
+router.post("/actions/:module/:fn", async (req: Request, res: Response) => {
+  const moduleName = req.params.module as string;
+  const fnName = req.params.fn as string;
+  const auth = ACTIONS[moduleName]?.[fnName];
+  const fn = auth ? MODULES[moduleName]?.[fnName] : undefined;
+  if (!auth || typeof fn !== "function") {
+    res.status(404).json({ ok: false, error: "Unknown action" });
+    return;
+  }
+  try {
+  if (!(await isAuthorized(req, auth))) {
+    res.status(401).json({ ok: false, error: "Unauthorized" });
+    return;
+  }
+  const rawArgs = Array.isArray(req.body?.args) ? (req.body.args as unknown[]) : [];
+  const args = rawArgs.map(decodeArg);
+    const result = await runWithRequestContext(req, res, () => {
+      if (moduleName === 'resellers' || moduleName === 'reseller-onboarding' || moduleName === 'affiliates' || moduleName === 'affiliate-onboarding' || moduleName === 'patient-texting' || moduleName === 'lead-terms') assertSameOrigin();
+      return (fn as ActionFn)(...args);
+    });
+    res.json({ ok: true, result: result === undefined ? null : result });
+  } catch (err) {
+    if (moduleName === 'sales-inbox' && err instanceof salesInbox.InboxAccessError) {
+      res.status(403).json({ ok: false, error: err.message });
+      return;
+    }
+    if (respondDatabaseUnavailable(err, res)) return;
+    if (isRedirectSignal(err)) {
+      res.json({ ok: true, result: null, redirect: err.location });
+      return;
+    }
+    if (isNotFoundSignal(err)) {
+      res.status(404).json({ ok: false, error: "Not found" });
+      return;
+    }
+    // Database/validation exceptions can contain sensitive parameters. Never log them for intake.
+    if (moduleName !== 'reseller-onboarding' && moduleName !== 'affiliate-onboarding' && moduleName !== 'patient-texting') logger.error({ err, module: req.params.module, fn: req.params.fn }, "action failed");
+    if ((moduleName === 'reseller-onboarding' || moduleName === 'affiliate-onboarding' || moduleName === 'patient-texting') && !(err instanceof Error && !('code' in err) && !('cause' in err))) {
+      res.status(500).json({ ok: false, error: 'Secure onboarding request failed. Please try again.' });
+      return;
+    }
+    res.status(500).json({ ok: false, error: err instanceof Error ? err.message : "Action failed" });
+  }
+});
+
+export default router;

@@ -1,0 +1,29 @@
+kind = "video"
+videoAspectRatio = "16:9"
+previewPath = "/patient-pipeline-facebook-ghl/"
+title = "Patient Pipeline — Facebook & Instagram Through GoHighLevel"
+description = "Standalone beginner tutorial, matching the approved Sarah voice and animated-cursor treatment. Labeled instructional recreations; no live account recording or successful delivery is claimed."
+version = "1.0.0"
+id = "artifacts/patient-pipeline-facebook-ghl"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/patient-pipeline-facebook-ghl/" ]
+localPort = 24675
+
+[services.development]
+run = "pnpm --filter @workspace/patient-pipeline-facebook-ghl run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/patient-pipeline-facebook-ghl", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/patient-pipeline-facebook-ghl/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24675"
+BASE_PATH = "/patient-pipeline-facebook-ghl/"
