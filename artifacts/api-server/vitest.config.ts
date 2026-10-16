@@ -10,7 +10,9 @@ export default defineConfig({
     setupFiles: ['./src/test/database-pools.ts'],
     // Each isolated worker owns a pool against the shared Supabase session
     // pooler. Unbounded workers can exhaust its connection limit.
-    ...(process.env.SUPABASE_DB_URL ? { maxWorkers: 1, hookTimeout: 30000 } : {}),
+    // Real-database suites round-trip to Supabase on every statement; the 5 s
+    // default times out under a full run even though each test passes alone.
+    ...(process.env.SUPABASE_DB_URL ? { maxWorkers: 1, hookTimeout: 30000, testTimeout: 30000 } : {}),
   },
   resolve: {
     alias: [

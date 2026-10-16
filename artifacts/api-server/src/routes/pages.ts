@@ -41,6 +41,7 @@ import {
 import { getAdminClient } from "../lib/supabase/admin";
 import { getStripeMode } from "../lib/stripe";
 import { getCronJobStatuses } from "../lib/cron/jobs";
+import { lastSchedulerCheck } from "../lib/cron/scheduler-check";
 import { leadCallBlockReason, leadQueueBlockReason, withoutLeadLeaseToken } from '@workspace/shared/lead-followup';
 import { DEFAULT_CALL_BATCH_SIZE } from '@workspace/shared/types';
 import { demoIsStale } from "../lib/demo/seed";
@@ -726,8 +727,12 @@ add("/admin/payments", "admin", async (req) => {
   // The Scheduled jobs card (global card-charging controls) is super-admin only.
   const session = await getAdminSessionFromRequest(req);
   const superAdmin = session?.role === "super_admin";
-  const [links, cronJobs] = await Promise.all([listPaymentLinks(), superAdmin ? getCronJobStatuses(5) : Promise.resolve(null)]);
-  return { links, stripeMode: getStripeMode(), cronJobs };
+  const [links, cronJobs, schedulerCheck] = await Promise.all([
+    listPaymentLinks(),
+    superAdmin ? getCronJobStatuses(5) : Promise.resolve(null),
+    superAdmin ? lastSchedulerCheck() : Promise.resolve(null),
+  ]);
+  return { links, stripeMode: getStripeMode(), cronJobs, schedulerCheck };
 });
 add("/admin/payments/:id", "admin", async (req) => {
   const id = String(req.params.id);

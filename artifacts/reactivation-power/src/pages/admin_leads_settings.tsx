@@ -52,7 +52,7 @@ export default function AdminLeadsSettingsPage() {
       <section className={card + ' space-y-2'} data-testid="section-scheduler">
         <h2 className="font-semibold">Scheduler</h2>
         <p className="text-sm">Reminders and automatic texts only go out while the published app is running.</p>
-        <p className="text-xs text-muted-foreground">Last check-in: {fmt(wake?.checkedAt)} · {schedulerReady ? 'Running' : 'Not running'}</p>
+        <p className="text-xs text-muted-foreground">Last check-in: {fmt(wake?.checkedAt)} · {schedulerReady ? 'Running' : 'Not running'}{wake?.source === 'vercel-cron' ? ' · Vercel Cron' : wake?.source === 'supabase' ? ' · Supabase job' : ''}</p>
       </section>
 
       <section className={card + ' space-y-3'} data-testid="section-assignee">

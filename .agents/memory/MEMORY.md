@@ -2,7 +2,7 @@
 - [Patient texting boundaries](patient-texting-boundaries.md) — independent office billing; internal-sales separation; fictional model use has a non-resetting $1 authorization.
 - [Next.js port architecture](next-port-architecture.md) — actions via allow-listed RPC + per-page loaders; CRLF sources, headless H.264 limits, placeholder-grep first.
 - [Hosting direction](hosting-direction.md) — build in Replit, host on Vercel as-is (no Next.js rewrite); Preview shares prod DB, so gate side effects.
-- [Private video streaming](private-video-streaming.md) — cached Blob ranges can misreport totals and offsets; validate actual bytes, and distinguish protocol checks from real iPad playback.
+- [Private video streaming](private-video-streaming.md) — cached Blob ranges can misreport totals and offsets; validate actual bytes; 4 MiB range cap for Vercel; public MP4s via static CDN there.
 - [Supabase Postgres access & migrations](supabase-postgres-access.md) — SUPABASE_DB_URL pooler + relaxed TLS; never drizzle-kit push; MCP tools not mounted; ask for a reset DB password up front.
 - [Supabase admin accounts](supabase-admin-accounts.md) — admin roles live in auth app_metadata (kept after DDL access arrived); invite needs manual-link fallback; Base UI menu API.
 - [Transactional email via Resend](transactional-email.md) — send-only connector key, RESEND_FROM override, email_log in Supabase via drizzle, once-per-event mail needs an outbox not a log lookup.
@@ -16,7 +16,7 @@
 - [One-off api-server scripts & test admins](api-server-scripts.md) — esbuild-bundle with pino externalized; create disposable admins via Supabase createUser, never ask for the owner's password.
 - [Web app unit tests](web-app-tests.md) — reactivation-power vitest uses its own config (vite.config throws without PORT); root `pnpm test` + validation `test`/`typecheck` registered.
 - [Shared workspace libs](shared-libs.md) — lib/shared + lib/niche-catalog are the only copies; `tsc --build` libs before artifact typecheck (stale dist = phantom missing exports); no DOM types in libs.
-- [Scheduled jobs on autoscale](scheduled-jobs.md) — day slot claimed in cron_runs by both in-process ticker and external cron route; external trigger still needed for on-time runs; off in dev.
+- [Scheduled jobs on autoscale and Vercel](scheduled-jobs.md) — one slot claim for all triggers; both UTC hours per ET slot; partial runs continue; Vercel off until SCHEDULED_JOBS=on.
 - [Two sales-demo practices](demo-practices.md) — keep resets isolated to one demo family; sample CSV entitlement and dedupe constraints.
 - [Stale dev process after failed restart](stale-dev-process.md) — EADDRINUSE in a workflow log = old build still serving; check listener start time vs dist mtime before debugging code.
 - [Campaign setup audience](campaign-setup-guidance.md) — self-service office setup is primary; agency handoff is secondary, and receipt claims must stay factual.
@@ -37,7 +37,7 @@
 - [Internal sales lead policy](internal-sales-lead-policy.md) — provider-sales CRM uses GoHighLevel, separate from patient queues; consented cadence, call logging, and timezone boundaries.
 - [Enrollment notification policy](enrollment-notification-policy.md) — recover alerts without retrying billing; historical card replacements are not new milestones; shared-link views do not prove identity.
 - [Structural merge integrity](merge-integrity.md) — clean syncs can mispair sibling tests; validate the merged tree and regenerate colliding migration metadata.
-- [Shared connection budget](connection-budget.md) — 15 sessions are shared across hosts, overlap and tests; nested pool borrowing can starve small pools.
+- [Shared connection budget](connection-budget.md) — 15 sessions shared across hosts/overlap/tests; Vercel keeps Session pooler (locks); post-response work needs waitUntil.
 - [Customer enrollment boundaries](customer-enrollment-policy.md) — commercial identities, access records, and offers stay distinct; opening setup is not conversion.
 - [Saved inquiry booking](booking-handoff-policy.md) — preserve calendar design and identity protection; reconcile uncertain writes; no analytics consent popup or floating controls.
 - [Sales sync safety](sales-sync-policy.md) — keep durable fast sync separate from maintenance; contact uncertainty also constrains booking.
@@ -53,3 +53,4 @@
 - [HBOT caller boundaries](hbot-approval-boundary.md) — owner authorized regular Chiro caller choices; keep clinical-review routes, no efficacy promises, and exact sleep wording.
 - [React form-action reset](react-form-action-reset.md) — form actions reset fields on settle; selects need a re-render; Back restores need echoed values.
 - [PostHog replay](posthog-replay.md) — headless verification quirks only; rules live in replit.md.
+- [Server bundle and pdfkit](server-bundle-pdfkit.md) — bundle pdfkit with the #standard-fonts rewrite plugin; never externalize @swc/helpers (fontkit needs it bundled).

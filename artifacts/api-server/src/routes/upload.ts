@@ -6,6 +6,8 @@ import { logger } from "@/lib/logger";
 import { runWithRequestContext } from "@/lib/request-context";
 import { getAdminSessionFromRequest } from "@/lib/auth/admin-session";
 import { readIdleSession } from '@/lib/auth/idle-session';
+import { describeMegabytes, MAX_SERVER_UPLOAD_BYTES } from "@/lib/request-limits";
+export { MAX_SERVER_UPLOAD_BYTES } from "@/lib/request-limits";
 
 /** Uploads (course media) are only performed by super admins from the admin UI. */
 async function isAdmin(req: Request): Promise<boolean> {
@@ -22,13 +24,26 @@ interface MultipartUpload {
   kind?: string;
 }
 
-/** Server-side fallback uploads are buffered; large videos go direct-to-Blob. */
-const MAX_SERVER_UPLOAD_BYTES = 100 * 1024 * 1024;
+/**
+ * The admin UI uploads every file straight from the browser to Vercel Blob
+ * with a token from `/upload/token`; that path has no practical size limit.
+ * This server-side fallback buffers the whole body inside one request, which
+ * a Vercel function caps at 4.5 MB, so it only accepts small files.
+ */
+export const UPLOAD_TOO_LARGE_MESSAGE =
+  `Files larger than ${describeMegabytes(MAX_SERVER_UPLOAD_BYTES)} cannot be sent through the server. ` +
+  "Upload from the admin page, which sends the file directly to storage.";
 
 class UploadTooLargeError extends Error {
   constructor() {
-    super(`Upload exceeds ${MAX_SERVER_UPLOAD_BYTES / (1024 * 1024)} MB; use the direct upload path.`);
+    super(UPLOAD_TOO_LARGE_MESSAGE);
   }
+}
+
+/** Reject an oversized upload from its declared length before reading any of it. */
+function declaredTooLarge(req: Request): boolean {
+  const declared = Number(req.get("content-length"));
+  return Number.isFinite(declared) && declared > MAX_SERVER_UPLOAD_BYTES;
 }
 
 function readBody(req: Request): Promise<Buffer> {
@@ -39,7 +54,9 @@ function readBody(req: Request): Promise<Buffer> {
       const buf = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
       total += buf.length;
       if (total > MAX_SERVER_UPLOAD_BYTES) {
-        req.destroy();
+        // Stop buffering but keep the connection so the 413 reaches the sender.
+        chunks.length = 0;
+        req.pause();
         reject(new UploadTooLargeError());
         return;
       }
@@ -70,7 +87,14 @@ function readMultipart(req: Request): Promise<MultipartUpload | null> {
       }
       const chunks: Buffer[] = [];
       pending.push(new Promise((done, fail) => {
-        stream.on("limit", () => fail(new UploadTooLargeError()));
+        stream.on("limit", () => {
+          // Stop parsing but keep the connection so the 413 reaches the sender.
+          chunks.length = 0;
+          req.unpipe(parser);
+          req.pause();
+          reject(new UploadTooLargeError());
+          done(); // settles the part so a later "close" cannot leave a dangling rejection
+        });
         stream.on("data", (chunk: Buffer) => chunks.push(chunk));
         stream.on("end", () => {
           file = {
@@ -136,6 +160,7 @@ router.post("/upload", async (req: Request, res: Response) => {
   }
   await runWithRequestContext(req, res, async () => {
     try {
+      if (declaredTooLarge(req)) throw new UploadTooLargeError();
       const queryKind = typeof req.query.kind === "string" ? req.query.kind : "video";
       const queryName = typeof req.query.name === "string" ? req.query.name : "";
       const contentType = req.get("content-type") ?? "application/octet-stream";
@@ -185,7 +210,11 @@ router.post("/upload", async (req: Request, res: Response) => {
       });
     } catch (err) {
       if (err instanceof UploadTooLargeError) {
-        res.status(413).json({ error: err.message });
+        res.status(413).set("Cache-Control", "no-store").json({
+          error: err.message,
+          code: "UPLOAD_TOO_LARGE",
+          maxBytes: MAX_SERVER_UPLOAD_BYTES,
+        });
         return;
       }
       logger.error({ err }, "upload error");

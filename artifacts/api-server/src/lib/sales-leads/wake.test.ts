@@ -1,7 +1,7 @@
 import { afterEach,beforeEach,describe,expect,it,vi } from 'vitest'
 const f=vi.hoisted(()=>({cfg:{automation_enabled:false,capabilities:{} as Record<string,any>},query:vi.fn()}))
 vi.mock('./store',()=>({settings:async()=>f.cfg,transaction:async(fn:any)=>fn({query:f.query})}))
-import {configureNativeWake,nativeWakeCommand,recordNativeWake,schedulerHealthy} from './wake'
+import {configureNativeWake,nativeWakeCommand,recordNativeWake,recordVercelCronWake,retireNativeWake,schedulerHealthy} from './wake'
 beforeEach(()=>{
   f.cfg={automation_enabled:false,capabilities:{}}
   f.query.mockImplementation(async(sql:string)=>({rows:sql.includes('cron.schedule')?[{id:42}]:sql.includes('SELECT EXISTS')?[{active:true}]:[]}))
@@ -43,6 +43,26 @@ describe('independent Supabase sales wake',()=>{
     const status=f.query.mock.calls.find(([sql])=>sql.includes('UPDATE sales_settings'))![1][0]
     expect(JSON.parse(status).state).toBe('verified')
     expect(schedulerHealthy({scheduler_wake:JSON.parse(status)})).toBe(true)
+  })
+  it('a Vercel Cron wake verifies the same scheduler capability, only from the Vercel production deployment',async()=>{
+    vi.stubEnv('NODE_ENV','production')
+    await recordVercelCronWake()
+    expect(f.query).not.toHaveBeenCalled()
+    vi.stubEnv('VERCEL','1');vi.stubEnv('VERCEL_ENV','preview')
+    await recordVercelCronWake()
+    expect(f.query).not.toHaveBeenCalled()
+    vi.stubEnv('VERCEL_ENV','production')
+    await recordVercelCronWake()
+    const status=f.query.mock.calls.find(([sql])=>sql.includes('UPDATE sales_settings'))![1][0]
+    expect(JSON.parse(status)).toMatchObject({state:'verified',source:'vercel-cron'})
+    expect(schedulerHealthy({scheduler_wake:JSON.parse(status)})).toBe(true)
+  })
+  it('retiring the Supabase wake unschedules its job and marks the capability retired',async()=>{
+    f.cfg.capabilities.native_scheduler={jobId:42}
+    expect(await retireNativeWake()).toEqual({retiredJobId:42})
+    expect(f.query.mock.calls.some(([sql,params])=>sql.includes('cron.unschedule')&&params[0]===42)).toBe(true)
+    const native=f.query.mock.calls.find(([sql])=>sql.includes("'{native_scheduler}'"))![1][0]
+    expect(JSON.parse(native)).toMatchObject({state:'retired',jobId:null})
   })
   it('blocks stale, unknown, failed and future-dated heartbeat evidence',()=>{
     const now=Date.now()

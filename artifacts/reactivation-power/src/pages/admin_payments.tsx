@@ -9,7 +9,7 @@ export default function AdminPaymentsPage() {
   const { data, loading, error } = usePageData<any>('/admin/payments')
   if (loading) return <PageLoading />
   if (error) return <PageError error={error} />
-  const { links, stripeMode, cronJobs } = data
+  const { links, stripeMode, cronJobs, schedulerCheck } = data
 
   return (
     <div className="flex h-full flex-col gap-6">
@@ -31,7 +31,7 @@ export default function AdminPaymentsPage() {
           for quick actions.
         </p>
       </header>
-      {cronJobs ? <CronJobsCard initialJobs={cronJobs} /> : null}
+      {cronJobs ? <CronJobsCard initialJobs={cronJobs} schedulerCheck={schedulerCheck} /> : null}
       <div className="min-h-0 flex-1">
         <PaymentsManager initialLinks={links} />
       </div>

@@ -598,6 +598,7 @@ export async function resolveBillingLink(token: string): Promise<ResolvedBilling
     terms = t ?? null
   }
   if (!terms) terms = await currentTermsForCustomer(customer.id)
-  void db.update(billingLinksTable).set({ lastUsedAt: new Date() }).where(eq(billingLinksTable.id, link.id)).catch(() => undefined)
+  // Awaited: an unawaited write is lost when a Vercel function is frozen after the response.
+  await db.update(billingLinksTable).set({ lastUsedAt: new Date() }).where(eq(billingLinksTable.id, link.id)).catch(() => undefined)
   return { link, customer, terms }
 }

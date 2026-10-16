@@ -4,8 +4,10 @@ export type { PoolClient } from "pg";
 import * as schema from "./schema";
 import { runtimePoolSettings } from "./pool-settings";
 import { trackDatabasePool } from "./read-tracking";
+import { attachVercelPoolCleanup } from "./vercel-pool";
 export { configureDatabaseReadTracking, flushDatabaseReadTracking } from "./read-tracking";
-export { runtimePoolSettings } from "./pool-settings";
+export { runtimePoolSettings, poolHost } from "./pool-settings";
+export { attachVercelPoolCleanup } from "./vercel-pool";
 export { isDatabaseUnavailable, DATABASE_UNAVAILABLE_MESSAGE } from "./capacity";
 
 const { Pool } = pg;
@@ -16,6 +18,13 @@ const { Pool } = pg;
  * (Project Settings → Database → Connection string, Session pooler URI).
  * There is no fallback: a missing URL is a configuration error, not a
  * reason to fall back to another database.
+ *
+ * Session mode everywhere, including Vercel (decision recorded in
+ * docs/database-connection-budget.md): a pooled client is one Postgres
+ * session for its whole life, so session advisory locks, long transactions
+ * and prepared statements behave exactly as on a direct connection. The
+ * Transaction pooler would hand successive statements of one client to
+ * different sessions, which breaks the lock-then-unlock paths in the app.
  */
 export function supabaseDbUrl(): string {
   const url = process.env.SUPABASE_DB_URL?.trim();
@@ -46,6 +55,7 @@ export function poolConfig(url = supabaseDbUrl()): pg.PoolConfig {
 
 export const pool = new Pool(poolConfig());
 trackDatabasePool(pool);
+attachVercelPoolCleanup(pool);
 // pg removes broken idle clients before emitting; a listener prevents a process crash.
 // Never log the driver message/connection object, which may contain credentials or SQL.
 pool.on("error", (error: Error & { code?: string }) => {

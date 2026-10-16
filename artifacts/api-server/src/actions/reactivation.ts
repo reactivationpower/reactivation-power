@@ -411,11 +411,18 @@ export interface ImportMapping {
 }
 
 const MAX_IMPORT_ROWS = 5000
+const MAX_FILE_ROWS = 1_000_000
 
 /**
- * Resolve each row's service, then match people and apply the complete import
+ * Resolve each row's service, then match people and apply this request's rows
  * atomically. Repeated uploads preserve outreach; uncertain identities are
  * held for explicit review instead of silently dropped or merged.
+ *
+ * A request must fit the hosting body limit (4 MB on Vercel), so the browser
+ * sends a large file as several consecutive requests in file order, each with
+ * `rowOffset` (rows already sent). Rows in a later request match people the
+ * earlier ones created, exactly as a repeated upload would, and row numbers in
+ * reviews and messages stay those of the file.
  */
 export async function importContacts(input: {
   rows: ImportRow[]
@@ -423,6 +430,8 @@ export async function importContacts(input: {
   /** When set, every contact in this upload is tagged with this niche */
   forceNicheId?: string | null
   sourceSystem?: string
+  /** Number of file rows sent in earlier requests of the same upload (default 0). */
+  rowOffset?: number
 }) {
   const participant = await getCurrentParticipant()
   if (!participant) return { error: 'Not signed in' }
@@ -432,6 +441,9 @@ export async function importContacts(input: {
     return { error: `Upload at most ${MAX_IMPORT_ROWS} rows at a time.` }
   const rows = input.rows
   if (rows.length === 0) return { error: 'No rows to import' }
+  const rowOffset = input.rowOffset ?? 0
+  if (!Number.isInteger(rowOffset) || rowOffset < 0 || rowOffset > MAX_FILE_ROWS)
+    return { error: 'Invalid upload position. Upload the file again.' }
   const fields = ['name', 'phone', 'email', 'niche', 'service', 'complaint', 'notes', 'patientId', 'lastVisit', 'doNotCall'] as const
   if (rows.some(r => !r || typeof r !== 'object' || fields.some(k => r[k] !== undefined && (typeof r[k] !== 'string' || r[k]!.length > (k === 'notes' ? 10000 : 500)))))
     return { error: 'Invalid CSV fields. Check the file and upload again.' }
@@ -544,6 +556,7 @@ export async function importContacts(input: {
       ownerId, participantId: participant.id, source, stageId: newStage?.id ?? null,
       simulated: Boolean(participant.is_demo),
       mappings,
+      firstRowNumber: rowOffset + 1,
     }, resolvedRows)
     revalidatePath('/portal', 'layout')
     return { ...result, unmatchedNiches: Array.from(unmatchedNiches).slice(0, 8), notEnabledNiches: Array.from(notEnabledNiches).slice(0, 12) }

@@ -27,7 +27,7 @@ const fmtWhen = (iso: string | null | undefined) =>
 
 const hourLabel = (h: number) => `${((h + 11) % 12) + 1}:00 ${h < 12 ? 'AM' : 'PM'} ET`
 
-const TRIGGER_LABEL = { scheduler: 'scheduled', http: 'external cron', admin: 'run by' }
+const TRIGGER_LABEL = { scheduler: 'scheduled', http: 'external cron', 'vercel-cron': 'Vercel Cron', admin: 'run by' }
 
 function summaryLine(job, run) {
   if (!run?.summary) return null
@@ -42,10 +42,11 @@ function summaryLine(job, run) {
 function StatusIcon({ status }) {
   if (status === 'failed') return <AlertTriangle className="h-4 w-4 text-red-600" aria-label="Failed" />
   if (status === 'running') return <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" aria-label="Running" />
+  if (status === 'partial') return <Clock className="h-4 w-4 text-amber-600" aria-label="Stopped at its time limit; continues on the next run" />
   return <CheckCircle2 className="h-4 w-4 text-emerald-600" aria-label="Succeeded" />
 }
 
-export function CronJobsCard({ initialJobs }) {
+export function CronJobsCard({ initialJobs, schedulerCheck = null }) {
   const [jobs, setJobs] = useState(initialJobs ?? [])
   const [running, setRunning] = useState<string | null>(null)
   const anyFailed = jobs.some((j) => j.lastRun?.status === 'failed')
@@ -63,7 +64,7 @@ export function CronJobsCard({ initialJobs }) {
     setRunning(job.name)
     try {
       const res = await runCronJobNow({ job: job.name })
-      if (res.ok) notifyDone(`${job.label} finished`)
+      if (res.ok) notifyDone(res.incomplete ? `${job.label} stopped at its time limit — click Run now again for the rest` : `${job.label} finished`)
       else notifyError(res.error)
     } catch (e) {
       notifyError(e instanceof Error ? e.message : 'The job could not be started.')
@@ -84,7 +85,7 @@ export function CronJobsCard({ initialJobs }) {
             <Clock className="h-4 w-4 text-muted-foreground" /> Scheduled jobs
           </h2>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            Run automatically every day by the server.{' '}
+            Run automatically every day (by the server on Replit, by Vercel Cron on Vercel).{' '}
             {anyFailed
               ? 'The last run of a job failed — see below.'
               : anyOverdue
@@ -116,6 +117,7 @@ export function CronJobsCard({ initialJobs }) {
                     Last run {fmtWhen(last.startedAt)} ({TRIGGER_LABEL[last.trigger] ?? last.trigger}
                     {last.trigger === 'admin' && last.actor ? ` ${last.actor}` : ''}):{' '}
                     {failed ? `failed — ${last.error}` : last.status === 'running' ? 'running…' : summaryLine(job.name, last) ?? 'ok'}
+                    {last.status === 'partial' ? ' — stopped at its time limit; the rest runs on the next scheduled call' : ''}
                   </p>
                 ) : (
                   <p className="mt-1 text-xs text-muted-foreground">Has not run yet.</p>
@@ -138,6 +140,12 @@ export function CronJobsCard({ initialJobs }) {
           )
         })}
       </ul>
+      {schedulerCheck ? (
+        <p data-testid="cron-scheduler-check" className="mt-3 border-t border-border/70 pt-2 text-xs text-muted-foreground">
+          Scheduler check: last call received {fmtWhen(schedulerCheck.startedAt)} ({TRIGGER_LABEL[schedulerCheck.trigger] ?? schedulerCheck.trigger}
+          {schedulerCheck.summary?.target ? `, ${schedulerCheck.summary.target}` : ''}; scheduled jobs {schedulerCheck.summary?.scheduledJobs === 'on' ? 'on' : 'off'} there).
+        </p>
+      ) : null}
     </section>
   )
 }

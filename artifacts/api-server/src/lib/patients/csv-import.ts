@@ -10,13 +10,13 @@ type Client = PoolClient
 type Plan = ReturnType<typeof planPatientImport>
 const contactFields = 'id, name, phone, email, niche_id, service_label, original_complaint, notes, do_not_call'
 
-async function loadPlan(client: Client, ownerId: string, source: string, rows: ResolvedImportRow[], override?: { decision: 'match' | 'create'; contactId?: string }) {
+async function loadPlan(client: Client, ownerId: string, source: string, rows: ResolvedImportRow[], override?: { decision: 'match' | 'create'; contactId?: string }, firstRowNumber?: number) {
   const contacts = await client.query<ImportContactRecord>(`SELECT ${contactFields} FROM contacts WHERE owner_id = $1`, [ownerId])
   const sources = await client.query<ImportSourceRecord>('SELECT contact_id, patient_id FROM patient_sources WHERE owner_id = $1 AND source_system = $2', [ownerId, source])
   const services = await client.query<ImportServiceRecord>(`SELECT contact_id, service_key, niche_id, service_label, last_visit::text, original_complaint, source_notes
     FROM contact_services WHERE owner_id = $1`, [ownerId])
   const reviews = await client.query<PreviousReview>('SELECT fingerprint, decision, contact_id FROM patient_import_reviews WHERE owner_id = $1 AND source_system = $2', [ownerId, source])
-  return planPatientImport({ source, rows, contacts: contacts.rows, sources: sources.rows, services: services.rows, previousReviews: reviews.rows, override })
+  return planPatientImport({ source, rows, contacts: contacts.rows, sources: sources.rows, services: services.rows, previousReviews: reviews.rows, override, firstRowNumber })
 }
 
 /** Owner-scoped lock serializes concurrent CSV uploads AND review resolution.
@@ -85,9 +85,11 @@ async function writePlan(client: Client, plan: Plan, context: { ownerId: string;
 export async function executePatientImport(context: {
   ownerId: string; participantId: string; source: string; stageId: string | null; simulated: boolean
   mappings?: Array<{ service_label: string; niche_id: string | null }>
+  /** 1-based file row number of `rows[0]` when the upload arrives in several requests. */
+  firstRowNumber?: number
 }, rows: ResolvedImportRow[]): Promise<PatientImportSummary> {
   return transaction(context.ownerId, async client => {
-    const plan = await loadPlan(client, context.ownerId, context.source, rows)
+    const plan = await loadPlan(client, context.ownerId, context.source, rows, undefined, context.firstRowNumber)
     const batchId = randomUUID()
     if (!context.simulated) {
       await writePlan(client, plan, { ...context, batchId })

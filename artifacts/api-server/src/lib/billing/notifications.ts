@@ -1,5 +1,6 @@
 import { randomBytes } from 'crypto'
 import type Stripe from 'stripe'
+import { pastDeadline } from '@/lib/cron/budget'
 import { and, eq, lt, or, sql } from 'drizzle-orm'
 import {
   billingNotificationsTable,
@@ -127,8 +128,8 @@ async function enqueueAndSend<K extends DunningEmailType>(
  * and pick up rows left `pending` by a crash mid-send. Called from the daily
  * billing cron.
  */
-export async function retryFailedNotifications(): Promise<{ retried: number; sent: number; failed: number }> {
-  const summary = { retried: 0, sent: 0, failed: 0 }
+export async function retryFailedNotifications(opts: { deadline?: number } = {}): Promise<{ retried: number; sent: number; failed: number; incomplete?: boolean }> {
+  const summary: { retried: number; sent: number; failed: number; incomplete?: boolean } = { retried: 0, sent: 0, failed: 0 }
   const stale = new Date(Date.now() - 15 * 60 * 1000)
   const rows = await db
     .select()
@@ -144,6 +145,8 @@ export async function retryFailedNotifications(): Promise<{ retried: number; sen
     )
     .limit(100)
   for (const candidate of rows) {
+    // Unleased rows are simply picked up by the next run.
+    if (pastDeadline(opts.deadline, 5_000)) { summary.incomplete = true; break }
     // Lease the row before sending: a conditional update that only succeeds
     // while it is still in the state we selected it in, so two cron runs (or
     // the cron and a webhook re-claim) cannot both deliver it.

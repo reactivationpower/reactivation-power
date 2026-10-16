@@ -39,7 +39,8 @@ export async function ingestReceivedEmail(id: string, data: any) {
     return 'done'
   })
 }
-export async function runInboxInbound() {
+/** Session lock, work and unlock all happen on one connection inside one call, so a frozen function cannot leave the lock held. */
+export async function runInboxInbound(deadline: number = Date.now() + 30_000) {
   if (process.env.NODE_ENV !== 'production' || isVercelPreview()) return
   const lock = await pool.connect()
   let acquired = false
@@ -47,7 +48,7 @@ export async function runInboxInbound() {
     acquired = (await lock.query("SELECT pg_try_advisory_lock(hashtextextended('sales-inbox-receiving',0)) AS ok")).rows[0].ok
     if (!acquired) return
     await lock.query("UPDATE sales_inbox_messages SET state='uncertain',error='Sending was interrupted; check provider before composing another message' WHERE state='sending' AND created_at<now()-interval '15 minutes'")
-    const deadline = Date.now() + 30_000
+    deadline = Math.min(deadline, Date.now() + 30_000)
     const rows = (await lock.query("SELECT id FROM sales_inbox_inbound WHERE state='pending' ORDER BY (last_error IS NOT NULL),created_at LIMIT 5")).rows
     for (const row of rows) {
       if (Date.now() >= deadline) break

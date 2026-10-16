@@ -2,13 +2,23 @@
 
 ## Delivery contract
 
-The API serves only three explicitly allowlisted public MP4s. The API build copies
-them into its own runtime output, so delivery does not depend on the static-site
-proxy or web build order. Players use the base-path-aware API URL; posters stay
-static. Private Blob videos remain on the authenticated `/api/media` route.
+The API serves only three explicitly allowlisted public MP4s. On Replit the API
+build copies them into its own runtime output, so delivery does not depend on the
+static-site proxy or web build order. Players use the base-path-aware API URL;
+posters stay static. Private Blob videos remain on the authenticated `/api/media`
+route.
 
-Each valid single-range GET returns at most 8 MiB, with the actual requested
-offset, authoritative total and exact body length. Large suffix requests return
+**On Vercel** the web build links the pages straight to the same files under
+`/videos/`, which the CDN serves with its own full range support, and the API
+build does not copy the MP4s into the function. `/api/public-media/*` answers
+with a 302 to `/videos/<name>` there (never reading the function's disk), so
+older links keep working.
+
+Each valid single-range GET returns at most 4 MiB (`MAX_MEDIA_RANGE_BYTES`), with
+the actual requested offset, authoritative total and exact body length. The cap
+is below the 4.5 MB a Vercel function may return in one response and is
+guarded by a startup check plus tests, so the same bound applies on both hosts;
+an iPad walks a lesson as consecutive `bytes=N-` requests of at most 4 MiB. Large suffix requests return
 the beginning of the requested suffix, not a different suffix relabeled as that
 range. HEAD describes the full representation without fetching a video body.
 Malformed/multiple/unsatisfiable ranges receive 416.

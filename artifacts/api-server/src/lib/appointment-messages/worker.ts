@@ -123,8 +123,10 @@ function pauseReason(error: unknown) {
 }
 
 /** Durable five-minute production wake plus immediate post-booking nudge.
- * Dedicated lock prevents overlap; never sends from preview/dev. */
-export async function runAppointmentMessages() {
+ * Dedicated lock prevents overlap; never sends from preview/dev. Every
+ * session-level lock is taken and released on the one connection within
+ * this call, so a function frozen after it returns holds nothing. */
+export async function runAppointmentMessages(deadline: number = Date.now() + 45_000) {
   if (process.env.NODE_ENV !== 'production' || isVercelPreview()) return
   const c = await pool.connect()
   let locked = false
@@ -142,14 +144,16 @@ export async function runAppointmentMessages() {
       AND d.channel='email' AND d.state IN ('sending','uncertain') AND e.provider_id IS NOT NULL`)
     await c.query("UPDATE appointment_deliveries SET state='uncertain',last_error='Worker interrupted after dispatch began',sent_at=NULL WHERE state='sending'")
     await c.query("UPDATE appointment_deliveries SET state='skipped',last_error='Send window expired' WHERE state IN ('pending','blocked') AND expires_at<=now()")
-    const deadline = Date.now() + 45_000
+    deadline = Math.min(deadline, Date.now() + 45_000)
     const rows = (await c.query(`SELECT * FROM appointment_messages WHERE NOT stopped AND reconcile_at<=now()
        ORDER BY reconcile_at,appointment_id LIMIT 8`)).rows
     for (const row of rows) {
       if (Date.now() >= deadline) break
       // Booked lead's stop/edit and our final send checks share the same lock.
+      // Never wait for it: a lead mid-edit or mid-booking keeps its reconcile_at
+      // in the past and is simply first in line next run.
       const key = `sales-send:${row.lead_id}`
-      await c.query('SELECT pg_advisory_lock(hashtextextended($1,0))', [key])
+      if (!(await c.query('SELECT pg_try_advisory_lock(hashtextextended($1,0)) AS ok', [key])).rows[0].ok) continue
       try {
         const lead = (await c.query('SELECT * FROM sales_leads WHERE id=$1', [row.lead_id])).rows[0]
         if (!lead?.ghl_contact_id) throw new AppointmentCheckError('lead has no GoHighLevel contact')

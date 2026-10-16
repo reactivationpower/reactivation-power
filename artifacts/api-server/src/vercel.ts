@@ -8,7 +8,8 @@ import { enableDatabaseReadTracking } from "./lib/startup";
 /**
  * Vercel function entry. Wraps the same Express app as the Replit server
  * (src/index.ts), without app.listen, shutdown handling or the in-process
- * scheduler. Super-admin seeding and the encryption check do not run here;
+ * scheduler: Vercel Cron (vercel.json `crons`) calls the /api/cron routes
+ * instead, and after-response work goes through lib/after-response.ts. Super-admin seeding and the encryption check do not run here;
  * use `pnpm --filter @workspace/api-server run seed:super-admin` instead.
  *
  * Stripe setup runs once per instance and every request waits for it. If it
@@ -16,7 +17,8 @@ import { enableDatabaseReadTracking } from "./lib/startup";
  * setting never turns into a crash loop.
  */
 
-enableDatabaseReadTracking();
+// No interval timers on Vercel: the function is frozen between requests.
+enableDatabaseReadTracking({ flush: "lazy" });
 
 let ready: Promise<void> | null = null;
 

@@ -8,6 +8,11 @@ import salesCallMediaRouter from "./routes/sales-call-media";
 import { logger } from "./lib/logger";
 import { redactSecretPath } from "./lib/redact-path";
 import { respondDatabaseUnavailable } from "./lib/database-unavailable";
+import { describeMegabytes, JSON_BODY_LIMIT, JSON_BODY_LIMIT_BYTES } from "./lib/request-limits";
+
+/** Body-parser rejects oversized JSON with 413; tell the sender what to do. */
+export const BODY_TOO_LARGE_MESSAGE =
+  `The request is larger than ${describeMegabytes(JSON_BODY_LIMIT_BYTES)}. Split it into smaller uploads and try again.`;
 
 const app: Express = express();
 
@@ -43,9 +48,11 @@ app.use("/api", salesCallMediaRouter);
 // Parse sensitive intake separately: bounded body, no retained raw-body copy.
 app.use("/api/actions/affiliate-onboarding", express.json({ limit: "3mb" }));
 app.use("/api/actions/patient-texting", express.json({ limit: "32kb" }));
+// 4 MB keeps every JSON request under the 4.5 MB a Vercel function accepts;
+// the browser splits large CSV imports into several requests to fit.
 app.use(
   express.json({
-    limit: "10mb",
+    limit: JSON_BODY_LIMIT,
     // Webhook signature checks (Stripe, Resend/Svix) need the exact bytes received.
     verify: (req, _res, buf) => {
       (req as express.Request & { rawBody?: Buffer }).rawBody = buf;
@@ -73,7 +80,11 @@ const errorHandler: ErrorRequestHandler = (err, req, res, _next) => {
   const status = (err as { status?: unknown })?.status;
   if (typeof status === "number" && status >= 400 && status < 500) {
     logger.warn({ err: err instanceof Error ? err.message : String(err), method: req.method, path: redactSecretPath(req.path) }, "request rejected");
-    res.status(status).json({ error: status === 400 ? "The request body could not be parsed." : err instanceof Error ? err.message : "Bad request" });
+    res.status(status).json({
+      error: status === 400 ? "The request body could not be parsed."
+        : status === 413 ? BODY_TOO_LARGE_MESSAGE
+        : err instanceof Error ? err.message : "Bad request",
+    });
     return;
   }
   logger.error({ err, method: req.method, path: redactSecretPath(req.path) }, "unhandled request error");

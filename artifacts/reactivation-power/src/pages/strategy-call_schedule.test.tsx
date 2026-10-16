@@ -252,9 +252,13 @@ describe('coming back with the browser Back button after submitting', () => {
     expect(id).not.toBe(firstId)
     expect(container.querySelector<HTMLInputElement>('input[name="firstName"]')!.value).toBe('Test')
     expect(container.querySelector<HTMLInputElement>('input[name="phone"]')!.value).toBe('(555) 555-1234')
-    expect((screen.getByLabelText(/Best time to connect/) as HTMLSelectElement).value).toBe('Anytime')
-    expect((screen.getByLabelText(/What can we help with/) as HTMLSelectElement).value).toBe('lead-follow-up')
-    expect((screen.getByLabelText(/How long in practice/) as HTMLSelectElement).value).toBe('4-7 years')
+    // The kept choices come back on the render after React's post-action form
+    // reset, which lands a tick after the button re-enables on a slow runner.
+    await waitFor(() => {
+      expect((screen.getByLabelText(/Best time to connect/) as HTMLSelectElement).value).toBe('Anytime')
+      expect((screen.getByLabelText(/What can we help with/) as HTMLSelectElement).value).toBe('lead-follow-up')
+      expect((screen.getByLabelText(/How long in practice/) as HTMLSelectElement).value).toBe('4-7 years')
+    })
     expect((screen.getByRole('checkbox', { name: /I consent/ }) as HTMLInputElement).checked).toBe(true)
 
     fireEvent.change(container.querySelector('input[name="lastName"]')!, { target: { value: 'Corrected' } })

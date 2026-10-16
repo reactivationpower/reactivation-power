@@ -9,7 +9,7 @@ const delivery = vi.hoisted(() => ({
   // Stand-in for the real lookup: our own contact holds the phone unless a test says otherwise.
   textContactFor: vi.fn(async (_phone: string, id: string) => (delivery.contact as any)(id)),
 }))
-vi.mock('./dispatch', () => ({ nudgeSalesSync: vi.fn() }))
+vi.mock('./dispatch', () => ({ nudgeSalesSync: vi.fn(), workerState: { busy: false } }))
 vi.mock('@workspace/db', () => ({ pool: {
   query: (...args: any[]) => fixture.pool.query(...args),
   connect: () => fixture.pool.connect(),

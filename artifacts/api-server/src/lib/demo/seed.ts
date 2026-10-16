@@ -1096,6 +1096,17 @@ export type EnsureSeedResult =
   | { status: 'seeded'; summary: SeedSummary }
   | { status: 'waited' }
   | { status: 'error'; message: string }
+  /** Not started: the caller's time budget could not fit another rebuild. */
+  | { status: 'deferred' }
+
+/**
+ * A rebuild is wipe-then-build and cannot be stopped half-way without leaving
+ * a half-built demo, so a practice is only started when at least this much
+ * of the caller's budget is left (a possible 90 s wait on another rebuild
+ * plus the build itself). The lock expires after SEED_LOCK_TTL_MS anyway, so
+ * even a killed rebuild is recoverable, just not clean.
+ */
+export const DEMO_PRACTICE_RESERVE_MS = 120_000
 
 const errorMessage = (e: unknown) => (e instanceof Error ? e.message : String(e))
 
@@ -1169,12 +1180,23 @@ export async function ensureDemoSeeded(
   }
 }
 
-/** Rebuild every demo practice in turn (the nightly reset). */
+/**
+ * Rebuild every demo practice in turn (the nightly reset). With a deadline,
+ * a practice that no longer fits is reported as `deferred` and left for the
+ * next run; its own seed stamp (a previous Eastern day) makes that run — or
+ * the first presenter to sign in — rebuild it.
+ */
 export async function ensureAllDemosSeeded(
-  opts: { force?: boolean } = {},
+  opts: { force?: boolean; deadline?: number } = {},
 ): Promise<Record<DemoPracticeKey, EnsureSeedResult>> {
   const out = {} as Record<DemoPracticeKey, EnsureSeedResult>
-  for (const p of DEMO_PRACTICES) out[p.key] = await ensureDemoSeeded(p.key, opts)
+  for (const p of DEMO_PRACTICES) {
+    if (opts.deadline !== undefined && opts.deadline - Date.now() < DEMO_PRACTICE_RESERVE_MS) {
+      out[p.key] = { status: 'deferred' }
+      continue
+    }
+    out[p.key] = await ensureDemoSeeded(p.key, { force: opts.force })
+  }
   return out
 }
 

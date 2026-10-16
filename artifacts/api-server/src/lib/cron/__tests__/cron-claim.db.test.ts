@@ -28,9 +28,10 @@ let holdRetry: Promise<void> | null = null
 const retry = vi.fn(async () => {
   started += 1
   if (holdRetry) await holdRetry
-  return { customers: 0, invoices: 0, paid: 0, failed: 0, details: [] }
+  return { customers: 0, invoices: 0, paid: 0, failed: 0, details: [], attempted: [] }
 })
 vi.mock('@/lib/billing/dunning', () => ({ retryPastDueInvoices: retry }))
+vi.mock('@/lib/billing/notifications', () => ({ retryFailedNotifications: vi.fn(async () => ({ retried: 0, sent: 0, failed: 0 })) }))
 vi.mock('@/actions/enrollment', () => ({ reconcilePendingEnrollments: vi.fn(async () => ({ examined: 0, completed: 0 })) }))
 vi.mock('@/lib/demo/seed', () => ({ ensureAllDemosSeeded: vi.fn(async () => ({ status: 'fresh' })) }))
 vi.mock('@/lib/mail', () => ({ sendEmail: vi.fn(async (..._args: unknown[]) => ({ ok: true, logId: 'log' })) }))
@@ -75,7 +76,7 @@ describe.skipIf(!hasDb)('cron slot claim (Postgres)', { timeout: 25000 }, () => 
     expect(outcomes.filter(o => 'skipped' in o)).toHaveLength(2)
     const rows = await db.select().from(cronRunsTable).where(and(eq(cronRunsTable.job, 'auth-cleanup'), eq(cronRunsTable.dueKey, DUE_KEY)))
     expect(rows).toHaveLength(1)
-    expect(rows[0]).toMatchObject({ status: 'ok', summary: { challengesDeleted: 0, rateLimitsDeleted: 0, idleSessionsDeleted: 0 } })
+    expect(rows[0]).toMatchObject({ status: 'ok', summary: { auth: { challengesDeleted: 0, rateLimitsDeleted: 0, idleSessionsDeleted: 0 } } })
   })
 
   it('scheduler instances and the external trigger racing for one slot run it once', async () => {
@@ -152,5 +153,16 @@ describe.skipIf(!hasDb)('cron slot claim (Postgres)', { timeout: 25000 }, () => 
     expect(rows).toHaveLength(1)
     expect(rows[0]).toMatchObject({ status: 'ok' })
     expect(rows[0]?.id).not.toBe('live-' + DUE_KEY)
+  })
+
+  it('records the safe scheduler check once per UTC hour and prunes week-old checks', async () => {
+    const { recordSchedulerCheck, lastSchedulerCheck } = await import('@/lib/cron/scheduler-check')
+    await recordSchedulerCheck('http', new Date(Date.now() - 8 * 86_400_000))
+    const now = new Date()
+    expect(await recordSchedulerCheck('vercel-cron', now)).toMatchObject({ recorded: true, target: 'replit', scheduledJobs: 'on' })
+    expect(await recordSchedulerCheck('vercel-cron', now)).toMatchObject({ recorded: false })
+    const rows = await db.select().from(cronRunsTable).where(eq(cronRunsTable.job, 'scheduler-check'))
+    expect(rows).toHaveLength(1)
+    expect(await lastSchedulerCheck()).toMatchObject({ trigger: 'vercel-cron', status: 'ok' })
   })
 })

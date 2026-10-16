@@ -15,12 +15,13 @@ deployment keep working unchanged (`src/index.ts` with `app.listen`).
 
 | File | Purpose |
 | --- | --- |
-| `vercel.json` (repo root) | Install/build/output commands and routing |
+| `vercel.json` (repo root) | Install/build/output commands, routing, function time limit and the Vercel Cron schedule |
 | `api/index.mjs` | The Vercel function; re-exports the bundled handler |
 | `artifacts/api-server/src/vercel.ts` | Wraps the Express app: waits for Stripe setup once per instance, clear 503 on setup failure |
 | `artifacts/api-server/src/index.ts` | Replit server entry (unchanged behavior) |
 | `artifacts/api-server/src/seed-super-admin.ts` | One-off first-admin seed + encryption check (not run on Vercel cold starts) |
-| `artifacts/api-server/src/lib/deployment-safety.ts` | The one Preview-safety check |
+| `artifacts/api-server/src/lib/deployment-safety.ts` | The one Preview-safety check, and the scheduled-jobs switch (`SCHEDULED_JOBS`) |
+| `artifacts/api-server/src/lib/cron/budget.ts` | Time budget for cron calls on Vercel (stop and continue) |
 | `package.json` (root) | Pins `pnpm@10.26.1` and Node `24.x`; `build:vercel` script |
 
 ## Changes to the existing Vercel project "reactivation-power"
@@ -66,13 +67,36 @@ size). A Vercel build (`VERCEL` is set during the build) points the page at the
 same files under `/videos/` instead, which Vercel's CDN serves directly with
 full range (seek) support. The API route is not used on Vercel.
 
+## Request and response size limits
+
+A Vercel function accepts at most 4.5 MB in a request body and may return at most
+4.5 MB in one response. The app stays inside that on every host
+(`artifacts/api-server/src/lib/request-limits.ts`):
+
+- **Uploads** go straight from the browser to Vercel Blob with a token from
+  `/api/upload/token` (up to 5 GB). The server-side `/api/upload` fallback only
+  accepts files up to 4 MB and answers 413 `UPLOAD_TOO_LARGE` with a message
+  pointing at the admin page for anything bigger.
+- **Private lesson videos** stream from Blob in byte ranges of at most 4 MiB
+  (see `docs/video-playback-verification.md`).
+- **Public marketing videos** are static files under `/videos/` on the CDN; the
+  API route redirects there and the function bundle contains no MP4s.
+- **JSON bodies** are capped at 4 MB. A CSV import larger than that is sent by
+  the browser as several consecutive requests (`rowOffset` keeps the file's row
+  numbers in review items); matching rules are unchanged because later rows
+  match the people earlier rows created, exactly like uploading twice.
+- **Agreement PDFs** render from pdfkit bundled into the function with its
+  standard font data (esbuild rewrites pdfkit's private `#standard-fonts`
+  loaders; see `esbuild.config.mjs`). A PDF over 4 MB is reported as an error
+  instead of being cut off.
+
 ## Preview safety
 
 Vercel Preview deployments use the same Supabase database as production. On any
 Vercel deployment whose `VERCEL_ENV` is not `production`, the app:
 
 - never runs scheduled jobs (`/api/cron/*` answers 503, "Run now" refuses, the
-  in-process scheduler stays off),
+  in-process scheduler stays off; Vercel Cron does not call Preview at all),
 - never sends real email (logged as failed with a clear reason),
 - never sends texts/emails through GoHighLevel,
 - never runs the internal sales workers (lead sync, follow-ups, appointment
@@ -82,6 +106,18 @@ Vercel deployment whose `VERCEL_ENV` is not `production`, the app:
 Production behavior only happens when Vercel itself marks the deployment as
 production. Important: a Preview still **reads and writes real data** in the
 shared database (sign-ups, edits). Only test with test accounts there.
+
+
+## Sign-in, cookies and client addresses
+
+- Cookies stay `Secure`/`HttpOnly` as on Replit: Express trusts the proxy, and
+  Vercel always serves HTTPS on one origin.
+- Client IP for rate limits: Vercel replaces `X-Forwarded-For` with the real
+  client address (clients cannot fake it), and the affiliate sign-in limits read
+  Vercel's `X-Real-IP`. On Replit nothing changed.
+- Links in emails always use `https://patientpipeline.app`. On Vercel an
+  `APP_URL` with any other host (for example a temporary `*.vercel.app`) is
+  ignored, so test deployments can never send customers to a temporary address.
 
 ## Stripe mode
 
@@ -113,11 +149,27 @@ pnpm --filter @workspace/api-server run seed:super-admin
 It does nothing if a super admin already exists. The Replit server still runs
 this check on boot, as before.
 
+
+## Database connections
+
+The shared Supabase database allows about 15 sessions for everything: Vercel
+production, the Replit workspace, scripts and tests. Vercel keeps the same
+Session-pooler `SUPABASE_DB_URL` and the app's own small pool (2 per function
+instance), and the database library attaches Vercel's `attachDatabasePool`
+helper so idle connections close before an instance is suspended. The pool
+size and both timeouts can be changed with the `DB_POOL_*` variables below.
+When the database is full, requests get the existing "temporarily unavailable"
+503 with `Retry-After`, not a crash. Why the Session pooler (and not the
+Transaction pooler) was kept, the worst-case numbers, and the rule for deploy
+overlap are in `docs/database-connection-budget.md`.
+
 ## Environment variables
 
-None of these are needed by the browser build. No private value may use a
-`VITE_` or `NEXT_PUBLIC_` name (Vite only exposes `VITE_*` to the browser; the
-app reads none). "Server" = read only by the API function at run time.
+Only the two `VITE_POSTHOG_*` values are read by the browser build; they are
+public by design (an analytics project key) and are baked in when Vercel builds.
+No private value may use a `VITE_` or `NEXT_PUBLIC_` name (Vite exposes every
+`VITE_*` value to the browser). "Server" = read only by the API function at run
+time. "Build" = read while Vercel builds.
 
 | Variable | What it is for | Used by | Production | Preview |
 | --- | --- | --- | --- | --- |
@@ -126,9 +178,12 @@ app reads none). "Server" = read only by the API function at run time.
 | `SUPABASE_URL` | Supabase project address | Server | Yes | Yes |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase admin access | Server | Yes | Yes |
 | `SUPABASE_JWT_SECRET` | Fallback cookie-signing secret, only used if `SESSION_SECRET` is missing | Server | Optional | Optional |
-| `SUPABASE_DB_URL` | Direct Postgres (session pooler) | Server | Yes | Yes |
+| `SUPABASE_DB_URL` | Postgres, Supabase **Session** pooler URI (port 5432); not the Transaction pooler | Server | Yes | Yes |
+| `DB_POOL_MAX` | Connections per function instance (default `2`; keep ≥ 2) | Server | Optional | Optional |
+| `DB_POOL_ACQUIRE_TIMEOUT_MS` | Wait for a free connection before a friendly 503 (default `5000`) | Server | Optional | Optional |
+| `DB_POOL_IDLE_TIMEOUT_MS` | Close idle connections after (default `5000` on Vercel, `10000` on Replit) | Server | Optional | Optional |
 | `SESSION_SECRET` | Signs sign-in cookies | Server | Yes | Yes (same value keeps sessions valid) |
-| `APP_URL` | Links in emails (`https://patientpipeline.app`) | Server | Yes | Optional |
+| `APP_URL` | Links in emails. On Vercel only `https://patientpipeline.app` (or `www.`) is accepted; anything else, such as a `*.vercel.app` address, is ignored and the real domain is used | Server | Optional (`https://patientpipeline.app`) | Not needed |
 | `BLOB_READ_WRITE_TOKEN` | Video/file storage (Vercel Blob) | Server | Yes | Yes |
 | `STRIPE_MODE` | `live` or `test` (required on Vercel) | Server | `live` | `test` |
 | `STRIPE_SECRET_KEY` | Live Stripe secret key | Server | Yes | **No** |
@@ -141,7 +196,11 @@ app reads none). "Server" = read only by the API function at run time.
 | `RESEND_FROM` | Optional sender override (must be `@patientpipeline.app`) | Server | Optional | Optional |
 | `RESEND_WEBHOOK_SECRET` | Checks Resend delivery webhooks | Server | Yes | Optional |
 | `RESEND_RECEIVING_API_KEY` | Reading replies for the sales inbox | Server | Yes | Optional |
-| `CRON_SECRET` | Protects `/api/cron/*` | Server | Yes | No |
+| `CRON_SECRET` | Protects `/api/cron/*`; Vercel Cron sends it automatically when set | Server | Yes | No |
+| `CRON_RUN_BUDGET_MS` | Optional: time budget of one cron run (default 240000, must stay below the function limit) | Server | Optional | — |
+| `SCHEDULED_JOBS` | `on` lets this Vercel production deployment run the scheduled jobs. **Leave unset (off) until switch-over** | Server | Unset until switch-over | Never |
+| `VITE_POSTHOG_KEY` | PostHog project key (public, analytics) | Build | Yes | Optional |
+| `VITE_POSTHOG_HOST` | `https://us.i.posthog.com` | Build | Yes | Optional |
 | `GHL_API_TOKEN` | GoHighLevel API | Server | Yes | Optional (sends are blocked) |
 | `GHL_LOCATION_ID` | GoHighLevel location | Server | Yes | With token |
 | `GHL_CALENDAR_ID` | GoHighLevel booking calendar | Server | Yes | With token |
@@ -150,18 +209,119 @@ app reads none). "Server" = read only by the API function at run time.
 | `DEMO_PASSWORD` | Sales demo account password | Server | Yes | Yes |
 | `PATIENT_DEMO_OPENAI_API_KEY` | Patient texting demo (fictional) | Server | Optional | Optional |
 | `PATIENT_TEXT_INDEPENDENT_CALLBACK_URL` | Patient texting webhook address | Server | Optional | No |
-| `SUPER_ADMIN_EMAIL` | First super admin (seed script only) | Script | Optional | No |
+| `SUPER_ADMIN_EMAIL` | Where cron failure alerts go; also the first super admin for the seed script | Server | Yes | No |
 | `SUPER_ADMIN_INITIAL_PASSWORD` | First super admin password (seed script only) | Script | Optional | No |
-| `CRON_SCHEDULER` | In-process scheduler switch; not used on Vercel | Replit | — | — |
+| `CRON_SCHEDULER` | In-process scheduler switch; not used on Vercel (Vercel Cron replaces it) | Replit | — | — |
 | `LOG_LEVEL` | Log detail (default `info`) | Server | Optional | Optional |
 | `BASE_PATH` | Frontend base path; defaults to `/` | Build | Not needed | Not needed |
 
-Set automatically, do not add: `VERCEL`, `VERCEL_ENV`, `NODE_ENV`, `PORT`.
+Set automatically, do not add: `VERCEL`, `VERCEL_ENV`, `VERCEL_URL`, `VERCEL_REGION`,
+`NODE_ENV`, `PORT`. (`VERCEL_URL` and `VERCEL_REGION` are what turns on the
+idle-connection cleanup helper.)
 Replit-only, not needed on Vercel: `REPLIT_CONNECTORS_HOSTNAME`, `REPL_IDENTITY`,
 `WEB_REPL_RENEWAL`, `REPL_ID`.
 
-## Not covered here (separate tasks)
 
-- Scheduled jobs and the five-minute workers on Vercel Cron.
-- Upload, video and body-size limits for admin uploads and private lesson videos.
-- Database connection limits for many function instances.
+## Scheduled jobs (Vercel Cron)
+
+There is no always-on process on Vercel: a function is frozen as soon as it has
+answered, so the in-process five-minute scheduler and anything "started after the
+response" cannot run there. Vercel Cron calls the existing protected
+`/api/cron/*` routes instead. **Plan: Vercel Pro is required** — Hobby allows
+only daily crons (no five-minute schedule) and a 60-second function limit,
+while this setup uses a five-minute schedule and `maxDuration: 300`.
+
+**Off until switch-over.** The `crons` in `vercel.json` start calling the
+*production* deployment as soon as it exists, but on a Vercel production
+deployment every cron route except the heartbeat answers
+`{"ok":true,"skipped":true,"reason":"…until switch-over…"}` and does nothing,
+and the admin "Run now" button refuses, until the variable
+**`SCHEDULED_JOBS=on`** is added (`lib/deployment-safety.ts`). This keeps the live
+Replit site the only place that charges cards, resets demos or sends queued
+email while both exist. Turn it on only at switch-over, together with turning
+the Replit scheduler off and retiring the Supabase pg_cron wake (below); see
+`docs/vercel-release-and-cutover.md`. Replit is not affected by the switch.
+
+**Safe scheduler check.** `/api/cron/heartbeat` (hourly at :15) runs even while
+jobs are off. It only writes one `cron_runs` row per UTC hour (job
+`scheduler-check`, kept 7 days) and changes nothing else. The super-admin
+Scheduled jobs card ends with "Scheduler check: last call received …" showing
+the deployment and whether jobs are on there, so the schedule and secret can be
+proven before switch-over. Vercel → Settings → Cron Jobs → **Run** triggers it
+on demand.
+
+### Schedule (`vercel.json` → `crons`, all times UTC)
+
+| Path | Schedule | What it is |
+| --- | --- | --- |
+| `/api/cron/heartbeat` | `15 * * * *` | Safe scheduler check (runs even while jobs are off) |
+| `/api/cron/demo-reset` | `0 7,8 * * *` | Demo reset, 3:00 AM ET |
+| `/api/cron/auth-cleanup` | `0 8,9 * * *` | Auth / affiliate / marketing cleanup, 4:00 AM ET |
+| `/api/cron/billing-retry` | `0 10,11 * * *` | Billing retry + enrollment / affiliate / marketing reconcile + failed billing-email retries, 6:00 AM ET |
+| `/api/cron/workers` | `1,6,11,…,56 * * * *` | Every five minutes: lead emails, enrollment and affiliate invitation recovery, sales worker (sales inbox inbound, appointment confirmations, GoHighLevel sync, cadence), marketing reconcile — then a catch-up claim of each daily slot |
+
+- **Daylight saving.** Vercel Cron only knows UTC, so each daily job is scheduled
+  at *both* UTC hours its Eastern time can fall on (summer and winter). Each call
+  claims the Eastern-day slot in `cron_runs`; the wrong-hour call finds the slot
+  taken (or not yet due) and is a no-op, so the job runs exactly once a day.
+- **Missed calls.** Vercel does not retry a failed cron call. The five-minute
+  `/api/cron/workers` pass also claims any daily slot that has not run yet, so a
+  missed day runs late instead of never. The daily crons fire on the hour and the
+  workers pass one minute later, so the daily call claims its slot first with a
+  full time budget.
+- **Time budget.** `functions.api/index.mjs.maxDuration` is 300 s; every cron run
+  works within 240 s (`lib/cron/budget.ts`), checks the clock *between* items
+  and stops cleanly. A daily job that stops early is stored as `partial` and the
+  next call for the same slot (the second UTC hour, the workers pass, or Run
+  now) continues it from the progress already in the database: billing retry
+  skips the customers the slot already attempted (a declined card is not
+  retried again while later customers wait) and skips the follow-up steps it
+  already finished; enrollment, affiliate-history and marketing reconcile and
+  all cleanups stop between items or delete in batches, and only a step that
+  stopped early is re-run; demo reset only starts a practice when ≥ 2 minutes
+  are left and rebuilds a deferred one next time; the five-minute workers
+  leave unclaimed rows for the next pass. Progress is also checkpointed into
+  the run row while it is still running (after every billing customer and
+  after every step), so a function killed outright is continued from its last
+  checkpoint when the stale slot is taken over 30 minutes later, never
+  restarted. The admin "Run now" button continues a partial run too, rather
+  than starting the job over. A slot still partial after 24 continuations is
+  reported as failed (email to `SUPER_ADMIN_EMAIL`).
+- **Patient texting.** `/api/cron/patient-texting` now answers GET as well as
+  POST (Vercel Cron only sends GET) but is **not scheduled** while patient
+  texting is off. Add it to `crons` when texting is turned on.
+- **Trigger and visibility.** A call with Vercel's `vercel-cron/…` user agent is
+  recorded in `cron_runs` with trigger `vercel-cron` ("Vercel Cron" on the
+  super-admin Scheduled jobs card); the Overdue badge and failure emails work
+  unchanged.
+- **After-response work.** The sales sync nudge after a save, the confirmation
+  messages right after a booking and the sales-worker wake after lead changes
+  go through `lib/after-response.ts`, which hands the promise to Vercel's
+  `waitUntil` (`@vercel/functions`) with a 45-second budget. On Replit the same
+  code simply runs in the background. Nothing depends on it finishing: the
+  workers pass picks up whatever is left.
+- **Locks.** Workers take their session-level advisory locks and release them on
+  the same connection inside one call (the appointment worker now uses a
+  non-blocking try-lock per lead), so a frozen function never leaves a lock held.
+- **Timers.** The in-process scheduler never starts on Vercel (even with
+  `CRON_SCHEDULER=on`) and database read-usage reporting flushes lazily from the
+  next query instead of a five-minute timer.
+- **Preview.** Every `/api/cron/*` route answers 503 on Preview deployments and
+  the job registry refuses before claiming a slot.
+
+### Sales automation readiness after the move
+
+The Leads settings "Scheduler running" check reads one capability,
+`scheduler_wake`, through the shared rule list (`lib/shared/src/sales-automation.ts`).
+On Replit the Supabase pg_cron job stamps it (`source: supabase`); on Vercel the
+five-minute cron stamps the same capability (`source: vercel-cron`). Either keeps
+the checklist green; no second rule exists. While both schedulers run, the
+worker is simply woken twice — its durable claims make that harmless. At cutover,
+retire the pg_cron job with `retireNativeWake()` (`lib/sales-leads/wake.ts`,
+operator-run) so it stops double-triggering; `/api/cron/sales-leads` and
+`/api/cron/lead-emails` remain as names for the same workers pass.
+
+
+## Release flow, test deployment, switch-over and rollback
+
+See `docs/vercel-release-and-cutover.md`.

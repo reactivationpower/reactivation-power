@@ -1,6 +1,7 @@
 import express from 'express'
 import type { Server } from 'node:http'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
+import { VERCEL_PAYLOAD_LIMIT_BYTES } from '@/lib/request-limits'
 
 const blob = vi.hoisted(() => ({
   get: vi.fn(),
@@ -103,7 +104,8 @@ describe('GET /api/media private video streaming', () => {
     }
   })
 
-  it('serves Safari open-ended requests as 8 MiB bounded 206 streams', async () => {
+  it('serves Safari open-ended requests as bounded 206 streams that fit one Vercel response', async () => {
+    expect(MAX_MEDIA_RANGE_BYTES).toBeLessThan(VERCEL_PAYLOAD_LIMIT_BYTES)
     blob.get.mockResolvedValue(upstream(0, MAX_MEDIA_RANGE_BYTES - 1))
     const response = await request({ Range: 'bytes=0-' })
     expect(response.status).toBe(206)
@@ -212,7 +214,24 @@ describe('GET /api/media private video streaming', () => {
 })
 
 describe('parseMediaRange', () => {
-  it('caps open-ended and long bounded video ranges below the published proxy limit', () => {
+  it('keeps every chunk under the 4.5 MB Vercel function response limit', () => {
+    expect(MAX_MEDIA_RANGE_BYTES).toBe(4 * 1024 * 1024)
+    expect(MAX_MEDIA_RANGE_BYTES).toBeLessThan(VERCEL_PAYLOAD_LIMIT_BYTES)
+    // Consecutive open-ended requests, as iPad Safari issues them, walk the
+    // whole file with exact offsets and no chunk over the limit.
+    let next = 0
+    let chunks = 0
+    while (next < SIZE) {
+      const range = parseMediaRange(`bytes=${next}-`, SIZE)!
+      expect(range.start).toBe(next)
+      expect(range.end - range.start + 1).toBeLessThanOrEqual(MAX_MEDIA_RANGE_BYTES)
+      next = range.end + 1
+      chunks++
+    }
+    expect(next).toBe(SIZE)
+    expect(chunks).toBe(Math.ceil(SIZE / MAX_MEDIA_RANGE_BYTES))
+  })
+  it('caps open-ended and long bounded video ranges below the hosting response limit', () => {
     expect(parseMediaRange('bytes=0-', SIZE))
       .toEqual({ start: 0, end: MAX_MEDIA_RANGE_BYTES - 1 })
     expect(parseMediaRange(`bytes=4096-${SIZE - 1}`, SIZE))

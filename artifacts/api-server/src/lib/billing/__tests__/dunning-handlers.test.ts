@@ -710,4 +710,38 @@ describe('retryPastDueInvoices', () => {
     expect(summary).toMatchObject({ customers: 0, invoices: 0 })
     expect(stripeMock.invoices.list).not.toHaveBeenCalled()
   })
+
+  it('stops between customers at its deadline and reports the pass as incomplete, never mid-card', async () => {
+    seed({ billingStatus: 'past_due', billingBlockedAt: new Date() })
+    tables.customers.push({ ...tables.customers[0]!, id: 'cust_2', stripeCustomerId: 'cus_stripe_2' })
+    stubStripe({ paying: [PM_SECONDARY], openInvoices: [invoice({ status: 'open' })] })
+
+    // Already past the deadline: not one customer is started, nothing is charged.
+    const none = await retryPastDueInvoices('cron', undefined, { deadline: Date.now() - 1 })
+    expect(none).toMatchObject({ customers: 0, incomplete: true, remainingCustomers: 2 })
+    expect(stripeMock.invoices.pay).not.toHaveBeenCalled()
+
+    // Plenty of time: both customers, all cards, no incomplete flag.
+    const all = await retryPastDueInvoices('cron', undefined, { deadline: Date.now() + 600_000 })
+    expect(all).toMatchObject({ customers: 2, paid: 1, attempted: [CUSTOMER, 'cust_2'] })
+    expect(all).not.toHaveProperty('incomplete')
+  })
+
+  it('a continued pass leaves customers whose cards already declined this slot alone instead of charging them again', async () => {
+    seed({ billingStatus: 'past_due', billingBlockedAt: new Date() })
+    tables.customers.push({ ...tables.customers[0]!, id: 'cust_2', stripeCustomerId: 'cus_stripe_2' })
+    tables.payment_link_terms.push({ ...tables.payment_link_terms[0]!, id: 'terms_2', customerId: 'cust_2', stripeSubscriptionId: 'sub_2' })
+    stubStripe({ paying: [], openInvoices: [invoice({ status: 'open' })] })
+
+    // First pass: every card declines; both customers stay past due.
+    const first = await retryPastDueInvoices('cron')
+    expect(first).toMatchObject({ customers: 2, paid: 0, failed: 2, attempted: [CUSTOMER, 'cust_2'] })
+    const attemptsAfterFirst = stripeMock.invoices.pay.mock.calls.length
+    expect(attemptsAfterFirst).toBeGreaterThan(0)
+
+    // Continuation of the same slot: the attempted customers are skipped, so no card is charged twice.
+    const second = await retryPastDueInvoices('cron', undefined, { skipCustomerIds: first.attempted })
+    expect(second).toMatchObject({ customers: 0, failed: 0, attempted: [] })
+    expect(stripeMock.invoices.pay.mock.calls.length).toBe(attemptsAfterFirst)
+  })
 })

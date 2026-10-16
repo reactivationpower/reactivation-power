@@ -1,4 +1,5 @@
 import { randomBytes } from 'crypto'
+import { pastDeadline } from '@/lib/cron/budget'
 import type Stripe from 'stripe'
 import { and, desc, eq, isNull } from 'drizzle-orm'
 import {
@@ -667,24 +668,52 @@ export interface RetrySummary {
   paid: number
   failed: number
   details: { customerId: string; invoiceId: string; result: 'paid' | 'failed' | 'skipped'; card?: string; message?: string | null }[]
+  /** True when the pass stopped at its deadline with past-due customers still unvisited. */
+  incomplete?: boolean
+  remainingCustomers?: number
+  /** Every customer this pass visited (including those whose cards declined again). */
+  attempted: string[]
 }
+
+/** Do not start another customer's retries with less than this left: each card attempt is a Stripe round trip. */
+const CUSTOMER_RESERVE_MS = 20_000
 
 /** Re-attempt every open invoice of every past-due customer, primary then secondary. */
 export async function retryPastDueInvoices(
   source: NewPaymentHistory['source'] = 'cron',
   onlyCustomerId?: string,
+  opts: {
+    deadline?: number
+    skipCustomerIds?: Iterable<string>
+    /** Called after each customer with the summary so far, so progress can be checkpointed. */
+    onCustomerDone?: (summary: RetrySummary) => Promise<void>
+  } = {},
 ): Promise<RetrySummary> {
-  const summary: RetrySummary = { customers: 0, invoices: 0, paid: 0, failed: 0, details: [] }
-  const pastDue = await db
+  const summary: RetrySummary = { customers: 0, invoices: 0, paid: 0, failed: 0, details: [], attempted: [] }
+  const skip = new Set(opts.skipCustomerIds ?? [])
+  const pastDue = (await db
     .select()
     .from(customersTable)
     .where(
       onlyCustomerId
         ? and(eq(customersTable.billingStatus, 'past_due'), eq(customersTable.id, onlyCustomerId))
         : eq(customersTable.billingStatus, 'past_due'),
-    )
-  for (const customer of pastDue) {
+    ))
+    // A continued pass skips the customers an earlier pass of the same slot
+    // already visited: a customer whose cards declined is still past due and
+    // would otherwise be retried again before the pass reaches the rest.
+    .filter((c) => !skip.has(c.id))
+  for (const [index, customer] of pastDue.entries()) {
+    // Stop between customers, never between a customer's cards: every attempt
+    // is already in payment_history, and the attempted list is handed back so
+    // the next run of the same slot continues with the customers still unvisited.
+    if (pastDeadline(opts.deadline, CUSTOMER_RESERVE_MS)) {
+      summary.incomplete = true
+      summary.remainingCustomers = pastDue.length - index
+      break
+    }
     summary.customers += 1
+    summary.attempted.push(customer.id)
     const termsRows = await db
       .select()
       .from(paymentLinkTermsTable)
@@ -745,6 +774,9 @@ export async function retryPastDueInvoices(
         }
       }
     }
+    // Checkpoint after every customer: if this invocation is killed before it
+    // can store its summary, the next run of the slot still knows who was tried.
+    if (opts.onCustomerDone) await opts.onCustomerDone(summary)
   }
   return summary
 }

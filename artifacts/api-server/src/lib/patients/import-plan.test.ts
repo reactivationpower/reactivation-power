@@ -52,6 +52,17 @@ describe('CSV patient matching and safe updates', () => {
     expect(p.reviews[0]?.candidate_ids).toEqual([contact.id])
     expect(p.inserts).toEqual([])
   })
+  it('numbers reviews and invalid rows by their place in the file when the upload arrives in parts', () => {
+    const held = { ...row, row: { ...row.row, name: 'John Example', email: '' } }
+    const invalid = { ...row, row: { ...row.row, lastVisit: '2/30/2020' } }
+    const whole = plan([held, invalid])
+    expect(whole.reviews[0]?.row_number).toBe(1)
+    expect(whole.summary.invalidRows).toEqual([{ rowNumber: 2, reason: expect.any(String) }])
+    const later = plan([held, invalid], { firstRowNumber: 5001 })
+    expect(later.reviews[0]?.row_number).toBe(5001)
+    expect(later.summary.invalidRows?.[0]?.rowNumber).toBe(5002)
+    expect(later.summary).toEqual(whole.summary.invalidRows && { ...whole.summary, invalidRows: later.summary.invalidRows })
+  })
   it('holds conflicting emails and patient IDs', () => {
     expect(plan([{ ...row, row: { ...row.row, email: 'other@example.invalid' } }]).summary.needsReview).toBe(1)
     expect(plan([{ ...row, row: { ...row.row, patientId: 'P200' } }], {

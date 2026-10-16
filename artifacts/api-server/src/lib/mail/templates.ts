@@ -125,7 +125,7 @@ export interface CronFailedData {
   jobLabel: string
   /** Job id as stored in cron_runs, e.g. "billing-retry". */
   job: string
-  trigger: 'scheduler' | 'http' | 'admin'
+  trigger: 'scheduler' | 'http' | 'admin' | 'vercel-cron'
   startedAt: string
   error: string
   /** Admin page where the run log and "Run now" button live. */
@@ -602,7 +602,7 @@ const cronFailed: TemplateDefinition<'cron_failed'> = {
           panel([`<strong>Error:</strong> ${esc(d.error)}`], '#ef4444'),
           details([
             ['Job', d.job],
-            ['Triggered by', d.trigger],
+            ['Triggered by', d.trigger === 'vercel-cron' ? 'Vercel Cron' : d.trigger],
             ['Started', when],
           ]),
           button('Open the run log', d.dashboardUrl),

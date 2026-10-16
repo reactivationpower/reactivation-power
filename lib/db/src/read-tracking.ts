@@ -18,6 +18,8 @@ type Entry = {
 const entries = new Map<string, Entry>()
 let startedAt = Date.now()
 let timer: NodeJS.Timeout | undefined
+/** 'interval': a five-minute timer flushes (long-lived process). 'lazy': no timer; the first query after a window ends flushes (frozen serverless functions cannot keep a timer). */
+let flushMode: 'interval' | 'lazy' = 'interval'
 let contextProvider = () => 'background-or-test'
 let reportSink = (report: DatabaseReadReport) => {
   process.stderr.write(`${JSON.stringify(report)}\n`)
@@ -40,9 +42,12 @@ export interface DatabaseReadReport {
 export function configureDatabaseReadTracking(
   sink: (report: DatabaseReadReport) => void,
   context?: () => string,
+  options: { flush?: 'interval' | 'lazy' } = {},
 ) {
   reportSink = sink
   if (context) contextProvider = context
+  flushMode = options.flush ?? 'interval'
+  if (flushMode === 'lazy' && timer) { clearInterval(timer); timer = undefined }
 }
 
 function sourceFromStack() {
@@ -89,7 +94,9 @@ function record(identity: ReturnType<typeof identify>, result: unknown, failed: 
     entry.estimatedResultBytes += bytes
     entry.failures += Number(failed)
     entries.set(key, entry)
-    if (!timer) {
+    if (flushMode === 'lazy') {
+      if (Date.now() - startedAt >= WINDOW_MS) flushDatabaseReadTracking()
+    } else if (!timer) {
       timer = setInterval(flushDatabaseReadTracking, WINDOW_MS)
       timer.unref()
     }

@@ -23,7 +23,7 @@ export interface SalesSubmission {
 }
 export interface SalesSettings {
   default_assignee_id: string | null; automation_enabled: boolean; approved_at: string | null;
-  followup_texts: string[]; later_days: number[]; capabilities: Record<string, { state: string; requirement: string; checkedAt?:string|null }>;
+  followup_texts: string[]; later_days: number[]; capabilities: Record<string, { state: string; requirement: string; checkedAt?:string|null; source?:string }>;
   capabilities_checked_at: string | null; scope_reviewed_at: string | null;
 }
 export interface SalesTeamMember { id: string; name: string | null; email: string; active: boolean }

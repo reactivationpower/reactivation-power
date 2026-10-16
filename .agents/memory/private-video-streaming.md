@@ -27,3 +27,8 @@ When automated Chromium reports `DEMUXER_ERROR_NO_SUPPORTED_STREAMS`, check `can
 **Why:** The available Chromium runtime returned no H.264/AAC capability and failed identically on original static files and the bounded API. Repeated player retries cannot repair a missing browser codec.
 
 **How to apply:** Report actual decoding/seek/end checks as blocked in that environment; do not treat emulated Android or iPad user-agent strings as a different browser engine.
+Vercel functions cap one request body and one response at about 4.5 MB, below the 32 MiB Replit proxy figure, so the range cap is now 4 MiB on both hosts. On Vercel, public marketing videos must come from the static `/videos/` CDN copy (the API route redirects); non-video private attachments over 4.5 MB still cannot be served through the function and remain an open gap.
+
+**Why:** Keeping one bound everywhere avoids host-specific behaviour; the function bundle must not contain MP4s or read them from its disk.
+
+**How to apply:** Keep `MAX_MEDIA_RANGE_BYTES` under `VERCEL_PAYLOAD_LIMIT_BYTES` (guarded at startup and in tests) and verify consecutive 4 MiB chunks walk the whole file with exact offsets.

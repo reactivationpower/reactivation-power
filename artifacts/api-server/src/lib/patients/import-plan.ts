@@ -135,8 +135,13 @@ export function planPatientImport(options: {
   /** Only set by the authenticated, tenant-checked review resolver. */
   override?: { decision: 'match' | 'create'; contactId?: string }
   makeId?: () => string
+  /** Row number of `rows[0]` in the uploaded file (1-based). The browser sends
+   * a large file as several requests; each carries its own offset so review
+   * items and invalid-row messages still quote the file's row numbers. */
+  firstRowNumber?: number
 }) {
   const makeId = options.makeId ?? randomUUID
+  const firstRowNumber = options.firstRowNumber ?? 1
   const index = new PatientIndex(options.contacts, options.sources)
   const originals = new Map(options.contacts.map(c => [c.id, c]))
   const services = new Map(options.services.map(s => [`${s.contact_id}/${s.service_key}`, { ...s }]))
@@ -171,7 +176,7 @@ export function planPatientImport(options: {
       doNotCall = parseDoNotCall(r.doNotCall)
     } catch (error) {
       summary.skippedInvalid++
-      if (summary.invalidRows!.length < 12) summary.invalidRows!.push({ rowNumber: rowIndex + 1, reason: (error as Error).message })
+      if (summary.invalidRows!.length < 12) summary.invalidRows!.push({ rowNumber: firstRowNumber + rowIndex, reason: (error as Error).message })
       continue
     }
     const fingerprint = rowFingerprint(options.source, incoming)
@@ -197,7 +202,7 @@ export function planPatientImport(options: {
     }
     if (match.reason) {
       summary.needsReview++
-      reviewWrites.push({ row_number: rowIndex + 1, fingerprint, incoming, reason: match.reason, candidate_ids: match.candidates })
+      reviewWrites.push({ row_number: firstRowNumber + rowIndex, fingerprint, incoming, reason: match.reason, candidate_ids: match.candidates })
       continue
     }
     const isNew = !match.id
