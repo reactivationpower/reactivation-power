@@ -45,7 +45,7 @@ it.each(['/api/cron/workers','/api/cron/sales-leads','/api/cron/lead-emails'])('
   expect(f.runCronJob.mock.calls[0]?.[1]).toMatchObject({trigger:'http',dueKey:expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/)})
 })
 it('records a Vercel Cron call as the vercel-cron trigger and a Vercel scheduler wake',async()=>{
-  vi.stubEnv('CRON_SECRET','sales-cron-test-only');vi.stubEnv('VERCEL','1');vi.stubEnv('VERCEL_ENV','production')
+  vi.stubEnv('CRON_SECRET','sales-cron-test-only');vi.stubEnv('VERCEL','1');vi.stubEnv('VERCEL_ENV','production');vi.stubEnv('SCHEDULED_JOBS','on')
   const headers={...auth,'user-agent':'vercel-cron/1.0'}
   const res=await fetch(url+'/api/cron/workers',{headers})
   expect(res.status).toBe(200);expect(await res.json()).toMatchObject({ok:true,trigger:'vercel-cron'})

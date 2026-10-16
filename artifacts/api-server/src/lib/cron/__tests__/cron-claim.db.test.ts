@@ -154,4 +154,15 @@ describe.skipIf(!hasDb)('cron slot claim (Postgres)', { timeout: 25000 }, () => 
     expect(rows[0]).toMatchObject({ status: 'ok' })
     expect(rows[0]?.id).not.toBe('live-' + DUE_KEY)
   })
+
+  it('records the safe scheduler check once per UTC hour and prunes week-old checks', async () => {
+    const { recordSchedulerCheck, lastSchedulerCheck } = await import('@/lib/cron/scheduler-check')
+    await recordSchedulerCheck('http', new Date(Date.now() - 8 * 86_400_000))
+    const now = new Date()
+    expect(await recordSchedulerCheck('vercel-cron', now)).toMatchObject({ recorded: true, target: 'replit', scheduledJobs: 'on' })
+    expect(await recordSchedulerCheck('vercel-cron', now)).toMatchObject({ recorded: false })
+    const rows = await db.select().from(cronRunsTable).where(eq(cronRunsTable.job, 'scheduler-check'))
+    expect(rows).toHaveLength(1)
+    expect(await lastSchedulerCheck()).toMatchObject({ trigger: 'vercel-cron', status: 'ok' })
+  })
 })

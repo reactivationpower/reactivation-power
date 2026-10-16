@@ -15,12 +15,13 @@ deployment keep working unchanged (`src/index.ts` with `app.listen`).
 
 | File | Purpose |
 | --- | --- |
-| `vercel.json` (repo root) | Install/build/output commands, routing, function time limit and the cron schedules |
+| `vercel.json` (repo root) | Install/build/output commands, routing, function time limit and the Vercel Cron schedule |
 | `api/index.mjs` | The Vercel function; re-exports the bundled handler |
 | `artifacts/api-server/src/vercel.ts` | Wraps the Express app: waits for Stripe setup once per instance, clear 503 on setup failure |
 | `artifacts/api-server/src/index.ts` | Replit server entry (unchanged behavior) |
 | `artifacts/api-server/src/seed-super-admin.ts` | One-off first-admin seed + encryption check (not run on Vercel cold starts) |
-| `artifacts/api-server/src/lib/deployment-safety.ts` | The one Preview-safety check |
+| `artifacts/api-server/src/lib/deployment-safety.ts` | The one Preview-safety check, and the scheduled-jobs switch (`SCHEDULED_JOBS`) |
+| `artifacts/api-server/src/lib/cron/budget.ts` | Time budget for cron calls on Vercel (stop and continue) |
 | `package.json` (root) | Pins `pnpm@10.26.1` and Node `24.x`; `build:vercel` script |
 
 ## Changes to the existing Vercel project "reactivation-power"
@@ -95,7 +96,7 @@ Vercel Preview deployments use the same Supabase database as production. On any
 Vercel deployment whose `VERCEL_ENV` is not `production`, the app:
 
 - never runs scheduled jobs (`/api/cron/*` answers 503, "Run now" refuses, the
-  in-process scheduler stays off),
+  in-process scheduler stays off; Vercel Cron does not call Preview at all),
 - never sends real email (logged as failed with a clear reason),
 - never sends texts/emails through GoHighLevel,
 - never runs the internal sales workers (lead sync, follow-ups, appointment
@@ -105,6 +106,18 @@ Vercel deployment whose `VERCEL_ENV` is not `production`, the app:
 Production behavior only happens when Vercel itself marks the deployment as
 production. Important: a Preview still **reads and writes real data** in the
 shared database (sign-ups, edits). Only test with test accounts there.
+
+
+## Sign-in, cookies and client addresses
+
+- Cookies stay `Secure`/`HttpOnly` as on Replit: Express trusts the proxy, and
+  Vercel always serves HTTPS on one origin.
+- Client IP for rate limits: Vercel replaces `X-Forwarded-For` with the real
+  client address (clients cannot fake it), and the affiliate sign-in limits read
+  Vercel's `X-Real-IP`. On Replit nothing changed.
+- Links in emails always use `https://patientpipeline.app`. On Vercel an
+  `APP_URL` with any other host (for example a temporary `*.vercel.app`) is
+  ignored, so test deployments can never send customers to a temporary address.
 
 ## Stripe mode
 
@@ -152,9 +165,11 @@ overlap are in `docs/database-connection-budget.md`.
 
 ## Environment variables
 
-None of these are needed by the browser build. No private value may use a
-`VITE_` or `NEXT_PUBLIC_` name (Vite only exposes `VITE_*` to the browser; the
-app reads none). "Server" = read only by the API function at run time.
+Only the two `VITE_POSTHOG_*` values are read by the browser build; they are
+public by design (an analytics project key) and are baked in when Vercel builds.
+No private value may use a `VITE_` or `NEXT_PUBLIC_` name (Vite exposes every
+`VITE_*` value to the browser). "Server" = read only by the API function at run
+time. "Build" = read while Vercel builds.
 
 | Variable | What it is for | Used by | Production | Preview |
 | --- | --- | --- | --- | --- |
@@ -168,7 +183,7 @@ app reads none). "Server" = read only by the API function at run time.
 | `DB_POOL_ACQUIRE_TIMEOUT_MS` | Wait for a free connection before a friendly 503 (default `5000`) | Server | Optional | Optional |
 | `DB_POOL_IDLE_TIMEOUT_MS` | Close idle connections after (default `5000` on Vercel, `10000` on Replit) | Server | Optional | Optional |
 | `SESSION_SECRET` | Signs sign-in cookies | Server | Yes | Yes (same value keeps sessions valid) |
-| `APP_URL` | Links in emails (`https://patientpipeline.app`) | Server | Yes | Optional |
+| `APP_URL` | Links in emails. On Vercel only `https://patientpipeline.app` (or `www.`) is accepted; anything else, such as a `*.vercel.app` address, is ignored and the real domain is used | Server | Optional (`https://patientpipeline.app`) | Not needed |
 | `BLOB_READ_WRITE_TOKEN` | Video/file storage (Vercel Blob) | Server | Yes | Yes |
 | `STRIPE_MODE` | `live` or `test` (required on Vercel) | Server | `live` | `test` |
 | `STRIPE_SECRET_KEY` | Live Stripe secret key | Server | Yes | **No** |
@@ -181,9 +196,11 @@ app reads none). "Server" = read only by the API function at run time.
 | `RESEND_FROM` | Optional sender override (must be `@patientpipeline.app`) | Server | Optional | Optional |
 | `RESEND_WEBHOOK_SECRET` | Checks Resend delivery webhooks | Server | Yes | Optional |
 | `RESEND_RECEIVING_API_KEY` | Reading replies for the sales inbox | Server | Yes | Optional |
-| `CRON_SECRET` | Protects `/api/cron/*`; Vercel Cron sends it as `Authorization: Bearer …` automatically | Server | Yes | No |
+| `CRON_SECRET` | Protects `/api/cron/*`; Vercel Cron sends it automatically when set | Server | Yes | No |
 | `CRON_RUN_BUDGET_MS` | Optional: time budget of one cron run (default 240000, must stay below the function limit) | Server | Optional | — |
-| `SUPER_ADMIN_EMAIL` | Also: where cron failure alerts go | Server | Yes | No |
+| `SCHEDULED_JOBS` | `on` lets this Vercel production deployment run the scheduled jobs. **Leave unset (off) until switch-over** | Server | Unset until switch-over | Never |
+| `VITE_POSTHOG_KEY` | PostHog project key (public, analytics) | Build | Yes | Optional |
+| `VITE_POSTHOG_HOST` | `https://us.i.posthog.com` | Build | Yes | Optional |
 | `GHL_API_TOKEN` | GoHighLevel API | Server | Yes | Optional (sends are blocked) |
 | `GHL_LOCATION_ID` | GoHighLevel location | Server | Yes | With token |
 | `GHL_CALENDAR_ID` | GoHighLevel booking calendar | Server | Yes | With token |
@@ -192,8 +209,9 @@ app reads none). "Server" = read only by the API function at run time.
 | `DEMO_PASSWORD` | Sales demo account password | Server | Yes | Yes |
 | `PATIENT_DEMO_OPENAI_API_KEY` | Patient texting demo (fictional) | Server | Optional | Optional |
 | `PATIENT_TEXT_INDEPENDENT_CALLBACK_URL` | Patient texting webhook address | Server | Optional | No |
+| `SUPER_ADMIN_EMAIL` | Where cron failure alerts go; also the first super admin for the seed script | Server | Yes | No |
 | `SUPER_ADMIN_INITIAL_PASSWORD` | First super admin password (seed script only) | Script | Optional | No |
-| `CRON_SCHEDULER` | In-process scheduler switch; not used on Vercel | Replit | — | — |
+| `CRON_SCHEDULER` | In-process scheduler switch; not used on Vercel (Vercel Cron replaces it) | Replit | — | — |
 | `LOG_LEVEL` | Log detail (default `info`) | Server | Optional | Optional |
 | `BASE_PATH` | Frontend base path; defaults to `/` | Build | Not needed | Not needed |
 
@@ -213,14 +231,30 @@ response" cannot run there. Vercel Cron calls the existing protected
 only daily crons (no five-minute schedule) and a 60-second function limit,
 while this setup uses a five-minute schedule and `maxDuration: 300`.
 
-**Nothing is turned on by this alone.** The `crons` in `vercel.json` take effect
-on the next *production* deployment of the project; the cutover (and retiring
-the Supabase pg_cron wake, below) happens with the owner's approval.
+**Off until switch-over.** The `crons` in `vercel.json` start calling the
+*production* deployment as soon as it exists, but on a Vercel production
+deployment every cron route except the heartbeat answers
+`{"ok":true,"skipped":true,"reason":"…until switch-over…"}` and does nothing,
+and the admin "Run now" button refuses, until the variable
+**`SCHEDULED_JOBS=on`** is added (`lib/deployment-safety.ts`). This keeps the live
+Replit site the only place that charges cards, resets demos or sends queued
+email while both exist. Turn it on only at switch-over, together with turning
+the Replit scheduler off and retiring the Supabase pg_cron wake (below); see
+`docs/vercel-release-and-cutover.md`. Replit is not affected by the switch.
+
+**Safe scheduler check.** `/api/cron/heartbeat` (hourly at :15) runs even while
+jobs are off. It only writes one `cron_runs` row per UTC hour (job
+`scheduler-check`, kept 7 days) and changes nothing else. The super-admin
+Scheduled jobs card ends with "Scheduler check: last call received …" showing
+the deployment and whether jobs are on there, so the schedule and secret can be
+proven before switch-over. Vercel → Settings → Cron Jobs → **Run** triggers it
+on demand.
 
 ### Schedule (`vercel.json` → `crons`, all times UTC)
 
 | Path | Schedule | What it is |
 | --- | --- | --- |
+| `/api/cron/heartbeat` | `15 * * * *` | Safe scheduler check (runs even while jobs are off) |
 | `/api/cron/demo-reset` | `0 7,8 * * *` | Demo reset, 3:00 AM ET |
 | `/api/cron/auth-cleanup` | `0 8,9 * * *` | Auth / affiliate / marketing cleanup, 4:00 AM ET |
 | `/api/cron/billing-retry` | `0 10,11 * * *` | Billing retry + enrollment / affiliate / marketing reconcile + failed billing-email retries, 6:00 AM ET |
@@ -287,6 +321,7 @@ retire the pg_cron job with `retireNativeWake()` (`lib/sales-leads/wake.ts`,
 operator-run) so it stops double-triggering; `/api/cron/sales-leads` and
 `/api/cron/lead-emails` remain as names for the same workers pass.
 
-## Not covered here (separate tasks)
 
-- Turning the crons on for the live site and retiring the pg_cron wake (cutover, owner approval).
+## Release flow, test deployment, switch-over and rollback
+
+See `docs/vercel-release-and-cutover.md`.

@@ -46,7 +46,7 @@ function StatusIcon({ status }) {
   return <CheckCircle2 className="h-4 w-4 text-emerald-600" aria-label="Succeeded" />
 }
 
-export function CronJobsCard({ initialJobs }) {
+export function CronJobsCard({ initialJobs, schedulerCheck = null }) {
   const [jobs, setJobs] = useState(initialJobs ?? [])
   const [running, setRunning] = useState<string | null>(null)
   const anyFailed = jobs.some((j) => j.lastRun?.status === 'failed')
@@ -140,6 +140,12 @@ export function CronJobsCard({ initialJobs }) {
           )
         })}
       </ul>
+      {schedulerCheck ? (
+        <p data-testid="cron-scheduler-check" className="mt-3 border-t border-border/70 pt-2 text-xs text-muted-foreground">
+          Scheduler check: last call received {fmtWhen(schedulerCheck.startedAt)} ({TRIGGER_LABEL[schedulerCheck.trigger] ?? schedulerCheck.trigger}
+          {schedulerCheck.summary?.target ? `, ${schedulerCheck.summary.target}` : ''}; scheduled jobs {schedulerCheck.summary?.scheduledJobs === 'on' ? 'on' : 'off'} there).
+        </p>
+      ) : null}
     </section>
   )
 }

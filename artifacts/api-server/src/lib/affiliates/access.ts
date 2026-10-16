@@ -1,3 +1,4 @@
+import { isVercel } from '@/lib/deployment-safety'
 import { isIP } from 'node:net'
 import type { Request } from 'express'
 import { pool } from '@workspace/db'
@@ -11,6 +12,12 @@ export const AFFILIATE_COOKIE = 'pp_affiliate'
 const secure = () => getRequestContext().req.secure || process.env.NODE_ENV === 'production'
 /** Only the directly connected local ingress is trusted. Never use the leftmost, user-supplied hop. */
 export function trustedAffiliateIp(req: Request): string | null {
+  // On Vercel the socket peer is Vercel's own proxy; Vercel sets x-real-ip
+  // (and overwrites x-forwarded-for) to the real client, so clients cannot spoof it.
+  if (isVercel()) {
+    const ip = (req.header('x-real-ip') ?? req.header('x-forwarded-for')?.split(',')[0])?.trim().replace(/^::ffff:/, '')
+    return ip && isIP(ip) ? ip : null
+  }
   const peer = req.socket.remoteAddress?.replace(/^::ffff:/, '')
   if (!peer || !isIP(peer)) return null
   if (peer === '127.0.0.1' || peer === '::1') {

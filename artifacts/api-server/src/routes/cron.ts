@@ -1,10 +1,12 @@
+import { timingSafeEqual } from "node:crypto";
 import { Router, type IRouter, type Request, type Response, type NextFunction } from "express";
 import { runWithRequestContext } from "@/lib/request-context";
 import { currentDueKey, runCronJob, type CronJobName, type CronTrigger } from "@/lib/cron/jobs";
 import { runScheduledTick } from "@/lib/cron/tick";
 import { RunBudget, cronRunBudgetMs } from "@/lib/cron/budget";
 import { reconcileTextIntents } from "@/lib/patient-texting/worker";
-import { isVercel, isVercelPreview } from "@/lib/deployment-safety";
+import { isVercel, isVercelPreview, scheduledJobsBlockedReason } from "@/lib/deployment-safety";
+import { recordSchedulerCheck } from "@/lib/cron/scheduler-check";
 import { NATIVE_WAKE_HEADER, NATIVE_WAKE_MARKER, recordNativeWake, recordVercelCronWake } from "@/lib/sales-leads/wake";
 
 /**
@@ -18,6 +20,11 @@ import { NATIVE_WAKE_HEADER, NATIVE_WAKE_MARKER, recordNativeWake, recordVercelC
  *                          claim of every daily slot (lib/cron/tick.ts)
  * - GET /cron/lead-emails, /cron/sales-leads   older names for the same pass
  * - GET|POST /cron/patient-texting   intent reconcile; not scheduled while texting is off
+ * - GET /cron/heartbeat    safe scheduler check: records that the call arrived, nothing else
+ *
+ * On a Vercel production deployment everything except the heartbeat answers
+ * `{ ok: true, skipped: true }` until SCHEDULED_JOBS=on (switch-over), so the
+ * live Replit site and a candidate Vercel deployment never both run jobs.
  *
  * Every call runs under a time budget below the function limit and returns
  * what it got done; whatever is left waits for the next call. A Vercel Cron
@@ -35,7 +42,10 @@ router.use("/cron", (_req, res, next) => {
 
 function authorized(req: Request, res: Response, next: NextFunction) {
   const expected = process.env.CRON_SECRET;
-  if (!expected || req.get("authorization") !== `Bearer ${expected}`) {
+  const given = req.get("authorization");
+  const a = Buffer.from(given ?? "");
+  const b = Buffer.from(`Bearer ${expected}`);
+  if (!expected || !given || a.length !== b.length || !timingSafeEqual(a, b)) {
     res.status(401).json({ error: "Unauthorized" });
     return;
   }
@@ -46,6 +56,21 @@ router.use("/cron", authorized);
 export function cronTrigger(req: Request): CronTrigger {
   return (req.get("user-agent") ?? "").toLowerCase().startsWith("vercel-cron") ? "vercel-cron" : "http";
 }
+
+// Safe schedule check: records that the call arrived, changes nothing else. Runs even while jobs are off.
+router.get("/cron/heartbeat", async (req, res) => {
+  res.json({ ok: true, ...(await recordSchedulerCheck(cronTrigger(req))) });
+});
+
+// Everything below does real work: off on a Vercel production deployment until switch-over.
+router.use("/cron", (_req, res, next) => {
+  const reason = scheduledJobsBlockedReason();
+  if (reason) {
+    res.json({ ok: true, skipped: true, reason });
+    return;
+  }
+  next();
+});
 
 /** Record which scheduler is alive for the sales-automation readiness checklist. */
 async function recordWake(req: Request, trigger: CronTrigger) {

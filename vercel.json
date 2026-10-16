@@ -12,6 +12,7 @@
     "api/index.mjs": { "maxDuration": 300 }
   },
   "crons": [
+    { "path": "/api/cron/heartbeat", "schedule": "15 * * * *" },
     { "path": "/api/cron/demo-reset", "schedule": "0 7,8 * * *" },
     { "path": "/api/cron/auth-cleanup", "schedule": "0 8,9 * * *" },
     { "path": "/api/cron/billing-retry", "schedule": "0 10,11 * * *" },

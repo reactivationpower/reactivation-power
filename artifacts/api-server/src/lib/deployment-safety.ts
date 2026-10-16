@@ -35,3 +35,24 @@ export class PreviewSafetyError extends Error {
 export function assertRealEffectsAllowed(action: string, env: NodeJS.ProcessEnv = process.env): void {
   if (isVercelPreview(env)) throw new PreviewSafetyError(action)
 }
+
+const ON = new Set(['on', 'true', '1', 'yes'])
+
+/**
+ * Why scheduled jobs (cron routes, admin "Run now") may not run here, or null
+ * when they may. Preview never runs them. A Vercel production deployment runs
+ * them only after the owner turns them on with SCHEDULED_JOBS=on at
+ * switch-over, so the live site and a candidate Vercel deployment never both
+ * run billing retries or demo resets against the shared database. Replit keeps
+ * its existing behavior.
+ */
+export function scheduledJobsBlockedReason(env: NodeJS.ProcessEnv = process.env): string | null {
+  const target = deploymentTarget(env)
+  if (target === 'vercel-preview') {
+    return 'Scheduled jobs are turned off on Vercel Preview deployments (they share the production database).'
+  }
+  if (target === 'vercel-production' && !ON.has((env.SCHEDULED_JOBS ?? '').trim().toLowerCase())) {
+    return 'Scheduled jobs are turned off on this Vercel deployment until switch-over (set SCHEDULED_JOBS=on).'
+  }
+  return null
+}
