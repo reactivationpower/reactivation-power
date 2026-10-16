@@ -56,10 +56,20 @@ function encodeArg(arg: unknown): unknown {
  * If the action redirected, the browser follows the redirect (full navigation,
  * because the redirect may depend on freshly set cookies).
  */
+export interface ActionOptions<T> {
+  /**
+   * Value to settle with when the visitor comes back (browser Back) to this
+   * page after the action redirected away. Defaults to the previous state for
+   * (prevState, formData) form actions, otherwise undefined.
+   */
+  restored?: (args: unknown[]) => T
+}
+
 export async function callAction<T = unknown>(
   module: string,
   fn: string,
   args: unknown[],
+  options: ActionOptions<T> = {},
 ): Promise<T> {
   const res = await fetch(apiUrl(`/actions/${module}/${fn}`), {
     method: 'POST',
@@ -75,15 +85,52 @@ export async function callAction<T = unknown>(
   if (!body) throw new ApiError(`Request failed (${res.status})`, res.status)
   if (!body.ok) throw new ApiError(body.error || 'Request failed', res.status)
   if (body.redirect) {
-    window.location.assign(safeRedirect(body.redirect))
     // Keep pending UI stable while the browser navigates.
-    return new Promise<T>(() => {})
+    const restored = untilRestoredFromBackForwardCache()
+    window.location.assign(safeRedirect(body.redirect))
+    await restored
+    // The visitor pressed Back and the browser brought this page back from its
+    // back/forward cache. Settle so pending UI ("Submitting…") clears and the
+    // form can be sent again. By default a form-state action ((prevState,
+    // formData), as used by useActionState) gets its previous state back;
+    // anything else resolves empty.
+    if (options.restored) return options.restored(args)
+    return (args.length === 2 && isFormData(args[1]) ? args[0] : undefined) as T
   }
   return body.result
 }
 
-export function action<T = unknown>(module: string, fn: string) {
-  return (...args: unknown[]): Promise<T> => callAction<T>(module, fn, args)
+function isFormData(value: unknown): boolean {
+  return typeof FormData !== 'undefined' && value instanceof FormData
+}
+
+/** Resolves only when this page is shown again from the back/forward cache. */
+function untilRestoredFromBackForwardCache(): Promise<void> {
+  return new Promise<void>((resolve) => {
+    const onPageShow = (event: Event) => {
+      if (!(event as PageTransitionEvent).persisted) return
+      window.removeEventListener('pageshow', onPageShow)
+      resolve()
+    }
+    window.addEventListener('pageshow', onPageShow)
+  })
+}
+
+/**
+ * Run `onRestore` whenever this page comes back from the back/forward cache
+ * (for example after a redirecting submit and the browser Back button).
+ * Returns a cleanup function.
+ */
+export function onBackForwardRestore(onRestore: () => void): () => void {
+  const onPageShow = (event: Event) => {
+    if ((event as PageTransitionEvent).persisted) onRestore()
+  }
+  window.addEventListener('pageshow', onPageShow)
+  return () => window.removeEventListener('pageshow', onPageShow)
+}
+
+export function action<T = unknown>(module: string, fn: string, options?: ActionOptions<T>) {
+  return (...args: unknown[]): Promise<T> => callAction<T>(module, fn, args, options)
 }
 
 export type PageResult<T> = { data: T } | { redirect: string }

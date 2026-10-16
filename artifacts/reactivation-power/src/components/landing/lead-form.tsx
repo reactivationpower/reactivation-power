@@ -1,6 +1,6 @@
 // @ts-nocheck
 
-import { useActionState, useEffect, useId, useRef, useState } from 'react'
+import { useActionState, useEffect, useId, useReducer, useRef, useState } from 'react'
 import {
   lookupZip,
   submitHealthcareLead,
@@ -12,7 +12,8 @@ import { getCurrentTerms } from '@/app/actions/lead-terms'
 import { nextAccepted, termsId } from '@/components/landing/terms-state'
 import type { CurrentLeadTerms } from '@workspace/shared/lead-terms'
 import { Button } from '@/components/ui/button'
-import { readLeadFields, validateLeadFields } from '@workspace/shared/lead-validation'
+import { BEST_TIMES, readLeadFields, validateLeadFields } from '@workspace/shared/lead-validation'
+import { onBackForwardRestore } from '@/lib/api'
 import type { CalculatorScenario } from '@workspace/shared/opportunity'
 import { validatedBookingFunnel } from '@workspace/shared/booking-funnel'
 import { track, flush } from '@/lib/marketing-tracker'
@@ -75,8 +76,12 @@ export function LeadForm({ scheduleMode = false, calculatorScenario, funnelSourc
   const [termsChanged, setTermsChanged] = useState(false)
   const termsRef = useRef<CurrentLeadTerms | null>(null)
   const termsRequest = useRef(0)
-  const submissionId = useRef('')
-  if (!submissionId.current) submissionId.current = crypto.randomUUID()
+  // One id per submission attempt. Retrying after an error reuses it so the
+  // server can recognize a duplicate; coming back with the browser Back button
+  // after a successful submit gets a fresh one, so a corrected resend counts
+  // as a new submission rather than a retry of the first.
+  const [submissionId, setSubmissionId] = useState(() => crypto.randomUUID())
+  useEffect(() => onBackForwardRestore(() => setSubmissionId(crypto.randomUUID())), [])
   const applyTerms = (next: CurrentLeadTerms) => {
     const previous = termsRef.current
     if (previous && termsId(previous) !== termsId(next)) setTermsChanged(true)
@@ -132,6 +137,7 @@ export function LeadForm({ scheduleMode = false, calculatorScenario, funnelSourc
   const [inactiveEdited, setInactiveEdited] = useState(false)
   const [productInterest, setProductInterest] = useState('')
   const [yearsInPractice, setYearsInPractice] = useState('')
+  const [bestTime, setBestTime] = useState('')
   // Follow the slider if the visitor moves it after this form has mounted
   const sliderCount = calculatorScenario?.inactivePatients ?? calc?.inactiveCount
   useEffect(() => {
@@ -145,9 +151,15 @@ export function LeadForm({ scheduleMode = false, calculatorScenario, funnelSourc
   const [errorRound, setErrorRound] = useState(0)
   const v = state.values ?? {}
 
-  // Restore controlled values after a failed submit so nothing resets
+  // React resets the form's fields when an action settles. That puts selects
+  // back to their first option even though their React state did not change,
+  // so render once more afterwards to show the kept choices again.
+  const [, resync] = useReducer((n: number) => n + 1, 0)
+  // Restore controlled values after a failed submit (or a Back-button return)
+  // so nothing resets
   useEffect(() => {
     if (state.values) {
+      resync()
       if (state.values.phone) setPhone(formatPhone(state.values.phone))
       if (state.values.zip) setZip(state.values.zip)
       if (state.values.inactivePatients)
@@ -156,6 +168,8 @@ export function LeadForm({ scheduleMode = false, calculatorScenario, funnelSourc
         setProductInterest(state.values.productInterest)
       if (state.values.yearsInPractice !== undefined)
         setYearsInPractice(state.values.yearsInPractice)
+      if (state.values.bestTime !== undefined)
+        setBestTime(state.values.bestTime)
     }
   }, [state.values])
 
@@ -245,7 +259,7 @@ export function LeadForm({ scheduleMode = false, calculatorScenario, funnelSourc
       <input type="hidden" name="actualSourcePath" defaultValue="" />
       <input type="hidden" name="utmContext" defaultValue="" />
       <input type="hidden" name="termsVersion" value={activeTerms?.id ?? ''} />
-      <input type="hidden" name="marketingSubmissionId" value={submissionId.current} />
+      <input type="hidden" name="marketingSubmissionId" value={submissionId} />
       {calculatorScenario && !scheduleMode && (
         <>
           <input type="hidden" name="calculatorScenario" value="combined" />
@@ -538,6 +552,35 @@ export function LeadForm({ scheduleMode = false, calculatorScenario, funnelSourc
         error={errors.services}
         onSelectionChange={() => clearError('services')}
       />
+
+      <div className="flex flex-col gap-1.5">
+        <label
+          htmlFor={`${uid}-best-time`}
+          className="text-sm font-medium text-foreground"
+        >
+          Best time to connect with you{' '}
+          <span className="font-normal text-muted-foreground">(optional)</span>
+        </label>
+        <select
+          id={`${uid}-best-time`}
+          name="bestTime"
+          data-testid="select-best-time"
+          value={bestTime}
+          onChange={(e) => { setBestTime(e.target.value); clearError('bestTime') }}
+          aria-invalid={errors.bestTime ? 'true' : undefined}
+          className={inputClass(Boolean(errors.bestTime))}
+        >
+          <option value="">Select one</option>
+          {BEST_TIMES.map((time) => (
+            <option key={time} value={time}>{time}</option>
+          ))}
+        </select>
+        {errors.bestTime ? (
+          <p className="text-xs font-medium text-destructive">{errors.bestTime}</p>
+        ) : (
+          <p className="text-xs text-muted-foreground">Your local time.</p>
+        )}
+      </div>
 
       <div className="flex flex-col gap-1.5">
         <label

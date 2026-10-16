@@ -12,9 +12,14 @@ export interface LeadState {
 }
 
 export const lookupZip = action<any>('leads', 'lookupZip')
-const rawSubmit = action<LeadState>('leads', 'submitHealthcareLead')
+// After a successful submit the browser goes to the booking page. If the
+// visitor comes back with Back, React clears the form's plain inputs when the
+// action settles, so settle with their entries to keep them on screen.
+const rawSubmit = action<LeadState>('leads', 'submitHealthcareLead', {
+  restored: (args) => echo(args[1] as FormData),
+})
 
-/** Echo the visitor's entries so a transport failure never wipes the form. */
+/** Echo the visitor's entries so a transport failure or Back never wipes the form. */
 function echo(data: FormData): Pick<LeadState, 'values' | 'services'> {
   const values: Record<string, string> = {}
   const services: string[] = []

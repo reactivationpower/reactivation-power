@@ -77,6 +77,7 @@ export async function submitHealthcareLead(
     consent,
     services,
     productInterest,
+    bestTime,
   } = fields
   const practiceName = String(formData.get('practiceName') ?? '').trim()
   const scheduleSource = formData.get('leadSource') === 'schedule-a-call'
@@ -100,6 +101,7 @@ export async function submitHealthcareLead(
     inactivePatients,
     consent: consent ? 'on' : '',
     productInterest: productInterest ?? '',
+    bestTime,
     patientValue: fields.patientValue,
     additionalPatientsPerMonth: fields.additionalPatientsPerMonth,
     newPatientValue: fields.newPatientValue,
@@ -238,6 +240,7 @@ export async function submitHealthcareLead(
         `New patient first-year cohort value estimate: ${money(estimates.newPatients)}`,
         `Combined illustrative opportunity: ${money(estimates.combined)} (12 months; illustrative, not guaranteed)`,
       ] : []),
+      ...(bestTime ? [`Best time to connect: ${bestTime} (visitor's local time${timezone ? `, ${timezone}` : '; time zone not reported'})`] : []),
     ].join('\n'),
     firstName, lastName, email, phone: `+1${phoneDigits}`, practiceName,
     source: attribution.affiliateId ? 'affiliate' : 'website', sourcePath: actualPath, submittedAt,
@@ -252,6 +255,7 @@ export async function submitHealthcareLead(
       bookingHandoff: { ...handoff.context, ref: handoff.ref },
       marketingVisitorId: await requestVisitorId(),
       firstName, lastName, email, phone, practiceName, zip, city, state, yearsInPractice, services, productInterest: interest,
+      ...(bestTime ? { bestTime } : {}),
       inactivePatients: inactiveCount, patientValue, revenueShown, scenario, estimates,
       inactiveAdjusted: formData.get('inactiveAdjusted'), valueAdjusted: valueAdjusted ?? 'assumed',
       additionalPatientsAdjusted: formData.get('additionalPatientsAdjusted'), newValueAdjusted: formData.get('newValueAdjusted'),

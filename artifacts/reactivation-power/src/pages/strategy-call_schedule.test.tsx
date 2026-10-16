@@ -1,6 +1,6 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import StrategyCallSchedulePage from './strategy-call_schedule'
 import { LeadForm } from '@/components/landing/lead-form'
 
@@ -25,6 +25,7 @@ const fields = [
   ['Practice name', 'practiceName', false],
   ['How long in practice?', 'yearsInPractice', true],
   ['Inactive patient files', 'inactivePatients', true],
+  ['Best time to connect with you', 'bestTime', false],
 ] as const
 
 function checkLabels(container: HTMLElement) {
@@ -129,7 +130,7 @@ describe('strategy call schedule form labels', () => {
   it('does not add schedule-only fields or duplicate labels to other shared form uses', () => {
     const { container } = render(<LeadForm />)
     expect(screen.queryByLabelText(/What can we help with/)).toBeNull()
-    expect(container.querySelectorAll('label[for]')).toHaveLength(8)
+    expect(container.querySelectorAll('label[for]')).toHaveLength(9)
     for (const name of ['firstName', 'lastName', 'email', 'practiceName']) {
       expect(container.querySelector<HTMLInputElement>(`input[name="${name}"]`)?.placeholder).toBe('')
     }
@@ -157,4 +158,111 @@ describe('strategy call schedule form labels', () => {
     expect(submitted.get('consent')).toBe('on')
     expect(submitted.getAll('services')).toEqual(['Chiropractic'])
   })
+})
+
+async function fillValidScheduleForm(container: HTMLElement, user: ReturnType<typeof userEvent.setup>) {
+  for (const [name, value] of Object.entries({
+    firstName: 'Test', lastName: 'Practice', email: 'test@example.invalid',
+    phone: '5555551234', zip: '12345',
+  })) {
+    fireEvent.change(container.querySelector(`input[name="${name}"]`)!, { target: { value } })
+  }
+  await user.selectOptions(screen.getByLabelText(/What can we help with/), 'lead-follow-up')
+  await user.selectOptions(screen.getByLabelText(/How long in practice/), '4-7 years')
+  await user.click(screen.getByRole('checkbox', { name: 'Chiropractic' }))
+  await user.click(screen.getByRole('checkbox', { name: /I consent/ }))
+}
+
+describe('best time to connect', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    HTMLElement.prototype.scrollIntoView = vi.fn()
+  })
+
+  it('sits below the services list and above consent, with local-time choices', () => {
+    const { container } = render(<StrategyCallSchedulePage />)
+    const select = screen.getByLabelText(/Best time to connect with you/) as HTMLSelectElement
+    expect([...select.options].map((o) => o.textContent)).toEqual(['Select one', '9–11 AM', '11 AM–1 PM', '1–3 PM', '3–5 PM', 'Anytime'])
+    expect(select.value).toBe('')
+    expect(select.required).toBe(false)
+    const services = screen.getByRole('group', { name: /What services do you offer/ })
+    const consent = screen.getByRole('checkbox', { name: /I consent/ })
+    expect(services.compareDocumentPosition(select) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(select.compareDocumentPosition(consent) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(container.querySelector('select[name="bestTime"]')).toBe(select)
+  })
+
+  it('submits the chosen time and keeps it when the server returns errors', async () => {
+    const user = userEvent.setup()
+    submit.mockImplementationOnce((async (_prev: unknown, data: FormData) => ({
+      fieldErrors: { email: 'Enter a valid email address.' },
+      values: Object.fromEntries([...data].filter(([, v]) => typeof v === 'string')) as Record<string, string>,
+    })) as never)
+    const { container } = render(<StrategyCallSchedulePage />)
+    await fillValidScheduleForm(container, user)
+    await user.selectOptions(screen.getByLabelText(/Best time to connect/), '1–3 PM')
+    await user.click(screen.getByRole('button', { name: 'Get My Free Strategy Call' }))
+    await waitFor(() => expect(submit).toHaveBeenCalledTimes(1))
+    const submitted = (submit.mock.calls[0] as unknown as [unknown, FormData])[1]
+    expect(submitted.get('bestTime')).toBe('1–3 PM')
+    await screen.findByText('Enter a valid email address.')
+    expect((screen.getByLabelText(/Best time to connect/) as HTMLSelectElement).value).toBe('1–3 PM')
+  })
+})
+
+describe('coming back with the browser Back button after submitting', () => {
+  beforeEach(async () => {
+    vi.clearAllMocks()
+    HTMLElement.prototype.scrollIntoView = vi.fn()
+    // Run the real client action and redirect handling; the server answers "go to booking".
+    vi.stubGlobal('fetch', vi.fn(async (url: string) => ({
+      status: 200,
+      json: async () => (String(url).includes('/actions/')
+        ? { ok: true, result: null, redirect: '/#booking' }
+        : { ok: true, result: null }),
+    })))
+    const actual = await vi.importActual<typeof import('@/app/actions/leads')>('@/app/actions/leads')
+    submit.mockImplementation(actual.submitHealthcareLead as never)
+  })
+  afterEach(() => {
+    vi.unstubAllGlobals()
+    window.location.hash = ''
+  })
+
+  it('re-enables the button, keeps entries, and sends a corrected resubmission with a new submission id', async () => {
+    const user = userEvent.setup()
+    const { container } = render(<StrategyCallSchedulePage />)
+    await fillValidScheduleForm(container, user)
+    await user.selectOptions(screen.getByLabelText(/Best time to connect/), 'Anytime')
+    await user.click(screen.getByRole('button', { name: 'Get My Free Strategy Call' }))
+    await screen.findByRole('button', { name: 'Submitting…' })
+    await waitFor(() => expect(window.location.hash).toBe('#booking'))
+    const firstId = (submit.mock.calls[0] as unknown as [unknown, FormData])[1].get('marketingSubmissionId')
+    expect(firstId).toBeTruthy()
+
+    const restore = new Event('pageshow')
+    Object.defineProperty(restore, 'persisted', { value: true })
+    act(() => { window.dispatchEvent(restore) })
+
+    const button = await screen.findByRole('button', { name: 'Get My Free Strategy Call' })
+    expect((button as HTMLButtonElement).disabled).toBe(false)
+    const form = container.querySelector('form')!
+    const id = form.querySelector<HTMLInputElement>('input[name="marketingSubmissionId"]')!.value
+    expect(id).toBeTruthy()
+    expect(id).not.toBe(firstId)
+    expect(container.querySelector<HTMLInputElement>('input[name="firstName"]')!.value).toBe('Test')
+    expect(container.querySelector<HTMLInputElement>('input[name="phone"]')!.value).toBe('(555) 555-1234')
+    expect((screen.getByLabelText(/Best time to connect/) as HTMLSelectElement).value).toBe('Anytime')
+    expect((screen.getByLabelText(/What can we help with/) as HTMLSelectElement).value).toBe('lead-follow-up')
+    expect((screen.getByLabelText(/How long in practice/) as HTMLSelectElement).value).toBe('4-7 years')
+    expect((screen.getByRole('checkbox', { name: /I consent/ }) as HTMLInputElement).checked).toBe(true)
+
+    fireEvent.change(container.querySelector('input[name="lastName"]')!, { target: { value: 'Corrected' } })
+    await user.click(button)
+    await waitFor(() => expect(submit).toHaveBeenCalledTimes(2))
+    const second = (submit.mock.calls[1] as unknown as [unknown, FormData])[1]
+    expect(second.get('marketingSubmissionId')).toBe(id)
+    expect(second.get('lastName')).toBe('Corrected')
+    await screen.findByRole('button', { name: 'Submitting…' })
+  }, 15_000)
 })

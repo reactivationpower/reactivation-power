@@ -204,4 +204,31 @@ describe('schedule lead validation and submission', () => {
     expect((await submitHealthcareLead({}, data)).fieldErrors?.newPatientValue).toBeTruthy()
     expect(insert).not.toHaveBeenCalled()
   })
+
+  it('adds the optional best time and the visitor time zone to the sales note and details', async () => {
+    const data = form('both', '50')
+    data.set('bestTime', '11 AM–1 PM')
+    data.set('deviceTimezone', 'America/Chicago')
+    await expect(submitHealthcareLead({}, data)).rejects.toThrow('REDIRECT:')
+    const input = vi.mocked(intake).mock.calls[0][0]
+    expect(input.noteBody).toContain("Best time to connect: 11 AM–1 PM (visitor's local time, America/Chicago)")
+    expect(input.context).toMatchObject({ bestTime: '11 AM–1 PM', deviceTimezone: 'America/Chicago' })
+  })
+
+  it('leaves the best time out of the note when none was chosen', async () => {
+    await expect(submitHealthcareLead({}, form('both', '50'))).rejects.toThrow('REDIRECT:')
+    const input = vi.mocked(intake).mock.calls[0][0]
+    expect(input.noteBody).not.toContain('Best time to connect')
+    expect(input.context.bestTime).toBeUndefined()
+  })
+
+  it.each(['Midnight', '9-11 AM', '<script>'])('rejects an unlisted best time %s and keeps entries', async (value) => {
+    const data = form('both', '50')
+    data.set('bestTime', value)
+    expect(validateLeadFields(readLeadFields(data)).bestTime).toBeTruthy()
+    const result = await submitHealthcareLead({}, data)
+    expect(result.fieldErrors?.bestTime).toBeTruthy()
+    expect(result.values?.bestTime).toBe(value)
+    expect(insert).not.toHaveBeenCalled()
+  })
 })

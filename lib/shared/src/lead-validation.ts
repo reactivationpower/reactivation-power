@@ -18,6 +18,13 @@ export function isProductInterest(value: string): value is ProductInterest {
   return PRODUCT_INTERESTS.some((interest) => interest === value)
 }
 
+/** "Best time to connect" choices, in the visitor's own local time. Empty = not chosen. */
+export const BEST_TIMES = ['9–11 AM', '11 AM–1 PM', '1–3 PM', '3–5 PM', 'Anytime'] as const
+export type BestTime = (typeof BEST_TIMES)[number]
+export function isBestTime(value: string): value is BestTime {
+  return BEST_TIMES.some((time) => time === value)
+}
+
 export interface LeadFieldValues {
   firstName: string
   lastName: string
@@ -33,6 +40,8 @@ export interface LeadFieldValues {
   services: string[]
   /** Missing on legacy /healthcare submissions; those remain reactivation. */
   productInterest?: string
+  /** Optional; empty or one of BEST_TIMES */
+  bestTime: string
   calculatorScenario: boolean
   additionalPatientsPerMonth: string
   newPatientValue: string
@@ -69,6 +78,7 @@ export function readLeadFields(formData: LeadFormDataLike): LeadFieldValues {
       .filter(Boolean)
       .slice(0, 30),
     productInterest: str('productInterest') || undefined,
+    bestTime: str('bestTime'),
   }
 }
 
@@ -101,6 +111,8 @@ export function validateLeadFields(
     if (!/^\d+$/.test(v.inactivePatients) || !Number.isSafeInteger(count) || count < 1 || count > INACTIVE_TYPED_MAX)
       errors.inactivePatients = `Enter a whole number from 1 to ${INACTIVE_TYPED_MAX.toLocaleString('en-US')}.`
   }
+  if (v.bestTime && !isBestTime(v.bestTime))
+    errors.bestTime = 'Select a time from the list.'
   if (v.services.length === 0)
     errors.services = 'Select at least one service.'
   if (v.calculatorScenario) {
