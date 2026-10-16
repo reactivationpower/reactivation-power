@@ -1,4 +1,5 @@
 import { pool, db, paymentHistoryTable, type PoolClient, type PaymentHistory } from '@workspace/db'
+import { pastDeadline } from '@/lib/cron/budget'
 import { eq } from 'drizzle-orm'
 import type Stripe from 'stripe'
 import { stripe } from '@/lib/stripe'
@@ -196,9 +197,11 @@ export async function queueAffiliateHistory(row: PaymentHistory) {
     throw error
   }
 }
-export async function retryAffiliateHistory() {
+/** Stops between rows at the deadline (`incomplete: true`); every row is a durable work item, so the continuation picks up the rest. */
+export async function retryAffiliateHistory(opts: { deadline?: number } = {}) {
   const { retryResellerHistory } = await import('@/lib/resellers/ledger')
-  await retryResellerHistory()
+  const resellers = await retryResellerHistory(opts)
+  if (resellers.incomplete) return { processed: 0, resellers: resellers.processed, incomplete: true }
   // Repair a process crash between the billing write and its retry-inbox insertion.
   // Existing attribution must already have been effective at the transaction time.
   await pool.query(`INSERT INTO affiliate_history_work(history_id)
@@ -210,8 +213,9 @@ export async function retryAffiliateHistory() {
   const pending = (await pool.query('SELECT history_id FROM affiliate_history_work WHERE completed_at IS NULL ORDER BY created_at LIMIT 500')).rows
   let processed = 0
   for (const work of pending) {
+    if (pastDeadline(opts.deadline, 5_000)) return { processed, resellers: resellers.processed, incomplete: true }
     const [row] = await db.select().from(paymentHistoryTable).where(eq(paymentHistoryTable.id, work.history_id))
     if (row) { await queueAffiliateHistory(row); processed++ }
   }
-  return { processed }
+  return { processed, resellers: resellers.processed }
 }

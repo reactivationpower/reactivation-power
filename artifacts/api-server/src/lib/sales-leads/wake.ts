@@ -1,5 +1,5 @@
 import { settings, transaction } from './store'
-import { isVercelPreview } from '../deployment-safety'
+import { isVercel, isVercelPreview } from '../deployment-safety'
 
 export const NATIVE_WAKE_HEADER = 'x-patient-pipeline-scheduler'
 export const NATIVE_WAKE_MARKER = 'supabase-sales-v1'
@@ -51,7 +51,18 @@ export async function configureNativeWake(target: string) {
   })
 }
 
-/** Dev/manual requests cannot establish production scheduler readiness. */
+/**
+ * Dev/manual requests cannot establish production scheduler readiness.
+ *
+ * Two schedulers can feed the one `scheduler_wake` capability the shared
+ * readiness rule list reads (lib/shared/src/sales-automation.ts): the
+ * Supabase pg_cron job on Replit, and Vercel Cron on Vercel. Each stamps the
+ * same capability with its `source`, so the checklist's "Scheduler running"
+ * row is true whenever *a* scheduler woke the published worker in the last
+ * ten minutes and never needs a second rule. After the Vercel cutover the
+ * pg_cron job is retired (retireNativeWake) so the two do not both wake the
+ * worker; while both exist, overlapping wakes are safe (durable claims).
+ */
 export async function recordNativeWake() {
   if (process.env.NODE_ENV !== 'production' || isVercelPreview()) return
   await transaction(async c => {
@@ -59,8 +70,36 @@ export async function recordNativeWake() {
     const jobId = cfg.capabilities.native_scheduler?.jobId
     if (!jobId) return
     const active = (await c.query("SELECT EXISTS(SELECT 1 FROM cron.job WHERE jobid=$1 AND jobname=$2 AND active AND schedule='*/5 * * * *') AS active",[jobId,NATIVE_WAKE_JOB])).rows[0].active
-    const wake = { state:active ? 'verified' : 'missing',checkedAt:new Date().toISOString(),
+    const wake = { state:active ? 'verified' : 'missing',checkedAt:new Date().toISOString(),source:'supabase',
       requirement:active ? 'Healthy authenticated Supabase wake received by the published worker. Last success is shown below.' : 'The configured five-minute Supabase cron job is not active. Keep automation off.' }
     await c.query("UPDATE sales_settings SET capabilities=jsonb_set(capabilities,'{scheduler_wake}',$1::jsonb) WHERE id='internal'",[JSON.stringify(wake)])
+  })
+}
+
+/** A Vercel Cron call of the five-minute route on the Vercel production deployment. */
+export async function recordVercelCronWake() {
+  if (process.env.NODE_ENV !== 'production' || !isVercel() || isVercelPreview()) return
+  await transaction(async c => {
+    const wake = { state:'verified',checkedAt:new Date().toISOString(),source:'vercel-cron',
+      requirement:'Healthy authenticated Vercel Cron wake received by the published worker. Last success is shown below.' }
+    await c.query("UPDATE sales_settings SET capabilities=jsonb_set(capabilities,'{scheduler_wake}',$1::jsonb) WHERE id='internal'",[JSON.stringify(wake)])
+  })
+}
+
+/**
+ * Cutover step (operator-run, after Vercel Cron is live): unschedule the
+ * Supabase pg_cron wake so the worker is not woken twice. The Vault secret
+ * is kept. Not called by any route.
+ */
+export async function retireNativeWake() {
+  return transaction(async c => {
+    await c.query("SELECT pg_advisory_xact_lock(hashtextextended('internal-sales-native-wake',0))")
+    await c.query("SELECT id FROM sales_settings WHERE id='internal' FOR UPDATE")
+    const cfg = await settings(c)
+    const jobId = cfg.capabilities.native_scheduler?.jobId
+    if (jobId) await c.query('SELECT cron.unschedule($1::bigint)',[jobId]).catch(() => undefined)
+    const native = { state:'retired',jobId:null,requirement:'Retired: Vercel Cron calls /api/cron/workers every five minutes instead.' }
+    await c.query("UPDATE sales_settings SET capabilities=jsonb_set(capabilities,'{native_scheduler}',$1::jsonb) WHERE id='internal'",[JSON.stringify(native)])
+    return { retiredJobId: jobId ?? null }
   })
 }

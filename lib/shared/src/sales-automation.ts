@@ -12,7 +12,8 @@ export interface SalesAutomationInput {
   approved_at: Stamp
   scope_reviewed_at: Stamp
   capabilities_checked_at: Stamp
-  capabilities: Record<string, { state?: string; checkedAt?: string | null } | undefined> | null | undefined
+  /** `scheduler_wake.source` names which scheduler last woke the worker ('supabase' | 'vercel-cron'); either satisfies the rule. */
+  capabilities: Record<string, { state?: string; checkedAt?: string | null; source?: string } | undefined> | null | undefined
 }
 
 export interface SalesAutomationRequirement {
@@ -56,7 +57,7 @@ export function salesAutomationRequirements(s: SalesAutomationInput, now = Date.
   return [
     { key: 'scheduler', ok: schedulerHealthy(caps, now), label: 'Scheduler running',
       fix: 'The published app must be running. See Scheduler above.',
-      error: 'Wait for a healthy scheduled wake on the published app before enabling automation. The Supabase five-minute job must be active.' },
+      error: 'Wait for a healthy scheduled wake on the published app before enabling automation. The five-minute scheduler (Supabase job on Replit, Vercel Cron on Vercel) must be active.' },
     { key: 'assignee', ok: !!s.default_assignee_id, label: 'Default assignee set',
       fix: 'Pick someone and click Save assignee above.', error: reviewError },
     { key: 'texts', ok: !!s.approved_at, label: 'Texts approved',

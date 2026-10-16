@@ -9,6 +9,8 @@ import { contact, contactPage, locationId, notes, phoneOwnedByOtherContact, prov
 import { salesTiming } from './timing'
 import { runInboxInbound } from '../sales-inbox/inbound'
 import { isVercelPreview } from '../deployment-safety'
+import { pastDeadline } from '@/lib/cron/budget'
+import { workerState } from './dispatch'
 import { ingestProviderFacts, providerContext, providerDnd, reconcileLead, refreshLeadMessages } from './ingestion'
 function importPhone(value: unknown): string {
   try { return phoneKey(String(value ?? '')) } catch { return '' } // original value remains in submission context for staff review
@@ -85,9 +87,11 @@ export async function claimSalesJob(syncOnly = false) {
         j.due_at,j.created_at,j.id FOR UPDATE SKIP LOCKED LIMIT 1) RETURNING *`, [syncOnly])).rows[0]
   })
 }
-export async function drainSalesSync() {
+/** Up to ten sync jobs, or fewer at the deadline. Returns true when more may be waiting. */
+export async function drainSalesSync(deadline?: number) {
   if (isVercelPreview()) return false
   for (let i = 0; i < 10; i++) {
+    if (pastDeadline(deadline, STEP_RESERVE_MS)) return true
     const job = await claimSalesJob(true)
     if (!job) return false
     await processSalesJob(job)
@@ -289,23 +293,36 @@ async function discoverScopedContacts() {
   }
 }
 let busy = false
-export async function runSalesWorker() {
+/** Do not start another step or job with less than this left. */
+const STEP_RESERVE_MS = 5_000
+/** Default wall-clock budget of one worker pass; the five-minute tick passes its own slice. */
+export const SALES_WORKER_BUDGET_MS = 120_000
+/**
+ * One pass of every sales worker step. Every claim and session lock is taken
+ * and released inside this call, and each step checks the deadline before
+ * starting, so a pass always ends on its own well before the function limit;
+ * durable claims mean the next pass simply continues.
+ */
+export async function runSalesWorker(opts: { deadline?: number } = {}) {
   // Vercel Preview shares the production database: never claim or update
   // production sales work (sync, follow-ups, appointment messages) from there.
   if (busy || isVercelPreview()) return
   busy = true
+  workerState.busy = true
+  const deadline = opts.deadline ?? Date.now() + SALES_WORKER_BUDGET_MS
+  const stepLeft = () => !pastDeadline(deadline, STEP_RESERVE_MS)
   try {
     // Previously delivered emails retain their thread Reply-To addresses even
     // when new messages route replies to an external mailbox.
-    await runInboxInbound()
+    await runInboxInbound(deadline)
     const { runAppointmentMessages } = await import('../appointment-messages/worker')
-    await runAppointmentMessages()
-    await recoverClaims()
-    await drainSalesSync()
-    await importSalesPage()
-    await discoverScopedContacts()
-    await boundedReconciliation()
-    await plan()
-    for (let i = 0; i < 10; i++) { const job = await claimSalesJob(); if (!job) break; await processSalesJob(job) }
-  } finally { busy = false }
+    if (stepLeft()) await runAppointmentMessages(deadline)
+    if (stepLeft()) await recoverClaims()
+    if (stepLeft()) await drainSalesSync(deadline)
+    if (stepLeft()) await importSalesPage()
+    if (stepLeft()) await discoverScopedContacts()
+    if (stepLeft()) await boundedReconciliation()
+    if (stepLeft()) await plan()
+    for (let i = 0; i < 10 && stepLeft(); i++) { const job = await claimSalesJob(); if (!job) break; await processSalesJob(job) }
+  } finally { busy = false; workerState.busy = false }
 }

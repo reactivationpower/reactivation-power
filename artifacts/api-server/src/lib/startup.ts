@@ -3,8 +3,13 @@ import { logger } from "./logger";
 import { tryGetRequestContext } from "./request-context";
 import { seal, unseal } from "./affiliates/onboarding-crypto";
 
-/** Shared by the Replit server entry and the Vercel function entry. */
-export function enableDatabaseReadTracking(): void {
+/**
+ * Shared by the Replit server entry and the Vercel function entry. The Replit
+ * process flushes on a five-minute timer; a Vercel function is frozen between
+ * requests, so there the report is flushed lazily by the first query after a
+ * window ends instead (no timer may be relied on).
+ */
+export function enableDatabaseReadTracking(options: { flush?: "interval" | "lazy" } = {}): void {
   configureDatabaseReadTracking(
     report => logger.info(report, "Database read usage (estimated result bytes)"),
     () => {
@@ -14,6 +19,7 @@ export function enableDatabaseReadTracking(): void {
         ? `${request.method} ${request.route.path}`
         : "background";
     },
+    options,
   );
 }
 

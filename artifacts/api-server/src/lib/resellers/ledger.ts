@@ -1,4 +1,5 @@
 import { pool, db, paymentHistoryTable, type PaymentHistory, type PoolClient } from '@workspace/db'
+import { pastDeadline } from '@/lib/cron/budget'
 import { eq } from 'drizzle-orm'
 import type Stripe from 'stripe'
 import { stripe } from '@/lib/stripe'
@@ -169,14 +170,17 @@ export async function queueResellerHistory(row: PaymentHistory) {
   await processResellerHistory(row)
   await pool.query('UPDATE reseller_history_work SET completed_at=now(),error=NULL WHERE history_id=$1',[row.id])
 }
-export async function retryResellerHistory() {
+export async function retryResellerHistory(opts: { deadline?: number } = {}) {
   await pool.query(`INSERT INTO reseller_history_work(history_id) SELECT h.id FROM payment_history h
     JOIN reseller_sales s ON s.link_id=h.link_id WHERE h.occurred_at>=s.created_at AND
     NOT EXISTS(SELECT 1 FROM reseller_history_work w WHERE w.history_id=h.id) ORDER BY h.occurred_at LIMIT 500 ON CONFLICT DO NOTHING`)
   const rows=(await pool.query('SELECT history_id FROM reseller_history_work WHERE completed_at IS NULL ORDER BY created_at LIMIT 500')).rows
+  let processed=0
   for (const r of rows) {
+    if (pastDeadline(opts.deadline, 5_000)) return { processed, incomplete: true }
     const [history]=await db.select().from(paymentHistoryTable).where(eq(paymentHistoryTable.id,r.history_id))
     if (history) await queueResellerHistory(history)
+    processed++
   }
-  return { processed: rows.length }
+  return { processed }
 }

@@ -14,11 +14,12 @@ export async function listCronJobs(): Promise<CronJobStatus[]> {
   return getCronJobStatuses(5)
 }
 
-export async function runCronJobNow(input: { job: string }): Promise<Result<{ runId: string; summary: Record<string, unknown> }>> {
+export async function runCronJobNow(input: { job: string }): Promise<Result<{ runId: string; summary: Record<string, unknown>; incomplete: boolean }>> {
   const admin = await requireAdmin('super_admin')
   if (!isCronJobName(input.job)) return { ok: false, error: 'Unknown job.' }
   const outcome = await runCronJob(input.job, { trigger: 'admin', actor: admin.name || admin.email })
   if ('skipped' in outcome) return { ok: false, error: 'That job is already running — wait for it to finish.' }
   if (!outcome.ok) return { ok: false, error: outcome.error }
-  return { ok: true, runId: outcome.run.id, summary: outcome.summary }
+  // A manual run has no daily slot to continue; incomplete means "click Run now again for the rest".
+  return { ok: true, runId: outcome.run.id, summary: outcome.summary, incomplete: outcome.incomplete }
 }

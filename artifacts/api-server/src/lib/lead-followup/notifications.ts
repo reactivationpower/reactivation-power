@@ -3,6 +3,7 @@ import { db } from '@workspace/db'
 import { sendEmail } from '@/lib/mail'
 import { appOrigin } from '@/lib/app-origin'
 import { logger } from '@/lib/logger'
+import { pastDeadline } from '@/lib/cron/budget'
 
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0]
 export interface LeadEmailSettings { enabled: boolean; recipient: string }
@@ -58,7 +59,7 @@ interface OutboxRow {
 /** Leases + provider idempotency prevent concurrent sends and ambiguous retry duplicates.
  * Resend retains keys for 24h: ambiguous attempts stop after 23h for manual review.
  */
-export async function deliverLeadEmails(ownerId?: string): Promise<void> {
+export async function deliverLeadEmails(ownerId?: string, opts: { deadline?: number } = {}): Promise<void> {
   try {
     await db.execute(sql`UPDATE lead_email_outbox SET status = 'expired', last_error = 'Delivery uncertain; retry window expired'
       WHERE status IN ('pending', 'sending', 'failed') AND first_attempt_at < now() - interval '23 hours'`)
@@ -76,6 +77,12 @@ export async function deliverLeadEmails(ownerId?: string): Promise<void> {
         updated_at = now(), first_attempt_at = coalesce(first_attempt_at, now())
       FROM candidates c WHERE o.id = c.id RETURNING o.*`)
     for (const row of claimed.rows as unknown as OutboxRow[]) {
+      if (pastDeadline(opts.deadline, 5_000)) {
+        // Hand the unsent rows back now rather than leaving them "sending" for five minutes.
+        await db.execute(sql`UPDATE lead_email_outbox SET status = 'pending', attempts = greatest(attempts - 1, 0), updated_at = now()
+          WHERE id = ${row.id} AND status = 'sending'`)
+        continue
+      }
       const result = await sendEmail('new_leads', row.recipient, {
         count: row.lead_count,
         portalUrl: `${appOrigin()}/portal/campaigns/${encodeURIComponent(row.campaign_id)}`,

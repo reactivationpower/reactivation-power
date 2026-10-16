@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto'
+import { pastDeadline } from '@/lib/cron/budget'
 import type Stripe from 'stripe'
 import { and, eq, isNull, lt, or, sql } from 'drizzle-orm'
 import { agreementDeliveriesTable, agreementsTable, customerCardsTable, customersTable, db, paymentLinkTermsTable } from '@workspace/db'
@@ -190,7 +191,8 @@ export async function reconcile(token: string) {
 }
 
 /** Daily recovery if the buyer closes the browser or an endpoint omits PI events. */
-export async function reconcilePendingEnrollments() {
+/** Stops between enrollments at the deadline (`incomplete: true`); the cron continuation finishes the rest. */
+export async function reconcilePendingEnrollments(opts: { deadline?: number } = {}) {
   const pending = await db.select({ token: agreementsTable.token })
     .from(paymentLinkTermsTable)
     .innerJoin(agreementsTable, eq(agreementsTable.linkId, paymentLinkTermsTable.linkId))
@@ -209,8 +211,12 @@ export async function reconcilePendingEnrollments() {
       )`,
     )).limit(100)
   let completed = 0
+  let examined = 0
+  let incomplete = false
   const errors: string[] = []
   for (const row of pending) {
+    if (pastDeadline(opts.deadline, 10_000)) { incomplete = true; break }
+    examined++
     try {
       const result = await reconcile(row.token)
       if (result.completed) completed++
@@ -219,7 +225,7 @@ export async function reconcilePendingEnrollments() {
     }
   }
   if (errors.length) throw new Error(`${errors.length} enrollment(s) could not be reconciled: ${errors[0]}`)
-  return { examined: pending.length, completed }
+  return { examined, completed, ...(incomplete ? { incomplete: true } : {}) }
 }
 
 /** The selected card must be a card saved for this link, never a customer-wide default. */

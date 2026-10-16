@@ -16,7 +16,7 @@
 - [One-off api-server scripts & test admins](api-server-scripts.md) — esbuild-bundle with pino externalized; create disposable admins via Supabase createUser, never ask for the owner's password.
 - [Web app unit tests](web-app-tests.md) — reactivation-power vitest uses its own config (vite.config throws without PORT); root `pnpm test` + validation `test`/`typecheck` registered.
 - [Shared workspace libs](shared-libs.md) — lib/shared + lib/niche-catalog are the only copies; `tsc --build` libs before artifact typecheck (stale dist = phantom missing exports); no DOM types in libs.
-- [Scheduled jobs on autoscale](scheduled-jobs.md) — day slot claimed in cron_runs by both in-process ticker and external cron route; external trigger still needed for on-time runs; off in dev.
+- [Scheduled jobs on autoscale and Vercel](scheduled-jobs.md) — one slot claim shared by ticker, HTTP and Vercel Cron; both UTC hours per ET slot; partial runs continue; after-response via waitUntil.
 - [Two sales-demo practices](demo-practices.md) — keep resets isolated to one demo family; sample CSV entitlement and dedupe constraints.
 - [Stale dev process after failed restart](stale-dev-process.md) — EADDRINUSE in a workflow log = old build still serving; check listener start time vs dist mtime before debugging code.
 - [Campaign setup audience](campaign-setup-guidance.md) — self-service office setup is primary; agency handoff is secondary, and receipt claims must stay factual.

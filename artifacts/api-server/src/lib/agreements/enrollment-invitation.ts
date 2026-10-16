@@ -2,6 +2,7 @@ import { and, eq, isNull, isNotNull, lt, or, sql } from 'drizzle-orm'
 import { db, customersTable, paymentLinkTermsTable, enrollmentInvitationsTable } from '@workspace/db'
 import { sendAgreementSentEmail } from '@/lib/mail'
 import { logger } from '@/lib/logger'
+import { pastDeadline } from '@/lib/cron/budget'
 import { agreementUrl, createAgreement, loadAgreementByLink, isSigned, isExpired } from './store'
 import { AGREEMENT_DEFAULTS, COMPANY, agreementTitle } from './defaults'
 import { DEFAULT_ONE_TIME_AGREEMENT_BODY, CALENDAR_AGREEMENT_BODY } from './template'
@@ -119,7 +120,7 @@ export async function supersedeInitialInvitation(linkId: string): Promise<void> 
 }
 
 /** Only newly queued invitations, never historical customers. No billing calls. */
-export async function retryPendingEnrollmentInvitations(): Promise<void> {
+export async function retryPendingEnrollmentInvitations(opts: { deadline?: number } = {}): Promise<void> {
   try {
     const due = await db.select({ linkId: enrollmentInvitationsTable.linkId }).from(enrollmentInvitationsTable)
       .where(and(
@@ -130,6 +131,7 @@ export async function retryPendingEnrollmentInvitations(): Promise<void> {
           sql`${enrollmentInvitationsTable.firstAttemptAt} > ${new Date(Date.now() - 23 * 3600_000)}`),
       )).limit(20)
     for (const row of due) {
+      if (pastDeadline(opts.deadline, 5_000)) break // nothing is leased before the send; the next run sees the same rows
       const [terms] = await db.select().from(paymentLinkTermsTable).where(eq(paymentLinkTermsTable.linkId, row.linkId)).limit(1)
       if (!terms?.enrollmentFlow) continue
       const [customer] = await db.select().from(customersTable).where(eq(customersTable.id, terms.customerId)).limit(1)

@@ -109,3 +109,22 @@ it('keeps bounded groups, preserves overflow totals, and ranks the largest reads
   expect(report.topQueries).toHaveLength(20)
   expect(report.topQueries[0]?.queryId).toBe('overflow')
 })
+
+it('lazy mode flushes from the next query after the window ends instead of a timer (Vercel)', async () => {
+  const reports: unknown[] = []
+  configureDatabaseReadTracking((r) => reports.push(r), () => 'test-fixture', { flush: 'lazy' })
+  const client = { query: vi.fn().mockResolvedValue({ rows: [{ a: 1 }] }) } as unknown as PoolClient
+  trackDatabaseClient(client)
+  vi.useFakeTimers()
+  try {
+    await client.query('SELECT 1')
+    vi.advanceTimersByTime(10 * 60_000)
+    // No timer fired: nothing was reported while the process was "frozen".
+    expect(reports).toHaveLength(0)
+    await client.query('SELECT 2')
+    expect(reports).toHaveLength(1)
+  } finally {
+    vi.useRealTimers()
+    configureDatabaseReadTracking(() => {}, () => 'test-fixture')
+  }
+})

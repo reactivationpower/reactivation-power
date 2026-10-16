@@ -3,6 +3,7 @@ import { sendEmail, fromAddress } from '@/lib/mail/send'
 import { renderTemplate } from '@/lib/mail/templates'
 import { accessId } from './access'
 import { id, transaction, type Partner } from './store'
+import { pastDeadline } from '@/lib/cron/budget'
 
 export async function enqueueOnboarding(client: PoolClient, p: Partner, initial: boolean) {
   const jobId = id()
@@ -71,11 +72,15 @@ export async function deliverOnboarding(jobId: string): Promise<boolean> {
   [row.id, result.ok ? 'accepted' : 'failed', result.providerId ?? null, result.logId])
   return result.ok
 }
-export async function retryOnboardingInvitations() {
+export async function retryOnboardingInvitations(opts: { deadline?: number } = {}) {
   const rows = (await pool.query(`SELECT id FROM affiliate_onboarding_invitations
     WHERE status IN ('pending','failed','sending') AND next_attempt_at<=now()
     AND (lease_until IS NULL OR lease_until<now()) AND (attempts<5 OR status='sending') ORDER BY created_at LIMIT 20`)).rows
-  let accepted = 0
-  for (const row of rows) if (await deliverOnboarding(row.id)) accepted++
-  return { examined: rows.length, accepted }
+  let accepted = 0, examined = 0
+  for (const row of rows) {
+    if (pastDeadline(opts.deadline, 5_000)) break // unleased rows wait for the next run
+    examined++
+    if (await deliverOnboarding(row.id)) accepted++
+  }
+  return { examined, accepted }
 }
