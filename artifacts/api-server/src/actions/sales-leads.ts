@@ -121,20 +121,22 @@ export async function logSalesCall(leadId: string, input: { disposition: SalesDi
   if (!SALES_DISPOSITIONS.includes(input.disposition)) throw new Error('Select a disposition before logging a call')
   const terminal = ['Booked', 'Wrong Number', 'Do Not Contact'].includes(input.disposition)
   const next = input.nextFollowupAt || (input.confirmedSuggestedSlot ? suggestedFollowup(new Date(), leadId) : null)
-  if (!terminal && !next) throw new Error('Choose a next follow-up or explicitly confirm the suggested slot')
   if (next && (!Number.isFinite(Date.parse(next)) || Date.parse(next) <= Date.now() || !allowed(new Date(next)))) throw new Error('Follow-up must be Monday–Friday 9 AM–5 PM Eastern, in the future')
   await transaction(async c => {
     await c.query("SELECT pg_advisory_xact_lock(hashtextextended($1,0))", [`sales-send:${leadId}`])
     const lead = (await c.query('SELECT * FROM sales_leads WHERE id=$1 FOR UPDATE', [leadId])).rows[0]
     if (!lead) throw new Error('Lead not found')
-    const stage = input.disposition === 'Booked' ? 'Strategy Call Booked' : ['Wrong Number', 'Do Not Contact'].includes(input.disposition) ? 'Lost/Do Not Contact' :
+    // A lead linked to a customer stays at its stage (Won); a follow-up time is optional for it.
+    const customer = !!lead.customer_id
+    if (!terminal && !next && !customer) throw new Error('Choose a next follow-up or explicitly confirm the suggested slot')
+    const stage = customer ? lead.stage : input.disposition === 'Booked' ? 'Strategy Call Booked' : ['Wrong Number', 'Do Not Contact'].includes(input.disposition) ? 'Lost/Do Not Contact' :
       input.disposition === 'Not Now' ? 'Not Now' : ['No Answer', 'Voicemail'].includes(input.disposition) ? 'Attempting Contact' : 'Follow-Up Scheduled'
     await c.query(`UPDATE sales_leads SET stage=$2,next_followup_at=$3,dnd=dnd OR $4,revision=revision+1,updated_at=now(),sync_state='pending' WHERE id=$1`,
-      [leadId, stage, terminal ? null : next, ['Do Not Contact', 'Wrong Number'].includes(input.disposition)])
-    const a = await activity(c, leadId, { kind: 'call', body: input.notes, disposition: input.disposition, nextFollowupAt: terminal ? undefined : next!, authorId: admin.userId, authorName: admin.name || admin.email })
-    await enqueue(c, leadId, 'note_sync', `call-note:${a.id}`, { activityId: a.id, body: `[Patient Pipeline ${a.id}] Call outcome: ${input.disposition}\n${input.notes}\nNext follow-up: ${terminal ? 'none' : next}` })
+      [leadId, stage, terminal ? null : customer && !next ? lead.next_followup_at : next, ['Do Not Contact', 'Wrong Number'].includes(input.disposition)])
+    const a = await activity(c, leadId, { kind: 'call', body: input.notes, disposition: input.disposition, nextFollowupAt: terminal || !next ? undefined : next, authorId: admin.userId, authorName: admin.name || admin.email })
+    await enqueue(c, leadId, 'note_sync', `call-note:${a.id}`, { activityId: a.id, body: `[Patient Pipeline ${a.id}] Call outcome: ${input.disposition}\n${input.notes}\nNext follow-up: ${terminal || !next ? 'none' : next}` })
     await enqueue(c, leadId, 'contact_sync', `call:${a.id}`)
-    if (!['No Answer', 'Voicemail'].includes(input.disposition)) await stop(c, leadId, 'call_outcome')
+    if (!customer && !['No Answer', 'Voicemail'].includes(input.disposition)) await stop(c, leadId, 'call_outcome')
     // Logging is a staff assertion, not a browser telephony event. Every call counts toward the shared daily cap.
     await c.query("UPDATE sales_jobs SET state='done',finished_at=now() WHERE lead_id=$1 AND kind='call_task' AND state='pending' AND due_at::date<=now()::date", [leadId])
   })

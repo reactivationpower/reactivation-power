@@ -718,7 +718,7 @@ add("/admin/customers/:id", "admin", async (req) => {
   const detail = await getCustomerRecord(String(req.params.id));
   if (!detail) notFound();
   const session = await getAdminSessionFromRequest(req);
-  return { ...detail, canManageViewers: session?.role === "super_admin" || session?.canManageServices === true };
+  return { ...detail, canManageViewers: session?.role === "super_admin" || session?.canManageServices === true, superAdmin: session?.role === "super_admin" };
 });
 add("/admin/enrollment-setup", "admin", async (req) => getEnrollmentSetup(queryString(req, "lead"), queryString(req, "customer")));
 

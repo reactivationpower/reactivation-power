@@ -282,6 +282,20 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('internal sales durable storage (i
     expect(call.next_followup_at).toBeTruthy()
     expect((await fixture.pool.query('SELECT stage,automation_state FROM sales_leads')).rows[0]).toMatchObject({ stage:'Not Now', automation_state:'call_outcome' })
   })
+  it('a call logged for a lead linked to a customer keeps Won, needs no follow-up, and still syncs and marks DNC', async () => {
+    const { id } = await intake(input('a'))
+    await fixture.pool.query("UPDATE sales_leads SET customer_id='fixture-customer',stage='Won',automation_state='converted' WHERE id=$1",[id])
+    await logSalesCall(id,{ disposition:'No Answer', notes:'Checked in after signing' })
+    let lead = (await fixture.pool.query('SELECT stage,automation_state,next_followup_at,dnd FROM sales_leads')).rows[0]
+    expect(lead).toMatchObject({ stage:'Won', automation_state:'converted', next_followup_at:null, dnd:false })
+    const call = (await fixture.pool.query("SELECT * FROM sales_activities WHERE kind='call'")).rows[0]
+    expect(call).toMatchObject({ disposition:'No Answer', body:'Checked in after signing', next_followup_at:null })
+    const sync = (await fixture.pool.query("SELECT payload FROM sales_jobs WHERE kind='note_sync' AND dedupe_key=$1",[`call-note:${call.id}`])).rows[0]
+    expect(sync.payload.body).toContain('Next follow-up: none')
+    await logSalesCall(id,{ disposition:'Do Not Contact', notes:'Asked us to stop calling' })
+    lead = (await fixture.pool.query('SELECT stage,dnd FROM sales_leads')).rows[0]
+    expect(lead).toMatchObject({ stage:'Won', dnd:true })
+  })
   it('duplicate inbound STOP cancels sends and queues exactly one reply notice', async () => {
     const { id } = await intake(input('a'))
     await fixture.pool.query("UPDATE sales_leads SET assignee_id='fixture-admin' WHERE id=$1",[id])

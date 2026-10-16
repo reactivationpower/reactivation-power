@@ -5,6 +5,7 @@ import { ArrowLeft, FileText, Plus, Receipt, Users } from 'lucide-react'
 import { usePageData } from '@/hooks/use-page-data'
 import { PageError, PageLoading } from '@/components/page-status'
 import { AgreementCard } from '@/components/admin/agreement-card'
+import { CustomerLeadPanel } from '@/components/admin/customer-lead-panel'
 import { BillingStatusBadge } from '@/components/admin/billing-panel'
 import { StateBadge } from '@/pages/admin_customers'
 import { Badge } from '@/components/ui/badge'
@@ -44,7 +45,7 @@ export default function CustomerDetailPage() {
   if (loading) return <PageLoading />
   if (notFound) return <NotFound />
   if (error) return <PageError error={error} />
-  const { customer, offers = [], accounts = [], history = [], agreements = [], canManageViewers } = data
+  const { customer, offers = [], accounts = [], history = [], agreements = [], leads = [], canManageViewers, superAdmin } = data
   const offerIds = new Set(data.liveOfferIds ?? offers.map((o) => o.id))
   const offerAgreementIds = new Set(offers.map((o) => o.agreement?.id).filter(Boolean))
   const pastAgreements = agreements.filter((a) => !offerAgreementIds.has(a.id))
@@ -94,6 +95,8 @@ export default function CustomerDetailPage() {
               </dl>
             </CardContent>
           </Card>
+
+          <CustomerLeadPanel leads={leads} superAdmin={superAdmin === true} />
 
           <section className="flex flex-col gap-3">
             <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Offers ({offerIds.size})</h2>

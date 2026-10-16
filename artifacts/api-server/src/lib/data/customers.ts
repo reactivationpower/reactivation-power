@@ -30,7 +30,7 @@ export async function listCustomers(query = '', rawPage = '1') {
 export async function getCustomerRecord(id: string) {
   const customer = (await pool.query(`SELECT ${customerFields} FROM customers WHERE id=$1`, [id])).rows[0]
   if (!customer) return null
-  const [offers, accounts, history, agreements] = await Promise.all([
+  const [offers, accounts, history, agreements, leads] = await Promise.all([
     pool.query(`SELECT l.id,l.name,l.email,l.status,l.amount_cents,t.type,t.monthly_cents,t.setup_fee_cents,
       t.completed_at,CASE WHEN t.completed_at IS NOT NULL THEN 'completed'
         WHEN t.type='subscription' AND t.setup_paid_at IS NOT NULL THEN 'awaiting_backup_card'
@@ -50,6 +50,9 @@ export async function getCustomerRecord(id: string) {
     pool.query(`SELECT id,link_id,kind,status,amount_cents,currency,description,failure_message,occurred_at
       FROM payment_history WHERE customer_id=$1 ORDER BY occurred_at DESC,created_at DESC LIMIT 200`, [id]),
     pool.query(`SELECT id,status,signed_at,link_id FROM agreements WHERE customer_id=$1 ORDER BY created_at DESC LIMIT 100`, [id]),
+    // Sales leads linked to this customer, newest first. Their history is shown here, never copied.
+    pool.query(`SELECT id,first_name,last_name,practice_name,email,phone,stage,source,created_at
+      FROM sales_leads WHERE customer_id=$1 ORDER BY created_at DESC,id LIMIT 20`, [id]),
   ])
   // Do not fan out a full agreement hydration for every offer at once.
   const hydratedOffers = []
@@ -60,7 +63,7 @@ export async function getCustomerRecord(id: string) {
   for (const agreement of agreements.rows) agreement.can_view = await canAccessNotificationAgreement(admin, agreement.id)
   const liveOfferIds = (await pool.query(`SELECT l.id FROM payment_links l JOIN payment_link_terms t
     ON t.link_id=l.id::text WHERE t.customer_id=$1`, [id])).rows.map(row => row.id)
-  return { customer, offers: hydratedOffers, liveOfferIds, accounts: accounts.rows, history: history.rows, agreements: agreements.rows }
+  return { customer, offers: hydratedOffers, liveOfferIds, accounts: accounts.rows, history: history.rows, agreements: agreements.rows, leads: leads.rows }
 }
 
 /** Read-only prefill. Opening or cancelling setup must never convert a lead. */

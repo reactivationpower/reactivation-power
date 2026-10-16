@@ -13,3 +13,7 @@ Opening or cancelling enrollment is not conversion. Existing linked leads contin
 **Why:** The user requires truthful progress and recoverable invitation failures without duplicate records or charges.
 
 **How to apply:** Link a lead only after durable enrollment persistence, retain attribution and cadence-stop semantics, and present saved, invitation, signing, completion, and billing outcomes separately.
+
+## Talking to customers after Won
+Customer conversations use the linked sales lead's record: one shared history, never a copy or a separate customer inbox. A call logged for a customer must not move the lead off Won.
+**Why:** staff lost messaging once a lead was Won, and a "No Answer" call used to knock customers back to Attempting Contact.

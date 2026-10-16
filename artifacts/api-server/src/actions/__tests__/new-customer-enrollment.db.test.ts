@@ -179,6 +179,11 @@ describe.skipIf(!process.env.SUPABASE_DB_URL)('New Customer → agreement → mo
     const detail = await getCustomerRecord(first.link!.customer_id!)
     expect(detail!.offers.map(o => o.id)).toEqual(expect.arrayContaining([first.link!.id, second.link!.id]))
     expect(detail!.accounts).toEqual([])
+    expect(detail!.leads).toEqual([])
+    await scopedPool.query(`INSERT INTO sales_leads(id,email,first_name,source,customer_id,stage,created_at) VALUES
+      ('older-linked-lead',$1,'Older','website',$2,'Won',now()-interval '2 days'),('newer-linked-lead',$1,'Newer','manual',$2,'Won',now()),
+      ('unlinked-lead',$1,'Other','website',NULL,'New',now())`, [customer.email, first.link!.customer_id])
+    expect((await getCustomerRecord(first.link!.customer_id!))!.leads.map(l => l.id)).toEqual(['newer-linked-lead', 'older-linked-lead'])
     await scopedPool.query('DELETE FROM payment_link_terms')
     await scopedPool.query('DELETE FROM payment_links')
     const orphan = await getCustomerRecord(first.link!.customer_id!)
