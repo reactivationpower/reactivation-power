@@ -1796,3 +1796,17 @@ mtime_ms = 1792089462655
 storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/c772586c-2a18-48b4-b9ac-bd32eea834bf/fc307827-1560-4af3-b691-01c7f26df5e5"
 storage_version_token = "1792089513044836"
 content_type = "image/png"
+
+[[outputs]]
+id = "t_fQM7S3O-hacdrbvYjsh"
+uri = "file://exports/welcome-email-preview.jpg"
+type = "image"
+title = "Welcome email preview"
+description = "Draft of the thank-you / account active email sent after payment (sample customer)."
+logical_id = "156c46c4-bb11-4a50-b205-c767cd57a70c"
+content_hash = "sha256:20dbdebb6fbfb8af12c5473be871a200f4198e7344094f0b226991da15511ecf"
+size = 102115
+mtime_ms = 1792188266799
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:2c778ca8-8bd4-4b83-9ec3-0b3c34f84032/156c46c4-bb11-4a50-b205-c767cd57a70c/6ceee8e7-5c17-420b-bc7a-ab8575edec7c"
+storage_version_token = "1792188269242823"
+content_type = "image/jpeg"
