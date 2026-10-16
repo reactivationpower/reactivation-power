@@ -20,6 +20,7 @@ import { billingPageUrl, greetingName, portalSetupUrl, sendEmail, type CardSumma
 import { BRAND } from '@/lib/mail/layout'
 import { appOrigin } from '@/lib/app-origin'
 import { getAdminClient } from '@/lib/supabase/admin'
+import { onboardingUrl } from '@/lib/onboarding/booking'
 import { invoiceDescription, latestInvoiceAttempt, type CardUsed } from './dunning'
 
 /**
@@ -380,4 +381,40 @@ export async function notifyAccountActive(linkId: string): Promise<'sent' | 'fai
     logger.error({ err, linkId }, 'account active email: could not queue')
     return 'failed'
   }
+}
+
+/**
+ * "Schedule your onboarding" — sent once per completed enrollment, right
+ * after the account-active email, to the same login email. Never throws.
+ */
+export async function notifyOnboardingSchedule(linkId: string): Promise<'sent' | 'failed' | 'duplicate' | 'skipped'> {
+  try {
+    const [terms] = await db.select().from(paymentLinkTermsTable).where(eq(paymentLinkTermsTable.linkId, linkId))
+    if (!terms?.completedAt) return 'skipped'
+    const [customer] = await db.select().from(customersTable).where(eq(customersTable.id, terms.customerId))
+    if (!customer) return 'skipped'
+    const { data: link } = await getAdminClient().from('payment_links')
+      .select('name, email, participant_id').eq('id', linkId).maybeSingle()
+    if (!link?.email) return 'skipped'
+    let firstName: string | null = null
+    if (link.participant_id) {
+      const { data: owner } = await getAdminClient().from('participants')
+        .select('first_name').eq('id', link.participant_id).maybeSingle()
+      firstName = (owner?.first_name as string | undefined)?.trim() || null
+    }
+    return await enqueueAndSend('onboarding_schedule', `enrollment:${linkId}`, customer, {
+      firstName: firstName ?? greetingName(String(link.name || customer.fullName)),
+      businessName: customer.businessName?.trim() || customer.fullName,
+      scheduleUrl: onboardingUrl(linkId),
+    }, String(link.email).trim().toLowerCase())
+  } catch (err) {
+    logger.error({ err, linkId }, 'onboarding schedule email: could not queue')
+    return 'failed'
+  }
+}
+
+/** Both post-payment emails, in order: account active, then schedule onboarding. */
+export async function notifyEnrollmentWelcome(linkId: string): Promise<void> {
+  await notifyAccountActive(linkId)
+  await notifyOnboardingSchedule(linkId)
 }

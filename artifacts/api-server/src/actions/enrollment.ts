@@ -9,7 +9,7 @@ import { agreementAllowsPayment, loadAgreementByLink, loadAgreementByToken, onSe
 import { isSameCard } from '@/lib/billing/rules'
 import { activateSubscription } from './subscriptions'
 import { PRODUCT_NAME, provisionAccounts, recordIntentPayment } from './payments'
-import { notifyAccountActive } from '@/lib/billing/notifications'
+import { notifyEnrollmentWelcome } from '@/lib/billing/notifications'
 import { recordAffiliateConversion } from '@/lib/affiliates/attribution'
 import { reconcileMarketing } from '@/lib/marketing/reconcile'
 import { logger } from '@/lib/logger'
@@ -331,7 +331,7 @@ async function finish(linkId: string, intent: Stripe.PaymentIntent | null, selec
       await reconcileMarketing().catch(() => logger.warn('Marketing conversion awaits reconciliation'))
       await provisionAccounts(linkId)
       await onSubscriptionStarted(linkId, { monthlyCents: current.monthlyCents, firstChargeAt: current.nextPaymentAt })
-      await notifyAccountActive(linkId)
+      await notifyEnrollmentWelcome(linkId)
       return
     }
     throw new Error('Enrollment completion is in progress. Reload shortly; the card will not be charged again.')
@@ -391,8 +391,8 @@ async function finish(linkId: string, intent: Stripe.PaymentIntent | null, selec
       await provisionAccounts(linkId)
       await onSubscriptionStarted(linkId, { monthlyCents: 0, firstChargeAt: null })
     }
-    // Thank-you + login setup email; once per enrollment (outbox), never fatal.
-    await notifyAccountActive(linkId)
+    // Account-active + schedule-onboarding emails; once per enrollment (outbox), never fatal.
+    await notifyEnrollmentWelcome(linkId)
     // Waived setup fees are still a conversion; do not wait for a first monthly invoice to lock the lead.
     await recordAffiliateConversion(terms.customerId, now)
     await reconcileMarketing().catch(() => logger.warn('Marketing conversion awaits reconciliation'))

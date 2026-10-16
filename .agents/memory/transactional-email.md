@@ -27,3 +27,5 @@ description: Constraints learned wiring Resend sends, sender domains, and email 
 - Enrollment-flow owners get one "account active" email after payment (new or existing account) instead of the owner portal welcome; staff still get the welcome. Its button opens login with the setup step, not a direct password link.
   **Why:** a paying customer whose account already existed got no email at all; direct password links expire in 30 minutes, too short for an inbox email.
   **How to apply:** Keep any future post-payment owner email in that single once-per-link outbox slot rather than adding a second send.
+- Post-payment enrollment sends two outbox emails in order: account active, then schedule onboarding (signed /onboarding link). The onboarding GHL calendar ID lives in code (not secret; user preferred no env var), env var only overrides.
+  **Why:** the user asked for onboarding scheduling in the same GHL sub-account without new environment variables.

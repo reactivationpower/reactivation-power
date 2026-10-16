@@ -9,6 +9,7 @@ import {
   h1,
   layout,
   p,
+  bulletList,
   numberedSteps,
   panel,
   sectionTitle,
@@ -62,6 +63,14 @@ export interface AccountActiveData {
   cardLast4?: string | null
   /** Sign-in page with the email filled in and the password setup step open. */
   setupUrl: string
+}
+
+/** Sent right after `account_active`: how to prepare, plus the scheduling link. */
+export interface OnboardingScheduleData {
+  firstName: string
+  businessName: string
+  /** Signed /onboarding link for this enrollment. */
+  scheduleUrl: string
 }
 
 export interface PaymentReceivedData {
@@ -167,6 +176,7 @@ export interface TemplateDataMap {
   admin_invite: AdminInviteData
   payment_received: PaymentReceivedData
   account_active: AccountActiveData
+  onboarding_schedule: OnboardingScheduleData
   payment_failed: PaymentFailedData
   payment_failed_backup_used: PaymentFailedBackupUsedData
   access_paused: AccessPausedData
@@ -344,6 +354,86 @@ const accountActive: TemplateDefinition<'account_active'> = {
           ]),
           small('Use your own email, not a shared office inbox. Never share your password or sign-in codes.'),
           signoff('Glad to have you on board,'),
+        ],
+        { previewText, footerNote: SUPPORT_NOTE },
+      ),
+    }
+  },
+}
+
+const onboardingSchedule: TemplateDefinition<'onboarding_schedule'> = {
+  id: 'onboarding_schedule',
+  name: 'Schedule your onboarding',
+  description:
+    'Sent right after the "account active" email when an enrollment payment completes. Explains how to prepare and links to the onboarding calendar.',
+  sample: {
+    firstName: 'Sarah',
+    businessName: 'Bright Smile Chiropractic',
+    scheduleUrl: `${BRAND.siteUrl}/onboarding?ref=sample`,
+  },
+  render: (d) => {
+    const previewText = 'Pick a time for your onboarding, and see what to have ready.'
+    return {
+      subject: `Getting ready for your ${BRAND.name} onboarding`,
+      previewText,
+      html: layout(
+        [
+          statusBadge('Next step: onboarding'),
+          h1(`Hi ${esc(d.firstName)}, let's get your team started`),
+          p(`Welcome to ${BRAND.name}! We're looking forward to helping the team at <strong>${esc(d.businessName)}</strong> get started.`),
+          p("During onboarding, we'll begin with <strong>Reactivation</strong>. We'll walk through your setup, practice the calling process, and make sure everyone knows what to do next."),
+          details([
+            ['Length', 'About 45–60 minutes'],
+            ['Format', 'Online, on a computer'],
+          ]),
+          small('If more time is needed, a second meeting will be scheduled.'),
+          button('Schedule my onboarding', d.scheduleUrl),
+          sectionTitle('Who should attend'),
+          p('Please have you and the person who will be making calls attend together. If someone else manages your scheduling or lead forms, it would also be helpful to have them available.'),
+          sectionTitle('Your computer setup'),
+          p('Both you and your caller should be in front of a desktop or laptop, not just joining by phone. Ideally, each person should have their own computer so they can sign in and practice.'),
+          p('Please have:'),
+          bulletList([
+            'A reliable internet connection',
+            'A working microphone and speakers or a headset',
+            'A quiet place to participate',
+            'The ability to share your screen',
+            "Access to the email inboxes you'll use for Patient Pipeline",
+          ]),
+          sectionTitle('For Reactivation'),
+          p('Please have the following ready:'),
+          bulletList([
+            "Your practice's name and main callback number",
+            "Your caller's name and email address",
+            ['A small, office-approved list of <strong>10–25 former patients</strong> who have not been seen by your office in the last 3–12 months. Include their names, phone numbers, and previous service.', [
+              'Keep the list to <strong>one service</strong>. It can be any service your practice offers. Just make sure every patient on the list received that same service. For example, only chiropractic patients (not neuropathy), only red light therapy patients, or only hyperbaric oxygen therapy patients.',
+              'We recommend exporting the list from your EHR or EMR as a CSV file. Moving forward, this makes importing patients much easier and faster.',
+              "If you're not sure how to export it, please contact your EHR or EMR provider and ask them to walk you through it before onboarding. We don't access your patient records, so this step has to come from your office.",
+              "If you can't get an export before the meeting, that's okay. Just have your list of 10–25 former patients from the same service ready, and we'll show you how to enter them into the system one by one.",
+            ]],
+            'Access to your appointment calendar',
+          ]),
+          panel([
+            "<strong>Please do not email patient information</strong> or attach your patient list to your reply. We'll guide you through uploading it during onboarding.",
+          ], '#d97706'),
+          sectionTitle('For Lead Follow-Up'),
+          p('Please also have:'),
+          bulletList([
+            'The first service or offer you want to follow up on',
+            'The exact offer details, including approved pricing and any restrictions',
+            'Access to the form or system where your leads originate, such as GoHighLevel or Facebook',
+            'Your marketing agency or account administrator available, if they manage those connections',
+            "An authorized staff member's contact information to use for a test submission",
+          ]),
+          p("There's no need to share passwords with us."),
+          panel([
+            "You don't need to set everything up beforehand. Just have these items available, and we'll work through the setup together. If you're unsure how to prepare your patient list or access your lead source, reply and let us know.",
+          ]),
+          sectionTitle('Schedule your onboarding'),
+          p('Please choose a date and time far enough out to give your team time to gather everything above. Having it all ready will help you get the most out of your onboarding.'),
+          button('Schedule my onboarding', d.scheduleUrl),
+          fallbackLink(d.scheduleUrl),
+          signoff('We look forward to getting you started!'),
         ],
         { previewText, footerNote: SUPPORT_NOTE },
       ),
@@ -1102,6 +1192,7 @@ export const TEMPLATES: { [K in TemplateId]: TemplateDefinition<K> } = {
   admin_invite: adminInvite,
   payment_received: paymentReceived,
   account_active: accountActive,
+  onboarding_schedule: onboardingSchedule,
   payment_failed: paymentFailed,
   payment_failed_backup_used: paymentFailedBackupUsed,
   access_paused: accessPaused,

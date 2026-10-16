@@ -38,6 +38,19 @@ describe('transactional templates', () => {
     expect(monthly.html).toContain('$497.00 / month')
   })
 
+  it('onboarding email gives the preparation list and the scheduling link', () => {
+    const r = renderTemplate('onboarding_schedule', {
+      firstName: 'Shannon', businessName: 'Example Wellness',
+      scheduleUrl: 'https://patientpipeline.app/onboarding?ref=abc.def',
+    })
+    expect(r.subject).toBe('Getting ready for your Patient Pipeline onboarding')
+    expect(r.html).toContain('Schedule my onboarding')
+    expect(r.html).toContain('onboarding?ref=abc.def')
+    expect(r.html).toContain('10–25 former patients')
+    expect(r.html).toContain('Please do not email patient information')
+    expect(r.html).toContain('45–60 minutes')
+  })
+
   it('uses Patient Pipeline for website and logo links', () => {
     expect(BRAND.name).toBe('Patient Pipeline')
     expect(BRAND.siteUrl).toBe('https://patientpipeline.app')

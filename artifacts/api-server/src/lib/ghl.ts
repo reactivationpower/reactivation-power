@@ -176,8 +176,10 @@ export async function getGhlFreeSlots(params: {
   startMs: number
   endMs: number
   timezone: string
+  /** Defaults to the strategy-call calendar. */
+  calendarId?: string
 }): Promise<Record<string, string[]>> {
-  const calendarId = process.env.GHL_CALENDAR_ID
+  const calendarId = params.calendarId ?? process.env.GHL_CALENDAR_ID
   if (!calendarId) throw new Error('GHL_CALENDAR_ID is not set')
 
   // GHL caps each free-slots request at 31 days, so chunk the window
@@ -224,9 +226,11 @@ export async function bookGhlAppointment(params: {
   contactId: string
   startTime: string
   title?: string
+  /** Defaults to the strategy-call calendar. */
+  calendarId?: string
 }): Promise<string> {
   const locationId = process.env.GHL_LOCATION_ID
-  const calendarId = process.env.GHL_CALENDAR_ID
+  const calendarId = params.calendarId ?? process.env.GHL_CALENDAR_ID
   if (!locationId || !calendarId)
     throw new Error('GHL_LOCATION_ID / GHL_CALENDAR_ID is not set')
 
@@ -251,4 +255,25 @@ export async function bookGhlAppointment(params: {
   const id = json?.id ?? json?.event?.id
   if (!id) throw new Error('Provider booking response did not contain an appointment ID')
   return id
+}
+
+export interface GhlContactAppointment {
+  id: string
+  calendarId: string
+  startTime: string
+  appointmentStatus: string
+  deleted: boolean
+  dateAdded: string
+}
+
+/** A contact's appointments (all calendars). Verified reply: `{ events: [...] }`. */
+export async function listGhlContactAppointments(contactId: string): Promise<GhlContactAppointment[]> {
+  const json = (await ghlFetch(`/contacts/${encodeURIComponent(contactId)}/appointments`)) as { events?: GhlContactAppointment[] }
+  return Array.isArray(json?.events) ? json.events : []
+}
+
+/** One appointment; `startTime` carries the offset. Verified reply: `{ appointment: {...} }`. */
+export async function getGhlAppointment(id: string): Promise<{ id: string; calendarId: string; startTime: string; appointmentStatus: string; deleted?: boolean } | null> {
+  const json = (await ghlFetch(`/calendars/events/appointments/${encodeURIComponent(id)}`)) as { appointment?: any }
+  return json?.appointment ?? null
 }

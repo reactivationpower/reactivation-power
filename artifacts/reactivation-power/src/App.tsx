@@ -37,6 +37,7 @@ import Page_admin_team from '@/pages/admin_team';
 import Page_demo from '@/pages/demo';
 import Page_healthcare from '@/pages/healthcare';
 import Page_healthcare_book_a_call from '@/pages/healthcare_book-a-call';
+import Page_onboarding from '@/pages/onboarding';
 import Page_healthcare_testimonial from '@/pages/healthcare_testimonial';
 import Page_healthcare_thank_you from '@/pages/healthcare_thank-you';
 import Page_healthcare_your_opportunity from '@/pages/healthcare_your-opportunity';
@@ -320,6 +321,13 @@ function Router() {
         <RoutedErrorBoundary>
           <RootLayout>
             <Page_healthcare />
+          </RootLayout>
+        </RoutedErrorBoundary>
+      </Route>
+      <Route path="/onboarding">
+        <RoutedErrorBoundary>
+          <RootLayout>
+            <Page_onboarding />
           </RootLayout>
         </RoutedErrorBoundary>
       </Route>
