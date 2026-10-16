@@ -8,6 +8,7 @@ import { schedulerHealthy } from './wake'
 import { contact, contactPage, locationId, notes, phoneOwnedByOtherContact, provider, safeSalesUpsert, SalesProviderError, textContactFor, textsBlocked } from './provider'
 import { salesTiming } from './timing'
 import { runInboxInbound } from '../sales-inbox/inbound'
+import { isVercelPreview } from '../deployment-safety'
 import { ingestProviderFacts, providerContext, providerDnd, reconcileLead, refreshLeadMessages } from './ingestion'
 function importPhone(value: unknown): string {
   try { return phoneKey(String(value ?? '')) } catch { return '' } // original value remains in submission context for staff review
@@ -85,6 +86,7 @@ export async function claimSalesJob(syncOnly = false) {
   })
 }
 export async function drainSalesSync() {
+  if (isVercelPreview()) return false
   for (let i = 0; i < 10; i++) {
     const job = await claimSalesJob(true)
     if (!job) return false
@@ -288,7 +290,9 @@ async function discoverScopedContacts() {
 }
 let busy = false
 export async function runSalesWorker() {
-  if (busy) return
+  // Vercel Preview shares the production database: never claim or update
+  // production sales work (sync, follow-ups, appointment messages) from there.
+  if (busy || isVercelPreview()) return
   busy = true
   try {
     // Previously delivered emails retain their thread Reply-To addresses even

@@ -16,6 +16,8 @@ export async function replyAddress(leadId: string, c: Client = pool) {
 }
 export async function receivingApi(path: string) {
   const key = process.env.RESEND_RECEIVING_API_KEY
+  // Off Replit (e.g. Vercel) there is no connector: the receiving key is required.
+  if (!key && !process.env.REPLIT_CONNECTORS_HOSTNAME) throw new Error('Resend receiving API access unavailable')
   const response = key
     ? await fetch(`https://api.resend.com${path}`, { headers: { Authorization: `Bearer ${key}` }, signal: AbortSignal.timeout(15000) })
     : await new ReplitConnectors().proxy('resend', path, { method: 'GET' })

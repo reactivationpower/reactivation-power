@@ -3,6 +3,7 @@ import { deliverLeadEmails } from '@/lib/lead-followup/notifications'
 import { retryPendingEnrollmentInvitations } from '@/lib/agreements/enrollment-invitation'
 import { CRON_JOBS, CRON_JOB_NAMES, runCronJob, type CronJobName } from './jobs'
 import { dueKeyFor } from './slots'
+import { isVercelPreview } from '@/lib/deployment-safety'
 
 export { dueKeyFor } from './slots'
 import { runSalesWorker } from '@/lib/sales-leads/worker'
@@ -34,6 +35,8 @@ export const CRON_TICK_MS = 5 * 60_000
 const pad = (n: number) => String(n).padStart(2, '0')
 
 export function schedulerEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
+  // Vercel Preview shares the production database: never run jobs there, whatever the flag says.
+  if (isVercelPreview(env)) return false
   const flag = env.CRON_SCHEDULER?.trim().toLowerCase()
   if (flag === 'on' || flag === 'true' || flag === '1') return true
   if (flag === 'off' || flag === 'false' || flag === '0') return false

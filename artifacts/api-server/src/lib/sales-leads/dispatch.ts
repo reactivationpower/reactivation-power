@@ -1,7 +1,11 @@
+import { isVercelPreview } from '../deployment-safety'
+
 /** Coalesce post-commit wakes without coupling saves to provider availability. */
 let running = false
 let requested = false
 export function nudgeSalesSync() {
+  // Vercel Preview shares the production queue; leave it to production.
+  if (isVercelPreview()) return
   requested = true
   if (running) return
   running = true

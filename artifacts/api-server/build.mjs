@@ -21,7 +21,9 @@ async function buildAll() {
   }
 
   await esbuild({
-    entryPoints: [path.resolve(artifactDir, "src/index.ts")],
+    // index: Replit server (app.listen). vercel: Vercel function wrapper used by
+    // /api/index.mjs at the repo root. seed-super-admin: explicit one-off setup.
+    entryPoints: ["index", "vercel", "seed-super-admin"].map((name) => path.resolve(artifactDir, `src/${name}.ts`)),
     platform: "node",
     bundle: true,
     format: "esm",

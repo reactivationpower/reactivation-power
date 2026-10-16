@@ -22,6 +22,9 @@ describe('Patient Pipeline outgoing sender and links', () => {
     mocks.values.mockResolvedValue(undefined)
     mocks.proxy.mockResolvedValue({ ok: true, status: 200, json: async () => ({ id: 'test-email' }) })
     vi.stubEnv('RESEND_FROM', '')
+    vi.stubEnv('RESEND_API_KEY', '')
+    vi.stubEnv('VERCEL', '')
+    vi.stubEnv('REPLIT_CONNECTORS_HOSTNAME', 'connectors.test')
   })
   afterEach(() => vi.unstubAllEnvs())
 
@@ -105,5 +108,54 @@ describe('Patient Pipeline outgoing sender and links', () => {
     expect(query.mock.calls[0][1][0]).toBe('durable-log')
     expect(query.mock.calls[0][1][4]).toBe('sent')
     expect(mocks.proxy.mock.calls[0][2]).toMatchObject({headers:{'Idempotency-Key':'delivery-fixture'},body:{reply_to:'jacobb@patientpipeline.app'}})
+  })
+
+  it('sends directly with RESEND_API_KEY off Replit, with the same body, idempotency key and attachments', async () => {
+    vi.stubEnv('REPLIT_CONNECTORS_HOSTNAME', '')
+    vi.stubEnv('RESEND_API_KEY', 're_fixture')
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({ id: 'direct-email' }) })
+    vi.stubGlobal('fetch', fetchMock)
+    try {
+      const result = await sendEmail('portal_welcome', 'delivered@resend.dev', TEMPLATES.portal_welcome.sample, {
+        idempotencyKey: 'direct-fixture', attachments: [{ filename: 'a.pdf', content: Buffer.from('pdf'), contentType: 'application/pdf' }],
+      })
+      expect(result).toMatchObject({ ok: true, providerId: 'direct-email' })
+      expect(mocks.proxy).not.toHaveBeenCalled()
+      const [url, init] = fetchMock.mock.calls[0]!
+      expect(url).toBe('https://api.resend.com/emails')
+      expect(init.headers).toMatchObject({ Authorization: 'Bearer re_fixture', 'Idempotency-Key': 'direct-fixture' })
+      const body = JSON.parse(init.body)
+      expect(body.from).toBe(DEFAULT_FROM)
+      expect(body.attachments).toEqual([{ filename: 'a.pdf', content: Buffer.from('pdf').toString('base64'), content_type: 'application/pdf' }])
+      expect(body.headers).toEqual({ 'X-Entity-Ref-ID': 'direct-fixture' })
+    } finally {
+      vi.unstubAllGlobals()
+    }
+  })
+
+  it('fails clearly, and not as uncertain, when no Resend key or connector is available', async () => {
+    vi.stubEnv('REPLIT_CONNECTORS_HOSTNAME', '')
+    const result = await sendEmail('payment_received', 'delivered@resend.dev', TEMPLATES.payment_received.sample)
+    expect(result).toMatchObject({ ok: false, error: 'RESEND_API_KEY is not set' })
+    expect(result.uncertain).toBeUndefined()
+    expect(mocks.proxy).not.toHaveBeenCalled()
+  })
+
+  it('never sends real email from a Vercel Preview deployment', async () => {
+    vi.stubEnv('VERCEL', '1')
+    vi.stubEnv('VERCEL_ENV', 'preview')
+    vi.stubEnv('RESEND_API_KEY', 're_fixture')
+    const fetchMock = vi.fn()
+    vi.stubGlobal('fetch', fetchMock)
+    try {
+      const result = await sendEmail('portal_welcome', 'delivered@resend.dev', TEMPLATES.portal_welcome.sample)
+      expect(result.ok).toBe(false)
+      expect(result.error).toContain('Preview')
+      expect(fetchMock).not.toHaveBeenCalled()
+      expect(mocks.proxy).not.toHaveBeenCalled()
+      expect(mocks.values).toHaveBeenCalledWith(expect.objectContaining({ status: 'failed' }))
+    } finally {
+      vi.unstubAllGlobals()
+    }
   })
 })

@@ -10,6 +10,7 @@ import { smsAllowed } from '@/lib/appointment-messages/schedule'
 import { getAdminUserById } from '@/lib/data/admin-users'
 import { listAppointmentEmailHistory } from '@/lib/appointment-messages/history'
 import { safeEmailPreview } from '@/lib/sales-inbox/email-preview'
+import { assertRealEffectsAllowed } from '@/lib/deployment-safety'
 import { toPlainText } from '@/lib/mail/layout'
 import { stop, transaction } from '@/lib/sales-leads/store'
 
@@ -127,6 +128,9 @@ const sendSchema=z.object({leadId:z.string().min(1),channel:z.literal('sms'),sub
   body:z.string().trim().min(1).max(10000),requestId:z.string().uuid(),confirmed:z.boolean().optional()})
 export async function sendMessage(input:unknown) {
   const data=sendSchema.parse(input), admin=await requireAdmin()
+  // Vercel Preview shares the production database: refuse before any lead,
+  // message or queue row changes (stop() would cancel real follow-ups).
+  assertRealEffectsAllowed('Sending inbox messages')
   if(data.channel==='sms'&&data.body.length>1600) throw new Error('Text messages are limited to 1,600 characters')
   const {confirmed,...fields}=data
   const fingerprint=createHash('sha256').update(JSON.stringify({...fields,author:admin.userId})).digest('hex')

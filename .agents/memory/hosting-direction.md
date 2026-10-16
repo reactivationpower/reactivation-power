@@ -13,3 +13,9 @@ The domain switch is deferred until after Vercel preparation and testing.
 **Why:** The user explicitly agreed to do the domain transfer afterward.
 
 **How to apply:** Keep the live domain and existing hosting unchanged during preparation. Moving the domain's hosting/DNS is a separate later approval, not a registrar transfer requirement.
+
+The user chose to keep the Vite SPA + Express API as they are on Vercel, not rewrite to Next.js (Oct 2026).
+
+**Why:** the user picked "keep the app as is and run it on Vercel" when asked.
+
+**How to apply:** Do not propose a Next.js rewrite for hosting. Vercel Preview shares the production database, so every new job, worker, outbound message or payment path must go through the shared Preview-safety check and must not claim production queue rows from Preview.

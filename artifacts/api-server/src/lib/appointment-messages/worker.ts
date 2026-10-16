@@ -11,6 +11,7 @@ import { MINUTE, SMS_GAP, nextSmsWindow, smsAllowed } from './schedule'
 import { renderAppointmentMessage, type AppointmentCopy } from './content'
 import { SALES_REPLY_TO } from '../sales-inbox/store'
 import { randomUUID } from 'node:crypto'
+import { isVercelPreview } from '../deployment-safety'
 
 function channelBlocked(remote: any, channel: string) {
   return remote?.dnd === true || remote?.dndSettings?.[channel]?.status === 'active'
@@ -124,7 +125,7 @@ function pauseReason(error: unknown) {
 /** Durable five-minute production wake plus immediate post-booking nudge.
  * Dedicated lock prevents overlap; never sends from preview/dev. */
 export async function runAppointmentMessages() {
-  if (process.env.NODE_ENV !== 'production') return
+  if (process.env.NODE_ENV !== 'production' || isVercelPreview()) return
   const c = await pool.connect()
   let locked = false
   try {

@@ -7,6 +7,7 @@
     "dev": "export NODE_ENV=development && pnpm run build && node ../../scripts/free-port.mjs && pnpm run start",
     "build": "node ./build.mjs",
     "start": "node --enable-source-maps ./dist/index.mjs",
+    "seed:super-admin": "node --enable-source-maps ./dist/seed-super-admin.mjs",
     "typecheck": "tsc --build ../../tsconfig.json && tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "flows:export": "node scripts/flows/export.ts",

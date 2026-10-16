@@ -9,9 +9,15 @@ import { runSalesWorker } from "@/lib/sales-leads/worker";
 import { reconcileTextIntents } from "@/lib/patient-texting/worker";
 import { reconcileMarketing } from "@/lib/marketing/reconcile";
 import { logger } from "@/lib/logger";
+import { isVercelPreview } from "@/lib/deployment-safety";
 import { NATIVE_WAKE_HEADER,NATIVE_WAKE_MARKER,recordNativeWake } from "@/lib/sales-leads/wake";
 
 const router: IRouter = Router();
+// Vercel Preview shares the production database: no scheduled job or worker may run there.
+router.use("/cron", (_req, res, next) => {
+  if (!isVercelPreview()) { next(); return; }
+  res.status(503).json({ error: "Scheduled jobs are turned off on Vercel Preview deployments." });
+});
 router.post('/cron/patient-texting', async (req, res) => {
   if (!process.env.CRON_SECRET || req.get('authorization') !== `Bearer ${process.env.CRON_SECRET}`) {
     res.status(401).json({ error: 'Unauthorized' }); return

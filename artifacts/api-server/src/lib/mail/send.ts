@@ -5,9 +5,12 @@ import { logger } from '@/lib/logger'
 import { toPlainText } from './layout'
 import { renderTemplate, type TemplateDataMap, type TemplateId } from './templates'
 import { isAuthenticationEmail, safeEmailMetadata } from './diagnostics'
+import { isVercelPreview } from '@/lib/deployment-safety'
 
 /**
- * Transactional sending through the Resend connector.
+ * Transactional sending through Resend: directly with RESEND_API_KEY when it
+ * is set (required off Replit, e.g. on Vercel), otherwise through the Replit
+ * Resend connector. Vercel Preview deployments never send real email.
  *
  * sendEmail never throws: it returns { ok: false } and logs the failure, so
  * it is safe to call from server actions and webhook handlers where a mail
@@ -68,7 +71,44 @@ interface ResendSendResponse {
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-const connectors = new ReplitConnectors()
+export const PREVIEW_EMAIL_BLOCKED = 'Email sending is turned off on Vercel Preview deployments'
+
+let connectors: ReplitConnectors | null = null
+
+/** POST /emails to Resend, directly or through the Replit connector. Same request either way. */
+async function postToResend(
+  body: Record<string, unknown>,
+  idempotencyKey: string | undefined,
+): Promise<{ ok: boolean; status: number; json(): Promise<unknown> }> {
+  const apiKey = process.env.RESEND_API_KEY?.trim()
+  if (apiKey) {
+    return fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+        ...(idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : {}),
+      },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(30_000),
+    })
+  }
+  if (!process.env.REPLIT_CONNECTORS_HOSTNAME) {
+    throw new ResendNotConfiguredError()
+  }
+  connectors ??= new ReplitConnectors()
+  return connectors.proxy('resend', '/emails', {
+    method: 'POST',
+    ...(idempotencyKey ? { headers: { 'Idempotency-Key': idempotencyKey } } : {}),
+    body,
+  })
+}
+
+class ResendNotConfiguredError extends Error {
+  constructor() {
+    super('RESEND_API_KEY is not set')
+  }
+}
 
 /** Render a template and send it. */
 export async function sendEmail<K extends TemplateId>(
@@ -101,30 +141,33 @@ export async function sendEmail<K extends TemplateId>(
     return { ok: false, logId, error }
   }
 
+  if (isVercelPreview()) {
+    const error = PREVIEW_EMAIL_BLOCKED
+    await log({ ...base, status: 'failed', error })
+    logger.info({ email: { type, recipient, logId } }, `email not sent: ${error}`)
+    return { ok: false, logId, error }
+  }
+
   try {
-    const response = await connectors.proxy('resend', '/emails', {
-      method: 'POST',
-      ...(options.idempotencyKey ? { headers: { 'Idempotency-Key': options.idempotencyKey } } : {}),
-      body: {
-        from: options.deliverySnapshot?.from ?? fromAddress(),
-        to: [recipient],
-        subject: rendered.subject,
-        html: rendered.html,
-        text: toPlainText(rendered.html),
-        ...(options.replyTo ? { reply_to: options.replyTo } : {}),
-        ...(options.attachments?.length
-          ? {
-              attachments: options.attachments.map((a) => ({
-                filename: a.filename,
-                content: Buffer.isBuffer(a.content) ? a.content.toString('base64') : a.content,
-                ...(a.contentType ? { content_type: a.contentType } : {}),
-              })),
-            }
-          : {}),
-        tags: [{ name: 'type', value: type }],
-        headers: { 'X-Entity-Ref-ID': options.idempotencyKey ?? logId },
-      },
-    })
+    const response = await postToResend({
+      from: options.deliverySnapshot?.from ?? fromAddress(),
+      to: [recipient],
+      subject: rendered.subject,
+      html: rendered.html,
+      text: toPlainText(rendered.html),
+      ...(options.replyTo ? { reply_to: options.replyTo } : {}),
+      ...(options.attachments?.length
+        ? {
+            attachments: options.attachments.map((a) => ({
+              filename: a.filename,
+              content: Buffer.isBuffer(a.content) ? a.content.toString('base64') : a.content,
+              ...(a.contentType ? { content_type: a.contentType } : {}),
+            })),
+          }
+        : {}),
+      tags: [{ name: 'type', value: type }],
+      headers: { 'X-Entity-Ref-ID': options.idempotencyKey ?? logId },
+    }, options.idempotencyKey)
     const payload = (await response.json().catch(() => ({}))) as ResendSendResponse
     if (!response.ok || !payload.id) {
       const error = authentication ? `Resend rejected the authentication email (HTTP ${response.status})` : sensitiveDelivery ? `Resend rejected the email (HTTP ${response.status})` : payload.message || `Resend responded ${response.status}`
@@ -136,7 +179,9 @@ export async function sendEmail<K extends TemplateId>(
     logger.info({ email: { type, recipient, logId, providerId: payload.id } }, 'email sent')
     return { ok: true, logId, providerId: payload.id }
   } catch (err) {
-    const senderConfigurationError = err instanceof Error && err.message === 'RESEND_FROM must use a patientpipeline.app email address'
+    // Configuration problems are known before any request leaves: never "uncertain".
+    const senderConfigurationError = err instanceof ResendNotConfiguredError ||
+      (err instanceof Error && err.message === 'RESEND_FROM must use a patientpipeline.app email address')
     const uncertain = !senderConfigurationError
     const error = sensitiveDelivery && !senderConfigurationError ? (authentication ? 'Authentication email send failed; check the registered inbox and email provider' : 'Email send failed; check the recipient and email provider') : err instanceof Error ? err.message : String(err)
     await log({ ...base, status: uncertain && type === 'agreement_sent' ? 'pending' : 'failed', error })

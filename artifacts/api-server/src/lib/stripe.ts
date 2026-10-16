@@ -1,17 +1,21 @@
 import Stripe from 'stripe'
+import { isVercel, isVercelPreview } from '@/lib/deployment-safety'
 
 /**
  * Stripe mode switch.
  *
  * Two sources of keys:
  *   live: STRIPE_SECRET_KEY + NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY (or VITE_STRIPE_PUBLISHABLE_KEY)
- *   test: the Replit Stripe integration (a Stripe Sandbox) — or, as a manual
- *         fallback, STRIPE_TEST_SECRET_KEY + STRIPE_TEST_PUBLISHABLE_KEY.
+ *   test: the Replit Stripe integration (a Stripe Sandbox) when running on
+ *         Replit, otherwise the direct STRIPE_TEST_SECRET_KEY +
+ *         STRIPE_TEST_PUBLISHABLE_KEY.
  *
- * `STRIPE_MODE=test|live` picks the source explicitly. When it is unset, the
- * development workspace runs in test mode whenever sandbox keys are available
- * (test cards work, nothing real is charged) and the published app runs live.
- * To force live everywhere, set STRIPE_MODE=live.
+ * `STRIPE_MODE=test|live` picks the source explicitly. Test mode never falls
+ * back to live keys: if no test keys are found, startup fails with a clear
+ * error. On Replit, when STRIPE_MODE is unset, the development workspace runs
+ * in test mode and the published app runs live (unchanged behavior). On Vercel
+ * STRIPE_MODE must always be set, and Preview deployments refuse live mode
+ * because they share the production database.
  *
  * `initStripe()` must be awaited once at startup before any request handler
  * touches `stripe`.
@@ -50,7 +54,7 @@ async function fetchSandboxKeys(): Promise<{ secretKey: string; publishableKey: 
       // fall through to the manual keys
     }
   }
-  // Fallback: manually supplied sandbox keys.
+  // Direct sandbox keys (used everywhere outside Replit, e.g. Vercel).
   if (process.env.STRIPE_TEST_SECRET_KEY) {
     return {
       secretKey: process.env.STRIPE_TEST_SECRET_KEY,
@@ -74,33 +78,41 @@ function liveKeys(): { secretKey: string; publishableKey: string | null } {
 export async function initStripe(): Promise<StripeMode> {
   if (resolved) return resolved.mode
   const explicit = (process.env.STRIPE_MODE ?? '').trim().toLowerCase()
+  if (explicit && explicit !== 'test' && explicit !== 'live') {
+    throw new Error(`STRIPE_MODE must be "test" or "live" (got "${explicit}")`)
+  }
+  if (isVercel() && !explicit) {
+    throw new Error('STRIPE_MODE must be set to "test" or "live" on Vercel')
+  }
+  if (isVercelPreview() && explicit === 'live') {
+    throw new Error('Live Stripe is not allowed on Vercel Preview deployments; set STRIPE_MODE=test for Preview')
+  }
   let mode: StripeMode
   let keys: { secretKey: string; publishableKey: string | null }
 
-  if (explicit === 'live') {
-    mode = 'live'
-    keys = liveKeys()
-  } else if (explicit === 'test') {
-    const sandbox = await fetchSandboxKeys()
-    if (!sandbox) throw new Error('STRIPE_MODE=test but no Stripe sandbox keys are available (connect the Stripe integration)')
-    mode = 'test'
-    keys = sandbox
-  } else if (isProduction) {
+  if (explicit === 'live' || (!explicit && isProduction)) {
     mode = 'live'
     keys = liveKeys()
   } else {
+    // Explicit test mode, or the Replit development workspace. Never fall back to live.
     const sandbox = await fetchSandboxKeys()
-    if (sandbox) {
-      mode = 'test'
-      keys = sandbox
-    } else {
-      mode = 'live'
-      keys = liveKeys()
+    if (!sandbox) {
+      throw new Error(explicit === 'test'
+        ? 'STRIPE_MODE=test but no Stripe test keys are available (set STRIPE_TEST_SECRET_KEY or connect the Stripe integration)'
+        : 'No Stripe test keys are available (set STRIPE_TEST_SECRET_KEY or connect the Stripe integration). Set STRIPE_MODE=live to use live keys on purpose.')
     }
+    mode = 'test'
+    keys = sandbox
   }
 
   if (mode === 'test' && !keys.secretKey.startsWith('sk_test')) {
     throw new Error('Stripe test mode selected but the sandbox secret key is not a test key')
+  }
+  if (mode === 'test' && keys.publishableKey && !keys.publishableKey.startsWith('pk_test')) {
+    throw new Error('Stripe test mode selected but the publishable key is not a test key')
+  }
+  if (mode === 'live' && keys.secretKey.startsWith('sk_test')) {
+    throw new Error('Stripe live mode selected but STRIPE_SECRET_KEY is a test key')
   }
   resolved = { mode, ...keys, client: new Stripe(keys.secretKey) }
   return mode

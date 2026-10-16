@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto'
+import { assertRealEffectsAllowed } from '@/lib/deployment-safety'
 import { and, desc, eq, inArray, sql } from 'drizzle-orm'
 import { cronRunsTable, db, type CronRun } from '@workspace/db'
 
@@ -197,6 +198,8 @@ async function claimRun(job: CronJobName, opts: RunOptions): Promise<ClaimResult
 /** Run a job now, recording the attempt. Skips (without running) if the slot is already taken. */
 export async function runCronJob(job: CronJobName, opts: RunOptions): Promise<RunOutcome> {
   const def = CRON_JOBS[job]
+  // Checked before claiming, so a preview never uses up production's daily slot.
+  assertRealEffectsAllowed('Scheduled jobs')
   const claim = await claimRun(job, opts)
   if (!claim.claimed) {
     if (claim.inProgress) return { ok: true, skipped: true, existing: claim.inProgress, reason: 'a run is already in progress' }

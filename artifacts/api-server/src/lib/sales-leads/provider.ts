@@ -7,6 +7,7 @@
 const BASE = 'https://services.leadconnectorhq.com'
 import type { GhlUpsertInput } from '@/lib/ghl'
 import { salesTiming } from './timing'
+import { assertRealEffectsAllowed } from '@/lib/deployment-safety'
 /** Provider upsert prefers phone/email according to location configuration.
  * Check both identities first; never let that implicit preference merge two
  * different people or erase existing tags. */
@@ -109,6 +110,8 @@ export async function provider(path: string, method = 'GET', body?: unknown): Pr
 }
 async function request(path: string, method: string, body?: unknown): Promise<any> {
   if (!process.env.GHL_API_TOKEN) throw new Error('Existing GoHighLevel private integration is not configured')
+  // Sending a text or email through GoHighLevel is a real message: never from a Vercel Preview.
+  if (method !== 'GET' && /^\/conversations\/messages(?:[/?]|$)/.test(path)) assertRealEffectsAllowed('Sending texts and emails')
   let r: Response
   try {
     r = await fetch(`${BASE}${path}`, {

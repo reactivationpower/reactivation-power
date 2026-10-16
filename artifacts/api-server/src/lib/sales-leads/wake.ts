@@ -1,4 +1,5 @@
 import { settings, transaction } from './store'
+import { isVercelPreview } from '../deployment-safety'
 
 export const NATIVE_WAKE_HEADER = 'x-patient-pipeline-scheduler'
 export const NATIVE_WAKE_MARKER = 'supabase-sales-v1'
@@ -52,7 +53,7 @@ export async function configureNativeWake(target: string) {
 
 /** Dev/manual requests cannot establish production scheduler readiness. */
 export async function recordNativeWake() {
-  if (process.env.NODE_ENV !== 'production') return
+  if (process.env.NODE_ENV !== 'production' || isVercelPreview()) return
   await transaction(async c => {
     const cfg = await settings(c)
     const jobId = cfg.capabilities.native_scheduler?.jobId

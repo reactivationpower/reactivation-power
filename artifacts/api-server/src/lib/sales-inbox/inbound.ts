@@ -1,5 +1,6 @@
 import { pool } from '@workspace/db'
 import { randomUUID } from 'node:crypto'
+import { isVercelPreview } from '../deployment-safety'
 import { activity, enqueue, stop, transaction } from '../sales-leads/store'
 import { safeProviderText } from '../sales-leads/ingestion'
 import { inboxSettings, mailbox, receivingApi } from './store'
@@ -39,7 +40,7 @@ export async function ingestReceivedEmail(id: string, data: any) {
   })
 }
 export async function runInboxInbound() {
-  if (process.env.NODE_ENV !== 'production') return
+  if (process.env.NODE_ENV !== 'production' || isVercelPreview()) return
   const lock = await pool.connect()
   let acquired = false
   try {
