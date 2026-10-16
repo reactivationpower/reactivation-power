@@ -24,3 +24,6 @@ description: Constraints learned wiring Resend sends, sender domains, and email 
 - Confirm public webhook errors against published application logs before diagnosing route absence.
   **Why:** A missing-secret rejection logged as HTTP 503 by the published server appeared as HTTP 500 through the public proxy.
   **How to apply:** Correlate a harmless unsigned probe with application logs; public status alone does not establish whether the route was reached.
+- Enrollment-flow owners get one "account active" email after payment (new or existing account) instead of the owner portal welcome; staff still get the welcome. Its button opens login with the setup step, not a direct password link.
+  **Why:** a paying customer whose account already existed got no email at all; direct password links expire in 30 minutes, too short for an inbox email.
+  **How to apply:** Keep any future post-payment owner email in that single once-per-link outbox slot rather than adding a second send.

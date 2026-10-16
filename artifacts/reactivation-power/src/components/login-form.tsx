@@ -9,10 +9,10 @@ import { Label } from '@/components/ui/label'
 import { BillingNotice } from '@/components/billing-notice'
 
 type Mode = 'password' | 'code' | 'request' | 'set-password'
-export function LoginForm({ next, email, setupToken, pendingLogin }: {
-  next?: string; email?: string; setupToken?: string; pendingLogin?: LoginState | null
+export function LoginForm({ next, email, setupToken, pendingLogin, startSetup }: {
+  next?: string; email?: string; setupToken?: string; pendingLogin?: LoginState | null; startSetup?: boolean
 }) {
-  const [mode, setMode] = useState<Mode>(setupToken ? 'set-password' : pendingLogin?.codeSent ? 'code' : 'password')
+  const [mode, setMode] = useState<Mode>(setupToken ? 'set-password' : pendingLogin?.codeSent ? 'code' : startSetup ? 'request' : 'password')
   const [state, setState] = useState<LoginState>(pendingLogin ?? {})
   const [pending, setPending] = useState(false)
   const [address, setAddress] = useState(pendingLogin?.email ?? email ?? '')

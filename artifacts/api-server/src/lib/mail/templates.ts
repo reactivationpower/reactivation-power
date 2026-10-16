@@ -9,9 +9,12 @@ import {
   h1,
   layout,
   p,
+  numberedSteps,
   panel,
+  sectionTitle,
   signoff,
   small,
+  statusBadge,
 } from './layout'
 
 /**
@@ -41,6 +44,24 @@ export interface AdminInviteData {
   role: 'super_admin' | 'sales_rep' | 'reseller_manager' | 'reseller_salesperson'
   invitedByName: string | null
   inviteUrl: string
+}
+
+/** Sent once when an enrollment payment completes: account active + login setup. */
+export interface AccountActiveData {
+  firstName: string
+  businessName: string
+  /** The login email (username). */
+  email: string
+  plan: 'one_time' | 'subscription'
+  /** Paid today; 0 when the setup fee was waived. */
+  amountCents: number
+  /** Subscriptions only. */
+  monthlyCents?: number | null
+  paidAt: string
+  cardBrand?: string | null
+  cardLast4?: string | null
+  /** Sign-in page with the email filled in and the password setup step open. */
+  setupUrl: string
 }
 
 export interface PaymentReceivedData {
@@ -145,6 +166,7 @@ export interface TemplateDataMap {
   cron_failed: CronFailedData
   admin_invite: AdminInviteData
   payment_received: PaymentReceivedData
+  account_active: AccountActiveData
   payment_failed: PaymentFailedData
   payment_failed_backup_used: PaymentFailedBackupUsedData
   access_paused: AccessPausedData
@@ -270,6 +292,67 @@ const adminInvite: TemplateDefinition<'admin_invite'> = {
     ),
   }),
 }
+
+const accountActive: TemplateDefinition<'account_active'> = {
+  id: 'account_active',
+  name: 'Account active (after payment)',
+  description:
+    'Thank-you email sent once when a customer completes their enrollment payment. Confirms the account is active and walks them through setting up their login.',
+  sample: {
+    firstName: 'Sarah',
+    businessName: 'Bright Smile Chiropractic',
+    email: 'sarah@brightsmilechiro.com',
+    plan: 'one_time',
+    amountCents: 250000,
+    monthlyCents: null,
+    paidAt: new Date().toISOString(),
+    cardBrand: 'Visa',
+    cardLast4: '4242',
+    setupUrl: `${BRAND.siteUrl}/login?email=sarah%40brightsmilechiro.com&start=setup`,
+  },
+  render: (d) => {
+    const rows: Array<[string, string]> = [
+      ['Plan', d.plan === 'subscription' ? `${BRAND.name} — monthly plan` : `${BRAND.name} — full payment`],
+      ['Amount paid', d.amountCents > 0 ? money(d.amountCents) : 'Waived'],
+    ]
+    if (d.plan === 'subscription' && d.monthlyCents) rows.push(['Monthly', `${money(d.monthlyCents)} / month`])
+    rows.push(['Paid on', longDate(d.paidAt)])
+    if (d.cardLast4) rows.push(['Card', `${esc(cardBrandLabel(d.cardBrand))} ending ${esc(d.cardLast4)}`])
+    const previewText = 'Thank you! Your account is active. Here is how to set up your login.'
+    return {
+      subject: `You're all set — your ${BRAND.name} account is active`,
+      previewText,
+      html: layout(
+        [
+          statusBadge('Payment received'),
+          h1(`Thank you, ${esc(d.firstName)}! Your account is active.`),
+          p(`Welcome to ${BRAND.name}. We received your payment, and the account for <strong>${esc(d.businessName)}</strong> is now active.`),
+          details(rows),
+          sectionTitle('Set up your login (about 2 minutes)'),
+          numberedSteps([
+            ['Click “Set up my account” below.', `Your username is your email: <strong>${esc(d.email)}</strong>`],
+            ['Create your password.', 'We email you a secure link right away. Open it and choose your password.'],
+            ['Sign in.', 'Enter your email and password, then the 6-digit code we email you. After that, your computer is remembered for 2 days.'],
+          ]),
+          button('Set up my account', d.setupUrl),
+          fallbackLink(d.setupUrl),
+          panel([
+            '<strong>After you sign in</strong>',
+            '&bull;&nbsp; Watch the <strong>Getting Started</strong> course (short videos).',
+            '&bull;&nbsp; Add your callers. Each person gets their own login.',
+            '&bull;&nbsp; Upload your past-patient list or set up your first campaign.',
+          ]),
+          small('Use your own email, not a shared office inbox. Never share your password or sign-in codes.'),
+          signoff('Glad to have you on board,'),
+        ],
+        { previewText, footerNote: SUPPORT_NOTE },
+      ),
+    }
+  },
+}
+
+const cardBrandLabel = (brand?: string | null) =>
+  brand ? brand.charAt(0).toUpperCase() + brand.slice(1) : 'Card'
 
 const paymentReceived: TemplateDefinition<'payment_received'> = {
   id: 'payment_received',
@@ -1018,6 +1101,7 @@ export const TEMPLATES: { [K in TemplateId]: TemplateDefinition<K> } = {
   },
   admin_invite: adminInvite,
   payment_received: paymentReceived,
+  account_active: accountActive,
   payment_failed: paymentFailed,
   payment_failed_backup_used: paymentFailedBackupUsed,
   access_paused: accessPaused,

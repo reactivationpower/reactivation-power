@@ -38,6 +38,16 @@ describe('portal password and email-code form', () => {
     expect((actions.verifyLoginCode.mock.calls[0][1] as FormData).get('code')).toBe('123456')
     expect(screen.getByText('4 incorrect attempts remaining.')).toBeTruthy()
   })
+  it('opens the password setup step with the email filled in from the account-active email link', async () => {
+    actions.requestPasswordSetup.mockResolvedValue({ message: 'If that email is registered, we sent a link.' })
+    render(<LoginForm email="owner@example.invalid" startSetup />)
+    expect(screen.getByText('Set up or reset your password')).toBeTruthy()
+    expect((screen.getByLabelText('Email (username)') as HTMLInputElement).value).toBe('owner@example.invalid')
+    fireEvent.click(screen.getByRole('button', { name: 'Email password link' }))
+    await waitFor(() => expect(actions.requestPasswordSetup).toHaveBeenCalled())
+    expect((actions.requestPasswordSetup.mock.calls[0][1] as FormData).get('email')).toBe('owner@example.invalid')
+  })
+
   it('offers existing users a password setup request to their individual registered email', async () => {
     actions.requestPasswordSetup.mockResolvedValue({ message: 'If this email is registered, check your inbox.' })
     render(<LoginForm email="owner@example.invalid" />)

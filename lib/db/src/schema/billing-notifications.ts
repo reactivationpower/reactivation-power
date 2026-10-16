@@ -6,7 +6,9 @@ export type BillingNotificationType =
   | "access_paused"
   | "access_restored"
   | "payment_received"
-  | "subscription_cancelled";
+  | "subscription_cancelled"
+  /** Once per completed enrollment; `stripe_invoice_id` holds `enrollment:<link id>`. */
+  | "account_active";
 export type BillingNotificationStatus = "pending" | "sent" | "failed";
 
 /**

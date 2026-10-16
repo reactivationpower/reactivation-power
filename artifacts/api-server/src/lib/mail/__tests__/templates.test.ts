@@ -18,6 +18,26 @@ describe('transactional templates', () => {
     }
   })
 
+  it('account active email confirms payment and gives the login setup steps', () => {
+    const base = {
+      firstName: 'Shannon', businessName: 'Example Wellness', email: 'owner@example.invalid',
+      paidAt: '2026-10-16T21:53:48.000Z', cardBrand: 'visa', cardLast4: '4242',
+      setupUrl: 'https://patientpipeline.app/login?email=owner%40example.invalid&start=setup',
+    }
+    const once = renderTemplate('account_active', { ...base, plan: 'one_time', amountCents: 250000 })
+    expect(once.subject).toBe("You're all set — your Patient Pipeline account is active")
+    expect(once.html).toContain('Thank you, Shannon! Your account is active.')
+    expect(once.html).toContain('$2,500.00')
+    expect(once.html).toContain('Visa ending 4242')
+    expect(once.html).toContain('owner@example.invalid')
+    expect(once.html).toContain('Set up my account')
+    expect(once.html).toContain('start=setup')
+    expect(once.html).not.toContain('/ month')
+    const monthly = renderTemplate('account_active', { ...base, plan: 'subscription', amountCents: 0, monthlyCents: 49700 })
+    expect(monthly.html).toContain('Waived')
+    expect(monthly.html).toContain('$497.00 / month')
+  })
+
   it('uses Patient Pipeline for website and logo links', () => {
     expect(BRAND.name).toBe('Patient Pipeline')
     expect(BRAND.siteUrl).toBe('https://patientpipeline.app')

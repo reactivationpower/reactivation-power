@@ -20,6 +20,8 @@ export default function LoginPage() {
   const requestedNext = search.get('next') ?? undefined
   // Welcome emails link here with the account email prefilled.
   const prefillEmail = search.get('email') ?? undefined
+  // The "account active" email opens the password setup step directly.
+  const startSetup = search.get('start') === 'setup'
   const { data, loading, error } = usePageData<any>('/login', {
     next: requestedNext,
     reason: search.get('reason') ?? undefined,
@@ -59,7 +61,7 @@ export default function LoginPage() {
           {search.get('reason') === 'inactivity' && (
             <p role="status" className="mb-4 text-sm text-muted-foreground">You were signed out after 30 minutes of inactivity. Please sign in again.</p>
           )}
-          <LoginForm next={next} email={prefillEmail} setupToken={setupToken} pendingLogin={pendingLogin} />
+          <LoginForm next={next} email={prefillEmail} setupToken={setupToken} pendingLogin={pendingLogin} startSetup={startSetup} />
         </div>
         <p className="mt-6 text-center text-xs text-muted-foreground text-pretty">
           Don&apos;t have access? Contact your administrator to be added.
