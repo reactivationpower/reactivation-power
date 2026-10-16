@@ -136,6 +136,20 @@ pnpm --filter @workspace/api-server run seed:super-admin
 It does nothing if a super admin already exists. The Replit server still runs
 this check on boot, as before.
 
+
+## Database connections
+
+The shared Supabase database allows about 15 sessions for everything: Vercel
+production, the Replit workspace, scripts and tests. Vercel keeps the same
+Session-pooler `SUPABASE_DB_URL` and the app's own small pool (2 per function
+instance), and the database library attaches Vercel's `attachDatabasePool`
+helper so idle connections close before an instance is suspended. The pool
+size and both timeouts can be changed with the `DB_POOL_*` variables below.
+When the database is full, requests get the existing "temporarily unavailable"
+503 with `Retry-After`, not a crash. Why the Session pooler (and not the
+Transaction pooler) was kept, the worst-case numbers, and the rule for deploy
+overlap are in `docs/database-connection-budget.md`.
+
 ## Environment variables
 
 None of these are needed by the browser build. No private value may use a
@@ -149,7 +163,10 @@ app reads none). "Server" = read only by the API function at run time.
 | `SUPABASE_URL` | Supabase project address | Server | Yes | Yes |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase admin access | Server | Yes | Yes |
 | `SUPABASE_JWT_SECRET` | Fallback cookie-signing secret, only used if `SESSION_SECRET` is missing | Server | Optional | Optional |
-| `SUPABASE_DB_URL` | Direct Postgres (session pooler) | Server | Yes | Yes |
+| `SUPABASE_DB_URL` | Postgres, Supabase **Session** pooler URI (port 5432); not the Transaction pooler | Server | Yes | Yes |
+| `DB_POOL_MAX` | Connections per function instance (default `2`; keep ≥ 2) | Server | Optional | Optional |
+| `DB_POOL_ACQUIRE_TIMEOUT_MS` | Wait for a free connection before a friendly 503 (default `5000`) | Server | Optional | Optional |
+| `DB_POOL_IDLE_TIMEOUT_MS` | Close idle connections after (default `5000` on Vercel, `10000` on Replit) | Server | Optional | Optional |
 | `SESSION_SECRET` | Signs sign-in cookies | Server | Yes | Yes (same value keeps sessions valid) |
 | `APP_URL` | Links in emails (`https://patientpipeline.app`) | Server | Yes | Optional |
 | `BLOB_READ_WRITE_TOKEN` | Video/file storage (Vercel Blob) | Server | Yes | Yes |
@@ -179,11 +196,12 @@ app reads none). "Server" = read only by the API function at run time.
 | `LOG_LEVEL` | Log detail (default `info`) | Server | Optional | Optional |
 | `BASE_PATH` | Frontend base path; defaults to `/` | Build | Not needed | Not needed |
 
-Set automatically, do not add: `VERCEL`, `VERCEL_ENV`, `NODE_ENV`, `PORT`.
+Set automatically, do not add: `VERCEL`, `VERCEL_ENV`, `VERCEL_URL`, `VERCEL_REGION`,
+`NODE_ENV`, `PORT`. (`VERCEL_URL` and `VERCEL_REGION` are what turns on the
+idle-connection cleanup helper.)
 Replit-only, not needed on Vercel: `REPLIT_CONNECTORS_HOSTNAME`, `REPL_IDENTITY`,
 `WEB_REPL_RENEWAL`, `REPL_ID`.
 
 ## Not covered here (separate tasks)
 
 - Scheduled jobs and the five-minute workers on Vercel Cron.
-- Database connection limits for many function instances.

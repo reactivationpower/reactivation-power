@@ -6,6 +6,7 @@ import { getGhlFreeSlots } from './ghl'
 import { bookingWindow } from '@workspace/shared/booking-window'
 import { activity, stop, intake, transaction } from './sales-leads/store'
 import { bookingOutcome } from './marketing/outcomes'
+import { continueAfterResponse } from './background-work'
 
 const TTL = 7 * 24 * 60 * 60 * 1000
 export const handoffHash = (ref: string) => createHash('sha256').update(ref).digest('hex')
@@ -215,7 +216,8 @@ async function attemptSavedBooking(saved: any, slot: string, timezone: string, b
     if (outcomeId) {
       await bookingOutcome(saved.lead_id, outcomeId)
       const { runAppointmentMessages } = await import('./appointment-messages/worker')
-      void runAppointmentMessages()
+      // The worker holds session advisory locks; keep a Vercel instance awake for it.
+      continueAfterResponse(runAppointmentMessages())
     }
   }
 }

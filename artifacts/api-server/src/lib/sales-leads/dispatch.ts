@@ -1,4 +1,5 @@
 import { isVercelPreview } from '../deployment-safety'
+import { continueAfterResponse } from '../background-work'
 
 /** Coalesce post-commit wakes without coupling saves to provider availability. */
 let running = false
@@ -9,7 +10,10 @@ export function nudgeSalesSync() {
   requested = true
   if (running) return
   running = true
-  setImmediate(async () => {
+  // One drain loop serves every nudge that arrives while it runs. The request
+  // that started it keeps its Vercel instance awake until the loop settles, so
+  // a claimed job's transaction/lock is never frozen in a suspended instance.
+  continueAfterResponse(new Promise<void>(resolve => setImmediate(async () => {
     try {
       do {
         requested = false
@@ -22,7 +26,8 @@ export function nudgeSalesSync() {
       console.warn('sales_sync_wake_failed; durable scheduled recovery retained')
     } finally {
       running = false
+      resolve()
       if (requested) nudgeSalesSync()
     }
-  })
+  })))
 }

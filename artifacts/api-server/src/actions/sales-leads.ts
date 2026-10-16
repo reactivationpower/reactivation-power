@@ -7,6 +7,7 @@ import { activity, emailKey, enqueue, id, intake, phoneKey, settings, stop, tran
 import { allowed, cadence, suggestedFollowup, validTimezone } from '@/lib/sales-leads/cadence'
 import { contactPage, contactUrl, verifyCapabilities } from '@/lib/sales-leads/provider'
 import { runSalesWorker } from '@/lib/sales-leads/worker'
+import { continueAfterResponse } from '@/lib/background-work'
 import { salesAutomationMissing } from '@workspace/shared/sales-automation'
 import { withSyncState } from '@/lib/sales-leads/sync-state'
 import { assignTextNumbers, followupTexts, validateFollowupTexts } from '@/lib/sales-leads/followup-texts'
@@ -57,7 +58,7 @@ export async function createSalesLead(input: { firstName: string; lastName: stri
     context: { notes: safeText(input.notes, 10000), author: admin.name || admin.email }, affiliateId: attribution.affiliateId, dedupeKey: id() })
   if (result.review) throw new Error('Submission saved for identity review. Resolve it under Leads → Import before contacting.')
   if (input.notes?.trim()) await addSalesNote(result.id, input.notes)
-  void runSalesWorker().catch(() => {})
+  continueAfterResponse(runSalesWorker())
   return result
 }
 export async function updateSalesLead(leadId: string, input: {
@@ -206,7 +207,7 @@ export async function startSalesImport(previewId: string) {
   await requireAdmin('super_admin')
   const job = (await pool.query("UPDATE sales_imports SET state='pending' WHERE id=$1 AND state='preview' AND expires_at>now() RETURNING *", [previewId])).rows[0]
   if (!job) throw new Error('Preview expired or already started; preview the scope again')
-  void runSalesWorker().catch(() => {})
+  continueAfterResponse(runSalesWorker())
   return { id: previewId }
 }
 export async function getSalesImport(importId?: string) {
@@ -218,7 +219,7 @@ export async function getSalesImport(importId?: string) {
 export async function resumeSalesImport(importId: string) {
   await requireAdmin('super_admin')
   await pool.query("UPDATE sales_imports SET state='pending',last_error=NULL,claimed_at=NULL WHERE id=$1 AND (state='failed' OR (state='running' AND claimed_at<now()-interval '5 minutes'))", [importId])
-  void runSalesWorker().catch(() => {})
+  continueAfterResponse(runSalesWorker())
 }
 export async function resolveSalesMerge(reviewId: string, leadId: string | null) {
   await requireAdmin('super_admin')
@@ -246,7 +247,7 @@ export async function retrySalesSync(leadId: string) {
     await enqueue(c, leadId, 'contact_sync', `retry:${id()}`)
     await c.query("UPDATE sales_leads SET sync_state='pending',sync_error=NULL WHERE id=$1", [leadId])
   })
-  void runSalesWorker().catch(() => {})
+  continueAfterResponse(runSalesWorker())
 }
 export async function salesCadencePreview(timezone: string) {
   await requireAdmin()

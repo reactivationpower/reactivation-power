@@ -37,7 +37,7 @@
 - [Internal sales lead policy](internal-sales-lead-policy.md) — provider-sales CRM uses GoHighLevel, separate from patient queues; consented cadence, call logging, and timezone boundaries.
 - [Enrollment notification policy](enrollment-notification-policy.md) — recover alerts without retrying billing; historical card replacements are not new milestones; shared-link views do not prove identity.
 - [Structural merge integrity](merge-integrity.md) — clean syncs can mispair sibling tests; validate the merged tree and regenerate colliding migration metadata.
-- [Shared connection budget](connection-budget.md) — 15 sessions are shared across hosts, overlap and tests; nested pool borrowing can starve small pools.
+- [Shared connection budget](connection-budget.md) — 15 sessions shared across hosts/overlap/tests; Vercel keeps Session pooler (locks); post-response work needs waitUntil.
 - [Customer enrollment boundaries](customer-enrollment-policy.md) — commercial identities, access records, and offers stay distinct; opening setup is not conversion.
 - [Saved inquiry booking](booking-handoff-policy.md) — preserve calendar design and identity protection; reconcile uncertain writes; no analytics consent popup or floating controls.
 - [Sales sync safety](sales-sync-policy.md) — keep durable fast sync separate from maintenance; contact uncertainty also constrains booking.
