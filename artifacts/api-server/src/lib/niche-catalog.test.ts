@@ -101,11 +101,13 @@ describe('@workspace/niche-catalog is the only copy', () => {
   it('maps the acoustic-wave canonical niche to its display label without changing its key', () => {
     const canonicalNiche = 'Acoustic Wave Therapy'
     const niche = { id: 'acoustic-id', name: canonicalNiche }
-    expect(displayNicheName(canonicalNiche)).toBe('SoftWave/shock wave')
+    expect(displayNicheName(canonicalNiche)).toBe('SoftWave/shockwave')
     expect(SERVICE_GROUPS.flatMap((group) => group.services).find(
-      (service) => service.label === 'SoftWave/shock wave',
+      (service) => service.label === 'SoftWave/shockwave',
     )?.niche).toBe(canonicalNiche)
+    expect(matchNicheByName('SoftWave/shockwave', [niche])).toBe(niche)
     expect(matchNicheByName('SoftWave/shock wave', [niche])).toBe(niche)
+    expect(matchNicheByName('shock wave', [niche])).toBe(niche)
     expect(displayNicheName('Chiropractic')).toBe('Chiropractic')
   })
 

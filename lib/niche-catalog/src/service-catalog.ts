@@ -51,7 +51,7 @@ export const SERVICE_GROUPS: ServiceGroup[] = [
       { label: 'HBOT', niche: 'HBOT' },
       { label: 'Neuropathy', niche: 'Neuropathy' },
       { label: 'Joint Pain', niche: 'Joint Pain' },
-      { label: 'SoftWave/shock wave', niche: 'Acoustic Wave Therapy' },
+      { label: 'SoftWave/shockwave', niche: 'Acoustic Wave Therapy' },
       { label: 'Acupuncture', niche: 'Acupuncture' },
       { label: 'Massage Therapy', niche: 'Massage Therapy' },
       { label: 'Gut Health', niche: 'Gut Health' },
@@ -132,5 +132,5 @@ export function publicServiceName(niche: string): string {
 
 /** Display-only name for a niche; never use this value as a persisted key. */
 export function displayNicheName(niche: string): string {
-  return niche === 'Acoustic Wave Therapy' ? 'SoftWave/shock wave' : niche
+  return niche === 'Acoustic Wave Therapy' ? 'SoftWave/shockwave' : niche
 }
