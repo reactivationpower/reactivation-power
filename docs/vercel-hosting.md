@@ -66,6 +66,29 @@ size). A Vercel build (`VERCEL` is set during the build) points the page at the
 same files under `/videos/` instead, which Vercel's CDN serves directly with
 full range (seek) support. The API route is not used on Vercel.
 
+## Request and response size limits
+
+A Vercel function accepts at most 4.5 MB in a request body and may return at most
+4.5 MB in one response. The app stays inside that on every host
+(`artifacts/api-server/src/lib/request-limits.ts`):
+
+- **Uploads** go straight from the browser to Vercel Blob with a token from
+  `/api/upload/token` (up to 5 GB). The server-side `/api/upload` fallback only
+  accepts files up to 4 MB and answers 413 `UPLOAD_TOO_LARGE` with a message
+  pointing at the admin page for anything bigger.
+- **Private lesson videos** stream from Blob in byte ranges of at most 4 MiB
+  (see `docs/video-playback-verification.md`).
+- **Public marketing videos** are static files under `/videos/` on the CDN; the
+  API route redirects there and the function bundle contains no MP4s.
+- **JSON bodies** are capped at 4 MB. A CSV import larger than that is sent by
+  the browser as several consecutive requests (`rowOffset` keeps the file's row
+  numbers in review items); matching rules are unchanged because later rows
+  match the people earlier rows created, exactly like uploading twice.
+- **Agreement PDFs** render from pdfkit bundled into the function with its
+  standard font data (esbuild rewrites pdfkit's private `#standard-fonts`
+  loaders; see `esbuild.config.mjs`). A PDF over 4 MB is reported as an error
+  instead of being cut off.
+
 ## Preview safety
 
 Vercel Preview deployments use the same Supabase database as production. On any
@@ -163,5 +186,4 @@ Replit-only, not needed on Vercel: `REPLIT_CONNECTORS_HOSTNAME`, `REPL_IDENTITY`
 ## Not covered here (separate tasks)
 
 - Scheduled jobs and the five-minute workers on Vercel Cron.
-- Upload, video and body-size limits for admin uploads and private lesson videos.
 - Database connection limits for many function instances.

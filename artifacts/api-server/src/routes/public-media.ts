@@ -4,6 +4,7 @@ import path from "node:path";
 import { pipeline } from "node:stream/promises";
 import { Router } from "express";
 import { MAX_MEDIA_RANGE_BYTES, matchesIfRange, parseMediaRange } from "../lib/media-range";
+import { isVercel } from "../lib/deployment-safety";
 import { logger } from "../lib/logger";
 
 // Deliberately not a filesystem path supplied by a client.
@@ -13,11 +14,38 @@ export const PUBLIC_VIDEOS = [
   "patient-pipeline-walkthrough-preview.mp4",
 ] as const;
 
-export function publicMediaRouter(directory = path.resolve(import.meta.dirname, "public-videos")) {
+/**
+ * Where the same three files live as plain static assets. On Vercel the web
+ * build ships them under /videos/ and the CDN serves them with full range
+ * support, so the function never reads a video from its own disk (a function
+ * response is capped at 4.5 MB). Vercel builds of the web app already link
+ * to /videos/ directly; this redirect keeps older links and the API URL working.
+ */
+export const STATIC_PUBLIC_VIDEO_BASE = "/videos/";
+
+export interface PublicMediaOptions {
+  /** Directory holding the allowlisted MP4s (Replit: copied into dist by the build). */
+  directory?: string;
+  /** When set, every request is redirected to `${staticBase}${name}` instead of read from disk. */
+  staticBase?: string | null;
+}
+
+export function publicMediaRouter(options: PublicMediaOptions | string = {}) {
+  const resolved = typeof options === "string" ? { directory: options } : options;
+  const directory = resolved.directory ?? path.resolve(import.meta.dirname, "public-videos");
+  const staticBase = resolved.staticBase === undefined
+    ? (isVercel() ? STATIC_PUBLIC_VIDEO_BASE : null)
+    : resolved.staticBase;
   const router = Router();
   router.get("/public-media/:name", async (req, res) => {
     if (!(PUBLIC_VIDEOS as readonly string[]).includes(req.params.name)) {
       res.sendStatus(404);
+      return;
+    }
+    if (staticBase) {
+      // The CDN answers Range, HEAD and conditional requests itself.
+      res.set("Cache-Control", "public, max-age=0, must-revalidate");
+      res.redirect(302, `${staticBase}${req.params.name}`);
       return;
     }
     try {

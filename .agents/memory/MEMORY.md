@@ -2,7 +2,7 @@
 - [Patient texting boundaries](patient-texting-boundaries.md) — independent office billing; internal-sales separation; fictional model use has a non-resetting $1 authorization.
 - [Next.js port architecture](next-port-architecture.md) — actions via allow-listed RPC + per-page loaders; CRLF sources, headless H.264 limits, placeholder-grep first.
 - [Hosting direction](hosting-direction.md) — build in Replit, host on Vercel as-is (no Next.js rewrite); Preview shares prod DB, so gate side effects.
-- [Private video streaming](private-video-streaming.md) — cached Blob ranges can misreport totals and offsets; validate actual bytes, and distinguish protocol checks from real iPad playback.
+- [Private video streaming](private-video-streaming.md) — cached Blob ranges can misreport totals and offsets; validate actual bytes; 4 MiB range cap for Vercel; public MP4s via static CDN there.
 - [Supabase Postgres access & migrations](supabase-postgres-access.md) — SUPABASE_DB_URL pooler + relaxed TLS; never drizzle-kit push; MCP tools not mounted; ask for a reset DB password up front.
 - [Supabase admin accounts](supabase-admin-accounts.md) — admin roles live in auth app_metadata (kept after DDL access arrived); invite needs manual-link fallback; Base UI menu API.
 - [Transactional email via Resend](transactional-email.md) — send-only connector key, RESEND_FROM override, email_log in Supabase via drizzle, once-per-event mail needs an outbox not a log lookup.
@@ -53,3 +53,4 @@
 - [HBOT caller boundaries](hbot-approval-boundary.md) — owner authorized regular Chiro caller choices; keep clinical-review routes, no efficacy promises, and exact sleep wording.
 - [React form-action reset](react-form-action-reset.md) — form actions reset fields on settle; selects need a re-render; Back restores need echoed values.
 - [PostHog replay](posthog-replay.md) — headless verification quirks only; rules live in replit.md.
+- [Server bundle and pdfkit](server-bundle-pdfkit.md) — bundle pdfkit with the #standard-fonts rewrite plugin; never externalize @swc/helpers (fontkit needs it bundled).

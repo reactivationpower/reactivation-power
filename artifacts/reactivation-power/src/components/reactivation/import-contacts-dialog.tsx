@@ -47,6 +47,7 @@ import { PatientImportReviews } from '@/components/reactivation/patient-import-r
 import { Input } from '@/components/ui/input'
 import { ImportProgress } from '@/components/portal/import-progress'
 import type { PatientImportSummary } from '@workspace/shared/csv-patients'
+import { mergeImportSummaries, partialImportMessage, splitImportRows } from '@/lib/import-requests'
 
 // ---------- column auto-detection ----------
 
@@ -480,24 +481,35 @@ export function ImportContactsDialog({
           service_label,
           niche_id: v === NONE ? null : v,
         }))
-      let res
-      try {
-        res = await importContacts({
-          rows: buildRows(),
-          mappings,
-          forceNicheId: fileNiche !== AUTO ? fileNiche : null,
-          sourceSystem: sourceSystem.trim() || 'csv',
-        })
-      } catch {
-        setError('Could not confirm the upload result. Check your contacts before retrying; repeating the same file is safe.')
-        setStep(returnTo)
-        return
+      // One request must fit the API's body limit, so a large file goes up as
+      // several consecutive requests in file order (see lib/import-requests).
+      const parts = []
+      let sentRows = 0
+      for (const rows of splitImportRows(buildRows())) {
+        let part
+        try {
+          part = await importContacts({
+            rows,
+            mappings,
+            forceNicheId: fileNiche !== AUTO ? fileNiche : null,
+            sourceSystem: sourceSystem.trim() || 'csv',
+            rowOffset: sentRows,
+          })
+        } catch {
+          const reason = 'Could not confirm the upload result. Check your contacts before retrying; repeating the same file is safe.'
+          setError(sentRows > 0 ? partialImportMessage(sentRows, reason) : reason)
+          setStep(returnTo)
+          return
+        }
+        if (part?.error) {
+          setError(sentRows > 0 ? partialImportMessage(sentRows, part.error) : part.error)
+          setStep(returnTo)
+          return
+        }
+        parts.push(part)
+        sentRows += rows.length
       }
-      if (res?.error) {
-        setError(res.error)
-        setStep(returnTo)
-        return
-      }
+      const res = mergeImportSummaries(parts)
       // Let the bar be visible long enough to read on small files
       const elapsed = Date.now() - startedAt
       if (elapsed < 900) await new Promise((r) => setTimeout(r, 900 - elapsed))

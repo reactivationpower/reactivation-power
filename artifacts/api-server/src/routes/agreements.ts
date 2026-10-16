@@ -2,6 +2,7 @@ import { Router, type IRouter, type Request, type Response } from "express";
 import { logger } from "@/lib/logger";
 import { runWithRequestContext } from "@/lib/request-context";
 import { getOrCreatePdf, isSigned, loadAgreementByToken, pdfFileName } from "@/lib/agreements/store";
+import { describeMegabytes, MAX_RESPONSE_FILE_BYTES } from "@/lib/request-limits";
 
 const router: IRouter = Router();
 
@@ -20,6 +21,15 @@ router.get("/agreements/:token/pdf", async (req: Request, res: Response) => {
         return;
       }
       const bytes = await getOrCreatePdf(loaded);
+      // A signed agreement renders to well under 1 MB (text plus one signature
+      // image). A Vercel function cannot return more than 4.5 MB, so a PDF that
+      // somehow outgrew that is reported rather than cut off mid-download.
+      if (bytes.length > MAX_RESPONSE_FILE_BYTES) {
+        logger.error({ token, bytes: bytes.length }, "agreement pdf exceeds the download size limit");
+        res.status(500).set("Cache-Control", "private, no-store")
+          .send(`This PDF is ${describeMegabytes(bytes.length)}, larger than the ${describeMegabytes(MAX_RESPONSE_FILE_BYTES)} download limit. Please contact support for a copy.`);
+        return;
+      }
       const inline = req.query.inline === "1";
       res
         .status(200)

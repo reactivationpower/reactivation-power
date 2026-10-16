@@ -1,7 +1,18 @@
-export const MAX_MEDIA_RANGE_BYTES = 8 * 1024 * 1024;
+import { VERCEL_PAYLOAD_LIMIT_BYTES } from "./request-limits";
+
+/**
+ * Largest body a single video range response may carry. Vercel functions
+ * cannot return more than 4.5 MB per request, so 4 MiB keeps headroom for
+ * headers; Replit's published proxy allows more, but the same bound applies
+ * on both hosts so playback behaves identically.
+ */
+export const MAX_MEDIA_RANGE_BYTES = 4 * 1024 * 1024;
+if (MAX_MEDIA_RANGE_BYTES >= VERCEL_PAYLOAD_LIMIT_BYTES) {
+  throw new Error("MAX_MEDIA_RANGE_BYTES must stay below the Vercel response limit");
+}
 export type ByteRange = { start: number; end: number };
 
-/** Single ranges only; keep every partial response below the published proxy limit. */
+/** Single ranges only; keep every partial response below the hosting response limit. */
 export function parseMediaRange(header: string, size: number): ByteRange | null {
   if (!Number.isSafeInteger(size) || size <= 0) return null;
   const match = /^bytes=(\d*)-(\d*)$/.exec(header);

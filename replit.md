@@ -97,5 +97,5 @@ Training portal + patient-reactivation dialer for healthcare/service businesses:
 
 - Files under `artifacts/reactivation-power/src` and `artifacts/api-server/src/actions|lib` are largely CRLF and many carry `// @ts-nocheck`; typecheck passing does not guarantee no undefined identifiers — read diffs.
 - Loaders serialize `Map`s as plain objects keyed by id; pages must use `obj[id]`, not `.get(id)`.
-- `/api/upload/token` and `/api/upload` require the admin cookie; server-side fallback uploads are capped at 100 MB (large videos go direct to Blob from the browser).
+- `/api/upload/token` and `/api/upload` require the admin cookie; server-side fallback uploads are capped at 4 MB to fit Vercel's 4.5 MB request limit (large files go direct to Blob from the browser); see `src/lib/request-limits.ts`.
 - Admin participants page lists owners only (staff nested under their owner), so its count is lower than the dashboard's total viewers — this matches the original app.
