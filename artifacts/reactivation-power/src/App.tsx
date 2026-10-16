@@ -95,6 +95,7 @@ import PageAdminLeadSources from '@/pages/admin_lead_sources';
 import PageAdminMarketingAnalytics from '@/pages/admin_marketing_analytics';
 import PageAnalyticsTest from '@/pages/analytics-test';
 import { MarketingAnalytics } from '@/components/marketing/analytics-consent';
+import { PostHogReplay } from '@/components/posthog-replay';
 import PageAffOnboarding from '@/pages/affiliates_onboarding';
 import ResellersLayout from '@/layouts/resellers_layout';
 import PageAdminResellers from '@/pages/admin_resellers';
@@ -641,6 +642,7 @@ function App() {
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
           <ReferralCapture />
           <MarketingAnalytics />
+          <PostHogReplay />
           <Router />
         </WouterRouter>
         <Toaster />

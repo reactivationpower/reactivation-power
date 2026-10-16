@@ -52,3 +52,4 @@
 - [Supabase egress diagnosis](egress-diagnosis.md) — use the billed service breakdown; API script downloads do not explain a direct-pooler spike.
 - [HBOT caller boundaries](hbot-approval-boundary.md) — owner authorized regular Chiro caller choices; keep clinical-review routes, no efficacy promises, and exact sleep wording.
 - [React form-action reset](react-form-action-reset.md) — form actions reset fields on settle; selects need a re-render; Back restores need echoed values.
+- [PostHog replay](posthog-replay.md) — headless verification quirks only; rules live in replit.md.
