@@ -114,7 +114,7 @@ function HomeContent() {
                 <h1 className="text-balance text-4xl font-bold leading-[1.08] tracking-tight text-foreground md:text-5xl lg:text-[3.4rem]">Reconnect with past patients.<br /><span className="text-accent">Follow up with incoming campaign leads.</span></h1>
                  <p className="max-w-xl text-pretty text-lg leading-relaxed text-muted-foreground">Patient Pipeline gives your team two staff-led calling workflows: Reactivation for inactive patients, with scripts tailored to their past service, and Lead Follow-Up for incoming inquiries, with scripts tailored to each campaign. Both are included together in one launch offer.</p>
                 <div className="flex flex-wrap items-center gap-3">
-                  <Link href="/schedule-a-call" className="rounded-md bg-red-600 px-6 py-3 text-base font-semibold text-white transition-colors hover:bg-red-700">Schedule a Call</Link>
+                  <Link href="/schedule-a-call" className="rounded-md bg-accent px-6 py-3 text-base font-semibold text-accent-foreground transition-colors hover:bg-accent/90">Schedule a Call</Link>
                    <AnchorLink href="#products" className="inline-flex items-center gap-2 rounded-md border border-border bg-card px-6 py-3 text-base font-semibold text-foreground transition-colors hover:bg-muted">See both workflows <ArrowRight className="size-4" aria-hidden="true" /></AnchorLink>
                 </div>
                 <ul className="mt-2 grid grid-cols-1 gap-3 text-sm text-muted-foreground sm:grid-cols-3">
