@@ -85,6 +85,34 @@ describe('portal password and email-code form', () => {
     expect((screen.getByLabelText('Email (username)') as HTMLInputElement).value).toBe('owner@example.invalid')
     expect(screen.queryByLabelText('Sign-in code')).toBeNull()
   })
+  it('starts the code box empty after a password sign-in, never carrying the password over', async () => {
+    actions.login.mockResolvedValue({ codeSent: true, attemptsRemaining: 5, resendAfter: 15 })
+    render(<LoginForm />)
+    type('Email (username)', 'caller@example.invalid')
+    type('Password', 'a long test password')
+    fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
+    const code = await screen.findByLabelText('Sign-in code') as HTMLInputElement
+    expect(code.value).toBe('')
+    expect(code.getAttribute('autocomplete')).toBe('one-time-code')
+    expect(new FormData(code.form!).get('code')).toBe('')
+    expect([...new FormData(code.form!).values()]).not.toContain('a long test password')
+    type('Sign-in code', '654321')
+    expect(code.value).toBe('654321')
+  })
+  it('starts the code box empty after saving a new password', async () => {
+    actions.setPortalPassword.mockResolvedValue({ codeSent: true, email: 'owner@example.invalid', attemptsRemaining: 5, resendAfter: 15 })
+    render(<LoginForm setupToken="one-time-test-token" />)
+    type('New password', 'a long test password')
+    type('Confirm password', 'a long test password')
+    fireEvent.click(screen.getByRole('button', { name: 'Save password' }))
+    const code = await screen.findByLabelText('Sign-in code') as HTMLInputElement
+    expect(code.value).toBe('')
+    expect([...new FormData(code.form!).values()]).not.toContain('a long test password')
+  })
+  it('starts the code box empty after a reload on the code screen', () => {
+    render(<LoginForm pendingLogin={{ codeSent: true, email: 'caller@example.invalid', attemptsRemaining: 5, resendAfter: 0 }} />)
+    expect((screen.getByLabelText('Sign-in code') as HTMLInputElement).value).toBe('')
+  })
   it('uses the server wait time for the resend countdown, including after a reload', async () => {
     render(<LoginForm pendingLogin={{ codeSent: true, email: 'caller@example.invalid', attemptsRemaining: 3, resendAfter: 7 }} />)
     expect(screen.getByRole('button', { name: 'Resend code in 7s' })).toBeTruthy()
