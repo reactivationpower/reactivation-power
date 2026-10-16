@@ -25,7 +25,8 @@ const params = { contactId: 'mock-contact', slot, timezone: 'America/Los_Angeles
 describe('website-only booking confirmation', () => {
   beforeEach(() => {
     vi.useFakeTimers()
-    vi.setSystemTime(new Date('2026-10-09T12:00:00Z'))
+    // Sunday, Nov 1 in Pacific Time: the calendar window runs Nov 1 – Sat, Nov 28.
+    vi.setSystemTime(new Date('2026-11-01T12:00:00Z'))
     vi.stubEnv('SESSION_SECRET', 'booking-test-secret')
     vi.clearAllMocks()
     ghl.book.mockResolvedValue('mock-appointment')
@@ -84,6 +85,23 @@ describe('website-only booking confirmation', () => {
 
   it.each(['Not/AZone', ''])('does not fabricate timezone from invalid context %s', timezone => {
     expect(readBookingConfirmation(createBookingConfirmation(slot, timezone)).confirmed).toBe(false)
+  })
+
+  it.each([
+    ['legacy contact', { contactId: 'mock-contact' }],
+    ['saved inquiry', { bookingRef: 'mock-ref' }],
+  ])('rejects a %s time after the last Saturday the calendar shows', async (_label, who) => {
+    // Midnight Sun, Nov 29 PT is the first instant after the window.
+    for (const late of ['2026-11-29T08:00:00Z', '2026-12-10T18:00:00Z']) {
+      const result = await bookStrategyCall({ ...who, slot: late, timezone: 'America/Los_Angeles' })
+      expect(result).toEqual({ ok: false, error: 'That time is no longer available. Pick another.' })
+    }
+    expect(ghl.book).not.toHaveBeenCalled()
+  })
+
+  it('still books a time on the last Saturday the calendar shows', async () => {
+    const result = await bookStrategyCall({ ...params, slot: '2026-11-29T07:30:00Z' })
+    expect(result).toEqual({ ok: true, appointmentId: 'mock-appointment' })
   })
 
   it('only allows an explicit marker', () => {

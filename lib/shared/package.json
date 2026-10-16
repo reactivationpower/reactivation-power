@@ -27,6 +27,7 @@
     "./script-merge": "./src/script-merge.ts",
     "./types": "./src/types.ts",
     "./us-timezones": "./src/us-timezones.ts",
-    "./sales-automation": "./src/sales-automation.ts"
+    "./sales-automation": "./src/sales-automation.ts",
+    "./booking-window": "./src/booking-window.ts"
   }
 }

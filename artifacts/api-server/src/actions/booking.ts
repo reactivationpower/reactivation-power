@@ -9,10 +9,10 @@ import {
 import { US_TIMEZONES } from '@workspace/shared/us-timezones'
 import { isProductInterest, PRODUCT_INTEREST_LABELS } from '@workspace/shared/lead-validation'
 import { validatedBookingFunnel } from '@workspace/shared/booking-funnel'
+import { bookingWindow, isWithinBookingWindow } from '@workspace/shared/booking-window'
 import { assertBookingConfirmationConfigured, createBookingConfirmation } from '@/lib/booking-confirmation'
 import { withBookingHandoff, withLegacyBooking } from '@/lib/booking-handoff'
 export { requestSavedInquiryHelp, checkSavedBooking } from '@/lib/booking-handoff'
-const BOOKING_WINDOW_DAYS = 45
 
 export interface AvailabilityResult {
   /** "YYYY-MM-DD" (in the requested timezone) -> ISO slot strings */
@@ -24,8 +24,8 @@ export interface AvailabilityResult {
 const VALID_TZ = new Set<string>(US_TIMEZONES.map((z) => z.value))
 
 /**
- * Rolling 45-day availability for the strategy-call calendar,
- * localized to the requested US timezone.
+ * Availability for the strategy-call calendar, localized to the requested
+ * US timezone: from now through the last Saturday the calendar shows.
  */
 export async function getAvailability(
   timezone: string,
@@ -35,7 +35,7 @@ export async function getAvailability(
     return { slots: {}, configured: false }
   }
   const now = Date.now()
-  const end = now + BOOKING_WINDOW_DAYS * 24 * 60 * 60 * 1000
+  const end = bookingWindow(now, timezone).endMs
   try {
     const slots = await getGhlFreeSlots({
       startMs: now,
@@ -118,6 +118,10 @@ export async function bookStrategyCall(params: {
   productInterest?: string
   funnelSource?: string
 }): Promise<BookResult> {
+  // Times after the last day the calendar shows are never bookable.
+  if (params.slot && Number.isFinite(Date.parse(params.slot)) &&
+    !isWithinBookingWindow(Date.parse(params.slot), Date.now(), VALID_TZ.has(params.timezone) ? params.timezone : 'America/New_York'))
+    return { ok: false, error: 'That time is no longer available. Pick another.' }
   if (params.bookingRef) {
     if (!params.slot || !Number.isFinite(Date.parse(params.slot)) || Date.parse(params.slot) < Date.now())
       return { ok: false, error: 'That time is no longer available. Pick another.' }

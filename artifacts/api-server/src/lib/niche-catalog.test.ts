@@ -39,6 +39,7 @@ const SHARED_MODULES = [
   'sales-automation',
   'analytics-types',
   'booking-funnel',
+  'booking-window',
   'call-time',
   'campaign-tokens',
   'csv-patients',

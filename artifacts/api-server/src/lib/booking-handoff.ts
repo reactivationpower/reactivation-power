@@ -3,6 +3,7 @@ import { pool } from '@workspace/db'
 import { appointments } from './sales-leads/provider'
 import { nudgeSalesSync } from './sales-leads/dispatch'
 import { getGhlFreeSlots } from './ghl'
+import { bookingWindow } from '@workspace/shared/booking-window'
 import { activity, stop, intake, transaction } from './sales-leads/store'
 import { bookingOutcome } from './marketing/outcomes'
 
@@ -193,7 +194,7 @@ async function attemptSavedBooking(saved: any, slot: string, timezone: string, b
     const { assertBookingConfirmationConfigured } = await import('./booking-confirmation')
     const { validatedBookingFunnel } = await import('@workspace/shared/booking-funnel')
     if (validatedBookingFunnel(handoff.carried.funnelSource)) assertBookingConfirmationConfigured()
-    const slots = await getGhlFreeSlots({ startMs: Date.now(), endMs: Date.now() + 45 * 86400000, timezone })
+    const slots = await getGhlFreeSlots({ startMs: Date.now(), endMs: bookingWindow(Date.now(), timezone).endMs, timezone })
     if (!Object.values(slots).flat().some(value => Date.parse(value) === Date.parse(slot)))
       return { ok: false, error: 'That time is no longer available. Pick another time.' }
     handoff.slot = slot

@@ -17,12 +17,9 @@ import {
 } from '@workspace/shared/us-timezones'
 import { CalendarClock, ChevronLeft, Globe, Loader2 } from 'lucide-react'
 import { validatedBookingFunnel } from '@workspace/shared/booking-funnel'
+import { bookingWindow } from '@workspace/shared/booking-window'
 import { bookingDestination } from '@/lib/booking-destination'
 import { track, flush } from '@/lib/marketing-tracker'
-
-const PAST_DAYS_SHOWN = 3
-const WINDOW_DAYS = 45
-const DAY_MS = 24 * 60 * 60 * 1000
 
 /** Detect the visitor's timezone, mapped onto our US list (default ET). */
 function detectTimezone(): string {
@@ -51,25 +48,6 @@ function detectTimezone(): string {
   return DEFAULT_TIMEZONE
 }
 
-/** "YYYY-MM-DD" for an instant, in a timezone */
-function dayKey(ms: number, tz: string): string {
-  return new Intl.DateTimeFormat('en-CA', {
-    timeZone: tz,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).format(new Date(ms))
-}
-
-/** 0 (Sun) - 6 (Sat) for an instant, in a timezone */
-function weekdayIndex(ms: number, tz: string): number {
-  const short = new Intl.DateTimeFormat('en-US', {
-    timeZone: tz,
-    weekday: 'short',
-  }).format(new Date(ms))
-  return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(short)
-}
-
 interface DayCell {
   key: string
   ms: number
@@ -80,49 +58,30 @@ interface DayCell {
 }
 
 /**
- * Build the rolling window as one continuous run of weeks (Sun-Sat rows)
- * with no month breaks — the Continuous Flow layout. Month changes are
- * marked on the cell itself via isNewMonth.
+ * Build the booking window as exactly 4 full weeks (Sun-Sat rows), starting
+ * on this week's Sunday, with no month breaks — the Continuous Flow layout.
+ * Month changes are marked on the cell itself via isNewMonth; days before
+ * today are grayed out as past days.
  */
-function buildWeeks(tz: string): (DayCell | null)[][] {
-  const now = Date.now()
-  const cells: DayCell[] = []
-  const seen = new Set<string>()
+function buildWeeks(tz: string): DayCell[][] {
+  const weeks: DayCell[][] = []
   let prevMonth = ''
-  for (let i = -PAST_DAYS_SHOWN; i < WINDOW_DAYS; i++) {
-    const ms = now + i * DAY_MS
-    const key = dayKey(ms, tz)
-    if (seen.has(key)) continue // DST fold safety
-    seen.add(key)
+  for (const day of bookingWindow(Date.now(), tz).days) {
     const monthShort = new Intl.DateTimeFormat('en-US', {
       timeZone: tz,
       month: 'short',
-    }).format(new Date(ms))
-    cells.push({
-      key,
-      ms,
-      dayOfMonth: Number(key.slice(8, 10)),
+    }).format(new Date(day.ms))
+    const cell: DayCell = {
+      key: day.key,
+      ms: day.ms,
+      dayOfMonth: Number(day.key.slice(8, 10)),
       monthShort,
       isNewMonth: monthShort !== prevMonth,
-      isPast: i < 0,
-    })
-    prevMonth = monthShort
-  }
-
-  const weeks: (DayCell | null)[][] = []
-  let week: (DayCell | null)[] = new Array(
-    weekdayIndex(cells[0].ms, tz),
-  ).fill(null)
-  for (const cell of cells) {
-    week.push(cell)
-    if (week.length === 7) {
-      weeks.push(week)
-      week = []
+      isPast: day.isPast,
     }
-  }
-  if (week.length > 0) {
-    while (week.length < 7) week.push(null)
-    weeks.push(week)
+    prevMonth = monthShort
+    if (weeks.length === 0 || weeks[weeks.length - 1].length === 7) weeks.push([])
+    weeks[weeks.length - 1].push(cell)
   }
   return weeks
 }
@@ -179,7 +138,7 @@ export function BookingCalendar({
   const firstAvailableDay = useMemo(() => {
     for (const week of weeks) {
       for (const d of week) {
-        if (d && !d.isPast && (slots[d.key]?.length ?? 0) > 0) return d.key
+        if (!d.isPast && (slots[d.key]?.length ?? 0) > 0) return d.key
       }
     }
     return null
@@ -292,10 +251,7 @@ export function BookingCalendar({
       </div>
       {weeks.map((week, wi) => (
         <div key={wi} className="grid grid-cols-7 gap-1">
-          {week.map((d, di) => {
-            if (d === null) {
-              return <span key={`blank-${wi}-${di}`} aria-hidden="true" />
-            }
+          {week.map((d) => {
             const count = slots[d.key]?.length ?? 0
             const bookable = !d.isPast && count > 0
             const isActive = activeDay === d.key
