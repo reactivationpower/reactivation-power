@@ -27,7 +27,7 @@ import { logger } from '@/lib/logger'
  * as the strategy-call calendar. Not a secret, so it lives in code; set the
  * env var only to override it (e.g. a test calendar).
  */
-const ONBOARDING_CALENDAR_ID = ''
+const ONBOARDING_CALENDAR_ID = 'qBjaZ9ZycGBv22nWRjgI'
 export const onboardingCalendarId = (): string | null =>
   process.env.GHL_ONBOARDING_CALENDAR_ID?.trim() || ONBOARDING_CALENDAR_ID || null
 
