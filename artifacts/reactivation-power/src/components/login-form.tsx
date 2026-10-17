@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { Fragment, useEffect, useState, type FormEvent } from 'react'
 import {
   login, verifyLoginCode, resendLoginCode, requestPasswordSetup,
   setPortalPassword, type LoginState,
@@ -9,10 +9,10 @@ import { Label } from '@/components/ui/label'
 import { BillingNotice } from '@/components/billing-notice'
 
 type Mode = 'password' | 'code' | 'request' | 'set-password'
-export function LoginForm({ next, email, setupToken, pendingLogin }: {
-  next?: string; email?: string; setupToken?: string; pendingLogin?: LoginState | null
+export function LoginForm({ next, email, setupToken, pendingLogin, startSetup }: {
+  next?: string; email?: string; setupToken?: string; pendingLogin?: LoginState | null; startSetup?: boolean
 }) {
-  const [mode, setMode] = useState<Mode>(setupToken ? 'set-password' : pendingLogin?.codeSent ? 'code' : 'password')
+  const [mode, setMode] = useState<Mode>(setupToken ? 'set-password' : pendingLogin?.codeSent ? 'code' : startSetup ? 'request' : 'password')
   const [state, setState] = useState<LoginState>(pendingLogin ?? {})
   const [pending, setPending] = useState(false)
   const [address, setAddress] = useState(pendingLogin?.email ?? email ?? '')
@@ -60,8 +60,10 @@ export function LoginForm({ next, email, setupToken, pendingLogin }: {
   return (
     <form onSubmit={submit} className="flex flex-col gap-5">
       <input type="hidden" name="next" value={next ?? ''} />
+      {/* Each screen gets its own key so React builds fresh fields; otherwise the code box
+          reuses the password box's DOM input and shows the typed password. */}
       {mode === 'set-password' ? (
-        <>
+        <Fragment key="set-password">
           <h2 className="text-lg font-semibold">Set your password</h2>
           <input type="hidden" name="token" value={setupToken ?? ''} />
           <div className="flex flex-col gap-2">
@@ -75,9 +77,9 @@ export function LoginForm({ next, email, setupToken, pendingLogin }: {
             <Input id="confirm" name="confirm" type="password" autoComplete="new-password"
               minLength={12} maxLength={128} required />
           </div>
-        </>
+        </Fragment>
       ) : mode === 'code' ? (
-        <>
+        <Fragment key="code">
           <h2 className="text-lg font-semibold">Check your email</h2>
           <p className="text-sm text-muted-foreground">
             Enter the six-digit code sent to {address || state.email || 'your registered email'}.
@@ -95,9 +97,9 @@ export function LoginForm({ next, email, setupToken, pendingLogin }: {
               {`${state.attemptsRemaining} incorrect attempt${state.attemptsRemaining === 1 ? '' : 's'} remaining.`}
             </p>
           )}
-        </>
+        </Fragment>
       ) : (
-        <>
+        <Fragment key={mode}>
           {mode === 'request' && <h2 className="text-lg font-semibold">Set up or reset your password</h2>}
           <div className="flex flex-col gap-2">
             <Label htmlFor="email">Email (username)</Label>
@@ -115,7 +117,7 @@ export function LoginForm({ next, email, setupToken, pendingLogin }: {
                 maxLength={128} required />
             </div>
           )}
-        </>
+        </Fragment>
       )}
       {state.billing && <BillingNotice reason={state.billing.reason} email={state.billing.email} />}
       {state.error && !state.billing && <p role="alert" className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">{state.error}</p>}

@@ -110,11 +110,24 @@ export function BookingCalendar({
   thankYouHref,
   productInterest,
   funnelSource,
+  loadAvailability,
+  book,
+  onBooked,
+  confirmNoun = 'call',
+  savedNote = 'Your inquiry is saved.',
+  unavailableNote = 'Your inquiry remains saved. Please retry shortly, or return to the website for help scheduling your call.',
 }: {
+  /** Other calendars (e.g. onboarding) pass their own loader, booking call and success handler. */
+  loadAvailability?: (timezone: string) => Promise<AvailabilityResult>
+  book?: (slot: string, timezone: string) => Promise<{ ok: boolean; error?: string; bookedSlot?: string; bookedTimezone?: string }>
+  onBooked?: (slot: string, timezone: string) => void
+  confirmNoun?: string
+  savedNote?: string
+  unavailableNote?: string
   contactId?: string
   bookingRef?: string
   /** Thank-you page URL with the lead's details; slot + tz are appended */
-  thankYouHref: string
+  thankYouHref?: string
   productInterest?: string
   funnelSource?: string
 }) {
@@ -127,8 +140,8 @@ export function BookingCalendar({
   const [bookError, setBookError] = useState<string | null>(null)
 
   const { data, isLoading, error: availabilityError, mutate } = useSWR<AvailabilityResult>(
-    ['ghl-availability', timezone],
-    () => getAvailability(timezone),
+    [loadAvailability ? 'custom-availability' : 'ghl-availability', timezone],
+    () => (loadAvailability ?? getAvailability)(timezone),
     { revalidateOnFocus: false, keepPreviousData: true },
   )
 
@@ -169,7 +182,7 @@ export function BookingCalendar({
     setBookError(null)
     let res
     try {
-      res = await bookStrategyCall({
+      res = book ? await book(selectedSlot, timezone) : await bookStrategyCall({
         contactId,
         bookingRef,
         slot: selectedSlot,
@@ -181,6 +194,10 @@ export function BookingCalendar({
       track('booking_failure', { category: 'network', control: 'confirm-booking' })
       setBooking(false)
       setBookError('We could not confirm the booking. Please try again.')
+      return
+    }
+    if (res.ok && onBooked) {
+      onBooked(res.bookedSlot ?? selectedSlot, res.bookedTimezone ?? timezone)
       return
     }
     if (res.ok) {
@@ -207,8 +224,7 @@ export function BookingCalendar({
           Scheduling is temporarily unavailable
         </p>
         <p className="max-w-md text-sm leading-relaxed text-muted-foreground">
-          Your inquiry remains saved. Please retry shortly, or return to the
-          website for help scheduling your call.
+          {unavailableNote}
         </p>
         <Button onClick={() => void mutate()}>Retry availability</Button>
       </div>
@@ -363,7 +379,7 @@ export function BookingCalendar({
             Booking…
           </>
         ) : selectedSlot ? (
-          `Confirm ${slotTimeLabel(selectedSlot, timezone)} call`
+          `Confirm ${slotTimeLabel(selectedSlot, timezone)} ${confirmNoun}`
         ) : (
           'Pick a time to confirm'
         )}
@@ -375,7 +391,7 @@ export function BookingCalendar({
     <div className="flex w-full flex-col gap-5">
       {(data?.error || availabilityError) && (
         <div role="alert" className="rounded-xl border border-border bg-card p-4 text-center">
-          <p>Your inquiry is saved. We could not load available times.</p>
+          <p>{savedNote ? `${savedNote} ` : ''}We could not load available times.</p>
           <Button className="mt-3" onClick={() => void mutate()}>Retry availability</Button>
         </div>
       )}

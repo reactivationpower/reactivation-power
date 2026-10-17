@@ -310,13 +310,19 @@ export async function provisionAccounts(linkId: string): Promise<string | null> 
       return null
     }
     ownerId = created.id
-    await sendPortalWelcomeEmail({
-      participantId: created.id,
-      firstName: first,
-      email,
-      role: 'owner',
-      source: 'payment',
-    })
+    // Enrollment-flow owners get the "account active" email instead (sent
+    // after every completed enrollment, new account or not), not both.
+    const [terms] = await db.select({ enrollmentFlow: paymentLinkTermsTable.enrollmentFlow })
+      .from(paymentLinkTermsTable).where(eq(paymentLinkTermsTable.linkId, linkId))
+    if (!terms?.enrollmentFlow) {
+      await sendPortalWelcomeEmail({
+        participantId: created.id,
+        firstName: first,
+        email,
+        role: 'owner',
+        source: 'payment',
+      })
+    }
   }
 
   // Staff members become sub-accounts under the owner

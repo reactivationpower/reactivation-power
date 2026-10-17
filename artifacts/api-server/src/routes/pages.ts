@@ -55,6 +55,7 @@ import { HBOT_NICHE_NAME, publicServiceName } from "@workspace/niche-catalog";
 import { DEFAULT_TIMEZONE, isUsTimezone, timezoneLabel } from '@workspace/shared/us-timezones';
 import { bookingThankYouHref, validatedBookingFunnel, WEBSITE_CONFIRMATION_PATH } from '@workspace/shared/booking-funnel';
 import { readBookingConfirmation } from '../lib/booking-confirmation';
+import { onboardingPage } from '../lib/onboarding/booking';
 import {
   confirmPayment, getPaymentDetail, getPaymentLinkPublic, listPaymentLinks,
 } from "../actions/payments";
@@ -865,6 +866,8 @@ add("/pay/:token/thank-you", undefined, async (req) => {
   }
   return { token, link, confirmation };
 });
+
+add("/onboarding", undefined, async (req) => onboardingPage(queryString(req, "ref")));
 
 add("/healthcare/book-a-call", undefined, async (req) => {
   const bookingRef = queryString(req, "bookingRef");

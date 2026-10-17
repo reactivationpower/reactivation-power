@@ -80,6 +80,45 @@ ${rows
   .join('\n')}
 </table>`
 
+/** Small green pill, e.g. "Payment received". */
+export const statusBadge = (text: string) =>
+  `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 18px 0;"><tr>
+  <td style="background-color:#e7f6ec;border-radius:999px;padding:6px 14px;font-family:${FONT};font-size:13px;font-weight:bold;color:#1f7a3d;">&#10003;&nbsp; ${text}</td>
+</tr></table>`
+
+/** Bold sub-heading inside the body. */
+export const sectionTitle = (text: string) =>
+  `<p style="margin:28px 0 12px 0;font-family:${FONT};font-size:18px;line-height:26px;font-weight:bold;color:${BRAND.ink};">${text}</p>`
+
+/** Numbered steps with teal number circles. Each item is [title, text] (HTML). */
+export const numberedSteps = (items: Array<[string, string]>) =>
+  `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 8px 0;">
+${items.map(([title, text], i) => `  <tr>
+    <td valign="top" width="44" style="padding:0 0 16px 0;">
+      <div style="width:30px;height:30px;line-height:30px;border-radius:15px;background-color:${BRAND.teal};color:#ffffff;text-align:center;font-family:${FONT};font-size:15px;font-weight:bold;">${i + 1}</div>
+    </td>
+    <td valign="top" style="padding:3px 0 16px 0;font-family:${FONT};font-size:15px;line-height:24px;color:${BRAND.body};">
+      <strong style="color:${BRAND.ink};">${title}</strong><br />${text}
+    </td>
+  </tr>`).join('\n')}
+</table>`
+
+/** Bulleted list; an item given as [text, subItems] gets an indented sub-list. */
+export type BulletItem = string | [string, string[]]
+export const bulletList = (items: BulletItem[]) =>
+  `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 16px 0;">
+${items.map((item) => {
+  const [text, subs] = typeof item === 'string' ? [item, [] as string[]] : item
+  return `  <tr>
+    <td valign="top" width="22" style="padding:0 0 8px 0;font-family:${FONT};font-size:15px;line-height:24px;color:${BRAND.teal};font-weight:bold;">&bull;</td>
+    <td valign="top" style="padding:0 0 8px 0;font-family:${FONT};font-size:15px;line-height:24px;color:${BRAND.body};">${text}${subs.length ? `
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:8px 0 0 0;">
+${subs.map((sub) => `        <tr><td valign="top" width="18" style="padding:0 0 6px 0;font-family:${FONT};font-size:14px;line-height:22px;color:${BRAND.muted};">&ndash;</td><td valign="top" style="padding:0 0 6px 0;font-family:${FONT};font-size:14px;line-height:22px;color:${BRAND.body};">${sub}</td></tr>`).join('\n')}
+      </table>` : ''}</td>
+  </tr>`
+}).join('\n')}
+</table>`
+
 /** A link the recipient can copy when the button does not work. */
 export const fallbackLink = (href: string) =>
   `<p style="margin:0 0 16px 0;font-family:${FONT};font-size:13px;line-height:20px;color:${BRAND.muted};word-break:break-all;">If the button doesn't work, copy and paste this link into your browser:<br /><a href="${esc(href)}" style="color:${BRAND.teal};">${esc(href)}</a></p>`

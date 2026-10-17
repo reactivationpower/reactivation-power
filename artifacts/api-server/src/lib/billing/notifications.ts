@@ -4,7 +4,10 @@ import { pastDeadline } from '@/lib/cron/budget'
 import { and, eq, lt, or, sql } from 'drizzle-orm'
 import {
   billingNotificationsTable,
+  customerCardsTable,
+  customersTable,
   db,
+  paymentLinkTermsTable,
   type BillingNotification,
   type BillingNotificationType,
   type Customer,
@@ -13,9 +16,11 @@ import {
 
 import { logger } from '@/lib/logger'
 import { stripe } from '@/lib/stripe'
-import { billingPageUrl, sendEmail, type CardSummary, type TemplateDataMap } from '@/lib/mail'
+import { billingPageUrl, greetingName, portalSetupUrl, sendEmail, type CardSummary, type TemplateDataMap } from '@/lib/mail'
 import { BRAND } from '@/lib/mail/layout'
 import { appOrigin } from '@/lib/app-origin'
+import { getAdminClient } from '@/lib/supabase/admin'
+import { onboardingUrl } from '@/lib/onboarding/booking'
 import { invoiceDescription, latestInvoiceAttempt, type CardUsed } from './dunning'
 
 /**
@@ -56,6 +61,7 @@ async function claim<K extends DunningEmailType>(
   invoiceId: string,
   customer: Customer,
   payload: Payload<K>,
+  recipient: string = customer.email,
 ): Promise<BillingNotification | null> {
   const [inserted] = await db
     .insert(billingNotificationsTable)
@@ -64,7 +70,7 @@ async function claim<K extends DunningEmailType>(
       type,
       stripeInvoiceId: invoiceId,
       customerId: customer.id,
-      recipient: customer.email.trim().toLowerCase(),
+      recipient: recipient.trim().toLowerCase(),
       payload: payload as unknown as Record<string, unknown>,
       status: 'pending',
       attempts: 0,
@@ -112,9 +118,10 @@ async function enqueueAndSend<K extends DunningEmailType>(
   invoiceId: string,
   customer: Customer,
   payload: Payload<K>,
+  recipient?: string,
 ): Promise<'sent' | 'failed' | 'duplicate'> {
   try {
-    const row = await claim(type, invoiceId, customer, payload)
+    const row = await claim(type, invoiceId, customer, payload, recipient)
     if (!row) return 'duplicate'
     return (await deliver(row)) ? 'sent' : 'failed'
   } catch (err) {
@@ -328,4 +335,86 @@ export async function notifyPaymentReceived(input: {
 /** A paid invoice that actually charged the customer something. */
 export function isReceiptWorthy(invoice: Pick<Stripe.Invoice, 'amount_paid'>): boolean {
   return (invoice.amount_paid ?? 0) > 0
+}
+
+/**
+ * "Thank you, your account is active" — sent once per completed enrollment,
+ * whether the portal account is new or already existed. Keyed on the payment
+ * link in the same outbox, so the completion path and its recovery retries
+ * can both call it safely; a provider failure is retried by the daily cron.
+ * Never throws: enrollment completion must not depend on email delivery.
+ */
+export async function notifyAccountActive(linkId: string): Promise<'sent' | 'failed' | 'duplicate' | 'skipped'> {
+  try {
+    const [terms] = await db.select().from(paymentLinkTermsTable).where(eq(paymentLinkTermsTable.linkId, linkId))
+    if (!terms?.completedAt) return 'skipped'
+    const [customer] = await db.select().from(customersTable).where(eq(customersTable.id, terms.customerId))
+    if (!customer) return 'skipped'
+    const { data: link } = await getAdminClient().from('payment_links')
+      .select('name, email, amount_cents, participant_id').eq('id', linkId).maybeSingle()
+    if (!link?.email) return 'skipped'
+    const loginEmail = String(link.email).trim().toLowerCase()
+    let firstName: string | null = null
+    if (link.participant_id) {
+      const { data: owner } = await getAdminClient().from('participants')
+        .select('first_name').eq('id', link.participant_id).maybeSingle()
+      firstName = (owner?.first_name as string | undefined)?.trim() || null
+    }
+    const [card] = await db.select().from(customerCardsTable).where(and(
+      eq(customerCardsTable.customerId, customer.id), eq(customerCardsTable.linkId, linkId),
+      eq(customerCardsTable.active, true), eq(customerCardsTable.rank, 'primary'),
+    ))
+    const subscription = terms.type === 'subscription'
+    return await enqueueAndSend('account_active', `enrollment:${linkId}`, customer, {
+      firstName: firstName ?? greetingName(String(link.name || customer.fullName)),
+      businessName: customer.businessName?.trim() || customer.fullName,
+      email: loginEmail,
+      plan: subscription ? 'subscription' : 'one_time',
+      amountCents: subscription ? terms.setupFeeCents : Number(link.amount_cents ?? 0),
+      monthlyCents: subscription ? terms.monthlyCents : null,
+      paidAt: (terms.setupPaidAt ?? terms.completedAt).toISOString(),
+      cardBrand: card?.brand ?? null,
+      cardLast4: card?.last4 || null,
+      setupUrl: portalSetupUrl(loginEmail),
+    }, loginEmail)
+  } catch (err) {
+    logger.error({ err, linkId }, 'account active email: could not queue')
+    return 'failed'
+  }
+}
+
+/**
+ * "Schedule your onboarding" — sent once per completed enrollment, right
+ * after the account-active email, to the same login email. Never throws.
+ */
+export async function notifyOnboardingSchedule(linkId: string): Promise<'sent' | 'failed' | 'duplicate' | 'skipped'> {
+  try {
+    const [terms] = await db.select().from(paymentLinkTermsTable).where(eq(paymentLinkTermsTable.linkId, linkId))
+    if (!terms?.completedAt) return 'skipped'
+    const [customer] = await db.select().from(customersTable).where(eq(customersTable.id, terms.customerId))
+    if (!customer) return 'skipped'
+    const { data: link } = await getAdminClient().from('payment_links')
+      .select('name, email, participant_id').eq('id', linkId).maybeSingle()
+    if (!link?.email) return 'skipped'
+    let firstName: string | null = null
+    if (link.participant_id) {
+      const { data: owner } = await getAdminClient().from('participants')
+        .select('first_name').eq('id', link.participant_id).maybeSingle()
+      firstName = (owner?.first_name as string | undefined)?.trim() || null
+    }
+    return await enqueueAndSend('onboarding_schedule', `enrollment:${linkId}`, customer, {
+      firstName: firstName ?? greetingName(String(link.name || customer.fullName)),
+      businessName: customer.businessName?.trim() || customer.fullName,
+      scheduleUrl: onboardingUrl(linkId),
+    }, String(link.email).trim().toLowerCase())
+  } catch (err) {
+    logger.error({ err, linkId }, 'onboarding schedule email: could not queue')
+    return 'failed'
+  }
+}
+
+/** Both post-payment emails, in order: account active, then schedule onboarding. */
+export async function notifyEnrollmentWelcome(linkId: string): Promise<void> {
+  await notifyAccountActive(linkId)
+  await notifyOnboardingSchedule(linkId)
 }

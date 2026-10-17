@@ -38,6 +38,16 @@ describe('portal password and email-code form', () => {
     expect((actions.verifyLoginCode.mock.calls[0][1] as FormData).get('code')).toBe('123456')
     expect(screen.getByText('4 incorrect attempts remaining.')).toBeTruthy()
   })
+  it('opens the password setup step with the email filled in from the account-active email link', async () => {
+    actions.requestPasswordSetup.mockResolvedValue({ message: 'If that email is registered, we sent a link.' })
+    render(<LoginForm email="owner@example.invalid" startSetup />)
+    expect(screen.getByText('Set up or reset your password')).toBeTruthy()
+    expect((screen.getByLabelText('Email (username)') as HTMLInputElement).value).toBe('owner@example.invalid')
+    fireEvent.click(screen.getByRole('button', { name: 'Email password link' }))
+    await waitFor(() => expect(actions.requestPasswordSetup).toHaveBeenCalled())
+    expect((actions.requestPasswordSetup.mock.calls[0][1] as FormData).get('email')).toBe('owner@example.invalid')
+  })
+
   it('offers existing users a password setup request to their individual registered email', async () => {
     actions.requestPasswordSetup.mockResolvedValue({ message: 'If this email is registered, check your inbox.' })
     render(<LoginForm email="owner@example.invalid" />)
@@ -74,6 +84,34 @@ describe('portal password and email-code form', () => {
     await waitFor(() => expect(screen.getByLabelText('Email (username)')).toBeTruthy())
     expect((screen.getByLabelText('Email (username)') as HTMLInputElement).value).toBe('owner@example.invalid')
     expect(screen.queryByLabelText('Sign-in code')).toBeNull()
+  })
+  it('starts the code box empty after a password sign-in, never carrying the password over', async () => {
+    actions.login.mockResolvedValue({ codeSent: true, attemptsRemaining: 5, resendAfter: 15 })
+    render(<LoginForm />)
+    type('Email (username)', 'caller@example.invalid')
+    type('Password', 'a long test password')
+    fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
+    const code = await screen.findByLabelText('Sign-in code') as HTMLInputElement
+    expect(code.value).toBe('')
+    expect(code.getAttribute('autocomplete')).toBe('one-time-code')
+    expect(new FormData(code.form!).get('code')).toBe('')
+    expect([...new FormData(code.form!).values()]).not.toContain('a long test password')
+    type('Sign-in code', '654321')
+    expect(code.value).toBe('654321')
+  })
+  it('starts the code box empty after saving a new password', async () => {
+    actions.setPortalPassword.mockResolvedValue({ codeSent: true, email: 'owner@example.invalid', attemptsRemaining: 5, resendAfter: 15 })
+    render(<LoginForm setupToken="one-time-test-token" />)
+    type('New password', 'a long test password')
+    type('Confirm password', 'a long test password')
+    fireEvent.click(screen.getByRole('button', { name: 'Save password' }))
+    const code = await screen.findByLabelText('Sign-in code') as HTMLInputElement
+    expect(code.value).toBe('')
+    expect([...new FormData(code.form!).values()]).not.toContain('a long test password')
+  })
+  it('starts the code box empty after a reload on the code screen', () => {
+    render(<LoginForm pendingLogin={{ codeSent: true, email: 'caller@example.invalid', attemptsRemaining: 5, resendAfter: 0 }} />)
+    expect((screen.getByLabelText('Sign-in code') as HTMLInputElement).value).toBe('')
   })
   it('uses the server wait time for the resend countdown, including after a reload', async () => {
     render(<LoginForm pendingLogin={{ codeSent: true, email: 'caller@example.invalid', attemptsRemaining: 3, resendAfter: 7 }} />)

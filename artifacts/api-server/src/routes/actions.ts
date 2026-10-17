@@ -11,6 +11,7 @@ import * as admin from "../actions/admin";
 import * as auth from "../actions/auth";
 import * as billing from "../actions/billing";
 import * as booking from "../actions/booking";
+import * as onboarding from "../actions/onboarding";
 import * as demo from "../actions/demo";
 import * as leads from "../actions/leads";
 import * as leadTerms from "../actions/lead-terms";
@@ -82,6 +83,7 @@ const MODULES: Record<string, ActionModule> = {
   auth,
   billing,
   booking,
+  onboarding,
   commissions,
   cron,
   "customer-billing": customerBilling,
@@ -186,6 +188,7 @@ const ACTIONS: Record<string, Record<string, Auth>> = {
     changeBillingDate: "admin", retryCustomerPayment: "admin",
   },
   booking: { getAvailability: "public", bookStrategyCall: "public", requestSavedInquiryHelp: "public", checkSavedBooking: "public" },
+  onboarding: { getOnboardingAvailability: "public", bookOnboardingCall: "public" },
   "customer-billing": {
     // Public, emailed-token billing page (works while access is paused).
     requestBillingLink: "public", getBillingByToken: "public",

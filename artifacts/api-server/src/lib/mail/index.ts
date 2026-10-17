@@ -29,6 +29,11 @@ export function portalLoginUrl(email: string): string {
   return `${appOrigin()}/login?email=${encodeURIComponent(email.trim().toLowerCase())}`
 }
 
+/** Sign-in page with the email prefilled and the "set up your password" step open. */
+export function portalSetupUrl(email: string): string {
+  return `${appOrigin()}/login?email=${encodeURIComponent(email.trim().toLowerCase())}&start=setup`
+}
+
 export function sendPortalWelcomeEmail(input: {
   participantId: string
   firstName: string
